@@ -202,7 +202,7 @@ public class GameView
 		yield return prop.Interact(characterView);
 	}
 
-	public IEnumerator WaitCharacterLookDirection(CharacterView characterView, Vector3 dir)
+	private IEnumerator WaitCharacterLookDirection(CharacterView characterView, Vector3 dir)
 	{
 		while (!characterView.IsFacingDirection(dir))
 		{
@@ -223,7 +223,7 @@ public class GameView
 		}));
 	}
 	
-	public IEnumerator WaitCharacterMoved(CharacterView movingCharacterView, Vector3 dest, System.Action onComplete = null)
+	private IEnumerator WaitCharacterMoved(CharacterView movingCharacterView, Vector3 dest, System.Action onComplete = null)
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacterView);
 		
@@ -340,7 +340,7 @@ public class GameView
 	}
 
 	public void ClickRunAction() => RunAction(_selectedCharacterView, false);
-	public void RunAction(CharacterView onCharacterView, bool force)
+	public void RunAction(CharacterView onCharacterView, bool force = false)
 	{
 		if (onCharacterView == null)
 		{
