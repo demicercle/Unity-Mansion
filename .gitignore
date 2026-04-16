@@ -100,3 +100,5 @@ InitTestScene*.unity*
 
 /.idea/*
 /Assets/_Ignored_*
+/Assets/FMPUtils*
+/Assets/UnityDbgDraw*
