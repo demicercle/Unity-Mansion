@@ -69,7 +69,7 @@ public class Character : MonoBehaviour, ICursorHandler
 		{
 			if (hasDestination)
 			{
-				Debug.Log(aiPath + " ClearDestination()");
+//				Debug.Log(aiPath + " ClearDestination()");
 				hasDestination = false;
 				aiPath.destination = aiPath.transform.position;
 				onSearchPath?.Invoke();
@@ -78,6 +78,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	}
 	
 	[Header("Stats")]  // todo use scriptable
+	[SerializeField] private CharacterStats stats;
 	[SerializeField] private string displayName;
 	public string GetDisplayName() => displayName;
 	[SerializeField] private Texture2D portrait;
@@ -196,10 +197,20 @@ public class Character : MonoBehaviour, ICursorHandler
 		}
 		
 		UpdateComponents();
+
+		if (stats == null)
+		{
+			Debug.LogError(this + " stats is null");
+			stats = ScriptableObject.CreateInstance<CharacterStats>();
+		}
+
+		stats.Init();
 	}
 
 	void OnDestroy()
 	{
+		stats.Dispose();
+		
 		GameEvents.characterAddedToParty -= CharacterAddedToParty;
 		GameEvents.characterSelected -= CharacterSelected;
 		GameEvents.newTurnStarted -= TurnBegins;
