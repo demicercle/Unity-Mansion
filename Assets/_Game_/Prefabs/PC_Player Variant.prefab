@@ -2117,7 +2117,8 @@ PrefabInstance:
       propertyPath: m_LookAtBones.Array.data[4].m_Bone
       value: 
       objectReference: {fileID: 5757940252884302325}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4438104301555917016, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 2682672067756541164, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
