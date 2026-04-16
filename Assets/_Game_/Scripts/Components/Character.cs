@@ -173,6 +173,7 @@ public class Character : MonoBehaviour, ICursorHandler
 
 		GameEvents.characterAddedToParty += CharacterAddedToParty;
 		GameEvents.characterSelected += CharacterSelected;
+		GameEvents.newTurnStarted += TurnBegins;
 
 		if (TryGetComponent<AIPath>(out var aiPath))
 		{
@@ -192,6 +193,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	{
 		GameEvents.characterAddedToParty -= CharacterAddedToParty;
 		GameEvents.characterSelected -= CharacterSelected;
+		GameEvents.newTurnStarted -= TurnBegins;
 	}
 
 	private void CharacterSelected(Character arg1, bool arg2)
@@ -280,5 +282,10 @@ public class Character : MonoBehaviour, ICursorHandler
     public Vector3 GetPosition()
     {
 	    return transform.position;
+    }
+
+    private void TurnBegins(int turnIndex)
+    {
+	    usedMovePoints = 0.0f;
     }
 }

@@ -63,8 +63,18 @@ public class GameManager : ScriptableObject
 		coroutine = default;
 		return false;
 	}
-	
-	public void RemoveNextCoroutine()  => coroutines.RemoveAt(0);
+
+	public void RemoveNextCoroutine()
+	{
+		if (coroutines.Count > 0)
+		{
+			coroutines.RemoveAt(0);
+			if (coroutines.Count == 0)
+			{
+				GameEvents.routinesStarted?.Invoke(false);
+			}
+		}
+	}
 	
 	public bool mouseOverViewport { get; set; }
 	public bool hasFocus { get; set; }
@@ -80,6 +90,7 @@ public class GameManager : ScriptableObject
 	private Character movingCharacter;
 	private float movingCharacterDeltaPosition;
 	private Vector3 lastMovingCharacterPosition;
+	private int currentTurn;
 
 	public void MouseMove(Vector2 pos)
 	{
@@ -122,6 +133,11 @@ public class GameManager : ScriptableObject
 
 	public void StartCoroutine(IEnumerator coroutine)
 	{
+		if (coroutines.Count == 0)
+		{
+			GameEvents.routinesStarted?.Invoke(true);
+		}
+		
 		coroutines.Add(coroutine);
 	}
 
@@ -148,6 +164,22 @@ public class GameManager : ScriptableObject
 		if(selectedCharacter != null) GameEvents.characterSelected?.Invoke(selectedCharacter, false);
 		selectedCharacter = character;
 		GameEvents.characterSelected?.Invoke(selectedCharacter, true);
+	}
+
+	public void EndTurn()
+	{
+		StartCoroutine(WaitEndTurn());
+	}
+
+	private IEnumerator WaitEndTurn()
+	{
+		Debug.Log(">> End turn");
+		
+		yield return new WaitForSeconds(1.0f);
+		currentTurn += 1;
+		GameEvents.newTurnStarted?.Invoke(currentTurn);
+		
+		Debug.Log(">> New turn: " + currentTurn);
 	}
 	
 	public void Start()
@@ -198,10 +230,12 @@ public class GameManager : ScriptableObject
 		if (value)
 		{
 			UIEvents.clickSelectCharacter += SelectCharacter;
+			UIEvents.clickEndTurn += EndTurn;
 		}
 		else
 		{
 			UIEvents.clickSelectCharacter -= SelectCharacter;
+			UIEvents.clickEndTurn += EndTurn;
 		}
 	}
 
