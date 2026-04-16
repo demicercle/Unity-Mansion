@@ -85,8 +85,9 @@ public class Character : MonoBehaviour, ICursorHandler
 	[SerializeField] private float movePoints;
 	[SerializeField] private float moveSpeed;
 	
-	[Header("Selection Circle")]
-	[SerializeField] private CircleRenderer circleRenderer;
+	[Header("Selection")]
+	[SerializeField] private CircleRenderer selectionCircle;
+	[SerializeField] private CircleRenderer movePointsCircle;
 	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red;
 	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
 	
@@ -117,9 +118,16 @@ public class Character : MonoBehaviour, ICursorHandler
 			aiPath.maxSpeed = moveSpeed;
 		}
 
-		if (circleRenderer)
+		if (selectionCircle)
 		{
-			circleRenderer.radius = radius;
+			selectionCircle.radius = radius;
+			selectionCircle.UpdateCircle();
+		}
+
+		if (movePointsCircle)
+		{
+			movePointsCircle.radius = radius;
+			movePointsCircle.UpdateCircle();
 		}
 
 		if (capsuleCollider)
@@ -158,6 +166,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	public void ConsumeMovePoints(float delta)
 	{
 		usedMovePoints += Mathf.Abs(delta);
+		movePointsCircle.UpdateCircle();
 	}
 
 	private AgentWrapper agent;
@@ -264,9 +273,14 @@ public class Character : MonoBehaviour, ICursorHandler
 	    }
     }
 
+	private float alphaColor;
     void LateUpdate()
     {
-	    circleRenderer.SetColor(currentColor, alphaCurve.Evaluate(isSelected ? 1f : mouseOver ? 0.5f : 0.0f));
+	    alphaColor = alphaCurve.Evaluate(isSelected ? 1f : mouseOver ? 0.5f : 0.0f);
+	    
+	    selectionCircle.SetColor(currentColor, alphaColor);
+	    movePointsCircle.SetColor(currentColor, alphaColor);
+	    movePointsCircle.SetProgress(movePoints <= 0 ? 1f : GetRemainingMovePoints() / movePoints);
 
 	    if (animator != null)
 	    {

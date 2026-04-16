@@ -2102,6 +2102,10 @@ PrefabInstance:
       value: 1.75
       objectReference: {fileID: 0}
     - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: maxSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: alwaysDrawGizmos
       value: 1
       objectReference: {fileID: 0}
