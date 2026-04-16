@@ -11,6 +11,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	private const string TAG_PLAYER = "Player";
 	private const string TAG_ENEMY = "Enemy";
 	public bool IsPlayer() => CompareTag(TAG_PLAYER);
+	public bool IsEnemy() => CompareTag(TAG_ENEMY);
 	
 	static public CharacterView SpawnPlayerAt(CharacterView characterViewPrefab, CharacterData characterData, Waypoint waypoint)
 	{
@@ -209,8 +210,9 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 	private void SetPartyIndex(int newIndex)
 	{
+		Debug.Log(this + " SetPartyIndex " + newIndex);
 		partyIndex = newIndex;
-		SetColor(partyIndex >= 0 ? partyColor : defaultColor);
+		SetColor(partyIndex >= 0 ? partyColor : IsEnemy() ? enemyColor : defaultColor);
 	}
 
 	private void Awake()
@@ -246,13 +248,14 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		if (newData != null)
 			data = newData;
 		
-		data.Init(this);
 		UpdateComponents();
 		RegisterEvents(true);
+		data.Init(this);
 	}
 
 	void RegisterEvents(bool value)
 	{
+		Debug.Log(this + " RegisterEvents " + value);
 		var gameView = GameView.GetInstance();
 		
 		if (value)

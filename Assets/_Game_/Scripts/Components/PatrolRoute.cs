@@ -86,6 +86,10 @@ public class PatrolRoute : MonoBehaviour
 		{
 			Gizmos.color = color;
 			Utils.DrawGizmosPath(GetPath(), closedLoop);
-			if (assignedCharacter) Gizmos.DrawLine(transform.position, assignedCharacter.transform.position);
+			if (assignedCharacter)
+			{
+				Gizmos.DrawLine(transform.position, assignedCharacter.GetPosition() + Vector3.up);
+				Utils.DrawGizmosCircle(assignedCharacter.GetPosition() + Vector3.up, Vector3.up, 1.0f);
+			}
 		}
 }

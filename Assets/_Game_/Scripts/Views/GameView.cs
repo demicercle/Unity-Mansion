@@ -387,6 +387,7 @@ public class GameView
 		coroutines = new List<IEnumerator>();
 		partyCharacters = new List<CharacterView>();
 		allCharacters = new List<CharacterView>(FindAllObjects<CharacterView>());
+		Debug.Log(this + " allCharacters: " + allCharacters.Count);
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
@@ -409,8 +410,8 @@ public class GameView
 				continue;
 			}
 			
-			gameData.AddCharacter(characterData);
 			character.Init();
+			gameData.AddCharacter(characterData);
 			
 			if (character.IsPlayer())
 			{

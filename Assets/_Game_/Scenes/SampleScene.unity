@@ -428,8 +428,9 @@ MonoBehaviour:
     gameData: {fileID: 11400000, guid: 48fda2e77e2aaa748ac5cdce78b8cc90, type: 2}
     drawDebug: 0
     debugGUI: 0
-    cameraSpeed: 1
-    maxNavigationDistance: 0.5
+    cameraSpeed: 10
+    maxNavigationDistance: 0.254
+    startupComponent: {fileID: 0}
 --- !u!1001 &1467149466160358941
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -726,6 +727,14 @@ PrefabInstance:
     - target: {fileID: 4120535536435144642, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
       value: 7117019844445765476
+      objectReference: {fileID: 0}
+    - target: {fileID: 4560185080063673984, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
+      propertyPath: uniqueID
+      value: 8574423036272286817
+      objectReference: {fileID: 0}
+    - target: {fileID: 4629684245918677721, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
+      propertyPath: uniqueID
+      value: 202192149966217811
       objectReference: {fileID: 0}
     - target: {fileID: 5069342738124118939, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID

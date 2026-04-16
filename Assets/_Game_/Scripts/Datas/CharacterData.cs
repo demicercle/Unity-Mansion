@@ -32,11 +32,8 @@ public class CharacterData : ScriptableObject
 
 	public void SetPartyIndex(int index)
 	{
-		if (index != partyIndex)
-		{
-			partyIndex = index;
-			partyIndexChanged?.Invoke(partyIndex);
-		}
+		partyIndex = index;
+		partyIndexChanged?.Invoke(partyIndex);
 	}
 
 	public CharacterView GetCharacter() => characterViewOwner;
@@ -92,10 +89,11 @@ public class CharacterData : ScriptableObject
 
 	public void Init(CharacterView c, int inParty = -1)
 	{
-		partyIndex = inParty;
+		Debug.Log(this + " Init " + c + " " + inParty);
 		characterViewOwner = c;
 		usedMovePoints = 0;
 		usedActions = 0;
+		SetPartyIndex(inParty);
 	}
 
 	public void Dispose()
