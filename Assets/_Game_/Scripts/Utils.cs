@@ -4,6 +4,14 @@ using UnityEngine;
 public static class Utils
 {
 	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
+
+	public static float PathLength(params Vector3[] path)
+	{
+		var length = 0f;
+		for(int i = 0; i < path.Length -1; i++)
+			length += (path[i] - path[i + 1]).magnitude;
+		return length;
+	}
 	
 	/// <summary>
 	/// Limite la longueur totale d'un chemin (somme des distances entre les points) à une valeur maximale donnée.
