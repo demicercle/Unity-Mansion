@@ -2,6 +2,8 @@
 
 public static class Utils
 {
+	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
+	
 	static public void RebuildNavigation()
 	{
 		foreach (var astar in Object.FindObjectsByType<AstarPath>(FindObjectsInactive.Exclude, FindObjectsSortMode.InstanceID))

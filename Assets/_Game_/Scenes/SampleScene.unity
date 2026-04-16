@@ -586,7 +586,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7238060625527304640, guid: 10686670536caec44989ab102557fd6c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.7024808
+      value: -1.5
       objectReference: {fileID: 0}
     - target: {fileID: 7238060625527304640, guid: 10686670536caec44989ab102557fd6c, type: 3}
       propertyPath: m_LocalPosition.y
@@ -594,7 +594,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7238060625527304640, guid: 10686670536caec44989ab102557fd6c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.0240037
+      value: 5.5
       objectReference: {fileID: 0}
     - target: {fileID: 7238060625527304640, guid: 10686670536caec44989ab102557fd6c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -978,7 +978,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 2.0972e-41, y: 2.524355e-29, z: 0, w: 3.93419e+12}
+  m_BoundingSphereOverride: {x: 2.6248e-41, y: 2.524355e-29, z: 0, w: 4.3e-44}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -1439,7 +1439,7 @@ MonoBehaviour:
   manualDebugFloorRoof: 0
   showSearchTree: 0
   unwalkableNodeDebugSize: 0.3
-  logPathResults: 1
+  logPathResults: 4
   maxNearestNodeDistance: 100
   scanOnStartup: 1
   fullGetNearestSearch: 0

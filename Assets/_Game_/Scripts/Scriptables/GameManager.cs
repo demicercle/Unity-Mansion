@@ -162,6 +162,13 @@ public class GameManager : ScriptableObject
 				}
 			}
 		}
+		else
+		{
+			if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+			{
+				agent.ClearDestination();
+			}
+		}
 	}
 
 	private const int CURSOR_RAYCAST_RESULT_NONE = 0;

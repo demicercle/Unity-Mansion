@@ -8,11 +8,13 @@ using UnityEngine.UI;
 
 public class Character : MonoBehaviour, ICursorHandler
 {
-	public struct AgentWrapper
+	public class AgentWrapper
 	{
 		public AIPath aiPath;
 		public Vector3 velocity => aiPath.velocity;
 		public bool isMoving => aiPath.isStopped == false;
+
+		private bool hasDestination;
 
 		public System.Action onSearchPath
 		{
@@ -28,7 +30,7 @@ public class Character : MonoBehaviour, ICursorHandler
 
 		public Vector3[] GetCurrentPath()
 		{
-			if (!aiPath.hasPath)
+			if (!hasDestination)
 				return new Vector3[0];
 			
 			var buffer = new List<Vector3>();
@@ -39,7 +41,20 @@ public class Character : MonoBehaviour, ICursorHandler
 		public void AssignDestination(Vector3 hitPoint)
 		{
 			aiPath.destination = hitPoint;
-			DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Color.cyan, 0f);
+			hasDestination = true;
+			onSearchPath?.Invoke();
+			DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Utils.ColorAlpha(Color.cyan, 0.2f), 0f);
+		}
+
+		public void ClearDestination()
+		{
+			if (hasDestination)
+			{
+				Debug.Log(aiPath + " ClearDestination()");
+				hasDestination = false;
+				aiPath.destination = aiPath.transform.position;
+				onSearchPath?.Invoke();
+			}
 		}
 	}
 	
@@ -172,6 +187,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	private void OnSearchPath()
 	{
 		var points = agent.GetCurrentPath();
+//		Debug.Log(this + " OnSearchPath() " + points.Length);
 		if ( pathRenderer && (pathRenderer.enabled = points.Length > 0))
 		{
 			pathRenderer.useWorldSpace = true;
