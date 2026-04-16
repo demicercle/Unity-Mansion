@@ -8,9 +8,7 @@ public class Waypoint : MonoBehaviour
 {
 	public const float MAX_SEARCH_DISTANCE = 10.0f;
 	
-		static public List<Waypoint> waypoints = new List<Waypoint>();
-
-		static public bool GetBestWaypointFromPosition(Vector3 startPoint, out Waypoint bestWaypoint)
+		static public bool GetBestWaypointFromPosition(Vector3 startPoint, out Waypoint bestWaypoint, IEnumerable<Waypoint> waypoints)
 		{
 			bestWaypoint = null;
 
@@ -54,22 +52,25 @@ public class Waypoint : MonoBehaviour
 			return bestWaypoint != null;
 		}
 
-		private Vector3 GetPosition() => transform.position;
+		public Vector3 GetPosition() => transform.position;
+
+		public float radius = 0.4f;
+		public Color color = Color.cyan;
 
 		private void OnEnable()
 		{
-			waypoints.Add(this);
+			//waypoints.Add(this);
 		}
 
 		void OnDisable()
 		{
-			waypoints.Remove(this);
+			//waypoints.Remove(this);
 		}
 
 		private void OnDrawGizmos()
 		{
-			Gizmos.color = Color.cyan;
+			Gizmos.color = color;
 			Utils.DrawGizmosArrow(transform.position, transform.forward);
-			Utils.DrawGizmosCircle(transform.position, transform.up, 0.5f, 16);
+			Utils.DrawGizmosCircle(transform.position, transform.up, radius, 16);
 		}
 }

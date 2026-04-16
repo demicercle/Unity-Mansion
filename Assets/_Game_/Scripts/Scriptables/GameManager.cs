@@ -104,21 +104,35 @@ public class GameManager : ScriptableObject
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
 			{
-				if (hit.collider.TryGetComponent(out Character character))
+				if (hit.collider.TryGetComponent(out Character clickedCharacter)) // click character
 				{
-					if (partyCharacters.Contains(character))
+					if (partyCharacters.Contains(clickedCharacter))
 					{
-						SelectCharacter(character);
+						SelectCharacter(clickedCharacter);
+					}
+				}
+
+				if (hit.collider.TryGetComponent(out PropComponent clickedProp)) // click prop
+				{
+					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent) && selectedCharacter.CanMove())
+					{
+						if (!HasCoroutines())
+						{
+							if (clickedProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
+							{
+								StartCoroutine(WaitCharacterMoved(selectedCharacter, bestWaypoint.GetPosition()));
+							}
+						}
 					}
 				}
 			}
-			else if (raycastResult == CURSOR_RAYCAST_RESULT_NAVIGATION)
+			else if (raycastResult == CURSOR_RAYCAST_RESULT_NAVIGATION) // click navigation
 			{
 				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent) && selectedCharacter.CanMove())
 				{
 					if (!HasCoroutines())
 					{
-						StartCoroutine(WaitAgentMoved(selectedCharacter, hit.point));
+						StartCoroutine(WaitCharacterMoved(selectedCharacter, hit.point));
 					}
 				}
 			}
@@ -135,7 +149,7 @@ public class GameManager : ScriptableObject
 		coroutines.Add(coroutine);
 	}
 
-	private IEnumerator WaitAgentMoved(Character movingCharacter, Vector3 dest)
+	private IEnumerator WaitCharacterMoved(Character movingCharacter, Vector3 dest)
 	{
 		if (!movingCharacter.TryGetAgent(out var agent)) yield break;
 		
@@ -264,7 +278,7 @@ public class GameManager : ScriptableObject
 			Cursor.SetCursor(null,default,default);
 		}
 
-		if (mouseOverViewport)
+		if (mouseOverViewport) // process mouse over
 		{
 			var result = CursorRaycast(out var hit);
 			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION) // mouse over navigation
@@ -279,19 +293,37 @@ public class GameManager : ScriptableObject
 			}
 			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER) // mouse over character (or prop?)
 			{
-				if (hit.collider.TryGetComponent(out Character otherCharacter))
+				if (hit.collider.TryGetComponent(out Character overCharacter))
 				{
 					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
 					{
 						if (!HasCoroutines())
 						{
-							if (partyCharacters.Contains(otherCharacter))
+							if (partyCharacters.Contains(overCharacter))
 							{
 								agent.ClearDestination();
 							}
 							else
 							{
-								agent.AssignDestination(otherCharacter.GetPosition());
+								agent.AssignDestination(overCharacter.GetPosition());
+							}
+						}
+					}
+				}
+				
+				if (hit.collider.TryGetComponent(out PropComponent overProp)) // click prop
+				{
+					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+					{
+						if (!HasCoroutines())
+						{
+							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
+							{
+								agent.AssignDestination(bestWaypoint.GetPosition());
+							}
+							else
+							{
+								Debug.LogWarning("no waypoint found");
 							}
 						}
 					}
@@ -325,7 +357,7 @@ public class GameManager : ScriptableObject
 			if(drawDebug) DbgDraw.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
 			Utils.DrawDebugCircle(hit.collider.transform.position, Vector3.up, 0.5f);
 
-			foreach (var cursorHandler in hit.collider.GetComponents<ICursorHandler>())
+			foreach (var cursorHandler in hit.collider.GetComponents<ICursorHandler>().Concat(hit.collider.GetComponentsInChildren<ICursorHandler>()))
 			{
 				cursorHandler.CursorOver();
 			}

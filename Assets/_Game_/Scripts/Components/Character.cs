@@ -297,6 +297,8 @@ public class Character : MonoBehaviour, ICursorHandler
 
 	void Start()
 	{
+		gameObject.layer = LayerMask.NameToLayer(GameManager.LAYER_CHARACTER);
+		
 		lastPosition = GetPosition();
 		
 	    if (animator != null)

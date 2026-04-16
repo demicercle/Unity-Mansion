@@ -5,6 +5,11 @@ public static class Utils
 {
 	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
 
+	public static Color HTML_To_Color(string html)
+	{
+		return ColorUtility.TryParseHtmlString(html, out var c) ? c : default;
+	}
+	
 	public static float PathLength(params Vector3[] path)
 	{
 		var length = 0f;
