@@ -54,6 +54,7 @@ public class Waypoint : MonoBehaviour
 
 		public Vector3 GetPosition() => transform.position;
 		public int GetRotation() => (int)transform.eulerAngles.y;
+		public Vector3 GetDirection() => transform.forward;
 		
 		public float radius = 0.4f;
 		public Color color = Color.cyan;

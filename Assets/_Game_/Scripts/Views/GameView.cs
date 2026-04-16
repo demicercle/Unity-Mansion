@@ -63,6 +63,7 @@ public class GameView
 	public float cameraSpeed = 1.0f;
 	[Range(0.01f, 0.50f)] public float maxNavigationDistance = 0.5f;
 
+	private bool isPlayerTurn;
 	public bool HasCoroutines() => coroutines.Count > 0;
 	
 	public bool GetNextCoroutine(out IEnumerator coroutine)
@@ -98,7 +99,7 @@ public class GameView
 	private AstarPath aStar;
 	private MainCamera mainCamera;
 	private InputSystem_Actions inputSystem;
-	private CharacterView _selectedCharacterView;
+	private CharacterView _selectedCharacterView;//TODO rename
 	private List<IEnumerator> coroutines;
 
 	private List<CharacterView> allCharacters;
@@ -140,7 +141,7 @@ public class GameView
 				{
 					if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent) && _selectedCharacterView.CanMove())
 					{
-						if (!HasCoroutines())
+						if (CanControlCharacter(_selectedCharacterView)) // assign interact
 						{
 							if (clickedProp.GetBestWaypoint(_selectedCharacterView.GetPosition(), out var bestWaypoint))
 							{
@@ -169,7 +170,7 @@ public class GameView
 			{
 				if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent) && _selectedCharacterView.CanMove())
 				{
-					if (!HasCoroutines())
+					if (CanControlCharacter(_selectedCharacterView)) // assign set nav destination (move)
 					{
 						QueueRoutine(WaitCharacterMoved(_selectedCharacterView, hit.point));
 					}
@@ -200,8 +201,29 @@ public class GameView
 		propInteracted?.Invoke(prop, characterView.gameObject);
 		yield return prop.Interact(characterView);
 	}
+
+	public IEnumerator WaitCharacterLookDirection(CharacterView characterView, Vector3 dir)
+	{
+		while (!characterView.IsFacingDirection(dir))
+		{
+			characterView.SetRotateTowards(dir, Time.deltaTime);
+			yield return null;
+		}
+	}
+
+	public void MoveCharacterToWaypoint(CharacterView characterView, Waypoint waypoint,
+		System.Action onComplete = null)
+	{
+		QueueRoutine(WaitCharacterMoved(characterView, waypoint.GetPosition(), () =>
+		{
+			if (characterView.WaypointReached(waypoint))
+			{
+				QueueRoutine(WaitCharacterLookDirection(characterView, waypoint.GetDirection()));
+			}
+		}));
+	}
 	
-	private IEnumerator WaitCharacterMoved(CharacterView movingCharacterView, Vector3 dest, System.Action onComplete = null)
+	public IEnumerator WaitCharacterMoved(CharacterView movingCharacterView, Vector3 dest, System.Action onComplete = null)
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacterView);
 		
@@ -218,16 +240,11 @@ public class GameView
 		}
 		
 		agent.AssignDestination(dest);
-		
-		while (agent.pathPending)
-			yield return null;
-		
-		if (!movingCharacterView.GetPath(out var path))
-		{
-			Debug.LogWarning(movingCharacterView + " has no path");
-			yield break;
-		}
 
+		do yield return null;
+		while (agent.pathPending);
+
+		var path = agent.GetCurrentPath();
 		if (path.Length > 1)
 		{
 			var firstPoint = path[1];
@@ -240,7 +257,7 @@ public class GameView
 		}
 		else
 		{
-			Debug.LogWarning(movingCharacterView + " has path with only 1 point");
+			Debug.LogWarning(movingCharacterView + " has path " + path.Length);
 		}
 		
 		agent.SetCanMove(true);
@@ -285,11 +302,16 @@ public class GameView
 
 	public void EndTurn()
 	{
-		QueueRoutine(WaitEndTurn());
+		startupComponent.StartCoroutine(WaitEndTurn());
 	}
+
+	[HideInInspector] public MonoBehaviour startupComponent;
+
+	public bool CanControlCharacter(CharacterView charView) => isPlayerTurn && !HasCoroutines() && charView && partyCharacters.Contains(charView);
 
 	private IEnumerator WaitEndTurn()
 	{
+		isPlayerTurn = false;
 		Debug.Log(">> End turn");
 
 		foreach (var otherCharacter in allCharacters)
@@ -306,12 +328,15 @@ public class GameView
 
 			Debug.Log("Think() " + aiBrain + " " + otherCharacter);
 			yield return otherCharacter.StartCoroutine(aiBrain.Think(otherCharacter));
+			Debug.Log("End Think()");
 		}
 		
 		yield return new WaitForSeconds(1.0f);
 		gameData.NextTurn();
 		
 		Debug.Log(">> New turn: " + gameData.GetCurrentTurn());
+		SelectCharacter(partyCharacters.First(), true);
+		isPlayerTurn = true;
 	}
 
 	public void ClickRunAction() => RunAction(_selectedCharacterView, false);
@@ -401,6 +426,7 @@ public class GameView
 		yield return new WaitForSeconds(0.1f); // todo hak camera focus
 		
 		// focus first character
+		isPlayerTurn = true;
 		SelectCharacter(partyCharacters.First(), true);
 	}
 
@@ -461,23 +487,23 @@ public class GameView
 		if (mouseOverViewport) // process mouse over
 		{
 			var result = CursorRaycast(out var hit);
-			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION) // mouse over navigation
+			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION)
 			{
 				if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
 				{
-					if (!HasCoroutines())
+					if (CanControlCharacter(_selectedCharacterView)) // mouse over navigation
 					{
 						agent.AssignDestination(hit.point);
 					}
 				}
 			}
-			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER) // mouse over character (or prop?)
+			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER) 
 			{
 				if (hit.collider.TryGetComponent(out CharacterView overCharacter))
 				{
 					if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
 					{
-						if (!HasCoroutines())
+						if (CanControlCharacter(_selectedCharacterView)) // mouse over character
 						{
 							if (partyCharacters.Contains(overCharacter))
 							{
@@ -495,7 +521,7 @@ public class GameView
 				{
 					if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
 					{
-						if (!HasCoroutines())
+						if (CanControlCharacter(_selectedCharacterView)) // mouse over prop
 						{
 							if (overProp.GetBestWaypoint(_selectedCharacterView.GetPosition(), out var bestWaypoint))
 							{
@@ -513,7 +539,7 @@ public class GameView
 			{
 				if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
 				{
-					if (!HasCoroutines())
+					if (CanControlCharacter(_selectedCharacterView)) // mouse over raycast no result
 					{
 						agent.ClearDestination();
 					}

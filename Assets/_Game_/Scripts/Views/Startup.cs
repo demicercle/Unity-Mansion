@@ -8,6 +8,7 @@ public class Startup : MonoBehaviour
 	
 	private void Awake()
 	{
+		gameView.startupComponent = this; // TODO (only used for coroutine)
 		gameView.Awake();
 	}
 

@@ -9,6 +9,19 @@ public class AIBrain_Patrol : AIBrainData
 		if (PatrolRoute.FindRoute(character, out PatrolRoute patrolRoute))
 		{
 			patrolRoute.DebugDraw(1f);
+			if (lastWaypointToReach == null)
+			{
+				if (!Waypoint.GetBestWaypointFromPosition(character.GetPosition(), out var bestWaypoint,
+					    patrolRoute.waypoints))
+				{
+					Debug.LogWarning(character + " cannot find next waypoint");
+				}
+				else
+				{
+					gameView.MoveCharacterToWaypoint(character, bestWaypoint);
+					while(gameView.HasCoroutines()) yield return null;
+				}
+			}
 		}
 		else
 		{
@@ -17,4 +30,6 @@ public class AIBrain_Patrol : AIBrainData
 		
 		yield return new WaitForSeconds(1.0f);
 	}
+
+	private Waypoint lastWaypointToReach;
 }

@@ -66,7 +66,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 			}
 		}
 
-		public Vector3[] GetCurrentPath(bool ignoreLimit = false)
+		public Vector3[] GetCurrentPath()
 		{
 			if (!hasDestination)
 				return new Vector3[0];
@@ -79,6 +79,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		public void AssignDestination(Vector3 hitPoint)
 		{
 			aiPath.destination = hitPoint;
+			aiPath.SearchPath();
 			hasDestination = true;
 			onSearchPath?.Invoke();
 			DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Utils.ColorAlpha(Color.cyan, 0.2f), 0f);
@@ -287,6 +288,11 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 				agent.onSearchPath -= UpdatePath;
 			}
 		}
+	}
+
+	public bool WaypointReached(Waypoint wp)
+	{
+		return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	}
 
 	public void UpdatePath()
