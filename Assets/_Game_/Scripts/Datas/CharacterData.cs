@@ -22,7 +22,7 @@ public class CharacterData : ScriptableObject
 	[Header("Debug")]
 	[SerializeField] private float usedMovePoints;
 	[SerializeField] private int usedActions;
-	[SerializeField] private Character characterOwner;
+	[SerializeField] private CharacterView characterViewOwner;
 	[SerializeField] private Vector3 position;
 	[SerializeField] private int rotation;
 	[SerializeField] private int partyIndex;
@@ -38,7 +38,7 @@ public class CharacterData : ScriptableObject
 		}
 	}
 
-	public Character GetCharacter() => characterOwner;
+	public CharacterView GetCharacter() => characterViewOwner;
 
 	public void SetPosition(Vector3 newPos)
 	{
@@ -89,10 +89,10 @@ public class CharacterData : ScriptableObject
 		usedMovePoints -= runActionExtraMovePoints;
 	}
 
-	public void Init(Character c, int inParty = -1)
+	public void Init(CharacterView c, int inParty = -1)
 	{
 		partyIndex = inParty;
-		characterOwner = c;
+		characterViewOwner = c;
 		usedMovePoints = 0;
 		usedActions = 0;
 	}

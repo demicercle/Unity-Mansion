@@ -6,15 +6,15 @@ using RPGCharacterAnims.Lookups;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Character : MonoBehaviour, ICursorHandler
+public class CharacterView : MonoBehaviour, ICursorHandler
 {
 	private const string TAG_PLAYER = "Player";
 	private const string TAG_ENEMY = "Enemy";
 	public bool IsPlayer() => CompareTag(TAG_PLAYER);
 	
-	static public Character SpawnPlayerAt(Character characterPrefab, CharacterData characterData, Waypoint waypoint)
+	static public CharacterView SpawnPlayerAt(CharacterView characterViewPrefab, CharacterData characterData, Waypoint waypoint)
 	{
-		var newChar = Instantiate(characterPrefab.gameObject).GetComponent<Character>();
+		var newChar = Instantiate(characterViewPrefab.gameObject).GetComponent<CharacterView>();
 		newChar.data = characterData;
 		return newChar;
 	}
@@ -199,7 +199,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	private void SetPartyIndex(int newIndex)
 	{
 		partyIndex = newIndex;
-		currentColor = partyIndex >= 0 ? partyColor : defaultColor;
+		SetColor(partyIndex >= 0 ? partyColor : defaultColor);
 	}
 
 	private void Awake()
@@ -258,7 +258,7 @@ public class Character : MonoBehaviour, ICursorHandler
 		}
 	}
 
-	private void CharacterSelected(Character arg1, bool arg2)
+	private void CharacterSelected(CharacterView arg1, bool arg2)
 	{
 		if (arg1 == this)
 		{

@@ -8,14 +8,14 @@ using UnityEngine;
 [System.Serializable]
 public class GameView
 {
-	public System.Action<Character, int> characterAddedToParty;
-	public System.Action<Character> actionUsed;
-	static public System.Action<Character> clickSelectCharacter;
+	public System.Action<CharacterView, int> characterAddedToParty;
+	public System.Action<CharacterView> actionUsed;
+	static public System.Action<CharacterView> clickSelectCharacter;
 	static public System.Action clickEndTurn;
 	static public System.Action clickRunAction;
 	public System.Action<bool> routinesStarted;
-	public System.Action<Character, bool> characterSelected;
-	static public System.Action<Character, Vector3> characterMoved;
+	public System.Action<CharacterView, bool> characterSelected;
+	static public System.Action<CharacterView, Vector3> characterMoved;
 	static public System.Action<PropComponent, GameObject> propInteracted;
 	
 	static public string LAYER_GROUND = "Ground";
@@ -98,11 +98,11 @@ public class GameView
 	private AstarPath aStar;
 	private MainCamera mainCamera;
 	private InputSystem_Actions inputSystem;
-	private Character selectedCharacter;
+	private CharacterView _selectedCharacterView;
 	private List<IEnumerator> coroutines;
 
-	private List<Character> allCharacters;
-	private List<Character> partyCharacters;
+	private List<CharacterView> allCharacters;
+	private List<CharacterView> partyCharacters;
 
 	public void MouseMove(Vector2 pos)
 	{
@@ -127,7 +127,7 @@ public class GameView
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
 			{
-				if (hit.collider.TryGetComponent(out Character clickedCharacter)) // click character
+				if (hit.collider.TryGetComponent(out CharacterView clickedCharacter)) // click character
 				{
 					if (partyCharacters.Contains(clickedCharacter))
 					{
@@ -137,26 +137,26 @@ public class GameView
 
 				if (hit.collider.TryGetComponent(out PropComponent clickedProp)) // click prop
 				{
-					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent) && selectedCharacter.CanMove())
+					if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent) && _selectedCharacterView.CanMove())
 					{
 						if (!HasCoroutines())
 						{
-							if (clickedProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
+							if (clickedProp.GetBestWaypoint(_selectedCharacterView.GetPosition(), out var bestWaypoint))
 							{
-								StartCoroutine(WaitCharacterMoved(selectedCharacter, bestWaypoint.GetPosition(), () =>
+								StartCoroutine(WaitCharacterMoved(_selectedCharacterView, bestWaypoint.GetPosition(), () =>
 								{
-									var dist = Vector3.Distance(selectedCharacter.GetPosition(), bestWaypoint.GetPosition());
+									var dist = Vector3.Distance(_selectedCharacterView.GetPosition(), bestWaypoint.GetPosition());
 									if (dist <= agent.reachDistance)
 									{
 										// waypoint reach
-										if (selectedCharacter.CanInteract())
+										if (_selectedCharacterView.CanInteract())
 										{
-											StartCoroutine(WaitCharacterInteract(selectedCharacter, clickedProp, bestWaypoint));
+											StartCoroutine(WaitCharacterInteract(_selectedCharacterView, clickedProp, bestWaypoint));
 										}
 									}
 									else
 									{
-										Debug.Log(selectedCharacter + " not at reach");
+										Debug.Log(_selectedCharacterView + " not at reach");
 									}
 								}));
 							}
@@ -166,11 +166,11 @@ public class GameView
 			}
 			else if (raycastResult == CURSOR_RAYCAST_RESULT_NAVIGATION) // click navigation
 			{
-				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent) && selectedCharacter.CanMove())
+				if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent) && _selectedCharacterView.CanMove())
 				{
 					if (!HasCoroutines())
 					{
-						StartCoroutine(WaitCharacterMoved(selectedCharacter, hit.point));
+						StartCoroutine(WaitCharacterMoved(_selectedCharacterView, hit.point));
 					}
 				}
 			}
@@ -188,31 +188,31 @@ public class GameView
 		coroutines.Add(coroutine);
 	}
 
-	private IEnumerator WaitCharacterInteract(Character character, PropComponent prop, Waypoint waypoint = null)
+	private IEnumerator WaitCharacterInteract(CharacterView characterView, PropComponent prop, Waypoint waypoint = null)
 	{
-		Debug.Log("WaitCharacterInteract " + character + " > " + prop + " @ " + waypoint);
+		Debug.Log("WaitCharacterInteract " + characterView + " > " + prop + " @ " + waypoint);
 		if (waypoint != null)
 		{
-			character.RotateTowards(waypoint.GetPosition(), -1f);
+			characterView.RotateTowards(waypoint.GetPosition(), -1f);
 		}
 		
-		propInteracted?.Invoke(prop, character.gameObject);
-		yield return prop.Interact(character);
+		propInteracted?.Invoke(prop, characterView.gameObject);
+		yield return prop.Interact(characterView);
 	}
 	
-	private IEnumerator WaitCharacterMoved(Character movingCharacter, Vector3 dest, System.Action onComplete = null)
+	private IEnumerator WaitCharacterMoved(CharacterView movingCharacterView, Vector3 dest, System.Action onComplete = null)
 	{
-		Debug.Log("WaitCharacterMoved " + movingCharacter);
+		Debug.Log("WaitCharacterMoved " + movingCharacterView);
 		
-		if (!movingCharacter.TryGetAgent(out var agent))
+		if (!movingCharacterView.TryGetAgent(out var agent))
 		{
-			Debug.LogWarning(movingCharacter + " has no agent");
+			Debug.LogWarning(movingCharacterView + " has no agent");
 			yield break;
 		}
 
-		if (!movingCharacter.TryGetData(out var characterData))
+		if (!movingCharacterView.TryGetData(out var characterData))
 		{
-			Debug.LogWarning(movingCharacter + " has no data");
+			Debug.LogWarning(movingCharacterView + " has no data");
 			yield break;
 		}
 		
@@ -221,17 +221,17 @@ public class GameView
 		while (agent.pathPending)
 			yield return null;
 		
-		if (!movingCharacter.GetPath(out var path))
+		if (!movingCharacterView.GetPath(out var path))
 		{
-			Debug.LogWarning(movingCharacter + " has no path");
+			Debug.LogWarning(movingCharacterView + " has no path");
 			yield break;
 		}
 
 		var firstPoint = path.First();
-		var dir = (firstPoint - movingCharacter.GetPosition()).normalized;
-		while (dir.sqrMagnitude > 0.01f && !movingCharacter.IsFacingDirection(dir))
+		var dir = (firstPoint - movingCharacterView.GetPosition()).normalized;
+		while (dir.sqrMagnitude > 0.01f && !movingCharacterView.IsFacingDirection(dir))
 		{
-			movingCharacter.RotateTowards(firstPoint, Time.deltaTime);
+			movingCharacterView.RotateTowards(firstPoint, Time.deltaTime);
 			yield return null;
 		}
 		
@@ -245,16 +245,16 @@ public class GameView
 				break;
 			}
 			
-			var oldPosition = movingCharacter.GetPosition();
+			var oldPosition = movingCharacterView.GetPosition();
 			
 			yield return null;
 			
-			var newPosition = movingCharacter.GetPosition();
+			var newPosition = movingCharacterView.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			
 			characterData.ConsumeMovePoints(deltaPos);
 			characterData.SetPosition(newPosition);
-			characterData.SetRotation(movingCharacter.GetRotation());
+			characterData.SetRotation(movingCharacterView.GetRotation());
 			
 		} while (agent.isMoving && !agent.reachedDestination);
 		
@@ -264,14 +264,14 @@ public class GameView
 		onComplete?.Invoke();
 	}
 
-	public void SelectCharacter(Character character, bool focusCamera = false)
+	public void SelectCharacter(CharacterView characterView, bool focusCamera = false)
 	{
-		if(selectedCharacter != null) characterSelected?.Invoke(selectedCharacter, false);
-		selectedCharacter = character;
-		if (selectedCharacter != null)
+		if(_selectedCharacterView != null) characterSelected?.Invoke(_selectedCharacterView, false);
+		_selectedCharacterView = characterView;
+		if (_selectedCharacterView != null)
 		{
-			characterSelected?.Invoke(selectedCharacter, true);
-			if (focusCamera) mainCamera.Focus(selectedCharacter);
+			characterSelected?.Invoke(_selectedCharacterView, true);
+			if (focusCamera) mainCamera.Focus(_selectedCharacterView);
 		}
 	}
 
@@ -289,34 +289,34 @@ public class GameView
 		Debug.Log(">> New turn: " + gameData.GetCurrentTurn());
 	}
 
-	public void ClickRunAction() => RunAction(selectedCharacter, false);
-	public void RunAction(Character onCharacter, bool force)
+	public void ClickRunAction() => RunAction(_selectedCharacterView, false);
+	public void RunAction(CharacterView onCharacterView, bool force)
 	{
-		if (onCharacter == null)
+		if (onCharacterView == null)
 		{
 			Debug.LogError(this + " no character!");
 			return;
 		}
 
-		if (!force && !onCharacter.CanUseRunAction())
+		if (!force && !onCharacterView.CanUseRunAction())
 		{
-			Debug.LogWarning(onCharacter + " has no actions");
+			Debug.LogWarning(onCharacterView + " has no actions");
 			return;
 		}
 
-		StartCoroutine(WaitRunAction(onCharacter));
+		StartCoroutine(WaitRunAction(onCharacterView));
 	}
 
-	private IEnumerator WaitRunAction(Character onCharacter)
+	private IEnumerator WaitRunAction(CharacterView onCharacterView)
 	{
-		Debug.Log(">> WaitRunAction: " + onCharacter);
+		Debug.Log(">> WaitRunAction: " + onCharacterView);
 
-		if (!onCharacter.TryGetData(out var characterData))
+		if (!onCharacterView.TryGetData(out var characterData))
 		{
 			yield break;
 		}
 
-		DebugGUI.WorldLabel(onCharacter.GetPosition(), "RUN", 1f).offset = Vector2.up; // TODO Floating Text Component
+		DebugGUI.WorldLabel(onCharacterView.GetPosition(), "RUN", 1f).offset = Vector2.up; // TODO Floating Text Component
 		yield return new WaitForSeconds(1.0f);
 		characterData.RunAction();
 	}
@@ -335,8 +335,8 @@ public class GameView
 		aStar = FindObject<AstarPath>();
 		
 		coroutines = new List<IEnumerator>();
-		partyCharacters = new List<Character>();
-		allCharacters = new List<Character>(FindAllObjects<Character>());
+		partyCharacters = new List<CharacterView>();
+		allCharacters = new List<CharacterView>(FindAllObjects<CharacterView>());
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
@@ -436,7 +436,7 @@ public class GameView
 			var result = CursorRaycast(out var hit);
 			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION) // mouse over navigation
 			{
-				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+				if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
 				{
 					if (!HasCoroutines())
 					{
@@ -446,9 +446,9 @@ public class GameView
 			}
 			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER) // mouse over character (or prop?)
 			{
-				if (hit.collider.TryGetComponent(out Character overCharacter))
+				if (hit.collider.TryGetComponent(out CharacterView overCharacter))
 				{
-					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+					if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
 					{
 						if (!HasCoroutines())
 						{
@@ -466,11 +466,11 @@ public class GameView
 				
 				if (hit.collider.TryGetComponent(out PropComponent overProp)) // click prop
 				{
-					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+					if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
 					{
 						if (!HasCoroutines())
 						{
-							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
+							if (overProp.GetBestWaypoint(_selectedCharacterView.GetPosition(), out var bestWaypoint))
 							{
 								agent.AssignDestination(bestWaypoint.GetPosition());
 							}
@@ -484,7 +484,7 @@ public class GameView
 			}
 			else
 			{
-				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+				if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
 				{
 					if (!HasCoroutines())
 					{
@@ -542,11 +542,11 @@ public class GameView
 		GUILayout.FlexibleSpace();
 		GUILayout.Label(GetLabel("hasFocus") + hasFocus);
 		GUILayout.Label(GetLabel("coroutines") + coroutines.Count);
-		if (selectedCharacter)
+		if (_selectedCharacterView)
 		{
 			GUILayout.Space(space);
 			GUILayout.BeginVertical("window");
-			selectedCharacter?.OnGUIDebug();
+			_selectedCharacterView?.OnGUIDebug();
 			GUILayout.EndVertical();
 		}
 	}

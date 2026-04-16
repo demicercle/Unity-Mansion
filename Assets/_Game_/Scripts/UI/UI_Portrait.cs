@@ -13,13 +13,13 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		if (assignedCharacter != null)
+		if (_assignedCharacterView != null)
 		{
-			GameView.clickSelectCharacter?.Invoke(assignedCharacter);
+			GameView.clickSelectCharacter?.Invoke(_assignedCharacterView);
 		}
 	}
 
-	private Character assignedCharacter;
+	private CharacterView _assignedCharacterView;
 	private GameView gameView;
 	
 	private void Awake()
@@ -40,29 +40,29 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 
 	private void OnValueChanged(bool value)
 	{
-		if (value && assignedCharacter != null)
+		if (value && _assignedCharacterView != null)
 		{
-			GameView.clickSelectCharacter.Invoke(assignedCharacter);
+			GameView.clickSelectCharacter.Invoke(_assignedCharacterView);
 		}
 	}
 
-	private void CharacterSelected(Character character, bool selected)
+	private void CharacterSelected(CharacterView characterView, bool selected)
 	{
-		if (assignedCharacter == character)
+		if (_assignedCharacterView == characterView)
 		{
 			toggle.isOn = selected;
 		}
 	}
 
-	private void CharacterAddedToParty(Character arg1, int arg2)
+	private void CharacterAddedToParty(CharacterView arg1, int arg2)
 	{
 		var index = transform.GetSiblingIndex();
 		if (index == arg2)
 		{
-			assignedCharacter = arg1;
+			_assignedCharacterView = arg1;
 			gameObject.SetActive(arg1 && arg2 >= 0);
 
-			if (assignedCharacter && assignedCharacter.TryGetData(out var data))
+			if (_assignedCharacterView && _assignedCharacterView.TryGetData(out var data))
 			{
 				rawImage.texture = data.portraitTexture;
 				nameLabel.text = data.displayName;
