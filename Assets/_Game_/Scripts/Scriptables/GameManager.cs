@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Oddworm.Framework;
+using UnityEditor;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Game Manager", menuName = "Game Manager")]
@@ -43,8 +44,9 @@ public class GameManager : ScriptableObject
 
 	static public T FindObject<T>() where T : Object => FindObjectsByType<T>(default).FirstOrDefault();
 	static public T[] FindObjects<T>() where T : Object => FindObjectsByType<T>(default);
-	
+
 	public bool drawDebug = false;
+	public bool debugGUI = true;
 	public float cameraSpeed = 1.0f;
 	public float maxNavigationDistance = 0.5f;
 
@@ -73,6 +75,9 @@ public class GameManager : ScriptableObject
 	private List<Character> partyCharacters;
 	private Character selectedCharacter;
 	private List<IEnumerator> coroutines;
+	private Character movingCharacter;
+	private float movingCharacterDeltaPosition;
+	private Vector3 lastMovingCharacterPosition;
 
 	public void MouseMove(Vector2 pos)
 	{
@@ -103,6 +108,8 @@ public class GameManager : ScriptableObject
 					if (!HasCoroutines())
 					{
 						agent.SetCanMove(true);
+						movingCharacter = selectedCharacter;
+						lastMovingCharacterPosition = selectedCharacter.GetPosition();
 						StartCoroutine(WaitAgentMoved(agent));
 					}
 				}
@@ -119,9 +126,16 @@ public class GameManager : ScriptableObject
 	{
 		do
 		{
+			if (movingCharacter.GetRemainingMovePoints() <= 0)
+			{
+				Debug.Log(movingCharacter + " out of move points");
+				break;
+			}
+			
 			yield return null;
 		} while (agent.isMoving && !agent.reachedDestination);
 		
+		movingCharacter = null;
 		agent.ClearDestination();
 		agent.SetCanMove(false);
 	}
@@ -214,7 +228,7 @@ public class GameManager : ScriptableObject
 					{
 						if (!HasCoroutines())
 						{
-							agent.AssignDestination(character.HasDestination());
+							agent.AssignDestination(character.GetPosition());
 						}
 					}
 				}
@@ -229,6 +243,14 @@ public class GameManager : ScriptableObject
 					}
 				}
 			}
+		}
+
+		if (movingCharacter)
+		{
+			movingCharacter.DrawPath();
+			movingCharacterDeltaPosition = Vector3.Distance(movingCharacter.GetPosition(), lastMovingCharacterPosition);
+			lastMovingCharacterPosition = movingCharacter.GetPosition();
+			movingCharacter.ConsumeMovePoints(movingCharacterDeltaPosition);
 		}
 	}
 
@@ -275,8 +297,18 @@ public class GameManager : ScriptableObject
 
 	public void OnGUI()
 	{
-		GUILayout.Label("coroutines: " + coroutines.Count);
+		const float space = 0.5f;
+		GUILayout.FlexibleSpace();
+		GUILayout.Label(GetLabel("coroutines") + coroutines.Count);
+		GUILayout.Space(space);
+		if (selectedCharacter)
+		{
+			GUILayout.Label(GetLabel("selectedCharacter") + selectedCharacter);
+			GUILayout.Label(GetLabel(".movePoints") + selectedCharacter.GetRemainingMovePoints());
+		}
 	}
+	
+	string GetLabel(string label) => ObjectNames.NicifyVariableName(label) + ": ";
 }
 
 public interface ICursorHandler

@@ -75,6 +75,11 @@ public class Character : MonoBehaviour, ICursorHandler
 				onSearchPath?.Invoke();
 			}
 		}
+
+		public Vector3 GetPosition()
+		{
+			return aiPath.transform.position;
+		}
 	}
 	
 	[Header("Stats")]  // todo use scriptable
@@ -153,11 +158,19 @@ public class Character : MonoBehaviour, ICursorHandler
 		return out_agent.aiPath != null;
 	}
 
+	public float GetRemainingMovePoints() => movePoints - usedMovePoints;
+
+	public void ConsumeMovePoints(float delta)
+	{
+		usedMovePoints += Mathf.Abs(delta);
+	}
+
 	private AgentWrapper agent;
 	private Color currentColor;
 	private bool mouseOver;
 	private bool isSelected;
 	private bool inParty;
+	private float usedMovePoints;
 
 	private void Awake()
 	{
@@ -192,22 +205,22 @@ public class Character : MonoBehaviour, ICursorHandler
 		{
 			isSelected = arg2;
 
-			Debug.Log(this + " isSelected=" + isSelected);
+//			Debug.Log(this + " isSelected=" + isSelected);
 			if (isSelected)
 			{
 				agent.SetObstacle(false);
-				agent.onSearchPath += OnSearchPath;
+				agent.onSearchPath += DrawPath;
 			}
 			else
 			{
 				pathRenderers.ForEach(p => p.enabled = false);
 				agent.SetObstacle(true);
-				agent.onSearchPath -= OnSearchPath;
+				agent.onSearchPath -= DrawPath;
 			}
 		}
 	}
 
-	private void OnSearchPath()
+	public void DrawPath()
 	{
 		var points = agent.GetCurrentPath();
 		
@@ -219,7 +232,7 @@ public class Character : MonoBehaviour, ICursorHandler
 
 		if (pathRenderers.Count > 1)
 		{
-			points = Utils.LimitPathTotalLength(points, movePoints);
+			points = Utils.LimitPathTotalLength(points, GetRemainingMovePoints());
 			pathRenderers[1].positionCount = points.Length;
 			pathRenderers[1].SetPositions(points);
 		}
@@ -269,7 +282,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	    mouseOver = false;
     }
 
-    public Vector3 HasDestination()
+    public Vector3 GetPosition()
     {
 	    return transform.position;
     }
