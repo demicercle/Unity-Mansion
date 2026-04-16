@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections;
 using Oddworm.Framework;
 using UnityEngine;
-
 
 public class DebugGUI : MonoBehaviour
 {
@@ -10,10 +8,13 @@ public class DebugGUI : MonoBehaviour
 
 	static public void WorldLabel(Vector3 position, string message, float duration = 0f)
 	{
-		var label = new GameObject().AddComponent<GUILabel>();
-		label.message = message;
+		var label = new GameObject().AddComponent<DebugGUI>();
 		label.duration = duration;
 		label.worldPosition = position;
+		label.onGUI += () =>
+		{
+			GUILayout.Label(message);
+		};
 	}
 	
 	static public void WireArrow(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
@@ -25,44 +26,42 @@ public class DebugGUI : MonoBehaviour
 	{
 		DbgDraw.Line(start, end, color, duration);
 	}
-	
-		static private DebugGUI _instance;
-		
-		static public void Log(string message)
-		{
-			Debug.Log("> " + message);
-			GetInstance().lines.Add(message);
-		}
+		public bool destroyGameObject = true;
+		public float duration = 0.0f;
+		public Transform target;
+		public Vector2 size = Vector2.one * 100;
+		public Vector3 worldPosition = Vector3.zero;
 
-		static DebugGUI GetInstance()
+		private IEnumerator Start()
 		{
-			if (_instance == null)
+			if (duration < 0)
+				yield break;
+
+			if (target != null)
 			{
-				_instance = new GameObject("DebugGUI").AddComponent<DebugGUI>();
+				transform.SetParent(target);
+				transform.localPosition = worldPosition;
 			}
-
-			return _instance;
+			else
+			{
+				transform.position = worldPosition;
+			}
+		
+			if (duration > 0f)
+				yield return new WaitForSeconds(duration);
+			else
+				yield return new WaitForEndOfFrame();
+		
+			if (destroyGameObject) Destroy(gameObject);
 		}
 
-		private List<string> lines = new List<string>();
+		public System.Action onGUI;
 		
 		private void OnGUI()
 		{
-			
-			
-			if (lines.Count == 0) return;
-			GUILayout.BeginArea(new Rect(Vector2.zero, new Vector2(Screen.width, Screen.height)));
-			//GUILayout.BeginVertical("textfield");
-			foreach (var line in lines)
-			{
-				GUILayout.Label(line);
-			}
-			//GUILayout.EndVertical();
+			worldPosition = Camera.main.WorldToScreenPoint(transform.position);
+			GUILayout.BeginArea(new Rect(worldPosition.x, Screen.height - worldPosition.y, size.x, size.y));
+			onGUI?.Invoke();
 			GUILayout.EndArea();
-		}
-
-		private void LateUpdate()
-		{
-			lines.Clear();
 		}
 }
