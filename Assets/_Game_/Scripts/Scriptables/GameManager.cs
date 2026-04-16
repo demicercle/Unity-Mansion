@@ -144,7 +144,24 @@ public class GameManager : ScriptableObject
 			mainCamera.Move(inputSystem.Player.Move.ReadValue<Vector2>() * cameraSpeed * Time.unscaledDeltaTime);
 		}
 		
-		CursorRaycast(out _);
+		var result = CursorRaycast(out var hit);
+		if (result == CURSOR_RAYCAST_RESULT_NAVIGATION)
+		{
+			if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+			{
+				agent.AssignDestination(hit.point);
+			}
+		}
+		else if (result == CURSOR_RAYCAST_RESULT_CHARACTER)
+		{
+			if (hit.collider.TryGetComponent(out Character character))
+			{
+				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+				{
+					agent.AssignDestination(character.HasDestination());
+				}
+			}
+		}
 	}
 
 	private const int CURSOR_RAYCAST_RESULT_NONE = 0;

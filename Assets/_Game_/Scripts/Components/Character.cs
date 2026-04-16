@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Oddworm.Framework;
 using Pathfinding;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
@@ -6,6 +8,41 @@ using UnityEngine.UI;
 
 public class Character : MonoBehaviour, ICursorHandler
 {
+	public struct AgentWrapper
+	{
+		public AIPath aiPath;
+		public Vector3 velocity => aiPath.velocity;
+		public bool isMoving => aiPath.isStopped == false;
+
+		public System.Action onSearchPath
+		{
+			get => aiPath.onSearchPath;
+			set => aiPath.onSearchPath = value;
+		}
+
+		public bool disableMovement
+		{
+			get => !aiPath.simulateMovement;
+			set => aiPath.simulateMovement = !value;
+		}
+
+		public Vector3[] GetCurrentPath()
+		{
+			if (!aiPath.hasPath)
+				return new Vector3[0];
+			
+			var buffer = new List<Vector3>();
+			aiPath.GetRemainingPath(buffer, out var stale);
+			return buffer.ToArray();
+		}
+		
+		public void AssignDestination(Vector3 hitPoint)
+		{
+			aiPath.destination = hitPoint;
+			DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Color.cyan, 0f);
+		}
+	}
+	
 	[Header("Stats")] 
 	[SerializeField] private string displayName;
 	public string GetDisplayName() => displayName;
@@ -17,18 +54,68 @@ public class Character : MonoBehaviour, ICursorHandler
 	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red;
 	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
 	
+	[Header("Collision")]
+	[SerializeField] private CapsuleCollider capsuleCollider;
+	[SerializeField] private Rigidbody rigidbody;
+	
 	[Header("Navigation")]
-	[SerializeField] private AIPath aiAgent;
+	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
+	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
+	[SerializeField] private LineRenderer pathRenderer;
 	
 	[Header("Animation")]
 	[SerializeField] private Animator animator;
 	[SerializeField] private float velocityScale = 1.0f;
 
+	private void OnDrawGizmosSelected()
+	{
+		UpdateComponents();
+	}
+
+	private void UpdateComponents()
+	{
+		if (TryGetComponent<AIPath>(out var aiPath))
+		{
+			aiPath.radius = radius;
+			aiPath.height = height;
+		}
+
+		if (circleRenderer)
+		{
+			circleRenderer.radius = radius;
+		}
+
+		if (capsuleCollider)
+		{
+			capsuleCollider.height = height;
+			capsuleCollider.radius = radius;
+			capsuleCollider.center = Vector3.up * height / 2f;
+		}
+
+		if (rigidbody)
+		{
+			rigidbody.isKinematic = true;
+			rigidbody.useGravity = false;
+		}
+
+		if (pathRenderer)
+		{
+			pathRenderer.enabled = false;
+		}
+	}
+
 	public void CursorOver()
 	{
 		mouseOver = true;
 	}
-	
+
+	public bool TryGetAgent(out AgentWrapper out_agent)
+	{
+		out_agent = agent;
+		return out_agent.aiPath != null;
+	}
+
+	private AgentWrapper agent;
 	private Color currentColor;
 	private bool mouseOver;
 	private bool isSelected;
@@ -40,6 +127,26 @@ public class Character : MonoBehaviour, ICursorHandler
 
 		GameEvents.characterAddedToParty += CharacterAddedToParty;
 		GameEvents.characterSelected += CharacterSelected;
+
+		if (TryGetComponent<AIPath>(out var aiPath))
+		{
+			agent = new AgentWrapper()
+			{
+				aiPath = aiPath
+			};
+
+			//	agent.canMove = false;
+			//	agent.canRotate = false;
+			agent.disableMovement = true;
+		}
+		
+		UpdateComponents();
+	}
+
+	void OnDestroy()
+	{
+		GameEvents.characterAddedToParty -= CharacterAddedToParty;
+		GameEvents.characterSelected -= CharacterSelected;
 	}
 
 	private void CharacterSelected(Character arg1, bool arg2)
@@ -47,13 +154,30 @@ public class Character : MonoBehaviour, ICursorHandler
 		if (arg1 == this)
 		{
 			isSelected = arg2;
+
+			Debug.Log(this + " isSelected=" + isSelected);
+			if (isSelected)
+			{
+				agent.onSearchPath += OnSearchPath;
+			}
+			else
+			{
+				pathRenderer.enabled = false;
+				
+				agent.onSearchPath -= OnSearchPath;
+			}
 		}
 	}
 
-	private void OnDestroy()
+	private void OnSearchPath()
 	{
-		GameEvents.characterAddedToParty -= CharacterAddedToParty;
-		GameEvents.characterSelected -= CharacterSelected;
+		var points = agent.GetCurrentPath();
+		if ( pathRenderer && (pathRenderer.enabled = points.Length > 0))
+		{
+			pathRenderer.useWorldSpace = true;
+			pathRenderer.positionCount = points.Length;
+			pathRenderer.SetPositions(points);
+		}
 	}
 
 	private void CharacterAddedToParty(Character arg1, int arg2)
@@ -83,12 +207,17 @@ public class Character : MonoBehaviour, ICursorHandler
 
 	    if (animator != null)
 	    {
-		    var localVelocity = aiAgent.velocity;
+		    var localVelocity = agent.velocity;
 		    animator.SetFloat(AnimationParameters.VelocityX, 0);      
 		    animator.SetFloat(AnimationParameters.VelocityZ, localVelocity.magnitude * velocityScale);  
-		    animator.SetBool(AnimationParameters.Moving, aiAgent.isStopped == false);
+		    animator.SetBool(AnimationParameters.Moving, agent.isMoving);
 	    }
 
 	    mouseOver = false;
+    }
+
+    public Vector3 HasDestination()
+    {
+	    return transform.position;
     }
 }
