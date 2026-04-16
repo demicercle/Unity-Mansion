@@ -28,6 +28,24 @@ public class Character : MonoBehaviour, ICursorHandler
 			set => aiPath.simulateMovement = !value;
 		}
 
+		public void SetObstacle(bool value)
+		{
+			if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate))
+			{
+				graphUpdate.enabled = value;
+				if (value)
+				{
+					graphUpdate.points = new[]
+					{
+						Vector3.forward * aiPath.radius,
+						Vector3.right * aiPath.radius,
+						-Vector3.forward * aiPath.radius,
+						-Vector3.right * aiPath.radius,
+					};
+				}
+			}
+		}
+
 		public Vector3[] GetCurrentPath()
 		{
 			if (!hasDestination)
@@ -153,6 +171,7 @@ public class Character : MonoBehaviour, ICursorHandler
 			//	agent.canMove = false;
 			//	agent.canRotate = false;
 			agent.disableMovement = true;
+			agent.SetObstacle(true);
 		}
 		
 		UpdateComponents();
@@ -173,12 +192,14 @@ public class Character : MonoBehaviour, ICursorHandler
 			Debug.Log(this + " isSelected=" + isSelected);
 			if (isSelected)
 			{
+				agent.SetObstacle(false);
 				agent.onSearchPath += OnSearchPath;
 			}
 			else
 			{
 				pathRenderer.enabled = false;
 				
+				agent.SetObstacle(true);
 				agent.onSearchPath -= OnSearchPath;
 			}
 		}
