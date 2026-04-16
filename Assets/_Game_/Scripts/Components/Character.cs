@@ -14,6 +14,7 @@ public class Character : MonoBehaviour, ICursorHandler
 		public Vector3 velocity => aiPath.velocity;
 		public bool isMoving => aiPath.isStopped == false;
 
+		private float maxLength;
 		private bool hasDestination;
 
 		public System.Action onSearchPath
@@ -46,14 +47,17 @@ public class Character : MonoBehaviour, ICursorHandler
 			}
 		}
 
-		public Vector3[] GetCurrentPath()
+		public Vector3[] GetCurrentPath(bool ignoreLimit = false)
 		{
 			if (!hasDestination)
 				return new Vector3[0];
 			
 			var buffer = new List<Vector3>();
 			aiPath.GetRemainingPath(buffer, out var stale);
-			return buffer.ToArray();
+			if (!ignoreLimit && maxLength > 0)
+				return Utils.LimitPathTotalLength(buffer.ToArray(), maxLength);
+			else
+				return buffer.ToArray();
 		}
 		
 		public void AssignDestination(Vector3 hitPoint)
@@ -74,13 +78,20 @@ public class Character : MonoBehaviour, ICursorHandler
 				onSearchPath?.Invoke();
 			}
 		}
+
+		public void SetMaxPathLength(float length)
+		{
+			maxLength = length;
+			onSearchPath?.Invoke();
+		}
 	}
 	
-	[Header("Stats")] 
+	[Header("Stats")]  // todo use scriptable
 	[SerializeField] private string displayName;
 	public string GetDisplayName() => displayName;
 	[SerializeField] private Texture2D portrait;
 	public Texture GetPortraitTexture() => portrait;
+	[SerializeField] private float movePoints;
 	
 	[Header("Selection Circle")]
 	[SerializeField] private CircleRenderer circleRenderer;
@@ -193,6 +204,7 @@ public class Character : MonoBehaviour, ICursorHandler
 			if (isSelected)
 			{
 				agent.SetObstacle(false);
+				if (movePoints > 0) agent.SetMaxPathLength(movePoints);
 				agent.onSearchPath += OnSearchPath;
 			}
 			else

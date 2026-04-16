@@ -1,8 +1,47 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public static class Utils
 {
 	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
+	
+	/// <summary>
+	/// Limite la longueur totale d'un chemin (somme des distances entre les points) à une valeur maximale donnée.
+	/// </summary>
+	/// <param name="path">Le chemin à limiter (tableau de Vector3).</param>
+	/// <param name="maxTotalLength">La longueur totale maximale souhaitée pour le chemin.</param>
+	/// <returns>Un nouveau tableau de Vector3 dont la longueur totale est limitée à maxTotalLength.</returns>
+	public static Vector3[] LimitPathTotalLength(Vector3[] path, float maxTotalLength)
+	{
+		if (path == null || path.Length <= 1 || maxTotalLength <= 0f)
+		{
+			return new Vector3[0];
+		}
+
+		List<Vector3> limitedPath = new List<Vector3> { path[0] };
+		float currentTotalLength = 0f;
+
+		for (int i = 1; i < path.Length; i++)
+		{
+			float segmentLength = Vector3.Distance(path[i - 1], path[i]);
+			if (currentTotalLength + segmentLength > maxTotalLength)
+			{
+				// Si on dépasse la longueur max, on calcule le point final partiel pour atteindre exactement maxTotalLength
+				float remainingLength = maxTotalLength - currentTotalLength;
+				Vector3 direction = (path[i] - path[i - 1]).normalized;
+				Vector3 lastPoint = path[i - 1] + direction * remainingLength;
+				limitedPath.Add(lastPoint);
+				break;
+			}
+			else
+			{
+				limitedPath.Add(path[i]);
+				currentTotalLength += segmentLength;
+			}
+		}
+
+		return limitedPath.ToArray();
+	}
 	
 	static public void RebuildNavigation()
 	{
