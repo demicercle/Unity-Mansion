@@ -429,7 +429,7 @@ MonoBehaviour:
     drawDebug: 0
     debugGUI: 0
     cameraSpeed: 10
-    maxNavigationDistance: 0.254
+    maxNavDistance: 0.5
     startupComponent: {fileID: 0}
 --- !u!1001 &1467149466160358941
 PrefabInstance:
