@@ -106,6 +106,11 @@ public class GameManager : ScriptableObject
 			//DebugGUI.Log("Hit Character: " + hit.collider);
 			DbgDraw.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
 			Utils.DrawDebugCircle(hit.collider.transform.position, Vector3.up, 0.5f);
+
+			foreach (var cursorHandler in hit.collider.GetComponents<ICursorHandler>())
+			{
+				cursorHandler.CursorOver();
+			}
 		}
 		else if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(LAYER_GROUND, LAYER_WALL)))
 		{
@@ -119,4 +124,9 @@ public class GameManager : ScriptableObject
 			}
 		}
 	}
+}
+
+public interface ICursorHandler
+{
+	void CursorOver();
 }
