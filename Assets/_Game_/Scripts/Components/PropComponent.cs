@@ -13,6 +13,7 @@ public class PropComponent : MonoBehaviour
 	public bool onlyOnce;
 	public int consumeActions;
 	public bool rebuildNavigation;
+	public float autoTriggerDelay;
 	public string animatorTrigger;
 	public UnityEvent interacted;
 
@@ -54,7 +55,7 @@ public class PropComponent : MonoBehaviour
 		{
 			gameObject.layer = LayerMask.NameToLayer(GameManager.LAYER_IGNORE);
 		}
-
+		
 		if (consumeActions > 0)
 		{
 			interactor?.ConsumeActions(consumeActions);
@@ -81,8 +82,14 @@ public class PropComponent : MonoBehaviour
 		}
 	}
 
-	private void Start()
+	private IEnumerator Start()
 	{
 		gameObject.layer = LayerMask.NameToLayer(GameManager.LAYER_CHARACTER);
+
+		if (autoTriggerDelay > 0f)
+		{
+			yield return new WaitForSeconds(autoTriggerDelay);
+			Interact(null);
+		}
 	}
 }
