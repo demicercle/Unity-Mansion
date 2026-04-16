@@ -223,8 +223,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ddc7ec2695a47baa7e106ac9224a318, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animatorTrigger: Toggle
   onlyOnce: 1
+  consumeActions: 1
+  rebuildNavigation: 1
+  animatorTrigger: Toggle
   interacted:
     m_PersistentCalls:
       m_Calls: []

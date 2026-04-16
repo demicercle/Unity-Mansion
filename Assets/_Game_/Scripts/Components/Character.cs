@@ -12,9 +12,10 @@ public class Character : MonoBehaviour, ICursorHandler
 	{
 		public AIPath aiPath;
 		public Vector3 velocity => aiPath.velocity;
-		public bool isMoving => aiPath.isStopped == false;
+		public bool isMoving => !aiPath.isStopped;
 		public bool reachedDestination => aiPath.reachedDestination;
 		public float reachDistance => aiPath.endReachedDistance;
+		public bool pathPending => aiPath.pathPending;
 
 		private bool hasDestination;
 
@@ -23,7 +24,7 @@ public class Character : MonoBehaviour, ICursorHandler
 			get => aiPath.onSearchPath;
 			set => aiPath.onSearchPath = value;
 		}
-
+		
 		public void SetCanMove(bool value)
 		{
 			aiPath.simulateMovement = value;
@@ -79,9 +80,12 @@ public class Character : MonoBehaviour, ICursorHandler
 
 		public void StopMovement()
 		{
+			aiPath.isStopped = true;
 			ClearDestination();
 		}
 	}
+
+	public const float MIN_FACING_DOT = 0.9f;
 	
 	[Header("Stats")]  // todo use scriptable
 	[SerializeField] private CharacterStats stats;
@@ -92,7 +96,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	[Header("Selection")]
 	[SerializeField] private CircleRenderer selectionCircle;
 	[SerializeField] private CircleRenderer movePointsCircle;
-	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red;
+	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red, disabledColor = Color.gray;
 	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
 	
 	[Header("Collision")]
@@ -101,7 +105,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	
 	[Header("Navigation")]
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
-	[SerializeField] [Range(0.0f, 10.0f)] private float rotationSpeed = 1.0f;
+	//[SerializeField] [Range(0.0f, 10.0f)] private float rotationSpeed = 1.0f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -251,32 +255,33 @@ public class Character : MonoBehaviour, ICursorHandler
 			if (isSelected)
 			{
 				agent.SetObstacle(false);
-				agent.onSearchPath += DrawPath;
+				agent.onSearchPath += UpdatePath;
 			}
 			else
 			{
 				pathRenderers.ForEach(p => p.enabled = false);
 				agent.SetObstacle(true);
-				agent.onSearchPath -= DrawPath;
+				agent.onSearchPath -= UpdatePath;
 			}
 		}
 	}
 
-	public void DrawPath()
+	private Vector3[] lastPath;
+	public void UpdatePath()
 	{
-		var points = agent.GetCurrentPath();
+		lastPath = agent.GetCurrentPath();
 		
 		if (pathRenderers.Count > 0)
 		{
-			pathRenderers[0].positionCount = points.Length;
-			pathRenderers[0].SetPositions(points);
+			pathRenderers[0].positionCount = lastPath.Length;
+			pathRenderers[0].SetPositions(lastPath);
 		}
 
 		if (pathRenderers.Count > 1)
 		{
-			points = Utils.LimitPathTotalLength(points, stats.GetRemainingMovePoints());
-			pathRenderers[1].positionCount = points.Length;
-			pathRenderers[1].SetPositions(points);
+			lastPath = Utils.LimitPathTotalLength(lastPath, stats.GetRemainingMovePoints());
+			pathRenderers[1].positionCount = lastPath.Length;
+			pathRenderers[1].SetPositions(lastPath);
 		}
 		
 		pathRenderers.ForEach(p => p.enabled = p.positionCount > 0);
@@ -313,12 +318,14 @@ public class Character : MonoBehaviour, ICursorHandler
 	    }
     }
 
+	private bool hasActions;
 	private float alphaColor;
     void LateUpdate()
     {
+	    hasActions = stats.GetRemainingActions() > 0;
 	    alphaColor = alphaCurve.Evaluate(isSelected ? 1f : mouseOver ? 0.5f : 0.0f);
 	    
-	    selectionCircle.SetColor(currentColor, alphaColor);
+	    selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
 	    movePointsCircle.SetColor(currentColor, alphaColor);
 	    movePointsCircle.SetProgress(stats.GetMovePointsProgress());
 
@@ -361,11 +368,52 @@ public class Character : MonoBehaviour, ICursorHandler
 	    
 	    if (f < 0f)
 	    {
+		    DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
 		    transform.rotation = Quaternion.LookRotation(getDirection);
 	    }
 	    else
 	    {
-		    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(getDirection), f * rotationSpeed);
+		    DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
+		    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.aiPath.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 	    }
+    }
+
+    public Vector3 GetEyesPosition() => transform.position + Vector3.up * height * 0.9f;
+
+    public void ConsumeActions(int consumeActions)
+    {
+	    stats.ConsumeActions(consumeActions);
+    }
+
+    public bool CanInteract()
+    {
+	    return stats.GetRemainingActions() > 0;
+    }
+
+    public bool GetFirstPathPoint(out Vector3 firstPoint, Vector3[] path = null)
+    {
+	    if (path == null)
+	    {
+		    path = lastPath;
+	    }
+	    
+	    if (path.Length > 1)
+	    {
+		    firstPoint = path[1];
+		    return true;
+	    }
+
+	    firstPoint = default(Vector3);
+	    return false;
+    }
+
+    public bool IsFacingDirection(Vector3 dir)
+    {
+	    dir.y = 0;
+	    dir.Normalize();
+	    var dot = Vector3.Dot(dir, transform.forward);
+	    //Debug.Log(dot);
+	    DebugGUI.WorldLabel(transform.position, dot.ToString("N2"));
+	    return dot >= MIN_FACING_DOT;
     }
 }

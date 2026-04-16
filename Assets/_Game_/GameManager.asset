@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2573c8841a09f24488d74776bb16fd3a, type: 3}
   m_Name: GameManager
   m_EditorClassIdentifier: 
+  drawDebug: 1
+  debugGUI: 1
   cameraSpeed: 10
+  maxNavigationDistance: 0.5

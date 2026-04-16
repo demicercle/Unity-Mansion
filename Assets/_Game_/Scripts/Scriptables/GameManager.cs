@@ -1,9 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Oddworm.Framework;
 using UnityEditor;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 [CreateAssetMenu(fileName = "New Game Manager", menuName = "Game Manager")]
 public class GameManager : ScriptableObject
@@ -69,6 +73,7 @@ public class GameManager : ScriptableObject
 		if (coroutines.Count > 0)
 		{
 			coroutines.RemoveAt(0);
+			Debug.Log("EndCoroutine: " + coroutines.Count);
 			if (coroutines.Count == 0)
 			{
 				GameEvents.routinesStarted?.Invoke(false);
@@ -126,7 +131,10 @@ public class GameManager : ScriptableObject
 									if (dist <= agent.reachDistance)
 									{
 										// waypoint reach
-										StartCoroutine(WaitCharacterInteract(selectedCharacter, clickedProp, bestWaypoint));
+										if (selectedCharacter.CanInteract())
+										{
+											StartCoroutine(WaitCharacterInteract(selectedCharacter, clickedProp, bestWaypoint));
+										}
 									}
 									else
 									{
@@ -158,26 +166,50 @@ public class GameManager : ScriptableObject
 			GameEvents.routinesStarted?.Invoke(true);
 		}
 		
+		Debug.Log("StartCoroutine: " + coroutines.Count);
 		coroutines.Add(coroutine);
 	}
 
 	private IEnumerator WaitCharacterInteract(Character character, PropComponent prop, Waypoint waypoint = null)
 	{
+		Debug.Log("WaitCharacterInteract " + character + " > " + prop + " @ " + waypoint);
 		if (waypoint != null)
 		{
 			character.RotateTowards(waypoint.GetPosition(), -1f);
 		}
 		
-		Debug.Log(character + " Interact with " + prop);
-		yield return prop.Interact();
-		Utils.RebuildNavigation();
+		GameEvents.propInteracted?.Invoke(prop, character.gameObject);
+		yield return prop.Interact(character);
 	}
 	
 	private IEnumerator WaitCharacterMoved(Character movingCharacter, Vector3 dest, System.Action onComplete = null)
 	{
-		if (!movingCharacter.TryGetAgent(out var agent)) yield break;
+		Debug.Log("WaitCharacterMoved " + movingCharacter);
+		
+		if (!movingCharacter.TryGetAgent(out var agent))
+		{
+			Debug.LogWarning(movingCharacter + " has no agent");
+			yield break;
+		}
 		
 		agent.AssignDestination(dest);
+		
+		while (agent.pathPending)
+			yield return null;
+		
+		if (!movingCharacter.GetFirstPathPoint(out var firstPoint))
+		{
+			Debug.LogWarning(movingCharacter + " has no first point");
+			yield break;
+		}
+		
+		var dir = (firstPoint - movingCharacter.GetPosition()).normalized;
+		while (!movingCharacter.IsFacingDirection(dir))
+		{
+			movingCharacter.RotateTowards(firstPoint, Time.deltaTime);
+			yield return null;
+		}
+		
 		agent.SetCanMove(true);
 		
 		do

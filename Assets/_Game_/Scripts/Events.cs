@@ -7,6 +7,7 @@ public class GameEvents
 	static public System.Action<Character, Vector3> characterMoved;
 	static public System.Action<bool> routinesStarted;
 	static public System.Action<int> newTurnStarted;
+	static public System.Action<PropComponent, GameObject> propInteracted;
 }
 
 public class UIEvents

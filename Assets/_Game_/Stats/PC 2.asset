@@ -15,3 +15,4 @@ MonoBehaviour:
   displayName: Sarah
   portraitTexture: {fileID: 2800000, guid: 08e943a402f07f34aacd1f93940543fc, type: 3}
   maxMovePoints: 5
+  maxActions: 1

@@ -15,3 +15,4 @@ MonoBehaviour:
   displayName: "Andr\xE9"
   portraitTexture: {fileID: 2800000, guid: 6cb62fb6fad50a044b28d7ea87cb3efd, type: 3}
   maxMovePoints: 5
+  maxActions: 1

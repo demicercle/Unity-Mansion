@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Pathfinding;
@@ -9,8 +10,10 @@ public class PropComponent : MonoBehaviour
 {
 	public Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
 
-	public string animatorTrigger;
 	public bool onlyOnce;
+	public int consumeActions;
+	public bool rebuildNavigation;
+	public string animatorTrigger;
 	public UnityEvent interacted;
 
 	[ContextMenu("Update Obstacle")]
@@ -40,16 +43,21 @@ public class PropComponent : MonoBehaviour
 		return Waypoint.GetBestWaypointFromPosition(worldPos, out bestWaypoint, GetWaypoints());
 	}
 
-	public Coroutine Interact() => StartCoroutine(DoInteract());
+	public Coroutine Interact(Character interactor = null) => StartCoroutine(DoInteract(interactor));
 
 	public float triggerDelay = 0.0f;
 	public float animDuration = 1.0f;
 	
-	private IEnumerator DoInteract()
+	private IEnumerator DoInteract(Character interactor = null)
 	{
 		if (onlyOnce)
 		{
 			gameObject.layer = LayerMask.NameToLayer(GameManager.LAYER_IGNORE);
+		}
+
+		if (consumeActions > 0)
+		{
+			interactor?.ConsumeActions(consumeActions);
 		}
 		
 		yield return new WaitForSeconds(triggerDelay);
@@ -66,6 +74,11 @@ public class PropComponent : MonoBehaviour
 		interacted?.Invoke();
 		
 		yield return new WaitForSeconds(animDuration);
+
+		if (rebuildNavigation)
+		{
+			yield return Utils.RebuildNavigationAsync();
+		}
 	}
 
 	private void Start()

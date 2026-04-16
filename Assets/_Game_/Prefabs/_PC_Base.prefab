@@ -358,15 +358,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
-  displayName: "Andr\xE9"
-  portrait: {fileID: 2800000, guid: 6cb62fb6fad50a044b28d7ea87cb3efd, type: 3}
-  movePoints: 0
-  moveSpeed: 3
   selectionCircle: {fileID: 5050193632537316992}
   movePointsCircle: {fileID: 7923277011536477314}
   defaultColor: {r: 0, g: 0, b: 1, a: 1}
   partyColor: {r: 0, g: 1, b: 0, a: 1}
   enemyColor: {r: 1, g: 0, b: 0, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   alphaCurve:
     serializedVersion: 2
     m_Curve:
@@ -393,6 +390,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   capsuleCollider: {fileID: 7385597297877825555}
   rigidbody: {fileID: 6072534866263412361}
+  moveSpeed: 3
+  rotationSpeed: 1
   radius: 0.5
   height: 1.5
   pathRenderers:
@@ -611,7 +610,7 @@ MonoBehaviour:
   pickNextWaypointDist: 2
   alwaysDrawGizmos: 0
   slowWhenNotFacingTarget: 1
-  preventMovingBackwards: 0
+  preventMovingBackwards: 1
   constrainInsideGraph: 0
 --- !u!114 &8722277412283640718
 MonoBehaviour:

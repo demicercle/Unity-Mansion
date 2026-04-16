@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class Utils
@@ -14,6 +15,7 @@ public static class Utils
 #endif
 	}
 	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
+	static public Color ColorScale(Color color, float alpha) => new Color(color.r * alpha, color.g * alpha, color.b * alpha, color.a * alpha);
 
 	public static Color HTML_To_Color(string html)
 	{
@@ -71,6 +73,16 @@ public static class Utils
 		foreach (var astar in Object.FindObjectsByType<AstarPath>(FindObjectsInactive.Exclude, FindObjectsSortMode.InstanceID))
 		{
 			astar.Scan(astar.graphs);
+		}
+	}
+
+	static public Coroutine RebuildNavigationAsync() => AstarPath.active.StartCoroutine(DoRebuildNavigationAsync());
+	
+	static public IEnumerator DoRebuildNavigationAsync()
+	{
+		foreach (var progress in AstarPath.active.ScanAsync()) {
+//			Debug.Log("Scanning... " + progress.ToString());
+			yield return null;
 		}
 	}
 	
