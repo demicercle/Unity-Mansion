@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Oddworm.Framework;
@@ -47,12 +48,31 @@ public class GameManager : ScriptableObject
 	public float cameraSpeed = 1.0f;
 	public float maxNavigationDistance = 0.5f;
 
+	public bool HasCoroutines() => coroutines.Count > 0;
+	
+	public bool GetNextCoroutine(out IEnumerator coroutine)
+	{
+		if (coroutines.Count > 0)
+		{
+			coroutine = coroutines[0];
+			return true;
+		}
+
+		coroutine = default;
+		return false;
+	}
+	
+	public void RemoveNextCoroutine()  => coroutines.RemoveAt(0);
+	
+	public bool mouseOverViewport { get; set; }
+
 	private Vector2 mousePosition;
 	private AstarPath aStar;
 	private MainCamera mainCamera;
 	private InputSystem_Actions inputSystem;
 	private List<Character> partyCharacters;
 	private Character selectedCharacter;
+	private List<IEnumerator> coroutines;
 
 	public void MouseMove(Vector2 pos)
 	{
@@ -63,7 +83,7 @@ public class GameManager : ScriptableObject
 	{
 	//	Debug.Log("LeftClick: " + value);
 
-		if (value > 0f) // pressed
+		if (mouseOverViewport && value > 0f) // pressed
 		{
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
@@ -76,7 +96,34 @@ public class GameManager : ScriptableObject
 					}
 				}
 			}
+			else if (raycastResult == CURSOR_RAYCAST_RESULT_NAVIGATION)
+			{
+				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+				{
+					if (!HasCoroutines())
+					{
+						agent.SetCanMove(true);
+						StartCoroutine(WaitAgentMoved(agent));
+					}
+				}
+			}
 		}
+	}
+
+	public void StartCoroutine(IEnumerator coroutine)
+	{
+		coroutines.Add(coroutine);
+	}
+
+	private IEnumerator WaitAgentMoved(Character.AgentWrapper agent)
+	{
+		do
+		{
+			yield return null;
+		} while (agent.isMoving && !agent.reachedDestination);
+		
+		agent.ClearDestination();
+		agent.SetCanMove(false);
 	}
 
 	public void SelectCharacter(Character character)
@@ -92,6 +139,9 @@ public class GameManager : ScriptableObject
 		mainCamera = FindObject<MainCamera>();
 		aStar = FindObject<AstarPath>();
 		
+		coroutines = new List<IEnumerator>();
+		partyCharacters = new List<Character>();
+		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
 		inputSystem.UI.Enable();
@@ -101,7 +151,6 @@ public class GameManager : ScriptableObject
 		inputSystem.Player.Enable();
 		
 		// init characters
-		partyCharacters = new List<Character>();
 		foreach (var character in FindObjects<Character>())
 		{
 			if (character.CompareTag(TAG_PLAYER))
@@ -143,30 +192,42 @@ public class GameManager : ScriptableObject
 		{
 			mainCamera.Move(inputSystem.Player.Move.ReadValue<Vector2>() * cameraSpeed * Time.unscaledDeltaTime);
 		}
-		
-		var result = CursorRaycast(out var hit);
-		if (result == CURSOR_RAYCAST_RESULT_NAVIGATION)
+
+		if (mouseOverViewport)
 		{
-			if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
-			{
-				agent.AssignDestination(hit.point);
-			}
-		}
-		else if (result == CURSOR_RAYCAST_RESULT_CHARACTER)
-		{
-			if (hit.collider.TryGetComponent(out Character character))
+			var result = CursorRaycast(out var hit);
+			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION)
 			{
 				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
 				{
-					agent.AssignDestination(character.HasDestination());
+					if (!HasCoroutines())
+					{
+						agent.AssignDestination(hit.point);
+					}
 				}
 			}
-		}
-		else
-		{
-			if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER)
 			{
-				agent.ClearDestination();
+				if (hit.collider.TryGetComponent(out Character character))
+				{
+					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+					{
+						if (!HasCoroutines())
+						{
+							agent.AssignDestination(character.HasDestination());
+						}
+					}
+				}
+			}
+			else
+			{
+				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+				{
+					if (!HasCoroutines())
+					{
+						agent.ClearDestination();
+					}
+				}
 			}
 		}
 	}
@@ -210,6 +271,11 @@ public class GameManager : ScriptableObject
 		}
 
 		return CURSOR_RAYCAST_RESULT_NONE;
+	}
+
+	public void OnGUI()
+	{
+		GUILayout.Label("coroutines: " + coroutines.Count);
 	}
 }
 

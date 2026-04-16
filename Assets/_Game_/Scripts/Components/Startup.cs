@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class Startup : MonoBehaviour
@@ -6,10 +7,23 @@ public class Startup : MonoBehaviour
 	[SerializeField]
 	private GameManager _gameManager;
 	
-	private void Start()
+	private IEnumerator Start()
 	{
 		DontDestroyOnLoad(gameObject);
 		_gameManager.Start();
+
+		while (true)
+		{
+			if (_gameManager.GetNextCoroutine(out var coroutine))
+			{
+				yield return StartCoroutine(coroutine);
+				_gameManager.RemoveNextCoroutine();
+			}
+			else
+			{
+				yield return null;
+			}
+		}
 	}
 
 	private void Update()
@@ -20,5 +34,10 @@ public class Startup : MonoBehaviour
 	private void OnDestroy()
 	{
 		_gameManager.Dispose();
+	}
+
+	private void OnGUI()
+	{
+		_gameManager.OnGUI();
 	}
 }

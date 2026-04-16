@@ -13,6 +13,7 @@ public class Character : MonoBehaviour, ICursorHandler
 		public AIPath aiPath;
 		public Vector3 velocity => aiPath.velocity;
 		public bool isMoving => aiPath.isStopped == false;
+		public bool reachedDestination => aiPath.reachedDestination;
 
 		private bool hasDestination;
 
@@ -22,10 +23,10 @@ public class Character : MonoBehaviour, ICursorHandler
 			set => aiPath.onSearchPath = value;
 		}
 
-		public bool disableMovement
+		public void SetCanMove(bool value)
 		{
-			get => !aiPath.simulateMovement;
-			set => aiPath.simulateMovement = !value;
+			aiPath.simulateMovement = value;
+			aiPath.isStopped = !value;
 		}
 
 		public void SetObstacle(bool value)
@@ -82,6 +83,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	[SerializeField] private Texture2D portrait;
 	public Texture GetPortraitTexture() => portrait;
 	[SerializeField] private float movePoints;
+	[SerializeField] private float moveSpeed;
 	
 	[Header("Selection Circle")]
 	[SerializeField] private CircleRenderer circleRenderer;
@@ -112,6 +114,7 @@ public class Character : MonoBehaviour, ICursorHandler
 		{
 			aiPath.radius = radius;
 			aiPath.height = height;
+			aiPath.maxSpeed = moveSpeed;
 		}
 
 		if (circleRenderer)
@@ -170,7 +173,7 @@ public class Character : MonoBehaviour, ICursorHandler
 				aiPath = aiPath
 			};
 			
-			agent.disableMovement = true;
+			agent.SetCanMove(false);
 			agent.SetObstacle(true);
 		}
 		
