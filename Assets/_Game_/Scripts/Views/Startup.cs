@@ -4,20 +4,25 @@ using UnityEngine;
 
 public class Startup : MonoBehaviour
 {
-	[SerializeField]
-	private GameManager _gameManager;
+	public GameView gameView;
 	
+	private void Awake()
+	{
+		gameView.Awake();
+	}
+
 	private IEnumerator Start()
 	{
 		DontDestroyOnLoad(gameObject);
-		_gameManager.Start();
+		
+		gameView.Start();
 
 		while (true)
 		{
-			if (_gameManager.GetNextCoroutine(out var coroutine))
+			if (gameView.GetNextCoroutine(out var coroutine))
 			{
 				yield return StartCoroutine(coroutine);
-				_gameManager.RemoveNextCoroutine();
+				gameView.RemoveNextCoroutine();
 			}
 			else
 			{
@@ -28,31 +33,31 @@ public class Startup : MonoBehaviour
 
 	private void Update()
 	{
-		_gameManager.Update();
+		gameView.Update();
 	}
 
 	private void LateUpdate()
 	{
-		_gameManager.LateUpdate();
+		gameView.LateUpdate();
 	}
 
 	private void OnDestroy()
 	{
-		_gameManager.Dispose();
+		gameView.Dispose();
 	}
 
 	private void OnApplicationFocus(bool hasFocus)
 	{
-		_gameManager.hasFocus = hasFocus;
+		gameView.hasFocus = hasFocus;
 	}
 
 	private void OnGUI()
 	{
-		if (_gameManager.debugGUI > 0f && (Debug.isDebugBuild || Application.isEditor))
+		if (gameView.debugGUI > 0f && (Debug.isDebugBuild || Application.isEditor))
 		{
-			GUILayout.BeginArea(new RectOffset(5,5,5,5).Remove(new Rect(0,0,Screen.width * _gameManager.debugGUI,Screen.height)));
+			GUILayout.BeginArea(new RectOffset(5,5,5,5).Remove(new Rect(0,0,Screen.width * gameView.debugGUI,Screen.height)));
 			GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
-			_gameManager.OnGUIDebug();
+			gameView.OnGUIDebug();
 			GUILayout.EndVertical();
 			GUILayout.EndArea();
 		}

@@ -12,30 +12,30 @@ public class UI_SelectedCharacter : MonoBehaviour
 		actionButton_Run.interactable = !started && selectedCharacter && selectedCharacter.HasActions();
 	}
 
-	void ActionUsed(CharacterStats stats = null) => OnCharacterSelected();
+	void ActionUsed(Character character = null) => OnCharacterSelected();
 	
 	private bool hide;
 	private Character selectedCharacter;
+	private GameView gameView;
 	
 	private void Awake()
 	{
+		gameView = GameView.GetInstance();
 		hide = true;
 		
-		GameEvents.characterSelected += OnCharacterSelected;
-		GameEvents.routinesStarted += RoutinesStarted;
-		GameEvents.actionUsed += ActionUsed;
-		
-		actionButton_Run.onClick.AddListener(() =>
-		{
-			UIEvents.clickRunAction?.Invoke();
-		});
+		gameView.characterSelected += OnCharacterSelected;
+		gameView.routinesStarted += RoutinesStarted;
+		gameView.actionUsed += ActionUsed;
+
+		actionButton_Run.onClick.AddListener(gameView.ClickRunAction);
 	}
 
 	private void OnDestroy()
 	{
-		GameEvents.characterSelected -= OnCharacterSelected;
-		GameEvents.routinesStarted -= RoutinesStarted;
-		GameEvents.actionUsed -= ActionUsed;
+		var gameView = GameView.GetInstance();
+		gameView.characterSelected -= OnCharacterSelected;
+		gameView.routinesStarted -= RoutinesStarted;
+		gameView.actionUsed -= ActionUsed;
 		
 		actionButton_Run.onClick.RemoveAllListeners();
 	}

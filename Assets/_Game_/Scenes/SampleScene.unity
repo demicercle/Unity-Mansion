@@ -424,7 +424,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98e6b717ee364d13a1594d06da9c9841, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gameManager: {fileID: 11400000, guid: 27636381914f88d43ae66b7f825d291d, type: 2}
+  gameView:
+    gameData: {fileID: 11400000, guid: 48fda2e77e2aaa748ac5cdce78b8cc90, type: 2}
+    drawDebug: 0
+    debugGUI: 0
+    cameraSpeed: 1
+    maxNavigationDistance: 0.5
 --- !u!1001 &1467149466160358941
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -700,43 +705,43 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 181968808340921684, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 3017105426259805866
+      value: 4643334606335095838
       objectReference: {fileID: 0}
     - target: {fileID: 608453250645153476, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 1850059856894490603
+      value: 7510837489973169696
       objectReference: {fileID: 0}
     - target: {fileID: 665916455732756911, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 2281548248396083434
+      value: 1599719784720863451
       objectReference: {fileID: 0}
     - target: {fileID: 4120535536435144642, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 4908968949122736731
+      value: 7117019844445765476
       objectReference: {fileID: 0}
     - target: {fileID: 5069342738124118939, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 4651535619359530634
+      value: 3674988217164769511
       objectReference: {fileID: 0}
     - target: {fileID: 5618144609471526170, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 4227089822401564281
+      value: 6124993114864487778
       objectReference: {fileID: 0}
     - target: {fileID: 8523966216720023030, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 998325562465687994
+      value: 8086797152944591884
       objectReference: {fileID: 0}
     - target: {fileID: 8562783328736999387, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 926270914980692505
+      value: 4368438219157895142
       objectReference: {fileID: 0}
     - target: {fileID: 8576912389674232477, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 7883004838411144201
+      value: 3554067382587440178
       objectReference: {fileID: 0}
     - target: {fileID: 9074897059660931341, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
       propertyPath: uniqueID
-      value: 3420155100554136843
+      value: 7549142804331859912
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

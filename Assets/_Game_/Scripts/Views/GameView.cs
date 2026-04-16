@@ -1,18 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using Oddworm.Framework;
 using UnityEditor;
 using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
-using Vector2 = UnityEngine.Vector2;
-using Vector3 = UnityEngine.Vector3;
 
-[CreateAssetMenu(fileName = "New Game Manager", menuName = "Game Manager")]
-public class GameManager : ScriptableObject
+[System.Serializable]
+public class GameView
 {
-	private const string TAG_PLAYER = "Player";
+	public System.Action<Character, int> characterAddedToParty;
+	public System.Action<Character> actionUsed;
+	static public System.Action<Character> clickSelectCharacter;
+	static public System.Action clickEndTurn;
+	static public System.Action clickRunAction;
+	public System.Action<bool> routinesStarted;
+	public System.Action<Character, bool> characterSelected;
+	static public System.Action<Character, Vector3> characterMoved;
+	static public System.Action<PropComponent, GameObject> propInteracted;
+	
 	static public string LAYER_GROUND = "Ground";
 	static public string LAYER_WALL = "Wall";
 	static public string LAYER_CHARACTER = "Character";
@@ -46,9 +51,13 @@ public class GameManager : ScriptableObject
 		return false;
 	}
 
-	static public T FindObject<T>() where T : Object => FindObjectsByType<T>(default).FirstOrDefault();
-	static public T[] FindObjects<T>() where T : Object => FindObjectsByType<T>(default);
+	static private GameView instance;
 
+	static public GameView GetInstance() => instance;
+	static public T FindObject<T>() where T : Object => Object.FindObjectsByType<T>(default).FirstOrDefault();
+	static public T[] FindAllObjects<T>() where T : Object => Object.FindObjectsByType<T>(default);
+
+	public GameData gameData;
 	public bool drawDebug = false;
 	[Range(0f,1f)] public float debugGUI = 0f;
 	public float cameraSpeed = 1.0f;
@@ -76,7 +85,7 @@ public class GameManager : ScriptableObject
 			Debug.Log("EndCoroutine: " + coroutines.Count);
 			if (coroutines.Count == 0)
 			{
-				GameEvents.routinesStarted?.Invoke(false);
+				routinesStarted?.Invoke(false);
 			}
 		}
 	}
@@ -89,10 +98,11 @@ public class GameManager : ScriptableObject
 	private AstarPath aStar;
 	private MainCamera mainCamera;
 	private InputSystem_Actions inputSystem;
-	private List<Character> partyCharacters;
 	private Character selectedCharacter;
 	private List<IEnumerator> coroutines;
-	private int currentTurn;
+
+	private List<Character> allCharacters;
+	private List<Character> partyCharacters;
 
 	public void MouseMove(Vector2 pos)
 	{
@@ -171,7 +181,7 @@ public class GameManager : ScriptableObject
 	{
 		if (coroutines.Count == 0)
 		{
-			GameEvents.routinesStarted?.Invoke(true);
+			routinesStarted?.Invoke(true);
 		}
 		
 		Debug.Log("StartCoroutine: " + coroutines.Count);
@@ -186,7 +196,7 @@ public class GameManager : ScriptableObject
 			character.RotateTowards(waypoint.GetPosition(), -1f);
 		}
 		
-		GameEvents.propInteracted?.Invoke(prop, character.gameObject);
+		propInteracted?.Invoke(prop, character.gameObject);
 		yield return prop.Interact(character);
 	}
 	
@@ -199,18 +209,25 @@ public class GameManager : ScriptableObject
 			Debug.LogWarning(movingCharacter + " has no agent");
 			yield break;
 		}
+
+		if (!movingCharacter.TryGetData(out var characterData))
+		{
+			Debug.LogWarning(movingCharacter + " has no data");
+			yield break;
+		}
 		
 		agent.AssignDestination(dest);
 		
 		while (agent.pathPending)
 			yield return null;
 		
-		if (!movingCharacter.GetFirstPathPoint(out var firstPoint))
+		if (!movingCharacter.GetPath(out var path))
 		{
-			Debug.LogWarning(movingCharacter + " has no first point");
+			Debug.LogWarning(movingCharacter + " has no path");
 			yield break;
 		}
-		
+
+		var firstPoint = path.First();
 		var dir = (firstPoint - movingCharacter.GetPosition()).normalized;
 		while (dir.sqrMagnitude > 0.01f && !movingCharacter.IsFacingDirection(dir))
 		{
@@ -222,9 +239,26 @@ public class GameManager : ScriptableObject
 		
 		do
 		{
+			if (characterData.GetRemainingMovePoints() <= 0)
+			{
+				agent.StopMovement();
+				break;
+			}
+			
+			var oldPosition = movingCharacter.GetPosition();
+			
 			yield return null;
 			
-			GameEvents.characterMoved?.Invoke(movingCharacter, movingCharacter.GetPosition());
+			var newPosition = movingCharacter.GetPosition();
+			var deltaPos = (newPosition -  oldPosition).sqrMagnitude;
+			
+			if (newPosition.ToString() != oldPosition.ToString())
+			{
+				characterData.ConsumeMovePoints(deltaPos);
+				characterData.SetPosition(newPosition);
+				characterData.SetRotation(movingCharacter.GetRotation());
+			}
+			
 		} while (agent.isMoving && !agent.reachedDestination);
 		
 		agent.ClearDestination();
@@ -233,11 +267,15 @@ public class GameManager : ScriptableObject
 		onComplete?.Invoke();
 	}
 
-	public void SelectCharacter(Character character)
+	public void SelectCharacter(Character character, bool focusCamera = false)
 	{
-		if(selectedCharacter != null) GameEvents.characterSelected?.Invoke(selectedCharacter, false);
+		if(selectedCharacter != null) characterSelected?.Invoke(selectedCharacter, false);
 		selectedCharacter = character;
-		if(selectedCharacter != null) GameEvents.characterSelected?.Invoke(selectedCharacter, true);
+		if (selectedCharacter != null)
+		{
+			characterSelected?.Invoke(selectedCharacter, true);
+			if (focusCamera) mainCamera.Focus(selectedCharacter);
+		}
 	}
 
 	public void EndTurn()
@@ -248,12 +286,10 @@ public class GameManager : ScriptableObject
 	private IEnumerator WaitEndTurn()
 	{
 		Debug.Log(">> End turn");
-		
 		yield return new WaitForSeconds(1.0f);
-		currentTurn += 1;
-		GameEvents.newTurnStarted?.Invoke(currentTurn);
+		gameData.NextTurn();
 		
-		Debug.Log(">> New turn: " + currentTurn);
+		Debug.Log(">> New turn: " + gameData.GetCurrentTurn());
 	}
 
 	public void ClickRunAction() => RunAction(selectedCharacter, false);
@@ -278,9 +314,19 @@ public class GameManager : ScriptableObject
 	{
 		Debug.Log(">> WaitRunAction: " + onCharacter);
 
-		DebugGUI.WorldLabel(onCharacter.GetPosition(), "RUN", 1f).offset = Vector2.up;
+		if (!onCharacter.TryGetData(out var characterData))
+		{
+			yield break;
+		}
+
+		DebugGUI.WorldLabel(onCharacter.GetPosition(), "RUN", 1f).offset = Vector2.up; // TODO Floating Text Component
 		yield return new WaitForSeconds(1.0f);
-		GameEvents.runAction?.Invoke(onCharacter);
+		characterData.RunAction();
+	}
+
+	public void Awake()
+	{
+		instance = this;
 	}
 	
 	public void Start()
@@ -293,6 +339,7 @@ public class GameManager : ScriptableObject
 		
 		coroutines = new List<IEnumerator>();
 		partyCharacters = new List<Character>();
+		allCharacters = new List<Character>(FindAllObjects<Character>());
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
@@ -303,44 +350,57 @@ public class GameManager : ScriptableObject
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
 		inputSystem.Player.Enable();
 		
+		gameData.Init(this);
+		
 		// init characters
-		foreach (var character in FindObjects<Character>())
+		foreach (var character in allCharacters)
 		{
-			if (character.CompareTag(TAG_PLAYER))
+			if (!character.TryGetData(out var characterData))
 			{
-				Debug.Log("Add to party: " + character);
+				Debug.LogWarning(character + " has no data!");
+				character.gameObject.SetActive(false);
+				continue;
+			}
+			
+			gameData.AddCharacter(characterData);
+			character.Init();
+			
+			if (character.IsPlayer())
+			{
+				Debug.Log("Add to party: " + character + " with data " + characterData);
+				gameData.AddCharacterToParty(characterData);
 				partyCharacters.Add(character);
-				GameEvents.characterAddedToParty?.Invoke(character, partyCharacters.Count-1);
 			}
 		}
 		
 		// register UI Events
-		RegisterUIEvents(true);
+		RegisterEvents(true);
 		
 		// focus first character
-		mainCamera.Focus(partyCharacters.First());
+		SelectCharacter(partyCharacters.First(), true);
 	}
 
 	public void Dispose()
 	{
 		// unregister UI Events
-		RegisterUIEvents(false);
+		RegisterEvents(false);
 	}
-
-	public void RegisterUIEvents(bool value)
+	
+	public void RegisterEvents(bool value)
 	{
 		if (value)
 		{
-			UIEvents.clickSelectCharacter += SelectCharacter;
-			UIEvents.clickEndTurn += EndTurn;
-			UIEvents.clickRunAction += ClickRunAction;
+			gameData.characterAddedToParty += CharacterAddedToParty;
 		}
 		else
 		{
-			UIEvents.clickSelectCharacter -= SelectCharacter;
-			UIEvents.clickEndTurn += EndTurn;
-			UIEvents.clickRunAction -= ClickRunAction;
+			gameData.characterAddedToParty -= CharacterAddedToParty;
 		}
+	}
+
+	private void CharacterAddedToParty(CharacterData characterData, int partyIndex)
+	{
+		characterAddedToParty?.Invoke(characterData.GetCharacter(), partyIndex); // TODO remove "GetCharacter()"
 	}
 
 	public void LateUpdate()

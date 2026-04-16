@@ -11,9 +11,9 @@ public class PropComponent : MonoBehaviour
 	public Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
 
 	public bool onlyOnce;
-	public int consumeActions;
+	[Min(0)] public int consumeActions;
 	public bool rebuildNavigation;
-	public float autoTriggerDelay;
+	[Min(0f)]public float autoTriggerDelay;
 	public string animatorTrigger;
 	public UnityEvent interacted;
 
@@ -53,10 +53,17 @@ public class PropComponent : MonoBehaviour
 	{
 		if (onlyOnce)
 		{
-			gameObject.layer = LayerMask.NameToLayer(GameManager.LAYER_IGNORE);
+			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
 		}
-		
-		interactor?.ConsumeActions(consumeActions);
+
+		if (interactor)
+		{
+			if (interactor.TryGetData(out var characterData))
+			{
+				if (consumeActions > 0)
+					characterData.ConsumeActions(consumeActions);
+			}
+		}
 		
 		yield return new WaitForSeconds(triggerDelay);
 		
@@ -81,7 +88,7 @@ public class PropComponent : MonoBehaviour
 
 	private IEnumerator Start()
 	{
-		gameObject.layer = LayerMask.NameToLayer(GameManager.LAYER_CHARACTER);
+		gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
 
 		if (autoTriggerDelay > 0f)
 		{

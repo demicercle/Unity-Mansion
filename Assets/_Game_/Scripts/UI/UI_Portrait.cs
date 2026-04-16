@@ -15,24 +15,26 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	{
 		if (assignedCharacter != null)
 		{
-			UIEvents.clickSelectCharacter?.Invoke(assignedCharacter);
+			GameView.clickSelectCharacter?.Invoke(assignedCharacter);
 		}
 	}
 
 	private Character assignedCharacter;
+	private GameView gameView;
 	
 	private void Awake()
 	{
-		GameEvents.characterAddedToParty += CharacterAddedToParty;
-		GameEvents.characterSelected += CharacterSelected;
+		gameView = GameView.GetInstance();
+		gameView.characterAddedToParty += CharacterAddedToParty;
+		gameView.characterSelected += CharacterSelected;
 		//toggle.onValueChanged.AddListener(OnValueChanged);
 		gameObject.SetActive(false);
 	}
 
 	private void OnDestroy()
 	{
-		GameEvents.characterAddedToParty -= CharacterAddedToParty;
-		GameEvents.characterSelected -= CharacterSelected;
+		gameView.characterAddedToParty -= CharacterAddedToParty;
+		gameView.characterSelected -= CharacterSelected;
 		//toggle.onValueChanged.RemoveListener(OnValueChanged);
 	}
 
@@ -40,7 +42,7 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	{
 		if (value && assignedCharacter != null)
 		{
-			UIEvents.clickSelectCharacter.Invoke(assignedCharacter);
+			GameView.clickSelectCharacter.Invoke(assignedCharacter);
 		}
 	}
 
@@ -58,10 +60,13 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		if (index == arg2)
 		{
 			assignedCharacter = arg1;
-			gameObject.SetActive(true);
+			gameObject.SetActive(arg1 && arg2 >= 0);
 
-			rawImage.texture = arg1.GetPortraitTexture();
-			nameLabel.text = arg1.GetDisplayName();
+			if (assignedCharacter && assignedCharacter.TryGetData(out var data))
+			{
+				rawImage.texture = data.portraitTexture;
+				nameLabel.text = data.displayName;
+			}
 		}
 	}
 }
