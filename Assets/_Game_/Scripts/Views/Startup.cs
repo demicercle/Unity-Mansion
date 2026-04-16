@@ -15,7 +15,7 @@ public class Startup : MonoBehaviour
 	{
 		DontDestroyOnLoad(gameObject);
 		
-		gameView.Start();
+		StartCoroutine(gameView.Start());
 
 		while (true)
 		{

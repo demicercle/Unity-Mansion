@@ -107,6 +107,7 @@ public class GameView
 	public void MouseMove(Vector2 pos)
 	{
 		hasMousePosition = true;
+		hasFocus = true;
 		mousePosition = pos;
 	}
 
@@ -193,7 +194,7 @@ public class GameView
 		Debug.Log("WaitCharacterInteract " + characterView + " > " + prop + " @ " + waypoint);
 		if (waypoint != null)
 		{
-			characterView.RotateTowards(waypoint.GetPosition(), -1f);
+			characterView.SetRotateTowards(waypoint.GetPosition(), -1f);
 		}
 		
 		propInteracted?.Invoke(prop, characterView.gameObject);
@@ -227,12 +228,19 @@ public class GameView
 			yield break;
 		}
 
-		var firstPoint = path.First();
-		var dir = (firstPoint - movingCharacterView.GetPosition()).normalized;
-		while (dir.sqrMagnitude > 0.01f && !movingCharacterView.IsFacingDirection(dir))
+		if (path.Length > 1)
 		{
-			movingCharacterView.RotateTowards(firstPoint, Time.deltaTime);
-			yield return null;
+			var firstPoint = path[1];
+			var dir = (firstPoint - movingCharacterView.GetPosition()).normalized;
+			while (!movingCharacterView.IsFacingDirection(dir))
+			{
+				movingCharacterView.SetRotateTowards(firstPoint, Time.deltaTime);
+				yield return null;
+			}
+		}
+		else
+		{
+			Debug.LogWarning(movingCharacterView + " has path with only 1 point");
 		}
 		
 		agent.SetCanMove(true);
@@ -326,7 +334,7 @@ public class GameView
 		instance = this;
 	}
 	
-	public void Start()
+	public IEnumerator Start()
 	{
 		Debug.Log(this + " Start()");
 		hasFocus = !Application.isEditor;
@@ -372,6 +380,8 @@ public class GameView
 		
 		// register UI Events
 		RegisterEvents(true);
+
+		yield return new WaitForSeconds(0.1f); // todo hak camera focus
 		
 		// focus first character
 		SelectCharacter(partyCharacters.First(), true);

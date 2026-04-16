@@ -35,6 +35,12 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 			get => aiPath.onSearchPath;
 			set => aiPath.onSearchPath = value;
 		}
+
+		public void Teleport(Vector3 newPos, int newRot)
+		{
+			aiPath.Teleport(newPos, true);
+			aiPath.rotation = Quaternion.Euler(0, newRot, 0);
+		}
 		
 		public void SetCanMove(bool value)
 		{
@@ -346,12 +352,22 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	    return transform.position;
     }
 
-    public void RotateTowards(Vector3 worldPosition, float f = -1f)
+    public void SetTeleport(Waypoint wp)
+    {
+	    var newPos = wp.GetPosition();
+	    var newRot = wp.GetRotation();
+
+	    data.SetPosition(newPos);
+	    data.SetRotation(newRot);
+	    agent.Teleport(newPos, newRot);
+    }
+
+    public void SetRotateTowards(Vector3 worldPosition, float f = -1f)
     {
 	    LookDirection(worldPosition - GetPosition(), f);
     }
 
-    public void LookDirection(Vector3 getDirection, float f)
+    private void LookDirection(Vector3 getDirection, float f)
     {
 	    getDirection.y = 0;
 	    getDirection.Normalize();
@@ -372,6 +388,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		    DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
 		    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.aiPath.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 	    }
+	    
+	    data.SetRotation(GetRotation());
     }
 
     public Vector3 GetEyesPosition() => transform.position + Vector3.up * height * 0.9f;

@@ -77,6 +77,7 @@ public class MainCamera : MonoBehaviour
         if (mousePosition.x + padding >= Screen.width) motion.x = 1f;
         if (mousePosition.y - padding <= 0f) motion.y = -1f;
         if (mousePosition.y + padding >= Screen.height) motion.y = 1f;
+        //Debug.Log(this + " " + mousePosition + " " + motion);
         if (motion.sqrMagnitude > 0f)
         {
             Move(motion * Time.unscaledDeltaTime * panSpeed);

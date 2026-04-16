@@ -53,7 +53,7 @@ public class Waypoint : MonoBehaviour
 		}
 
 		public Vector3 GetPosition() => transform.position;
-		public float GetRotation() => transform.eulerAngles.y;
+		public int GetRotation() => (int)transform.eulerAngles.y;
 		
 		public float radius = 0.4f;
 		public Color color = Color.cyan;
