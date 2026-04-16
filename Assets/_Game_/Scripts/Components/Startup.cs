@@ -1,18 +1,24 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Startup : MonoBehaviour
 {
 	[SerializeField]
 	private GameManager _gameManager;
 	
-	void Start()
+	private void Start()
 	{
 		DontDestroyOnLoad(gameObject);
 		_gameManager.Start();
 	}
 
-	void Update()
+	private void Update()
 	{
 		_gameManager.Update();
+	}
+
+	private void OnDestroy()
+	{
+		_gameManager.Dispose();
 	}
 }

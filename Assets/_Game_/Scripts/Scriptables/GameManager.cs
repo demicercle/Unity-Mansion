@@ -6,7 +6,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Game Manager", menuName = "Game Manager")]
 public class GameManager : ScriptableObject
 {
-	const string TAG_PLAYER = "Player";
+	private const string TAG_PLAYER = "Player";
+	
 	static public string LAYER_GROUND = "Ground";
 	static public string LAYER_WALL = "Wall";
 	static public string LAYER_CHARACTER = "Character";
@@ -42,6 +43,7 @@ public class GameManager : ScriptableObject
 	static public T FindObject<T>() where T : Object => FindObjectsByType<T>(default).FirstOrDefault();
 	static public T[] FindObjects<T>() where T : Object => FindObjectsByType<T>(default);
 	
+	public bool drawDebug = false;
 	public float cameraSpeed = 1.0f;
 	public float maxNavigationDistance = 0.5f;
 
@@ -50,10 +52,38 @@ public class GameManager : ScriptableObject
 	private MainCamera mainCamera;
 	private InputSystem_Actions inputSystem;
 	private List<Character> partyCharacters;
+	private Character selectedCharacter;
 
 	public void MouseMove(Vector2 pos)
 	{
 		mousePosition = pos;
+	}
+
+	public void LeftClick(float value)
+	{
+	//	Debug.Log("LeftClick: " + value);
+
+		if (value > 0f) // pressed
+		{
+			var raycastResult = CursorRaycast(out var hit);
+			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
+			{
+				if (hit.collider.TryGetComponent(out Character character))
+				{
+					if (partyCharacters.Contains(character))
+					{
+						SelectCharacter(character);
+					}
+				}
+			}
+		}
+	}
+
+	public void SelectCharacter(Character character)
+	{
+		if(selectedCharacter != null) GameEvents.characterSelected?.Invoke(selectedCharacter, false);
+		selectedCharacter = character;
+		GameEvents.characterSelected?.Invoke(selectedCharacter, true);
 	}
 	
 	public void Start()
@@ -65,6 +95,7 @@ public class GameManager : ScriptableObject
 		// init inputs
 		inputSystem = new InputSystem_Actions();
 		inputSystem.UI.Enable();
+		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
 		inputSystem.Player.Enable();
@@ -81,8 +112,29 @@ public class GameManager : ScriptableObject
 			}
 		}
 		
+		// register UI Events
+		RegisterUIEvents(true);
+		
 		// focus first character
 		mainCamera.Focus(partyCharacters.First());
+	}
+
+	public void Dispose()
+	{
+		// unregister UI Events
+		RegisterUIEvents(false);
+	}
+
+	public void RegisterUIEvents(bool value)
+	{
+		if (value)
+		{
+			UIEvents.clickSelectCharacter += SelectCharacter;
+		}
+		else
+		{
+			UIEvents.clickSelectCharacter -= SelectCharacter;
+		}
 	}
 
 	public void Update()
@@ -92,37 +144,48 @@ public class GameManager : ScriptableObject
 			mainCamera.Move(inputSystem.Player.Move.ReadValue<Vector2>() * cameraSpeed * Time.unscaledDeltaTime);
 		}
 		
-		CursorRaycast();
+		CursorRaycast(out _);
 	}
 
-	public void CursorRaycast()
+	private const int CURSOR_RAYCAST_RESULT_NONE = 0;
+	private const int CURSOR_RAYCAST_RESULT_NAVIGATION = 1;
+	private const int CURSOR_RAYCAST_RESULT_CHARACTER = 2;
+	public int CursorRaycast(out RaycastHit hit)
 	{
 		//TODO: if mouse over viewport
-		var hit = default(RaycastHit);
+		hit = default(RaycastHit);
 		var cam = Camera.main;
 		var ray = cam.ScreenPointToRay(mousePosition);
 		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(LAYER_CHARACTER)))
 		{
 			//DebugGUI.Log("Hit Character: " + hit.collider);
-			DbgDraw.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
+			if(drawDebug) DbgDraw.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
 			Utils.DrawDebugCircle(hit.collider.transform.position, Vector3.up, 0.5f);
 
 			foreach (var cursorHandler in hit.collider.GetComponents<ICursorHandler>())
 			{
 				cursorHandler.CursorOver();
 			}
+
+			return CURSOR_RAYCAST_RESULT_CHARACTER;
 		}
-		else if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(LAYER_GROUND, LAYER_WALL)))
+		
+		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(LAYER_GROUND, LAYER_WALL)))
 		{
 			//DebugGUI.Log("Hit Navigation: " + hit.point);
-			DbgDraw.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Quaternion.Euler(90,0,0),maxNavigationDistance, Color.blue);
+			if(drawDebug) DbgDraw.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Quaternion.Euler(90,0,0),maxNavigationDistance, Color.blue);
 			Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavigationDistance);
 
 			if (TryGetNearestNavPosition(hit.point, maxNavigationDistance, out var navPosition))
 			{
-				DbgDraw.WireDisc(navPosition, Quaternion.identity,maxNavigationDistance * 0.5f, Color.cyan);
+				hit.point = navPosition;
+				if(drawDebug) DbgDraw.WireDisc(navPosition, Quaternion.identity,maxNavigationDistance * 0.5f, Color.cyan);
+
+				return CURSOR_RAYCAST_RESULT_NAVIGATION;
 			}
 		}
+
+		return CURSOR_RAYCAST_RESULT_NONE;
 	}
 }
 
