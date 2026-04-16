@@ -67,7 +67,8 @@ public class GameManager : ScriptableObject
 	public void RemoveNextCoroutine()  => coroutines.RemoveAt(0);
 	
 	public bool mouseOverViewport { get; set; }
-
+	public bool hasFocus { get; set; }
+	
 	private Vector2 mousePosition;
 	private AstarPath aStar;
 	private MainCamera mainCamera;
@@ -202,9 +203,27 @@ public class GameManager : ScriptableObject
 
 	public void Update()
 	{
-		if (inputSystem.Player.Move.IsPressed())
+		if (inputSystem.UI.Cancel.WasPressedThisFrame())
 		{
-			mainCamera.Move(inputSystem.Player.Move.ReadValue<Vector2>() * cameraSpeed * Time.unscaledDeltaTime);
+			hasFocus = false;
+		}
+		
+		if (hasFocus)
+		{
+			Cursor.lockState = CursorLockMode.Confined;
+			Cursor.SetCursor(Resources.Load<Texture2D>("Cursors/cursor_none"), Vector2.zero, CursorMode.Auto);
+			
+			mainCamera.MoveCameraWithCursor(mousePosition);
+		
+			if (inputSystem.Player.Move.IsPressed())
+			{
+				mainCamera.Move(inputSystem.Player.Move.ReadValue<Vector2>() * cameraSpeed * Time.unscaledDeltaTime);
+			}
+		}
+		else
+		{
+			Cursor.lockState = default;
+			Cursor.SetCursor(null,default,default);
 		}
 
 		if (mouseOverViewport)
@@ -299,6 +318,7 @@ public class GameManager : ScriptableObject
 	{
 		const float space = 0.5f;
 		GUILayout.FlexibleSpace();
+		GUILayout.Label(GetLabel("hasFocus") + hasFocus);
 		GUILayout.Label(GetLabel("coroutines") + coroutines.Count);
 		GUILayout.Space(space);
 		if (selectedCharacter)

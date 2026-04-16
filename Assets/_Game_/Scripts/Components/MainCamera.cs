@@ -8,6 +8,7 @@ public class MainCamera : MonoBehaviour
     public Bounds worldBounds;
     public float height = 1.5f;
     public float speed = 1.5f;
+    public float panSpeed = 8.0f;
     public float zoomSpeed = 1.0f;
     public float lightRange = 0.0f;
     public float lightRangeToAngle = Mathf.PI;
@@ -64,5 +65,20 @@ public class MainCamera : MonoBehaviour
         spotLight.type = LightType.Spot;
         spotLight.range = currentPosition.y + height + lightRange;
         spotLight.spotAngle = spotLight.range * lightRangeToAngle;
+    }
+
+    public void MoveCameraWithCursor(Vector3 mousePosition)
+    {
+        var motion = new Vector2();
+        //var screen = new Vector2(Screen.width, Screen.height);
+        var padding = 1f;
+        if (mousePosition.x - padding <= 0f) motion.x = -1f;
+        if (mousePosition.x + padding >= Screen.width) motion.x = 1f;
+        if (mousePosition.y - padding <= 0f) motion.y = -1f;
+        if (mousePosition.y + padding >= Screen.height) motion.y = 1f;
+        if (motion.sqrMagnitude > 0f)
+        {
+            Move(motion * Time.unscaledDeltaTime * panSpeed);
+        }
     }
 }

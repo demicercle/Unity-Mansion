@@ -161,11 +161,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -521
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 373.5
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.z
@@ -387,11 +387,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -621
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 373.5
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.z
@@ -593,6 +593,18 @@ MonoBehaviour:
         - m_Target: {fileID: 11400000, guid: 27636381914f88d43ae66b7f825d291d, type: 2}
           m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
           m_MethodName: set_mouseOverViewport
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 1
+          m_CallState: 2
+        - m_Target: {fileID: 11400000, guid: 27636381914f88d43ae66b7f825d291d, type: 2}
+          m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+          m_MethodName: set_hasFocus
           m_Mode: 6
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -981,6 +993,7 @@ MonoBehaviour:
     m_Extent: {x: 10, y: 3, z: 10}
   height: 12
   speed: 6
+  panSpeed: 16
   zoomSpeed: 1
   lightRange: 1.38
   lightRangeToAngle: 3.17
@@ -1040,7 +1053,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 2.6248e-41, y: 2.524355e-29, z: 0, w: 4.3e-44}
+  m_BoundingSphereOverride: {x: 2.6384e-41, y: 2.524355e-29, z: 0, w: 7e-45}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -1658,11 +1671,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -721
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 373.5
       objectReference: {fileID: 0}
     - target: {fileID: 3385878558623037, guid: 9fbdb92a306b0014d96fc323d490fb8a, type: 3}
       propertyPath: m_LocalPosition.z

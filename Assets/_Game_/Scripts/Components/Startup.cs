@@ -36,6 +36,11 @@ public class Startup : MonoBehaviour
 		_gameManager.Dispose();
 	}
 
+	private void OnApplicationFocus(bool hasFocus)
+	{
+		_gameManager.hasFocus = hasFocus;
+	}
+
 	private void OnGUI()
 	{
 		if (_gameManager.debugGUI && (Debug.isDebugBuild || Application.isEditor))

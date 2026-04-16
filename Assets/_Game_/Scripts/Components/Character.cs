@@ -75,11 +75,6 @@ public class Character : MonoBehaviour, ICursorHandler
 				onSearchPath?.Invoke();
 			}
 		}
-
-		public Vector3 GetPosition()
-		{
-			return aiPath.transform.position;
-		}
 	}
 	
 	[Header("Stats")]  // todo use scriptable
