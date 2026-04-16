@@ -54,7 +54,7 @@ public class UI_SelectedCharacter : MonoBehaviour
 		//Debug.Log(this + " OnCharacterSelected " + character + " " + selected);
 		if (selected && character != null)
 		{
-			Debug.Log(this + " Show " + character);
+//			Debug.Log(this + " Show " + character);
 			selectedCharacter = character;
 			hide = false;
 			gameObject.SetActive(true);
@@ -63,7 +63,7 @@ public class UI_SelectedCharacter : MonoBehaviour
 		}
 		else if (selectedCharacter == character && !selected)
 		{
-			Debug.Log(this + " Hide");
+//			Debug.Log(this + " Hide");
 			hide = true;
 		}
 	}
