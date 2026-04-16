@@ -4,12 +4,19 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CharacterStats", menuName = "CharacterStats", order = 0)]
 public class CharacterStats : ScriptableObject
 {
+	[Header("Profile")]
 	public string displayName;
 	public Texture2D portraitTexture;
-	public float maxMovePoints;
+	
+	[Header("Actions")]
 	public int maxActions;
+	public float maxMovePoints;
+	public float runActionExtraMovePoints = 3.0f;
 
-	private float usedMovePoints;
+	[Header("Debug")]
+	[SerializeField] private float usedMovePoints;
+	[SerializeField] private int usedActions;
+	[SerializeField] private Character characterOwner;
 
 	public void ConsumeMovePoints(float v)
 	{
@@ -21,14 +28,14 @@ public class CharacterStats : ScriptableObject
 	public float GetRemainingMovePoints() => GetTotalMovePoints() - usedMovePoints;
 	
 	public float GetMovePointsProgress() => 1f - Mathf.Clamp01(maxMovePoints <= 0 ? 0f : usedMovePoints / GetTotalMovePoints());
-
-	private int usedActions;
 	
 	public int GetRemainingActions() => maxActions - usedActions;
 
-	public void ConsumeActions(int consumeActions = 1)
+	public void ConsumeActions()
 	{
-		usedActions += consumeActions;
+		usedActions += 1;
+		Debug.Log(this + " ConsumeActions " + usedActions + " remains " + GetRemainingActions());
+		GameEvents.actionUsed?.Invoke(this);
 	}
 	
 	public void TurnBegins(int turn)
@@ -38,15 +45,28 @@ public class CharacterStats : ScriptableObject
 		usedActions = 0;
 	}
 
-	public void Init()
+	public void RunAction(Character character)
 	{
+		if (character == characterOwner)
+		{
+			ConsumeActions();
+			usedMovePoints -= runActionExtraMovePoints;
+		}
+	}
+
+
+	public void Init(Character c)
+	{
+		characterOwner = c;
 		usedMovePoints = 0;
 		usedActions = 0;
 		GameEvents.newTurnStarted += TurnBegins;
+		GameEvents.runAction += RunAction;
 	}
 
 	public void Dispose()
 	{
 		GameEvents.newTurnStarted -= TurnBegins;
+		GameEvents.runAction -= RunAction;
 	}
 }

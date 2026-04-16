@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: GameManager
   m_EditorClassIdentifier: 
   drawDebug: 1
-  debugGUI: 1
+  debugGUI: 0
   cameraSpeed: 10
   maxNavigationDistance: 0.5

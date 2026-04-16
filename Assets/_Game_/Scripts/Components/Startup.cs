@@ -48,11 +48,11 @@ public class Startup : MonoBehaviour
 
 	private void OnGUI()
 	{
-		if (_gameManager.debugGUI && (Debug.isDebugBuild || Application.isEditor))
+		if (_gameManager.debugGUI > 0f && (Debug.isDebugBuild || Application.isEditor))
 		{
-			GUILayout.BeginArea(new Rect(0,0,Screen.width,Screen.height));
+			GUILayout.BeginArea(new RectOffset(5,5,5,5).Remove(new Rect(0,0,Screen.width * _gameManager.debugGUI,Screen.height)));
 			GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
-			_gameManager.OnGUI();
+			_gameManager.OnGUIDebug();
 			GUILayout.EndVertical();
 			GUILayout.EndArea();
 		}

@@ -50,9 +50,9 @@ public class GameManager : ScriptableObject
 	static public T[] FindObjects<T>() where T : Object => FindObjectsByType<T>(default);
 
 	public bool drawDebug = false;
-	public bool debugGUI = true;
+	[Range(0f,1f)] public float debugGUI = 0f;
 	public float cameraSpeed = 1.0f;
-	public float maxNavigationDistance = 0.5f;
+	[Range(0.01f, 0.50f)] public float maxNavigationDistance = 0.5f;
 
 	public bool HasCoroutines() => coroutines.Count > 0;
 	
@@ -98,6 +98,14 @@ public class GameManager : ScriptableObject
 	{
 		hasMousePosition = true;
 		mousePosition = pos;
+	}
+
+	public void RightClick(float value)
+	{
+		if (value > 0) // pressed
+		{
+			SelectCharacter(null); // deselect all
+		}
 	}
 
 	public void LeftClick(float value)
@@ -204,7 +212,7 @@ public class GameManager : ScriptableObject
 		}
 		
 		var dir = (firstPoint - movingCharacter.GetPosition()).normalized;
-		while (!movingCharacter.IsFacingDirection(dir))
+		while (dir.sqrMagnitude > 0.01f && !movingCharacter.IsFacingDirection(dir))
 		{
 			movingCharacter.RotateTowards(firstPoint, Time.deltaTime);
 			yield return null;
@@ -229,7 +237,7 @@ public class GameManager : ScriptableObject
 	{
 		if(selectedCharacter != null) GameEvents.characterSelected?.Invoke(selectedCharacter, false);
 		selectedCharacter = character;
-		GameEvents.characterSelected?.Invoke(selectedCharacter, true);
+		if(selectedCharacter != null) GameEvents.characterSelected?.Invoke(selectedCharacter, true);
 	}
 
 	public void EndTurn()
@@ -247,6 +255,33 @@ public class GameManager : ScriptableObject
 		
 		Debug.Log(">> New turn: " + currentTurn);
 	}
+
+	public void ClickRunAction() => RunAction(selectedCharacter, false);
+	public void RunAction(Character onCharacter, bool force)
+	{
+		if (onCharacter == null)
+		{
+			Debug.LogError(this + " no character!");
+			return;
+		}
+
+		if (!force && !onCharacter.CanUseRunAction())
+		{
+			Debug.LogWarning(onCharacter + " has no actions");
+			return;
+		}
+
+		StartCoroutine(WaitRunAction(onCharacter));
+	}
+
+	private IEnumerator WaitRunAction(Character onCharacter)
+	{
+		Debug.Log(">> WaitRunAction: " + onCharacter);
+
+		DebugGUI.WorldLabel(onCharacter.GetPosition(), "RUN", 1f).offset = Vector2.up;
+		yield return new WaitForSeconds(1.0f);
+		GameEvents.runAction?.Invoke(onCharacter);
+	}
 	
 	public void Start()
 	{
@@ -263,6 +298,7 @@ public class GameManager : ScriptableObject
 		inputSystem = new InputSystem_Actions();
 		inputSystem.UI.Enable();
 		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
+		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
 		inputSystem.Player.Enable();
@@ -297,11 +333,13 @@ public class GameManager : ScriptableObject
 		{
 			UIEvents.clickSelectCharacter += SelectCharacter;
 			UIEvents.clickEndTurn += EndTurn;
+			UIEvents.clickRunAction += ClickRunAction;
 		}
 		else
 		{
 			UIEvents.clickSelectCharacter -= SelectCharacter;
 			UIEvents.clickEndTurn += EndTurn;
+			UIEvents.clickRunAction -= ClickRunAction;
 		}
 	}
 
@@ -441,17 +479,18 @@ public class GameManager : ScriptableObject
 		return CURSOR_RAYCAST_RESULT_NONE;
 	}
 
-	public void OnGUI()
+	public void OnGUIDebug()
 	{
 		const float space = 0.5f;
 		GUILayout.FlexibleSpace();
 		GUILayout.Label(GetLabel("hasFocus") + hasFocus);
 		GUILayout.Label(GetLabel("coroutines") + coroutines.Count);
-		GUILayout.Space(space);
 		if (selectedCharacter)
 		{
-			GUILayout.Label(GetLabel("selectedCharacter") + selectedCharacter);
-			//GUILayout.Label(GetLabel(".movePoints") + selectedCharacter.GetStats().GetRemainingMovePoints().ToString("N2"));
+			GUILayout.Space(space);
+			GUILayout.BeginVertical("window");
+			selectedCharacter?.OnGUIDebug();
+			GUILayout.EndVertical();
 		}
 	}
 	

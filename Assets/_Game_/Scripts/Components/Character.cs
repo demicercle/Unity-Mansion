@@ -188,7 +188,7 @@ public class Character : MonoBehaviour, ICursorHandler
 			stats = ScriptableObject.CreateInstance<CharacterStats>();
 		}
 
-		stats.Init();
+		stats.Init(this);
 		
 		if (TryGetComponent<AIPath>(out var aiPath))
 		{
@@ -380,14 +380,22 @@ public class Character : MonoBehaviour, ICursorHandler
 
     public Vector3 GetEyesPosition() => transform.position + Vector3.up * height * 0.9f;
 
-    public void ConsumeActions(int consumeActions)
+    public void ConsumeActions(int q=1)
     {
-	    stats.ConsumeActions(consumeActions);
+	    for(int i = 0; i < q; i++)
+		    stats.ConsumeActions();
     }
+
+    public bool HasActions() => stats.GetRemainingActions() > 0;
 
     public bool CanInteract()
     {
-	    return stats.GetRemainingActions() > 0;
+	    return HasActions();
+    }
+
+    public bool CanUseRunAction()
+    {
+	    return  HasActions();
     }
 
     public bool GetFirstPathPoint(out Vector3 firstPoint, Vector3[] path = null)
@@ -415,5 +423,11 @@ public class Character : MonoBehaviour, ICursorHandler
 	    //Debug.Log(dot);
 	    DebugGUI.WorldLabel(transform.position, dot.ToString("N2"));
 	    return dot >= MIN_FACING_DOT;
+    }
+
+    public void OnGUIDebug()
+    {
+	    GUILayout.Label(GetDisplayName());
+	    GUILayout.Label("actions: " + stats.GetRemainingActions());
     }
 }

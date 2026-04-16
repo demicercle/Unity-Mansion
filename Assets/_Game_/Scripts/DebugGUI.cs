@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Oddworm.Framework;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ public class DebugGUI : MonoBehaviour
 {
 	public static bool DRAW_DEBUG = true;
 
-	static public void WorldLabel(Vector3 position, string message, float duration = 0f)
+	static public DebugGUI WorldLabel(Vector3 position, string message, float duration = 0f)
 	{
 		var label = new GameObject().AddComponent<DebugGUI>();
 		label.duration = duration;
@@ -15,6 +16,7 @@ public class DebugGUI : MonoBehaviour
 		{
 			GUILayout.Label(message);
 		};
+		return label;
 	}
 	
 	static public void WireArrow(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
@@ -31,6 +33,7 @@ public class DebugGUI : MonoBehaviour
 		public Transform target;
 		public Vector2 size = Vector2.one * 100;
 		public Vector3 worldPosition = Vector3.zero;
+		public Vector2 offset = Vector2.zero;
 
 		private IEnumerator Start()
 		{
@@ -56,7 +59,12 @@ public class DebugGUI : MonoBehaviour
 		}
 
 		public System.Action onGUI;
-		
+
+		private void LateUpdate()
+		{
+			transform.position += (Vector3)offset * Time.unscaledDeltaTime;
+		}
+
 		private void OnGUI()
 		{
 			worldPosition = Camera.main.WorldToScreenPoint(transform.position);
