@@ -153,6 +153,8 @@ public class GameManager : ScriptableObject
 	public void Start()
 	{
 		Debug.Log(this + " Start()");
+		hasFocus = !Application.isEditor;
+		
 		mainCamera = FindObject<MainCamera>();
 		aStar = FindObject<AstarPath>();
 		
@@ -237,7 +239,7 @@ public class GameManager : ScriptableObject
 		if (mouseOverViewport)
 		{
 			var result = CursorRaycast(out var hit);
-			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION)
+			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION) // mouse over navigation
 			{
 				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
 				{
@@ -247,15 +249,22 @@ public class GameManager : ScriptableObject
 					}
 				}
 			}
-			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER)
+			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER) // mouse over character (or prop?)
 			{
-				if (hit.collider.TryGetComponent(out Character character))
+				if (hit.collider.TryGetComponent(out Character otherCharacter))
 				{
 					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
 					{
 						if (!HasCoroutines())
 						{
-							agent.AssignDestination(character.GetPosition());
+							if (partyCharacters.Contains(otherCharacter))
+							{
+								agent.ClearDestination();
+							}
+							else
+							{
+								agent.AssignDestination(otherCharacter.GetPosition());
+							}
 						}
 					}
 				}
