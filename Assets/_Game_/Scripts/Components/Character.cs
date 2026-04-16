@@ -79,12 +79,8 @@ public class Character : MonoBehaviour, ICursorHandler
 	
 	[Header("Stats")]  // todo use scriptable
 	[SerializeField] private CharacterStats stats;
-	[SerializeField] private string displayName;
-	public string GetDisplayName() => displayName;
-	[SerializeField] private Texture2D portrait;
-	public Texture GetPortraitTexture() => portrait;
-	[SerializeField] private float movePoints;
-	[SerializeField] private float moveSpeed;
+
+	public CharacterStats GetStats() => stats;
 	
 	[Header("Selection")]
 	[SerializeField] private CircleRenderer selectionCircle;
@@ -97,6 +93,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	[SerializeField] private Rigidbody rigidbody;
 	
 	[Header("Navigation")]
+	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -162,14 +159,6 @@ public class Character : MonoBehaviour, ICursorHandler
 		return out_agent.aiPath != null;
 	}
 
-	public float GetRemainingMovePoints() => movePoints - usedMovePoints;
-
-	public void ConsumeMovePoints(float delta)
-	{
-		usedMovePoints += Mathf.Abs(delta);
-		movePointsCircle.UpdateCircle();
-	}
-
 	private AgentWrapper agent;
 	private Color currentColor;
 	private bool mouseOver;
@@ -185,6 +174,14 @@ public class Character : MonoBehaviour, ICursorHandler
 		GameEvents.characterSelected += CharacterSelected;
 		GameEvents.newTurnStarted += TurnBegins;
 
+		if (stats == null)
+		{
+			Debug.LogError(this + " stats is null");
+			stats = ScriptableObject.CreateInstance<CharacterStats>();
+		}
+
+		stats.Init();
+		
 		if (TryGetComponent<AIPath>(out var aiPath))
 		{
 			agent = new AgentWrapper()
@@ -195,16 +192,9 @@ public class Character : MonoBehaviour, ICursorHandler
 			agent.SetCanMove(false);
 			agent.SetObstacle(true);
 		}
+
 		
 		UpdateComponents();
-
-		if (stats == null)
-		{
-			Debug.LogError(this + " stats is null");
-			stats = ScriptableObject.CreateInstance<CharacterStats>();
-		}
-
-		stats.Init();
 	}
 
 	void OnDestroy()
@@ -249,7 +239,7 @@ public class Character : MonoBehaviour, ICursorHandler
 
 		if (pathRenderers.Count > 1)
 		{
-			points = Utils.LimitPathTotalLength(points, GetRemainingMovePoints());
+			points = Utils.LimitPathTotalLength(points, stats.GetRemainingMovePoints());
 			pathRenderers[1].positionCount = points.Length;
 			pathRenderers[1].SetPositions(points);
 		}
@@ -291,7 +281,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	    
 	    selectionCircle.SetColor(currentColor, alphaColor);
 	    movePointsCircle.SetColor(currentColor, alphaColor);
-	    movePointsCircle.SetProgress(movePoints <= 0 ? 1f : GetRemainingMovePoints() / movePoints);
+	    movePointsCircle.SetProgress(stats.GetMovePointsProgress());
 
 	    if (animator != null)
 	    {

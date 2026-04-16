@@ -23,10 +23,11 @@ public class CharacterStats : ScriptableObject
 	
 	public float GetTotalMovePoints() => maxMovePoints;
 	
-	public float GetMovePointsProgress() => maxMovePoints <= 0 ? 1f : usedMovePoints / maxMovePoints;
+	public float GetMovePointsProgress() => 1f - Mathf.Clamp01(maxMovePoints <= 0 ? 0f : usedMovePoints / maxMovePoints);
 
 	public void Init()
 	{
+		usedMovePoints = 0;
 		GameEvents.newTurnStarted += TurnBegins;
 	}
 

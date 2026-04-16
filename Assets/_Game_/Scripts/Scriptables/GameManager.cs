@@ -145,7 +145,7 @@ public class GameManager : ScriptableObject
 	{
 		do
 		{
-			if (movingCharacter.GetRemainingMovePoints() <= 0)
+			if (movingCharacter.GetStats().GetRemainingMovePoints() <= 0)
 			{
 				Debug.Log(movingCharacter + " out of move points");
 				break;
@@ -320,7 +320,7 @@ public class GameManager : ScriptableObject
 			movingCharacter.DrawPath();
 			movingCharacterDeltaPosition = Vector3.Distance(movingCharacter.GetPosition(), lastMovingCharacterPosition);
 			lastMovingCharacterPosition = movingCharacter.GetPosition();
-			movingCharacter.ConsumeMovePoints(movingCharacterDeltaPosition);
+			movingCharacter.GetStats().ConsumeUsePoints(movingCharacterDeltaPosition); // TODO use event
 		}
 	}
 
@@ -375,7 +375,7 @@ public class GameManager : ScriptableObject
 		if (selectedCharacter)
 		{
 			GUILayout.Label(GetLabel("selectedCharacter") + selectedCharacter);
-			GUILayout.Label(GetLabel(".movePoints") + selectedCharacter.GetRemainingMovePoints());
+			GUILayout.Label(GetLabel(".movePoints") + selectedCharacter.GetStats().GetRemainingMovePoints().ToString("N2"));
 		}
 	}
 	
