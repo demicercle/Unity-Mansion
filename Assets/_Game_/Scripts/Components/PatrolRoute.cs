@@ -1,0 +1,91 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+
+public class PatrolRoute : MonoBehaviour
+{
+	static public bool FindRoute(CharacterView character, out PatrolRoute patrolRoute)
+	{
+		foreach (var route in GameView.FindAllObjects<PatrolRoute>())
+		{
+			if (route.assignedCharacter == character)
+			{
+				patrolRoute = route;
+				return true;
+			}
+		}
+
+		patrolRoute = null;
+		return false;
+	}
+
+	[ContextMenu("Collect Waypoints")]
+	public void CollectWaypoints()
+	{
+		waypoints = new List<Waypoint>(GetComponentsInChildren<Waypoint>());
+		Utils.SetDirty(this);
+	}
+
+	[ContextMenu("Reset Position")]
+	public void ResetPosition()
+	{
+		var wpChild = GetComponentsInChildren<Waypoint>().ToList();
+		if (wpChild.Count <= 0) return;
+		var newPosition = waypoints.FirstOrDefault().transform.position;
+		waypoints.ForEach(wp => wp.transform.SetParent(null,true));
+		transform.position = newPosition;
+		waypoints.ForEach(wp => wp.transform.SetParent(transform, true));
+		Utils.SetDirty(gameObject);
+	}
+
+	public CharacterView assignedCharacter;
+	public List<Waypoint> waypoints = new List<Waypoint>();
+	public bool closedLoop = false;
+	public Color color = Color.blue;
+	public AIBrain_Patrol defaultBrain = null;
+		
+	public Vector3[] GetPath() => waypoints
+			.Where(wp => wp != null)
+			.ToList()
+			.ConvertAll<Vector3>(wp => wp.GetPosition()).ToArray();
+
+		public void DebugDraw(float duration = 0f)
+		{
+			DebugGUI.Path(GetPath(), closedLoop, color, duration);
+		}
+
+		public void SetAssignedCharacter(CharacterView newCharacter)
+		{
+			assignedCharacter = newCharacter;
+			if (!assignedCharacter.brainList.OfType<AIBrain_Patrol>().Any())
+			{
+				assignedCharacter.brainList.Add(defaultBrain.Clone());
+			}
+		}
+
+		private void Start() // TODO init patrol in GameData
+		{
+			if(assignedCharacter == null)
+				assignedCharacter = GetComponentInParent<CharacterView>();
+			
+			transform.SetParent(null, true); // to prevent waypoints to move in game
+			
+			if (assignedCharacter == null)
+			{
+				Debug.LogWarning(this + " has no assigned character");
+				gameObject.SetActive(false);
+				return;
+			}
+			
+			SetAssignedCharacter(assignedCharacter);
+		}
+
+		private void OnDrawGizmos()
+		{
+			Gizmos.color = color;
+			Utils.DrawGizmosPath(GetPath(), closedLoop);
+			if (assignedCharacter) Gizmos.DrawLine(transform.position, assignedCharacter.transform.position);
+		}
+}

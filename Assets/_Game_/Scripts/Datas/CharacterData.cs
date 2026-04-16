@@ -9,6 +9,7 @@ public class CharacterData : ScriptableObject
 	public System.Action<int> rotationChanged;
 	public System.Action<int> actionsChanged;
 	public System.Action<float> movesPointsChanged;
+	public System.Action<int> patrolRouteChanged;
 	
 	[Header("Profile")]
 	public string displayName;

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public static class Utils
@@ -119,6 +120,22 @@ public static class Utils
 		}
 
 		return false;
+	}
+
+	public static void DrawGizmosPath(Vector3[] path, bool closedLoop)
+	{
+		if (path.Length <= 0)
+			return;
+		
+		for (int i = 0; i < path.Length - 1; i++)
+		{
+			var p0 = path[i];
+			var p1 = path[i + 1];
+			Gizmos.DrawLine(p0, p1);
+		}
+		
+		if (closedLoop && path.Length > 2)
+			Gizmos.DrawLine(path.Last(), path.First());
 	}
 	
 	public static void DrawGizmosCircle(Vector3 pos, Vector3 normal, float radius, int numSegments = 16)

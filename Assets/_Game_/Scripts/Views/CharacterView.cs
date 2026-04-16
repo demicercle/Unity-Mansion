@@ -134,6 +134,10 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] private List<LineRenderer> pathRenderers;
 	
+	[Header("AI")]
+	[SerializeField] private List<AIBrainData> aiBrains = new List<AIBrainData>();
+	public List<AIBrainData> brainList => aiBrains;
+	
 	[Header("Animation")]
 	[SerializeField] private Animator animator;
 	[SerializeField] private float velocityScale = 1.0f;
@@ -420,7 +424,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	    dir.Normalize();
 	    var dot = Vector3.Dot(dir, transform.forward);
 	    //Debug.Log(dot);
-	    DebugGUI.WorldLabel(transform.position, dot.ToString("N2"));
+	    DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
 	    return dot >= MIN_FACING_DOT;
     }
 
@@ -428,5 +432,10 @@ public class CharacterView : MonoBehaviour, ICursorHandler
     {
 	    GUILayout.Label(GetDisplayName());
 	    GUILayout.Label("actions: " + data.GetRemainingActions());
+    }
+
+    public bool TryGetAIBrain(out AIBrainData aiBrain)
+    {
+	    return (aiBrain =aiBrains.OrderBy(b => b.GetPriority()).FirstOrDefault()) != null;
     }
 }

@@ -144,7 +144,7 @@ public class GameView
 						{
 							if (clickedProp.GetBestWaypoint(_selectedCharacterView.GetPosition(), out var bestWaypoint))
 							{
-								StartCoroutine(WaitCharacterMoved(_selectedCharacterView, bestWaypoint.GetPosition(), () =>
+								QueueRoutine(WaitCharacterMoved(_selectedCharacterView, bestWaypoint.GetPosition(), () =>
 								{
 									var dist = Vector3.Distance(_selectedCharacterView.GetPosition(), bestWaypoint.GetPosition());
 									if (dist <= agent.reachDistance)
@@ -152,7 +152,7 @@ public class GameView
 										// waypoint reach
 										if (_selectedCharacterView.CanInteract())
 										{
-											StartCoroutine(WaitCharacterInteract(_selectedCharacterView, clickedProp, bestWaypoint));
+											QueueRoutine(WaitCharacterInteract(_selectedCharacterView, clickedProp, bestWaypoint));
 										}
 									}
 									else
@@ -171,14 +171,14 @@ public class GameView
 				{
 					if (!HasCoroutines())
 					{
-						StartCoroutine(WaitCharacterMoved(_selectedCharacterView, hit.point));
+						QueueRoutine(WaitCharacterMoved(_selectedCharacterView, hit.point));
 					}
 				}
 			}
 		}
 	}
 
-	public void StartCoroutine(IEnumerator coroutine)
+	public void QueueRoutine(IEnumerator coroutine)
 	{
 		if (coroutines.Count == 0)
 		{
@@ -285,12 +285,29 @@ public class GameView
 
 	public void EndTurn()
 	{
-		StartCoroutine(WaitEndTurn());
+		QueueRoutine(WaitEndTurn());
 	}
 
 	private IEnumerator WaitEndTurn()
 	{
 		Debug.Log(">> End turn");
+
+		foreach (var otherCharacter in allCharacters)
+		{
+			if (partyCharacters.Contains(otherCharacter)) continue;
+			SelectCharacter(otherCharacter, true);
+
+			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
+			{
+				Debug.LogWarning(otherCharacter + " has no aiBrain");
+				yield return new WaitForSeconds(1.0f);
+				continue;
+			}
+
+			Debug.Log("Think() " + aiBrain + " " + otherCharacter);
+			yield return otherCharacter.StartCoroutine(aiBrain.Think(otherCharacter));
+		}
+		
 		yield return new WaitForSeconds(1.0f);
 		gameData.NextTurn();
 		
@@ -312,7 +329,7 @@ public class GameView
 			return;
 		}
 
-		StartCoroutine(WaitRunAction(onCharacterView));
+		QueueRoutine(WaitRunAction(onCharacterView));
 	}
 
 	private IEnumerator WaitRunAction(CharacterView onCharacterView)
@@ -324,7 +341,7 @@ public class GameView
 			yield break;
 		}
 
-		DebugGUI.WorldLabel(onCharacterView.GetPosition(), "RUN", 1f).offset = Vector2.up; // TODO Floating Text Component
+		DebugGUI.FloatingText(onCharacterView.GetPosition(), "RUN", 1f).offset = Vector2.up; // TODO Floating Text Component
 		yield return new WaitForSeconds(1.0f);
 		characterData.RunAction();
 	}

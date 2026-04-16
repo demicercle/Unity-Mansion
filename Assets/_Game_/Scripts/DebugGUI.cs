@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using Oddworm.Framework;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ public class DebugGUI : MonoBehaviour
 {
 	public static bool DRAW_DEBUG = true;
 
-	static public DebugGUI WorldLabel(Vector3 position, string message, float duration = 0f)
+	static public DebugGUI FloatingText(Vector3 position, string message, float duration = 0f)
 	{
 		var label = new GameObject().AddComponent<DebugGUI>();
 		label.duration = duration;
@@ -21,11 +22,30 @@ public class DebugGUI : MonoBehaviour
 	
 	static public void WireArrow(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
 	{
+		if (!DRAW_DEBUG) return;
 		DbgDraw.WireArrow(position, Quaternion.LookRotation(direction), scale, color, duration);
+	}
+	
+	static public void Path(Vector3[] path, bool closedLoop, Color color, float duration = 0f)
+	{
+		if (!DRAW_DEBUG) return;
+		if (path.Length <= 0)
+			return;
+		
+		for (int i = 0; i < path.Length - 1; i++)
+		{
+			var p0 = path[i];
+			var p1 = path[i + 1];
+			Line(p0, p1, color, duration);
+		}
+		
+		if (closedLoop && path.Length > 2)
+			Line(path.Last(), path.First(), color, duration);
 	}
 	
 	static public void Line(Vector3 start, Vector3 end, Color color, float duration = 0f)
 	{
+		if (!DRAW_DEBUG) return;
 		DbgDraw.Line(start, end, color, duration);
 	}
 		public bool destroyGameObject = true;
