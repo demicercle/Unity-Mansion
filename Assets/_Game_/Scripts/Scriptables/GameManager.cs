@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Oddworm.Framework;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Game Manager", menuName = "Game Manager")]
 public class GameManager : ScriptableObject
 {
+	const string TAG_PLAYER = "Player";
 	static public string LAYER_GROUND = "Ground";
 	static public string LAYER_WALL = "Wall";
 	static public string LAYER_CHARACTER = "Character";
@@ -36,14 +38,20 @@ public class GameManager : ScriptableObject
 
 		return false;
 	}
+
+	static public T FindObject<T>() where T : Object => FindObjectsByType<T>(default).FirstOrDefault();
+	static public T[] FindObjects<T>() where T : Object => FindObjectsByType<T>(default);
 	
 	public float cameraSpeed = 1.0f;
 	public float maxNavigationDistance = 0.5f;
+
+	public event System.Action<Character> characterAddedToParty;
 
 	private Vector2 mousePosition;
 	private AstarPath aStar;
 	private MainCamera mainCamera;
 	private InputSystem_Actions inputSystem;
+	private List<Character> partyCharacters;
 
 	public void MouseMove(Vector2 pos)
 	{
@@ -53,13 +61,30 @@ public class GameManager : ScriptableObject
 	public void Start()
 	{
 		Debug.Log(this + " Start()");
-		mainCamera = FindObjectsByType<MainCamera>(default).First();
-		aStar = FindObjectsByType<AstarPath>(default).First();
+		mainCamera = FindObject<MainCamera>();
+		aStar = FindObject<AstarPath>();
+		
+		// init inputs
 		inputSystem = new InputSystem_Actions();
 		inputSystem.UI.Enable();
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
 		inputSystem.Player.Enable();
+		
+		// init characters
+		partyCharacters = new List<Character>();
+		foreach (var character in FindObjects<Character>())
+		{
+			if (character.CompareTag(TAG_PLAYER))
+			{
+				Debug.Log("Add to party: " + character);
+				partyCharacters.Add(character);
+				characterAddedToParty?.Invoke(character);
+			}
+		}
+		
+		// focus first character
+		mainCamera.Focus(partyCharacters.First());
 	}
 
 	public void Update()

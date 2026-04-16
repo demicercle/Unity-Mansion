@@ -11,6 +11,13 @@ public class MainCamera : MonoBehaviour
     public float zoomSpeed = 1.0f;
     public float lightRange = 0.0f;
     public float lightRangeToAngle = Mathf.PI;
+
+    public void Focus(GameObject go) => Focus(go.transform.position);
+    public void Focus(Component comp) => Focus(comp.transform.position);
+    public void Focus(Vector3 world)
+    {
+        focusPosition = world;
+    }
     
     public void Move(Vector2 readValue)
     {
