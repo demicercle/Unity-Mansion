@@ -60,8 +60,8 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 			assignedCharacter = arg1;
 			gameObject.SetActive(true);
 
-			rawImage.texture = arg1.GetStats().portraitTexture;
-			nameLabel.text = arg1.GetStats().displayName;
+			rawImage.texture = arg1.GetPortraitTexture();
+			nameLabel.text = arg1.GetDisplayName();
 		}
 	}
 }

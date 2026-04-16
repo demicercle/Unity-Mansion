@@ -14,16 +14,16 @@ public class CharacterStats : ScriptableObject
 		usedMovePoints = 0f;
 	}
 
-	public void ConsumeUsePoints(float v)
+	public void ConsumeMovePoints(float v)
 	{
 		usedMovePoints += v;
 	}
 	
-	public float GetRemainingMovePoints() => maxMovePoints - usedMovePoints;
-	
 	public float GetTotalMovePoints() => maxMovePoints;
 	
-	public float GetMovePointsProgress() => 1f - Mathf.Clamp01(maxMovePoints <= 0 ? 0f : usedMovePoints / maxMovePoints);
+	public float GetRemainingMovePoints() => GetTotalMovePoints() - usedMovePoints;
+	
+	public float GetMovePointsProgress() => 1f - Mathf.Clamp01(maxMovePoints <= 0 ? 0f : usedMovePoints / GetTotalMovePoints());
 
 	public void Init()
 	{

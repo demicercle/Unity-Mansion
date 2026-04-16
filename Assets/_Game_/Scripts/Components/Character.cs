@@ -75,12 +75,18 @@ public class Character : MonoBehaviour, ICursorHandler
 				onSearchPath?.Invoke();
 			}
 		}
+
+		public void StopMovement()
+		{
+			ClearDestination();
+		}
 	}
 	
 	[Header("Stats")]  // todo use scriptable
 	[SerializeField] private CharacterStats stats;
-
-	public CharacterStats GetStats() => stats;
+	public Texture GetPortraitTexture() => stats.portraitTexture;
+	public string GetDisplayName() => stats.displayName;
+	public bool CanMove() => stats.GetRemainingMovePoints() > 0f;
 	
 	[Header("Selection")]
 	[SerializeField] private CircleRenderer selectionCircle;
@@ -170,10 +176,6 @@ public class Character : MonoBehaviour, ICursorHandler
 	{
 		currentColor = defaultColor;
 
-		GameEvents.characterAddedToParty += CharacterAddedToParty;
-		GameEvents.characterSelected += CharacterSelected;
-		GameEvents.newTurnStarted += TurnBegins;
-
 		if (stats == null)
 		{
 			Debug.LogError(this + " stats is null");
@@ -192,18 +194,49 @@ public class Character : MonoBehaviour, ICursorHandler
 			agent.SetCanMove(false);
 			agent.SetObstacle(true);
 		}
-
 		
 		UpdateComponents();
+		
+		RegisterEvents(true);
 	}
 
 	void OnDestroy()
 	{
 		stats.Dispose();
-		
-		GameEvents.characterAddedToParty -= CharacterAddedToParty;
-		GameEvents.characterSelected -= CharacterSelected;
-		GameEvents.newTurnStarted -= TurnBegins;
+		RegisterEvents(false);
+	}
+
+	void RegisterEvents(bool value)
+	{
+		if (value)
+		{
+			GameEvents.characterAddedToParty += CharacterAddedToParty;
+			GameEvents.characterSelected += CharacterSelected;
+			GameEvents.newTurnStarted += TurnBegins;
+			GameEvents.characterMoved += CharacterMoved;
+		}
+		else
+		{
+			GameEvents.characterAddedToParty -= CharacterAddedToParty;
+			GameEvents.characterSelected -= CharacterSelected;
+			GameEvents.newTurnStarted -= TurnBegins;
+			GameEvents.characterMoved -= CharacterMoved;
+		}
+	}
+
+	private Vector3 lastPosition;
+	private void CharacterMoved(Character character, Vector3 newPos)
+	{
+		if (character == this)
+		{
+			var deltaPos = (newPos - lastPosition).magnitude;
+			lastPosition = newPos;
+			stats.ConsumeMovePoints(deltaPos);
+			if (stats.GetRemainingMovePoints() <= 0f)
+			{
+				agent.StopMovement();
+			}
+		}
 	}
 
 	private void CharacterSelected(Character arg1, bool arg2)
@@ -263,7 +296,9 @@ public class Character : MonoBehaviour, ICursorHandler
 	}
 
 	void Start()
-    {
+	{
+		lastPosition = GetPosition();
+		
 	    if (animator != null)
 	    {
 		    animator.SetFloat(AnimationParameters.VelocityX, 0.0f);      
@@ -303,4 +338,5 @@ public class Character : MonoBehaviour, ICursorHandler
     {
 	    usedMovePoints = 0.0f;
     }
+
 }

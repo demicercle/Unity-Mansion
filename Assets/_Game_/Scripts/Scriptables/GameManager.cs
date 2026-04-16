@@ -87,9 +87,6 @@ public class GameManager : ScriptableObject
 	private List<Character> partyCharacters;
 	private Character selectedCharacter;
 	private List<IEnumerator> coroutines;
-	private Character movingCharacter;
-	private float movingCharacterDeltaPosition;
-	private Vector3 lastMovingCharacterPosition;
 	private int currentTurn;
 
 	public void MouseMove(Vector2 pos)
@@ -117,14 +114,11 @@ public class GameManager : ScriptableObject
 			}
 			else if (raycastResult == CURSOR_RAYCAST_RESULT_NAVIGATION)
 			{
-				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent))
+				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent) && selectedCharacter.CanMove())
 				{
 					if (!HasCoroutines())
 					{
-						agent.SetCanMove(true);
-						movingCharacter = selectedCharacter;
-						lastMovingCharacterPosition = selectedCharacter.GetPosition();
-						StartCoroutine(WaitAgentMoved(agent));
+						StartCoroutine(WaitAgentMoved(selectedCharacter, hit.point));
 					}
 				}
 			}
@@ -141,20 +135,20 @@ public class GameManager : ScriptableObject
 		coroutines.Add(coroutine);
 	}
 
-	private IEnumerator WaitAgentMoved(Character.AgentWrapper agent)
+	private IEnumerator WaitAgentMoved(Character movingCharacter, Vector3 dest)
 	{
+		if (!movingCharacter.TryGetAgent(out var agent)) yield break;
+		
+		agent.AssignDestination(dest);
+		agent.SetCanMove(true);
+		
 		do
 		{
-			if (movingCharacter.GetStats().GetRemainingMovePoints() <= 0)
-			{
-				Debug.Log(movingCharacter + " out of move points");
-				break;
-			}
-			
 			yield return null;
+			
+			GameEvents.characterMoved?.Invoke(movingCharacter, movingCharacter.GetPosition());
 		} while (agent.isMoving && !agent.reachedDestination);
 		
-		movingCharacter = null;
 		agent.ClearDestination();
 		agent.SetCanMove(false);
 	}
@@ -314,14 +308,6 @@ public class GameManager : ScriptableObject
 				}
 			}
 		}
-
-		if (movingCharacter)
-		{
-			movingCharacter.DrawPath();
-			movingCharacterDeltaPosition = Vector3.Distance(movingCharacter.GetPosition(), lastMovingCharacterPosition);
-			lastMovingCharacterPosition = movingCharacter.GetPosition();
-			movingCharacter.GetStats().ConsumeUsePoints(movingCharacterDeltaPosition); // TODO use event
-		}
 	}
 
 	private const int CURSOR_RAYCAST_RESULT_NONE = 0;
@@ -375,7 +361,7 @@ public class GameManager : ScriptableObject
 		if (selectedCharacter)
 		{
 			GUILayout.Label(GetLabel("selectedCharacter") + selectedCharacter);
-			GUILayout.Label(GetLabel(".movePoints") + selectedCharacter.GetStats().GetRemainingMovePoints().ToString("N2"));
+			//GUILayout.Label(GetLabel(".movePoints") + selectedCharacter.GetStats().GetRemainingMovePoints().ToString("N2"));
 		}
 	}
 	

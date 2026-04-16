@@ -4,6 +4,7 @@ public class GameEvents
 {
 	static public System.Action<Character, int> characterAddedToParty;
 	static public System.Action<Character, bool> characterSelected;
+	static public System.Action<Character, Vector3> characterMoved;
 	static public System.Action<bool> routinesStarted;
 	static public System.Action<int> newTurnStarted;
 }
