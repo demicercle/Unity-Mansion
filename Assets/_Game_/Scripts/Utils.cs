@@ -3,6 +3,16 @@ using UnityEngine;
 
 public static class Utils
 {
+	static public void SetDirty(params Object[] objects)
+	{
+#if UNITY_EDITOR
+		if (!Application.isPlaying)
+		{
+			foreach (var obj in objects)
+				UnityEditor.EditorUtility.SetDirty(obj);
+		}
+#endif
+	}
 	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
 
 	public static Color HTML_To_Color(string html)

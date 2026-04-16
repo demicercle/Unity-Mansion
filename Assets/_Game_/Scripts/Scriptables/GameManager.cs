@@ -9,10 +9,10 @@ using UnityEngine;
 public class GameManager : ScriptableObject
 {
 	private const string TAG_PLAYER = "Player";
-	
 	static public string LAYER_GROUND = "Ground";
 	static public string LAYER_WALL = "Wall";
 	static public string LAYER_CHARACTER = "Character";
+	public static string LAYER_IGNORE = "Ignore Raycast";
 	
 	public static bool TryGetNearestNavPosition(Vector3 position, float maxDistance, out Vector3 navPosition)
 	{
@@ -120,7 +120,19 @@ public class GameManager : ScriptableObject
 						{
 							if (clickedProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
-								StartCoroutine(WaitCharacterMoved(selectedCharacter, bestWaypoint.GetPosition()));
+								StartCoroutine(WaitCharacterMoved(selectedCharacter, bestWaypoint.GetPosition(), () =>
+								{
+									var dist = Vector3.Distance(selectedCharacter.GetPosition(), bestWaypoint.GetPosition());
+									if (dist <= agent.reachDistance)
+									{
+										// waypoint reach
+										StartCoroutine(WaitCharacterInteract(selectedCharacter, clickedProp, bestWaypoint));
+									}
+									else
+									{
+										Debug.Log(selectedCharacter + " not at reach");
+									}
+								}));
 							}
 						}
 					}
@@ -149,7 +161,19 @@ public class GameManager : ScriptableObject
 		coroutines.Add(coroutine);
 	}
 
-	private IEnumerator WaitCharacterMoved(Character movingCharacter, Vector3 dest)
+	private IEnumerator WaitCharacterInteract(Character character, PropComponent prop, Waypoint waypoint = null)
+	{
+		if (waypoint != null)
+		{
+			character.RotateTowards(waypoint.GetPosition(), -1f);
+		}
+		
+		Debug.Log(character + " Interact with " + prop);
+		yield return prop.Interact();
+		Utils.RebuildNavigation();
+	}
+	
+	private IEnumerator WaitCharacterMoved(Character movingCharacter, Vector3 dest, System.Action onComplete = null)
 	{
 		if (!movingCharacter.TryGetAgent(out var agent)) yield break;
 		
@@ -165,6 +189,8 @@ public class GameManager : ScriptableObject
 		
 		agent.ClearDestination();
 		agent.SetCanMove(false);
+		
+		onComplete?.Invoke();
 	}
 
 	public void SelectCharacter(Character character)

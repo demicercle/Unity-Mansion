@@ -14,6 +14,7 @@ public class Character : MonoBehaviour, ICursorHandler
 		public Vector3 velocity => aiPath.velocity;
 		public bool isMoving => aiPath.isStopped == false;
 		public bool reachedDestination => aiPath.reachedDestination;
+		public float reachDistance => aiPath.endReachedDistance;
 
 		private bool hasDestination;
 
@@ -100,6 +101,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	
 	[Header("Navigation")]
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
+	[SerializeField] [Range(0.0f, 10.0f)] private float rotationSpeed = 1.0f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -341,4 +343,29 @@ public class Character : MonoBehaviour, ICursorHandler
 	    usedMovePoints = 0.0f;
     }
 
+    public void RotateTowards(Vector3 worldPosition, float f = -1f)
+    {
+	    LookDirection(worldPosition - GetPosition(), f);
+    }
+
+    public void LookDirection(Vector3 getDirection, float f)
+    {
+	    getDirection.y = 0;
+	    getDirection.Normalize();
+
+	    if (getDirection.sqrMagnitude < 0.01f)
+	    {
+		    Debug.LogWarning(this + " invalid direction");
+		    return;
+	    }
+	    
+	    if (f < 0f)
+	    {
+		    transform.rotation = Quaternion.LookRotation(getDirection);
+	    }
+	    else
+	    {
+		    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(getDirection), f * rotationSpeed);
+	    }
+    }
 }
