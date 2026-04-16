@@ -6,8 +6,19 @@ using RPGCharacterAnims.Lookups;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Character : MonoBehaviour, ICursorHandler
+public class CharacterView : MonoBehaviour, ICursorHandler
 {
+	private const string TAG_PLAYER = "Player";
+	private const string TAG_ENEMY = "Enemy";
+	public bool IsPlayer() => CompareTag(TAG_PLAYER);
+	
+	static public CharacterView SpawnPlayerAt(CharacterView characterViewPrefab, CharacterData characterData, Waypoint waypoint)
+	{
+		var newChar = Instantiate(characterViewPrefab.gameObject).GetComponent<CharacterView>();
+		newChar.data = characterData;
+		return newChar;
+	}
+	
 	public class AgentWrapper
 	{
 		public AIPath aiPath;
@@ -23,6 +34,12 @@ public class Character : MonoBehaviour, ICursorHandler
 		{
 			get => aiPath.onSearchPath;
 			set => aiPath.onSearchPath = value;
+		}
+
+		public void Teleport(Vector3 newPos, int newRot)
+		{
+			aiPath.Teleport(newPos, true);
+			aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 		}
 		
 		public void SetCanMove(bool value)
@@ -88,10 +105,17 @@ public class Character : MonoBehaviour, ICursorHandler
 	public const float MIN_FACING_DOT = 0.9f;
 	
 	[Header("Stats")]  // todo use scriptable
-	[SerializeField] private CharacterStats stats;
-	public Texture GetPortraitTexture() => stats.portraitTexture;
-	public string GetDisplayName() => stats.displayName;
-	public bool CanMove() => stats.GetRemainingMovePoints() > 0f;
+	[SerializeField] private CharacterData data;
+
+	public bool TryGetData(out CharacterData outData)
+	{
+		outData = data;
+		return outData != null;
+	}
+	
+	public Texture GetPortraitTexture() => data.portraitTexture;
+	public string GetDisplayName() => data.displayName;
+	public bool CanMove() => data.GetRemainingMovePoints() > 0f;
 	
 	[Header("Selection")]
 	[SerializeField] private CircleRenderer selectionCircle;
@@ -175,20 +199,24 @@ public class Character : MonoBehaviour, ICursorHandler
 	private Color currentColor;
 	private bool mouseOver;
 	private bool isSelected;
-	private bool inParty;
-	private float usedMovePoints;
+	private int partyIndex;
+	private Vector3[] lastPath;
+
+	private void SetPartyIndex(int newIndex)
+	{
+		partyIndex = newIndex;
+		SetColor(partyIndex >= 0 ? partyColor : defaultColor);
+	}
 
 	private void Awake()
 	{
 		currentColor = defaultColor;
 
-		if (stats == null)
+		if (data == null)
 		{
 			Debug.LogError(this + " stats is null");
-			stats = ScriptableObject.CreateInstance<CharacterStats>();
+			data = ScriptableObject.CreateInstance<CharacterData>();
 		}
-
-		stats.Init(this);
 		
 		if (TryGetComponent<AIPath>(out var aiPath))
 		{
@@ -200,52 +228,43 @@ public class Character : MonoBehaviour, ICursorHandler
 			agent.SetCanMove(false);
 			agent.SetObstacle(true);
 		}
-		
-		UpdateComponents();
-		
-		RegisterEvents(true);
 	}
 
 	void OnDestroy()
 	{
-		stats.Dispose();
+		data.Dispose();
 		RegisterEvents(false);
+	}
+
+	public void Init(CharacterData newData = null)
+	{
+		if (newData != null)
+			data = newData;
+		
+		data.Init(this);
+		UpdateComponents();
+		RegisterEvents(true);
 	}
 
 	void RegisterEvents(bool value)
 	{
+		var gameView = GameView.GetInstance();
+		
 		if (value)
 		{
-			GameEvents.characterAddedToParty += CharacterAddedToParty;
-			GameEvents.characterSelected += CharacterSelected;
-			GameEvents.newTurnStarted += TurnBegins;
-			GameEvents.characterMoved += CharacterMoved;
+			data.partyIndexChanged += SetPartyIndex;
+			gameView.characterSelected += CharacterSelected;
+			//TODO for network?		GameData.characterMoved += CharacterMoved;
 		}
 		else
 		{
-			GameEvents.characterAddedToParty -= CharacterAddedToParty;
-			GameEvents.characterSelected -= CharacterSelected;
-			GameEvents.newTurnStarted -= TurnBegins;
-			GameEvents.characterMoved -= CharacterMoved;
+			data.partyIndexChanged -= SetPartyIndex;
+			gameView.characterSelected -= CharacterSelected;
+			//TODO for network?		GameData.characterMoved -= CharacterMoved;
 		}
 	}
 
-	private Vector3 lastPosition;
-	private void CharacterMoved(Character character, Vector3 newPos)
-	{
-		if (character == this)
-		{
-			var deltaPos = (newPos - lastPosition).magnitude;
-			lastPosition = newPos;
-			stats.ConsumeMovePoints(deltaPos);
-			if (stats.GetRemainingMovePoints() <= 0f)
-			{
-				agent.StopMovement();
-			}
-		}
-	}
-
-	private void CharacterSelected(Character arg1, bool arg2)
+	private void CharacterSelected(CharacterView arg1, bool arg2)
 	{
 		if (arg1 == this)
 		{
@@ -266,7 +285,6 @@ public class Character : MonoBehaviour, ICursorHandler
 		}
 	}
 
-	private Vector3[] lastPath;
 	public void UpdatePath()
 	{
 		lastPath = agent.GetCurrentPath();
@@ -279,21 +297,12 @@ public class Character : MonoBehaviour, ICursorHandler
 
 		if (pathRenderers.Count > 1)
 		{
-			lastPath = Utils.LimitPathTotalLength(lastPath, stats.GetRemainingMovePoints());
+			lastPath = Utils.LimitPathTotalLength(lastPath, data.GetRemainingMovePoints());
 			pathRenderers[1].positionCount = lastPath.Length;
 			pathRenderers[1].SetPositions(lastPath);
 		}
 		
 		pathRenderers.ForEach(p => p.enabled = p.positionCount > 0);
-	}
-
-	private void CharacterAddedToParty(Character arg1, int arg2)
-	{
-		if (arg1 == this)
-		{
-			inParty = true;
-			SetColor(partyColor);
-		}
 	}
 
 	void SetColor(Color newColor)
@@ -304,9 +313,7 @@ public class Character : MonoBehaviour, ICursorHandler
 
 	void Start()
 	{
-		gameObject.layer = LayerMask.NameToLayer(GameManager.LAYER_CHARACTER);
-		
-		lastPosition = GetPosition();
+		gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
 		
 	    if (animator != null)
 	    {
@@ -322,12 +329,12 @@ public class Character : MonoBehaviour, ICursorHandler
 	private float alphaColor;
     void LateUpdate()
     {
-	    hasActions = stats.GetRemainingActions() > 0;
+	    hasActions = data.GetRemainingActions() > 0;
 	    alphaColor = alphaCurve.Evaluate(isSelected ? 1f : mouseOver ? 0.5f : 0.0f);
 	    
 	    selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
 	    movePointsCircle.SetColor(currentColor, alphaColor);
-	    movePointsCircle.SetProgress(stats.GetMovePointsProgress());
+	    movePointsCircle.SetProgress(data.GetMovePointsProgress());
 
 	    if (animator != null)
 	    {
@@ -345,17 +352,22 @@ public class Character : MonoBehaviour, ICursorHandler
 	    return transform.position;
     }
 
-    private void TurnBegins(int turnIndex)
+    public void SetTeleport(Waypoint wp)
     {
-	    usedMovePoints = 0.0f;
+	    var newPos = wp.GetPosition();
+	    var newRot = wp.GetRotation();
+
+	    data.SetPosition(newPos);
+	    data.SetRotation(newRot);
+	    agent.Teleport(newPos, newRot);
     }
 
-    public void RotateTowards(Vector3 worldPosition, float f = -1f)
+    public void SetRotateTowards(Vector3 worldPosition, float f = -1f)
     {
 	    LookDirection(worldPosition - GetPosition(), f);
     }
 
-    public void LookDirection(Vector3 getDirection, float f)
+    private void LookDirection(Vector3 getDirection, float f)
     {
 	    getDirection.y = 0;
 	    getDirection.Normalize();
@@ -376,17 +388,15 @@ public class Character : MonoBehaviour, ICursorHandler
 		    DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
 		    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.aiPath.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 	    }
+	    
+	    data.SetRotation(GetRotation());
     }
 
     public Vector3 GetEyesPosition() => transform.position + Vector3.up * height * 0.9f;
 
-    public void ConsumeActions(int q=1)
-    {
-	    for(int i = 0; i < q; i++)
-		    stats.ConsumeActions();
-    }
+    public int GetRotation() => (int)transform.eulerAngles.y;
 
-    public bool HasActions() => stats.GetRemainingActions() > 0;
+    public bool HasActions() => data.GetRemainingActions() > 0;
 
     public bool CanInteract()
     {
@@ -398,21 +408,10 @@ public class Character : MonoBehaviour, ICursorHandler
 	    return  HasActions();
     }
 
-    public bool GetFirstPathPoint(out Vector3 firstPoint, Vector3[] path = null)
+    public bool GetPath(out Vector3[] path)
     {
-	    if (path == null)
-	    {
-		    path = lastPath;
-	    }
-	    
-	    if (path.Length > 1)
-	    {
-		    firstPoint = path[1];
-		    return true;
-	    }
-
-	    firstPoint = default(Vector3);
-	    return false;
+	    path = lastPath;
+		return path != null && path.Length > 0;
     }
 
     public bool IsFacingDirection(Vector3 dir)
@@ -428,6 +427,6 @@ public class Character : MonoBehaviour, ICursorHandler
     public void OnGUIDebug()
     {
 	    GUILayout.Label(GetDisplayName());
-	    GUILayout.Label("actions: " + stats.GetRemainingActions());
+	    GUILayout.Label("actions: " + data.GetRemainingActions());
     }
 }

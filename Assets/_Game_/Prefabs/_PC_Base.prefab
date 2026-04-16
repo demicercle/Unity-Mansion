@@ -357,7 +357,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dedf42b6901a7b44b653cea31cea834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
+  data: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
   selectionCircle: {fileID: 5050193632537316992}
   movePointsCircle: {fileID: 7923277011536477314}
   defaultColor: {r: 0, g: 0, b: 1, a: 1}
@@ -391,7 +391,6 @@ MonoBehaviour:
   capsuleCollider: {fileID: 7385597297877825555}
   rigidbody: {fileID: 6072534866263412361}
   moveSpeed: 3
-  rotationSpeed: 1
   radius: 0.5
   height: 1.5
   pathRenderers:

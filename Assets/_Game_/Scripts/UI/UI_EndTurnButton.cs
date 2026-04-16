@@ -12,17 +12,17 @@ public class UI_EndTurnButton : MonoBehaviour
 	private void Awake()
 	{
 		button.onClick.AddListener(Clicked);
-		GameEvents.routinesStarted += SetButtonDisabled;
+		GameView.GetInstance().routinesStarted += SetButtonDisabled;
 	}
 
 	private void OnDestroy()
 	{
 		button.onClick.RemoveListener(Clicked);
-		GameEvents.routinesStarted -= SetButtonDisabled;
+		GameView.GetInstance().routinesStarted -= SetButtonDisabled;
 	}
 
 	void Clicked()
 	{
-		UIEvents.clickEndTurn?.Invoke();
+		GameView.GetInstance().EndTurn();
 	}
 }

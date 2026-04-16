@@ -13,55 +13,60 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		if (assignedCharacter != null)
+		if (_assignedCharacterView != null)
 		{
-			UIEvents.clickSelectCharacter?.Invoke(assignedCharacter);
+			GameView.clickSelectCharacter?.Invoke(_assignedCharacterView);
 		}
 	}
 
-	private Character assignedCharacter;
+	private CharacterView _assignedCharacterView;
+	private GameView gameView;
 	
 	private void Awake()
 	{
-		GameEvents.characterAddedToParty += CharacterAddedToParty;
-		GameEvents.characterSelected += CharacterSelected;
+		gameView = GameView.GetInstance();
+		gameView.characterAddedToParty += CharacterAddedToParty;
+		gameView.characterSelected += CharacterSelected;
 		//toggle.onValueChanged.AddListener(OnValueChanged);
 		gameObject.SetActive(false);
 	}
 
 	private void OnDestroy()
 	{
-		GameEvents.characterAddedToParty -= CharacterAddedToParty;
-		GameEvents.characterSelected -= CharacterSelected;
+		gameView.characterAddedToParty -= CharacterAddedToParty;
+		gameView.characterSelected -= CharacterSelected;
 		//toggle.onValueChanged.RemoveListener(OnValueChanged);
 	}
 
 	private void OnValueChanged(bool value)
 	{
-		if (value && assignedCharacter != null)
+		if (value && _assignedCharacterView != null)
 		{
-			UIEvents.clickSelectCharacter.Invoke(assignedCharacter);
+			GameView.clickSelectCharacter.Invoke(_assignedCharacterView);
 		}
 	}
 
-	private void CharacterSelected(Character character, bool selected)
+	private void CharacterSelected(CharacterView characterView, bool selected)
 	{
-		if (assignedCharacter == character)
+		if (_assignedCharacterView == characterView)
 		{
 			toggle.isOn = selected;
 		}
 	}
 
-	private void CharacterAddedToParty(Character arg1, int arg2)
+	private void CharacterAddedToParty(CharacterView arg1, int arg2)
 	{
 		var index = transform.GetSiblingIndex();
 		if (index == arg2)
 		{
-			assignedCharacter = arg1;
-			gameObject.SetActive(true);
+			_assignedCharacterView = arg1;
+			gameObject.SetActive(arg1 && arg2 >= 0);
 
-			rawImage.texture = arg1.GetPortraitTexture();
-			nameLabel.text = arg1.GetDisplayName();
+			if (_assignedCharacterView && _assignedCharacterView.TryGetData(out var data))
+			{
+				rawImage.texture = data.portraitTexture;
+				nameLabel.text = data.displayName;
+			}
 		}
 	}
 }
