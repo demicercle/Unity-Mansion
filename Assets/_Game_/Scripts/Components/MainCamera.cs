@@ -22,6 +22,7 @@ public class MainCamera : MonoBehaviour
     
     public void Move(Vector2 readValue)
     {
+        //if (readValue.magnitude > 0.001f) Debug.Log(this + " Move " + readValue);
         focusPosition.x += readValue.x;
         focusPosition.z += readValue.y;
     }

@@ -247,7 +247,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	void SetColor(Color newColor)
 	{
 		currentColor = newColor;
-		pathRenderers.ForEach(p => p.startColor = p.endColor = newColor);
+		pathRenderers.ForEach(p => p.startColor = p.endColor = Utils.ColorAlpha(newColor, Mathf.Lerp(0.2f, 0.8f, (float)pathRenderers.IndexOf(p))));
 	}
 
 	void Start()

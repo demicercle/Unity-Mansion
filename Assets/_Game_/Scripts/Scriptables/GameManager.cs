@@ -70,6 +70,7 @@ public class GameManager : ScriptableObject
 	public bool hasFocus { get; set; }
 	
 	private Vector2 mousePosition;
+	private bool hasMousePosition;
 	private AstarPath aStar;
 	private MainCamera mainCamera;
 	private InputSystem_Actions inputSystem;
@@ -82,6 +83,7 @@ public class GameManager : ScriptableObject
 
 	public void MouseMove(Vector2 pos)
 	{
+		hasMousePosition = true;
 		mousePosition = pos;
 	}
 
@@ -201,6 +203,14 @@ public class GameManager : ScriptableObject
 		}
 	}
 
+	public void LateUpdate()
+	{
+		if (hasFocus)
+		{
+			if (hasMousePosition) mainCamera.MoveCameraWithCursor(mousePosition);
+		}
+	}
+	
 	public void Update()
 	{
 		if (inputSystem.UI.Cancel.WasPressedThisFrame())
@@ -212,8 +222,6 @@ public class GameManager : ScriptableObject
 		{
 			Cursor.lockState = CursorLockMode.Confined;
 			Cursor.SetCursor(Resources.Load<Texture2D>("Cursors/cursor_none"), Vector2.zero, CursorMode.Auto);
-			
-			mainCamera.MoveCameraWithCursor(mousePosition);
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{

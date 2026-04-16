@@ -2115,11 +2115,11 @@ PrefabInstance:
       objectReference: {fileID: 5757940252891256333}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: moveSpeed
-      value: 4.5
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: movePoints
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6483927452517428826, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_LookAtBones.Array.data[0].m_Bone

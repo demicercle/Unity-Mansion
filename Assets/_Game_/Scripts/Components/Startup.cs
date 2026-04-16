@@ -31,6 +31,11 @@ public class Startup : MonoBehaviour
 		_gameManager.Update();
 	}
 
+	private void LateUpdate()
+	{
+		_gameManager.LateUpdate();
+	}
+
 	private void OnDestroy()
 	{
 		_gameManager.Dispose();
