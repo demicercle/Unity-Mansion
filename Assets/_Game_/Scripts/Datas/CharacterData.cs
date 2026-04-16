@@ -19,6 +19,8 @@ public class CharacterData : ScriptableObject
 	public int maxActions;
 	public float maxMovePoints;
 	public float runActionExtraMovePoints = 3.0f;
+	public bool noAttack;
+	[Range(0f, 10f)] public float attackRange = 0.0f;
 
 	[Header("Debug")]
 	[SerializeField] private float usedMovePoints;
@@ -28,6 +30,7 @@ public class CharacterData : ScriptableObject
 	[SerializeField] private int rotation;
 	[SerializeField] private int partyIndex;
 
+	public bool CanAttack() => GetRemainingActions() > 0 && !noAttack;
 	public int GetPartyIndex() => partyIndex;
 
 	public void SetPartyIndex(int index)

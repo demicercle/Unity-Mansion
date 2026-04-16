@@ -8,11 +8,12 @@ public class DebugGUI : MonoBehaviour
 {
 	public static bool DRAW_DEBUG = true;
 
-	static public DebugGUI FloatingText(Vector3 position, string message, float duration = 0f)
+	static public DebugGUI FloatingText(Vector3 position, string message, float duration = 1.0f, float off = 1.0f)
 	{
 		var label = new GameObject().AddComponent<DebugGUI>();
 		label.duration = duration;
 		label.worldPosition = position;
+		label.offset = Vector3.up * off;
 		label.onGUI += () =>
 		{
 			GUILayout.Label(message);

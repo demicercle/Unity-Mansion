@@ -115,9 +115,12 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		return outData != null;
 	}
 	
+	public float GetAttackRange() => data.attackRange;
+	public float GetRadius() => radius;
 	public Texture GetPortraitTexture() => data.portraitTexture;
 	public string GetDisplayName() => data.displayName;
 	public bool CanMove() => data.GetRemainingMovePoints() > 0f;
+	public bool CanAttack() => data.CanAttack();
 	
 	[Header("Selection")]
 	[SerializeField] private CircleRenderer selectionCircle;
@@ -134,6 +137,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	//[SerializeField] [Range(0.0f, 10.0f)] private float rotationSpeed = 1.0f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
+	[SerializeField] [Range(0.01f, 0.50f)] private float minNavDistance = 0.01f; // put this in character view
 	[SerializeField] private List<LineRenderer> pathRenderers;
 	
 	[Header("AI")]
@@ -199,6 +203,47 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	{
 		out_agent = agent;
 		return out_agent.aiPath != null;
+	}
+
+	public void StopAgent()
+	{
+		agent?.StopMovement();
+	}
+
+	public void TakeDamage(float amount)
+	{
+		Debug.Log(this + " TakeDamage " + amount);
+		DebugGUI.FloatingText(GetCenterPosition(), amount.ToString("N2"));
+	}
+
+	public bool IsAtAttackRange(CharacterView target, bool losCheck, float drawDuration = 0.0f)
+	{
+		var atkRange = GetAttackRange();
+		atkRange = Mathf.Max(atkRange, GetRadius() + target.GetRadius() + minNavDistance);
+		if (Vector3.Distance(GetPosition(), target.GetPosition()) <= atkRange)
+		{
+			return !losCheck || LOSCheck(target, drawDuration);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool LOSCheck(CharacterView other, float drawDuration = 0.0f)
+	{
+		var start = GetEyesPosition();
+		var end = other.GetEyesPosition();
+		if(Physics.Linecast(start, end, out var hit,
+			   LayerMask.GetMask(GameView.LAYER_WALL, GameView.LAYER_GROUND)))
+		{
+			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
+			DebugGUI.Line(start, end, Color.red, drawDuration);
+			return false;
+		}
+
+		DebugGUI.Line(start, end, Color.green, drawDuration);
+		return true;
 	}
 
 	private AgentWrapper agent;
@@ -406,6 +451,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
     }
 
     public Vector3 GetEyesPosition() => transform.position + Vector3.up * height * 0.9f;
+    public Vector3 GetCenterPosition() => transform.position + Vector3.up * height * 0.5f;
 
     public int GetRotation() => (int)transform.eulerAngles.y;
 

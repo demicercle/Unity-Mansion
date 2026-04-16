@@ -61,7 +61,7 @@ public class GameView
 	public bool drawDebug = false;
 	[Range(0f,1f)] public float debugGUI = 0f;
 	public float cameraSpeed = 1.0f;
-	[Range(0.01f, 0.50f)] public float maxNavigationDistance = 0.5f;
+	[Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
 
 	private bool isPlayerTurn;
 	public bool HasCoroutines() => coroutines.Count > 0;
@@ -135,6 +135,14 @@ public class GameView
 					{
 						SelectCharacter(clickedCharacter);
 					}
+					else if (_selectedCharacterView != null && clickedCharacter != _selectedCharacterView)
+					{
+						Debug.Log("click other character: " + _selectedCharacterView + " > " + clickedCharacter);
+						if (clickedCharacter.IsEnemy())
+						{
+							AssignAttack(_selectedCharacterView, clickedCharacter, false, true);
+						}
+					}
 				}
 
 				if (hit.collider.TryGetComponent(out PropComponent clickedProp)) // click prop
@@ -179,6 +187,8 @@ public class GameView
 		}
 	}
 
+	public object StartCoroutine(IEnumerator coroutine) => startupComponent.StartCoroutine(coroutine);
+
 	public void QueueRoutine(IEnumerator coroutine)
 	{
 		if (coroutines.Count == 0)
@@ -188,6 +198,67 @@ public class GameView
 		
 		Debug.Log("StartCoroutine: " + coroutines.Count);
 		coroutines.Add(coroutine);
+	}
+
+	public void AssignAttack(CharacterView attacker, CharacterView target, bool canUseRunAction, bool losCheck)
+	{
+		QueueRoutine(WaitCharacterAttackCharacter(attacker, target, canUseRunAction, losCheck));
+	}
+
+	private IEnumerator WaitCharacterAttackCharacter(CharacterView attacker, CharacterView target, bool canUseRunAction, bool losCheck)
+	{
+		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
+		
+		while (attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck))
+		{
+			if (!attacker.IsAtAttackRange(target, losCheck))
+			{
+				yield return StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition(), null, () =>
+				{
+					if (attacker.IsAtAttackRange(target, losCheck, 1.0f)) // at atk range
+					{
+						Debug.Log(attacker + " is at attack range");
+						attacker.StopAgent();
+					}
+				}));
+			}
+				
+			if (canUseRunAction && !attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck, 1.0f) && attacker.CanUseRunAction())
+			{
+				yield return StartCoroutine(WaitRunAction(attacker));
+			}
+			
+			yield return null;
+		}
+
+		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target, true, losCheck));
+	}
+
+	private IEnumerator WaitCharacterPerformAttack(CharacterView character, CharacterView target, bool rangeCheck = true, bool losCheck = true)
+	{
+		Debug.Log("WaitCharacterPerformAttack " + character + " " + target + " " + losCheck);
+		
+		if (rangeCheck && !character.IsAtAttackRange(target, losCheck))
+		{
+			yield break;
+		}
+		
+		yield return StartCoroutine(WaitCharacterLookPosition(character, target.GetPosition()));
+
+		if (!character.CanAttack())
+		{
+			Debug.Log(character + " cannot attack!");
+			DebugGUI.FloatingText(character.GetPosition(), "Can't!");
+			yield return new WaitForSeconds(1.0f);
+		}
+		else
+		{
+			Debug.Log(character + " performs attack on " + target);
+			DebugGUI.FloatingText(character.GetPosition(), "Take this!");
+			yield return new WaitForSeconds(1.0f);
+			target.TakeDamage(1);
+			yield return new WaitForSeconds(1.0f);
+		}
 	}
 
 	private IEnumerator WaitCharacterInteract(CharacterView characterView, PropComponent prop, Waypoint waypoint = null)
@@ -202,6 +273,7 @@ public class GameView
 		yield return prop.Interact(characterView);
 	}
 
+	private IEnumerator WaitCharacterLookPosition(CharacterView characterView, Vector3 pos) => WaitCharacterLookDirection(characterView, (pos - characterView.GetPosition()).normalized);
 	private IEnumerator WaitCharacterLookDirection(CharacterView characterView, Vector3 dir)
 	{
 		while (!characterView.IsFacingDirection(dir))
@@ -223,7 +295,7 @@ public class GameView
 		}));
 	}
 	
-	private IEnumerator WaitCharacterMoved(CharacterView movingCharacterView, Vector3 dest, System.Action onComplete = null)
+	private IEnumerator WaitCharacterMoved(CharacterView movingCharacterView, Vector3 dest, System.Action onComplete = null, System.Action onUpdate = null)
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacterView);
 		
@@ -280,6 +352,8 @@ public class GameView
 			characterData.ConsumeMovePoints(deltaPos);
 			characterData.SetPosition(newPosition);
 			characterData.SetRotation(movingCharacterView.GetRotation());
+			
+			onUpdate?.Invoke();
 			
 		} while (agent.isMoving && !agent.reachedDestination);
 		
@@ -575,13 +649,13 @@ public class GameView
 		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(LAYER_GROUND, LAYER_WALL)))
 		{
 			//DebugGUI.Log("Hit Navigation: " + hit.point);
-			if(drawDebug) DbgDraw.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Quaternion.Euler(90,0,0),maxNavigationDistance, Color.blue);
-			Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavigationDistance);
+			if(drawDebug) DbgDraw.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Quaternion.Euler(90,0,0),maxNavDistance, Color.blue);
+			Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
 
-			if (TryGetNearestNavPosition(hit.point, maxNavigationDistance, out var navPosition))
+			if (TryGetNearestNavPosition(hit.point, maxNavDistance, out var navPosition))
 			{
 				hit.point = navPosition;
-				if(drawDebug) DbgDraw.WireDisc(navPosition, Quaternion.identity,maxNavigationDistance * 0.5f, Color.cyan);
+				if(drawDebug) DbgDraw.WireDisc(navPosition, Quaternion.identity,maxNavDistance * 0.5f, Color.cyan);
 
 				return CURSOR_RAYCAST_RESULT_NAVIGATION;
 			}
