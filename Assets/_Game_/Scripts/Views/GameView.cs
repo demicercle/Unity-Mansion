@@ -250,14 +250,11 @@ public class GameView
 			yield return null;
 			
 			var newPosition = movingCharacter.GetPosition();
-			var deltaPos = (newPosition -  oldPosition).sqrMagnitude;
+			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			
-			if (newPosition.ToString() != oldPosition.ToString())
-			{
-				characterData.ConsumeMovePoints(deltaPos);
-				characterData.SetPosition(newPosition);
-				characterData.SetRotation(movingCharacter.GetRotation());
-			}
+			characterData.ConsumeMovePoints(deltaPos);
+			characterData.SetPosition(newPosition);
+			characterData.SetRotation(movingCharacter.GetRotation());
 			
 		} while (agent.isMoving && !agent.reachedDestination);
 		
