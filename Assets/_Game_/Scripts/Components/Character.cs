@@ -1,4 +1,4 @@
-using System;
+using System.Linq;
 using System.Collections.Generic;
 using Oddworm.Framework;
 using Pathfinding;
@@ -14,7 +14,6 @@ public class Character : MonoBehaviour, ICursorHandler
 		public Vector3 velocity => aiPath.velocity;
 		public bool isMoving => aiPath.isStopped == false;
 
-		private float maxLength;
 		private bool hasDestination;
 
 		public System.Action onSearchPath
@@ -54,10 +53,7 @@ public class Character : MonoBehaviour, ICursorHandler
 			
 			var buffer = new List<Vector3>();
 			aiPath.GetRemainingPath(buffer, out var stale);
-			if (!ignoreLimit && maxLength > 0)
-				return Utils.LimitPathTotalLength(buffer.ToArray(), maxLength);
-			else
-				return buffer.ToArray();
+			return buffer.ToArray();
 		}
 		
 		public void AssignDestination(Vector3 hitPoint)
@@ -77,12 +73,6 @@ public class Character : MonoBehaviour, ICursorHandler
 				aiPath.destination = aiPath.transform.position;
 				onSearchPath?.Invoke();
 			}
-		}
-
-		public void SetMaxPathLength(float length)
-		{
-			maxLength = length;
-			onSearchPath?.Invoke();
 		}
 	}
 	
@@ -105,7 +95,7 @@ public class Character : MonoBehaviour, ICursorHandler
 	[Header("Navigation")]
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
-	[SerializeField] private LineRenderer pathRenderer;
+	[SerializeField] private List<LineRenderer> pathRenderers;
 	
 	[Header("Animation")]
 	[SerializeField] private Animator animator;
@@ -142,9 +132,10 @@ public class Character : MonoBehaviour, ICursorHandler
 			rigidbody.useGravity = false;
 		}
 
-		if (pathRenderer)
+		foreach (var pathRenderer in pathRenderers)
 		{
 			pathRenderer.enabled = false;
+			pathRenderer.useWorldSpace = true;
 		}
 	}
 
@@ -178,9 +169,7 @@ public class Character : MonoBehaviour, ICursorHandler
 			{
 				aiPath = aiPath
 			};
-
-			//	agent.canMove = false;
-			//	agent.canRotate = false;
+			
 			agent.disableMovement = true;
 			agent.SetObstacle(true);
 		}
@@ -204,13 +193,11 @@ public class Character : MonoBehaviour, ICursorHandler
 			if (isSelected)
 			{
 				agent.SetObstacle(false);
-				if (movePoints > 0) agent.SetMaxPathLength(movePoints);
 				agent.onSearchPath += OnSearchPath;
 			}
 			else
 			{
-				pathRenderer.enabled = false;
-				
+				pathRenderers.ForEach(p => p.enabled = false);
 				agent.SetObstacle(true);
 				agent.onSearchPath -= OnSearchPath;
 			}
@@ -220,13 +207,21 @@ public class Character : MonoBehaviour, ICursorHandler
 	private void OnSearchPath()
 	{
 		var points = agent.GetCurrentPath();
-//		Debug.Log(this + " OnSearchPath() " + points.Length);
-		if ( pathRenderer && (pathRenderer.enabled = points.Length > 0))
+		
+		if (pathRenderers.Count > 0)
 		{
-			pathRenderer.useWorldSpace = true;
-			pathRenderer.positionCount = points.Length;
-			pathRenderer.SetPositions(points);
+			pathRenderers[0].positionCount = points.Length;
+			pathRenderers[0].SetPositions(points);
 		}
+
+		if (pathRenderers.Count > 1)
+		{
+			points = Utils.LimitPathTotalLength(points, movePoints);
+			pathRenderers[1].positionCount = points.Length;
+			pathRenderers[1].SetPositions(points);
+		}
+		
+		pathRenderers.ForEach(p => p.enabled = p.positionCount > 0);
 	}
 
 	private void CharacterAddedToParty(Character arg1, int arg2)
@@ -234,8 +229,14 @@ public class Character : MonoBehaviour, ICursorHandler
 		if (arg1 == this)
 		{
 			inParty = true;
-			currentColor = partyColor;
+			SetColor(partyColor);
 		}
+	}
+
+	void SetColor(Color newColor)
+	{
+		currentColor = newColor;
+		pathRenderers.ForEach(p => p.startColor = p.endColor = newColor);
 	}
 
 	void Start()
