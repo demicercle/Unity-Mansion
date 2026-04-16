@@ -5,12 +5,18 @@ using UnityEngine.UI;
 
 public class Character : MonoBehaviour
 {
+	[Header("Stats")] 
+	[SerializeField] private string displayName;
+	public string GetDisplayName() => displayName;
+	[SerializeField] private Texture2D portrait;
+	public Texture GetPortraitTexture() => portrait;
+	
 	[Header("Navigation")]
-	public AIPath aiAgent;
+	[SerializeField] private AIPath aiAgent;
 	
 	[Header("Animation")]
-	public Animator animator;
-	public float velocityScale = 1.0f;
+	[SerializeField] private Animator animator;
+	[SerializeField] private float velocityScale = 1.0f;
 	
     void Start()
     {

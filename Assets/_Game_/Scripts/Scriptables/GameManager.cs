@@ -45,8 +45,6 @@ public class GameManager : ScriptableObject
 	public float cameraSpeed = 1.0f;
 	public float maxNavigationDistance = 0.5f;
 
-	public event System.Action<Character> characterAddedToParty;
-
 	private Vector2 mousePosition;
 	private AstarPath aStar;
 	private MainCamera mainCamera;
@@ -79,7 +77,7 @@ public class GameManager : ScriptableObject
 			{
 				Debug.Log("Add to party: " + character);
 				partyCharacters.Add(character);
-				characterAddedToParty?.Invoke(character);
+				GameEvents.characterAddedToParty?.Invoke(character, partyCharacters.Count-1);
 			}
 		}
 		
