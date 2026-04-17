@@ -4,20 +4,15 @@ using UnityEngine.EventSystems;
 
 public class UI_Viewport : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-	private GameView gameView;
-
-	void Awake()
-	{
-		gameView = GameView.GetInstance();
-	}
+	static public bool mouseOverViewport { get; private set; }
 	
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		if(gameView) gameView.mouseOverViewport = true;
+		mouseOverViewport = true;
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
-		if(gameView) gameView.mouseOverViewport = false;
+		mouseOverViewport = false;
 	}
 }

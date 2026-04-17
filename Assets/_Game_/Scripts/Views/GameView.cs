@@ -267,8 +267,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public bool HasCoroutines() => coroutines.Count > 0;
 	
-	public bool mouseOverViewport { get; set; }
-	
 	public bool hasFocus { get; set; }
 
 	private UI_Canvas canvas;
@@ -302,6 +300,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 	//	Debug.Log("LeftClick: " + value);
 
+	var mouseOverViewport = UI_Viewport.mouseOverViewport;
 		if (mouseOverViewport && value > 0f) // pressed
 		{
 			var raycastResult = CursorRaycast(out var hit);
@@ -628,6 +627,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 
 		
+		var mouseOverViewport = UI_Viewport.mouseOverViewport;
 		if (mouseOverViewport) // process mouse over
 		{
 			var gameController = GetController();

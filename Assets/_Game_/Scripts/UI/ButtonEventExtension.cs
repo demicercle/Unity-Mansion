@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class UI_EventHandler : MonoBehaviour
+public class ButtonEventExtension : MonoBehaviour
 {
     public Button button;
 
