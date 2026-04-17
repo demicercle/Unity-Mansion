@@ -6,16 +6,14 @@ using UnityEngine.UI;
 public class UI_SelectedCharacter : MonoBehaviour
 {
 	public Button actionButton_Run;
-	
-	private bool hide;
+
+	private bool routineStarted;
 	private CharacterView lastSelectedCharacter;
 	
 	private void Awake()
 	{
 		var gameView = GameView.GetInstance();
-		hide = true;
-		
-		gameView.characterSelected += SetSelectedCharacter;
+		gameView.selectionChanged += SelectionChanged;
 		gameView.routinesStarted += RoutinesStarted;
 
 		actionButton_Run.onClick.AddListener(gameView.ClickRunAction);
@@ -24,7 +22,7 @@ public class UI_SelectedCharacter : MonoBehaviour
 	private void OnDestroy()
 	{
 		var gameView = GameView.GetInstance();
-		gameView.characterSelected -= SetSelectedCharacter;
+		gameView.selectionChanged -= SelectionChanged;
 		gameView.routinesStarted -= RoutinesStarted;
 		
 		actionButton_Run.onClick.RemoveAllListeners();
@@ -32,44 +30,21 @@ public class UI_SelectedCharacter : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (hide)
+		if (lastSelectedCharacter)
 		{
-			gameObject.SetActive(false);
+			actionButton_Run.interactable = !routineStarted && lastSelectedCharacter.HasActions();
 		}
 	}
 
-	void RoutinesStarted(bool started)
+	private void RoutinesStarted(bool started)
 	{
-		actionButton_Run.interactable = !started;
-		ActionChanged(0);
+		routineStarted = started;
 	}
 	
-	void ActionChanged(int q) => SetSelectedCharacter(lastSelectedCharacter, lastSelectedCharacter != null);
-	
-	private void SetSelectedCharacter(CharacterView newChar, bool selected)
+	private void SelectionChanged(CharacterView newChar, bool canControlCharacter)
 	{
-		if (selected && newChar)
-		{
-			lastSelectedCharacter = newChar;
-			hide = false;
-			gameObject.SetActive(true);
-
-			var data = lastSelectedCharacter.GetData();
-			actionButton_Run.interactable = data.HasActions();
-
-			data.actionsChanged += ActionChanged;
-		}
-		else
-		{
-			if (lastSelectedCharacter != null)
-			{
-				var data = lastSelectedCharacter.GetData();
-				data.actionsChanged -= ActionChanged;
-			}
-
-			lastSelectedCharacter = null;
-			hide = true;
-		}
+		lastSelectedCharacter = newChar;
+		gameObject.SetActive(canControlCharacter);
 	}
 
 }

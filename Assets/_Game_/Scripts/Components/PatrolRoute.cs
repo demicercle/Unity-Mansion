@@ -5,9 +5,13 @@ using UnityEngine;
 
 public class PatrolRoute : MonoBehaviour
 {
+	static public List<PatrolRoute> routes = new List<PatrolRoute>();
+	void Awake() { routes.Add(this);}
+	void OnDestroy() { routes.Remove(this); }
+
 	static public bool FindRoute(CharacterView character, out PatrolRoute patrolRoute)
 	{
-		foreach (var route in Object.FindObjectsByType<PatrolRoute>(default))
+		foreach (var route in routes)
 		{
 			if (route.assignedCharacter == character)
 			{
@@ -91,4 +95,6 @@ public class PatrolRoute : MonoBehaviour
 				Utils.DrawGizmosCircle(assignedCharacter.GetPosition() + Vector3.up, Vector3.up, 1.0f);
 			}
 		}
+		
+		
 }

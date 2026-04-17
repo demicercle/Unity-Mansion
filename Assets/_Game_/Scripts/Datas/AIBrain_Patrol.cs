@@ -10,69 +10,74 @@ public class AIBrain_Patrol : AIBrainData
 	{
 		yield return new WaitForSeconds(1.0f);
 		
-		if (PatrolRoute.FindRoute(character, out PatrolRoute patrolRoute))
+		if (!character.CanMove())
 		{
-			var waypoints = patrolRoute.waypoints;
-
-			while (character.CanMove())
-			{
-				patrolRoute.DebugDraw(1f);
+			Debug.Log(character + " cannot move");
+			yield break;
+		}
+		
+		if (!PatrolRoute.FindRoute(character, out PatrolRoute patrolRoute))
+		{
+			Debug.LogWarning(character + " has no patrol route");
+			yield break;
+		}
+		
+		var waypoints = patrolRoute.waypoints;
+		
+		while (character.CanMove())
+		{
+			patrolRoute.DebugDraw(1f);
 				
-				if (lastWaypointToReach == null)
+			if (lastWaypointToReach == null)
+			{
+				if (!Waypoint.GetBestWaypointFromPosition(character.GetPosition(), out var bestWaypoint,
+					    waypoints))
 				{
-					if (!Waypoint.GetBestWaypointFromPosition(character.GetPosition(), out var bestWaypoint,
-						    waypoints))
+					Debug.LogWarning(character + " cannot find next waypoint");
+					yield break;
+				}
+				else
+				{
+					lastWaypointToReach = bestWaypoint;
+				}
+			}
+
+			if (lastWaypointToReach != null)
+			{
+				if (!character.WaypointReached(lastWaypointToReach)) // move to patrol waypoint
+				{
+					gameView.MoveCharacterToWaypoint(character, lastWaypointToReach); // patrol move
+					while(gameView.HasCoroutines()) yield return null;
+
+					if (!character.CanMove() && character.CanUseRunAction() && canUseRunAction)
 					{
-						Debug.LogWarning(character + " cannot find next waypoint");
+						gameView.RunAction(character);
+						while(gameView.HasCoroutines()) yield return null;
+					}
+				}
+				
+				if (character.WaypointReached(lastWaypointToReach)) // pick next waypoint in patrol
+				{
+					var wpIndex = waypoints.IndexOf(lastWaypointToReach);
+					
+					if (patrolRoute.closedLoop) 
+						wpIndex = (wpIndex + 1) % waypoints.Count;
+					else
+						wpIndex += 1;
+
+					if (wpIndex >= waypoints.Count)
+					{
+						Debug.Log(character + " reached last waypoint " + wpIndex);
 						yield break;
 					}
 					else
 					{
-						lastWaypointToReach = bestWaypoint;
-					}
-				}
-
-				if (lastWaypointToReach != null)
-				{
-					if (!character.WaypointReached(lastWaypointToReach)) // move to patrol waypoint
-					{
-						gameView.MoveCharacterToWaypoint(character, lastWaypointToReach); // patrol move
-						while(gameView.HasCoroutines()) yield return null;
-
-						if (!character.CanMove() && character.CanUseRunAction() && canUseRunAction)
-						{
-							gameView.RunAction(character);
-							while(gameView.HasCoroutines()) yield return null;
-						}
-					}
-				
-					if (character.WaypointReached(lastWaypointToReach)) // pick next waypoint in patrol
-					{
-						var wpIndex = waypoints.IndexOf(lastWaypointToReach);
-					
-						if (patrolRoute.closedLoop) 
-							wpIndex = (wpIndex + 1) % waypoints.Count;
-						else
-							wpIndex += 1;
-
-						if (wpIndex >= waypoints.Count)
-						{
-							Debug.Log(character + " reached last waypoint " + wpIndex);
-							yield break;
-						}
-						else
-						{
-							lastWaypointToReach = waypoints[wpIndex];
-							DebugGUI.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), Color.blue, 1.0f);
-							Debug.Log(character + " picked next waypoint " + wpIndex + " " + lastWaypointToReach);
-						}
+						lastWaypointToReach = waypoints[wpIndex];
+						DebugGUI.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), Color.blue, 1.0f);
+						Debug.Log(character + " picked next waypoint " + wpIndex + " " + lastWaypointToReach);
 					}
 				}
 			}
-		}
-		else
-		{
-			Debug.LogWarning(character + " has no patrol route");
 		}
 	}
 

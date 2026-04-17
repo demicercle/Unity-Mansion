@@ -12,6 +12,7 @@ public class GameView : MonoBehaviour
 
 	void Awake()
 	{
+		name = "GameView (Singleton)";
 		instance = this;
 		InitSingleton();
 	}
@@ -55,7 +56,7 @@ public class GameView : MonoBehaviour
 
 	public System.Action<CharacterView[]> partyChanged;
 	public System.Action<bool> routinesStarted;
-	public System.Action<CharacterView, bool> characterSelected;
+	public System.Action<CharacterView, bool> selectionChanged;
 	public System.Action<PropComponent, GameObject> propInteracted;
 	
 	static public string LAYER_GROUND = "Ground";
@@ -134,7 +135,7 @@ public class GameView : MonoBehaviour
 	public InputSystem_Actions inputSystem { get; private set; }
 	
 	private CharacterView selectedCharacter;//TODO rename
-	private List<IEnumerator> coroutines;
+	private List<IEnumerator> coroutines = new  List<IEnumerator>();
 
 	public void MouseMove(Vector2 pos)
 	{
@@ -220,26 +221,12 @@ public class GameView : MonoBehaviour
 
 	public void QueueRoutine(IEnumerator coroutine)
 	{
-		Debug.Log("StartCoroutine: " + coroutines.Count);
 		coroutines.Add(coroutine);
-		
 		if (coroutines.Count == 1)
 		{
-			StartCoroutine("Coroutines");
+			Debug.Log("Start Coroutines");
 			routinesStarted?.Invoke(true);
 		}
-	}
-
-	private IEnumerator Coroutines()
-	{
-		while (coroutines.Count > 0)
-		{
-			var next =  coroutines[0];
-			yield return StartCoroutine(next);
-			coroutines.RemoveAt(0);
-		}
-		
-		routinesStarted?.Invoke(false);
 	}
 
 	public void AssignAttack(CharacterView attacker, CharacterView target, bool canUseRunAction, bool losCheck)
@@ -434,13 +421,12 @@ public class GameView : MonoBehaviour
 	public void SelectCharacter(CharacterView characterView, bool focusCamera = false)
 	{
 		Debug.Log(this + " SelectCharacter " + characterView + " " + focusCamera);
-		if(selectedCharacter != null) characterSelected?.Invoke(selectedCharacter, false);
 		selectedCharacter = characterView;
 		if (selectedCharacter != null)
 		{
-			characterSelected?.Invoke(selectedCharacter, true);
-			if (focusCamera) mainCamera.Focus(selectedCharacter);
+			if (focusCamera) mainCamera.Focus(selectedCharacter); /// todo Camera listen for event
 		}
+		selectionChanged?.Invoke(selectedCharacter, CanControlCharacter(selectedCharacter));
 	}
 
 	public void EndTurn()
@@ -470,7 +456,7 @@ public class GameView : MonoBehaviour
 			}
 
 			Debug.Log("Think() " + aiBrain + " " + otherCharacter);
-			yield return otherCharacter.StartCoroutine(aiBrain.Think(otherCharacter));
+			yield return StartCoroutine(aiBrain.Think(otherCharacter));
 			Debug.Log("End Think()");
 		}
 		
@@ -570,6 +556,31 @@ public class GameView : MonoBehaviour
 
 		gameData.newTurnStarted += TurnStarted;
 		gameData.Init();
+
+		StartCoroutine(Coroutines());
+	}
+	
+
+	private IEnumerator Coroutines()
+	{
+		while (true)
+		{
+			if (coroutines.Count > 0)
+			{
+				while (coroutines.Count > 0)
+				{
+					var next =  coroutines[0];
+					Debug.Log("StartCoroutine: " + coroutines.Count);
+					yield return StartCoroutine(next);
+					coroutines.RemoveAt(0);
+				}
+		
+				routinesStarted?.Invoke(false);
+				Debug.Log("End Coroutines");
+			}
+			
+			yield return null;
+		}
 	}
 
 	private void PartyChanged(CharacterView[] party) => partyChanged?.Invoke(party);

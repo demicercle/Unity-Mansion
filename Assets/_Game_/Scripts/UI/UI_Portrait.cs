@@ -25,7 +25,7 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	{
 		gameView = GameView.GetInstance();
 		gameView.partyChanged += PartyChanged;
-		gameView.characterSelected += CharacterSelected;
+		gameView.selectionChanged += SelectionChanged;
 		
 		gameObject.SetActive(false);
 	}
@@ -33,15 +33,12 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	private void OnDestroy()
 	{
 		gameView.partyChanged -= PartyChanged;
-		gameView.characterSelected -= CharacterSelected;
+		gameView.selectionChanged -= SelectionChanged;
 	}
 
-	private void CharacterSelected(CharacterView characterView, bool selected)
+	private void SelectionChanged(CharacterView characterView, bool canControlCharacter)
 	{
-		if (_assignedCharacterView == characterView)
-		{
-			toggle.isOn = selected;
-		}
+		toggle.isOn = _assignedCharacterView == characterView;
 	}
 
 	private void PartyChanged(CharacterView[] partyCharacters)
