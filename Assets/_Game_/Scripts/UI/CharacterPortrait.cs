@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
-public class UI_Portrait : MonoBehaviour, IPointerClickHandler
+public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 {
 	public RawImage rawImage;
 	public TMP_Text nameLabel;

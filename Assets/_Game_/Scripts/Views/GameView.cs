@@ -65,7 +65,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		StartCoroutine(Coroutines());
 		
-		canvas = FindObjectsByType<UI_Canvas>(default).First();
+		canvas = FindObjectsByType<GameCanvas>(default).First();
 		canvas.UpdateUI(this);
 		
 		SetInputEnabled(false);
@@ -269,7 +269,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	public bool hasFocus { get; set; }
 
-	private UI_Canvas canvas;
+	private GameCanvas canvas;
 	private Vector2 mousePosition;
 	private bool hasMousePosition;
 	private AstarPath aStar;
@@ -300,8 +300,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 	//	Debug.Log("LeftClick: " + value);
 
-	var mouseOverViewport = UI_Viewport.mouseOverViewport;
-		if (mouseOverViewport && value > 0f) // pressed
+		if (canvas.mouseOverViewport && value > 0f) // pressed
 		{
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
@@ -627,8 +626,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 
 		
-		var mouseOverViewport = UI_Viewport.mouseOverViewport;
-		if (mouseOverViewport) // process mouse over
+		if (canvas.mouseOverViewport) // process mouse over
 		{
 			var gameController = GetController();
 			//var selectedCharacter = gameController.GetSelectedCharacter();

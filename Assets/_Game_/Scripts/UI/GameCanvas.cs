@@ -4,21 +4,27 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class UI_Canvas : MonoBehaviour
+public class GameCanvas : MonoBehaviour
 {
+	public RectTransform viewportRect;
 	public Toggle controlPanel;
 	public Button button_actionRun;
 	public Button button_endTurn;
-	public UI_Portrait[] portraits;
+	public CharacterPortrait[] portraits;
+	
+	public bool mouseOverViewport { get; private set; }
 	
 	void Awake()
 	{
 		var view = GameView.GetInstance();
 		button_endTurn.onClick.AddListener( () => view.ClickEndTurn());
 		button_actionRun.onClick.AddListener(() => view.ClickRunAction());
+
+		Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject).onMouseOverChanged +=
+			(mouseOver) => mouseOverViewport = mouseOver;
 		
 		if(portraits.Length == 0)
-			portraits = GetComponentsInChildren<UI_Portrait>();
+			portraits = GetComponentsInChildren<CharacterPortrait>();
 	}
 	
 	public void UpdateUI(GameView view)

@@ -6,3 +6,5 @@
 - add keyboard shortcut
 - GameController
 - more delay between turn + popup
+- attack zombi (enemy to player)
+- interact with npc
