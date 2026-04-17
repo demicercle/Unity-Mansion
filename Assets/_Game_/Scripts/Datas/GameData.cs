@@ -6,33 +6,6 @@ public class GameData : ScriptableObject
 {
 	public System.Action partyChanged;
 	public System.Action<int> newTurnStarted;
-	
-	/* TODO
-	 
-	 ViewEvents: (listened by views)		GameEvents:
-	 - partyChanged							- PartyChanged()
-	 - newTurnStarted						- TurnStarted(int)
-	 - characterDamaged						- CharacterDamaged(id,amount)
-	 - characterHealed						- CharacterHealed(id)
-	 - characterKilled						- CharacterKilled(id)
-	 - characterMoved						- CharacterMoved(id,newPos)
-	 - characterUsedActions					- CharacterUsedActions(id,int)
-	 
-	 // check in "GameData"
-	 -> GetCharacterByID(id):CharData
-		-> charData.GetRemainingActions(id)
-		-> charData.ConsumeActions(int)
-		-> charData.GetRemainingMovePoints(id)
-		-> charData.ConsumeMovePoints(value)
-		-> charData.AddDamage(value)
-		-> charData.Heal()
-		-> charData.Kill()
-		etc
-	
-	// notifies in GameController
-	
-	 
-	 */
 
 	public void AddCharacter(CharacterData characterData)
 	{

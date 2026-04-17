@@ -8,6 +8,38 @@ using UnityEngine;
 [System.Serializable]
 public class GameView
 {
+	
+	/* TODO
+
+	 GAME VIEW is not a "view", it's currently a controller!
+
+	 ViewEvents: (listened by views)		GameEvents:
+	 - partyChanged							- PartyChanged()
+	 - newTurnStarted						- TurnStarted(int)
+	 - characterDamaged						- CharacterDamaged(id,amount)
+	 - characterHealed						- CharacterHealed(id)
+	 - characterKilled						- CharacterKilled(id)
+	 - characterMoved						- CharacterMoved(id,newPos)
+	 - characterUsedActions					- CharacterUsedActions(id,int)
+
+	 // check in "GameData"
+	 -> GetCharacterByID(id):CharData
+		-> charData.GetRemainingActions(id)
+		-> charData.ConsumeActions(int)
+		-> charData.GetRemainingMovePoints(id)
+		-> charData.ConsumeMovePoints(value)
+		-> charData.AddDamage(value)
+		-> charData.Heal()
+		-> charData.Kill()
+		etc
+
+	// notifies in GameController
+	- EndTurn
+	- CharacterApplyDamage(id, amount)
+	-
+
+	 */
+	
 	public System.Action<CharacterView> actionUsed;
 	static public System.Action<CharacterView> clickSelectCharacter;
 	static public System.Action clickEndTurn;

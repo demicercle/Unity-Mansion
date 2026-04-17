@@ -20,9 +20,10 @@ MonoBehaviour:
   noAttack: 0
   attackRange: 0
   maxHealth: 5
+  lastAttackDamage: 1
   usedMovePoints: 0
   usedActions: 0
   characterViewOwner: {fileID: 0}
-  position: {x: 0, y: 0, z: 0}
-  rotation: 0
-  partyIndex: 0
+  position: {x: -5.302335, y: 0.00000035762787, z: 7.3597374}
+  rotation: 280
+  partyIndex: -1
