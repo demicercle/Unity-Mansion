@@ -25,7 +25,7 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		{
 			gameObject.SetActive(true);
 			toggle.interactable = _assignedCharacter.IsControllable();
-			toggle.isOn = _assignedCharacter.IsSelected();
+			toggle.isOn = view.IsCharacterSelected(_assignedCharacter);
 			rawImage.texture = _assignedCharacter.GetPortraitTexture();
 			nameLabel.text = _assignedCharacter.GetDisplayName();
 			healthSprite.fillAmount = 1f - _assignedCharacter.GetDamageProgress();

@@ -34,6 +34,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	private CharacterController selectedCharacter;
 	public CharacterController GetSelectedCharacter() => selectedCharacter;
+	
 	public bool IsCharacterSelected(CharacterController character) => character && selectedCharacter == character;
 
 	public void SelectCharacter(int index)
@@ -45,12 +46,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public void SelectCharacter(CharacterController character)
 	{
 		if (selectedCharacter != null)
-			selectedCharacter.SetSelected(false);
+			selectedCharacter.NotifySelected(false);
 		
 		selectedCharacter = character;
 		
 		if (selectedCharacter != null)
-			selectedCharacter.SetSelected(true);
+			selectedCharacter.NotifySelected(true);
 		
 		SelectionChanged();
 	}
@@ -645,6 +646,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	private void Update()
 	{
+		if (selectedCharacter != null)
+		{
+			if (selectedCharacter.IsDead())
+			{
+				SelectNextCharacter();
+			}
+		}
+		
 		if (inputSystem.UI.Cancel.WasPressedThisFrame())
 		{
 			hasFocus = false;

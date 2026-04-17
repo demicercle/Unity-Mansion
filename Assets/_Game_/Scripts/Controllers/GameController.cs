@@ -22,7 +22,7 @@ public class GameController : MonoBehaviour
 	[ReadOnly] [SerializeField] private int currentTurn;
 	[ReadOnly] [SerializeField] private bool playerTurn;
 
-	public int FindSelectedCharacterIndex()
+	/*public int FindSelectedCharacterIndex()
 	{
 		for (int i = 0; i < allCharacters.Count; i++)
 		{
@@ -31,7 +31,7 @@ public class GameController : MonoBehaviour
 		}
 		
 		return -1;
-	}
+	}*/
 
 	public void PartyChanged() => partyChanged?.Invoke(GetPartyCharacters());
 
@@ -60,10 +60,5 @@ public class GameController : MonoBehaviour
 		playerTurn = false;
 		Debug.Log(this + " EndTurn " + currentTurn);
 		turnEnded?.Invoke();
-	}
-
-	public void SelectionChanged()
-	{
-		selectionChanged?.Invoke();
 	}
 }

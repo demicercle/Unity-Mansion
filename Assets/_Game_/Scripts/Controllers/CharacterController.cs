@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
+	static public List<CharacterController> instances = new List<CharacterController>();
+	
 	private const int PLAYER_FACTION = 1;
 
 	private GameController gameController => GameView.GetInstance().GetController();
@@ -31,7 +33,7 @@ public class CharacterController : MonoBehaviour
 	public List<AIBrainData> GetBrains() => aiBrains.ToList();
 	
 	[ReadOnly] [SerializeField] private bool isControllable = false;
-	[ReadOnly] [SerializeField] private bool isSelected = false;
+//	[ReadOnly] [SerializeField] private bool isSelected = false;
 	[ReadOnly] [SerializeField] private int partyIndex = -1;
 	[ReadOnly] [SerializeField] private float usedMovePoints;
 	[ReadOnly] [SerializeField] private int usedActions;
@@ -53,16 +55,19 @@ public class CharacterController : MonoBehaviour
     
 	public Vector3 GetCenterPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.5f;
 
-	public bool IsSelected() => isSelected;
-	public void SetSelected(bool value)
+	//public bool IsSelected() => isSelected;
+	public void NotifySelected(bool value)
 	{
-		if (value != isSelected)
+		if (value)
 		{
-			isSelected = value;
-			agent.SetObstacle(!isSelected || !IsControllable());
-			selectionChanged?.Invoke(value);
-			gameController.SelectionChanged();
+			agent.SetObstacle(!IsControllable());
 		}
+		else
+		{
+			agent.SetObstacle(true);
+		}
+		
+		selectionChanged?.Invoke(value);
 	}
 
 	public void NewTurn(int turn)
@@ -213,7 +218,6 @@ public class CharacterController : MonoBehaviour
 		{
 			isDead = true;
 			agent.StopMovement();
-			SetSelected(false);
 			onKilled?.Invoke();
 			statsChanged?.Invoke();
 		}
@@ -300,10 +304,17 @@ public class CharacterController : MonoBehaviour
 
 	private void Awake()
 	{
+		instances.Add(this);
+		
 		if(characterData == null)
 			Debug.LogError(this + " has no character data");
 		
 		if(!aiBrains.OfType<AIBrain_Wait>().Any()) aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());//todo store instance static
+	}
+
+	private void OnDestroy()
+	{
+		instances.Remove(this);
 	}
 
 	public Vector3[] GetCurrentPath() => GetAgent().GetCurrentPath();

@@ -225,10 +225,11 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
     
     void LateUpdate()//TODO optim
     {
+	    var view = GameView.GetInstance();
 	    var controller = GetController();
 	    
 	    hasActions = controller.HasActions();
-	    alphaColor = alphaCurve.Evaluate(controller.IsSelected() ? 1f : mouseOver ? 0.5f : 0.0f);
+	    alphaColor = alphaCurve.Evaluate(view.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
 	    
 	    selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
 	    movePointsCircle.SetColor(currentColor, alphaColor);
