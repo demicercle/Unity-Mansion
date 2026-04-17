@@ -18,52 +18,52 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		GameView.GetInstance().SelectCharacter(_assignedCharacterData);
 	}
 	
-	private CharacterData _assignedCharacterData;
+	private CharacterController _assignedCharacter;
 	private GameView gameView;
 	
 	private void Awake()
 	{
 		gameView = GameView.GetInstance();
-		gameView.gameData.partyChanged += PartyChanged;
+		gameView.GetController().partyChanged += PartyChanged;
 	}
 
 	private void OnDestroy()
 	{
-		gameView.gameData.partyChanged -= PartyChanged;
+		gameView.GetController().partyChanged -= PartyChanged;
 	}
 
-	private void PartyChanged(CharacterData[] partyCharacters)
+	private void PartyChanged(CharacterController[] partyCharacters)
 	{
-		_assignedCharacterData = null;
+		_assignedCharacter = null;
 		
 		var index = transform.GetSiblingIndex();
 		for (int i = 0; i < partyCharacters.Length; i++)
 		{
 			if (i == index)
 			{
-				_assignedCharacterData =  partyCharacters[i];
+				_assignedCharacter =  partyCharacters[i];
 				break;
 			}
 		}
 
-		gameObject.SetActive(_assignedCharacterData != null);
-//		Debug.Log(this + " PartyChanged: " + gameObject.activeSelf);
+		gameObject.SetActive(_assignedCharacter != null);
 	}
 
 	private void OnEnable()
 	{
-		if(_assignedCharacterData) Debug.Log(this + " > " + _assignedCharacterData);
+		if(_assignedCharacter) Debug.Log(this + " > " + _assignedCharacter);
 	}
 
 	private void LateUpdate() // TODO use events
 	{
-		if (_assignedCharacterData)
+		if (_assignedCharacter)
 		{
-			toggle.isOn = gameView.IsCharacterSelected(_assignedCharacterData.GetCharacterIndex());
-			rawImage.texture = _assignedCharacterData.portraitTexture;
-			nameLabel.text = _assignedCharacterData.displayName;
-			healthSprite.fillAmount = _assignedCharacterData.GetDamageProgress();
-			healthLabel.text = _assignedCharacterData.GetCurrentHealthInt() + "/" + _assignedCharacterData.GetMaxHealth();
+			toggle.isOn = _assignedCharacter.IsSelected();
+			rawImage.texture = _assignedCharacter.GetPortraitTexture();
+			nameLabel.text = _assignedCharacter.GetDisplayName();
+			healthSprite.fillAmount = _assignedCharacter.GetDamageProgress();
+			healthLabel.text = _assignedCharacter.GetCurrentHealthInt() + "/" +
+			                   _assignedCharacter.GetMaxHealth();
 			return;
 		}
 		

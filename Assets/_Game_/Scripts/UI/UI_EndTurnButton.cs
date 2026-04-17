@@ -23,6 +23,6 @@ public class UI_EndTurnButton : MonoBehaviour
 
 	void Clicked()
 	{
-		GameView.GetInstance().EndTurn();
+		GameView.GetInstance().ClickEndTurn(); // todo prefab
 	}
 }

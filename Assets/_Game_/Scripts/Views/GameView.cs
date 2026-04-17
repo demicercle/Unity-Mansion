@@ -1,26 +1,163 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 using Oddworm.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
-public class GameView : MonoBehaviour
+public class GameView : MonoBehaviour, IView<GameController>
 {
 	static private GameView instance;
-
-	void Awake()
-	{
-		name = "GameView (Singleton)";
-		instance = this;
-		InitSingleton();
-	}
-	void OnDestroy(){}
-	
 	static public GameView GetInstance()
 	{
 		return instance;
+	}
+	
+	public GameController GetController() => Utils.GetOrAddComponent<GameController>(gameObject);
+	
+	void Awake()
+	{
+		instance = this;
+		DontDestroyOnLoad(gameObject);
+		name = "GameView (Singleton)";
+	}
+
+	[SerializeField] private List<string> scenesToLoad = new List<string>();
+	
+	private IEnumerator Start()
+	{
+		SetInputEnabled(false);
+		// TODO Fade In
+
+		for(int i = 0; i < scenesToLoad.Count; i++)
+		{
+			var loadSceneMode = i > 0 ? UnityEngine.SceneManagement.LoadSceneMode.Additive : LoadSceneMode.Single;
+			var async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scenesToLoad[i], loadSceneMode);
+			while (async.isDone == false) yield return null;
+		}
+		
+		Debug.Log(this + " LevelLoaded");
+		var partyIndex = 0;
+		foreach (var characterView in CharacterView.allInstances)
+		{
+			var character = characterView.GetController();
+			GetController().AddCharacter(character);
+			if(character.InParty()) character.SetPartyIndex(partyIndex++);
+		}
+		
+		// TODO Fade Out
+		SetInputEnabled(true);
+		
+		GetController().NewTurn();
+
+		yield return new WaitForSeconds(0.5f); // todo hak camera focus
+		
+		SelectNextCharacter();
+	}
+	
+	public void SelectionChanged()
+	{
+		mainCamera.Focus(GetController().GetSelectedCharacter());
+	}
+
+	public void ClickCharacter(CharacterView clickedCharacterView)
+	{
+		if (HasCoroutines()) return;
+		
+		var gameController = GetController();
+		if (!gameController.IsPlayerTurn())
+			return;
+
+		var clickedCharacter = clickedCharacterView.GetController();
+		var selectedCharacter = gameController.GetSelectedCharacter();
+		if (selectedCharacter == null)
+		{
+			if (!clickedCharacter.IsDead() && clickedCharacter.InParty())
+			{
+				clickedCharacter.SetSelected(true);
+			}
+		}
+	}
+
+	public void AssignAttack(CharacterController character, CharacterController target)
+	{
+		
+	}
+
+	public void ClickProp(PropComponent clickedProp) // TODO Prop Controller
+	{
+		if (HasCoroutines()) return;
+		
+		var gameController = GetController();
+		if (!gameController.IsPlayerTurn())
+			return;
+		
+		var selectedCharacter = gameController.GetSelectedCharacter();
+		if (selectedCharacter != null)
+		{
+			AssignInteract(selectedCharacter, clickedProp);
+		}
+	}
+
+	public void AssignInteract(CharacterController character, PropComponent clickedProp) // TODO Prop Controller
+	{
+		var characterView = GetCharacterView(character);
+		if (clickedProp.GetBestWaypoint(characterView.GetPosition(), out var bestWaypoint))
+		{
+			QueueRoutine(WaitCharacterMoved(characterView, bestWaypoint.GetPosition(), () =>
+			{
+				var agent = characterView.GetAgent();
+				var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
+				if (dist <= agent.reachDistance)
+				{
+					// waypoint reach
+					if (character.CanInteract())
+					{
+						QueueRoutine(WaitCharacterInteract(characterView, clickedProp, bestWaypoint));
+					}
+				}
+				else
+				{
+					Debug.Log(character + " not at reach");
+				}
+			}));
+		}
+	}
+
+	public void ClickNavigation(Vector3 navPosition)
+	{
+		if (HasCoroutines()) return;
+		
+		var gameController = GetController();
+		if (!gameController.IsPlayerTurn())
+			return;
+		
+		var selectedCharacter = gameController.GetSelectedCharacter();
+		if (selectedCharacter != null)
+		{
+			AssignMove(selectedCharacter, navPosition);
+		}
+	}
+
+	public void AssignMove(CharacterController controller, Vector3 navPosition)
+	{
+		var characterView = GetCharacterView(controller);
+		QueueRoutine(WaitCharacterMoved(characterView, navPosition));
+	}
+
+	CharacterView GetCharacterView(CharacterController controller)
+	{
+		foreach (var characterView in CharacterView.allInstances)
+		{
+			if (characterView.GetController() == controller)
+				return characterView;
+		}
+		
+		Debug.LogError("Invalid GetCharacterView! " + controller);
+		return null;
 	}
 	
 	public bool TryGetSelectedCharacter(out CharacterView view)
@@ -74,11 +211,10 @@ public class GameView : MonoBehaviour
 	public int GetCharacterIndex(CharacterView characterView) => allCharacters.IndexOf(characterView);
 	
 
-	public GameData gameData;
 	public bool drawDebug = false;
-	[Range(0f,1f)] public float debugGUI = 0f;
+	[UnityEngine.Range(0f,1f)] public float debugGUI = 0f;
 	public float cameraSpeed = 1.0f;
-	[Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
+	[UnityEngine.Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
 
 	public bool HasCoroutines() => coroutines.Count > 0;
 	
@@ -92,7 +228,6 @@ public class GameView : MonoBehaviour
 	private MainCamera mainCamera;
 	public InputSystem_Actions inputSystem { get; private set; }
 	
-	private CharacterView selectedCharacter;//TODO rename
 	private List<IEnumerator> coroutines = new  List<IEnumerator>();
 
 	public void MouseMove(Vector2 pos)
@@ -141,25 +276,7 @@ public class GameView : MonoBehaviour
 					{
 						if (CanControlCharacter(selectedCharacter)) // assign interact
 						{
-							if (clickedProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
-							{
-								QueueRoutine(WaitCharacterMoved(selectedCharacter, bestWaypoint.GetPosition(), () =>
-								{
-									var dist = Vector3.Distance(selectedCharacter.GetPosition(), bestWaypoint.GetPosition());
-									if (dist <= agent.reachDistance)
-									{
-										// waypoint reach
-										if (selectedCharacter.CanInteract())
-										{
-											QueueRoutine(WaitCharacterInteract(selectedCharacter, clickedProp, bestWaypoint));
-										}
-									}
-									else
-									{
-										Debug.Log(selectedCharacter + " not at reach");
-									}
-								}));
-							}
+							
 						}
 					}
 				}
@@ -170,7 +287,6 @@ public class GameView : MonoBehaviour
 				{
 					if (CanControlCharacter(selectedCharacter)) // assign set nav destination (move)
 					{
-						QueueRoutine(WaitCharacterMoved(selectedCharacter, hit.point));
 					}
 				}
 			}
@@ -188,25 +304,27 @@ public class GameView : MonoBehaviour
 		}
 	}
 
-	public void AssignAttack(CharacterView attacker, CharacterView target, bool canUseRunAction, bool losCheck)
+	public void AssignAttack(CharacterController attacker, CharacterController target, bool canUseRunAction, bool losCheck)
 	{
 		QueueRoutine(WaitCharacterAttackCharacter(attacker, target, canUseRunAction, losCheck));
 	}
 
-	private IEnumerator WaitCharacterAttackCharacter(CharacterView attacker, CharacterView target, bool canUseRunAction, bool losCheck)
+	private IEnumerator WaitCharacterAttackCharacter(CharacterController attacker, CharacterController target, bool canUseRunAction, bool losCheck)
 	{
 		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
-		
-		while (attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck))
+
+		var attackerView = GetCharacterView(attacker);
+		var targetView = GetCharacterView(target);
+		while (attacker.CanMove() && !attackerView.IsAtAttackRange(targetView, losCheck))
 		{
-			if (!attacker.IsAtAttackRange(target, losCheck))
+			if (!attackerView.IsAtAttackRange(targetView, losCheck))
 			{
 				yield return StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition(), null, () =>
 				{
-					if (attacker.IsAtAttackRange(target, losCheck, 1.0f)) // at atk range
+					if (attackerView.IsAtAttackRange(target, losCheck, 1.0f)) // at atk range
 					{
 						Debug.Log(attacker + " is at attack range");
-						attacker.StopAgent();
+						attackerView.StopAgent();
 					}
 				}));
 			}
@@ -221,7 +339,7 @@ public class GameView : MonoBehaviour
 		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target, true, losCheck));
 	}
 
-	private IEnumerator WaitCharacterPerformAttack(CharacterView character, CharacterView target, bool rangeCheck = true, bool losCheck = true)
+	private IEnumerator WaitCharacterPerformAttack(CharacterController character, CharacterController target, bool rangeCheck = true, bool losCheck = true)
 	{
 		Debug.Log("WaitCharacterPerformAttack " + character + " " + target + " " + losCheck);
 		
@@ -293,16 +411,12 @@ public class GameView : MonoBehaviour
 		}));
 	}
 	
-	private IEnumerator WaitCharacterMoved(CharacterView movingCharacterView, Vector3 dest, System.Action onComplete = null, System.Action onUpdate = null)
+	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null, System.Action onUpdate = null)
 	{
-		Debug.Log("WaitCharacterMoved " + movingCharacterView);
-		
-		if (!movingCharacterView.TryGetAgent(out var agent))
-		{
-			Debug.LogWarning(movingCharacterView + " has no agent");
-			yield break;
-		}
-		
+		Debug.Log("WaitCharacterMoved " + movingCharacter);
+
+		var movingCharacterView = GetCharacterView(movingCharacter);
+		var agent = movingCharacterView.GetAgent();
 		agent.AssignDestination(dest);
 
 		do yield return null;
@@ -328,10 +442,7 @@ public class GameView : MonoBehaviour
 		
 		do
 		{
-		//	TryGetCharacter(movingCharacterView, out var characterData);
-			
-			var characterData = movingCharacterView.GetCurrentData();
-			if (characterData.GetRemainingMovePoints() <= 0)
+			if (movingCharacter.CanMove() == false)
 			{
 				agent.StopMovement();
 				break;
@@ -345,9 +456,9 @@ public class GameView : MonoBehaviour
 			var newPosition = movingCharacterView.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			
-			characterData.ConsumeMovePoints(deltaPos);
-			characterData.SetPosition(newPosition);
-			characterData.SetRotation(newRotation);
+			movingCharacter.ConsumeMovePoints(deltaPos);
+			movingCharacter.SetPosition(newPosition);
+			movingCharacter.SetRotation(newRotation);
 			
 			onUpdate?.Invoke();
 			
@@ -359,10 +470,10 @@ public class GameView : MonoBehaviour
 		onComplete?.Invoke();
 	}
 
-	public bool IsCharacterSelected(int characterIndex) => IsCharacterSelected(allCharacters[characterIndex]);
-	public bool IsCharacterSelected(CharacterView characterView) => characterView != null && characterView == selectedCharacter;
+//	public bool IsCharacterSelected(int characterIndex) => IsCharacterSelected(allCharacters[characterIndex]);
+//	public bool IsCharacterSelected(CharacterView characterView) => characterView != null && characterView == selectedCharacter;
 
-	public void SelectNextCharacter()
+	/*public void SelectNextCharacter()
 	{
 		var index = 0;
 		if( selectedCharacter != null )
@@ -379,17 +490,17 @@ public class GameView : MonoBehaviour
 				return;
 			}
 		}
-	}
+	}*/
 
-	public void SelectCharacter(CharacterData characterData, bool focusCamera = false)
+	/*public void SelectCharacter(CharacterData characterData, bool focusCamera = false)
 	{
 		var dataIndex = characterData.GetCharacterIndex();
 		if(dataIndex < 0 || dataIndex >= allCharacters.Count)
 			Debug.LogError("SelectCharacter error invalid index " + characterData);
 		SelectCharacter(allCharacters[dataIndex], focusCamera);
-	}
+	}*/
 	
-	public void SelectCharacter(CharacterView characterView = null, bool focusCamera = false)
+	/*public void SelectCharacter(CharacterView characterView = null, bool focusCamera = false)
 	{
 		Debug.Log(this + " SelectCharacter " + characterView + " " + focusCamera);
 		selectedCharacter = characterView;
@@ -398,26 +509,22 @@ public class GameView : MonoBehaviour
 			if (focusCamera) mainCamera.Focus(selectedCharacter); /// todo Camera listen for event
 		}
 		selectionChanged?.Invoke(selectedCharacter, CanControlCharacter(selectedCharacter));
-	}
+	}*/
 
-	public void EndTurn()
+	public void ClickEndTurn()
 	{
-		gameData.EndTurn();
+		GetController().EndTurn();
 		StartCoroutine(EndTurnRoutine());
 	}
-
-	public bool CanSelectCharacter(CharacterView charView) => !HasCoroutines() && charView && !charView.IsDead() && (!gameData.IsPlayerTurn() || charView.IsInParty());
-
-	public bool CanControlCharacter(CharacterView charView) => gameData.IsPlayerTurn() && !HasCoroutines() && charView && !charView.IsDead() && gameData.IsPlayerTurn() && charView.IsInParty();
-
+	
 	private IEnumerator EndTurnRoutine()
 	{
 		Debug.Log("Starts AI Routine: ");
 
-		foreach (var otherCharacter in allCharacters)
+		foreach (var otherCharacterView in allCharacters)
 		{
-			if (partyCharacters.Contains(otherCharacter)) continue;
-			SelectCharacter(otherCharacter, true);
+			var otherCharacter = otherCharacterView.GetController();
+			if (otherCharacter.InParty()) continue;
 
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
 			{
@@ -479,54 +586,6 @@ public class GameView : MonoBehaviour
 	}
 	
 	private LevelView levelView;
-
-	private IEnumerator Start()
-	{
-		SetInputEnabled(false);
-		// TODO Fade In
-
-		var currentLevel = gameData.GetCurrentLevel();
-		yield return StartCoroutine(levelView.LoadLevel());
-		gameData.SetCurrentLevel(gameData.GetLevelIndex(currentLevel));
-		Debug.Log("level loaded " + gameData.GetCurrentLevelIndex());
-		
-		// TODO: load party
-		
-		// load from level
-		var partyIndex = 0;
-		foreach (var characterView in CharacterView.allInstances)
-		{
-			if(!characterView.HasSpawnData(out var spawnData))
-			{
-				Debug.LogWarning(characterView + " has no spawn data!");
-				characterView.gameObject.SetActive(false);
-				continue;
-			}
-			
-			var characterData = Instantiate(spawnData);
-			gameData.AddCharacter(characterData);
-			characterView.Init(characterData);
-			characterView.name += " (" + characterView.GetCharacterIndex() + ")";
-			allCharacters.Add(characterView);
-			
-			if (characterView.IsPlayer())
-			{
-				gameData.SetCharacterInParty(characterData, partyIndex++);
-				partyCharacters.Add(characterView);
-			}
-		}
-		
-		SetInputEnabled(true);
-		// TODO Fade Out
-		
-		// first turn
-		gameData.NewTurn();
-
-		// todo fade
-		yield return new WaitForSeconds(0.5f); // todo hak camera focus
-		
-		SelectNextCharacter();
-	}
 	
 	private void InitSingleton()
 	{

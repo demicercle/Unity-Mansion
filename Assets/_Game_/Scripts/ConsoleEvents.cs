@@ -4,8 +4,11 @@ using UnityEngine;
 public class ConsoleEvents : MonoBehaviour
 {
 	static GameView gameView => GameView.GetInstance();
-	static GameData gameData => gameView.gameData;
-	static CharacterData GetCharacterAt(int charIndex) => gameData.GetCharacterAt(charIndex);
+	static GameController GetController() => gameView.GetController();
+	static CharacterController GetCharacterAt(int charIndex)
+	{
+		return GetController().GetCharacterAt(charIndex);
+	}
 
 	static bool TryGetSelectedCharacterIndex(out int selected)
 	{
@@ -42,10 +45,10 @@ public class ConsoleEvents : MonoBehaviour
 	[ConsoleMethod("end_turn", "")]
 	static public void EndTurn()
 	{
-		gameData.EndTurn();
+		GetController().EndTurn();
 	}
 	
-	static public void ConsumeMovePoints(int charIndex, float amount)
+	/*static public void ConsumeMovePoints(int charIndex, float amount)
 	{
 		GetCharacterAt(charIndex).ConsumeMovePoints(amount);
 	}
@@ -67,6 +70,7 @@ public class ConsoleEvents : MonoBehaviour
 	
 	static public void SetCharacterPartyIndex(int charIndex, int newIndex)
 	{
-		gameData.SetCharacterInParty(GetCharacterAt(charIndex), newIndex);
-	}
+		GetCharacterAt(charIndex).SetPartyIndex(newIndex);
+		//	SetCharacterInParty(GetCharacterAt(charIndex), newIndex);
+	}*/
 }

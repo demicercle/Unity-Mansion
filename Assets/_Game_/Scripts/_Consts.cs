@@ -1,4 +1,4 @@
-﻿public static class Consts
+﻿public interface IView<T>
 {
-		
+	T GetController();
 }

@@ -14,9 +14,9 @@ public abstract class AIBrainData : ScriptableObject
 
 	public void StartCoroutine(IEnumerator routine) => gameView.QueueRoutine(routine);
 
-	virtual public int GetPriority(CharacterView characterView) => defaultPriority;
+	virtual public int GetPriority(CharacterController character) => defaultPriority;
 
-	virtual public void DrawGizmos(CharacterView characterView)
+	virtual public void DrawGizmos(CharacterController character)
 	{
 		
 	}

@@ -10,15 +10,15 @@ public class AIBrain_Chase : AIBrainData
 	public Color hearingColor = Color.magenta;
 	public float hearingDistance = 1.0f;
 	
-	private CharacterView lastTarget;
+	private CharacterController lastTarget;
 
-	public override int GetPriority(CharacterView character)
+	public override int GetPriority(CharacterController character)
 	{
 		UpdateTarget(character);
 		return lastTarget != null ? -1 : defaultPriority;
 	}
 
-	public void UpdateTarget(CharacterView character)
+	public void UpdateTarget(CharacterController character)
 	{
 		if (lastTarget != null)
 		{
