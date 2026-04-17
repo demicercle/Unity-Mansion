@@ -249,4 +249,11 @@ public static class Utils
 		Debug.DrawRay(pos + direction, right * arrowHeadLength, color);
 		Debug.DrawRay(pos + direction, left * arrowHeadLength, color);
 	}
+
+	public static string ArrayStr(IEnumerable<object> objs, char  separator = ',')
+	{
+		var str = "";
+		foreach (var obj in objs) str += obj?.ToString() + separator;
+		return str;
+	}
 }

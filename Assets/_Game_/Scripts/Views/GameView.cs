@@ -230,7 +230,6 @@ public class GameView
 			
 			yield return null;
 		}
-
 		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target, true, losCheck));
 	}
 
@@ -255,6 +254,7 @@ public class GameView
 		{
 			Debug.Log(character + " performs attack on " + target);
 			DebugGUI.FloatingText(character.GetPosition(), "Take this!");
+			character.PerformsAttack(target);
 			yield return new WaitForSeconds(1.0f);
 			target.TakeDamage(1);
 			yield return new WaitForSeconds(1.0f);

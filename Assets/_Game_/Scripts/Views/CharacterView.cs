@@ -12,6 +12,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	private const string TAG_ENEMY = "Enemy";
 	public bool IsPlayer() => CompareTag(TAG_PLAYER);
 	public bool IsEnemy() => CompareTag(TAG_ENEMY);
+
+	public bool IsDead() => data.IsDead();
 	
 	static public CharacterView SpawnPlayerAt(CharacterView characterViewPrefab, CharacterData characterData, Waypoint waypoint)
 	{
@@ -151,6 +153,10 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	private void OnDrawGizmosSelected()
 	{
 		UpdateComponents();
+		aiBrains.ForEach(b =>
+		{
+			b?.DrawGizmos(this);
+		});
 	}
 
 	private void UpdateComponents()
@@ -244,6 +250,27 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 		DebugGUI.Line(start, end, Color.green, drawDuration);
 		return true;
+	}
+
+	public CharacterView GetClosestCharacter(IEnumerable<CharacterView> characters)
+	{
+		return characters.OrderBy(c => Vector3.Distance(GetPosition(), c.GetPosition())).FirstOrDefault();
+	}
+
+	public List<CharacterView> GetNearbyLivingCharacters(float range, float drawDuration = 0f, Color drawColor = default)
+	{
+		var outList = new List<CharacterView>();
+		var center = GetPosition();
+		DebugGUI.Disc(center, Vector3.up, range, drawColor, drawDuration);
+		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(GameView.LAYER_CHARACTER)))
+		{
+			if (coll.TryGetComponent(out CharacterView otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())
+			{
+				outList.Add(otherCharacter);
+			}
+		}
+
+		return outList;
 	}
 
 	private AgentWrapper agent;
@@ -491,6 +518,13 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
     public bool TryGetAIBrain(out AIBrainData aiBrain)
     {
-	    return (aiBrain =aiBrains.OrderBy(b => b.GetPriority()).FirstOrDefault()) != null;
+	    aiBrains = aiBrains.OrderBy(b => b.GetPriority(this)).ToList();
+	    Debug.Log(this + " TryGetAIBrain " + Utils.ArrayStr(aiBrains));
+	    return (aiBrain = aiBrains.FirstOrDefault()) != null;
+    }
+
+    public void PerformsAttack(CharacterView target)
+    {
+	    data.ConsumeActions(1);
     }
 }

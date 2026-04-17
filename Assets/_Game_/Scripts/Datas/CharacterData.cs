@@ -30,6 +30,7 @@ public class CharacterData : ScriptableObject
 	[SerializeField] private int rotation;
 	[SerializeField] private int partyIndex;
 
+	public bool IsDead() => false; // TODO
 	public bool CanAttack() => GetRemainingActions() > 0 && !noAttack;
 	public int GetPartyIndex() => partyIndex;
 
