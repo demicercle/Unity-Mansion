@@ -12,6 +12,12 @@ public class FogVision : MonoBehaviour
 		return character.GetEyesPosition();
 	}
 
+	private void OnDrawGizmosSelected()
+	{
+		Gizmos.color = Color.cyan;
+		Utils.DrawGizmosCircle(transform.position, transform.forward, range);
+	}
+
 	[SerializeField] private float range = 2.0f;
 	public float GetRange() => range;
 	

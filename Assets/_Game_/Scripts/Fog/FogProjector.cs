@@ -7,21 +7,10 @@ using UnityEngine;
 [RequireComponent(typeof(Projector))]
 public class FogProjector : MonoBehaviour
 {
-	void OnMoved(FogVision vision)
-	{
-		changed = true;
-	}
-
-	void OnToggled(FogVision vision, bool add)
-	{
-		if(add) visions.Add(vision); else visions.Remove(vision);
-	}
-
 	private bool changed;
-	private List<FogVision> visions = new List<FogVision>();
-	private Color visibleColor = Color.clear;
-	private Color exploredColor = new Color(0.2f, 0.2f, 0.2f, 0.2f);
-	private Color hiddenColor = Color.black;
+	[SerializeField] private Color visibleColor = Color.clear;
+	[SerializeField] private Color exploredColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+	[SerializeField] private Color hiddenColor = Color.black;
 	
 	static private FogProjector instance;
 
@@ -62,13 +51,15 @@ public class FogProjector : MonoBehaviour
 		return tx >= 0 && tx < textureSize && ty >= 0 && ty < textureSize;
 	}
 
+	public int gridSize;
 	public int textureSize;
 	
 	private Grid grid;
-	private Camera orthoCamera;
+//orthoCamera;
 	[SerializeField] private Vector3 cellSize;
 	[SerializeField] private float refreshTime;
 	[SerializeField] private LayerMask obstructionLayer;
+	[SerializeField] private string textureParameter = "_MainTex";
 	private List<Vector3Int> visibleCells  = new List<Vector3Int>();
 	private List<Vector3Int> exploredCells = new List<Vector3Int>();
 	private Texture2D texture;
@@ -77,12 +68,11 @@ public class FogProjector : MonoBehaviour
 	private void Awake()
 	{
 		projector = GetComponent<Projector>();
-		orthoCamera = GetComponent<Camera>();
-		if(!orthoCamera) orthoCamera = gameObject.AddComponent<Camera>();
-		orthoCamera.enabled = false;
-		orthoCamera.orthographic = true;
-		grid = GetComponent<Grid>();
-		if(!grid) grid = gameObject.AddComponent<Grid>();
+	//	orthoCamera = GetComponent<Camera>();
+	//	if(!orthoCamera) orthoCamera = gameObject.AddComponent<Camera>();
+	//	orthoCamera.enabled = false;
+	//	orthoCamera.orthographic = true;
+		grid = new GameObject("FogGrid").AddComponent<Grid>();
 		grid.cellSize = cellSize;
 	}
 
@@ -93,9 +83,6 @@ public class FogProjector : MonoBehaviour
 
 	private void OnEnable()
 	{
-		FogVision.onMoved += OnMoved;
-		FogVision.onToggled += OnToggled;
-		
 		CreateTexture();
 		projector.enabled = true;
 		StartCoroutine("DoUpdate");
@@ -103,9 +90,6 @@ public class FogProjector : MonoBehaviour
 
 	private void OnDisable()
 	{
-		FogVision.onMoved -= OnMoved;
-		FogVision.onToggled -= OnToggled;
-		
 		DisposeTexture();
 		projector.enabled = false;
 		StopCoroutine("DoUpdate");
@@ -128,83 +112,103 @@ public class FogProjector : MonoBehaviour
 		}
 		texture.wrapMode = TextureWrapMode.Clamp;
 		texture.Apply();
-		projector.material.SetTexture("_MainTex", texture);
+		projector.material.SetTexture(textureParameter, texture);
 		Debug.Log(this + " newTexture size=" + textureSize);
 	}
 
 	void SetCellVisible(Vector3Int cell, bool value)
 	{
-		if(value)
-			visibleCells.Add(cell);
+		if (value)
+		{
+			if(!exploredCells.Contains(cell)) exploredCells.Add(cell);
+			if(!visibleCells.Contains(cell)) visibleCells.Add(cell);
+		}
 		else
 		{
 			visibleCells.Remove(cell);
-			if(!exploredCells.Contains(cell))
-				exploredCells.Add(cell);
 		}
 	}
 
+	[SerializeField] private float minRange;
 	private IEnumerator DoUpdate()
 	{
 		changed = true;
 		
 		while (enabled)
 		{
-			if (changed)
+			visibleCells.Clear();
+			
+			foreach (var character in CharacterController.instances)
 			{
-				Debug.Log(this + " changed");
-				changed = false;
-				
-				foreach (var vision in visions)
-				{
-					var world = vision.GetEyesWorldPosition();
-				
-					var cell = grid.WorldToCell(world);
-					cell.x += textureSize / 2;
-					cell.z += textureSize / 2;
-				
-					var range = vision.GetRange();
-					var delta = Mathf.CeilToInt(range);
+				if (character.IsDead()) continue;
+				if (!character.InParty()) continue;
 
-					for (int d = -delta; d < delta; d++)
+				var rot = transform.rotation;
+				var world = character.GetEyesPosition();
+				var range = character.GetVisionRange();
+				
+				world.y = 0;
+				var cell = grid.WorldToCell(world);
+				//DebugGUI.WireDBox(cell, rot,cellSize,Color.cyan,refreshTime);
+				
+				var delta = Mathf.CeilToInt(range);
+
+				for (int dx = -delta; dx < delta; dx++)
+				{
+					for (int dz = -delta; dz < delta; dz++)
 					{
-						var otherCell = new Vector3Int(cell.x + d, 0, cell.z+ d);
+						var otherCell = new Vector3Int(cell.x + dx, 0, cell.z + dz);
+						if (visibleCells.Contains(otherCell)) continue;
 						
 						var otherWorld = grid.CellToWorld(otherCell)
 						                 + Vector3.up * grid.cellSize.y / 2f;
-
+					
+						otherWorld.y = 0;
 						var distance = Vector3.Distance(world, otherWorld);
 						if (distance <= range)
 						{
-							if (!Physics.Linecast(world, otherWorld, obstructionLayer))
+							if (distance <= minRange || !Physics.Linecast(world, otherWorld, obstructionLayer))
 							{
-								SetCellVisible(otherCell, true);
-								continue;
+								visibleCells.Add(otherCell);
+								if(!exploredCells.Contains(otherCell)) exploredCells.Add(otherCell);
 							}
-						}
-							
-						SetCellVisible(otherCell, false);
-						
-						yield return new WaitForEndOfFrame();
-					}
-
-					for (int x = 0; x < textureSize; x++)
-					{
-						for (int y = 0; y < textureSize; y++)
-						{
-							var screenPos = new Vector2(x, y);
-							var worldPos = orthoCamera.ScreenToWorldPoint(screenPos);
-							//var texCell = new Vector3Int(x + textureSize/2, 0, y + textureSize/2);
-							if(IsPositionVisible(worldPos)) texture.SetPixel(x,y, visibleColor);
-							else if(IsPositionExplored(worldPos)) texture.SetPixel(x,y, exploredColor);
-							else texture.SetPixel(x,y, hiddenColor);
 						}
 					}
 				}
 			}
 			
+			for (int x = 0; x < gridSize; x++)
+			{
+				for (int y = 0; y < gridSize; y++)
+				{
+					var cell = new Vector3Int(x - gridSize / 2, 0, y - gridSize / 2);
+					var world =  grid.CellToWorld(cell);
+					if (visibleCells.Contains(cell))
+					{
+						DebugGUI.WireDBox(world, transform.rotation, cellSize, Color.white, refreshTime);
+						texture.SetPixel(x,y,Color.white);
+					}
+					else if (exploredCells.Contains(cell))
+					{
+						DebugGUI.WireDBox(world, transform.rotation, cellSize, Color.gray, refreshTime);
+						texture.SetPixel(x,y,Color.gray);
+					}
+					else
+					{
+						DebugGUI.WireDBox(world, transform.rotation, cellSize, Color.black, refreshTime);
+						texture.SetPixel(x, y, Color.black);
+					}
+				}
+			}
+					
+	//		Debug.Log(this + " Apply() " + visibleCells.Count + " / " + exploredCells.Count + " " + aspect);
+			texture.Apply();
+			
 			if(refreshTime <= 0) yield return new WaitForEndOfFrame();
 			else yield return new WaitForSeconds(refreshTime);
 		}
 	}
+
+	[SerializeField] private Vector2 screenOffset = default;
+	[SerializeField] float scaleSize = 1.0f;
 }

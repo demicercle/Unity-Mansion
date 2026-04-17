@@ -3234,7 +3234,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 3.604e-42, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 1.39e-43, y: 1e-45, z: 2.1e-44, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -5205,12 +5205,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f33dcffc221471b8ad70b31067d8fc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textureSize: 50
+  visibleColor: {r: 1, g: 1, b: 1, a: 0}
+  exploredColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+  hiddenColor: {r: 0, g: 0, b: 0, a: 1}
+  gridSize: 30
+  textureSize: 256
   cellSize: {x: 1, y: 1, z: 1}
   refreshTime: 0.1
   obstructionLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 0
+  textureParameter: _MainTex
+  minRange: 0
+  screenOffset: {x: 0, y: 0}
+  scaleSize: 1
 --- !u!119 &1970159544
 Projector:
   m_ObjectHideFlags: 0
@@ -5694,11 +5702,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 748483104604302093, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -585.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 748483104604302093, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 353.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 748483104604302093, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -5726,11 +5734,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1896307679591377928, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 50
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1896307679591377928, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -50
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1896307679591377928, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -5758,11 +5766,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1907533301925793265, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -685.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1907533301925793265, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 353.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1907533301925793265, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -5922,11 +5930,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8631826122352735374, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -485.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8631826122352735374, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 353.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8631826122352735374, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
       propertyPath: m_AnchoredPosition.x

@@ -321,7 +321,7 @@ GameObject:
   - component: {fileID: 8722277412283640718}
   - component: {fileID: 467592031822895063}
   m_Layer: 8
-  m_Name: _PC_Base
+  m_Name: CharacterBase
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -411,7 +411,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterData: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
   aiBrains: []
-  isSelected: 0
+  visionRange: 4
+  isControllable: 0
   partyIndex: -1
   usedMovePoints: 0
   usedActions: 0
@@ -432,6 +433,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5613c26fe6a42d782cf4c99a802cdf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveSpeed: 4.5
+  radius: 0.5
+  height: 1.5
 --- !u!54 &6072534866263412361
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -614,12 +618,12 @@ MonoBehaviour:
   radius: 0.5
   height: 1.5
   simulateMovement: 1
-  maxSpeed: 3
+  maxSpeed: 4.5
   gravity: {x: NaN, y: NaN, z: NaN}
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  endReachedDistance: 0.2
+  endReachedDistance: 0.1
   whenCloseToDestination: 0
   rvoDensityBehavior:
     enabled: 1

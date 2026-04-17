@@ -29,6 +29,8 @@ public class CharacterController : MonoBehaviour
 	
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
+	[SerializeField] private float visionRange = 2.0f;
+	public float GetVisionRange() => visionRange;
 	public List<AIBrainData> GetBrains() => aiBrains.ToList();
 	
 	[ReadOnly] [SerializeField] private bool isControllable = false;

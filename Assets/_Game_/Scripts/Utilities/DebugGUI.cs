@@ -50,6 +50,15 @@ public class DebugGUI : MonoBehaviour
 		DbgDraw.WireDisc(position, Quaternion.LookRotation(direction), scale, color, duration);
 	}
 	
+	
+	static public void WireDBox(Vector3 position, Quaternion rot, Vector3 size, Color color, float duration = 0f)
+	{
+		if (!DRAW_DEBUG) return;
+		DbgDraw.WireCube(position, rot, size, color, duration);
+	}
+
+
+	
 	static public void Line(Vector3 start, Vector3 end, Color color, float duration = 0f)
 	{
 		if (!DRAW_DEBUG) return;
