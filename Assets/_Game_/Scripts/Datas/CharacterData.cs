@@ -65,7 +65,7 @@ public class CharacterData : ScriptableObject
 		}
 	}
 
-	public void Heal()
+	public void Heal(float amount) //TODO heal amount
 	{
 		if (damageAmount > 0)
 		{
@@ -133,7 +133,7 @@ public class CharacterData : ScriptableObject
 	
 	public void TurnBegins(int turn)
 	{
-//		Debug.Log(this + " TurnBegins " + turn);
+		Debug.Log(this + " TurnBegins " + turn);
 		usedMovePoints = 0f;
 		usedActions = 0;
 	}
@@ -158,5 +158,10 @@ public class CharacterData : ScriptableObject
 	public void Dispose()
 	{
 		
+	}
+
+	public bool HasActions()
+	{
+		return GetRemainingActions() > 0;
 	}
 }

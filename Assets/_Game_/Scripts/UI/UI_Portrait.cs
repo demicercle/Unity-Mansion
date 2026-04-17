@@ -79,7 +79,8 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	{
 		if (_assignedCharacterView)
 		{
-			if (_assignedCharacterView.TryGetData(out var data)) // TODO selected character should be in data
+			var data = _assignedCharacterView.GetData();
+			if (data) // TODO selected character should be in data
 			{
 				rawImage.texture = data.portraitTexture;
 				nameLabel.text = data.displayName;

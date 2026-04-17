@@ -256,4 +256,11 @@ public static class Utils
 		foreach (var obj in objs) str += obj?.ToString() + separator;
 		return str;
 	}
+
+	public static T GetOrAddComponent<T>(GameObject gameObject) where T:Component
+	{
+		var t = gameObject.GetComponent<T>();
+		if (t == null) t= gameObject.AddComponent<T>();
+		return t;
+	}
 }

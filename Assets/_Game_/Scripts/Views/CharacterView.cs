@@ -17,12 +17,11 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	public bool IsEnemy() => CompareTag(TAG_ENEMY);
 	
 	[Header("Stats")]  // todo use scriptable
-	[SerializeField] private CharacterData data;
-	public bool TryGetData(out CharacterData outData)
-	{
-		outData = data;
-		return outData != null;
-	}
+	[SerializeField] private CharacterData spawnData;
+
+	private CharacterData data;
+	public CharacterData GetData() => data; //TODO remove
+	public bool IsInParty() => data.GetPartyIndex() >= 0;
 	
 	public bool IsDead() => data.IsDead();
 	public float GetAttackRange() => data.attackRange;
@@ -120,9 +119,10 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 	public void Init(CharacterData newData = null)
 	{
-		if (newData != null)
-			data = newData;
+		if (newData == null)
+			newData = Instantiate(spawnData);
 		
+		data = newData;
 		UpdateComponents();
 		RegisterEvents(true);
 		data.Init(this);
@@ -276,12 +276,12 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		DebugGUI.FloatingText(GetCenterPosition(), amount.ToString("N2"));
 	}
 
-    public void SetRotateTowards(Vector3 worldPosition, float f = -1f)
+    public void RotateTowards(Vector3 worldPosition, float f = -1f)
     {
 	    LookDirection(worldPosition - GetPosition(), f);
     }
 
-    private void LookDirection(Vector3 getDirection, float f)
+    public void LookDirection(Vector3 getDirection, float f = -1f)
     {
 	    getDirection.y = 0;
 	    getDirection.Normalize();
@@ -302,8 +302,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		    DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
 		    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.aiPath.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 	    }
-	    
-	    data.SetRotation(GetRotation());
     }
 
     public Vector3 GetEyesPosition() => transform.position + Vector3.up * height * 0.9f;
@@ -412,7 +410,12 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 			    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
 			    gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
 			    SetColor(deadColor);
-			    GameView.GetInstance().CharacterKilled(this);//TODO better
+			    
+			    var gameView = GameView.GetInstance();
+			    if (gameView.IsCharacterSelected(this))
+			    {
+				    gameView.SelectNextCharacter();
+			    }
 		    }
 		    else
 		    {

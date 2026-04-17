@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -8,7 +7,7 @@ public class PatrolRoute : MonoBehaviour
 {
 	static public bool FindRoute(CharacterView character, out PatrolRoute patrolRoute)
 	{
-		foreach (var route in GameView.FindAllObjects<PatrolRoute>())
+		foreach (var route in Object.FindObjectsByType<PatrolRoute>(default))
 		{
 			if (route.assignedCharacter == character)
 			{

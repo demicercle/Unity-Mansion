@@ -4,58 +4,50 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameData", menuName = "GameData", order = 0)]
 public class GameData : ScriptableObject
 {
-	public System.Action partyChanged;
 	public System.Action<int> newTurnStarted;
 
-	public void AddCharacter(CharacterData characterData)
-	{
-		Debug.Log("Adding character " + characterData + " to " + allCharacters.Count);
-		if (allCharacters.Contains(characterData)) Debug.LogError(characterData + " is already added");
-		allCharacters.Add(characterData);
-	}
+	[SerializeField] private List<LevelData> allLevels;
 	
-	public void AddCharacterToParty(CharacterData characterData)
-	{
-		if (!partyCharacters.Contains(characterData))
-		{
-			partyCharacters.Add(characterData);
-			partyChanged?.Invoke();
-			characterData.SetPartyIndex(partyCharacters.Count - 1);
-		}
-	}
-
-	public void  RemoveCharacterFromParty(CharacterData characterData)
-	{
-		if (partyCharacters.Contains(characterData))
-		{
-			partyCharacters.Remove(characterData);
-			partyChanged?.Invoke();
-			characterData.SetPartyIndex(-1);
-		}
-	}
+	[Header("ReadOnly")]
+	[SerializeField] private int currentLevel;
+	[ReadOnly] [SerializeField] private int currentTurn;
+	[ReadOnly] [SerializeField] private bool playerTurn; // TODO: "currentRound" (Players, Enemies, Neutral)
 	
+	public bool IsPlayerTurn() => playerTurn;
 	public int GetCurrentTurn() => currentTurn;
-
-	public void NextTurn()
+	
+	public void EndTurn()
 	{
+		Debug.Log(this + " EndTurn");
+		playerTurn = false;
+	}
+	
+	public void NewTurn()
+	{
+		playerTurn = true;
 		currentTurn++;
-		allCharacters.ForEach(c => c.TurnBegins(currentTurn));
+		Debug.Log(this + " NewTurn " + currentTurn);
 		newTurnStarted?.Invoke(currentTurn);
 	}
 
-	private int currentTurn;
-	private List<CharacterData> allCharacters = new List<CharacterData>();
-	private List<CharacterData> partyCharacters = new List<CharacterData>();
-
-	public void Init(GameView gameView)
+	public int GetLevelIndex(LevelData levelData) => allLevels.IndexOf(levelData);
+	
+	public void SetCurrentLevel(int levelIndex)
 	{
-		partyCharacters = new List<CharacterData>();
-		allCharacters = new List<CharacterData>();
-		currentTurn = 0;
+		currentLevel = levelIndex;
 	}
+	
+	public LevelData GetCurrentLevel() => allLevels[currentLevel];
+	
 
-	public void Dispose()
+	public void Init()
 	{
-		
+		currentTurn = -1;
+
+		if (allLevels.Count == 0)
+		{
+			Debug.LogWarning(this + " has no levels, add one");
+			allLevels.Add(CreateInstance<LevelData>());
+		}
 	}
 }

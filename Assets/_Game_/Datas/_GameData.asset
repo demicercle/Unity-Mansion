@@ -12,3 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 704af3568f7d4f1b9d01bf4cd71767c7, type: 3}
   m_Name: _GameData
   m_EditorClassIdentifier: 
+  currentTurn: 0
+  currentLevel: 0
+  allLevels:
+  - {fileID: 11400000, guid: 2b465d5fbbb7827499e473be74894ddc, type: 2}

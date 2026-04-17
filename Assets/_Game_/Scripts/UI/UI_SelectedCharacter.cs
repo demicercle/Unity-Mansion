@@ -6,26 +6,17 @@ using UnityEngine.UI;
 public class UI_SelectedCharacter : MonoBehaviour
 {
 	public Button actionButton_Run;
-
-	void RoutinesStarted(bool started)
-	{
-		actionButton_Run.interactable = !started && _selectedCharacterView && _selectedCharacterView.HasActions();
-	}
-
-	void ActionUsed(CharacterView characterView = null) => OnCharacterSelected();
 	
 	private bool hide;
-	private CharacterView _selectedCharacterView;
-	private GameView gameView;
+	private CharacterView lastSelectedCharacter;
 	
 	private void Awake()
 	{
-		gameView = GameView.GetInstance();
+		var gameView = GameView.GetInstance();
 		hide = true;
 		
-		gameView.characterSelected += OnCharacterSelected;
+		gameView.characterSelected += SetSelectedCharacter;
 		gameView.routinesStarted += RoutinesStarted;
-		gameView.actionUsed += ActionUsed;
 
 		actionButton_Run.onClick.AddListener(gameView.ClickRunAction);
 	}
@@ -33,9 +24,8 @@ public class UI_SelectedCharacter : MonoBehaviour
 	private void OnDestroy()
 	{
 		var gameView = GameView.GetInstance();
-		gameView.characterSelected -= OnCharacterSelected;
+		gameView.characterSelected -= SetSelectedCharacter;
 		gameView.routinesStarted -= RoutinesStarted;
-		gameView.actionUsed -= ActionUsed;
 		
 		actionButton_Run.onClick.RemoveAllListeners();
 	}
@@ -48,23 +38,38 @@ public class UI_SelectedCharacter : MonoBehaviour
 		}
 	}
 
-	void OnCharacterSelected() => OnCharacterSelected(_selectedCharacterView, _selectedCharacterView != null);
-	private void OnCharacterSelected(CharacterView characterView, bool selected)
+	void RoutinesStarted(bool started)
 	{
-		//Debug.Log(this + " OnCharacterSelected " + character + " " + selected);
-		if (selected && characterView != null)
+		actionButton_Run.interactable = !started;
+		ActionChanged(0);
+	}
+	
+	void ActionChanged(int q) => SetSelectedCharacter(lastSelectedCharacter, lastSelectedCharacter != null);
+	
+	private void SetSelectedCharacter(CharacterView newChar, bool selected)
+	{
+		if (selected && newChar)
 		{
-//			Debug.Log(this + " Show " + character);
-			_selectedCharacterView = characterView;
+			lastSelectedCharacter = newChar;
 			hide = false;
 			gameObject.SetActive(true);
 
-			actionButton_Run.interactable = characterView.HasActions();
+			var data = lastSelectedCharacter.GetData();
+			actionButton_Run.interactable = data.HasActions();
+
+			data.actionsChanged += ActionChanged;
 		}
-		else if (_selectedCharacterView == characterView && !selected)
+		else
 		{
-//			Debug.Log(this + " Hide");
+			if (lastSelectedCharacter != null)
+			{
+				var data = lastSelectedCharacter.GetData();
+				data.actionsChanged -= ActionChanged;
+			}
+
+			lastSelectedCharacter = null;
 			hide = true;
 		}
 	}
+
 }

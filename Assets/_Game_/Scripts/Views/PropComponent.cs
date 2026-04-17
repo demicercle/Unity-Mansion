@@ -58,10 +58,11 @@ public class PropComponent : MonoBehaviour
 
 		if (interactor)
 		{
-			if (interactor.TryGetData(out var characterData))
+			var data = interactor.GetData();
+			if (data)
 			{
 				if (consumeActions > 0)
-					characterData.ConsumeActions(consumeActions);
+					data.ConsumeActions(consumeActions);
 			}
 		}
 		

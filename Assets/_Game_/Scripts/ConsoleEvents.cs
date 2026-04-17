@@ -9,20 +9,21 @@ public class ConsoleEvents : MonoBehaviour
 	{
 		DontDestroyOnLoad(this);
 		var gameView = GameView.GetInstance();
+		var gameData = gameView.gameData;//TODO
 		
 		DebugLogConsole.AddCommand<int>("apply_dmg", "damage selected character", (amount) =>
 		{
-			if (gameView.GetSelectedCharacter(out var selected) && selected.TryGetData(out var selectedData))
+			if (gameView.GetSelectedCharacter(out var selected))
 			{
-				selectedData.TakeDamage(amount);
+				selected.GetData().TakeDamage(amount);
 			}
 		});
 		
-		DebugLogConsole.AddCommand("heal", "heal selected character", () =>
+		DebugLogConsole.AddCommand<float>("heal", "heal selected character", (amount) =>
 		{
-			if (gameView.GetSelectedCharacter(out var selected) && selected.TryGetData(out var selectedData))
+			if (gameView.GetSelectedCharacter(out var selected))
 			{
-				selectedData.Heal();
+				selected.GetData().Heal(amount);
 			}
 		});
 
