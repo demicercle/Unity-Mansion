@@ -44,7 +44,7 @@ public class DebugGUI : MonoBehaviour
 			Line(path.Last(), path.First(), color, duration);
 	}
 	
-	static public void Disc(Vector3 position, Vector3 direction, float scale, Color color, float duration = 0f)
+	static public void WireDisc(Vector3 position, Vector3 direction, float scale, Color color, float duration = 0f)
 	{
 		if (!DRAW_DEBUG) return;
 		DbgDraw.WireDisc(position, Quaternion.LookRotation(direction), scale, color, duration);

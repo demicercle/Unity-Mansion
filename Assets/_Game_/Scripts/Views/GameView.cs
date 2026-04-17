@@ -100,31 +100,6 @@ public class GameView : MonoBehaviour
 
 	public bool HasCoroutines() => coroutines.Count > 0;
 	
-	public bool GetNextCoroutine(out IEnumerator coroutine)
-	{
-		if (coroutines.Count > 0)
-		{
-			coroutine = coroutines[0];
-			return true;
-		}
-
-		coroutine = default;
-		return false;
-	}
-
-	public void RemoveNextCoroutine()
-	{
-		if (coroutines.Count > 0)
-		{
-			coroutines.RemoveAt(0);
-			Debug.Log("EndCoroutine: " + coroutines.Count);
-			if (coroutines.Count == 0)
-			{
-				routinesStarted?.Invoke(false);
-			}
-		}
-	}
-	
 	public bool mouseOverViewport { get; set; }
 	public bool hasFocus { get; set; }
 	
@@ -221,6 +196,7 @@ public class GameView : MonoBehaviour
 
 	public void QueueRoutine(IEnumerator coroutine)
 	{
+		Debug.Log("QueueRoutine: " + coroutines.Count);
 		coroutines.Add(coroutine);
 		if (coroutines.Count == 1)
 		{
@@ -431,16 +407,17 @@ public class GameView : MonoBehaviour
 
 	public void EndTurn()
 	{
-		QueueRoutine(WaitEndTurn());
+		gameData.EndTurn();
+		StartCoroutine(EndTurnRoutine());
 	}
 
 	public bool CanSelectCharacter(CharacterView charView) => !HasCoroutines() && charView && !charView.IsDead() && (!gameData.IsPlayerTurn() || charView.IsInParty());
 
 	public bool CanControlCharacter(CharacterView charView) => gameData.IsPlayerTurn() && !HasCoroutines() && charView && !charView.IsDead() && gameData.IsPlayerTurn() && charView.IsInParty();
 
-	private IEnumerator WaitEndTurn()
+	private IEnumerator EndTurnRoutine()
 	{
-		gameData.EndTurn();
+		Debug.Log("Starts AI Routine: ");
 
 		var partyCharacters = levelView.GetPartyCharacters();
 		foreach (var otherCharacter in levelView.GetAllCharacters())
@@ -545,8 +522,6 @@ public class GameView : MonoBehaviour
 		levelView = Utils.GetOrAddComponent<LevelView>(gameObject);
 		levelView.partyChanged += PartyChanged;
 		
-		coroutines = new List<IEnumerator>();
-		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
 		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
@@ -560,7 +535,6 @@ public class GameView : MonoBehaviour
 		StartCoroutine(Coroutines());
 	}
 	
-
 	private IEnumerator Coroutines()
 	{
 		while (true)

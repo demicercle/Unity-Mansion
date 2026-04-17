@@ -184,7 +184,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	{
 		var outList = new List<CharacterView>();
 		var center = GetPosition();
-		DebugGUI.Disc(center, Vector3.up, range, drawColor, drawDuration);
+		DebugGUI.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
 		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(GameView.LAYER_CHARACTER)))
 		{
 			if (coll.TryGetComponent(out CharacterView otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())

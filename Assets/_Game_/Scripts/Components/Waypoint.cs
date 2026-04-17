@@ -75,4 +75,10 @@ public class Waypoint : MonoBehaviour
 			Utils.DrawGizmosArrow(transform.position, transform.forward);
 			Utils.DrawGizmosCircle(transform.position, transform.up, radius, 16);
 		}
+
+		public void DrawDebug(float d =0f)
+		{
+			DebugGUI.WireArrow(GetPosition(), GetDirection(), radius * Vector3.one, color, d);
+			DebugGUI.WireDisc(GetPosition(), GetDirection(), radius, color, d);
+		}
 }

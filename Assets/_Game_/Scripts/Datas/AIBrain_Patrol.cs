@@ -26,7 +26,7 @@ public class AIBrain_Patrol : AIBrainData
 		
 		while (character.CanMove())
 		{
-			patrolRoute.DebugDraw(1f);
+			patrolRoute.DebugDraw(0);
 				
 			if (lastWaypointToReach == null)
 			{
@@ -44,19 +44,19 @@ public class AIBrain_Patrol : AIBrainData
 
 			if (lastWaypointToReach != null)
 			{
-				if (!character.WaypointReached(lastWaypointToReach)) // move to patrol waypoint
+				if (!character.WaypointReached(lastWaypointToReach))
 				{
-					gameView.MoveCharacterToWaypoint(character, lastWaypointToReach); // patrol move
-					while(gameView.HasCoroutines()) yield return null;
-
-					if (!character.CanMove() && character.CanUseRunAction() && canUseRunAction)
+					Debug.Log(this + " Move to patrol waypoint " + lastWaypointToReach);
+					gameView.MoveCharacterToWaypoint(character, lastWaypointToReach, () =>
 					{
-						gameView.RunAction(character);
-						while(gameView.HasCoroutines()) yield return null;
-					}
+						if (!character.CanMove() && character.CanUseRunAction() && canUseRunAction)
+						{
+							gameView.RunAction(character);
+						}
+					}); // patrol move
 				}
 				
-				if (character.WaypointReached(lastWaypointToReach)) // pick next waypoint in patrol
+				else
 				{
 					var wpIndex = waypoints.IndexOf(lastWaypointToReach);
 					
@@ -64,6 +64,8 @@ public class AIBrain_Patrol : AIBrainData
 						wpIndex = (wpIndex + 1) % waypoints.Count;
 					else
 						wpIndex += 1;
+					
+					Debug.Log(this + " picked next wpIndex " + wpIndex);
 
 					if (wpIndex >= waypoints.Count)
 					{
@@ -73,11 +75,22 @@ public class AIBrain_Patrol : AIBrainData
 					else
 					{
 						lastWaypointToReach = waypoints[wpIndex];
-						DebugGUI.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), Color.blue, 1.0f);
-						Debug.Log(character + " picked next waypoint " + wpIndex + " " + lastWaypointToReach);
+						DebugGUI.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), patrolRoute.color, 1.0f);
 					}
 				}
 			}
+
+			while (gameView.HasCoroutines())
+			{
+				if (lastWaypointToReach != null)
+				{
+					lastWaypointToReach.DrawDebug();
+				}
+				
+				yield return null;
+			}
+			
+			yield return null;
 		}
 	}
 
