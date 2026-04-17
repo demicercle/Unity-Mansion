@@ -51,6 +51,7 @@ public class GameController : MonoBehaviour
 	{
 		currentTurn += 1;
 		playerTurn = true;
+		CharacterController.instances.ForEach(c => c.NewTurn(currentTurn));
 		Debug.Log(this + " NewTurn " + currentTurn);
 		turnStarted?.Invoke();
 	}

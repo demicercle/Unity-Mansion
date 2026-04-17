@@ -57,15 +57,15 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
---- !u!114 &2212865812732267822 stripped
+--- !u!114 &5239462649818497492 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1855308542611445004, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5745611760749173238, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
   m_PrefabInstance: {fileID: 507443244978214946}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5dedf42b6901a7b44b653cea31cea834, type: 3}
+  m_Script: {fileID: 11500000, guid: e7371863386a46299d7e0db5a61d3cdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &7167493355756251618 stripped
@@ -351,7 +351,7 @@ PrefabInstance:
     - target: {fileID: 6305985891442708102, guid: 62095b5d5a365a8448bc1583f62602e0, type: 3}
       propertyPath: assignedCharacter
       value: 
-      objectReference: {fileID: 2212865812732267822}
+      objectReference: {fileID: 5239462649818497492}
     - target: {fileID: 6305985891442708102, guid: 62095b5d5a365a8448bc1583f62602e0, type: 3}
       propertyPath: 'waypoints.Array.data[0]'
       value: 

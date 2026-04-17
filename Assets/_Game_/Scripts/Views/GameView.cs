@@ -346,7 +346,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void QueueRoutine(IEnumerator coroutine)
 	{
-		Debug.Log("QueueRoutine: " + coroutines.Count);
+//		Debug.Log("QueueRoutine: " + coroutines.Count);
 		coroutines.Add(coroutine);
 		if (coroutines.Count == 1)
 		{
