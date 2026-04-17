@@ -26,7 +26,7 @@ public class UI_Canvas : MonoBehaviour
 		var party = CharacterController.GetPartyCharacters().ToArray();
 		for (int i = 0; i < portraits.Length; i++)
 		{
-			portraits[i].UpdateUI(i < portraits.Length ? party[i] : null);
+			portraits[i].UpdateUI(i < party.Length ? party[i] : null);
 		}
 		
 		controlPanel.isOn = view.IsControlPanelVisible();

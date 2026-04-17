@@ -26,7 +26,7 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		{
 			gameObject.SetActive(true);
 			
-			toggle.isOn = Selection.IsSelected(_assignedCharacter);
+			toggle.isOn = Selection.IsCharacterSelected(_assignedCharacter);
 			toggle.interactable = _assignedCharacter.IsControllable();
 			
 			rawImage.texture = _assignedCharacter.GetPortraitTexture();

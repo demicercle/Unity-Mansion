@@ -27,7 +27,7 @@ public class UI_ControlToggle : MonoBehaviour
 		var view = GameView.GetInstance();
 		//var selectedCharacter = view.GetSelectedCharacter();
 		var gameController = view.GetController();
-		var selectedCharacter = view.GetSelectedCharacter();
+		var selectedCharacter = Selection.GetSelectedCharacter();
 		var isVisible = !view.HasCoroutines() 
 		                      && gameController.IsPlayerTurn() 
 		                      && selectedCharacter != null

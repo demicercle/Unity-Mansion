@@ -30,34 +30,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		return characterController;
 	}
 	
-	#region SELECTION
-
-	private CharacterController selectedCharacter;
-	public CharacterController GetSelectedCharacter() => selectedCharacter;
-	
-	public bool IsCharacterSelected(CharacterController character) => character && selectedCharacter == character;
-	
-	public void SelectCharacter(CharacterController character)
-	{
-		if (selectedCharacter != null)
-			selectedCharacter.NotifySelected(false);
-		
-		selectedCharacter = character;
-		
-		if (selectedCharacter != null)
-			selectedCharacter.NotifySelected(true);
-		
-		SelectionChanged();
-	}
-	
 	void SelectionChanged()
 	{
+		var selectedCharacter = Selection.GetSelectedCharacter();
 		if (selectedCharacter)
 		{
 			mainCamera.Focus(selectedCharacter);
 		}
 	}
-	#endregion
 	
 	void Awake()
 	{
@@ -75,6 +55,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
+		
+		Selection.selectionChanged += SelectionChanged;
 	}
 
 	[SerializeField] private List<string> scenesToLoad = new List<string>();
@@ -149,11 +131,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public void ClickCharacter(CharacterView clickedCharacterView)
 	{
 		Debug.Log(this + " ClickCharacter " + clickedCharacterView);
+		var selectedCharacter = Selection.GetSelectedCharacter();
 		var clickedCharacter = clickedCharacterView.GetController();
 	//	//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (CanControlCharacter(clickedCharacter))
 		{
-			SelectCharacter(clickedCharacter); // ClickCharacter select party character
+			Selection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 		}
 		else if (clickedCharacter.IsEnemyToPlayer())
 		{
@@ -163,7 +146,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 			else
 			{
-				SelectCharacter(clickedCharacter); // ClickCharacter select enemy
+				Selection.SelectCharacter(clickedCharacter); // ClickCharacter select enemy
 			}
 		}
 		else
@@ -185,6 +168,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log(this + " ClickProp " + clickedProp);
 		var gameController = GetController();
+		var selectedCharacter = Selection.GetSelectedCharacter();
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
@@ -220,7 +204,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public void ClickNavigation(Vector3 navPosition)
 	{
 		Debug.Log(this + " ClickNavigation " + navPosition);
-		var gameController = GetController();
+		var selectedCharacter = Selection.GetSelectedCharacter();
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
@@ -309,7 +293,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		{
 			if (GetController().IsPlayerTurn() && !HasCoroutines())
 			{
-				SelectCharacter(null); // deselect all
+				Selection.SelectCharacter(null); // deselect all
 			}
 		}
 	}
@@ -499,10 +483,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
-			movingCharacter.SetPosition(newPosition);
+			//movingCharacter.SetPosition(newPosition);
 			
 			var newRotation = movingCharacter.GetRotation();
-			movingCharacter.SetRotation(newRotation);
+			//movingCharacter.SetRotation(newRotation);
 			
 			onUpdate?.Invoke();
 			
@@ -555,18 +539,21 @@ public class GameView : MonoBehaviour, IView<GameController>
 	}
 
 	public bool CanUseRunAction() =>
-		!HasCoroutines() && GetController().IsPlayerTurn() && selectedCharacter != null && selectedCharacter.CanUseRunAction();
+		!HasCoroutines() && GetController().IsPlayerTurn() && Selection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
 
 	public bool IsControlPanelVisible() =>
-		selectedCharacter && selectedCharacter.InParty() && GetController().IsPlayerTurn();
+		Selection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
 
 	//public CharacterController GetPartyCharacter(int index) => CharacterController.GetPartyCharacter(index);
 	
 	public void ClickRunAction()
 	{
-		if (selectedCharacter.CanUseRunAction())
+		if (Selection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			selectedCharacter.RunAction();
+			if (selectedCharacter.CanUseRunAction())
+			{
+				selectedCharacter.RunAction();
+			}
 		}
 	}
 
@@ -584,7 +571,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-	public bool CanControlSelectedCharacter() => selectedCharacter && CanControlCharacter(selectedCharacter);
+	public bool CanControlSelectedCharacter() => Selection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
 		return !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
@@ -610,14 +597,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	private void Update()
 	{
-		if (selectedCharacter != null)
-		{
-			if (selectedCharacter.IsDead())
-			{
-				Selection.SelectNextCharacter();
-			}
-		}
-		
 		if (inputSystem.UI.Cancel.WasPressedThisFrame())
 		{
 			hasFocus = false;
@@ -639,6 +618,16 @@ public class GameView : MonoBehaviour, IView<GameController>
 			Cursor.SetCursor(null,default,default);
 		}
 
+		Selection.TryGetSelectedCharacter(out var selectedCharacter);
+		if (selectedCharacter != null)
+		{
+			if (selectedCharacter.IsDead())
+			{
+				Selection.SelectNextCharacter();
+			}
+		}
+
+		
 		if (mouseOverViewport) // process mouse over
 		{
 			var gameController = GetController();

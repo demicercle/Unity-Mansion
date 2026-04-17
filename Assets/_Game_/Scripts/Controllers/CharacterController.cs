@@ -161,17 +161,21 @@ public class CharacterController : MonoBehaviour
 	}
 	
 	public Vector3 GetPosition() => transform.position;
-	public void SetPosition(Vector3 newPos)
+
+	public void Teleport(Vector3 dest) => Teleport(dest, GetRotation());
+	public void Teleport(Vector3 dest, int newRot)
 	{
-		transform.position = newPos;
+		GetAgent().Teleport(dest, newRot);
+	}
+	public void SavePosition(Vector3 newPos)
+	{
 		savedPosition = newPos;
 		onMoved?.Invoke();
 	}
 
 	public int GetRotation() => (int)transform.eulerAngles.y;
-	public void SetRotation(int newRot)
+	public void SaveRotation(int newRot)
 	{
-		transform.rotation = Quaternion.Euler(0, newRot, 0);
 		savedRotation = newRot;
 		onRotate?.Invoke();
 	}

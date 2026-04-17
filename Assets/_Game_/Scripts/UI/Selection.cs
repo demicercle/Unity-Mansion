@@ -4,6 +4,8 @@ using System.Linq;
 public static class Selection
 {
 	static CharacterController selectedCharacter;
+
+	static public event System.Action selectionChanged;
 	
 	static public CharacterController GetSelectedCharacter() => selectedCharacter;
 
@@ -13,10 +15,12 @@ public static class Selection
 		return character != null;
 	}
 
-	static public bool IsSelected(CharacterController character) => selectedCharacter == character;
+	static public bool IsCharacterSelected(CharacterController character) => selectedCharacter == character;
 
 	static public void SelectCharacter(CharacterController character)
 	{
+		Debug.Log("SelectCharacter: " + character);
+		
 		if(selectedCharacter != null)
 			selectedCharacter.NotifySelected(false);
 		
@@ -24,6 +28,8 @@ public static class Selection
 		
 		if(selectedCharacter != null)
 			selectedCharacter.NotifySelected(true);
+		
+		selectionChanged?.Invoke();
 	}
 
 	static public void SelectPartyCharacter(int index)
@@ -53,7 +59,7 @@ public static class Selection
 		while (partyCount-- > 0)
 		{
 			var newIndex = (partyCount + startIndex) % party.Length;
-			Debug.Log(" ? " + newIndex);
+//			Debug.Log(" ? " + newIndex);
 			var newChar = party[newIndex];
 			if (!newChar.IsDead())
 			{
