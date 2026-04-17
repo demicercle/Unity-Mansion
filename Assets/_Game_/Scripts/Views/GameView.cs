@@ -433,6 +433,7 @@ public class GameView : MonoBehaviour
 	
 	public void SelectCharacter(CharacterView characterView, bool focusCamera = false)
 	{
+		Debug.Log(this + " SelectCharacter " + characterView + " " + focusCamera);
 		if(selectedCharacter != null) characterSelected?.Invoke(selectedCharacter, false);
 		selectedCharacter = characterView;
 		if (selectedCharacter != null)
@@ -446,10 +447,10 @@ public class GameView : MonoBehaviour
 	{
 		QueueRoutine(WaitEndTurn());
 	}
-	
-	public bool CanSelectCharacter(CharacterView charView) => !HasCoroutines() && charView && !charView.IsDead();
 
-	public bool CanControlCharacter(CharacterView charView) => gameData.IsPlayerTurn() && !HasCoroutines() && charView && !charView.IsDead() && charView.IsInParty();
+	public bool CanSelectCharacter(CharacterView charView) => !HasCoroutines() && charView && !charView.IsDead() && (!gameData.IsPlayerTurn() || charView.IsInParty());
+
+	public bool CanControlCharacter(CharacterView charView) => gameData.IsPlayerTurn() && !HasCoroutines() && charView && !charView.IsDead() && gameData.IsPlayerTurn() && charView.IsInParty();
 
 	private IEnumerator WaitEndTurn()
 	{

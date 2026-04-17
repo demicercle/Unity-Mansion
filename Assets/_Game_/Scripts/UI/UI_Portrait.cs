@@ -27,7 +27,6 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		gameView.partyChanged += PartyChanged;
 		gameView.characterSelected += CharacterSelected;
 		
-		//toggle.onValueChanged.AddListener(OnValueChanged);
 		gameObject.SetActive(false);
 	}
 
@@ -35,16 +34,6 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	{
 		gameView.partyChanged -= PartyChanged;
 		gameView.characterSelected -= CharacterSelected;
-		
-		//toggle.onValueChanged.RemoveListener(OnValueChanged);
-	}
-
-	private void OnValueChanged(bool value)
-	{
-		if (value && _assignedCharacterView && !gameView.IsCharacterSelected(_assignedCharacterView))
-		{
-			gameView.SelectCharacter(_assignedCharacterView);
-		}
 	}
 
 	private void CharacterSelected(CharacterView characterView, bool selected)

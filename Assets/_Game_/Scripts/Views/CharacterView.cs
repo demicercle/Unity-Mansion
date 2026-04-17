@@ -199,7 +199,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	private AgentWrapper agent;
 	private Color currentColor;
 	private bool mouseOver;
-	private bool isSelected;
+	private bool wasSelected;
 	private int partyIndex;
 	private Vector3[] lastPath;
 
@@ -210,38 +210,17 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		
 		if (value)
 		{
-			gameView.characterSelected -= CharacterSelected;
+			//gameView.characterSelected -= CharacterSelected;
 			data.partyIndexChanged += SetPartyIndex;
 			data.onDamaged += ReceivedDamage;
 			data.onHeal += Healed;
 		}
 		else
 		{
-			gameView.characterSelected += CharacterSelected;
+			//gameView.characterSelected += CharacterSelected;
 			data.partyIndexChanged -= SetPartyIndex;
 			data.onDamaged -= ReceivedDamage;
 			data.onHeal -= Healed;
-		}
-	}
-
-	private void CharacterSelected(CharacterView arg1, bool arg2)
-	{
-		if (arg1 == this)
-		{
-			isSelected = arg2;
-
-//			Debug.Log(this + " isSelected=" + isSelected);
-			if (isSelected)
-			{
-				agent.SetObstacle(false);
-				agent.onSearchPath += UpdatePath;
-			}
-			else
-			{
-				pathRenderers.ForEach(p => p.enabled = false);
-				agent.SetObstacle(true);
-				agent.onSearchPath -= UpdatePath;
-			}
 		}
 	}
 	
@@ -408,6 +387,25 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	    {
 		    Debug.LogWarning(this + " has no data!");
 		    return;
+	    }
+
+	    var isSelected = GameView.GetInstance().IsCharacterSelected(this);
+	    if (isSelected != wasSelected)
+	    {
+		    wasSelected = isSelected;
+		    
+		    Debug.Log(this + " isSelected=" + isSelected);
+		    if (isSelected)
+		    {
+			    agent.SetObstacle(false);
+			    agent.onSearchPath += UpdatePath;
+		    }
+		    else
+		    {
+			    pathRenderers.ForEach(p => p.enabled = false);
+			    agent.SetObstacle(true);
+			    agent.onSearchPath -= UpdatePath;
+		    }
 	    }
 	    
 	    if (data.IsDead() != killed)
