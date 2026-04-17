@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 using Oddworm.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -11,7 +10,10 @@ using UnityEngine.SceneManagement;
 [System.Serializable]
 public class GameView : MonoBehaviour, IView<GameController>
 {
+	static public event System.Action<GameView> onUpdate;
+	
 	override public string ToString() => "GameView";
+
 	
 	static private GameView instance;
 	static public GameView GetInstance()
@@ -33,6 +35,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 	private CharacterController selectedCharacter;
 	public CharacterController GetSelectedCharacter() => selectedCharacter;
 	public bool IsCharacterSelected(CharacterController character) => character && selectedCharacter == character;
+
+	public void SelectCharacter(int index)
+	{
+		var partyCharacters = GetController().GetPartyCharacters();
+		SelectCharacter(partyCharacters[index]);
+	}
 	
 	public void SelectCharacter(CharacterController character)
 	{
@@ -110,6 +118,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		StartCoroutine(Coroutines());
 		
+		canvas = FindObjectsByType<UI_Canvas>(default).First();
+		canvas.UpdateUI(this);
+		
 		SetInputEnabled(false);
 		// TODO Fade In
 		yield return null;
@@ -123,8 +134,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		yield return null; //
 		
-		var levelCharacters = FindObjectsOfType<CharacterController>();
-		Debug.Log(this + " LevelLoaded: levelCharacters=" + levelCharacters.Length);
+		var levelCharacters = FindObjectsOfType<CharacterController>()
+			.OrderBy(c => c.name)
+			.ToList();
+		
+		Debug.Log(this + " LevelLoaded: levelCharacters=" + levelCharacters.Count);
 		
 		var partyIndex = 0;
 		foreach (var character in levelCharacters)
@@ -307,7 +321,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public bool mouseOverViewport { get; set; }
 	
 	public bool hasFocus { get; set; }
-	
+
+	private UI_Canvas canvas;
 	private Vector2 mousePosition;
 	private bool hasMousePosition;
 	private AstarPath aStar;
@@ -536,6 +551,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		onComplete?.Invoke();
 	}
 
+	public bool CanEndTurn() => !HasCoroutines() && GetController().IsPlayerTurn();
+
 	public void ClickEndTurn()
 	{
 		GetController().EndTurn();
@@ -572,9 +589,17 @@ public class GameView : MonoBehaviour, IView<GameController>
 		SelectNextCharacter();
 	}
 
+	public bool CanUseRunAction() =>
+		!HasCoroutines() && GetController().IsPlayerTurn() && selectedCharacter != null && selectedCharacter.CanUseRunAction();
+
+	public bool IsControlPanelVisible() =>
+		selectedCharacter && selectedCharacter.InParty() && GetController().IsPlayerTurn();
+
+	public CharacterController GetPartyCharacter(int index) => GetController().GetPartyCharacter(index);
+	
 	public void ClickRunAction()
 	{
-		if (selectedCharacter != null && selectedCharacter.CanUseRunAction())
+		if (selectedCharacter.CanUseRunAction())
 		{
 			selectedCharacter.RunAction();
 		}
@@ -614,6 +639,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		{
 			if (hasMousePosition) mainCamera.MoveCameraWithCursor(mousePosition);
 		}
+
+		canvas.UpdateUI(this);
 	}
 	
 	private void Update()

@@ -15,54 +15,20 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		if(_assignedCharacter && _assignedCharacter.IsControllable())
-			gameView.SelectCharacter(_assignedCharacter);
+		GameView.GetInstance().SelectCharacter(transform.GetSiblingIndex());
 	}
 	
-	private CharacterController _assignedCharacter;
-	private GameView gameView;
-	
-	private void Awake()
+	public void UpdateUI(GameView view) // TODO use events
 	{
-		gameView = GameView.GetInstance();
-		gameView.GetController().partyChanged += PartyChanged;
-	}
-
-	private void OnDestroy()
-	{
-		gameView.GetController().partyChanged -= PartyChanged;
-	}
-
-	private void PartyChanged(CharacterController[] partyCharacters)
-	{
-		_assignedCharacter = null;
-		
-		var index = transform.GetSiblingIndex();
-		for (int i = 0; i < partyCharacters.Length; i++)
-		{
-			if (i == index)
-			{
-				_assignedCharacter =  partyCharacters[i];
-				break;
-			}
-		}
-
-		gameObject.SetActive(_assignedCharacter != null);
-	}
-
-	private void OnEnable()
-	{
-		if(_assignedCharacter) Debug.Log(this + " > " + _assignedCharacter);
-	}
-
-	private void LateUpdate() // TODO use events
-	{
+		var _assignedCharacter = view.GetPartyCharacter(transform.GetSiblingIndex());
 		if (_assignedCharacter)
 		{
+			gameObject.SetActive(true);
+			toggle.interactable = _assignedCharacter.IsControllable();
 			toggle.isOn = _assignedCharacter.IsSelected();
 			rawImage.texture = _assignedCharacter.GetPortraitTexture();
 			nameLabel.text = _assignedCharacter.GetDisplayName();
-			healthSprite.fillAmount = _assignedCharacter.GetDamageProgress();
+			healthSprite.fillAmount = 1f - _assignedCharacter.GetDamageProgress();
 			healthLabel.text = _assignedCharacter.GetCurrentHealthInt() + "/" +
 			                   _assignedCharacter.GetMaxHealth();
 			return;

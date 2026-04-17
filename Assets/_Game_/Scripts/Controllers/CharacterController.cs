@@ -59,6 +59,7 @@ public class CharacterController : MonoBehaviour
 		if (value != isSelected)
 		{
 			isSelected = value;
+			agent.SetObstacle(!isSelected || !IsControllable());
 			selectionChanged?.Invoke(value);
 			gameController.SelectionChanged();
 		}
@@ -75,6 +76,7 @@ public class CharacterController : MonoBehaviour
 	public void ConsumeActions(int actions = 1)
 	{
 		usedActions += actions;
+		Debug.Log(this + " usedActions=" + usedActions);
 		statsChanged?.Invoke();
 	}
 
@@ -85,6 +87,7 @@ public class CharacterController : MonoBehaviour
 
 	public void SetPartyIndex(int index)
 	{
+		Debug.Log(this + " SetPartyIndex " + index);
 		partyIndex = index;
 		isControllable = index >= 0;
 		onPartyIndexChanged?.Invoke(index);
@@ -219,7 +222,7 @@ public class CharacterController : MonoBehaviour
 
 	public float GetAttackRange() => characterData.attackRange;
 	
-	public bool CanAttack() => !characterData.noAttack;
+	public bool CanAttack() => !characterData.noAttack && HasActions();
 
 	public bool TryGetAIBrain(out AIBrainData aiBrain)
 	{

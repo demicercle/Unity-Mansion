@@ -9,6 +9,12 @@ public class GameController : MonoBehaviour
 
 	public CharacterController[] GetPartyCharacters() => allCharacters.Where(c => c.InParty()).ToArray();
 
+	public CharacterController GetPartyCharacter(int index)
+	{
+		var party = GetPartyCharacters();//TODO not optim!
+		return index >= 0 && index < party.Length ? party[index] : null;
+	}
+
 	public System.Action turnStarted, turnEnded, selectionChanged;
 	public System.Action<CharacterController[]> partyChanged;
 	
