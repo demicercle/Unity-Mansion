@@ -231,11 +231,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	public System.Action<bool> routinesStarted;
 	
-	static public string LAYER_GROUND = "Ground";
-	static public string LAYER_WALL = "Wall";
-	static public string LAYER_CHARACTER = "Character";
-	public static string LAYER_IGNORE = "Ignore Raycast";
-	
 	public static bool TryGetNearestNavPosition(Vector3 position, float maxDistance, out Vector3 navPosition)
 	{
 		navPosition = position;
@@ -732,7 +727,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		hit = default(RaycastHit);
 		var cam = Camera.main;
 		var ray = cam.ScreenPointToRay(mousePosition);
-		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(LAYER_CHARACTER)))
+		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
 		{
 			//DebugGUI.Log("Hit Character: " + hit.collider);
 			if(drawDebug) DbgDraw.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
@@ -746,7 +741,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			return CURSOR_RAYCAST_RESULT_CHARACTER;
 		}
 		
-		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(LAYER_GROUND, LAYER_WALL)))
+		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(Consts.LAYER_GROUND, Consts.LAYER_WALL)))
 		{
 			//DebugGUI.Log("Hit Navigation: " + hit.point);
 			if(drawDebug) DbgDraw.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Quaternion.Euler(90,0,0),maxNavDistance, Color.blue);

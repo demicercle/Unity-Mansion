@@ -244,7 +244,7 @@ public class CharacterController : MonoBehaviour
 		var outList = new List<CharacterController>();
 		var center = GetPosition();
 		DebugGUI.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
-		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(GameView.LAYER_CHARACTER)))
+		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
 		{
 			if (coll.TryGetComponent(out CharacterController otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())
 			{
@@ -289,7 +289,7 @@ public class CharacterController : MonoBehaviour
 		var start = GetEyesPosition();
 		var end = other.GetEyesPosition();
 		if(Physics.Linecast(start, end, out var hit,
-			   LayerMask.GetMask(GameView.LAYER_WALL, GameView.LAYER_GROUND)))
+			   LayerMask.GetMask(Consts.LAYER_WALL, Consts.LAYER_GROUND)))
 		{
 			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
 			DebugGUI.Line(start, end, Color.red, drawDuration);

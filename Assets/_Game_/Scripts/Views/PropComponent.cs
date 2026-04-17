@@ -62,11 +62,11 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 	{
 		if (value)
 		{
-			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
+			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 		}
 		else
 		{
-			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
+			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
 		}
 	}
 
@@ -99,7 +99,7 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 	{
 		if (rebuildNavigation) RebuildNavigationAsync();
 		
-		gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
+		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
 
 		if (autoTriggerDelay > 0f)
 		{

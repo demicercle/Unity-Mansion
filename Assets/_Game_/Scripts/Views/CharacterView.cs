@@ -53,7 +53,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		{
 			animator.SetTrigger(AnimationParameters.Trigger);
 			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
-			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
+			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 			SetColor(deadColor);
 		};
 
@@ -204,7 +204,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 
     private void Start()
     {
-	    gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
+	    gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
 		
 	    if (animator != null)
 	    {
