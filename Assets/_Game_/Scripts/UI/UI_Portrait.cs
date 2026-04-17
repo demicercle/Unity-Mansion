@@ -27,7 +27,7 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	private void Awake()
 	{
 		gameView = GameView.GetInstance();
-		gameView.characterAddedToParty += CharacterAddedToParty;
+		gameView.partyChanged += PartyChanged;
 		gameView.characterSelected += CharacterSelected;
 		
 		toggle.onValueChanged.AddListener(OnValueChanged);
@@ -36,7 +36,7 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 
 	private void OnDestroy()
 	{
-		gameView.characterAddedToParty -= CharacterAddedToParty;
+		gameView.partyChanged -= PartyChanged;
 		gameView.characterSelected -= CharacterSelected;
 		
 		toggle.onValueChanged.RemoveListener(OnValueChanged);
@@ -58,15 +58,21 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		}
 	}
 
-	private void CharacterAddedToParty(CharacterView arg1, int arg2)
+	private void PartyChanged(CharacterView[] partyCharacters)
 	{
+		_assignedCharacterView = null;
+		
 		var index = transform.GetSiblingIndex();
-		Debug.Log(this + " " + index + " CharacterAddedToParty " + arg1 + arg2);
-		if (index == arg2)
+		for (int i = 0; i < partyCharacters.Length; i++)
 		{
-			_assignedCharacterView = arg1;
-			gameObject.SetActive(arg1 && arg2 >= 0);
+			if (i == index)
+			{
+				_assignedCharacterView = partyCharacters[i];
+				break;
+			}
 		}
+
+		gameObject.SetActive(_assignedCharacterView != null);
 	}
 
 	private void LateUpdate() // TODO use events

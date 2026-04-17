@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameData", menuName = "GameData", order = 0)]
 public class GameData : ScriptableObject
 {
-	public System.Action<CharacterData, int> characterAddedToParty;
+	public System.Action partyChanged;
 	public System.Action<int> newTurnStarted;
 	public System.Action<CharacterData> runAction;
 	public System.Action<CharacterData> actionUsed;
@@ -21,8 +21,8 @@ public class GameData : ScriptableObject
 		if (!partyCharacters.Contains(characterData))
 		{
 			partyCharacters.Add(characterData);
+			partyChanged?.Invoke();
 			characterData.SetPartyIndex(partyCharacters.Count - 1);
-			characterAddedToParty?.Invoke(characterData, partyCharacters.Count - 1);
 		}
 	}
 
@@ -31,8 +31,8 @@ public class GameData : ScriptableObject
 		if (partyCharacters.Contains(characterData))
 		{
 			partyCharacters.Remove(characterData);
+			partyChanged?.Invoke();
 			characterData.SetPartyIndex(-1);
-			characterAddedToParty?.Invoke(characterData, -1);
 		}
 	}
 	

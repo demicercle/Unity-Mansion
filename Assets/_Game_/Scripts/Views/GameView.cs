@@ -8,7 +8,6 @@ using UnityEngine;
 [System.Serializable]
 public class GameView
 {
-	public System.Action<CharacterView, int> characterAddedToParty;
 	public System.Action<CharacterView> actionUsed;
 	static public System.Action<CharacterView> clickSelectCharacter;
 	static public System.Action clickEndTurn;
@@ -476,6 +475,9 @@ public class GameView
 		
 		gameData.Init(this);
 		
+		// register Events? TODO remove
+		RegisterEvents(true);
+		
 		// init characters
 		foreach (var character in allCharacters)
 		{
@@ -497,8 +499,7 @@ public class GameView
 			}
 		}
 		
-		// register UI Events
-		RegisterEvents(true);
+		PartyChanged();
 
 		yield return new WaitForSeconds(0.1f); // todo hak camera focus
 		
@@ -517,19 +518,21 @@ public class GameView
 	{
 		if (value)
 		{
-			gameData.characterAddedToParty += CharacterAddedToParty;
+			gameData.partyChanged += PartyChanged;
 		}
 		else
 		{
-			gameData.characterAddedToParty -= CharacterAddedToParty;
+			gameData.partyChanged -= PartyChanged;
 		}
 	}
 
-	private void CharacterAddedToParty(CharacterData characterData, int partyIndex)
+	public System.Action<CharacterView[]> partyChanged;
+
+	public void PartyChanged()
 	{
-		Debug.Log(this + " CharacterAddedToParty " + characterData + " " + partyIndex);
-		characterAddedToParty?.Invoke(characterData.GetCharacter(), partyIndex); // TODO remove "GetCharacter()"
-	}
+		Debug.Log(this + " PartyChanged");
+		partyChanged?.Invoke(partyCharacters.ToArray());
+	} 
 
 	public void LateUpdate()
 	{
