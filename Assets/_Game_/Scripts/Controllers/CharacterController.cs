@@ -40,7 +40,11 @@ public class CharacterController : MonoBehaviour
 	[ReadOnly] [SerializeField] private bool isDead;
 	[ReadOnly] [SerializeField] private CharacterAgent agent;
 
-	public CharacterAgent GetAgent() => agent;
+	public CharacterAgent GetAgent()
+	{
+		if (agent == null) agent = Utils.GetOrAddComponent<CharacterAgent>(gameObject);
+		return agent;
+	}
 
 	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.9f;
     
@@ -291,7 +295,7 @@ public class CharacterController : MonoBehaviour
 	{
 		if(characterData == null)
 			Debug.LogError(this + " has no character data");
-		agent = Utils.GetOrAddComponent<CharacterAgent>(gameObject);
+		
 		if(!aiBrains.OfType<AIBrain_Wait>().Any()) aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());//todo store instance static
 	}
 

@@ -312,6 +312,7 @@ GameObject:
   - component: {fileID: 2682672067756541164}
   - component: {fileID: 6410703130520739872}
   - component: {fileID: 1077634328985660634}
+  - component: {fileID: 2515140718575658048}
   - component: {fileID: 6072534866263412361}
   - component: {fileID: 7385597297877825555}
   - component: {fileID: 6483927452517428826}
@@ -410,10 +411,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterData: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
   aiBrains: []
-  moveSpeed: 4.5
-  radius: 0.5
-  height: 1.5
-  minNavDistance: 0.1
   isSelected: 0
   partyIndex: -1
   usedMovePoints: 0
@@ -422,7 +419,19 @@ MonoBehaviour:
   savedRotation: 0
   savedPosition: {x: 0, y: 0, z: 0}
   isDead: 0
-  agent: {fileID: 0}
+  agent: {fileID: 2515140718575658048}
+--- !u!114 &2515140718575658048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837400758454604685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5613c26fe6a42d782cf4c99a802cdf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!54 &6072534866263412361
 Rigidbody:
   m_ObjectHideFlags: 0
