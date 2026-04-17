@@ -9,10 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 704af3568f7d4f1b9d01bf4cd71767c7, type: 3}
-  m_Name: _GameData
+  m_Script: {fileID: 11500000, guid: 262c467057e34eb994a448ba38a6ab6c, type: 3}
+  m_Name: Zombi
   m_EditorClassIdentifier: 
-  currentTurn: 0
-  currentLevel: 0
-  allLevels:
-  - {fileID: 11400000, guid: 2b465d5fbbb7827499e473be74894ddc, type: 2}
+  displayName: Zombi
+  portraitTexture: {fileID: 0}
+  faction: 2
+  maxActions: 1
+  maxMovePoints: 5
+  runActionExtraMovePoints: 3
+  noAttack: 0
+  attackRange: 0
+  maxHealth: 5
+  lastAttackDamage: 1

@@ -37,7 +37,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 			return;
 		}
 		
-		Debug.Log(this + " No party character");
+//		Debug.Log(this + " No party character");
 		gameObject.SetActive(false);
 	}
 }

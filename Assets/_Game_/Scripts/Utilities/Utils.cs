@@ -77,9 +77,9 @@ public static class Utils
 		}
 	}
 
-	static public Coroutine RebuildNavigationAsync() => AstarPath.active.StartCoroutine(DoRebuildNavigationAsync());
+	//static public Coroutine RebuildNavigationAsync() => AstarPath.active.StartCoroutine(DoRebuildNavigationAsync());
 	
-	static public IEnumerator DoRebuildNavigationAsync()
+	static public IEnumerator RebuildNavigationAsync()
 	{
 		foreach (var progress in AstarPath.active.ScanAsync()) {
 //			Debug.Log("Scanning... " + progress.ToString());

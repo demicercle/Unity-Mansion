@@ -58,14 +58,32 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 		return Waypoint.GetBestWaypointFromPosition(worldPos, out bestWaypoint, GetWaypoints());
 	}
 
+	public void SetDisabled(bool value)
+	{
+		if (value)
+		{
+			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
+		}
+		else
+		{
+			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
+		}
+	}
+
 	public float triggerDelay = 0.0f;
 	public float animDuration = 1.0f;
 
 	private void OnInteract(int interactionCount)
 	{
+		if (rebuildNavigation)
+		{
+			Debug.Log(this + " rebuild navigation async");
+			StartCoroutine(Utils.RebuildNavigationAsync());
+		}
+		
 		if (onlyOnce && interactionCount > 0)
 		{
-			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
+			SetDisabled(true);
 		}
 		
 		if (!string.IsNullOrEmpty(animatorTrigger))

@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 262c467057e34eb994a448ba38a6ab6c, type: 3}
-  m_Name: Zombi
+  m_Name: PC_2
   m_EditorClassIdentifier: 
-  displayName: Zombi
-  portraitTexture: {fileID: 0}
+  displayName: John
+  portraitTexture: {fileID: 2800000, guid: 3fa5538c2bc3e5f46945b5125f3ad7ef, type: 3}
+  faction: 1
   maxActions: 1
   maxMovePoints: 5
   runActionExtraMovePoints: 3
@@ -21,9 +22,3 @@ MonoBehaviour:
   attackRange: 0
   maxHealth: 5
   lastAttackDamage: 1
-  usedMovePoints: 0
-  usedActions: 0
-  characterViewOwner: {fileID: 0}
-  position: {x: -5.302335, y: 0.00000035762787, z: 7.3597374}
-  rotation: 280
-  partyIndex: -1

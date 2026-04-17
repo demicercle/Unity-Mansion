@@ -153,7 +153,22 @@ public class GameView : MonoBehaviour, IView<GameController>
 		{
 			if (selectedCharacter != null)
 			{
-				Debug.Log("TODO interact with " + clickedCharacter); //TODO
+				if (clickedCharacter.IsEnemyToPlayer())
+				{
+					// assign attack
+					if (selectedCharacter.CanAttack())
+					{
+						AssignAttack(selectedCharacter, clickedCharacter, false, true);
+					}
+					else
+					{
+						DebugGUI.FloatingText(selectedCharacter.GetCenterPosition(), "Can't");
+					}
+				}
+				else
+				{
+					Debug.Log("TODO interact with " + clickedCharacter); //TODO
+				}
 			}
 		}
 	}
@@ -405,11 +420,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 			prop.GetController().Interact();
 		
 			yield return new WaitForSeconds(prop.animDuration);
-
-			if (prop.rebuildNavigation)
-			{
-				yield return Utils.RebuildNavigationAsync();
-			}
 		}
 	}
 

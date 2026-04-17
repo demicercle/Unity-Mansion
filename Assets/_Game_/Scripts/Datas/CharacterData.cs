@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+
 [CreateAssetMenu(fileName = "CharacterData", menuName = "CharacterData", order = 0)]
 public class CharacterData : ScriptableObject
 {
@@ -17,7 +18,7 @@ public class CharacterData : ScriptableObject
 	[Header("Profile")] // todo use private and [SerializeField]
 	public string displayName;
 	public Texture2D portraitTexture;
-	public int factionIndex;
+	public CharacterFaction faction;
 	
 	[Header("Actions")]
 	public int maxActions;
