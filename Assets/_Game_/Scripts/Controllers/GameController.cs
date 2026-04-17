@@ -7,18 +7,18 @@ public class GameController : MonoBehaviour
 {
 	//public CharacterController GetSelectedCharacter() => allCharacters.FirstOrDefault(c => c.IsSelected());
 
-	public CharacterController[] GetPartyCharacters() => allCharacters.Where(c => c.InParty()).ToArray();
+	//public CharacterController[] GetPartyCharacters() => allCharacters.Where(c => c.InParty()).ToArray();
 
-	public CharacterController GetPartyCharacter(int index)
+	/*public CharacterController GetPartyCharacter(int index)
 	{
 		var party = GetPartyCharacters();//TODO not optim!
 		return index >= 0 && index < party.Length ? party[index] : null;
-	}
+	}*/
 
 	public System.Action turnStarted, turnEnded, selectionChanged;
 	public System.Action<CharacterController[]> partyChanged;
 	
-	[ReadOnly] [SerializeField] private List<CharacterController> allCharacters =  new List<CharacterController>();
+	//[ReadOnly] [SerializeField] private List<CharacterController> allCharacters =  new List<CharacterController>();
 	[ReadOnly] [SerializeField] private int currentTurn;
 	[ReadOnly] [SerializeField] private bool playerTurn;
 
@@ -33,16 +33,16 @@ public class GameController : MonoBehaviour
 		return -1;
 	}*/
 
-	public void PartyChanged() => partyChanged?.Invoke(GetPartyCharacters());
+//	public void PartyChanged() => partyChanged?.Invoke(GetPartyCharacters());
 
-	public void AddCharacter(CharacterController character)
+/*	public void AddCharacter(CharacterController character)
 	{
 		Debug.Log(this + " AddCharacter " + character + " at " + allCharacters.Count);
 		if(allCharacters.Contains(character)) Debug.LogError(this + " character already added!");
 		character.name += " (" + allCharacters.Count + ")";
 		allCharacters.Add(character);
-	}
-	public CharacterController GetCharacterAt(int index) => allCharacters[index];
+	}*/
+//	public CharacterController GetCharacterAt(int index) => allCharacters[index];
 	
 	public int GetCurrentTurn() => currentTurn;
 	public bool IsPlayerTurn() => playerTurn;

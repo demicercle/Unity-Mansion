@@ -13,19 +13,22 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	public Image healthSprite;
 	public TMP_Text healthLabel;
 
+	public int GetPartyIndex() => transform.GetSiblingIndex();
+	
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		GameView.GetInstance().SelectCharacter(transform.GetSiblingIndex());
+		Selection.SelectPartyCharacter(GetPartyIndex());
 	}
 	
-	public void UpdateUI(GameView view) // TODO use events
+	public void UpdateUI(CharacterController _assignedCharacter) // TODO use events
 	{
-		var _assignedCharacter = view.GetPartyCharacter(transform.GetSiblingIndex());
 		if (_assignedCharacter)
 		{
 			gameObject.SetActive(true);
+			
+			toggle.isOn = Selection.IsSelected(_assignedCharacter);
 			toggle.interactable = _assignedCharacter.IsControllable();
-			toggle.isOn = view.IsCharacterSelected(_assignedCharacter);
+			
 			rawImage.texture = _assignedCharacter.GetPortraitTexture();
 			nameLabel.text = _assignedCharacter.GetDisplayName();
 			healthSprite.fillAmount = 1f - _assignedCharacter.GetDamageProgress();

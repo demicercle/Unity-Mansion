@@ -3,11 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+
 public class CharacterController : MonoBehaviour
 {
 	static public List<CharacterController> instances = new List<CharacterController>();
-	
-	private const int PLAYER_FACTION = 1;
+	static public IEnumerable<CharacterController> GetPartyCharacters() => instances.Where(c => c.InParty());
+
+	static public CharacterController GetPartyCharacter(int i)
+	{
+		if (i < 0) return null;
+		var party = GetPartyCharacters().ToArray();
+		return i < party.Length ? party[i] : null;
+	}
 
 	private GameController gameController => GameView.GetInstance().GetController();
 	
@@ -85,7 +92,7 @@ public class CharacterController : MonoBehaviour
 		statsChanged?.Invoke();
 	}
 
-	public bool IsEnemyToPlayer() => characterData.factionIndex > PLAYER_FACTION;
+	public bool IsEnemyToPlayer() => characterData.factionIndex > Consts.PLAYER_FACTION;
 	
 	public bool InParty() => partyIndex >= 0;
 	public int GetPartyIndex() => partyIndex;
@@ -96,7 +103,6 @@ public class CharacterController : MonoBehaviour
 		partyIndex = index;
 		isControllable = index >= 0;
 		onPartyIndexChanged?.Invoke(index);
-		gameController.PartyChanged();
 	}
 	
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);

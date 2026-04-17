@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,9 +23,10 @@ public class UI_Canvas : MonoBehaviour
 	
 	public void UpdateUI(GameView view)
 	{
+		var party = CharacterController.GetPartyCharacters().ToArray();
 		for (int i = 0; i < portraits.Length; i++)
 		{
-			portraits[i].UpdateUI(view);
+			portraits[i].UpdateUI(i < portraits.Length ? party[i] : null);
 		}
 		
 		controlPanel.isOn = view.IsControlPanelVisible();

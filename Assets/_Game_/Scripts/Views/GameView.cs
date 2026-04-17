@@ -36,12 +36,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public CharacterController GetSelectedCharacter() => selectedCharacter;
 	
 	public bool IsCharacterSelected(CharacterController character) => character && selectedCharacter == character;
-
-	public void SelectCharacter(int index)
-	{
-		var partyCharacters = GetController().GetPartyCharacters();
-		SelectCharacter(partyCharacters[index]);
-	}
 	
 	public void SelectCharacter(CharacterController character)
 	{
@@ -54,36 +48,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 			selectedCharacter.NotifySelected(true);
 		
 		SelectionChanged();
-	}
-	
-	public void SelectNextCharacter()
-	{
-		var gameController = GetController();
-		
-		var party = gameController.GetPartyCharacters().OrderBy(c => c.GetPartyIndex()).ToArray();
-		var startIndex = gameController.FindSelectedCharacterIndex();
-		if (startIndex < 0)
-		{
-			Debug.Log(this + " Select First Character");
-			SelectCharacter(party.FirstOrDefault());
-			return;
-		}
-		
-		Debug.Log(this + " SelectNextCharacter " + startIndex);
-		var partyCount = party.Length;
-		while (partyCount-- > 0)
-		{
-			var newIndex = (partyCount + startIndex) % party.Length;
-			Debug.Log(this + " ? " + newIndex);
-			var newChar = party[newIndex];
-			if (!newChar.IsDead())
-			{
-				SelectCharacter(newChar);
-				return;
-			}
-		}
-		
-		Debug.LogWarning(this + " Has no character to select next!");
 	}
 	
 	void SelectionChanged()
@@ -144,8 +108,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var partyIndex = 0;
 		foreach (var character in levelCharacters)
 		{
-			GetController().AddCharacter(character);
-			if(character.CompareTag(Consts.TAG_PLAYER)) character.SetPartyIndex(partyIndex++);
+			if(character.CompareTag(Consts.TAG_PLAYER))
+				character.SetPartyIndex(partyIndex++);
 		}
 		
 		// TODO Fade Out
@@ -157,7 +121,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		yield return new WaitForSeconds(0.5f); // todo hak camera focus
 		
-		SelectNextCharacter();
+		Selection.SelectNextCharacter();
 	}
 	
 	private IEnumerator Coroutines()
@@ -587,7 +551,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		GetController().NewTurn();
 		
-		SelectNextCharacter();
+		Selection.SelectNextCharacter();
 	}
 
 	public bool CanUseRunAction() =>
@@ -596,7 +560,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public bool IsControlPanelVisible() =>
 		selectedCharacter && selectedCharacter.InParty() && GetController().IsPlayerTurn();
 
-	public CharacterController GetPartyCharacter(int index) => GetController().GetPartyCharacter(index);
+	//public CharacterController GetPartyCharacter(int index) => CharacterController.GetPartyCharacter(index);
 	
 	public void ClickRunAction()
 	{
@@ -650,7 +614,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		{
 			if (selectedCharacter.IsDead())
 			{
-				SelectNextCharacter();
+				Selection.SelectNextCharacter();
 			}
 		}
 		
