@@ -1,0 +1,266 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+public static class Utils
+{
+	static public void SetDirty(params Object[] objects)
+	{
+#if UNITY_EDITOR
+		if (!Application.isPlaying)
+		{
+			foreach (var obj in objects)
+				UnityEditor.EditorUtility.SetDirty(obj);
+		}
+#endif
+	}
+	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
+	static public Color ColorScale(Color color, float alpha) => new Color(color.r * alpha, color.g * alpha, color.b * alpha, color.a * alpha);
+
+	public static Color HTML_To_Color(string html)
+	{
+		return ColorUtility.TryParseHtmlString(html, out var c) ? c : default;
+	}
+	
+	public static float PathLength(params Vector3[] path)
+	{
+		var length = 0f;
+		for(int i = 0; i < path.Length -1; i++)
+			length += (path[i] - path[i + 1]).magnitude;
+		return length;
+	}
+	
+	/// <summary>
+	/// Limite la longueur totale d'un chemin (somme des distances entre les points) à une valeur maximale donnée.
+	/// </summary>
+	/// <param name="path">Le chemin à limiter (tableau de Vector3).</param>
+	/// <param name="maxTotalLength">La longueur totale maximale souhaitée pour le chemin.</param>
+	/// <returns>Un nouveau tableau de Vector3 dont la longueur totale est limitée à maxTotalLength.</returns>
+	public static Vector3[] LimitPathTotalLength(Vector3[] path, float maxTotalLength)
+	{
+		if (path == null || path.Length <= 1 || maxTotalLength <= 0f)
+		{
+			return new Vector3[0];
+		}
+
+		List<Vector3> limitedPath = new List<Vector3> { path[0] };
+		float currentTotalLength = 0f;
+
+		for (int i = 1; i < path.Length; i++)
+		{
+			float segmentLength = Vector3.Distance(path[i - 1], path[i]);
+			if (currentTotalLength + segmentLength > maxTotalLength)
+			{
+				// Si on dépasse la longueur max, on calcule le point final partiel pour atteindre exactement maxTotalLength
+				float remainingLength = maxTotalLength - currentTotalLength;
+				Vector3 direction = (path[i] - path[i - 1]).normalized;
+				Vector3 lastPoint = path[i - 1] + direction * remainingLength;
+				limitedPath.Add(lastPoint);
+				break;
+			}
+			else
+			{
+				limitedPath.Add(path[i]);
+				currentTotalLength += segmentLength;
+			}
+		}
+
+		return limitedPath.ToArray();
+	}
+	
+	static public void RebuildNavigation()
+	{
+		foreach (var astar in Object.FindObjectsByType<AstarPath>(FindObjectsInactive.Exclude, FindObjectsSortMode.InstanceID))
+		{
+			astar.Scan(astar.graphs);
+		}
+	}
+
+	//static public Coroutine RebuildNavigationAsync() => AstarPath.active.StartCoroutine(DoRebuildNavigationAsync());
+	
+	static public IEnumerator RebuildNavigationAsync()
+	{
+		foreach (var progress in AstarPath.active.ScanAsync()) {
+//			Debug.Log("Scanning... " + progress.ToString());
+			yield return null;
+		}
+	}
+	
+	/// <summary>
+	/// Tente de trouver une position navigable sur le navmesh, proche du point donné.
+	/// </summary>
+	/// <param name="position">Position de départ.</param>
+	/// <param name="maxDistance">Distance maximale autorisée pour chercher un point navigable.</param>
+	/// <param name="navPosition">Position navigable retournée si succès.</param>
+	/// <returns>True si une position navigable valide a été trouvée.</returns>
+	public static bool TryGetNearestNavPosition(Vector3 position, float maxDistance, out Vector3 navPosition)
+	{
+		navPosition = position;
+
+		if (AstarPath.active == null)
+			return false;
+
+		// Crée une contrainte pour nœuds walkables uniquement
+		Pathfinding.NNConstraint constraint = Pathfinding.NNConstraint.Walkable;
+		constraint.constrainWalkability = true;
+		constraint.walkable = true;
+
+		// Cherche le nœud le plus proche
+		Pathfinding.NNInfo nearest = AstarPath.active.GetNearest(position, constraint);
+
+		if (nearest.node != null && nearest.node.Walkable)
+		{
+			float distance = Vector3.Distance(position, (Vector3)nearest.position);
+			if (distance <= maxDistance)
+			{
+				navPosition = (Vector3)nearest.position;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static void DrawGizmosPath(Vector3[] path, bool closedLoop)
+	{
+		if (path.Length <= 0)
+			return;
+		
+		for (int i = 0; i < path.Length - 1; i++)
+		{
+			var p0 = path[i];
+			var p1 = path[i + 1];
+			Gizmos.DrawLine(p0, p1);
+		}
+		
+		if (closedLoop && path.Length > 2)
+			Gizmos.DrawLine(path.Last(), path.First());
+	}
+	
+	public static void DrawGizmosCircle(Vector3 pos, Vector3 normal, float radius, int numSegments = 16)
+	{
+		// I think of normal as conceptually in the Y direction.  We find the
+		// "forward" and "right" axes relative to normal and I think of them 
+		// as the X and Z axes, though they aren't in any particular direction.
+		// All that matters is that they're perpendicular to each other and on
+		// the plane defined by pos and normal.
+		Vector3 temp = (normal.x < normal.z) ? new Vector3(1f, 0f, 0f) : new Vector3(0f, 0f, 1f);
+		Vector3 forward = Vector3.Cross(normal, temp).normalized;
+		Vector3 right = Vector3.Cross(forward, normal).normalized;
+
+		Vector3 prevPt = pos + (forward * radius);
+		float angleStep = (Mathf.PI * 2f) / numSegments;
+		for (int i = 0; i < numSegments; i++)
+		{
+			// Get the angle for the end of this segment.  If it's the last segment,
+			// use the angle of the first point so the last segment meets up with
+			// the first point exactly (regardless of floating point imprecision).
+			float angle = (i == numSegments - 1) ? 0f : (i + 1) * angleStep;
+
+			// Get the segment end point in local space, i.e. pretend as if the
+			// normal was (0, 1, 0), forward was (0, 0, 1), right was (1, 0, 0),
+			// and pos was (0, 0, 0).
+			Vector3 nextPtLocal = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle)) * radius;
+
+			// Transform from local to world coords.  nextPtLocal's x,z are distances
+			// along its axes, so we want those as the distances along our right and
+			// forward axes.
+			Vector3 nextPt = pos + (right * nextPtLocal.x) + (forward * nextPtLocal.z);
+
+			Gizmos.DrawLine(prevPt, nextPt);
+
+			prevPt = nextPt;
+		}
+	}
+	
+	public static void DrawDebugCircle(Vector3 pos, Vector3 normal, float radius, int numSegments = 16)
+	{
+		// I think of normal as conceptually in the Y direction.  We find the
+		// "forward" and "right" axes relative to normal and I think of them 
+		// as the X and Z axes, though they aren't in any particular direction.
+		// All that matters is that they're perpendicular to each other and on
+		// the plane defined by pos and normal.
+		Vector3 temp = (normal.x < normal.z) ? new Vector3(1f, 0f, 0f) : new Vector3(0f, 0f, 1f);
+		Vector3 forward = Vector3.Cross(normal, temp).normalized;
+		Vector3 right = Vector3.Cross(forward, normal).normalized;
+
+		Vector3 prevPt = pos + (forward * radius);
+		float angleStep = (Mathf.PI * 2f) / numSegments;
+		for (int i = 0; i < numSegments; i++)
+		{
+			// Get the angle for the end of this segment.  If it's the last segment,
+			// use the angle of the first point so the last segment meets up with
+			// the first point exactly (regardless of floating point imprecision).
+			float angle = (i == numSegments - 1) ? 0f : (i + 1) * angleStep;
+
+			// Get the segment end point in local space, i.e. pretend as if the
+			// normal was (0, 1, 0), forward was (0, 0, 1), right was (1, 0, 0),
+			// and pos was (0, 0, 0).
+			Vector3 nextPtLocal = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle)) * radius;
+
+			// Transform from local to world coords.  nextPtLocal's x,z are distances
+			// along its axes, so we want those as the distances along our right and
+			// forward axes.
+			Vector3 nextPt = pos + (right * nextPtLocal.x) + (forward * nextPtLocal.z);
+
+			Debug.DrawLine(prevPt, nextPt);
+
+			prevPt = nextPt;
+		}
+	}
+	
+	public static void DrawGizmosArrow(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+	{
+		Gizmos.DrawRay(pos, direction);
+		
+		Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0,180+arrowHeadAngle,0) * new Vector3(0,0,1);
+		Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0,180-arrowHeadAngle,0) * new Vector3(0,0,1);
+		Gizmos.DrawRay(pos + direction, right * arrowHeadLength);
+		Gizmos.DrawRay(pos + direction, left * arrowHeadLength);
+	}
+
+	public static void DrawGizmosArrow(Vector3 pos, Vector3 direction, Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+	{
+		Gizmos.color = color;
+		Gizmos.DrawRay(pos, direction);
+		
+		Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0,180+arrowHeadAngle,0) * new Vector3(0,0,1);
+		Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0,180-arrowHeadAngle,0) * new Vector3(0,0,1);
+		Gizmos.DrawRay(pos + direction, right * arrowHeadLength);
+		Gizmos.DrawRay(pos + direction, left * arrowHeadLength);
+	}
+
+	public static void DrawDebugArrow(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+	{
+		Debug.DrawRay(pos, direction);
+		
+		Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0,180+arrowHeadAngle,0) * new Vector3(0,0,1);
+		Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0,180-arrowHeadAngle,0) * new Vector3(0,0,1);
+		Debug.DrawRay(pos + direction, right * arrowHeadLength);
+		Debug.DrawRay(pos + direction, left * arrowHeadLength);
+	}
+	public static void DrawDebugArrow(Vector3 pos, Vector3 direction, Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+	{
+		Debug.DrawRay(pos, direction, color);
+		
+		Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0,180+arrowHeadAngle,0) * new Vector3(0,0,1);
+		Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0,180-arrowHeadAngle,0) * new Vector3(0,0,1);
+		Debug.DrawRay(pos + direction, right * arrowHeadLength, color);
+		Debug.DrawRay(pos + direction, left * arrowHeadLength, color);
+	}
+
+	public static string ArrayStr(IEnumerable<object> objs, char  separator = ',')
+	{
+		var str = "";
+		foreach (var obj in objs) str += obj?.ToString() + separator;
+		return str;
+	}
+
+	public static T GetOrAddComponent<T>(GameObject gameObject) where T:Component
+	{
+		var t = gameObject.GetComponent<T>();
+		if (t == null) t= gameObject.AddComponent<T>();
+		return t;
+	}
+}

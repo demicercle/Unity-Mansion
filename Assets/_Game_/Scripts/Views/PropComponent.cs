@@ -6,8 +6,22 @@ using Pathfinding;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class PropComponent : MonoBehaviour
+public class PropComponent : MonoBehaviour, IView<PropController>
 {
+	private PropController controller;
+
+	public PropController GetController()
+	{
+		if (controller == null) controller = Utils.GetOrAddComponent<PropController>(gameObject);
+		return controller;
+	}
+
+	private void Awake()
+	{
+		var controller = GetController();
+		controller.onInteract += OnInteract;
+	}
+
 	public Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
 
 	public bool onlyOnce;
@@ -44,28 +58,30 @@ public class PropComponent : MonoBehaviour
 		return Waypoint.GetBestWaypointFromPosition(worldPos, out bestWaypoint, GetWaypoints());
 	}
 
-	public Coroutine Interact(CharacterView interactor = null) => StartCoroutine(DoInteract(interactor));
-
-	public float triggerDelay = 0.0f;
-	public float animDuration = 1.0f;
-	
-	private IEnumerator DoInteract(CharacterView interactor = null)
+	public void SetDisabled(bool value)
 	{
-		if (onlyOnce)
+		if (value)
 		{
 			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
 		}
-
-		if (interactor)
+		else
 		{
-			if (interactor.TryGetData(out var characterData))
-			{
-				if (consumeActions > 0)
-					characterData.ConsumeActions(consumeActions);
-			}
+			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
 		}
+	}
+
+	public float triggerDelay = 0.0f;
+	public float animDuration = 1.0f;
+
+	void RebuildNavigationAsync() => NavUtility.RebuildNavigationAsync(Mathf.Max(0.1f, animDuration));
+	private void OnInteract(int interactionCount)
+	{
+		if (rebuildNavigation) RebuildNavigationAsync();
 		
-		yield return new WaitForSeconds(triggerDelay);
+		if (onlyOnce && interactionCount > 0)
+		{
+			SetDisabled(true);
+		}
 		
 		if (!string.IsNullOrEmpty(animatorTrigger))
 		{
@@ -77,23 +93,18 @@ public class PropComponent : MonoBehaviour
 		}
 		
 		interacted?.Invoke();
-		
-		yield return new WaitForSeconds(animDuration);
-
-		if (rebuildNavigation)
-		{
-			yield return Utils.RebuildNavigationAsync();
-		}
 	}
 
 	private IEnumerator Start()
 	{
+		if (rebuildNavigation) RebuildNavigationAsync();
+		
 		gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
 
 		if (autoTriggerDelay > 0f)
 		{
 			yield return new WaitForSeconds(autoTriggerDelay);
-			Interact(null);
+			GetController().Interact();
 		}
 	}
 }

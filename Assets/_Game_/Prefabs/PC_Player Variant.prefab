@@ -2053,6 +2053,10 @@ PrefabInstance:
       propertyPath: uniqueID
       value: 1834756290401724115
       objectReference: {fileID: 0}
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: moveSpeed
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 1837400758454604685, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_Name
       value: PC_Player Variant

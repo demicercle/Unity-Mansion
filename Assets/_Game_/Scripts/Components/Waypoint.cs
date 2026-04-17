@@ -54,6 +54,7 @@ public class Waypoint : MonoBehaviour
 
 		public Vector3 GetPosition() => transform.position;
 		public int GetRotation() => (int)transform.eulerAngles.y;
+		public Vector3 GetDirection() => transform.forward;
 		
 		public float radius = 0.4f;
 		public Color color = Color.cyan;
@@ -73,5 +74,11 @@ public class Waypoint : MonoBehaviour
 			Gizmos.color = color;
 			Utils.DrawGizmosArrow(transform.position, transform.forward);
 			Utils.DrawGizmosCircle(transform.position, transform.up, radius, 16);
+		}
+
+		public void DrawDebug(float d =0f)
+		{
+			DebugGUI.WireArrow(GetPosition(), GetDirection(), radius * Vector3.one, color, d);
+			DebugGUI.WireDisc(GetPosition(), GetDirection(), radius, color, d);
 		}
 }

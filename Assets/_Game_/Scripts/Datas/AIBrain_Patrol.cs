@@ -1,0 +1,98 @@
+﻿using System.Collections;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "AIBrain_Patrol", menuName = "AIBrain/Patrol", order = 0)]
+public class AIBrain_Patrol : AIBrainData
+{
+	public bool canUseRunAction;
+	
+	public override IEnumerator Think(CharacterController character)
+	{
+		yield return new WaitForSeconds(1.0f);
+		
+		if (!character.CanMove())
+		{
+			Debug.Log(character + " cannot move");
+			yield break;
+		}
+		
+		if (!PatrolRoute.FindRoute(character, out PatrolRoute patrolRoute))
+		{
+			Debug.LogWarning(character + " has no patrol route");
+			yield break;
+		}
+		
+		var waypoints = patrolRoute.waypoints;
+		
+		while (character.CanMove())
+		{
+			patrolRoute.DebugDraw(0);
+				
+			if (lastWaypointToReach == null)
+			{
+				if (!Waypoint.GetBestWaypointFromPosition(character.GetPosition(), out var bestWaypoint,
+					    waypoints))
+				{
+					Debug.LogWarning(character + " cannot find next waypoint");
+					yield break;
+				}
+				else
+				{
+					lastWaypointToReach = bestWaypoint;
+				}
+			}
+
+			if (lastWaypointToReach != null)
+			{
+				if (!character.WaypointReached(lastWaypointToReach))
+				{
+					Debug.Log(this + " Move to patrol waypoint " + lastWaypointToReach);
+					gameView.MoveCharacterToWaypoint(character, lastWaypointToReach, () =>
+					{
+						if (!character.CanMove() && character.CanUseRunAction() && canUseRunAction)
+						{
+							gameView.AssignRunAction(character);
+						}
+					}); // patrol move
+				}
+				
+				else
+				{
+					var wpIndex = waypoints.IndexOf(lastWaypointToReach);
+					
+					if (patrolRoute.closedLoop) 
+						wpIndex = (wpIndex + 1) % waypoints.Count;
+					else
+						wpIndex += 1;
+					
+					Debug.Log(this + " picked next wpIndex " + wpIndex);
+
+					if (wpIndex >= waypoints.Count)
+					{
+						Debug.Log(character + " reached last waypoint " + wpIndex);
+						yield break;
+					}
+					else
+					{
+						lastWaypointToReach = waypoints[wpIndex];
+						DebugGUI.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), patrolRoute.color, 1.0f);
+					}
+				}
+			}
+
+			while (gameView.HasCoroutines())
+			{
+				if (lastWaypointToReach != null)
+				{
+					lastWaypointToReach.DrawDebug();
+				}
+				
+				yield return null;
+			}
+			
+			yield return null;
+		}
+	}
+
+	private Waypoint lastWaypointToReach;
+}
