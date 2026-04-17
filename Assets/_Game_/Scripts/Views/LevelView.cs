@@ -7,51 +7,52 @@ using UnityEngine.SceneManagement;
 
 public class LevelView : MonoBehaviour
 {
-	static public T FindObject<T>() where T : Object => Object.FindObjectsByType<T>(default).FirstOrDefault();
-	static public T[] FindAllObjects<T>() where T : Object => Object.FindObjectsByType<T>(default);
-	
-	private LevelData levelData;
-	private List<CharacterView> allCharacters;
-	private List<CharacterView> partyCharacters;
+	private LevelData levelData = null;
+	private List<CharacterView> allCharacters = new List<CharacterView>();
+	private List<CharacterView> partyCharacters = new List<CharacterView>();
 	
 	public List<CharacterView> GetAllCharacters() => allCharacters;
 	public List<CharacterView> GetPartyCharacters() => partyCharacters;
 
 	public IEnumerator LoadLevel(LevelData newData = null)
 	{
-		if(newData == null)
+		if (newData == null)
+		{
+			Debug.LogWarning(this + " Init no data, create one");
 			newData = ScriptableObject.CreateInstance<LevelData>();
-
+		}
+		
 		var allScenes = newData.GetScenes();
 		if (allScenes.Length <= 0)
 		{
-			Debug.LogWarning(this + " has no scenes!");
-			yield break;
+			Debug.LogWarning(newData + " has no scenes!");
 		}
 		
 		foreach (var scene in allScenes)
 		{
 			Debug.Log(this + " load scene: " + scene);
 			var async = SceneManager.LoadSceneAsync(scene);
-			while (!async.isDone)
+			do
 				yield return null;
+			while (!async.isDone);
 		}
 		
 		Init(newData);
 	}
 	
-	public void Init(LevelData newData = null)
+	void Init(LevelData newData)
 	{
-		if(newData == null)
-			newData = ScriptableObject.CreateInstance<LevelData>();
-		
+		Debug.Log(this + " Init " + newData);
 		levelData = newData;
 		partyCharacters = new List<CharacterView>();
-		allCharacters = new List<CharacterView>(FindAllObjects<CharacterView>());
+		allCharacters = new List<CharacterView>();
 		//TODO SpawnParty(); from save
 
-		foreach (var character in allCharacters)
+		foreach (var character in CharacterView.allInstances)
 		{
+			allCharacters.Add(character);
+			Debug.Log(this + " found character: " + character);
+			
 			character.Init(null);
 			
 			var characterData = character.GetData();

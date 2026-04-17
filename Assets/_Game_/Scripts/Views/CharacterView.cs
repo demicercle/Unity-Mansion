@@ -9,6 +9,8 @@ using UnityEngine.UI;
 
 public class CharacterView : MonoBehaviour, ICursorHandler
 {
+	static public List<CharacterView> allInstances  = new List<CharacterView>();
+	
 	public const float MIN_FACING_DOT = 0.9f;
 	
 	private const string TAG_PLAYER = "Player";
@@ -120,12 +122,22 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	public void Init(CharacterData newData = null)
 	{
 		if (newData == null)
+		{
+			if (!spawnData)
+			{
+				Debug.LogError(this + " has no spawn data");
+				return;
+			}
+			
 			newData = Instantiate(spawnData);
+			Debug.Log(this + " spawned at init: " + newData);
+		}
 		
 		data = newData;
 		UpdateComponents();
 		RegisterEvents(true);
 		data.Init(this);
+		gameObject.SetActive(true);
 	}
 
 	public bool IsAtAttackRange(CharacterView target, bool losCheck, float drawDuration = 0.0f)
@@ -193,7 +205,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 	private void RegisterEvents(bool value)
 	{
-		var gameView = GameView.GetInstance();
+		var gameView = GameView.GetInstance();//TODO
+		if (!gameView) return;
 		
 		if (value)
 		{
@@ -354,13 +367,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler
     
     private void Awake()
     {
+	    allInstances.Add(this);
 	    currentColor = defaultColor;
-
-	    if (data == null)
-	    {
-		    Debug.LogError(this + " stats is null");
-		    data = ScriptableObject.CreateInstance<CharacterData>();
-	    }
 		
 	    if (TryGetComponent<AIPath>(out var aiPath))
 	    {
@@ -372,6 +380,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		    agent.SetCanMove(false);
 		    agent.SetObstacle(true);
 	    }
+	    
+	    gameObject.SetActive(false);
     }
 
     private void Start()
@@ -443,7 +453,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
     private void OnDestroy()
     {
-	    data.Dispose();
+	    allInstances.Remove(this);
+	    if(data) data.Dispose();
 	    RegisterEvents(false);
     }
 

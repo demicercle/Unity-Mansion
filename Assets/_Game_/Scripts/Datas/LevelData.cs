@@ -10,8 +10,8 @@ public class LevelData : ScriptableObject
 	[SerializeField] private List<string> scenes = new List<string>();
 	
 	[Header("ReadOnly")]
-	[ReadOnly] [SerializeField] private List<CharacterData> allCharacters;
-	[ReadOnly] [SerializeField] private List<CharacterData> partyCharacters;
+	[ReadOnly] [SerializeField] private List<CharacterData> allCharacters = new List<CharacterData>();
+	[ReadOnly] [SerializeField] private List<CharacterData> partyCharacters = new List<CharacterData>();
 	
 	public string[] GetScenes() => scenes.ToArray();
 	

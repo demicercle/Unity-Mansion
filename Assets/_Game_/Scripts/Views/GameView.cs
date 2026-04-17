@@ -497,6 +497,20 @@ public class GameView : MonoBehaviour
 		QueueRoutine(WaitRunAction(onCharacterView));
 	}
 
+	public void SetInputEnabled(bool value)
+	{
+		if (value)
+		{
+			inputSystem.Player.Enable();
+			inputSystem.UI.Enable();
+		}
+		else
+		{
+			inputSystem.Player.Disable();
+			inputSystem.UI.Disable();
+		}
+	}
+	
 	private IEnumerator WaitRunAction(CharacterView onCharacterView)
 	{
 		Debug.Log(">> WaitRunAction: " + onCharacterView);
@@ -511,11 +525,15 @@ public class GameView : MonoBehaviour
 	{
 		Init();
 		
-		// TODO Fade In Out
+		SetInputEnabled(false);
+		// TODO Fade In
 
 		var currentLevel = gameData.GetCurrentLevel();
 		yield return StartCoroutine(levelView.LoadLevel());
 		gameData.SetCurrentLevel(gameData.GetLevelIndex(currentLevel));
+		
+		SetInputEnabled(true);
+		// TODO Fade Out
 		
 		// first turn
 		gameData.NewTurn();
@@ -539,15 +557,13 @@ public class GameView : MonoBehaviour
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
-		inputSystem.UI.Enable();
 		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
-		inputSystem.Player.Enable();
 		
-		gameData.Init();
 		gameData.newTurnStarted += TurnStarted;
+		gameData.Init();
 	}
 
 	private void TurnStarted(int turn)

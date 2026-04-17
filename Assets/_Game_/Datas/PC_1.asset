@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 262c467057e34eb994a448ba38a6ab6c, type: 3}
-  m_Name: PC 2
+  m_Name: PC_1
   m_EditorClassIdentifier: 
   displayName: Sarah
   portraitTexture: {fileID: 2800000, guid: 08e943a402f07f34aacd1f93940543fc, type: 3}

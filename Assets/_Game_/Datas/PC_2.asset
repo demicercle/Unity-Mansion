@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 262c467057e34eb994a448ba38a6ab6c, type: 3}
-  m_Name: PC 1
+  m_Name: PC_2
   m_EditorClassIdentifier: 
-  displayName: "Andr\xE9"
-  portraitTexture: {fileID: 2800000, guid: 6cb62fb6fad50a044b28d7ea87cb3efd, type: 3}
+  displayName: John
+  portraitTexture: {fileID: 2800000, guid: 3fa5538c2bc3e5f46945b5125f3ad7ef, type: 3}
   maxActions: 1
   maxMovePoints: 5
   runActionExtraMovePoints: 3
@@ -24,6 +24,6 @@ MonoBehaviour:
   usedMovePoints: 0
   usedActions: 0
   characterViewOwner: {fileID: 0}
-  position: {x: -3.2501416, y: 0.00000035762787, z: 0.43033066}
-  rotation: 128
-  partyIndex: 2
+  position: {x: -6.2651935, y: 0.00000035762787, z: 7.5361066}
+  rotation: 292
+  partyIndex: 0
