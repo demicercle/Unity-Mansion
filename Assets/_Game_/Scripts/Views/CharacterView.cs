@@ -220,11 +220,11 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	public int GetMaxHealth() => data.GetMaxHealth();
 	public float GetDamageProgress() => data.GetDamageProgress();
 
-	public void TakeDamage(float amount)
+	public void TakeDamage(float amount, bool setData)
 	{
 		Debug.Log(this + " TakeDamage " + amount);
 		DebugGUI.FloatingText(GetCenterPosition(), amount.ToString("N2"));
-		data.TakeDamage(amount);
+		if(setData) data.TakeDamage(amount);
 	}
 
 	public bool IsAtAttackRange(CharacterView target, bool losCheck, float drawDuration = 0.0f)

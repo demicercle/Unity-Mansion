@@ -97,7 +97,7 @@ public class GameView
 	private bool hasMousePosition;
 	private AstarPath aStar;
 	private MainCamera mainCamera;
-	private InputSystem_Actions inputSystem;
+	public InputSystem_Actions inputSystem { get; private set; }
 	private CharacterView _selectedCharacterView;//TODO rename
 	private List<IEnumerator> coroutines;
 
@@ -255,7 +255,7 @@ public class GameView
 			DebugGUI.FloatingText(character.GetPosition(), "Take this!");
 			character.PerformsAttack(target);
 			yield return new WaitForSeconds(1.0f);
-			target.TakeDamage(1);
+			target.TakeDamage(1, true);
 			yield return new WaitForSeconds(1.0f);
 		}
 	}
@@ -686,6 +686,11 @@ public class GameView
 	}
 	
 	string GetLabel(string label) => ObjectNames.NicifyVariableName(label) + ": ";
+
+	public bool GetSelectedCharacter(out CharacterView view)
+	{
+		return (view = _selectedCharacterView) != null;
+	}
 }
 
 public interface ICursorHandler
