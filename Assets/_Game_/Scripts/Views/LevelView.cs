@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement;
 
 public class LevelView : MonoBehaviour
 {
+	public System.Action<CharacterView[]> partyChanged;
+	
 	private LevelData levelData = null;
 	private List<CharacterView> allCharacters = new List<CharacterView>();
 	private List<CharacterView> partyCharacters = new List<CharacterView>();
@@ -42,8 +44,16 @@ public class LevelView : MonoBehaviour
 	
 	void Init(LevelData newData)
 	{
+		if (levelData != null)
+		{
+			Debug.Log(this +" Dispose " + levelData);
+			levelData.partyChanged -= PartyChanged;
+		}
+		
 		Debug.Log(this + " Init " + newData);
 		levelData = newData;
+		levelData.partyChanged += PartyChanged;
+		
 		partyCharacters = new List<CharacterView>();
 		allCharacters = new List<CharacterView>();
 		//TODO SpawnParty(); from save
@@ -64,5 +74,10 @@ public class LevelView : MonoBehaviour
 				partyCharacters.Add(character);
 			}
 		}
+	}
+
+	private void PartyChanged(CharacterData[] obj)
+	{
+		partyChanged?.Invoke(partyCharacters.ToArray());
 	}
 }

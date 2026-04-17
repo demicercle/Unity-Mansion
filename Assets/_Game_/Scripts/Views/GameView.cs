@@ -9,7 +9,12 @@ using UnityEngine;
 public class GameView : MonoBehaviour
 {
 	static private GameView instance;
-	void Awake() => instance = this;
+
+	void Awake()
+	{
+		instance = this;
+		InitSingleton();
+	}
 	void OnDestroy(){}
 	
 	static public GameView GetInstance()
@@ -49,14 +54,9 @@ public class GameView : MonoBehaviour
 	 */
 
 	public System.Action<CharacterView[]> partyChanged;
-	
-	static public System.Action<CharacterView> clickSelectCharacter;
-	static public System.Action clickEndTurn;
-	static public System.Action clickRunAction;
 	public System.Action<bool> routinesStarted;
 	public System.Action<CharacterView, bool> characterSelected;
-	static public System.Action<CharacterView, Vector3> characterMoved;
-	static public System.Action<PropComponent, GameObject> propInteracted;
+	public System.Action<PropComponent, GameObject> propInteracted;
 	
 	static public string LAYER_GROUND = "Ground";
 	static public string LAYER_WALL = "Wall";
@@ -447,7 +447,7 @@ public class GameView : MonoBehaviour
 		QueueRoutine(WaitEndTurn());
 	}
 	
-	public bool CanSelectCharacter(CharacterView charView) => !HasCoroutines() && charView;
+	public bool CanSelectCharacter(CharacterView charView) => !HasCoroutines() && charView && !charView.IsDead();
 
 	public bool CanControlCharacter(CharacterView charView) => gameData.IsPlayerTurn() && !HasCoroutines() && charView && !charView.IsDead() && charView.IsInParty();
 
@@ -523,8 +523,6 @@ public class GameView : MonoBehaviour
 
 	private IEnumerator Start()
 	{
-		Init();
-		
 		SetInputEnabled(false);
 		// TODO Fade In
 
@@ -544,14 +542,21 @@ public class GameView : MonoBehaviour
 		SelectNextCharacter();
 	}
 	
-	private void Init()
+	private void InitSingleton()
 	{
 		Debug.Log(this + " Init()");
+		if (gameData == null)
+		{
+			Debug.LogError(this + " has no game data!");
+		}
+		
 		hasFocus = !Application.isEditor;
 		
 		mainCamera = FindObjectsByType<MainCamera>(default).First();
 		aStar = FindObjectsByType<AstarPath>(default).First();
+		
 		levelView = Utils.GetOrAddComponent<LevelView>(gameObject);
+		levelView.partyChanged += PartyChanged;
 		
 		coroutines = new List<IEnumerator>();
 		
@@ -561,10 +566,12 @@ public class GameView : MonoBehaviour
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
-		
+
 		gameData.newTurnStarted += TurnStarted;
 		gameData.Init();
 	}
+
+	private void PartyChanged(CharacterView[] party) => partyChanged?.Invoke(party);
 
 	private void TurnStarted(int turn)
 	{
