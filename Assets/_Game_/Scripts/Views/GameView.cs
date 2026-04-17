@@ -28,7 +28,6 @@ public class GameView : MonoBehaviour
 		return (view = selectedCharacter) != null;
 	}
 
-	public System.Action<CharacterView[]> partyChanged;
 	public System.Action<bool> routinesStarted;
 	public System.Action<CharacterView, bool> selectionChanged;
 	public System.Action<PropComponent, GameObject> propInteracted;
@@ -65,6 +64,15 @@ public class GameView : MonoBehaviour
 
 		return false;
 	}
+	
+	private List<CharacterView> allCharacters = new List<CharacterView>();
+	private List<CharacterView> partyCharacters = new List<CharacterView>();
+
+	public List<CharacterView> GetAllCharacters() => allCharacters.ToList();
+	public List<CharacterView> GetPartyCharacters() => partyCharacters.ToList();
+	public int GetPartyCharacterIndex(CharacterView characterView) => partyCharacters.IndexOf(characterView);
+	public int GetCharacterIndex(CharacterView characterView) => allCharacters.IndexOf(characterView);
+	
 
 	public GameData gameData;
 	public bool drawDebug = false;
@@ -98,7 +106,7 @@ public class GameView : MonoBehaviour
 	{
 		if (value > 0) // pressed
 		{
-			SelectCharacter(null); // deselect all
+			SelectCharacter(); // deselect all
 		}
 	}
 
@@ -232,8 +240,8 @@ public class GameView : MonoBehaviour
 		}
 		else
 		{
-			var characterData = character.GetData();
-			var targetData = target.GetData();
+			var characterData = character.GetCurrentData();
+			var targetData = target.GetCurrentData();
 			
 			yield return character.StartCoroutine(character.PerformsAttack(target));
 			yield return new WaitForSeconds(1.0f);
@@ -251,7 +259,11 @@ public class GameView : MonoBehaviour
 			while (!characterView.IsFacingDirection(wpDir))
 				characterView.LookDirection(wpDir, Time.deltaTime);
 		}
-		characterView.GetData().SetRotation(characterView.GetRotation());
+
+		var data = characterView.GetCurrentData();
+		data.SetRotation(characterView.GetRotation());
+		if (prop.consumeActions > 0)
+			data.ConsumeActions(prop.consumeActions);
 		propInteracted?.Invoke(prop, characterView.gameObject);
 		yield return prop.Interact(characterView);
 	}
@@ -266,7 +278,7 @@ public class GameView : MonoBehaviour
 		}
 		
 		//TryGetCharacter(characterView, out var characterData);
-		characterView.GetData().SetRotation(characterView.GetRotation());
+		characterView.GetCurrentData().SetRotation(characterView.GetRotation());
 	}
 
 	public void MoveCharacterToWaypoint(CharacterView characterView, Waypoint waypoint,
@@ -318,7 +330,7 @@ public class GameView : MonoBehaviour
 		{
 		//	TryGetCharacter(movingCharacterView, out var characterData);
 			
-			var characterData = movingCharacterView.GetData();
+			var characterData = movingCharacterView.GetCurrentData();
 			if (characterData.GetRemainingMovePoints() <= 0)
 			{
 				agent.StopMovement();
@@ -347,12 +359,11 @@ public class GameView : MonoBehaviour
 		onComplete?.Invoke();
 	}
 
-	public bool IsCharacterSelected(CharacterView characterView) => characterView == selectedCharacter;
+	public bool IsCharacterSelected(int characterIndex) => IsCharacterSelected(allCharacters[characterIndex]);
+	public bool IsCharacterSelected(CharacterView characterView) => characterView != null && characterView == selectedCharacter;
 
 	public void SelectNextCharacter()
 	{
-		var partyCharacters = levelView.GetPartyCharacters();
-		
 		var index = 0;
 		if( selectedCharacter != null )
 			index = partyCharacters.IndexOf(selectedCharacter);
@@ -369,8 +380,16 @@ public class GameView : MonoBehaviour
 			}
 		}
 	}
+
+	public void SelectCharacter(CharacterData characterData, bool focusCamera = false)
+	{
+		var dataIndex = characterData.GetCharacterIndex();
+		if(dataIndex < 0 || dataIndex >= allCharacters.Count)
+			Debug.LogError("SelectCharacter error invalid index " + characterData);
+		SelectCharacter(allCharacters[dataIndex], focusCamera);
+	}
 	
-	public void SelectCharacter(CharacterView characterView, bool focusCamera = false)
+	public void SelectCharacter(CharacterView characterView = null, bool focusCamera = false)
 	{
 		Debug.Log(this + " SelectCharacter " + characterView + " " + focusCamera);
 		selectedCharacter = characterView;
@@ -395,8 +414,7 @@ public class GameView : MonoBehaviour
 	{
 		Debug.Log("Starts AI Routine: ");
 
-		var partyCharacters = levelView.GetPartyCharacters();
-		foreach (var otherCharacter in levelView.GetAllCharacters())
+		foreach (var otherCharacter in allCharacters)
 		{
 			if (partyCharacters.Contains(otherCharacter)) continue;
 			SelectCharacter(otherCharacter, true);
@@ -451,12 +469,13 @@ public class GameView : MonoBehaviour
 		}
 	}
 	
-	private IEnumerator WaitRunAction(CharacterView onCharacterView)
+	
+	private IEnumerator WaitRunAction(CharacterView characterView)
 	{
-		Debug.Log(">> WaitRunAction: " + onCharacterView);
-		DebugGUI.FloatingText(onCharacterView.GetPosition(), "RUN!");
+		Debug.Log(">> WaitRunAction: " + characterView);
+		DebugGUI.FloatingText(characterView.GetPosition(), "RUN!");
 		yield return new WaitForSeconds(1.0f);
-		onCharacterView.GetData().RunAction();
+		characterView.GetCurrentData().RunAction();
 	}
 	
 	private LevelView levelView;
@@ -469,6 +488,33 @@ public class GameView : MonoBehaviour
 		var currentLevel = gameData.GetCurrentLevel();
 		yield return StartCoroutine(levelView.LoadLevel());
 		gameData.SetCurrentLevel(gameData.GetLevelIndex(currentLevel));
+		Debug.Log("level loaded " + gameData.GetCurrentLevelIndex());
+		
+		// TODO: load party
+		
+		// load from level
+		var partyIndex = 0;
+		foreach (var characterView in CharacterView.allInstances)
+		{
+			if(!characterView.HasSpawnData(out var spawnData))
+			{
+				Debug.LogWarning(characterView + " has no spawn data!");
+				characterView.gameObject.SetActive(false);
+				continue;
+			}
+			
+			var characterData = Instantiate(spawnData);
+			gameData.AddCharacter(characterData);
+			characterView.Init(characterData);
+			characterView.name += " (" + characterView.GetCharacterIndex() + ")";
+			allCharacters.Add(characterView);
+			
+			if (characterView.IsPlayer())
+			{
+				gameData.SetCharacterInParty(characterData, partyIndex++);
+				partyCharacters.Add(characterView);
+			}
+		}
 		
 		SetInputEnabled(true);
 		// TODO Fade Out
@@ -496,7 +542,6 @@ public class GameView : MonoBehaviour
 		aStar = FindObjectsByType<AstarPath>(default).First();
 		
 		levelView = Utils.GetOrAddComponent<LevelView>(gameObject);
-		levelView.partyChanged += PartyChanged;
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
@@ -533,13 +578,12 @@ public class GameView : MonoBehaviour
 		}
 	}
 
-	private void PartyChanged(CharacterView[] party) => partyChanged?.Invoke(party);
 
 	private void TurnStarted(int turn)
 	{
-		foreach (var characterData in gameData.GetCurrentLevel().GetAllCharacters())
+		foreach (var characterView in GetAllCharacters())
 		{
-			characterData.TurnBegins(turn);
+			characterView.TurnBegins(turn);
 		}
 	}
 

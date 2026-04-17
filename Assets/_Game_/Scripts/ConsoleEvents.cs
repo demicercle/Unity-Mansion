@@ -1,44 +1,72 @@
 ﻿using IngameDebugConsole;
 using UnityEngine;
-using System.Collections;
 
 public class ConsoleEvents : MonoBehaviour
 {
-	
-	IEnumerator Start()
-	{
-		DontDestroyOnLoad(this);
-		var gameView = GameView.GetInstance();
-		var gameData = gameView.gameData;//TODO
-		
-		DebugLogConsole.AddCommand<int>("apply_dmg", "damage selected character", (amount) =>
-		{
-			if (gameView.TryGetSelectedCharacter(out var selected))
-				selected.GetData().TakeDamage(amount);
-		});
-		
-		DebugLogConsole.AddCommand<float>("heal", "heal selected character", (amount) =>
-		{
-			if (gameView.TryGetSelectedCharacter(out var selected) )
-				selected.GetData().Heal(amount);
-		});
+	static GameView gameView => GameView.GetInstance();
+	static GameData gameData => gameView.gameData;
+	static CharacterData GetCharacterAt(int charIndex) => gameData.GetCharacterAt(charIndex);
 
-		var wasVisible = DebugLogManager.Instance.IsLogWindowVisible;
-		while (true)
+	static bool TryGetSelectedCharacterIndex(out int selected)
+	{
+		if (gameView.TryGetSelectedCharacter(out var characterView))
 		{
-			if (wasVisible != DebugLogManager.Instance.IsLogWindowVisible)
-			{
-				wasVisible = DebugLogManager.Instance.IsLogWindowVisible;
-				if (DebugLogManager.Instance.IsLogWindowVisible)
-				{
-					gameView.inputSystem.Disable();
-				}
-				else
-				{
-					gameView.inputSystem.Enable();
-				}
-			}
-			yield return null;
+			selected = characterView.GetCharacterIndex();
+			return true;
 		}
+
+		selected = -1;
+		return false;
+	}
+
+	[ConsoleMethod("apply_dmg", "")]
+	static public void ApplyDamage(int amount)
+	{
+		if (TryGetSelectedCharacterIndex(out var selected)) ApplyDamage(selected, amount);
+	}
+	static public void ApplyDamage(int charIndex, float amount)
+	{
+		GetCharacterAt(charIndex).TakeDamage(amount);
+	}
+
+	[ConsoleMethod("heal", "")]
+	static public void Heal(int amount)
+	{
+		if (TryGetSelectedCharacterIndex(out var selected)) Heal(selected, amount);
+	}
+	static public void Heal(int charIndex, float amount)
+	{
+		GetCharacterAt(charIndex).Heal(amount);
+	}
+
+	[ConsoleMethod("end_turn", "")]
+	static public void EndTurn()
+	{
+		gameData.EndTurn();
+	}
+	
+	static public void ConsumeMovePoints(int charIndex, float amount)
+	{
+		GetCharacterAt(charIndex).ConsumeMovePoints(amount);
+	}
+
+	static public void ConsumeActions(int charIndex, int amount)
+	{
+		GetCharacterAt(charIndex).ConsumeActions(amount);
+	}
+
+	static public void SetCharacterRotation(int charIndex, int rotation)
+	{
+		GetCharacterAt(charIndex).SetRotation(rotation);
+	}
+
+	static public void SetCharacterPosition(int charIndex, Vector3 newPos)
+	{
+		GetCharacterAt(charIndex).SetPosition(newPos);
+	}
+	
+	static public void SetCharacterPartyIndex(int charIndex, int newIndex)
+	{
+		gameData.SetCharacterInParty(GetCharacterAt(charIndex), newIndex);
 	}
 }

@@ -56,13 +56,6 @@ public class PropComponent : MonoBehaviour
 		{
 			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
 		}
-
-		if (interactor)
-		{
-			var data = interactor.GetData();
-			if (consumeActions > 0)
-				data.ConsumeActions(consumeActions);
-		}
 		
 		yield return new WaitForSeconds(triggerDelay);
 		

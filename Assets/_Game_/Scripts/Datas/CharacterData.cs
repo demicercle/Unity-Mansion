@@ -36,10 +36,10 @@ public class CharacterData : ScriptableObject
 	private bool isDead;
 	private float damageAmount;
 	public int GetMaxHealth() => maxHealth;
-	public float GetRemainingHealth() => maxHealth - damageAmount;
+	public float GetCurrentHealth() => maxHealth - damageAmount;
 
 	public float GetDamageProgress() => Mathf.Clamp01(damageAmount / (float)maxHealth);
-
+	
 	public void TakeDamage(float amount)
 	{
 		Debug.Log(this + " TakeDamage " + amount);
@@ -50,7 +50,7 @@ public class CharacterData : ScriptableObject
 			onDamaged?.Invoke(damageAmount);
 		}
 
-		if (GetRemainingHealth() <= 0)
+		if (GetCurrentHealth() <= 0)
 		{
 			Kill();
 		}
@@ -65,6 +65,11 @@ public class CharacterData : ScriptableObject
 		}
 	}
 
+	public void UseMovePoints(float amount)
+	{
+		usedMovePoints += amount;
+	}
+
 	public void Heal(float amount) //TODO heal amount
 	{
 		if (damageAmount > 0)
@@ -74,9 +79,10 @@ public class CharacterData : ScriptableObject
 		}
 	}
 	
-	public bool IsDead() => isDead; 
-	
-	[Header("Debug")]
+	public bool IsDead() => isDead;
+
+	[Header("Debug")] 
+	[SerializeField] private int characterIndex = -1;
 	[SerializeField] private float usedMovePoints;
 	[SerializeField] private int usedActions;
 //	[SerializeField] private CharacterView characterViewOwner;
@@ -86,6 +92,7 @@ public class CharacterData : ScriptableObject
 // TODO
 	public bool CanAttack() => GetRemainingActions() > 0 && !noAttack;
 	public int GetPartyIndex() => partyIndex;
+	public int GetCharacterIndex() => characterIndex;
 
 	public void SetPartyIndex(int index)
 	{
@@ -144,15 +151,17 @@ public class CharacterData : ScriptableObject
 		usedMovePoints -= runActionExtraMovePoints;
 	}
 
-	public void Init(int inParty = -1)
+	public void Init(int index)
 	{
-		Debug.Log(this + " Init " + inParty);
+		characterIndex = index;
+		Debug.Log(this + " Init " + index);
+		name = name.Replace("Clone", characterIndex.ToString());
 		//characterViewOwner = c;
 		usedMovePoints = 0;
 		usedActions = 0;
 		damageAmount = 0;
 		isDead = false;
-		SetPartyIndex(inParty);
+		partyIndex = -1;
 	}
 
 	public void Dispose()
@@ -163,5 +172,10 @@ public class CharacterData : ScriptableObject
 	public bool HasActions()
 	{
 		return GetRemainingActions() > 0;
+	}
+
+	public int GetCurrentHealthInt()
+	{
+		return Mathf.CeilToInt(GetCurrentHealth());
 	}
 }

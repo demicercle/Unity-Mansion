@@ -17,11 +17,15 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	public bool IsPlayer() => CompareTag(TAG_PLAYER);
 	private const string TAG_ENEMY = "Enemy";
 	public bool IsEnemy() => CompareTag(TAG_ENEMY);
+
+	private int characterIndex;
+	public int GetCharacterIndex() => characterIndex;
 	
 	[Header("Stats")]  // todo use scriptable
 	[SerializeField] private CharacterData spawnData;
 
 	private CharacterData data;
+	public CharacterData GetCurrentData() => data;
 
 	public bool HasSpawnData(out CharacterData data)
 	{
@@ -29,7 +33,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		return data != null;
 	}
 	
-	public CharacterData GetData() => data;
+	//public CharacterData GetData() => data;
 	
 	//public CharacterData GetData() => data; //TODO remove
 	public bool IsInParty() => data.GetPartyIndex() >= 0;
@@ -125,15 +129,22 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		agent?.StopMovement();
 	}
 
-	public int GetCurrentHealthInt() => (int)data.GetRemainingHealth();
+	public int GetCurrentHealthInt() => (int)data.GetCurrentHealth();
 	public int GetMaxHealth() => data.GetMaxHealth();
 	
 	public void Init(CharacterData newData)
 	{
-		Debug.Log(this + " Init " + newData);
+		if (data != null)
+		{
+			RegisterDataEvents(false);
+			data = null;
+		}
+		
+		Debug.Log(this + " Init " + characterIndex + " " + newData);
+		characterIndex = newData.GetCharacterIndex();
 		data = newData;
+		RegisterDataEvents(true);
 		UpdateComponents();
-		RegisterEvents(true);
 		gameObject.SetActive(true);
 	}
 
@@ -200,11 +211,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	private int partyIndex;
 	private Vector3[] lastPath;
 
-	private void RegisterEvents(bool value)
+	private void RegisterDataEvents(bool value)
 	{
-		var gameView = GameView.GetInstance();//TODO
-		if (!gameView) return;
-		
 		if (value)
 		{
 			//gameView.characterSelected -= CharacterSelected;
@@ -219,6 +227,11 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 			data.onDamaged -= ReceivedDamage;
 			data.onHeal -= Healed;
 		}
+	}
+
+	public void TurnBegins(int turn)
+	{
+		
 	}
 	
 	private void SetPartyIndex(int newIndex)
@@ -391,7 +404,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	    {
 		    wasSelected = isSelected;
 		    
-		    Debug.Log(this + " isSelected=" + isSelected);
+//		    Debug.Log(this + " isSelected=" + isSelected);
 		    if (isSelected)
 		    {
 			    agent.SetObstacle(false);
@@ -450,7 +463,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
     {
 	    allInstances.Remove(this);
 	    if(data) data.Dispose();
-	    RegisterEvents(false);
+	    RegisterDataEvents(false);
     }
 
     private void OnDrawGizmosSelected()

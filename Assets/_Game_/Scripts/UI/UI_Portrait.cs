@@ -15,65 +15,59 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		GameView.GetInstance().SelectCharacter(_assignedCharacterView);
+		GameView.GetInstance().SelectCharacter(_assignedCharacterData);
 	}
-
-	private CharacterView _assignedCharacterView;
+	
+	private CharacterData _assignedCharacterData;
 	private GameView gameView;
 	
 	private void Awake()
 	{
 		gameView = GameView.GetInstance();
-		gameView.partyChanged += PartyChanged;
-		gameView.selectionChanged += SelectionChanged;
+		gameView.gameData.partyChanged += PartyChanged;
 	}
 
 	private void OnDestroy()
 	{
-		gameView.partyChanged -= PartyChanged;
-		gameView.selectionChanged -= SelectionChanged;
+		gameView.gameData.partyChanged -= PartyChanged;
 	}
 
-	private void SelectionChanged(CharacterView characterView, bool canControlCharacter)
+	private void PartyChanged(CharacterData[] partyCharacters)
 	{
-		toggle.isOn = _assignedCharacterView == characterView;
-	}
-
-	private void PartyChanged(CharacterView[] partyCharacters)
-	{
-		_assignedCharacterView = null;
+		_assignedCharacterData = null;
 		
 		var index = transform.GetSiblingIndex();
 		for (int i = 0; i < partyCharacters.Length; i++)
 		{
 			if (i == index)
 			{
-				_assignedCharacterView = partyCharacters[i];
+				_assignedCharacterData =  partyCharacters[i];
 				break;
 			}
 		}
 
-		gameObject.SetActive(_assignedCharacterView != null);
+		gameObject.SetActive(_assignedCharacterData != null);
+//		Debug.Log(this + " PartyChanged: " + gameObject.activeSelf);
 	}
 
 	private void OnEnable()
 	{
-		if(_assignedCharacterView) Debug.Log(this + " > " + _assignedCharacterView);
+		if(_assignedCharacterData) Debug.Log(this + " > " + _assignedCharacterData);
 	}
 
 	private void LateUpdate() // TODO use events
 	{
-		if (_assignedCharacterView)
+		if (_assignedCharacterData)
 		{
-			var data = _assignedCharacterView.GetData();
-			rawImage.texture = data.portraitTexture;
-			nameLabel.text = data.displayName;
-			healthSprite.fillAmount = data.GetDamageProgress();
-			healthLabel.text = _assignedCharacterView.GetCurrentHealthInt() + "/" + _assignedCharacterView.GetMaxHealth();
+			toggle.isOn = gameView.IsCharacterSelected(_assignedCharacterData.GetCharacterIndex());
+			rawImage.texture = _assignedCharacterData.portraitTexture;
+			nameLabel.text = _assignedCharacterData.displayName;
+			healthSprite.fillAmount = _assignedCharacterData.GetDamageProgress();
+			healthLabel.text = _assignedCharacterData.GetCurrentHealthInt() + "/" + _assignedCharacterData.GetMaxHealth();
 			return;
 		}
 		
-		Debug.Log(this + " No character");
+		Debug.Log(this + " No party character");
 		gameObject.SetActive(false);
 	}
 }
