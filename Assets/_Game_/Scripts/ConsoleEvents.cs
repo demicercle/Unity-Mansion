@@ -11,9 +11,17 @@ public class ConsoleEvents : MonoBehaviour
 		
 		DebugLogConsole.AddCommand<int>("apply_dmg", "damage selected character", (amount) =>
 		{
-			if (gameView.GetSelectedCharacter(out var selected))
+			if (gameView.GetSelectedCharacter(out var selected) && selected.TryGetData(out var selectedData))
 			{
-				selected.TakeDamage(amount, true);
+				selectedData.TakeDamage(amount);
+			}
+		});
+		
+		DebugLogConsole.AddCommand("heal", "heal selected character", () =>
+		{
+			if (gameView.GetSelectedCharacter(out var selected) && selected.TryGetData(out var selectedData))
+			{
+				selectedData.Heal();
 			}
 		});
 

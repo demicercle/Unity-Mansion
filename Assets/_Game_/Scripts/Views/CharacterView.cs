@@ -220,11 +220,15 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	public int GetMaxHealth() => data.GetMaxHealth();
 	public float GetDamageProgress() => data.GetDamageProgress();
 
-	public void TakeDamage(float amount, bool setData)
+	public void Healed()
 	{
-		Debug.Log(this + " TakeDamage " + amount);
+		DebugGUI.FloatingText(GetCenterPosition(), "HEAL");
+	}
+	
+	public void ReceivedDamage(float amount)
+	{
+		Debug.Log(this + " ReceivedDamage " + amount);
 		DebugGUI.FloatingText(GetCenterPosition(), amount.ToString("N2"));
-		if(setData) data.TakeDamage(amount);
 	}
 
 	public bool IsAtAttackRange(CharacterView target, bool losCheck, float drawDuration = 0.0f)
@@ -332,12 +336,14 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 	void RegisterEvents(bool value)
 	{
-		Debug.Log(this + " RegisterEvents " + value);
+//		Debug.Log(this + " RegisterEvents " + value);
 		var gameView = GameView.GetInstance();
 		
 		if (value)
 		{
 			data.partyIndexChanged += SetPartyIndex;
+			data.onDamaged += ReceivedDamage;
+			data.onHeal += Healed;
 			gameView.characterSelected += CharacterSelected;
 			//TODO for network?		GameData.characterMoved += CharacterMoved;
 		}
@@ -345,6 +351,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		{
 			data.partyIndexChanged -= SetPartyIndex;
 			gameView.characterSelected -= CharacterSelected;
+			data.onDamaged -= ReceivedDamage;
+			data.onHeal -= Healed;
 			//TODO for network?		GameData.characterMoved -= CharacterMoved;
 		}
 	}

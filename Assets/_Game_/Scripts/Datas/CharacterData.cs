@@ -11,8 +11,9 @@ public class CharacterData : ScriptableObject
 	public System.Action<float> movesPointsChanged;
 	public System.Action onKill;
 	public System.Action<float> onDamaged;
+	public System.Action onHeal;
 	
-	[Header("Profile")]
+	[Header("Profile")] // todo use private and [SerializeField]
 	public string displayName;
 	public Texture2D portraitTexture;
 	
@@ -25,6 +26,12 @@ public class CharacterData : ScriptableObject
 
 	[Header("Health")] 
 	[Range(1, 99)] public int maxHealth;
+	public float lastAttackDamage;
+
+	public float GetLastAttackDamage()
+	{
+		return lastAttackDamage;
+	}
 
 	private bool isDead;
 	private float damageAmount;
@@ -58,6 +65,15 @@ public class CharacterData : ScriptableObject
 		{
 			isDead = true;
 			onKill?.Invoke();
+		}
+	}
+
+	public void Heal()
+	{
+		if (damageAmount > 0)
+		{
+			damageAmount = 0;
+			onHeal?.Invoke();
 		}
 	}
 	
@@ -137,6 +153,7 @@ public class CharacterData : ScriptableObject
 		characterViewOwner = c;
 		usedMovePoints = 0;
 		usedActions = 0;
+		damageAmount = 0;
 		SetPartyIndex(inParty);
 	}
 

@@ -251,12 +251,15 @@ public class GameView
 		}
 		else
 		{
+			target.TryGetData(out var targetData);
+			character.TryGetData(out var characterData);
+			
 			Debug.Log(character + " performs attack on " + target);
 			DebugGUI.FloatingText(character.GetPosition(), "Take this!");
 			character.PerformsAttack(target);
 			yield return new WaitForSeconds(1.0f);
-			target.TakeDamage(1, true);
-			yield return new WaitForSeconds(1.0f);
+			// apply attack damage, etc
+			targetData.TakeDamage(characterData.GetLastAttackDamage());
 		}
 	}
 
@@ -530,7 +533,7 @@ public class GameView
 
 	public void PartyChanged()
 	{
-		Debug.Log(this + " PartyChanged");
+//		Debug.Log(this + " PartyChanged");
 		partyChanged?.Invoke(partyCharacters.ToArray());
 	} 
 
