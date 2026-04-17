@@ -83,7 +83,7 @@ public class CharacterController : MonoBehaviour
 		statsChanged?.Invoke();
 	}
 
-	public bool IsEnemyToPlayer() => characterData.faction == CharacterFaction.Player;
+	public bool IsEnemyToPlayer() => characterData.faction == CharacterFaction.Enemy;
 	
 	public bool InParty() => partyIndex >= 0;
 	public int GetPartyIndex() => partyIndex;

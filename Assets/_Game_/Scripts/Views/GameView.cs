@@ -233,6 +233,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 		QueueRoutine(WaitCharacterMoved(controller, navPosition));
 	}
 
+
+	public void AssignRunAction(CharacterController character)
+	{
+		Debug.Log(this + " AssignRunAction " + character);
+		QueueRoutine(WaitRunAction(character));
+	}
+	
 	public System.Action<bool> routinesStarted;
 	
 	static public string LAYER_GROUND = "Ground";
@@ -556,12 +563,20 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	public void ClickRunAction()
 	{
-		if (Selection.TryGetSelectedCharacter(out var selectedCharacter))
+		Selection.TryGetSelectedCharacter(out var selectedCharacter);
+		if (selectedCharacter == null)
 		{
-			if (selectedCharacter.CanUseRunAction())
-			{
-				selectedCharacter.RunAction();
-			}
+			Debug.LogWarning("no selected character!");
+			return;
+		}
+		
+		if (selectedCharacter.CanUseRunAction())
+		{
+			AssignRunAction(selectedCharacter);
+		}
+		else
+		{
+			DebugGUI.FloatingText(selectedCharacter.GetCenterPosition(), "Can't");
 		}
 	}
 
@@ -777,7 +792,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	}
 	
 	string GetLabel(string label) => ObjectNames.NicifyVariableName(label) + ": ";
-
 }
 
 public interface ICursorHandler

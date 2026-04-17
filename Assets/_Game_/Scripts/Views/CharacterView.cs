@@ -42,9 +42,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 
 		controller.onPartyIndexChanged += (newIndex) =>
 		{
-			inParty = GetController().InParty();
-			isEnemy = GetController().IsEnemyToPlayer();
-			SetColor(inParty ? partyColor : isEnemy ? enemyColor : defaultColor);
 		};
 
 		controller.onDamaged += (amount) =>
@@ -227,6 +224,10 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
     {
 	    var view = GameView.GetInstance();
 	    var controller = GetController();
+	    
+	    inParty = controller.InParty();
+	    isEnemy = controller.IsEnemyToPlayer();
+	    SetColor(inParty ? partyColor : isEnemy ? enemyColor : defaultColor);
 	    
 	    hasActions = controller.HasActions();
 	    alphaColor = alphaCurve.Evaluate(Selection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);

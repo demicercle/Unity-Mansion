@@ -51,7 +51,7 @@ public class AIBrain_Patrol : AIBrainData
 					{
 						if (!character.CanMove() && character.CanUseRunAction() && canUseRunAction)
 						{
-							character.RunAction();
+							gameView.AssignRunAction(character);
 						}
 					}); // patrol move
 				}

@@ -537,7 +537,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewportRect: {fileID: 6833649656114864165}
   controlPanel: {fileID: 1860599611960562148}
-  button_actionRun: {fileID: 6829224796664647201}
+  button_actionRun: {fileID: 4559085250805307426}
   button_endTurn: {fileID: 6829224796664647201}
   portraits: []
 --- !u!1 &6805044113424152427
@@ -1014,6 +1014,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 9100710245468494187, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
   m_PrefabInstance: {fileID: 7213990389480158563}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4559085250805307426 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6582048139357908289, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
+  m_PrefabInstance: {fileID: 7213990389480158563}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8630708261411680691
 PrefabInstance:
   m_ObjectHideFlags: 0
