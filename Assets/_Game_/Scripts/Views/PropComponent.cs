@@ -73,13 +73,10 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 	public float triggerDelay = 0.0f;
 	public float animDuration = 1.0f;
 
+	void RebuildNavigationAsync() => NavUtility.RebuildNavigationAsync(Mathf.Max(0.1f, animDuration));
 	private void OnInteract(int interactionCount)
 	{
-		if (rebuildNavigation)
-		{
-			Debug.Log(this + " rebuild navigation async");
-			StartCoroutine(Utils.RebuildNavigationAsync());
-		}
+		if (rebuildNavigation) RebuildNavigationAsync();
 		
 		if (onlyOnce && interactionCount > 0)
 		{
@@ -100,6 +97,8 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 
 	private IEnumerator Start()
 	{
+		if (rebuildNavigation) RebuildNavigationAsync();
+		
 		gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
 
 		if (autoTriggerDelay > 0f)

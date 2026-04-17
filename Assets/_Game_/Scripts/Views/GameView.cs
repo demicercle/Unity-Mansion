@@ -134,41 +134,31 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var selectedCharacter = Selection.GetSelectedCharacter();
 		var clickedCharacter = clickedCharacterView.GetController();
 	//	//var selectedCharacter = gameController.GetSelectedCharacter();
-		if (CanControlCharacter(clickedCharacter))
+		if (clickedCharacter.InParty())
 		{
-			Selection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
+			if(GetController().IsPlayerTurn())
+				Selection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 		}
 		else if (clickedCharacter.IsEnemyToPlayer())
 		{
 			if (selectedCharacter != null)
 			{
-				AssignAttack(selectedCharacter, clickedCharacter, false, true);
-			}
-			else
-			{
-				Selection.SelectCharacter(clickedCharacter); // ClickCharacter select enemy
+				// assign attack
+				if (selectedCharacter.CanAttack())
+				{
+					AssignAttack(selectedCharacter, clickedCharacter, false, true);
+				}
+				else
+				{
+					DebugGUI.FloatingText(selectedCharacter.GetCenterPosition(), "Can't");
+				}
 			}
 		}
 		else
 		{
 			if (selectedCharacter != null)
 			{
-				if (clickedCharacter.IsEnemyToPlayer())
-				{
-					// assign attack
-					if (selectedCharacter.CanAttack())
-					{
-						AssignAttack(selectedCharacter, clickedCharacter, false, true);
-					}
-					else
-					{
-						DebugGUI.FloatingText(selectedCharacter.GetCenterPosition(), "Can't");
-					}
-				}
-				else
-				{
-					Debug.Log("TODO interact with " + clickedCharacter); //TODO
-				}
+				Debug.Log("TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
 			}
 		}
 	}

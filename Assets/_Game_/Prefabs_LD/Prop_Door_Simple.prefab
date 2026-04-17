@@ -47,10 +47,10 @@ MonoBehaviour:
   version: 1073741824
   uniqueID: 8457648513945163430
   points:
-  - {x: 0.6194279, y: 0, z: 0.1548571}
-  - {x: -0.6194279, y: 0, z: 0.1548571}
-  - {x: -0.6194279, y: 0, z: -0.1548571}
-  - {x: 0.6194279, y: 0, z: -0.1548571}
+  - {x: 0.5165385, y: 0, z: 0.06443918}
+  - {x: -0.56330657, y: 0, z: 0.064439036}
+  - {x: -0.5695417, y: 0, z: -0.061321516}
+  - {x: 0.5165392, y: 0, z: -0.05820335}
   convex: 1
   minBoundsHeight: 1
   penaltyDelta: 0
@@ -226,10 +226,23 @@ MonoBehaviour:
   onlyOnce: 1
   consumeActions: 1
   rebuildNavigation: 1
+  autoTriggerDelay: 0
   animatorTrigger: Toggle
   interacted:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2283852087915108632}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   triggerDelay: 0.2
   animDuration: 2
 --- !u!65 &2209946154352752973
