@@ -2049,6 +2049,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: characterData
+      value: 
+      objectReference: {fileID: 11400000, guid: 1073438ee4f0c4348946f744ef5176ad, type: 2}
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: aiBrains.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: 'aiBrains.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 7fdd958a7081f7244a15ffb7e5d0cf96, type: 2}
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: 'aiBrains.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: c748149b05c63454da88307adf411fb2, type: 2}
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: 'aiBrains.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: c748149b05c63454da88307adf411fb2, type: 2}
     - target: {fileID: 1837400758454604685, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_Name
       value: PC_Zombi

@@ -36,6 +36,10 @@ PrefabInstance:
       propertyPath: uniqueID
       value: 5197270786531915048
       objectReference: {fileID: 0}
+    - target: {fileID: 5745611760749173238, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: characterData
+      value: 
+      objectReference: {fileID: 11400000, guid: 99cf44f11d897744489efec6ea4fe616, type: 2}
     - target: {fileID: 5757940252895373513, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

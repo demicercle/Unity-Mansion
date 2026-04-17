@@ -9,9 +9,13 @@ using UnityEngine.UI;
 
 public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterController>
 {
-	public CharacterController GetController() => Utils.GetOrAddComponent<CharacterController>(gameObject);
+	private CharacterController characterController;
 
-
+	public CharacterController GetController()
+	{
+		if(!characterController) characterController = GetComponent<CharacterController>();
+		return characterController;
+	}
 	
 	private bool inParty;
 	private bool isEnemy;
@@ -114,10 +118,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	
 	[Header("Navigation")]
 	[SerializeField] private List<LineRenderer> pathRenderers;
-	
-	[Header("AI")]
-	[SerializeField] private List<AIBrainData> aiBrains = new List<AIBrainData>();
-	public List<AIBrainData> brainList => aiBrains;
 	
 	[Header("Animation")]
 	[SerializeField] private Animator animator;
@@ -249,10 +249,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
     private void OnDrawGizmosSelected()
     {
 	    UpdateComponents();
-	    aiBrains.ForEach(b =>
-	    {
-		    b?.DrawGizmos(GetController());
-	    });
     }
     
   /* public class AgentWrapper

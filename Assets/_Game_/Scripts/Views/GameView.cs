@@ -16,13 +16,30 @@ public class GameView : MonoBehaviour, IView<GameController>
 		return instance;
 	}
 	
-	public GameController GetController() => Utils.GetOrAddComponent<GameController>(gameObject);
+	private GameController characterController;
+
+	public GameController GetController()
+	{
+		if(!characterController) characterController = GetComponent<GameController>();
+		return characterController;
+	}
 	
 	void Awake()
 	{
 		instance = this;
 		DontDestroyOnLoad(gameObject);
 		name = "GameView (Singleton)";
+		hasFocus = !Application.isEditor;
+		
+		mainCamera = FindObjectsByType<MainCamera>(default).First();
+		aStar = FindObjectsByType<AstarPath>(default).First();
+		
+		// init inputs
+		inputSystem = new InputSystem_Actions();
+		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
+		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
+		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
+		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
 
 		var gameController = GetController();
 		gameController.selectionChanged += () =>
@@ -39,6 +56,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	private IEnumerator Start()
 	{
+		StartCoroutine(Coroutines());
+		
 		SetInputEnabled(false);
 		// TODO Fade In
 
@@ -66,6 +85,28 @@ public class GameView : MonoBehaviour, IView<GameController>
 		yield return new WaitForSeconds(0.5f); // todo hak camera focus
 		
 		GetController().SelectNextCharacter();
+	}
+	
+	private IEnumerator Coroutines()
+	{
+		while (true)
+		{
+			if (coroutines.Count > 0)
+			{
+				while (coroutines.Count > 0)
+				{
+					var next =  coroutines[0];
+					Debug.Log("StartCoroutine: " + coroutines.Count);
+					yield return StartCoroutine(next);
+					coroutines.RemoveAt(0);
+				}
+		
+				routinesStarted?.Invoke(false);
+				Debug.Log("End Coroutines");
+			}
+			
+			yield return null;
+		}
 	}
 
 	
@@ -511,45 +552,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		Debug.Log(">> WaitRunAction: " + character);
 		yield return new WaitForSeconds(1.0f);
 		character.RunAction();
-	}
-	
-	private void InitSingleton()
-	{
-		hasFocus = !Application.isEditor;
-		
-		mainCamera = FindObjectsByType<MainCamera>(default).First();
-		aStar = FindObjectsByType<AstarPath>(default).First();
-		
-		// init inputs
-		inputSystem = new InputSystem_Actions();
-		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
-		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
-		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
-		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
-
-		StartCoroutine(Coroutines());
-	}
-	
-	private IEnumerator Coroutines()
-	{
-		while (true)
-		{
-			if (coroutines.Count > 0)
-			{
-				while (coroutines.Count > 0)
-				{
-					var next =  coroutines[0];
-					Debug.Log("StartCoroutine: " + coroutines.Count);
-					yield return StartCoroutine(next);
-					coroutines.RemoveAt(0);
-				}
-		
-				routinesStarted?.Invoke(false);
-				Debug.Log("End Coroutines");
-			}
-			
-			yield return null;
-		}
 	}
 
 	private void LateUpdate()

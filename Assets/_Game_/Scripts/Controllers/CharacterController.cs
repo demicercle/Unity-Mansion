@@ -298,7 +298,10 @@ public class CharacterController : MonoBehaviour
 
 	private void Awake()
 	{
+		if(characterData == null)
+			Debug.LogError(this + " has no character data");
 		agent = Utils.GetOrAddComponent<CharacterAgent>(gameObject);
+		if(!aiBrains.OfType<AIBrain_Wait>().Any()) aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());//todo store instance static
 	}
 
 	public Vector3[] GetCurrentPath() => GetAgent().GetCurrentPath();
@@ -324,5 +327,13 @@ public class CharacterController : MonoBehaviour
 	{
 		ConsumeActions(1);
 		onAttackAction?.Invoke(target);
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		aiBrains.ForEach(b =>
+		{
+			b?.DrawGizmos(this);
+		});
 	}
 }
