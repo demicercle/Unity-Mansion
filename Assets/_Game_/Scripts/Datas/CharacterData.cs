@@ -40,12 +40,9 @@ public class CharacterData : ScriptableObject
 
 	public float GetDamageProgress() => Mathf.Clamp01(damageAmount / (float)maxHealth);
 
-	public void TakeDamage(float amount, bool healthCheck = true)
+	public void TakeDamage(float amount)
 	{
-		if (healthCheck && isDead)
-		{
-			return;
-		}
+		Debug.Log(this + " TakeDamage " + amount);
 		
 		if (amount != 0f)
 		{
@@ -53,7 +50,7 @@ public class CharacterData : ScriptableObject
 			onDamaged?.Invoke(damageAmount);
 		}
 
-		if (healthCheck && GetRemainingHealth() <= 0)
+		if (GetRemainingHealth() <= 0)
 		{
 			Kill();
 		}
@@ -136,7 +133,7 @@ public class CharacterData : ScriptableObject
 	
 	public void TurnBegins(int turn)
 	{
-		Debug.Log(this + " TurnBegins " + turn);
+//		Debug.Log(this + " TurnBegins " + turn);
 		usedMovePoints = 0f;
 		usedActions = 0;
 	}

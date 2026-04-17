@@ -256,6 +256,7 @@ public class GameView
 			
 			Debug.Log(character + " performs attack on " + target);
 			DebugGUI.FloatingText(character.GetPosition(), "Take this!");
+			yield return new WaitForSeconds(0.5f);
 			character.PerformsAttack(target);
 			yield return new WaitForSeconds(1.0f);
 			// apply attack damage, etc
