@@ -15,5 +15,5 @@ MonoBehaviour:
   defaultPriority: 99
   noRun: 0
   noLOS: 0
-  hearingColor: {r: 1, g: 0, b: 1, a: 1}
-  hearingDistance: 2
+  hearingColor: {r: 1, g: 0.8163534, b: 0, a: 1}
+  hearingDistance: 3

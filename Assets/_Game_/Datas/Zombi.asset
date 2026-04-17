@@ -17,6 +17,9 @@ MonoBehaviour:
   maxActions: 1
   maxMovePoints: 5
   runActionExtraMovePoints: 3
+  noAttack: 0
+  attackRange: 0
+  maxHealth: 5
   usedMovePoints: 0
   usedActions: 0
   characterViewOwner: {fileID: 0}

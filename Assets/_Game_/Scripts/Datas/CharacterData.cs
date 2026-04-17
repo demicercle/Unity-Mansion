@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "CharacterStats", menuName = "CharacterStats", order = 0)]
+[CreateAssetMenu(fileName = "CharacterData", menuName = "CharacterData", order = 0)]
 public class CharacterData : ScriptableObject
 {
 	public System.Action<int> partyIndexChanged;
@@ -9,7 +9,8 @@ public class CharacterData : ScriptableObject
 	public System.Action<int> rotationChanged;
 	public System.Action<int> actionsChanged;
 	public System.Action<float> movesPointsChanged;
-	public System.Action<int> patrolRouteChanged;
+	public System.Action onKill;
+	public System.Action<float> onDamaged;
 	
 	[Header("Profile")]
 	public string displayName;
@@ -22,6 +23,46 @@ public class CharacterData : ScriptableObject
 	public bool noAttack;
 	[Range(0f, 10f)] public float attackRange = 0.0f;
 
+	[Header("Health")] 
+	[Range(1, 99)] public int maxHealth;
+
+	private bool isDead;
+	private float damageAmount;
+	public int GetMaxHealth() => maxHealth;
+	public float GetRemainingHealth() => maxHealth - damageAmount;
+
+	public float GetDamageProgress() => Mathf.Clamp01(damageAmount / (float)maxHealth);
+
+	public void TakeDamage(float amount, bool healthCheck = true)
+	{
+		if (healthCheck && isDead)
+		{
+			return;
+		}
+		
+		if (amount != 0f)
+		{
+			damageAmount += amount;
+			onDamaged?.Invoke(damageAmount);
+		}
+
+		if (healthCheck && GetRemainingHealth() <= 0)
+		{
+			Kill();
+		}
+	}
+	
+	public void Kill()
+	{
+		if (!isDead)
+		{
+			isDead = true;
+			onKill?.Invoke();
+		}
+	}
+	
+	public bool IsDead() => isDead; 
+	
 	[Header("Debug")]
 	[SerializeField] private float usedMovePoints;
 	[SerializeField] private int usedActions;
@@ -29,8 +70,7 @@ public class CharacterData : ScriptableObject
 	[SerializeField] private Vector3 position;
 	[SerializeField] private int rotation;
 	[SerializeField] private int partyIndex;
-
-	public bool IsDead() => false; // TODO
+// TODO
 	public bool CanAttack() => GetRemainingActions() > 0 && !noAttack;
 	public int GetPartyIndex() => partyIndex;
 

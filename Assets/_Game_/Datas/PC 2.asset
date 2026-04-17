@@ -14,5 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Sarah
   portraitTexture: {fileID: 2800000, guid: 08e943a402f07f34aacd1f93940543fc, type: 3}
-  maxMovePoints: 5
   maxActions: 1
+  maxMovePoints: 5
+  runActionExtraMovePoints: 3
+  noAttack: 0
+  attackRange: 0
+  maxHealth: 5
+  usedMovePoints: 0
+  usedActions: 0
+  characterViewOwner: {fileID: 0}
+  position: {x: 0, y: 0, z: 0}
+  rotation: 0
+  partyIndex: 0

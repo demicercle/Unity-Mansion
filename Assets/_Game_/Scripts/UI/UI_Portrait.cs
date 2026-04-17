@@ -10,6 +10,8 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	public RawImage rawImage;
 	public TMP_Text nameLabel;
 	public Toggle toggle;
+	public Image healthSprite;
+	public TMP_Text healthLabel;
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
@@ -27,7 +29,8 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		gameView = GameView.GetInstance();
 		gameView.characterAddedToParty += CharacterAddedToParty;
 		gameView.characterSelected += CharacterSelected;
-		//toggle.onValueChanged.AddListener(OnValueChanged);
+		
+		toggle.onValueChanged.AddListener(OnValueChanged);
 		gameObject.SetActive(false);
 	}
 
@@ -35,14 +38,15 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	{
 		gameView.characterAddedToParty -= CharacterAddedToParty;
 		gameView.characterSelected -= CharacterSelected;
-		//toggle.onValueChanged.RemoveListener(OnValueChanged);
+		
+		toggle.onValueChanged.RemoveListener(OnValueChanged);
 	}
 
 	private void OnValueChanged(bool value)
 	{
-		if (value && _assignedCharacterView != null)
+		if (value && _assignedCharacterView && !gameView.IsCharacterSelected(_assignedCharacterView))
 		{
-			GameView.clickSelectCharacter.Invoke(_assignedCharacterView);
+			gameView.SelectCharacter(_assignedCharacterView);
 		}
 	}
 
@@ -57,15 +61,24 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 	private void CharacterAddedToParty(CharacterView arg1, int arg2)
 	{
 		var index = transform.GetSiblingIndex();
+		Debug.Log(this + " " + index + " CharacterAddedToParty " + arg1 + arg2);
 		if (index == arg2)
 		{
 			_assignedCharacterView = arg1;
 			gameObject.SetActive(arg1 && arg2 >= 0);
+		}
+	}
 
-			if (_assignedCharacterView && _assignedCharacterView.TryGetData(out var data))
+	private void LateUpdate() // TODO use events
+	{
+		if (_assignedCharacterView)
+		{
+			if (_assignedCharacterView.TryGetData(out var data))
 			{
 				rawImage.texture = data.portraitTexture;
 				nameLabel.text = data.displayName;
+				healthSprite.fillAmount = data.GetDamageProgress();
+				healthLabel.text = _assignedCharacterView.GetCurrentHealthInt() + "/" + _assignedCharacterView.GetMaxHealth();
 			}
 		}
 	}

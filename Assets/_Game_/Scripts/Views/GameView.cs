@@ -363,6 +363,8 @@ public class GameView
 		onComplete?.Invoke();
 	}
 
+	public bool IsCharacterSelected(CharacterView characterView) => characterView == _selectedCharacterView;
+
 	public void SelectCharacter(CharacterView characterView, bool focusCamera = false)
 	{
 		if(_selectedCharacterView != null) characterSelected?.Invoke(_selectedCharacterView, false);
@@ -525,6 +527,7 @@ public class GameView
 
 	private void CharacterAddedToParty(CharacterData characterData, int partyIndex)
 	{
+		Debug.Log(this + " CharacterAddedToParty " + characterData + " " + partyIndex);
 		characterAddedToParty?.Invoke(characterData.GetCharacter(), partyIndex); // TODO remove "GetCharacter()"
 	}
 

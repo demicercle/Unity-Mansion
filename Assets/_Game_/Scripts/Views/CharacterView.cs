@@ -216,10 +216,15 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		agent?.StopMovement();
 	}
 
+	public int GetCurrentHealthInt() => (int)data.GetRemainingHealth();
+	public int GetMaxHealth() => data.GetMaxHealth();
+	public float GetDamageProgress() => data.GetDamageProgress();
+
 	public void TakeDamage(float amount)
 	{
 		Debug.Log(this + " TakeDamage " + amount);
 		DebugGUI.FloatingText(GetCenterPosition(), amount.ToString("N2"));
+		data.TakeDamage(amount);
 	}
 
 	public bool IsAtAttackRange(CharacterView target, bool losCheck, float drawDuration = 0.0f)
@@ -282,7 +287,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 	private void SetPartyIndex(int newIndex)
 	{
-		Debug.Log(this + " SetPartyIndex " + newIndex);
+//		Debug.Log(this + " SetPartyIndex " + newIndex);
 		partyIndex = newIndex;
 		SetColor(partyIndex >= 0 ? partyColor : IsEnemy() ? enemyColor : defaultColor);
 	}
