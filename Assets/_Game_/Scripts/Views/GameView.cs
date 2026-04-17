@@ -16,6 +16,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	static private GameView instance;
 	static public GameView GetInstance()
 	{
+		if (instance == null) instance = FindObjectOfType<GameView>();
 		return instance;
 	}
 	
@@ -439,7 +440,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			yield return prop.Interact(character);
 		}
-
 	}
 
 	private IEnumerator WaitCharacterLookPosition(CharacterController character, Vector3 pos) => WaitCharacterLookDirection(character, (pos - character.GetPosition()).normalized);
@@ -541,6 +541,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		{
 			var otherCharacter = otherCharacterView.GetController();
 			if (otherCharacter.InParty()) continue;
+
+			mainCamera.Focus(otherCharacter);
 
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
 			{

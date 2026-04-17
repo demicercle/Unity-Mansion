@@ -51,7 +51,6 @@ public class PropComponent : MonoBehaviour
 	
 	private IEnumerator DoInteract(CharacterController character = null)
 	{
-		var gameView = GameView.GetInstance();
 		if (onlyOnce)
 		{
 			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
