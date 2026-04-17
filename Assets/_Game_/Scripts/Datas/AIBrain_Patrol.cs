@@ -6,7 +6,7 @@ public class AIBrain_Patrol : AIBrainData
 {
 	public bool canUseRunAction;
 	
-	public override IEnumerator Think(CharacterView character)
+	public override IEnumerator Think(CharacterController character)
 	{
 		yield return new WaitForSeconds(1.0f);
 		
@@ -51,7 +51,7 @@ public class AIBrain_Patrol : AIBrainData
 					{
 						if (!character.CanMove() && character.CanUseRunAction() && canUseRunAction)
 						{
-							gameView.RunAction(character);
+							character.RunAction();
 						}
 					}); // patrol move
 				}

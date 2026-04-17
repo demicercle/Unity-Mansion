@@ -23,6 +23,16 @@ public class GameView : MonoBehaviour, IView<GameController>
 		instance = this;
 		DontDestroyOnLoad(gameObject);
 		name = "GameView (Singleton)";
+
+		var gameController = GetController();
+		gameController.selectionChanged += () =>
+		{
+			var selected = gameController.GetSelectedCharacter();
+			if (selected)
+			{
+				mainCamera.Focus(selected.GetPosition());
+			}
+		};
 	}
 
 	[SerializeField] private List<string> scenesToLoad = new List<string>();
@@ -99,19 +109,19 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void AssignInteract(CharacterController character, PropComponent clickedProp) // TODO Prop Controller
 	{
-		var characterView = GetCharacterView(character);
-		if (clickedProp.GetBestWaypoint(characterView.GetPosition(), out var bestWaypoint))
+		//var characterView = GetCharacterView(character);
+		if (clickedProp.GetBestWaypoint(character.GetPosition(), out var bestWaypoint))
 		{
 			QueueRoutine(WaitCharacterMoved(character, bestWaypoint.GetPosition(), () =>
 			{
-				var agent = characterView.GetAgent();
+				var agent = character.GetAgent();
 				var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
 				if (dist <= agent.reachDistance)
 				{
 					// waypoint reach
 					if (character.CanInteract())
 					{
-						QueueRoutine(WaitCharacterInteract(characterView, clickedProp, bestWaypoint));
+						QueueRoutine(WaitCharacterInteract(character, clickedProp, bestWaypoint));
 					}
 				}
 				else
@@ -293,7 +303,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 					if (attacker.IsAtAttackRange(target, losCheck, 1.0f)) // at atk range
 					{
 						Debug.Log(attacker + " is at attack range");
-						attackerView.StopAgent();
+						attacker.StopAgent();
 					}
 				}));
 			}
@@ -327,32 +337,29 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 		else
 		{
-			var characterData = character.GetCurrentData();
-			var targetData = target.GetCurrentData();
-			
-			yield return character.StartCoroutine(character.PerformsAttack(target));
+			character.AttackAction();
 			yield return new WaitForSeconds(1.0f);
 			// apply attack damage, etc
-			targetData.TakeDamage(characterData.GetLastAttackDamage());
+			target.TakeDamage(character.GetLastAttackDamage());
 		}
 	}
 
-	private IEnumerator WaitCharacterInteract(CharacterView characterView, PropComponent prop, Waypoint waypoint = null)
+	private IEnumerator WaitCharacterInteract(CharacterController character, PropComponent prop, Waypoint waypoint = null)
 	{
-		Debug.Log("WaitCharacterInteract " + characterView + " > " + prop + " @ " + waypoint);
+		Debug.Log("WaitCharacterInteract " + character + " > " + prop + " @ " + waypoint);
 		if (waypoint != null)
 		{
 			var wpDir = waypoint.GetDirection();
-			while (!characterView.IsFacingDirection(wpDir))
-				characterView.LookDirection(wpDir, Time.deltaTime);
+			
+			while (!character.IsFacingDirection(wpDir))
+				character.LookDirection(wpDir, Time.deltaTime);
+			
+			if (prop.consumeActions > 0)
+				character.ConsumeActions(prop.consumeActions);
+			
+			yield return prop.Interact(character);
 		}
 
-		var data = characterView.GetCurrentData();
-		data.SetRotation(characterView.GetRotation());
-		if (prop.consumeActions > 0)
-			data.ConsumeActions(prop.consumeActions);
-		propInteracted?.Invoke(prop, characterView.gameObject);
-		yield return prop.Interact(characterView);
 	}
 
 	private IEnumerator WaitCharacterLookPosition(CharacterController character, Vector3 pos) => WaitCharacterLookDirection(character, (pos - character.GetPosition()).normalized);
@@ -365,14 +372,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-	public void MoveCharacterToWaypoint(CharacterView characterView, Waypoint waypoint,
+	public void MoveCharacterToWaypoint(CharacterController character, Waypoint waypoint,
 		System.Action onComplete = null)
 	{
-		QueueRoutine(WaitCharacterMoved(characterView, waypoint.GetPosition(), () =>
+		QueueRoutine(WaitCharacterMoved(character, waypoint.GetPosition(), () =>
 		{
-			if (characterView.WaypointReached(waypoint))
+			if (character.WaypointReached(waypoint))
 			{
-				QueueRoutine(WaitCharacterLookDirection(characterView, waypoint.GetDirection()));
+				QueueRoutine(WaitCharacterLookDirection(character, waypoint.GetDirection()));
 			}
 		}));
 	}
@@ -381,8 +388,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacter);
 
-		var movingCharacterView = GetCharacterView(movingCharacter);
-		var agent = movingCharacterView.GetAgent();
+		//var movingCharacterView = GetCharacterView(movingCharacter);
+		var agent = movingCharacter.GetAgent();
 		agent.AssignDestination(dest);
 
 		do yield return null;
@@ -392,16 +399,16 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (path.Length > 1)
 		{
 			var firstPoint = path[1];
-			var dir = (firstPoint - movingCharacterView.GetPosition()).normalized;
-			while (!movingCharacterView.IsFacingDirection(dir))
+			var dir = (firstPoint - movingCharacter.GetPosition()).normalized;
+			while (!movingCharacter.IsFacingDirection(dir))
 			{
-				movingCharacterView.RotateTowards(firstPoint, Time.deltaTime);
+				movingCharacter.RotateTowards(firstPoint, Time.deltaTime);
 				yield return null;
 			}
 		}
 		else
 		{
-			Debug.LogWarning(movingCharacterView + " has wrong path: length=" + path.Length);
+			Debug.LogWarning(movingCharacter + " has wrong path: length=" + path.Length);
 			yield break;
 		}
 		
@@ -415,12 +422,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 				break;
 			}
 			
-			var oldPosition = movingCharacterView.GetPosition();
+			var oldPosition = movingCharacter.GetPosition();
 			
 			yield return null;
 			
 			//var newRotation = movingCharacterView.GetRotation();
-			var newPosition = movingCharacterView.GetPosition();
+			var newPosition = movingCharacter.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
@@ -432,7 +439,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		} while (agent.isMoving && !agent.reachedDestination);
 		
 		movingCharacter.SetPosition(path.Last());
-		movingCharacter.SetRotation(movingCharacterView.GetRotation());
+		movingCharacter.SetRotation(movingCharacter.GetRotation());
 		
 		agent.ClearDestination();
 		agent.SetCanMove(false);
@@ -468,27 +475,20 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 		
 		yield return new WaitForSeconds(1.0f);
-		gameData.NewTurn();
 		
-		SelectCharacter(partyCharacters.First(), true);
+		GetController().NewTurn();
+		
+		GetController().SelectNextCharacter();
 	}
 
-	public void ClickRunAction() => RunAction(selectedCharacter, false);
-	public void RunAction(CharacterView onCharacterView, bool force = false)
+	public void ClickRunAction()
 	{
-		if (onCharacterView == null)
+		var gameController = GetController();
+		var selected = gameController.GetSelectedCharacter();
+		if (selected != null && selected.CanUseRunAction())
 		{
-			Debug.LogError(this + " no character!");
-			return;
+			selected.RunAction();
 		}
-
-		if (!force && !onCharacterView.CanUseRunAction())
-		{
-			Debug.LogWarning(onCharacterView + " has no actions");
-			return;
-		}
-
-		QueueRoutine(WaitRunAction(onCharacterView));
 	}
 
 	public void SetInputEnabled(bool value)
@@ -596,7 +596,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				{
 					if (gameController.CanControlCharacter(selectedCharacter)) // mouse over navigation
 					{
-						GetCharacterView(selectedCharacter).GetAgent().AssignDestination(hit.point);
+						selectedCharacter.GetAgent().AssignDestination(hit.point);
 					}
 					else if(debugCursor) Debug.Log("character not controllable");
 				}
@@ -611,7 +611,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 					{
 						if (gameController.CanControlCharacter(selectedCharacter)) // mouse over character
 						{
-							var agent = GetCharacterView(selectedCharacter).GetAgent();
+							var agent = selectedCharacter.GetAgent();
 							if (overCharacter.InParty())
 							{
 								agent.ClearDestination();
@@ -634,7 +634,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 						{
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
-								var agent =  GetCharacterView(selectedCharacter).GetAgent();
+								var agent = selectedCharacter.GetAgent();
 								agent.AssignDestination(bestWaypoint.GetPosition());
 							}
 							else
@@ -653,7 +653,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				{
 					if (gameController.CanControlCharacter(selectedCharacter)) // mouse over raycast no result
 					{
-						var agent =  GetCharacterView(selectedCharacter).GetAgent();
+						var agent = selectedCharacter.GetAgent();
 						agent.ClearDestination();
 					}
 					else if(debugCursor) Debug.Log("character not controllable");
@@ -711,7 +711,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void OnGUIDebug()
 	{
-		const float space = 0.5f;
+		/*const float space = 0.5f;
 		GUILayout.FlexibleSpace();
 		GUILayout.Label(GetLabel("hasFocus") + hasFocus);
 		GUILayout.Label(GetLabel("coroutines") + coroutines.Count);
@@ -721,7 +721,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			GUILayout.BeginVertical("window");
 			selectedCharacter?.OnGUIDebug();
 			GUILayout.EndVertical();
-		}
+		}*/
 	}
 	
 	string GetLabel(string label) => ObjectNames.NicifyVariableName(label) + ": ";

@@ -12,76 +12,56 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	public CharacterController GetController() => Utils.GetOrAddComponent<CharacterController>(gameObject);
 
 
-	private AgentWrapper agent;
-	public AgentWrapper GetAgent() // TODO in character controller
-	{
-		return agent;
-	}
 	
 	private bool inParty;
 	private bool isEnemy;
 	void Awake()
 	{
+		var gameController = GetController();
+		
 		allInstances.Add(this);
 		currentColor = defaultColor;
-
-		if (TryGetComponent<AIPath>(out var aiPath))
-		{
-			agent = new AgentWrapper()
-			{
-				aiPath = aiPath
-			};
-			
-			agent.SetCanMove(false);
-			agent.SetObstacle(true);
-		}
-		else
-		{
-			Debug.LogError(this + " has no agent!");
-		}
 		
 		UpdateComponents();
 		
-		GetController().onHealed += (amount) =>
+		gameController.onHealed += (amount) =>
 		{
 			FloatingText("Heal!");
 		};
 
-		GetController().onPartyIndexChanged += (newIndex) =>
+		gameController.onPartyIndexChanged += (newIndex) =>
 		{
 			inParty = GetController().InParty();
 			isEnemy = GetController().IsEnemyToPlayer();
 			SetColor(inParty ? partyColor : isEnemy ? enemyColor : defaultColor);
 		};
 
-		GetController().onDamaged += (amount) =>
+		gameController.onDamaged += (amount) =>
 		{
 			FloatingText(Mathf.CeilToInt(amount).ToString());
 		};
 
-		GetController().onKilled += () =>
+		gameController.onKilled += () =>
 		{
-			StopAgent();
 			animator.SetTrigger(AnimationParameters.Trigger);
 			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
 			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
 			SetColor(deadColor);
-			    
-			var gameView = GameView.GetInstance();
-			if (gameView.IsCharacterSelected(this))
-			{
-				gameView.SelectNextCharacter();
-			}
 		};
 
-		GetController().onMoved += () =>
+		gameController.onMoved += () =>
 		{
 			// Debug.Log(this + " onMoved")
 		};
 
-		GetController().onRotate += () =>
+		gameController.onRotate += () =>
 		{
 			// Debug.Log(this + " onRotate")
+		};
+
+		gameController.onAttackAction += (target) =>
+		{
+			FloatingText("Take this!");
 		};
 	}
 
@@ -90,7 +70,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		allInstances.Remove(this);
 	}
 
-	public void FloatingText(string msg) => DebugGUI.FloatingText(GetCenterPosition(), msg);
+	public void FloatingText(string msg) => DebugGUI.FloatingText(GetController().GetCenterPosition(), msg);
 	
 	static public List<CharacterView> allInstances  = new List<CharacterView>();
 	
@@ -188,21 +168,10 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		}
 	}
 
-	public void StopAgent()
-	{
-		agent?.StopMovement();
-	}
-
 	public CharacterView GetClosestCharacter(IEnumerable<CharacterView> characters)
 	{
 		return characters.OrderBy(c => Vector3.Distance(GetPosition(), c.GetPosition())).FirstOrDefault();
 	}
-
-	public bool WaypointReached(Waypoint wp)
-	{
-		return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
-	} // TODO in game data
-	
 	
 	private Color currentColor;
 	private bool mouseOver;
@@ -212,7 +181,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 
 	private void UpdatePath()
 	{
-		lastPath = agent.GetCurrentPath();
+		lastPath = GetController().GetCurrentPath();
 		
 		if (pathRenderers.Count > 0)
 		{
@@ -254,21 +223,24 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
     private float alphaColor;
     private bool killed;
     
-    void LateUpdate()
+    void LateUpdate()//TODO optim
     {
-	    hasActions = GetController().HasActions();
-	    alphaColor = alphaCurve.Evaluate(GetController().IsSelected() ? 1f : mouseOver ? 0.5f : 0.0f);
+	    var controller = GetController();
+	    
+	    hasActions = controller.HasActions();
+	    alphaColor = alphaCurve.Evaluate(controller.IsSelected() ? 1f : mouseOver ? 0.5f : 0.0f);
 	    
 	    selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
 	    movePointsCircle.SetColor(currentColor, alphaColor);
-	    movePointsCircle.SetProgress(GetController().GetMovePointsProgress());
+	    movePointsCircle.SetProgress(controller.GetMovePointsProgress());
 
 	    if (animator != null)
 	    {
-		    var localVelocity = agent.velocity;
+		    var localVelocity = controller.GetVelocity();
+		    var isMoving = controller.IsMoving();
 		    animator.SetFloat(AnimationParameters.VelocityX, 0);      
 		    animator.SetFloat(AnimationParameters.VelocityZ, localVelocity.magnitude * velocityScale);  
-		    animator.SetBool(AnimationParameters.Moving, agent.isMoving);
+		    animator.SetBool(AnimationParameters.Moving, isMoving);
 	    }
 
 	    mouseOver = false;
@@ -283,7 +255,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	    });
     }
     
-    public class AgentWrapper
+  /* public class AgentWrapper
     {
 	    public AIPath aiPath;
 	    public Vector3 velocity => aiPath.velocity;
@@ -366,5 +338,5 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		    aiPath.isStopped = true;
 		    ClearDestination();
 	    }
-    }
+    }*/
 }

@@ -8,12 +8,17 @@ public class UI_SelectedCharacter : MonoBehaviour
 	public Button actionButton_Run;
 
 	private bool routineStarted;
-	private CharacterView lastSelectedCharacter;
+	private CharacterController lastSelectedCharacter;
+
+	private GameView gameView;
+	private GameController gameController;
 	
 	private void Awake()
 	{
-		var gameView = GameView.GetInstance();
-		gameView.selectionChanged += SelectionChanged;
+		gameView = GameView.GetInstance();
+		gameController = gameView.GetController();
+		
+		gameController.selectionChanged += SelectionChanged;
 		gameView.routinesStarted += RoutinesStarted;
 
 		actionButton_Run.onClick.AddListener(gameView.ClickRunAction);
@@ -21,8 +26,8 @@ public class UI_SelectedCharacter : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		var gameView = GameView.GetInstance();
-		gameView.selectionChanged -= SelectionChanged;
+		
+		gameController.selectionChanged -= SelectionChanged;
 		gameView.routinesStarted -= RoutinesStarted;
 		
 		actionButton_Run.onClick.RemoveAllListeners();
@@ -34,6 +39,10 @@ public class UI_SelectedCharacter : MonoBehaviour
 		{
 			actionButton_Run.interactable = !routineStarted && lastSelectedCharacter.HasActions();
 		}
+		else
+		{
+			gameObject.SetActive(false);
+		}
 	}
 
 	private void RoutinesStarted(bool started)
@@ -41,10 +50,9 @@ public class UI_SelectedCharacter : MonoBehaviour
 		routineStarted = started;
 	}
 	
-	private void SelectionChanged(CharacterView newChar, bool canControlCharacter)
+	private void SelectionChanged()
 	{
-		lastSelectedCharacter = newChar;
-		gameObject.SetActive(canControlCharacter);
+		lastSelectedCharacter = gameController.GetSelectedCharacter();
+		gameObject.SetActive(lastSelectedCharacter && gameController.CanControlCharacter(lastSelectedCharacter));
 	}
-
 }

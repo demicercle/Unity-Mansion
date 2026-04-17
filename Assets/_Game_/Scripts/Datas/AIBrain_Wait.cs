@@ -6,7 +6,7 @@ public class AIBrain_Wait : AIBrainData
 {
 	public float time = 1.0f;
 	
-	public override IEnumerator Think(CharacterView character)
+	public override IEnumerator Think(CharacterController character)
 	{
 		yield return new WaitForSeconds(time);
 	}

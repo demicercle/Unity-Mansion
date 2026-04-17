@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -23,9 +24,11 @@ public class CharacterController : MonoBehaviour
 	public event System.Action onKilled;
 	public event System.Action onMoved;
 	public event System.Action onRotate;
+	public event System.Action<CharacterController> onAttackAction;
 	
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
+	public List<AIBrainData> GetBrains() => aiBrains.ToList();
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
@@ -39,6 +42,9 @@ public class CharacterController : MonoBehaviour
 	[ReadOnly] [SerializeField] private int savedRotation;
 	[ReadOnly] [SerializeField] private Vector3 savedPosition;
 	[ReadOnly] [SerializeField] private bool isDead;
+	[ReadOnly] [SerializeField] private CharacterAgent agent;
+
+	public CharacterAgent GetAgent() => agent;
 
 	public float GetMaxSpeed() => moveSpeed;
 	
@@ -57,7 +63,7 @@ public class CharacterController : MonoBehaviour
 		{
 			isSelected = value;
 			selectionChanged?.Invoke(value);
-			GameView.GetInstance().SelectionChanged();//todo use events
+			gameController.SelectionChanged();
 		}
 	}
 
@@ -204,6 +210,8 @@ public class CharacterController : MonoBehaviour
 		if (!IsDead())
 		{
 			isDead = true;
+			agent.StopMovement();
+			SetSelected(false);
 			onKilled?.Invoke();
 			statsChanged?.Invoke();
 		}
@@ -245,6 +253,12 @@ public class CharacterController : MonoBehaviour
 	public float GetDistanceTo(Vector3 world) => Vector3.Distance(GetPosition(), world);
 
 	public float GetDistanceTo(CharacterController other) => GetDistanceTo(other.GetPosition());
+	
+	public bool WaypointReached(Waypoint wp)
+	{
+		return GetDistanceTo(wp.GetPosition()) <= agent.reachDistance;
+		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
+	} 
 
 	public bool IsAtAttackRange(CharacterController target, bool losCheck, float drawDuration = 0.0f)
 	{
@@ -280,5 +294,35 @@ public class CharacterController : MonoBehaviour
 	{
 		ConsumeActions(1);
 		usedMovePoints -= characterData.runActionExtraMovePoints;
+	}
+
+	private void Awake()
+	{
+		agent = Utils.GetOrAddComponent<CharacterAgent>(gameObject);
+	}
+
+	public Vector3[] GetCurrentPath() => GetAgent().GetCurrentPath();
+
+	public void StopAgent()
+	{
+		GetAgent().StopMovement();
+	}
+
+	public Vector3 GetVelocity()
+	{
+		return GetAgent().velocity;
+	}
+
+	public bool IsMoving() => GetAgent().isMoving;
+
+	public float GetLastAttackDamage()
+	{
+		return characterData.lastAttackDamage;
+	}
+
+	public void AttackAction(CharacterController target = null)
+	{
+		ConsumeActions(1);
+		onAttackAction?.Invoke(target);
 	}
 }

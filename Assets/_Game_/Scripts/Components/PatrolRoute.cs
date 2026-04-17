@@ -9,7 +9,7 @@ public class PatrolRoute : MonoBehaviour
 	void Awake() { routes.Add(this);}
 	void OnDestroy() { routes.Remove(this); }
 
-	static public bool FindRoute(CharacterView character, out PatrolRoute patrolRoute)
+	static public bool FindRoute(CharacterController character, out PatrolRoute patrolRoute)
 	{
 		foreach (var route in routes)
 		{
@@ -43,7 +43,7 @@ public class PatrolRoute : MonoBehaviour
 		Utils.SetDirty(gameObject);
 	}
 
-	public CharacterView assignedCharacter;
+	public CharacterController assignedCharacter;
 	public List<Waypoint> waypoints = new List<Waypoint>();
 	public bool closedLoop = false;
 	public Color color = Color.blue;
@@ -59,19 +59,10 @@ public class PatrolRoute : MonoBehaviour
 			DebugGUI.Path(GetPath(), closedLoop, color, duration);
 		}
 
-		public void SetAssignedCharacter(CharacterView newCharacter)
-		{
-			assignedCharacter = newCharacter;
-			if (!assignedCharacter.brainList.OfType<AIBrain_Patrol>().Any())
-			{
-				assignedCharacter.brainList.Add(defaultBrain.Clone());
-			}
-		}
-
 		private void Start() // TODO init patrol in GameData
 		{
 			if(assignedCharacter == null)
-				assignedCharacter = GetComponentInParent<CharacterView>();
+				assignedCharacter = GetComponentInParent<CharacterController>();
 			
 			transform.SetParent(null, true); // to prevent waypoints to move in game
 			
@@ -79,10 +70,7 @@ public class PatrolRoute : MonoBehaviour
 			{
 				Debug.LogWarning(this + " has no assigned character");
 				gameObject.SetActive(false);
-				return;
 			}
-			
-			SetAssignedCharacter(assignedCharacter);
 		}
 
 		private void OnDrawGizmos()

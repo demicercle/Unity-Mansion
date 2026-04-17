@@ -44,12 +44,12 @@ public class PropComponent : MonoBehaviour
 		return Waypoint.GetBestWaypointFromPosition(worldPos, out bestWaypoint, GetWaypoints());
 	}
 
-	public Coroutine Interact(CharacterView interactor = null) => StartCoroutine(DoInteract(interactor));
+	public Coroutine Interact(CharacterController character = null) => StartCoroutine(DoInteract(character));
 
 	public float triggerDelay = 0.0f;
 	public float animDuration = 1.0f;
 	
-	private IEnumerator DoInteract(CharacterView interactor = null)
+	private IEnumerator DoInteract(CharacterController character = null)
 	{
 		var gameView = GameView.GetInstance();
 		if (onlyOnce)

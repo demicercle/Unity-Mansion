@@ -9,7 +9,7 @@ public class GameController : MonoBehaviour
 
 	public CharacterController[] GetPartyCharacters() => allCharacters.Where(c => c.InParty()).ToArray();
 
-	public System.Action turnStarted, turnEnded;
+	public System.Action turnStarted, turnEnded, selectionChanged;
 	public System.Action<CharacterController[]> partyChanged;
 	
 	[ReadOnly] [SerializeField] private List<CharacterController> allCharacters =  new List<CharacterController>();
@@ -81,5 +81,10 @@ public class GameController : MonoBehaviour
 	public bool CanControlCharacter(CharacterController selectedCharacter)
 	{
 		return IsPlayerTurn() && selectedCharacter.InParty() && !selectedCharacter.IsDead();
+	}
+
+	public void SelectionChanged()
+	{
+		selectionChanged?.Invoke();
 	}
 }
