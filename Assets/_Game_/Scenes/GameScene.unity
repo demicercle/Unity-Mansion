@@ -5160,84 +5160,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1858412271}
   m_CullTransparentMesh: 1
---- !u!1 &1970159541
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1970159542}
-  - component: {fileID: 1970159544}
-  - component: {fileID: 1970159543}
-  m_Layer: 0
-  m_Name: FogProjector
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1970159542
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1970159541}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 12, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1970159543
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1970159541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f33dcffc221471b8ad70b31067d8fc6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  visibleColor: {r: 1, g: 1, b: 1, a: 0}
-  exploredColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  hiddenColor: {r: 0, g: 0, b: 0, a: 1}
-  gridSize: 30
-  textureSize: 256
-  cellSize: {x: 1, y: 1, z: 1}
-  refreshTime: 0.1
-  obstructionLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  textureParameter: _MainTex
-  minRange: 0
-  screenOffset: {x: 0, y: 0}
-  scaleSize: 1
---- !u!119 &1970159544
-Projector:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1970159541}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_NearClipPlane: 0.1
-  m_FarClipPlane: 100
-  m_FieldOfView: 60
-  m_AspectRatio: 1
-  m_Orthographic: 1
-  m_OrthographicSize: 10
-  m_Material: {fileID: 2100000, guid: 3a263d6cb897b8c4da9e17df4b42a630, type: 2}
-  m_IgnoreLayers:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!1 &2007086560
 GameObject:
   m_ObjectHideFlags: 0
@@ -5949,26 +5871,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
---- !u!1001 &4366051403716791220
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications: []
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ccfbb4b91ecc92a44bc4c812dbfa5e90, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 792779173}
-  - {fileID: 1970159542}
   - {fileID: 963194228}
   - {fileID: 1140513726}
   - {fileID: 1467149466160358941}
-  - {fileID: 4366051403716791220}

@@ -47,7 +47,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		hasFocus = !Application.isEditor;
 		
 		mainCamera = FindObjectsByType<MainCamera>(default).First();
-		aStar = FindObjectsByType<AstarPath>(default).First();
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
@@ -284,7 +283,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	private GameCanvas canvas;
 	private Vector2 mousePosition;
 	private bool hasMousePosition;
-	private AstarPath aStar;
 	private MainCamera mainCamera;
 	public InputSystem_Actions inputSystem { get; private set; }
 	
