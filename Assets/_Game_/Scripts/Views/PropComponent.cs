@@ -6,8 +6,22 @@ using Pathfinding;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class PropComponent : MonoBehaviour
+public class PropComponent : MonoBehaviour, IView<PropController>
 {
+	private PropController controller;
+
+	public PropController GetController()
+	{
+		if (controller == null) controller = Utils.GetOrAddComponent<PropController>(gameObject);
+		return controller;
+	}
+
+	private void Awake()
+	{
+		var controller = GetController();
+		controller.onInteract += OnInteract;
+	}
+
 	public Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
 
 	public bool onlyOnce;
@@ -44,19 +58,15 @@ public class PropComponent : MonoBehaviour
 		return Waypoint.GetBestWaypointFromPosition(worldPos, out bestWaypoint, GetWaypoints());
 	}
 
-	public Coroutine Interact(CharacterController character = null) => StartCoroutine(DoInteract(character));
-
 	public float triggerDelay = 0.0f;
 	public float animDuration = 1.0f;
-	
-	private IEnumerator DoInteract(CharacterController character = null)
+
+	private void OnInteract(int interactionCount)
 	{
-		if (onlyOnce)
+		if (onlyOnce && interactionCount > 0)
 		{
 			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
 		}
-		
-		yield return new WaitForSeconds(triggerDelay);
 		
 		if (!string.IsNullOrEmpty(animatorTrigger))
 		{
@@ -68,13 +78,6 @@ public class PropComponent : MonoBehaviour
 		}
 		
 		interacted?.Invoke();
-		
-		yield return new WaitForSeconds(animDuration);
-
-		if (rebuildNavigation)
-		{
-			yield return Utils.RebuildNavigationAsync();
-		}
 	}
 
 	private IEnumerator Start()
@@ -84,7 +87,7 @@ public class PropComponent : MonoBehaviour
 		if (autoTriggerDelay > 0f)
 		{
 			yield return new WaitForSeconds(autoTriggerDelay);
-			Interact(null);
+			GetController().Interact();
 		}
 	}
 }

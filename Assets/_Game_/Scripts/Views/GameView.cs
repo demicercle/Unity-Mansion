@@ -438,7 +438,16 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (prop.consumeActions > 0)
 				character.ConsumeActions(prop.consumeActions);
 			
-			yield return prop.Interact(character);
+			yield return new WaitForSeconds(prop.triggerDelay);
+
+			prop.GetController().Interact();
+		
+			yield return new WaitForSeconds(prop.animDuration);
+
+			if (prop.rebuildNavigation)
+			{
+				yield return Utils.RebuildNavigationAsync();
+			}
 		}
 	}
 
