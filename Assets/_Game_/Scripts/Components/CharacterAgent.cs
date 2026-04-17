@@ -8,6 +8,9 @@ public class CharacterAgent : MonoBehaviour
 {
 	public const float minNavDistance = 0.1f; // put this in character view
 
+	
+	public bool PositionChanged(Vector3 p1, Vector3 p2) => p1.ToString() != p2.ToString();
+	
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
@@ -103,6 +106,9 @@ public class CharacterAgent : MonoBehaviour
 	
     public void AssignDestination(Vector3 hitPoint)
     {
+	    if (hasDestination && !PositionChanged(hitPoint, aiPath.destination))
+		    return;
+	    
 	    //Debug.Log(aiPath + " AssignDestination " + hitPoint);
 	    aiPath.destination = hitPoint;
 	    aiPath.SearchPath();

@@ -5,3 +5,4 @@
 - character use action with serializable "action parameter" info
 - add keyboard shortcut
 - GameController
+- more delay between turn + popup

@@ -8,15 +8,6 @@ public class CharacterController : MonoBehaviour
 {
 	static public List<CharacterController> instances = new List<CharacterController>();
 	static public IEnumerable<CharacterController> GetPartyCharacters() => instances.Where(c => c.InParty());
-
-	static public CharacterController GetPartyCharacter(int i)
-	{
-		if (i < 0) return null;
-		var party = GetPartyCharacters().ToArray();
-		return i < party.Length ? party[i] : null;
-	}
-
-	private GameController gameController => GameView.GetInstance().GetController();
 	
 	/*public enum ActionType TODO
 	{
