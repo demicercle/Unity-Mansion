@@ -16,6 +16,46 @@ public class GameController : MonoBehaviour
 	[ReadOnly] [SerializeField] private int currentTurn;
 	[ReadOnly] [SerializeField] private bool playerTurn;
 
+	public int GetSelectedCharacterIndex()
+	{
+		for (int i = 0; i < allCharacters.Count; i++)
+		{
+			if (allCharacters[i].IsSelected())
+				return i;
+		}
+
+		return -1;
+	}
+	
+	public void SelectNextCharacter()
+	{
+		Debug.Log(this + " SelectNextCharacter");
+		var selectNext = false;
+		for (int i = 0; i < allCharacters.Count; i++)
+		{
+			var character = allCharacters[i];
+			if (character.IsSelected())
+			{
+				selectNext = true;
+			}
+			else if (selectNext && character.InParty() && !character.IsDead())
+			{
+				SelectCharacter(character);
+			}
+		}
+		
+		Debug.LogWarning(this + " Has no character to select next!");
+	}
+
+	public void SelectCharacter(CharacterController character)
+	{
+		Debug.Log(this + " SelectCharacter " + character);
+		for (int i = 0; i < allCharacters.Count; i++)
+		{
+			allCharacters[i].SetSelected(character == allCharacters[i]);
+		}
+	}
+
 	public void PartyChanged() => partyChanged?.Invoke(GetPartyCharacters());
 	public void AddCharacter(CharacterController character) =>  allCharacters.Add(character);
 	public CharacterController GetCharacterAt(int index) => allCharacters[index];
@@ -36,5 +76,10 @@ public class GameController : MonoBehaviour
 		playerTurn = false;
 		Debug.Log(this + " EndTurn " + currentTurn);
 		turnEnded?.Invoke();
+	}
+
+	public bool CanControlCharacter(CharacterController selectedCharacter)
+	{
+		return IsPlayerTurn() && selectedCharacter.InParty() && !selectedCharacter.IsDead();
 	}
 }

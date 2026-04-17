@@ -8,7 +8,7 @@ public abstract class AIBrainData : ScriptableObject
 //	public GameData gameData => gameView.gameData;
 	public int defaultPriority;
 	
-	abstract public IEnumerator Think(CharacterView character);
+	abstract public IEnumerator Think(CharacterController character);
 	
 	public AIBrainData Clone() => Instantiate(this);
 

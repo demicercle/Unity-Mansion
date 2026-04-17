@@ -12,14 +12,8 @@ public class ConsoleEvents : MonoBehaviour
 
 	static bool TryGetSelectedCharacterIndex(out int selected)
 	{
-		if (gameView.TryGetSelectedCharacter(out var characterView))
-		{
-			selected = characterView.GetCharacterIndex();
-			return true;
-		}
-
-		selected = -1;
-		return false;
+		selected = GetController().GetSelectedCharacterIndex();
+		return selected >= 0;
 	}
 
 	[ConsoleMethod("apply_dmg", "")]

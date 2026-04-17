@@ -40,14 +40,14 @@ public class AIBrain_Chase : AIBrainData
 		}
 	}
 	
-	public override void DrawGizmos(CharacterView characterView)
+	public override void DrawGizmos(CharacterController character)
 	{
 		Gizmos.color = hearingColor;
-		Utils.DrawGizmosCircle(characterView.GetEyesPosition(), default, hearingDistance);
-		if(Application.isPlaying && lastTarget != null) DebugGUI.Line(characterView.GetEyesPosition(), lastTarget.GetCenterPosition(), hearingColor, 0.0f);
+		Utils.DrawGizmosCircle(character.GetEyesPosition(), default, hearingDistance);
+		if(Application.isPlaying && lastTarget != null) DebugGUI.Line(character.GetEyesPosition(), character.GetCenterPosition(), hearingColor, 0.0f);
 	}
 
-	public override IEnumerator Think(CharacterView character)
+	public override IEnumerator Think(CharacterController character)
 	{
 		UpdateTarget(character);
 		yield return new WaitForSeconds(1.0f);

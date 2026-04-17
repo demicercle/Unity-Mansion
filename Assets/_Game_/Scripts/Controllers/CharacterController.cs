@@ -26,15 +26,29 @@ public class CharacterController : MonoBehaviour
 	
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
-
+	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
+	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
+	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
+	[SerializeField] [Range(0.01f, 0.50f)] private float minNavDistance = 0.01f; // put this in character view
+	
 	[ReadOnly] [SerializeField] private bool isSelected = false;
 	[ReadOnly] [SerializeField] private int partyIndex = -1;
 	[ReadOnly] [SerializeField] private float usedMovePoints;
 	[ReadOnly] [SerializeField] private int usedActions;
 	[ReadOnly] [SerializeField] private float totalDamages;
-	[ReadOnly] [SerializeField] private int rotation;
-	[ReadOnly] [SerializeField] private Vector3 position;
+	[ReadOnly] [SerializeField] private int savedRotation;
+	[ReadOnly] [SerializeField] private Vector3 savedPosition;
 	[ReadOnly] [SerializeField] private bool isDead;
+
+	public float GetMaxSpeed() => moveSpeed;
+	
+	public float GetRadius() => radius;
+
+	public float GetHeight() => height;
+
+	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * height * 0.9f;
+    
+	public Vector3 GetCenterPosition() => GetPosition() + Vector3.up * height * 0.5f;
 
 	public bool IsSelected() => isSelected;
 	public void SetSelected(bool value)
@@ -43,8 +57,7 @@ public class CharacterController : MonoBehaviour
 		{
 			isSelected = value;
 			selectionChanged?.Invoke(value);
-			gameController.SelectionChanged();
-			GameView.GetInstance().SelectionChanged();
+			GameView.GetInstance().SelectionChanged();//todo use events
 		}
 	}
 
@@ -78,26 +91,69 @@ public class CharacterController : MonoBehaviour
 	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
 
 	public bool CanMove() => GetRemainingMovePoints() > 0f;
+	
 	public bool CanUseRunAction()
 	{
 		return  HasActions();
 	}
+	
 	public bool CanInteract()
 	{
 		return HasActions();
 	}
+
+	public void RotateTowards(Vector3 worldPosition, float f = -1f)
+	{
+		LookDirection(worldPosition - GetPosition(), f);
+	}
+
+	public void LookDirection(Vector3 getDirection, float f = -1f)
+	{
+		getDirection.y = 0;
+		getDirection.Normalize();
+
+		if (getDirection.sqrMagnitude < 0.01f)
+		{
+			Debug.LogWarning(this + " invalid direction");
+			return;
+		}
+	    
+		if (f < 0f)
+		{
+			DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
+			transform.rotation = Quaternion.LookRotation(getDirection);
+		}
+		else
+		{
+			DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.aiPath.rotationSpeed); //TODO property "rotationSpeed" separated from agent
+		}
+	}
+    
+	const float MIN_FACING_DOT = 0.9f;
+	public bool IsFacingDirection(Vector3 dir)
+	{
+		dir.y = 0;
+		dir.Normalize();
+		var dot = Vector3.Dot(dir, transform.forward);
+		//Debug.Log(dot);
+		// DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
+		return dot >= MIN_FACING_DOT;
+	}
 	
-	public Vector3 GetPosition() => position;
+	public Vector3 GetPosition() => transform.position;
 	public void SetPosition(Vector3 newPos)
 	{
-		position = newPos;
+		transform.position = newPos;
+		savedPosition = newPos;
 		onMoved?.Invoke();
 	}
 
-	public int GetRotation() => rotation;
+	public int GetRotation() => (int)transform.eulerAngles.y;
 	public void SetRotation(int newRot)
 	{
-		rotation = newRot;
+		transform.rotation = Quaternion.Euler(0, newRot, 0);
+		savedRotation = newRot;
 		onRotate?.Invoke();
 	}
 	
@@ -163,5 +219,66 @@ public class CharacterController : MonoBehaviour
 		aiBrains = aiBrains.OrderBy(b => b.GetPriority(this)).ToList();
 		Debug.Log(this + " TryGetAIBrain " + Utils.ArrayStr(aiBrains));
 		return (aiBrain = aiBrains.FirstOrDefault()) != null;
+	}
+	
+	public List<CharacterController> GetNearbyLivingCharacters(float range, float drawDuration = 0f, Color drawColor = default)
+	{
+		var outList = new List<CharacterController>();
+		var center = GetPosition();
+		DebugGUI.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
+		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(GameView.LAYER_CHARACTER)))
+		{
+			if (coll.TryGetComponent(out CharacterController otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())
+			{
+				outList.Add(otherCharacter);
+			}
+		}
+
+		return outList;
+	}
+
+	public CharacterController GetClosestCharacter(List<CharacterController> getNearbyLivingCharacters)
+	{
+		return getNearbyLivingCharacters.OrderBy(other => GetDistanceTo(other)).FirstOrDefault();
+	}
+
+	public float GetDistanceTo(Vector3 world) => Vector3.Distance(GetPosition(), world);
+
+	public float GetDistanceTo(CharacterController other) => GetDistanceTo(other.GetPosition());
+
+	public bool IsAtAttackRange(CharacterController target, bool losCheck, float drawDuration = 0.0f)
+	{
+		var atkRange = GetAttackRange();
+		atkRange = Mathf.Max(atkRange, GetRadius() + target.GetRadius() + minNavDistance);
+		if (Vector3.Distance(GetPosition(), target.GetPosition()) <= atkRange)
+		{
+			return !losCheck || LOSCheck(target, drawDuration);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public bool LOSCheck(CharacterController other, float drawDuration = 0.0f)
+	{
+		var start = GetEyesPosition();
+		var end = other.GetEyesPosition();
+		if(Physics.Linecast(start, end, out var hit,
+			   LayerMask.GetMask(GameView.LAYER_WALL, GameView.LAYER_GROUND)))
+		{
+			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
+			DebugGUI.Line(start, end, Color.red, drawDuration);
+			return false;
+		}
+
+		DebugGUI.Line(start, end, Color.green, drawDuration);
+		return true;
+	}
+
+	public void RunAction()
+	{
+		ConsumeActions(1);
+		usedMovePoints -= characterData.runActionExtraMovePoints;
 	}
 }

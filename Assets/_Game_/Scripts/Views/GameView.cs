@@ -55,8 +55,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		yield return new WaitForSeconds(0.5f); // todo hak camera focus
 		
-		SelectNextCharacter();
+		GetController().SelectNextCharacter();
 	}
+
 	
 	public void SelectionChanged()
 	{
@@ -68,14 +69,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (HasCoroutines()) return;
 		
 		var gameController = GetController();
-		if (!gameController.IsPlayerTurn())
-			return;
-
 		var clickedCharacter = clickedCharacterView.GetController();
 		var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter == null)
 		{
-			if (!clickedCharacter.IsDead() && clickedCharacter.InParty())
+			if (gameController.CanControlCharacter(clickedCharacter))
 			{
 				clickedCharacter.SetSelected(true);
 			}
@@ -92,11 +90,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (HasCoroutines()) return;
 		
 		var gameController = GetController();
-		if (!gameController.IsPlayerTurn())
-			return;
-		
 		var selectedCharacter = gameController.GetSelectedCharacter();
-		if (selectedCharacter != null)
+		if (selectedCharacter != null && gameController.CanControlCharacter(selectedCharacter))
 		{
 			AssignInteract(selectedCharacter, clickedProp);
 		}
@@ -107,7 +102,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var characterView = GetCharacterView(character);
 		if (clickedProp.GetBestWaypoint(characterView.GetPosition(), out var bestWaypoint))
 		{
-			QueueRoutine(WaitCharacterMoved(characterView, bestWaypoint.GetPosition(), () =>
+			QueueRoutine(WaitCharacterMoved(character, bestWaypoint.GetPosition(), () =>
 			{
 				var agent = characterView.GetAgent();
 				var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
@@ -136,7 +131,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			return;
 		
 		var selectedCharacter = gameController.GetSelectedCharacter();
-		if (selectedCharacter != null)
+		if (selectedCharacter != null && gameController.CanControlCharacter(selectedCharacter))
 		{
 			AssignMove(selectedCharacter, navPosition);
 		}
@@ -145,10 +140,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public void AssignMove(CharacterController controller, Vector3 navPosition)
 	{
 		var characterView = GetCharacterView(controller);
-		QueueRoutine(WaitCharacterMoved(characterView, navPosition));
+		QueueRoutine(WaitCharacterMoved(controller, navPosition));
 	}
 
-	CharacterView GetCharacterView(CharacterController controller)
+	CharacterView GetCharacterView(CharacterController controller) // todo should not be public
 	{
 		foreach (var characterView in CharacterView.allInstances)
 		{
@@ -159,15 +154,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		Debug.LogError("Invalid GetCharacterView! " + controller);
 		return null;
 	}
-	
-	public bool TryGetSelectedCharacter(out CharacterView view)
-	{
-		return (view = selectedCharacter) != null;
-	}
 
 	public System.Action<bool> routinesStarted;
-	public System.Action<CharacterView, bool> selectionChanged;
-	public System.Action<PropComponent, GameObject> propInteracted;
 	
 	static public string LAYER_GROUND = "Ground";
 	static public string LAYER_WALL = "Wall";
@@ -241,7 +229,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		if (value > 0) // pressed
 		{
-			SelectCharacter(); // deselect all
+			if (GetController().IsPlayerTurn() && !HasCoroutines())
+			{
+				GetController().SelectCharacter(null); // deselect all
+			}
 		}
 	}
 
@@ -256,39 +247,17 @@ public class GameView : MonoBehaviour, IView<GameController>
 			{
 				if (hit.collider.TryGetComponent(out CharacterView clickedCharacter)) // click character
 				{
-					if (CanSelectCharacter(clickedCharacter))
-					{
-						SelectCharacter(clickedCharacter);
-					}
-					else if (selectedCharacter != null && clickedCharacter != selectedCharacter)
-					{
-						Debug.Log("click other character: " + selectedCharacter + " > " + clickedCharacter);
-						if (clickedCharacter.IsEnemy())
-						{
-							AssignAttack(selectedCharacter, clickedCharacter, false, true);
-						}
-					}
+					ClickCharacter(clickedCharacter);
 				}
 
 				if (hit.collider.TryGetComponent(out PropComponent clickedProp)) // click prop
 				{
-					if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent) && selectedCharacter.CanMove())
-					{
-						if (CanControlCharacter(selectedCharacter)) // assign interact
-						{
-							
-						}
-					}
+					ClickProp(clickedProp);
 				}
 			}
 			else if (raycastResult == CURSOR_RAYCAST_RESULT_NAVIGATION) // click navigation
 			{
-				if (selectedCharacter != null && selectedCharacter.TryGetAgent(out var agent) && selectedCharacter.CanMove())
-				{
-					if (CanControlCharacter(selectedCharacter)) // assign set nav destination (move)
-					{
-					}
-				}
+				ClickNavigation(hit.point);
 			}
 		}
 	}
@@ -315,13 +284,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		var attackerView = GetCharacterView(attacker);
 		var targetView = GetCharacterView(target);
-		while (attacker.CanMove() && !attackerView.IsAtAttackRange(targetView, losCheck))
+		while (attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck))
 		{
-			if (!attackerView.IsAtAttackRange(targetView, losCheck))
+			if (!attacker.IsAtAttackRange(target, losCheck))
 			{
 				yield return StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition(), null, () =>
 				{
-					if (attackerView.IsAtAttackRange(target, losCheck, 1.0f)) // at atk range
+					if (attacker.IsAtAttackRange(target, losCheck, 1.0f)) // at atk range
 					{
 						Debug.Log(attacker + " is at attack range");
 						attackerView.StopAgent();
@@ -386,17 +355,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		yield return prop.Interact(characterView);
 	}
 
-	private IEnumerator WaitCharacterLookPosition(CharacterView characterView, Vector3 pos) => WaitCharacterLookDirection(characterView, (pos - characterView.GetPosition()).normalized);
-	private IEnumerator WaitCharacterLookDirection(CharacterView characterView, Vector3 dir)
+	private IEnumerator WaitCharacterLookPosition(CharacterController character, Vector3 pos) => WaitCharacterLookDirection(character, (pos - character.GetPosition()).normalized);
+	private IEnumerator WaitCharacterLookDirection(CharacterController character, Vector3 dir)
 	{
-		while (!characterView.IsFacingDirection(dir))
+		while (!character.IsFacingDirection(dir))
 		{
-			characterView.RotateTowards(dir, Time.deltaTime);
+			character.RotateTowards(dir, Time.deltaTime);
 			yield return null;
 		}
-		
-		//TryGetCharacter(characterView, out var characterData);
-		characterView.GetCurrentData().SetRotation(characterView.GetRotation());
 	}
 
 	public void MoveCharacterToWaypoint(CharacterView characterView, Waypoint waypoint,
@@ -435,7 +401,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 		else
 		{
-			Debug.LogWarning(movingCharacterView + " has path " + path.Length);
+			Debug.LogWarning(movingCharacterView + " has wrong path: length=" + path.Length);
+			yield break;
 		}
 		
 		agent.SetCanMove(true);
@@ -452,64 +419,26 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			yield return null;
 			
-			var newRotation = movingCharacterView.GetRotation();
+			//var newRotation = movingCharacterView.GetRotation();
 			var newPosition = movingCharacterView.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
-			movingCharacter.SetPosition(newPosition);
-			movingCharacter.SetRotation(newRotation);
+			//movingCharacter.SetPosition(newPosition);
+			//movingCharacter.SetRotation(newRotation);
 			
 			onUpdate?.Invoke();
 			
 		} while (agent.isMoving && !agent.reachedDestination);
+		
+		movingCharacter.SetPosition(path.Last());
+		movingCharacter.SetRotation(movingCharacterView.GetRotation());
 		
 		agent.ClearDestination();
 		agent.SetCanMove(false);
 		
 		onComplete?.Invoke();
 	}
-
-//	public bool IsCharacterSelected(int characterIndex) => IsCharacterSelected(allCharacters[characterIndex]);
-//	public bool IsCharacterSelected(CharacterView characterView) => characterView != null && characterView == selectedCharacter;
-
-	/*public void SelectNextCharacter()
-	{
-		var index = 0;
-		if( selectedCharacter != null )
-			index = partyCharacters.IndexOf(selectedCharacter);
-
-		int c = partyCharacters.Count;
-		while (c-- > 0)
-		{
-			index = (index + 1) % partyCharacters.Count;
-			var newCharacter = partyCharacters[index];
-			if (CanControlCharacter(newCharacter))
-			{
-				SelectCharacter(newCharacter);
-				return;
-			}
-		}
-	}*/
-
-	/*public void SelectCharacter(CharacterData characterData, bool focusCamera = false)
-	{
-		var dataIndex = characterData.GetCharacterIndex();
-		if(dataIndex < 0 || dataIndex >= allCharacters.Count)
-			Debug.LogError("SelectCharacter error invalid index " + characterData);
-		SelectCharacter(allCharacters[dataIndex], focusCamera);
-	}*/
-	
-	/*public void SelectCharacter(CharacterView characterView = null, bool focusCamera = false)
-	{
-		Debug.Log(this + " SelectCharacter " + characterView + " " + focusCamera);
-		selectedCharacter = characterView;
-		if (selectedCharacter != null)
-		{
-			if (focusCamera) mainCamera.Focus(selectedCharacter); /// todo Camera listen for event
-		}
-		selectionChanged?.Invoke(selectedCharacter, CanControlCharacter(selectedCharacter));
-	}*/
 
 	public void ClickEndTurn()
 	{
@@ -577,30 +506,19 @@ public class GameView : MonoBehaviour, IView<GameController>
 	}
 	
 	
-	private IEnumerator WaitRunAction(CharacterView characterView)
+	private IEnumerator WaitRunAction(CharacterController character)
 	{
-		Debug.Log(">> WaitRunAction: " + characterView);
-		DebugGUI.FloatingText(characterView.GetPosition(), "RUN!");
+		Debug.Log(">> WaitRunAction: " + character);
 		yield return new WaitForSeconds(1.0f);
-		characterView.GetCurrentData().RunAction();
+		character.RunAction();
 	}
-	
-	private LevelView levelView;
 	
 	private void InitSingleton()
 	{
-		Debug.Log(this + " Init()");
-		if (gameData == null)
-		{
-			Debug.LogError(this + " has no game data!");
-		}
-		
 		hasFocus = !Application.isEditor;
 		
 		mainCamera = FindObjectsByType<MainCamera>(default).First();
 		aStar = FindObjectsByType<AstarPath>(default).First();
-		
-		levelView = Utils.GetOrAddComponent<LevelView>(gameObject);
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
@@ -608,9 +526,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
-
-		gameData.newTurnStarted += TurnStarted;
-		gameData.Init();
 
 		StartCoroutine(Coroutines());
 	}
@@ -637,28 +552,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-
-	private void TurnStarted(int turn)
-	{
-		foreach (var characterView in GetAllCharacters())
-		{
-			characterView.TurnBegins(turn);
-		}
-	}
-
 	private void LateUpdate()
 	{
 		if (hasFocus)
 		{
 			if (hasMousePosition) mainCamera.MoveCameraWithCursor(mousePosition);
-		}
-	}
-
-	private void CharacterKilled(CharacterView character)
-	{
-		if (IsCharacterSelected(character))
-		{
-			SelectNextCharacter();
 		}
 	}
 	
@@ -687,6 +585,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		if (mouseOverViewport) // process mouse over
 		{
+			var gameController = GetController();
+			var selectedCharacter = gameController.GetSelectedCharacter();
 			var debugCursor = false;
 			var result = CursorRaycast(out var hit);
 			if(debugCursor) Debug.Log("mouseOverViewport cursor result==" + result);
@@ -694,10 +594,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			{
 				if (selectedCharacter != null)
 				{
-					selectedCharacter.TryGetAgent(out var agent);
-					if (CanControlCharacter(selectedCharacter)) // mouse over navigation
+					if (gameController.CanControlCharacter(selectedCharacter)) // mouse over navigation
 					{
-						agent.AssignDestination(hit.point);
+						GetCharacterView(selectedCharacter).GetAgent().AssignDestination(hit.point);
 					}
 					else if(debugCursor) Debug.Log("character not controllable");
 				}
@@ -705,14 +604,15 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER) 
 			{
-				if (hit.collider.TryGetComponent(out CharacterView overCharacter))
+				if (hit.collider.TryGetComponent(out CharacterView overCharacterView))
 				{
+					var overCharacter = overCharacterView.GetController();
 					if (selectedCharacter != null)
 					{
-						selectedCharacter.TryGetAgent(out var agent);
-						if (CanControlCharacter(selectedCharacter)) // mouse over character
+						if (gameController.CanControlCharacter(selectedCharacter)) // mouse over character
 						{
-							if (overCharacter.IsInParty())
+							var agent = GetCharacterView(selectedCharacter).GetAgent();
+							if (overCharacter.InParty())
 							{
 								agent.ClearDestination();
 							}
@@ -730,11 +630,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 				{
 					if (selectedCharacter != null)
 					{
-						selectedCharacter.TryGetAgent(out var agent);
-						if (CanControlCharacter(selectedCharacter)) // mouse over prop
+						if (gameController.CanControlCharacter(selectedCharacter)) // mouse over prop
 						{
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
+								var agent =  GetCharacterView(selectedCharacter).GetAgent();
 								agent.AssignDestination(bestWaypoint.GetPosition());
 							}
 							else
@@ -751,9 +651,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			{
 				if (selectedCharacter != null)
 				{
-					selectedCharacter.TryGetAgent(out var agent);
-					if (CanControlCharacter(selectedCharacter)) // mouse over raycast no result
+					if (gameController.CanControlCharacter(selectedCharacter)) // mouse over raycast no result
 					{
+						var agent =  GetCharacterView(selectedCharacter).GetAgent();
 						agent.ClearDestination();
 					}
 					else if(debugCursor) Debug.Log("character not controllable");

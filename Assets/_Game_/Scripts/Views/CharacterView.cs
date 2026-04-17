@@ -13,7 +13,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 
 
 	private AgentWrapper agent;
-	public AgentWrapper GetAgent()
+	public AgentWrapper GetAgent() // TODO in character controller
 	{
 		return agent;
 	}
@@ -94,20 +94,14 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	
 	static public List<CharacterView> allInstances  = new List<CharacterView>();
 	
-	public const float MIN_FACING_DOT = 0.9f;
 	
 	private const string TAG_PLAYER = "Player";
 	public bool IsPlayer() => CompareTag(TAG_PLAYER);
 	
 	private const string TAG_ENEMY = "Enemy";
 	public bool IsEnemy() => CompareTag(TAG_ENEMY);
-	
-	public float GetRadius() => radius;
-	public Vector3 GetPosition() => transform.position;
 
-	public Vector3 GetEyesPosition() => transform.position + Vector3.up * height * 0.9f;
-    
-	public Vector3 GetCenterPosition() => transform.position + Vector3.up * height * 0.5f;
+	public Vector3 GetPosition() => transform.position;
 
 	public int GetRotation() => (int)transform.eulerAngles.y;
 
@@ -115,44 +109,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	{
 		mouseOver = true;
 	}
-
-    public void RotateTowards(Vector3 worldPosition, float f = -1f)
-    {
-	    LookDirection(worldPosition - GetPosition(), f);
-    }
-
-    public void LookDirection(Vector3 getDirection, float f = -1f)
-    {
-	    getDirection.y = 0;
-	    getDirection.Normalize();
-
-	    if (getDirection.sqrMagnitude < 0.01f)
-	    {
-		    Debug.LogWarning(this + " invalid direction");
-		    return;
-	    }
-	    
-	    if (f < 0f)
-	    {
-		    DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
-		    transform.rotation = Quaternion.LookRotation(getDirection);
-	    }
-	    else
-	    {
-		    DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
-		    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.aiPath.rotationSpeed); //TODO property "rotationSpeed" separated from agent
-	    }
-    }
-    
-    public bool IsFacingDirection(Vector3 dir)
-    {
-	    dir.y = 0;
-	    dir.Normalize();
-	    var dot = Vector3.Dot(dir, transform.forward);
-	    //Debug.Log(dot);
-	   // DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
-	    return dot >= MIN_FACING_DOT;
-    }
 
     public void OnGUIDebug()
     {
@@ -177,10 +133,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	[SerializeField] private Rigidbody rigidbody;
 	
 	[Header("Navigation")]
-	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
-	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
-	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
-	[SerializeField] [Range(0.01f, 0.50f)] private float minNavDistance = 0.01f; // put this in character view
 	[SerializeField] private List<LineRenderer> pathRenderers;
 	
 	[Header("AI")]
@@ -193,11 +145,15 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 
 	private void UpdateComponents()
 	{
+		var controller = GetController();
+		var radius = controller.GetRadius();
+		var height = controller.GetHeight();
+		
 		if (TryGetComponent<AIPath>(out var aiPath))
 		{
 			aiPath.radius = radius;
 			aiPath.height = height;
-			aiPath.maxSpeed = moveSpeed;
+			aiPath.maxSpeed = controller.GetMaxSpeed();
 		}
 
 		if (selectionCircle)
@@ -237,36 +193,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		agent?.StopMovement();
 	}
 
-	public bool IsAtAttackRange(CharacterView target, bool losCheck, float drawDuration = 0.0f)
-	{
-		var atkRange = GetController().GetAttackRange();
-		atkRange = Mathf.Max(atkRange, GetRadius() + target.GetRadius() + minNavDistance);
-		if (Vector3.Distance(GetPosition(), target.GetPosition()) <= atkRange)
-		{
-			return !losCheck || LOSCheck(target, drawDuration);
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	public bool LOSCheck(CharacterView other, float drawDuration = 0.0f)
-	{
-		var start = GetEyesPosition();
-		var end = other.GetEyesPosition();
-		if(Physics.Linecast(start, end, out var hit,
-			   LayerMask.GetMask(GameView.LAYER_WALL, GameView.LAYER_GROUND)))
-		{
-			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
-			DebugGUI.Line(start, end, Color.red, drawDuration);
-			return false;
-		}
-
-		DebugGUI.Line(start, end, Color.green, drawDuration);
-		return true;
-	}
-
 	public CharacterView GetClosestCharacter(IEnumerable<CharacterView> characters)
 	{
 		return characters.OrderBy(c => Vector3.Distance(GetPosition(), c.GetPosition())).FirstOrDefault();
@@ -277,21 +203,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	} // TODO in game data
 	
-	public List<CharacterView> GetNearbyLivingCharacters(float range, float drawDuration = 0f, Color drawColor = default)
-	{
-		var outList = new List<CharacterView>();
-		var center = GetPosition();
-		DebugGUI.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
-		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(GameView.LAYER_CHARACTER)))
-		{
-			if (coll.TryGetComponent(out CharacterView otherCharacter) && otherCharacter != this && !otherCharacter.GetController().IsDead())
-			{
-				outList.Add(otherCharacter);
-			}
-		}
-
-		return outList;
-	}
 	
 	private Color currentColor;
 	private bool mouseOver;
@@ -368,7 +279,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	    UpdateComponents();
 	    aiBrains.ForEach(b =>
 	    {
-		    b?.DrawGizmos(this);
+		    b?.DrawGizmos(GetController());
 	    });
     }
     
