@@ -29,10 +29,6 @@ public class CharacterController : MonoBehaviour
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
 	public List<AIBrainData> GetBrains() => aiBrains.ToList();
-	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
-	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
-	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
-	[SerializeField] [Range(0.01f, 0.50f)] private float minNavDistance = 0.01f; // put this in character view
 	
 	[ReadOnly] [SerializeField] private bool isSelected = false;
 	[ReadOnly] [SerializeField] private int partyIndex = -1;
@@ -46,15 +42,9 @@ public class CharacterController : MonoBehaviour
 
 	public CharacterAgent GetAgent() => agent;
 
-	public float GetMaxSpeed() => moveSpeed;
-	
-	public float GetRadius() => radius;
-
-	public float GetHeight() => height;
-
-	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * height * 0.9f;
+	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.9f;
     
-	public Vector3 GetCenterPosition() => GetPosition() + Vector3.up * height * 0.5f;
+	public Vector3 GetCenterPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.5f;
 
 	public bool IsSelected() => isSelected;
 	public void SetSelected(bool value)
@@ -123,7 +113,8 @@ public class CharacterController : MonoBehaviour
 			Debug.LogWarning(this + " invalid direction");
 			return;
 		}
-	    
+
+		var radius = agent.GetRadius();
 		if (f < 0f)
 		{
 			DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
@@ -132,7 +123,7 @@ public class CharacterController : MonoBehaviour
 		else
 		{
 			DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.aiPath.rotationSpeed); //TODO property "rotationSpeed" separated from agent
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 		}
 	}
     
@@ -263,7 +254,7 @@ public class CharacterController : MonoBehaviour
 	public bool IsAtAttackRange(CharacterController target, bool losCheck, float drawDuration = 0.0f)
 	{
 		var atkRange = GetAttackRange();
-		atkRange = Mathf.Max(atkRange, GetRadius() + target.GetRadius() + minNavDistance);
+		atkRange = Mathf.Max(atkRange, agent.GetRadius() + target.agent.GetRadius() + CharacterAgent.minNavDistance);
 		if (Vector3.Distance(GetPosition(), target.GetPosition()) <= atkRange)
 		{
 			return !losCheck || LOSCheck(target, drawDuration);

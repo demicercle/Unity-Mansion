@@ -6,12 +6,37 @@ using UnityEngine;
 
 public class CharacterAgent : MonoBehaviour
 {
-	private void Awake()
+	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
+	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
+	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
+	public const float minNavDistance = 0.1f; // put this in character view
+
+	public float GetMaxSpeed() => moveSpeed;
+	
+	public float GetRadius() => radius;
+
+	public float GetHeight() => height;
+
+	private void OnDrawGizmosSelected()
 	{
-		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
+		UpdateComponent();
 	}
 
-	public AIPath aiPath;
+	private void Awake()
+	{
+		UpdateComponent();
+	}
+
+	void UpdateComponent()
+	{
+		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
+		aiPath.radius = radius;
+		aiPath.height = height;
+		aiPath.maxSpeed = moveSpeed;
+		aiPath.endReachedDistance = minNavDistance;
+	}
+
+	private AIPath aiPath;
 	
 	public Vector3 velocity => aiPath.velocity;
 	
@@ -22,6 +47,8 @@ public class CharacterAgent : MonoBehaviour
 	public float reachDistance => aiPath.endReachedDistance;
 	   
 	public bool pathPending => aiPath.pathPending;
+
+	public float rotationSpeed => aiPath.rotationSpeed;
 
 	    
 	private bool hasDestination;

@@ -126,15 +126,9 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	private void UpdateComponents()
 	{
 		var controller = GetController();
-		var radius = controller.GetRadius();
-		var height = controller.GetHeight();
-		
-		if (TryGetComponent<AIPath>(out var aiPath))
-		{
-			aiPath.radius = radius;
-			aiPath.height = height;
-			aiPath.maxSpeed = controller.GetMaxSpeed();
-		}
+		var agent = controller.GetAgent();
+		var radius = agent.GetRadius();
+		var height = agent.GetHeight();
 
 		if (selectionCircle)
 		{
@@ -147,7 +141,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 			movePointsCircle.radius = radius;
 			movePointsCircle.UpdateCircle();
 		}
-
+		
 		if (capsuleCollider)
 		{
 			capsuleCollider.height = height;
