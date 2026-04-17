@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using Oddworm.Framework;
@@ -8,122 +9,29 @@ using UnityEngine.UI;
 
 public class CharacterView : MonoBehaviour, ICursorHandler
 {
-	private const string TAG_PLAYER = "Player";
-	private const string TAG_ENEMY = "Enemy";
-	public bool IsPlayer() => CompareTag(TAG_PLAYER);
-	public bool IsEnemy() => CompareTag(TAG_ENEMY);
-
-	public bool IsDead() => data.IsDead();
-	
-	static public CharacterView SpawnPlayerAt(CharacterView characterViewPrefab, CharacterData characterData, Waypoint waypoint)
-	{
-		var newChar = Instantiate(characterViewPrefab.gameObject).GetComponent<CharacterView>();
-		newChar.data = characterData;
-		return newChar;
-	}
-	
-	public class AgentWrapper
-	{
-		public AIPath aiPath;
-		public Vector3 velocity => aiPath.velocity;
-		public bool isMoving => !aiPath.isStopped;
-		public bool reachedDestination => aiPath.reachedDestination;
-		public float reachDistance => aiPath.endReachedDistance;
-		public bool pathPending => aiPath.pathPending;
-
-		private bool hasDestination;
-
-		public System.Action onSearchPath
-		{
-			get => aiPath.onSearchPath;
-			set => aiPath.onSearchPath = value;
-		}
-
-		public void Teleport(Vector3 newPos, int newRot)
-		{
-			aiPath.Teleport(newPos, true);
-			aiPath.rotation = Quaternion.Euler(0, newRot, 0);
-		}
-		
-		public void SetCanMove(bool value)
-		{
-			aiPath.simulateMovement = value;
-			aiPath.isStopped = !value;
-		}
-
-		public void SetObstacle(bool value)
-		{
-			if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate))
-			{
-				graphUpdate.enabled = value;
-				if (value)
-				{
-					graphUpdate.points = new[]
-					{
-						Vector3.forward * aiPath.radius,
-						Vector3.right * aiPath.radius,
-						-Vector3.forward * aiPath.radius,
-						-Vector3.right * aiPath.radius,
-					};
-				}
-			}
-		}
-
-		public Vector3[] GetCurrentPath()
-		{
-			if (!hasDestination)
-				return new Vector3[0];
-			
-			var buffer = new List<Vector3>();
-			aiPath.GetRemainingPath(buffer, out var stale);
-			return buffer.ToArray();
-		}
-		
-		public void AssignDestination(Vector3 hitPoint)
-		{
-			//Debug.Log(aiPath + " AssignDestination " + hitPoint);
-			aiPath.destination = hitPoint;
-			aiPath.SearchPath();
-			hasDestination = true;
-			onSearchPath?.Invoke();
-			DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Utils.ColorAlpha(Color.cyan, 0.2f), 0f);
-		}
-
-		public void ClearDestination()
-		{
-			if (hasDestination)
-			{
-//				Debug.Log(aiPath + " ClearDestination()");
-				hasDestination = false;
-				aiPath.destination = aiPath.transform.position;
-				onSearchPath?.Invoke();
-			}
-		}
-
-		public void StopMovement()
-		{
-			aiPath.isStopped = true;
-			ClearDestination();
-		}
-	}
-
 	public const float MIN_FACING_DOT = 0.9f;
+	
+	private const string TAG_PLAYER = "Player";
+	public bool IsPlayer() => CompareTag(TAG_PLAYER);
+	private const string TAG_ENEMY = "Enemy";
+	public bool IsEnemy() => CompareTag(TAG_ENEMY);
 	
 	[Header("Stats")]  // todo use scriptable
 	[SerializeField] private CharacterData data;
-
 	public bool TryGetData(out CharacterData outData)
 	{
 		outData = data;
 		return outData != null;
 	}
 	
+	public bool IsDead() => data.IsDead();
 	public float GetAttackRange() => data.attackRange;
 	public float GetRadius() => radius;
 	public Texture GetPortraitTexture() => data.portraitTexture;
 	public string GetDisplayName() => data.displayName;
 	public bool CanMove() => data.GetRemainingMovePoints() > 0f;
 	public bool CanAttack() => data.CanAttack();
+	public Vector3 GetPosition() => transform.position; //TODO with data?
 	
 	[Header("Selection")]
 	[SerializeField] private CircleRenderer selectionCircle;
@@ -137,7 +45,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	
 	[Header("Navigation")]
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
-	//[SerializeField] [Range(0.0f, 10.0f)] private float rotationSpeed = 1.0f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] [Range(0.01f, 0.50f)] private float minNavDistance = 0.01f; // put this in character view
@@ -150,15 +57,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	[Header("Animation")]
 	[SerializeField] private Animator animator;
 	[SerializeField] private float velocityScale = 1.0f;
-
-	private void OnDrawGizmosSelected()
-	{
-		UpdateComponents();
-		aiBrains.ForEach(b =>
-		{
-			b?.DrawGizmos(this);
-		});
-	}
 
 	private void UpdateComponents()
 	{
@@ -219,27 +117,15 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 	public int GetCurrentHealthInt() => (int)data.GetRemainingHealth();
 	public int GetMaxHealth() => data.GetMaxHealth();
-	public float GetDamageProgress() => data.GetDamageProgress();
 
-	public void Killed()
+	public void Init(CharacterData newData = null)
 	{
-		StopAgent();
-		animator.SetTrigger(AnimationParameters.Trigger);
-		animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
-		gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
-		SetColor(deadColor);
-		GameView.GetInstance().CharacterKilled(this);//TODO better
-	}
-
-	public void Healed()
-	{
-		DebugGUI.FloatingText(GetCenterPosition(), "HEAL");
-	}
-	
-	public void ReceivedDamage(float amount)
-	{
-		Debug.Log(this + " ReceivedDamage " + amount);
-		DebugGUI.FloatingText(GetCenterPosition(), amount.ToString("N2"));
+		if (newData != null)
+			data = newData;
+		
+		UpdateComponents();
+		RegisterEvents(true);
+		data.Init(this);
 	}
 
 	public bool IsAtAttackRange(CharacterView target, bool losCheck, float drawDuration = 0.0f)
@@ -256,7 +142,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		}
 	}
 
-	bool LOSCheck(CharacterView other, float drawDuration = 0.0f)
+	public bool LOSCheck(CharacterView other, float drawDuration = 0.0f)
 	{
 		var start = GetEyesPosition();
 		var end = other.GetEyesPosition();
@@ -277,6 +163,11 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		return characters.OrderBy(c => Vector3.Distance(GetPosition(), c.GetPosition())).FirstOrDefault();
 	}
 
+	public bool WaypointReached(Waypoint wp)
+	{
+		return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
+	} // TODO in game data
+	
 	public List<CharacterView> GetNearbyLivingCharacters(float range, float drawDuration = 0f, Color drawColor = default)
 	{
 		var outList = new List<CharacterView>();
@@ -292,7 +183,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 		return outList;
 	}
-
+	
 	private AgentWrapper agent;
 	private Color currentColor;
 	private bool mouseOver;
@@ -300,73 +191,23 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	private int partyIndex;
 	private Vector3[] lastPath;
 
-	private void SetPartyIndex(int newIndex)
+	private void RegisterEvents(bool value)
 	{
-//		Debug.Log(this + " SetPartyIndex " + newIndex);
-		partyIndex = newIndex;
-		SetColor(partyIndex >= 0 ? partyColor : IsEnemy() ? enemyColor : defaultColor);
-	}
-
-	private void Awake()
-	{
-		currentColor = defaultColor;
-
-		if (data == null)
-		{
-			Debug.LogError(this + " stats is null");
-			data = ScriptableObject.CreateInstance<CharacterData>();
-		}
-		
-		if (TryGetComponent<AIPath>(out var aiPath))
-		{
-			agent = new AgentWrapper()
-			{
-				aiPath = aiPath
-			};
-			
-			agent.SetCanMove(false);
-			agent.SetObstacle(true);
-		}
-	}
-
-	void OnDestroy()
-	{
-		data.Dispose();
-		RegisterEvents(false);
-	}
-
-	public void Init(CharacterData newData = null)
-	{
-		if (newData != null)
-			data = newData;
-		
-		UpdateComponents();
-		RegisterEvents(true);
-		data.Init(this);
-	}
-
-	void RegisterEvents(bool value)
-	{
-//		Debug.Log(this + " RegisterEvents " + value);
 		var gameView = GameView.GetInstance();
 		
 		if (value)
 		{
+			gameView.characterSelected -= CharacterSelected;
 			data.partyIndexChanged += SetPartyIndex;
 			data.onDamaged += ReceivedDamage;
 			data.onHeal += Healed;
-			data.onKill += Killed;
-			gameView.characterSelected += CharacterSelected;
-			//TODO for network?		GameData.characterMoved += CharacterMoved;
 		}
 		else
 		{
+			gameView.characterSelected += CharacterSelected;
 			data.partyIndexChanged -= SetPartyIndex;
-			gameView.characterSelected -= CharacterSelected;
 			data.onDamaged -= ReceivedDamage;
 			data.onHeal -= Healed;
-			data.onKill -= Killed;
-			//TODO for network?		GameData.characterMoved -= CharacterMoved;
 		}
 	}
 
@@ -390,13 +231,15 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 			}
 		}
 	}
-
-	public bool WaypointReached(Waypoint wp)
+	
+	private void SetPartyIndex(int newIndex)
 	{
-		return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
+//		Debug.Log(this + " SetPartyIndex " + newIndex);
+		partyIndex = newIndex;
+		SetColor(partyIndex >= 0 ? partyColor : IsEnemy() ? enemyColor : defaultColor);
 	}
 
-	public void UpdatePath()
+	private void UpdatePath()
 	{
 		lastPath = agent.GetCurrentPath();
 		
@@ -416,62 +259,22 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		pathRenderers.ForEach(p => p.enabled = p.positionCount > 0);
 	}
 
-	void SetColor(Color newColor)
+	private void SetColor(Color newColor)
 	{
 		currentColor = newColor;
 		pathRenderers.ForEach(p => p.startColor = p.endColor = Utils.ColorAlpha(newColor, Mathf.Lerp(0.2f, 0.8f, (float)pathRenderers.IndexOf(p))));
 	}
 
-	void Start()
+	private void Healed()
 	{
-		gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
-		
-	    if (animator != null)
-	    {
-		    animator.SetFloat(AnimationParameters.VelocityX, 0.0f);      
-		    animator.SetFloat(AnimationParameters.VelocityZ, 0.0f);        
-		    animator.SetInteger(AnimationParameters.Weapon, -1);
-		    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
-		    animator.SetTrigger(AnimationParameters.Trigger);
-	    }
-    }
-
-	private bool hasActions;
-	private float alphaColor;
-    void LateUpdate()
-    {
-	    hasActions = data.GetRemainingActions() > 0;
-	    alphaColor = alphaCurve.Evaluate(isSelected ? 1f : mouseOver ? 0.5f : 0.0f);
-	    
-	    selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
-	    movePointsCircle.SetColor(currentColor, alphaColor);
-	    movePointsCircle.SetProgress(data.GetMovePointsProgress());
-
-	    if (animator != null)
-	    {
-		    var localVelocity = agent.velocity;
-		    animator.SetFloat(AnimationParameters.VelocityX, 0);      
-		    animator.SetFloat(AnimationParameters.VelocityZ, localVelocity.magnitude * velocityScale);  
-		    animator.SetBool(AnimationParameters.Moving, agent.isMoving);
-	    }
-
-	    mouseOver = false;
-    }
-
-    public Vector3 GetPosition()
-    {
-	    return transform.position;
-    }
-
-    public void SetTeleport(Waypoint wp)
-    {
-	    var newPos = wp.GetPosition();
-	    var newRot = wp.GetRotation();
-
-	    data.SetPosition(newPos);
-	    data.SetRotation(newRot);
-	    agent.Teleport(newPos, newRot);
-    }
+		DebugGUI.FloatingText(GetCenterPosition(), "HEAL");
+	}
+	
+	private void ReceivedDamage(float amount)
+	{
+		Debug.Log(this + " ReceivedDamage " + amount);
+		DebugGUI.FloatingText(GetCenterPosition(), amount.ToString("N2"));
+	}
 
     public void SetRotateTowards(Vector3 worldPosition, float f = -1f)
     {
@@ -504,6 +307,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
     }
 
     public Vector3 GetEyesPosition() => transform.position + Vector3.up * height * 0.9f;
+    
     public Vector3 GetCenterPosition() => transform.position + Vector3.up * height * 0.5f;
 
     public int GetRotation() => (int)transform.eulerAngles.y;
@@ -518,12 +322,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler
     public bool CanUseRunAction()
     {
 	    return  HasActions();
-    }
-
-    public bool GetPath(out Vector3[] path)
-    {
-	    path = lastPath;
-		return path != null && path.Length > 0;
     }
 
     public bool IsFacingDirection(Vector3 dir)
@@ -549,8 +347,194 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	    return (aiBrain = aiBrains.FirstOrDefault()) != null;
     }
 
-    public void PerformsAttack(CharacterView target)
+    public IEnumerator PerformsAttack(CharacterView target)
     {
-	    data.ConsumeActions(1);
+	    Debug.Log(this + " PerformsAttack " + target);
+	    DebugGUI.FloatingText(GetPosition(), "Take this!");
+	    yield return new WaitForSeconds(1.0f);
+    }
+    
+    private void Awake()
+    {
+	    currentColor = defaultColor;
+
+	    if (data == null)
+	    {
+		    Debug.LogError(this + " stats is null");
+		    data = ScriptableObject.CreateInstance<CharacterData>();
+	    }
+		
+	    if (TryGetComponent<AIPath>(out var aiPath))
+	    {
+		    agent = new AgentWrapper()
+		    {
+			    aiPath = aiPath
+		    };
+			
+		    agent.SetCanMove(false);
+		    agent.SetObstacle(true);
+	    }
+    }
+
+    private void Start()
+    {
+	    gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_CHARACTER);
+		
+	    if (animator != null)
+	    {
+		    animator.SetFloat(AnimationParameters.VelocityX, 0.0f);      
+		    animator.SetFloat(AnimationParameters.VelocityZ, 0.0f);        
+		    animator.SetInteger(AnimationParameters.Weapon, -1);
+		    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+		    animator.SetTrigger(AnimationParameters.Trigger);
+	    }
+    }
+    
+    private bool hasActions;
+    private float alphaColor;
+    private bool killed;
+    
+    void LateUpdate()
+    {
+	    if (!data)
+	    {
+		    Debug.LogWarning(this + " has no data!");
+		    return;
+	    }
+	    
+	    if (data.IsDead() != killed)
+	    {
+		    killed = data.IsDead();
+		    if (killed)
+		    {
+			    StopAgent();
+			    animator.SetTrigger(AnimationParameters.Trigger);
+			    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
+			    gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
+			    SetColor(deadColor);
+			    GameView.GetInstance().CharacterKilled(this);//TODO better
+		    }
+		    else
+		    {
+			    // TODO revive character
+		    }
+	    }
+	    
+	    hasActions = data.GetRemainingActions() > 0;
+	    alphaColor = alphaCurve.Evaluate(isSelected ? 1f : mouseOver ? 0.5f : 0.0f);
+	    
+	    selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
+	    movePointsCircle.SetColor(currentColor, alphaColor);
+	    movePointsCircle.SetProgress(data.GetMovePointsProgress());
+
+	    if (animator != null)
+	    {
+		    var localVelocity = agent.velocity;
+		    animator.SetFloat(AnimationParameters.VelocityX, 0);      
+		    animator.SetFloat(AnimationParameters.VelocityZ, localVelocity.magnitude * velocityScale);  
+		    animator.SetBool(AnimationParameters.Moving, agent.isMoving);
+	    }
+
+	    mouseOver = false;
+    }
+
+    private void OnDestroy()
+    {
+	    data.Dispose();
+	    RegisterEvents(false);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+	    UpdateComponents();
+	    aiBrains.ForEach(b =>
+	    {
+		    b?.DrawGizmos(this);
+	    });
+    }
+    
+    public class AgentWrapper
+    {
+	    public AIPath aiPath;
+	    public Vector3 velocity => aiPath.velocity;
+	    public bool isMoving => !aiPath.isStopped;
+	    public bool reachedDestination => aiPath.reachedDestination;
+	    public float reachDistance => aiPath.endReachedDistance;
+	    public bool pathPending => aiPath.pathPending;
+
+	    private bool hasDestination;
+
+	    public System.Action onSearchPath
+	    {
+		    get => aiPath.onSearchPath;
+		    set => aiPath.onSearchPath = value;
+	    }
+
+	    public void Teleport(Vector3 newPos, int newRot)
+	    {
+		    aiPath.Teleport(newPos, true);
+		    aiPath.rotation = Quaternion.Euler(0, newRot, 0);
+	    }
+		
+	    public void SetCanMove(bool value)
+	    {
+		    aiPath.simulateMovement = value;
+		    aiPath.isStopped = !value;
+	    }
+
+	    public void SetObstacle(bool value)
+	    {
+		    if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate))
+		    {
+			    graphUpdate.enabled = value;
+			    if (value)
+			    {
+				    graphUpdate.points = new[]
+				    {
+					    Vector3.forward * aiPath.radius,
+					    Vector3.right * aiPath.radius,
+					    -Vector3.forward * aiPath.radius,
+					    -Vector3.right * aiPath.radius,
+				    };
+			    }
+		    }
+	    }
+
+	    public Vector3[] GetCurrentPath()
+	    {
+		    if (!hasDestination)
+			    return new Vector3[0];
+			
+		    var buffer = new List<Vector3>();
+		    aiPath.GetRemainingPath(buffer, out var stale);
+		    return buffer.ToArray();
+	    }
+		
+	    public void AssignDestination(Vector3 hitPoint)
+	    {
+		    //Debug.Log(aiPath + " AssignDestination " + hitPoint);
+		    aiPath.destination = hitPoint;
+		    aiPath.SearchPath();
+		    hasDestination = true;
+		    onSearchPath?.Invoke();
+		    DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Utils.ColorAlpha(Color.cyan, 0.2f), 0f);
+	    }
+
+	    public void ClearDestination()
+	    {
+		    if (hasDestination)
+		    {
+//				Debug.Log(aiPath + " ClearDestination()");
+			    hasDestination = false;
+			    aiPath.destination = aiPath.transform.position;
+			    onSearchPath?.Invoke();
+		    }
+	    }
+
+	    public void StopMovement()
+	    {
+		    aiPath.isStopped = true;
+		    ClearDestination();
+	    }
     }
 }

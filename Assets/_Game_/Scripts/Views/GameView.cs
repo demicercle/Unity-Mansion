@@ -254,10 +254,7 @@ public class GameView
 			target.TryGetData(out var targetData);
 			character.TryGetData(out var characterData);
 			
-			Debug.Log(character + " performs attack on " + target);
-			DebugGUI.FloatingText(character.GetPosition(), "Take this!");
-			yield return new WaitForSeconds(0.5f);
-			character.PerformsAttack(target);
+			yield return character.StartCoroutine(character.PerformsAttack(target));
 			yield return new WaitForSeconds(1.0f);
 			// apply attack damage, etc
 			targetData.TakeDamage(characterData.GetLastAttackDamage());

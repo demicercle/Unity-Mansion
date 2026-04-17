@@ -4,6 +4,7 @@ using System.Collections;
 
 public class ConsoleEvents : MonoBehaviour
 {
+	
 	IEnumerator Start()
 	{
 		DontDestroyOnLoad(this);
