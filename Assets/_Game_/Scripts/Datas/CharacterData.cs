@@ -154,6 +154,7 @@ public class CharacterData : ScriptableObject
 		usedMovePoints = 0;
 		usedActions = 0;
 		damageAmount = 0;
+		isDead = false;
 		SetPartyIndex(inParty);
 	}
 

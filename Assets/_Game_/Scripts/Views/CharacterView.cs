@@ -81,6 +81,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 		
 		public void AssignDestination(Vector3 hitPoint)
 		{
+			//Debug.Log(aiPath + " AssignDestination " + hitPoint);
 			aiPath.destination = hitPoint;
 			aiPath.SearchPath();
 			hasDestination = true;
@@ -127,7 +128,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	[Header("Selection")]
 	[SerializeField] private CircleRenderer selectionCircle;
 	[SerializeField] private CircleRenderer movePointsCircle;
-	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red, disabledColor = Color.gray;
+	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red, disabledColor = Color.gray, deadColor = Color.black;
 	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
 	
 	[Header("Collision")]
@@ -219,6 +220,16 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	public int GetCurrentHealthInt() => (int)data.GetRemainingHealth();
 	public int GetMaxHealth() => data.GetMaxHealth();
 	public float GetDamageProgress() => data.GetDamageProgress();
+
+	public void Killed()
+	{
+		StopAgent();
+		animator.SetTrigger(AnimationParameters.Trigger);
+		animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
+		gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
+		SetColor(deadColor);
+		GameView.GetInstance().CharacterKilled(this);//TODO better
+	}
 
 	public void Healed()
 	{
@@ -344,6 +355,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 			data.partyIndexChanged += SetPartyIndex;
 			data.onDamaged += ReceivedDamage;
 			data.onHeal += Healed;
+			data.onKill += Killed;
 			gameView.characterSelected += CharacterSelected;
 			//TODO for network?		GameData.characterMoved += CharacterMoved;
 		}
@@ -353,6 +365,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 			gameView.characterSelected -= CharacterSelected;
 			data.onDamaged -= ReceivedDamage;
 			data.onHeal -= Healed;
+			data.onKill -= Killed;
 			//TODO for network?		GameData.characterMoved -= CharacterMoved;
 		}
 	}

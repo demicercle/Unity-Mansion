@@ -367,6 +367,25 @@ public class GameView
 
 	public bool IsCharacterSelected(CharacterView characterView) => characterView == _selectedCharacterView;
 
+	public void SelectNextCharacter()
+	{
+		var index = 0;
+		if( _selectedCharacterView != null )
+			index = partyCharacters.IndexOf(_selectedCharacterView);
+
+		int c = partyCharacters.Count;
+		while (c-- > 0)
+		{
+			index = (index + 1) % partyCharacters.Count;
+			var newCharacter = partyCharacters[index];
+			if (CanControlCharacter(newCharacter))
+			{
+				SelectCharacter(newCharacter);
+				return;
+			}
+		}
+	}
+	
 	public void SelectCharacter(CharacterView characterView, bool focusCamera = false)
 	{
 		if(_selectedCharacterView != null) characterSelected?.Invoke(_selectedCharacterView, false);
@@ -385,7 +404,9 @@ public class GameView
 
 	[HideInInspector] public MonoBehaviour startupComponent;
 
-	public bool CanControlCharacter(CharacterView charView) => isPlayerTurn && !HasCoroutines() && charView && partyCharacters.Contains(charView);
+	public bool CanControlCharacter(CharacterView charView) => isPlayerTurn && !HasCoroutines() 
+	                                                                        && charView && !charView.IsDead() 
+	                                                                        & partyCharacters.Contains(charView);
 
 	private IEnumerator WaitEndTurn()
 	{
@@ -544,6 +565,14 @@ public class GameView
 			if (hasMousePosition) mainCamera.MoveCameraWithCursor(mousePosition);
 		}
 	}
+
+	public void CharacterKilled(CharacterView character)
+	{
+		if (IsCharacterSelected(character))
+		{
+			SelectNextCharacter();
+		}
+	}
 	
 	public void Update()
 	{
@@ -570,23 +599,29 @@ public class GameView
 
 		if (mouseOverViewport) // process mouse over
 		{
+			var debugCursor = false;
 			var result = CursorRaycast(out var hit);
+			if(debugCursor) Debug.Log("mouseOverViewport cursor result==" + result);
 			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION)
 			{
-				if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
+				if (_selectedCharacterView != null)
 				{
+					_selectedCharacterView.TryGetAgent(out var agent);
 					if (CanControlCharacter(_selectedCharacterView)) // mouse over navigation
 					{
 						agent.AssignDestination(hit.point);
 					}
+					else if(debugCursor) Debug.Log("character not controllable");
 				}
+				else if(debugCursor) Debug.Log("no selected character");
 			}
 			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER) 
 			{
 				if (hit.collider.TryGetComponent(out CharacterView overCharacter))
 				{
-					if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
+					if (_selectedCharacterView != null)
 					{
+						_selectedCharacterView.TryGetAgent(out var agent);
 						if (CanControlCharacter(_selectedCharacterView)) // mouse over character
 						{
 							if (partyCharacters.Contains(overCharacter))
@@ -598,13 +633,16 @@ public class GameView
 								agent.AssignDestination(overCharacter.GetPosition());
 							}
 						}
+						else if(debugCursor) Debug.Log("character not controllable");
 					}
+					else if(debugCursor) Debug.Log("no selected character");
 				}
 				
 				if (hit.collider.TryGetComponent(out PropComponent overProp)) // click prop
 				{
-					if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
+					if (_selectedCharacterView != null)
 					{
+						_selectedCharacterView.TryGetAgent(out var agent);
 						if (CanControlCharacter(_selectedCharacterView)) // mouse over prop
 						{
 							if (overProp.GetBestWaypoint(_selectedCharacterView.GetPosition(), out var bestWaypoint))
@@ -616,18 +654,23 @@ public class GameView
 								Debug.LogWarning("no waypoint found");
 							}
 						}
+						else if(debugCursor) Debug.Log("character not controllable");
 					}
+					else if(debugCursor) Debug.Log("no selected character");
 				}
 			}
 			else
 			{
-				if (_selectedCharacterView != null && _selectedCharacterView.TryGetAgent(out var agent))
+				if (_selectedCharacterView != null)
 				{
+					_selectedCharacterView.TryGetAgent(out var agent);
 					if (CanControlCharacter(_selectedCharacterView)) // mouse over raycast no result
 					{
 						agent.ClearDestination();
 					}
+					else if(debugCursor) Debug.Log("character not controllable");
 				}
+				else if(debugCursor) Debug.Log("no selected character");
 			}
 		}
 	}
