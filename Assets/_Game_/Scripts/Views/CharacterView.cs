@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Oddworm.Framework;
 using Pathfinding;
+using Pathfinding.Drawing;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,36 +17,42 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		if(!characterController) characterController = GetComponent<CharacterController>();
 		return characterController;
 	}
-	
+
+	private bool drawPath;
 	private bool inParty;
 	private bool isEnemy;
 	void Awake()
 	{
-		var gameController = GetController();
+		var controller = GetController();
 		
 		allInstances.Add(this);
 		currentColor = defaultColor;
 		
 		UpdateComponents();
+
+		controller.selectionChanged += (isSelected) =>
+		{
+			drawPath = isSelected && controller.IsControllable();
+		};
 		
-		gameController.onHealed += (amount) =>
+		controller.onHealed += (amount) =>
 		{
 			FloatingText("Heal!");
 		};
 
-		gameController.onPartyIndexChanged += (newIndex) =>
+		controller.onPartyIndexChanged += (newIndex) =>
 		{
 			inParty = GetController().InParty();
 			isEnemy = GetController().IsEnemyToPlayer();
 			SetColor(inParty ? partyColor : isEnemy ? enemyColor : defaultColor);
 		};
 
-		gameController.onDamaged += (amount) =>
+		controller.onDamaged += (amount) =>
 		{
 			FloatingText(Mathf.CeilToInt(amount).ToString());
 		};
 
-		gameController.onKilled += () =>
+		controller.onKilled += () =>
 		{
 			animator.SetTrigger(AnimationParameters.Trigger);
 			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
@@ -53,17 +60,17 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 			SetColor(deadColor);
 		};
 
-		gameController.onMoved += () =>
+		controller.onMoved += () =>
 		{
 			// Debug.Log(this + " onMoved")
 		};
 
-		gameController.onRotate += () =>
+		controller.onRotate += () =>
 		{
 			// Debug.Log(this + " onRotate")
 		};
 
-		gameController.onAttackAction += (target) =>
+		controller.onAttackAction += (target) =>
 		{
 			FloatingText("Take this!");
 		};
@@ -79,11 +86,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	static public List<CharacterView> allInstances  = new List<CharacterView>();
 	
 	
-	private const string TAG_PLAYER = "Player";
-	public bool IsPlayer() => CompareTag(TAG_PLAYER);
-	
-	private const string TAG_ENEMY = "Enemy";
-	public bool IsEnemy() => CompareTag(TAG_ENEMY);
 
 	public Vector3 GetPosition() => transform.position;
 
@@ -172,10 +174,14 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	private bool wasSelected;
 	private int partyIndex;
 	private Vector3[] lastPath;
-
-	private void UpdatePath()
+	
+	void DrawPath()
 	{
-		lastPath = GetController().GetCurrentPath();
+		if (!drawPath || (lastPath = GetController().GetCurrentPath()).Length <= 1)
+		{
+			pathRenderers.ForEach(p => p.enabled = false);
+			return;
+		}
 		
 		if (pathRenderers.Count > 0)
 		{
@@ -189,8 +195,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 			pathRenderers[1].positionCount = lastPath.Length;
 			pathRenderers[1].SetPositions(lastPath);
 		}
-		
-		pathRenderers.ForEach(p => p.enabled = p.positionCount > 0);
+
+		pathRenderers.ForEach(p => p.enabled = true);
 	}
 
 	private void SetColor(Color newColor)
@@ -238,6 +244,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	    }
 
 	    mouseOver = false;
+	    DrawPath();
     }
 
     private void OnDrawGizmosSelected()

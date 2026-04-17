@@ -26,6 +26,7 @@ public class CharacterAgent : MonoBehaviour
 	private void Awake()
 	{
 		UpdateComponent();
+		StopMovement();
 	}
 
 	void UpdateComponent()
@@ -112,13 +113,7 @@ public class CharacterAgent : MonoBehaviour
 
     public void ClearDestination()
     {
-	    if (hasDestination)
-	    {
-//				Debug.Log(aiPath + " ClearDestination()");
-		    hasDestination = false;
-		    aiPath.destination = aiPath.transform.position;
-		    onSearchPath?.Invoke();
-	    }
+	    hasDestination = false;
     }
 
     public void StopMovement()

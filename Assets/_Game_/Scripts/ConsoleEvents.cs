@@ -12,7 +12,7 @@ public class ConsoleEvents : MonoBehaviour
 
 	static bool TryGetSelectedCharacterIndex(out int selected)
 	{
-		selected = GetController().GetSelectedCharacterIndex();
+		selected = GetController().FindSelectedCharacterIndex();
 		return selected >= 0;
 	}
 

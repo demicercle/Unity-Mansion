@@ -15,9 +15,8 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		var gameController = gameView.GetController();
-		if(!gameView.HasCoroutines() && gameController.IsPlayerTurn())
-			gameController.SelectCharacter(_assignedCharacter);
+		if(_assignedCharacter && _assignedCharacter.IsControllable())
+			gameView.SelectCharacter(_assignedCharacter);
 	}
 	
 	private CharacterController _assignedCharacter;

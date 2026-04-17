@@ -7,9 +7,12 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
 [System.Serializable]
 public class GameView : MonoBehaviour, IView<GameController>
 {
+	override public string ToString() => "GameView";
+	
 	static private GameView instance;
 	static public GameView GetInstance()
 	{
@@ -23,6 +26,64 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if(!characterController) characterController = GetComponent<GameController>();
 		return characterController;
 	}
+	
+	#region SELECTION
+
+	private CharacterController selectedCharacter;
+	public CharacterController GetSelectedCharacter() => selectedCharacter;
+	public bool IsCharacterSelected(CharacterController character) => character && selectedCharacter == character;
+	
+	public void SelectCharacter(CharacterController character)
+	{
+		if (selectedCharacter != null)
+			selectedCharacter.SetSelected(false);
+		
+		selectedCharacter = character;
+		
+		if (selectedCharacter != null)
+			selectedCharacter.SetSelected(true);
+		
+		SelectionChanged();
+	}
+	
+	public void SelectNextCharacter()
+	{
+		var gameController = GetController();
+		
+		var party = gameController.GetPartyCharacters().OrderBy(c => c.GetPartyIndex()).ToArray();
+		var startIndex = gameController.FindSelectedCharacterIndex();
+		if (startIndex < 0)
+		{
+			Debug.Log(this + " Select First Character");
+			SelectCharacter(party.FirstOrDefault());
+			return;
+		}
+		
+		Debug.Log(this + " SelectNextCharacter " + startIndex);
+		var partyCount = party.Length;
+		while (partyCount-- > 0)
+		{
+			var newIndex = (partyCount + startIndex) % party.Length;
+			Debug.Log(this + " ? " + newIndex);
+			var newChar = party[newIndex];
+			if (!newChar.IsDead())
+			{
+				SelectCharacter(newChar);
+				return;
+			}
+		}
+		
+		Debug.LogWarning(this + " Has no character to select next!");
+	}
+	
+	void SelectionChanged()
+	{
+		if (selectedCharacter)
+		{
+			mainCamera.Focus(selectedCharacter);
+		}
+	}
+	#endregion
 	
 	void Awake()
 	{
@@ -40,16 +101,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
-
-		var gameController = GetController();
-		gameController.selectionChanged += () =>
-		{
-			var selected = gameController.GetSelectedCharacter();
-			if (selected)
-			{
-				mainCamera.Focus(selected.GetPosition());
-			}
-		};
 	}
 
 	[SerializeField] private List<string> scenesToLoad = new List<string>();
@@ -60,6 +111,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		SetInputEnabled(false);
 		// TODO Fade In
+		yield return null;
 
 		for(int i = 0; i < scenesToLoad.Count; i++)
 		{
@@ -68,23 +120,28 @@ public class GameView : MonoBehaviour, IView<GameController>
 			while (async.isDone == false) yield return null;
 		}
 		
-		Debug.Log(this + " LevelLoaded");
+		yield return null; //
+		
+		var levelCharacters = FindObjectsOfType<CharacterController>();
+		Debug.Log(this + " LevelLoaded: levelCharacters=" + levelCharacters.Length);
+		
 		var partyIndex = 0;
-		foreach (var characterView in CharacterView.allInstances)
+		foreach (var character in levelCharacters)
 		{
-			var character = characterView.GetController();
 			GetController().AddCharacter(character);
-			if(character.InParty()) character.SetPartyIndex(partyIndex++);
+			if(character.CompareTag(Consts.TAG_PLAYER)) character.SetPartyIndex(partyIndex++);
 		}
 		
 		// TODO Fade Out
+		yield return null;
+		
 		SetInputEnabled(true);
 		
 		GetController().NewTurn();
 
 		yield return new WaitForSeconds(0.5f); // todo hak camera focus
 		
-		GetController().SelectNextCharacter();
+		SelectNextCharacter();
 	}
 	
 	private IEnumerator Coroutines()
@@ -109,40 +166,47 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-	
-	public void SelectionChanged()
-	{
-		mainCamera.Focus(GetController().GetSelectedCharacter());
-	}
-
 	public void ClickCharacter(CharacterView clickedCharacterView)
 	{
-		if (HasCoroutines()) return;
-		
-		var gameController = GetController();
+		Debug.Log(this + " ClickCharacter " + clickedCharacterView);
 		var clickedCharacter = clickedCharacterView.GetController();
-		var selectedCharacter = gameController.GetSelectedCharacter();
-		if (selectedCharacter == null)
+	//	//var selectedCharacter = gameController.GetSelectedCharacter();
+		if (CanControlCharacter(clickedCharacter))
 		{
-			if (gameController.CanControlCharacter(clickedCharacter))
+			SelectCharacter(clickedCharacter); // ClickCharacter select party character
+		}
+		else if (clickedCharacter.IsEnemyToPlayer())
+		{
+			if (selectedCharacter != null)
 			{
-				clickedCharacter.SetSelected(true);
+				AssignAttack(selectedCharacter, clickedCharacter, false, true);
+			}
+			else
+			{
+				SelectCharacter(clickedCharacter); // ClickCharacter select enemy
+			}
+		}
+		else
+		{
+			if (selectedCharacter != null)
+			{
+				Debug.Log("TODO interact with " + clickedCharacter); //TODO
 			}
 		}
 	}
 
-	public void AssignAttack(CharacterController character, CharacterController target)
+	public void AssignAttack(CharacterController attacker, CharacterController target, bool canUseRunAction, bool losCheck)
 	{
-		
+		Debug.Log(this + " AssignAttack " + attacker + " " + target+ " " + canUseRunAction + " " + losCheck);
+		QueueRoutine(WaitCharacterAttackCharacter(attacker, target, canUseRunAction, losCheck));
 	}
 
 	public void ClickProp(PropComponent clickedProp) // TODO Prop Controller
 	{
-		if (HasCoroutines()) return;
-		
+		Debug.Log(this + " ClickProp " + clickedProp);
 		var gameController = GetController();
-		var selectedCharacter = gameController.GetSelectedCharacter();
-		if (selectedCharacter != null && gameController.CanControlCharacter(selectedCharacter))
+		//var selectedCharacter = gameController.GetSelectedCharacter();
+		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
 			AssignInteract(selectedCharacter, clickedProp);
 		}
@@ -150,7 +214,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void AssignInteract(CharacterController character, PropComponent clickedProp) // TODO Prop Controller
 	{
-		//var characterView = GetCharacterView(character);
+		Debug.Log(this + " AssignInteract " + character + " " + clickedProp);
 		if (clickedProp.GetBestWaypoint(character.GetPosition(), out var bestWaypoint))
 		{
 			QueueRoutine(WaitCharacterMoved(character, bestWaypoint.GetPosition(), () =>
@@ -175,14 +239,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void ClickNavigation(Vector3 navPosition)
 	{
-		if (HasCoroutines()) return;
-		
+		Debug.Log(this + " ClickNavigation " + navPosition);
 		var gameController = GetController();
-		if (!gameController.IsPlayerTurn())
-			return;
-		
-		var selectedCharacter = gameController.GetSelectedCharacter();
-		if (selectedCharacter != null && gameController.CanControlCharacter(selectedCharacter))
+		//var selectedCharacter = gameController.GetSelectedCharacter();
+		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
 			AssignMove(selectedCharacter, navPosition);
 		}
@@ -190,20 +250,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void AssignMove(CharacterController controller, Vector3 navPosition)
 	{
-		var characterView = GetCharacterView(controller);
+		Debug.Log(this + " AssignMove " + controller + " " + navPosition);
 		QueueRoutine(WaitCharacterMoved(controller, navPosition));
-	}
-
-	CharacterView GetCharacterView(CharacterController controller) // todo should not be public
-	{
-		foreach (var characterView in CharacterView.allInstances)
-		{
-			if (characterView.GetController() == controller)
-				return characterView;
-		}
-		
-		Debug.LogError("Invalid GetCharacterView! " + controller);
-		return null;
 	}
 
 	public System.Action<bool> routinesStarted;
@@ -240,15 +288,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		return false;
 	}
-	
-	private List<CharacterView> allCharacters = new List<CharacterView>();
-	private List<CharacterView> partyCharacters = new List<CharacterView>();
 
-	public List<CharacterView> GetAllCharacters() => allCharacters.ToList();
-	public List<CharacterView> GetPartyCharacters() => partyCharacters.ToList();
-	public int GetPartyCharacterIndex(CharacterView characterView) => partyCharacters.IndexOf(characterView);
-	public int GetCharacterIndex(CharacterView characterView) => allCharacters.IndexOf(characterView);
-	
+	public List<CharacterView> GetAllCharacters() =>  CharacterView.allInstances.ToList();
+
+	public List<CharacterView> GetPartyCharacters() => CharacterView.allInstances.Where(c => c.GetController().InParty()).ToList();
+
+	public int GetPartyCharacterIndex(CharacterView characterView) => GetPartyCharacters().IndexOf(characterView);
+	public int GetCharacterIndex(CharacterView characterView) => GetAllCharacters().IndexOf(characterView);
 
 	public bool drawDebug = false;
 	[UnityEngine.Range(0f,1f)] public float debugGUI = 0f;
@@ -282,7 +328,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		{
 			if (GetController().IsPlayerTurn() && !HasCoroutines())
 			{
-				GetController().SelectCharacter(null); // deselect all
+				SelectCharacter(null); // deselect all
 			}
 		}
 	}
@@ -324,17 +370,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-	public void AssignAttack(CharacterController attacker, CharacterController target, bool canUseRunAction, bool losCheck)
-	{
-		QueueRoutine(WaitCharacterAttackCharacter(attacker, target, canUseRunAction, losCheck));
-	}
-
 	private IEnumerator WaitCharacterAttackCharacter(CharacterController attacker, CharacterController target, bool canUseRunAction, bool losCheck)
 	{
 		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
 
-		var attackerView = GetCharacterView(attacker);
-		var targetView = GetCharacterView(target);
 		while (attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck))
 		{
 			if (!attacker.IsAtAttackRange(target, losCheck))
@@ -429,7 +468,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacter);
 
-		//var movingCharacterView = GetCharacterView(movingCharacter);
 		var agent = movingCharacter.GetAgent();
 		agent.AssignDestination(dest);
 
@@ -472,17 +510,18 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
-			//movingCharacter.SetPosition(newPosition);
-			//movingCharacter.SetRotation(newRotation);
+			movingCharacter.SetPosition(newPosition);
+			
+			var newRotation = movingCharacter.GetRotation();
+			movingCharacter.SetRotation(newRotation);
 			
 			onUpdate?.Invoke();
 			
 		} while (agent.isMoving && !agent.reachedDestination);
 		
-		movingCharacter.SetPosition(path.Last());
-		movingCharacter.SetRotation(movingCharacter.GetRotation());
+		//movingCharacter.SetPosition(path.Last());
+		//movingCharacter.SetRotation(movingCharacter.GetRotation());
 		
-		agent.ClearDestination();
 		agent.SetCanMove(false);
 		
 		onComplete?.Invoke();
@@ -498,7 +537,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log("Starts AI Routine: ");
 
-		foreach (var otherCharacterView in allCharacters)
+		foreach (var otherCharacterView in GetAllCharacters())
 		{
 			var otherCharacter = otherCharacterView.GetController();
 			if (otherCharacter.InParty()) continue;
@@ -519,16 +558,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		GetController().NewTurn();
 		
-		GetController().SelectNextCharacter();
+		SelectNextCharacter();
 	}
 
 	public void ClickRunAction()
 	{
-		var gameController = GetController();
-		var selected = gameController.GetSelectedCharacter();
-		if (selected != null && selected.CanUseRunAction())
+		if (selectedCharacter != null && selectedCharacter.CanUseRunAction())
 		{
-			selected.RunAction();
+			selectedCharacter.RunAction();
 		}
 	}
 
@@ -544,6 +581,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			inputSystem.Player.Disable();
 			inputSystem.UI.Disable();
 		}
+	}
+
+	public bool CanControlSelectedCharacter() => selectedCharacter && CanControlCharacter(selectedCharacter);
+	public bool CanControlCharacter(CharacterController character)
+	{
+		return !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
 	}
 	
 	
@@ -588,7 +631,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (mouseOverViewport) // process mouse over
 		{
 			var gameController = GetController();
-			var selectedCharacter = gameController.GetSelectedCharacter();
+			//var selectedCharacter = gameController.GetSelectedCharacter();
 			var debugCursor = false;
 			var result = CursorRaycast(out var hit);
 			if(debugCursor) Debug.Log("mouseOverViewport cursor result==" + result);
@@ -596,7 +639,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			{
 				if (selectedCharacter != null)
 				{
-					if (gameController.CanControlCharacter(selectedCharacter)) // mouse over navigation
+					if (CanControlCharacter(selectedCharacter)) // mouse over navigation
 					{
 						selectedCharacter.GetAgent().AssignDestination(hit.point);
 					}
@@ -611,7 +654,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 					var overCharacter = overCharacterView.GetController();
 					if (selectedCharacter != null)
 					{
-						if (gameController.CanControlCharacter(selectedCharacter)) // mouse over character
+						if (CanControlCharacter(selectedCharacter)) // mouse over character
 						{
 							var agent = selectedCharacter.GetAgent();
 							if (overCharacter.InParty())
@@ -627,12 +670,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 					}
 					else if(debugCursor) Debug.Log("no selected character");
 				}
-				
-				if (hit.collider.TryGetComponent(out PropComponent overProp)) // click prop
+				else if (hit.collider.TryGetComponent(out PropComponent overProp)) // mouse over prop
 				{
 					if (selectedCharacter != null)
 					{
-						if (gameController.CanControlCharacter(selectedCharacter)) // mouse over prop
+						if (CanControlCharacter(selectedCharacter)) // mouse over prop
 						{
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
@@ -649,11 +691,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 					else if(debugCursor) Debug.Log("no selected character");
 				}
 			}
-			else
+			else // mouse over raycast no result
 			{
 				if (selectedCharacter != null)
 				{
-					if (gameController.CanControlCharacter(selectedCharacter)) // mouse over raycast no result
+					if (CanControlCharacter(selectedCharacter))
 					{
 						var agent = selectedCharacter.GetAgent();
 						agent.ClearDestination();
@@ -727,6 +769,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	}
 	
 	string GetLabel(string label) => ObjectNames.NicifyVariableName(label) + ": ";
+
 }
 
 public interface ICursorHandler

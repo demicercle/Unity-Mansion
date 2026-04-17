@@ -7,22 +7,26 @@ public class UI_EndTurnButton : MonoBehaviour
 {
 	public Button button;
 
-	private void SetButtonDisabled(bool b) => button.interactable = !b;
+	private GameView view;
 
 	private void Awake()
 	{
+		view = GameView.GetInstance();
 		button.onClick.AddListener(Clicked);
-		GameView.GetInstance().routinesStarted += SetButtonDisabled;
 	}
 
 	private void OnDestroy()
 	{
 		button.onClick.RemoveListener(Clicked);
-		GameView.GetInstance().routinesStarted -= SetButtonDisabled;
 	}
 
 	void Clicked()
 	{
 		GameView.GetInstance().ClickEndTurn(); // todo prefab
+	}
+
+	void LateUpdate()
+	{
+		button.interactable = !view.HasCoroutines() && view.GetController().IsPlayerTurn();
 	}
 }

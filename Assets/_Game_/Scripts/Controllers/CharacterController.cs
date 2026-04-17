@@ -30,6 +30,7 @@ public class CharacterController : MonoBehaviour
 	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
 	public List<AIBrainData> GetBrains() => aiBrains.ToList();
 	
+	[ReadOnly] [SerializeField] private bool isControllable = false;
 	[ReadOnly] [SerializeField] private bool isSelected = false;
 	[ReadOnly] [SerializeField] private int partyIndex = -1;
 	[ReadOnly] [SerializeField] private float usedMovePoints;
@@ -40,6 +41,8 @@ public class CharacterController : MonoBehaviour
 	[ReadOnly] [SerializeField] private bool isDead;
 	[ReadOnly] [SerializeField] private CharacterAgent agent;
 
+	public bool IsControllable() => isControllable && !isDead;
+	
 	public CharacterAgent GetAgent()
 	{
 		if (agent == null) agent = Utils.GetOrAddComponent<CharacterAgent>(gameObject);
@@ -83,6 +86,7 @@ public class CharacterController : MonoBehaviour
 	public void SetPartyIndex(int index)
 	{
 		partyIndex = index;
+		isControllable = index >= 0;
 		onPartyIndexChanged?.Invoke(index);
 		gameController.PartyChanged();
 	}

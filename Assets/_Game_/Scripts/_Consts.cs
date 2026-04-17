@@ -1,4 +1,4 @@
-﻿public interface IView<T>
+﻿public static class Consts
 {
-	T GetController();
+	public const string TAG_PLAYER = "Player";
 }
