@@ -511,7 +511,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	    dir.Normalize();
 	    var dot = Vector3.Dot(dir, transform.forward);
 	    //Debug.Log(dot);
-	    DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
+	   // DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
 	    return dot >= MIN_FACING_DOT;
     }
 

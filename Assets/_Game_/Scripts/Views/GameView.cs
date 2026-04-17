@@ -441,7 +441,7 @@ public class GameView
 			yield break;
 		}
 
-		DebugGUI.FloatingText(onCharacterView.GetPosition(), "RUN", 1f).offset = Vector2.up; // TODO Floating Text Component
+		DebugGUI.FloatingText(onCharacterView.GetPosition(), "RUN!");
 		yield return new WaitForSeconds(1.0f);
 		characterData.RunAction();
 	}

@@ -13,7 +13,7 @@ public class DebugGUI : MonoBehaviour
 		var label = new GameObject().AddComponent<DebugGUI>();
 		label.duration = duration;
 		label.worldPosition = position;
-		label.offset = Vector3.up * off;
+		label.worldOffset = Vector3.Lerp(Camera.main.transform.forward, Camera.main.transform.up, 0.9f) * off;
 		label.onGUI += () =>
 		{
 			GUILayout.Label(message);
@@ -60,8 +60,10 @@ public class DebugGUI : MonoBehaviour
 		public Transform target;
 		public Vector2 size = Vector2.one * 100;
 		public Vector3 worldPosition = Vector3.zero;
-		public Vector2 offset = Vector2.zero;
+		public Vector3 worldOffset = Vector3.zero;
 
+		private Vector3 screenPosition;
+		
 		private IEnumerator Start()
 		{
 			if (duration < 0)
@@ -89,13 +91,14 @@ public class DebugGUI : MonoBehaviour
 
 		private void LateUpdate()
 		{
-			transform.position += (Vector3)offset * Time.unscaledDeltaTime;
+			worldPosition += worldOffset * Time.unscaledDeltaTime;
+			transform.position = worldPosition;
 		}
 
 		private void OnGUI()
 		{
-			worldPosition = Camera.main.WorldToScreenPoint(transform.position);
-			GUILayout.BeginArea(new Rect(worldPosition.x, Screen.height - worldPosition.y, size.x, size.y));
+			screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
+			GUILayout.BeginArea(new Rect(screenPosition.x, Screen.height - screenPosition.y, size.x, size.y));
 			onGUI?.Invoke();
 			GUILayout.EndArea();
 		}
