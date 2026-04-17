@@ -23,36 +23,10 @@ public class GameView : MonoBehaviour
 		return instance;
 	}
 	
-	/* TODO
-
-	 GAME VIEW is not a "view", it's currently a controller!
-
-	 ViewEvents: (listened by views)		GameEvents:
-	 - partyChanged							- PartyChanged()
-	 - newTurnStarted						- TurnStarted(int)
-	 - characterDamaged						- CharacterDamaged(id,amount)
-	 - characterHealed						- CharacterHealed(id)
-	 - characterKilled						- CharacterKilled(id)
-	 - characterMoved						- CharacterMoved(id,newPos)
-	 - characterUsedActions					- CharacterUsedActions(id,int)
-
-	 // check in "GameData"
-	 -> GetCharacterByID(id):CharData
-		-> charData.GetRemainingActions(id)
-		-> charData.ConsumeActions(int)
-		-> charData.GetRemainingMovePoints(id)
-		-> charData.ConsumeMovePoints(value)
-		-> charData.AddDamage(value)
-		-> charData.Heal()
-		-> charData.Kill()
-		etc
-
-	// notifies in GameController
-	- EndTurn
-	- CharacterApplyDamage(id, amount)
-	-
-
-	 */
+	public bool TryGetSelectedCharacter(out CharacterView view)
+	{
+		return (view = selectedCharacter) != null;
+	}
 
 	public System.Action<CharacterView[]> partyChanged;
 	public System.Action<bool> routinesStarted;
@@ -101,6 +75,7 @@ public class GameView : MonoBehaviour
 	public bool HasCoroutines() => coroutines.Count > 0;
 	
 	public bool mouseOverViewport { get; set; }
+	
 	public bool hasFocus { get; set; }
 	
 	private Vector2 mousePosition;
@@ -276,7 +251,6 @@ public class GameView : MonoBehaviour
 			while (!characterView.IsFacingDirection(wpDir))
 				characterView.LookDirection(wpDir, Time.deltaTime);
 		}
-		
 		characterView.GetData().SetRotation(characterView.GetRotation());
 		propInteracted?.Invoke(prop, characterView.gameObject);
 		yield return prop.Interact(characterView);
@@ -291,6 +265,7 @@ public class GameView : MonoBehaviour
 			yield return null;
 		}
 		
+		//TryGetCharacter(characterView, out var characterData);
 		characterView.GetData().SetRotation(characterView.GetRotation());
 	}
 
@@ -341,8 +316,9 @@ public class GameView : MonoBehaviour
 		
 		do
 		{
-			var characterData = movingCharacterView.GetData();
+		//	TryGetCharacter(movingCharacterView, out var characterData);
 			
+			var characterData = movingCharacterView.GetData();
 			if (characterData.GetRemainingMovePoints() <= 0)
 			{
 				agent.StopMovement();
@@ -746,11 +722,6 @@ public class GameView : MonoBehaviour
 	}
 	
 	string GetLabel(string label) => ObjectNames.NicifyVariableName(label) + ": ";
-
-	public bool GetSelectedCharacter(out CharacterView view)
-	{
-		return (view = selectedCharacter) != null;
-	}
 }
 
 public interface ICursorHandler

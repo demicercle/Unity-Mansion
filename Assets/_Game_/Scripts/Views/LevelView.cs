@@ -15,6 +15,7 @@ public class LevelView : MonoBehaviour
 	
 	public List<CharacterView> GetAllCharacters() => allCharacters;
 	public List<CharacterView> GetPartyCharacters() => partyCharacters;
+	public int GetPartyCharacterIndex(CharacterView characterView) => partyCharacters.IndexOf(characterView);
 
 	public IEnumerator LoadLevel(LevelData newData = null)
 	{
@@ -60,19 +61,30 @@ public class LevelView : MonoBehaviour
 
 		foreach (var character in CharacterView.allInstances)
 		{
-			allCharacters.Add(character);
 			Debug.Log(this + " found character: " + character);
 			
-			character.Init(null);
+			if (!character.HasSpawnData(out var spawnData))
+			{
+				Debug.LogWarning(character + " has no spawn data!");
+				character.gameObject.SetActive(false);
+				continue;
+			}
+
+			var partyIndex = character.IsPlayer() ? partyCharacters.Count : -1;
 			
-			var characterData = character.GetData();
+			var characterData = Instantiate(spawnData);
+			characterData.Init(partyIndex);
+			
 			levelData.AddCharacter(characterData);
 			
-			if (character.IsPlayer())
+			if (partyIndex >= 0)
 			{
-				levelData.SetCharacterInParty(characterData, partyCharacters.Count);
+				levelData.SetCharacterInParty(characterData, partyIndex);
 				partyCharacters.Add(character);
 			}
+			
+			character.Init(characterData);
+			allCharacters.Add(character);
 		}
 	}
 

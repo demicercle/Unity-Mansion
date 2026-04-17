@@ -13,18 +13,14 @@ public class ConsoleEvents : MonoBehaviour
 		
 		DebugLogConsole.AddCommand<int>("apply_dmg", "damage selected character", (amount) =>
 		{
-			if (gameView.GetSelectedCharacter(out var selected))
-			{
+			if (gameView.TryGetSelectedCharacter(out var selected))
 				selected.GetData().TakeDamage(amount);
-			}
 		});
 		
 		DebugLogConsole.AddCommand<float>("heal", "heal selected character", (amount) =>
 		{
-			if (gameView.GetSelectedCharacter(out var selected))
-			{
+			if (gameView.TryGetSelectedCharacter(out var selected) )
 				selected.GetData().Heal(amount);
-			}
 		});
 
 		var wasVisible = DebugLogManager.Instance.IsLogWindowVisible;

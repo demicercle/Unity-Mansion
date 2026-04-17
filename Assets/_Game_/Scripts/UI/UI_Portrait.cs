@@ -26,8 +26,6 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		gameView = GameView.GetInstance();
 		gameView.partyChanged += PartyChanged;
 		gameView.selectionChanged += SelectionChanged;
-		
-		gameObject.SetActive(false);
 	}
 
 	private void OnDestroy()
@@ -58,18 +56,24 @@ public class UI_Portrait : MonoBehaviour, IPointerClickHandler
 		gameObject.SetActive(_assignedCharacterView != null);
 	}
 
+	private void OnEnable()
+	{
+		if(_assignedCharacterView) Debug.Log(this + " > " + _assignedCharacterView);
+	}
+
 	private void LateUpdate() // TODO use events
 	{
 		if (_assignedCharacterView)
 		{
 			var data = _assignedCharacterView.GetData();
-			if (data) // TODO selected character should be in data
-			{
-				rawImage.texture = data.portraitTexture;
-				nameLabel.text = data.displayName;
-				healthSprite.fillAmount = data.GetDamageProgress();
-				healthLabel.text = _assignedCharacterView.GetCurrentHealthInt() + "/" + _assignedCharacterView.GetMaxHealth();
-			}
+			rawImage.texture = data.portraitTexture;
+			nameLabel.text = data.displayName;
+			healthSprite.fillAmount = data.GetDamageProgress();
+			healthLabel.text = _assignedCharacterView.GetCurrentHealthInt() + "/" + _assignedCharacterView.GetMaxHealth();
+			return;
 		}
+		
+		Debug.Log(this + " No character");
+		gameObject.SetActive(false);
 	}
 }

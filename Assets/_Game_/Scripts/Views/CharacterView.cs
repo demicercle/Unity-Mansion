@@ -22,7 +22,16 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 	[SerializeField] private CharacterData spawnData;
 
 	private CharacterData data;
-	public CharacterData GetData() => data; //TODO remove
+
+	public bool HasSpawnData(out CharacterData data)
+	{
+		data = spawnData;
+		return data != null;
+	}
+	
+	public CharacterData GetData() => data;
+	
+	//public CharacterData GetData() => data; //TODO remove
 	public bool IsInParty() => data.GetPartyIndex() >= 0;
 	
 	public bool IsDead() => data.IsDead();
@@ -118,25 +127,13 @@ public class CharacterView : MonoBehaviour, ICursorHandler
 
 	public int GetCurrentHealthInt() => (int)data.GetRemainingHealth();
 	public int GetMaxHealth() => data.GetMaxHealth();
-
-	public void Init(CharacterData newData = null)
+	
+	public void Init(CharacterData newData)
 	{
-		if (newData == null)
-		{
-			if (!spawnData)
-			{
-				Debug.LogError(this + " has no spawn data");
-				return;
-			}
-			
-			newData = Instantiate(spawnData);
-			Debug.Log(this + " spawned at init: " + newData);
-		}
-		
+		Debug.Log(this + " Init " + newData);
 		data = newData;
 		UpdateComponents();
 		RegisterEvents(true);
-		data.Init(this);
 		gameObject.SetActive(true);
 	}
 

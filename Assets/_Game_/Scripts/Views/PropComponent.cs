@@ -51,6 +51,7 @@ public class PropComponent : MonoBehaviour
 	
 	private IEnumerator DoInteract(CharacterView interactor = null)
 	{
+		var gameView = GameView.GetInstance();
 		if (onlyOnce)
 		{
 			gameObject.layer = LayerMask.NameToLayer(GameView.LAYER_IGNORE);
@@ -59,11 +60,8 @@ public class PropComponent : MonoBehaviour
 		if (interactor)
 		{
 			var data = interactor.GetData();
-			if (data)
-			{
-				if (consumeActions > 0)
-					data.ConsumeActions(consumeActions);
-			}
+			if (consumeActions > 0)
+				data.ConsumeActions(consumeActions);
 		}
 		
 		yield return new WaitForSeconds(triggerDelay);
