@@ -84,6 +84,7 @@ public class TopDownCamera : MonoBehaviour
     [SerializeField] private float inputSpeed = 10.0f;
     [SerializeField] private float panSpeed = 8.0f;
     [SerializeField] private int screenPadding = 2;
+    [Range(0f,1f)] [SerializeField] private float startZoom = .5f;
     [SerializeField] private float zoomSpeed = 1.0f;
     [SerializeField] private Vector3 rotationSpeed = new Vector2(3.0f, 6.0f);
     [SerializeField] private bool canRotateY = true;
@@ -189,7 +190,17 @@ public class TopDownCamera : MonoBehaviour
     
     #region PRIVATE
     
-    private Light sunLight; 
+    private Light sunLight;
+
+    void Awake()
+    {
+        currentYaw = desiredYaw = startZoom;
+    }
+
+    private void Start()
+    {
+        UpdateAnimator();
+    }
 
     private void Update()
     {

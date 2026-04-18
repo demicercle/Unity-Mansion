@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Oddworm.Framework;
 using UnityEngine;
+using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
 using UnityEngine.SceneManagement;
-
 
 [System.Serializable]
 public class GameView : MonoBehaviour, IView<GameController>
@@ -56,11 +56,21 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
-		inputSystem.UI.ScrollWheel.performed += ctx => TopDownCamera.Instance.Zoom(-ctx.ReadValue<Vector2>().y);
-		inputSystem.Player.RotateLeft.performed += ctx => TopDownCamera.Instance.RotateLR(false);
-		inputSystem.Player.RotateRight.performed += ctx => TopDownCamera.Instance.RotateLR(true);
+		inputSystem.UI.ScrollWheel.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y);
+		inputSystem.Player.RotateLeft.performed += ctx => CameraRL(false);
+		inputSystem.Player.RotateRight.performed += ctx => CameraRL(true);
 		
 		PlayerSelection.selectionChanged += SelectionChanged;
+	}
+
+	void CameraRL(bool left)
+	{
+		if(HasFocus())TopDownCamera.Instance.RotateLR(left);
+	}
+	
+	void CameraZoom(float delta)
+	{
+		if (HasFocus()) TopDownCamera.Instance.Zoom(delta);
 	}
 
 	[SerializeField] private List<string> scenesToLoad = new List<string>();
