@@ -1,8 +1,24 @@
+using System.Linq;
 using UnityEngine;
 using LightType = UnityEngine.LightType;
 
-public class MainCamera : MonoBehaviour
+public class TopDownCamera : MonoBehaviour
 {
+    static private TopDownCamera instance;
+
+    static public TopDownCamera Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectsByType<TopDownCamera>(default).FirstOrDefault();
+            }
+            
+            return instance;
+        }
+    }
+    
     public Light spotLight;
     public Vector3 focusPosition;
     public Bounds worldBounds;

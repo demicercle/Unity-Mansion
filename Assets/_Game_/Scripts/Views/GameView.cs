@@ -10,6 +10,10 @@ using UnityEngine.SceneManagement;
 [System.Serializable]
 public class GameView : MonoBehaviour, IView<GameController>
 {
+	static bool debugCursor = false;
+	const int CURSOR_RAYCAST_RESULT_NONE = 0;
+	const int CURSOR_RAYCAST_RESULT_NAVIGATION = 1;
+	const int CURSOR_RAYCAST_RESULT_CHARACTER = 2;
 	
 	override public string ToString() => "GameView";
 
@@ -34,7 +38,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var selectedCharacter = Selection.GetSelectedCharacter();
 		if (selectedCharacter)
 		{
-			mainCamera.Focus(selectedCharacter);
+			TopDownCamera.Instance.Focus(selectedCharacter);
 		}
 	}
 	
@@ -42,17 +46,18 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		instance = this;
 		DontDestroyOnLoad(gameObject);
-		name = "GameView (Singleton)";
-		hasFocus = !Application.isEditor;
+		name = ToString();
 		
-		mainCamera = FindObjectsByType<MainCamera>(default).First();
+		hasFocus = !Application.isEditor;
+		//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
+		hasEditorFocus = false;
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
 		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
-		inputSystem.UI.ScrollWheel.performed += ctx => mainCamera.Zoom(ctx.ReadValue<Vector2>().y);
+		inputSystem.UI.ScrollWheel.performed += ctx => TopDownCamera.Instance.Zoom(ctx.ReadValue<Vector2>().y);
 		
 		Selection.selectionChanged += SelectionChanged;
 	}
@@ -98,8 +103,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		SetInputEnabled(true);
 		
 		GetController().NewTurn();
-
-		yield return new WaitForSeconds(0.5f); // todo hak camera focus
 		
 		Selection.SelectNextCharacter();
 	}
@@ -237,27 +240,25 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public int GetPartyCharacterIndex(CharacterView characterView) => GetPartyCharacters().IndexOf(characterView);
 	public int GetCharacterIndex(CharacterView characterView) => GetAllCharacters().IndexOf(characterView);
 
-	public bool drawDebug = false;
-	[UnityEngine.Range(0f,1f)] public float debugGUI = 0f;
-	public float cameraSpeed = 1.0f;
-	[UnityEngine.Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
-
 	public bool HasCoroutines() => coroutines.Count > 0;
-	
-	public bool hasFocus { get; set; }
 
-	private GameCanvas canvas;
-	private Vector2 mousePosition;
-	private bool hasMousePosition;
-	private MainCamera mainCamera;
+	public bool drawDebug = false;
+	[Range(0f,1f)] public float debugGUI = 0f;
+	public float cameraSpeed = 1.0f;
+	[Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
+
+	[Header("Debug")]
+	[ReadOnly][SerializeField] private bool hasFocus;
+	[ReadOnly][SerializeField] private bool hasEditorFocus;
+	[ReadOnly][SerializeField] private GameCanvas canvas;
+	[ReadOnly][SerializeField] private Vector2 mousePosition;
+	//private TopDownCamera _topDownCamera;
 	public InputSystem_Actions inputSystem { get; private set; }
 	
 	private List<IEnumerator> coroutines = new  List<IEnumerator>();
 
 	public void MouseMove(Vector2 pos)
 	{
-		hasMousePosition = true;
-		hasFocus = true;
 		mousePosition = pos;
 	}
 
@@ -265,6 +266,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		if (value > 0) // pressed
 		{
+			
 			if (GetController().IsPlayerTurn() && !HasCoroutines())
 			{
 				Selection.SelectCharacter(null); // deselect all
@@ -278,6 +280,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		if (canvas.mouseOverViewport && value > 0f) // pressed
 		{
+			hasEditorFocus = true;
+			
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
 			{
@@ -491,14 +495,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 	private IEnumerator EndTurnRoutine()
 	{
 		Debug.Log("Starts AI Routine: ");
-
+		
 		foreach (var otherCharacterView in GetAllCharacters())
 		{
 			var otherCharacter = otherCharacterView.GetController();
 			if (otherCharacter.InParty()) continue;
 
 			if (IsCharacterVisible(otherCharacter))
-				mainCamera.Focus(otherCharacter);
+				TopDownCamera.Instance.Focus(otherCharacter);
 			else Debug.Log("Do not focus invisible character: " + otherCharacter);
 
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
@@ -524,7 +528,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		!HasCoroutines() && GetController().IsPlayerTurn() && Selection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
 
 	public bool IsControlPanelVisible() =>
-		Selection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
+		GetController().IsPlayerTurn() && Selection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllable();
 
 	//public CharacterController GetPartyCharacter(int index) => CharacterController.GetPartyCharacter(index);
 	
@@ -575,11 +579,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 		character.RunAction();
 	}
 
+	private bool HasFocus() => hasFocus && (!Application.isEditor || hasEditorFocus);
+	
 	private void LateUpdate()
 	{
-		if (hasFocus)
+		if (HasFocus())
 		{
-			if (hasMousePosition) mainCamera.MoveCameraWithCursor(mousePosition);
+			TopDownCamera.Instance.MoveCameraWithCursor(mousePosition);
 		}
 
 		canvas.UpdateUI(this);
@@ -587,19 +593,32 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	private void Update()
 	{
-		if (inputSystem.UI.Cancel.WasPressedThisFrame())
+		if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
 		{
-			hasFocus = false;
+			hasFocus = hasEditorFocus = false;
+			//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
+		}
+
+		if (Application.isEditor)
+		{
+			if (!hasFocus)
+				hasEditorFocus = false;
+			
+			if (!hasFocus && inputSystem.UI.Click.WasPressedThisFrame())
+			{
+				hasFocus = hasEditorFocus = true;
+				//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
+			}
 		}
 		
-		if (hasFocus)
+		if (HasFocus())
 		{
 			Cursor.lockState = CursorLockMode.Confined;
 			Cursor.SetCursor(Resources.Load<Texture2D>("Cursors/cursor_none"), Vector2.zero, CursorMode.Auto);
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
-				mainCamera.Move(inputSystem.Player.Move.ReadValue<Vector2>() * cameraSpeed * Time.unscaledDeltaTime);
+				TopDownCamera.Instance.Move(inputSystem.Player.Move.ReadValue<Vector2>() * cameraSpeed * Time.unscaledDeltaTime);
 			}
 		}
 		else
@@ -616,13 +635,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 				Selection.SelectNextCharacter();
 			}
 		}
-
 		
 		if (canvas.mouseOverViewport) // process mouse over
 		{
-			var gameController = GetController();
 			//var selectedCharacter = gameController.GetSelectedCharacter();
-			var debugCursor = false;
 			var result = CursorRaycast(out var hit);
 			if(debugCursor) Debug.Log("mouseOverViewport cursor result==" + result);
 			if (result == CURSOR_RAYCAST_RESULT_NAVIGATION)
@@ -699,12 +715,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	private void OnApplicationFocus(bool value)
 	{
-		hasFocus = value;
+		hasFocus = hasEditorFocus = value;
+		////Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
 	}
 
-	private const int CURSOR_RAYCAST_RESULT_NONE = 0;
-	private const int CURSOR_RAYCAST_RESULT_NAVIGATION = 1;
-	private const int CURSOR_RAYCAST_RESULT_CHARACTER = 2;
 	public int CursorRaycast(out RaycastHit hit)
 	{
 		//TODO: if mouse over viewport
