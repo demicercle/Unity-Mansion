@@ -31,11 +31,11 @@ public class LevelGrid : MonoBehaviour
 	[ContextMenu("Update Camera Bounds")]
 	void UpdateCameraBounds()
 	{
-		var topDownCamera = FindObjectsByType<TopDownCamera>(default).FirstOrDefault();
-		if (topDownCamera != null)
+		var cameraPivot = FindObjectsByType<CameraPivot>(default).FirstOrDefault();
+		if (cameraPivot != null)
 		{ 
-			topDownCamera.SetWorldBounds(new Bounds(default, new Vector3(extends.x * 2 * cellSize, 0, extends.y * 2 * cellSize)));
-			Utils.SetDirty(topDownCamera);
+			cameraPivot.SetWorldBounds(new Bounds(default, new Vector3(extends.x * 2 * cellSize, 0, extends.y * 2 * cellSize)));
+			Utils.SetDirty(cameraPivot);
 		}
 	}
 

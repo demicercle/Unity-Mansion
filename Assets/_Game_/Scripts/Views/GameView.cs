@@ -37,7 +37,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var selectedCharacter = PlayerSelection.GetSelectedCharacter();
 		if (selectedCharacter)
 		{
-			TopDownCamera.Instance.Focus(selectedCharacter);
+			cameraPivot.Focus(selectedCharacter);
 		}
 	}
 	
@@ -65,12 +65,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	void CameraRL(bool left)
 	{
-		if(HasFocus())TopDownCamera.Instance.RotateLR(left);
+		if(HasFocus())cameraPivot.RotateLR(left);
 	}
 	
 	void CameraZoom(float delta)
 	{
-		if (HasFocus()) TopDownCamera.Instance.Zoom(delta);
+		if (HasFocus()) cameraPivot.Zoom(delta);
 	}
 
 	[SerializeField] private List<string> scenesToLoad = new List<string>();
@@ -264,10 +264,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 	[ReadOnly][SerializeField] private GameCanvas canvas;
 	[ReadOnly][SerializeField] private Vector2 mousePosition;
 
+	private CameraPivot cameraPivot => CameraPivot.Instance; // TODO
+	
 	private Vector2 middleClickMousePosition;
 
 	private bool holdMiddleClick;
-	//private TopDownCamera _topDownCamera;
 	public InputSystem_Actions inputSystem { get; private set; }
 	
 	private List<IEnumerator> coroutines = new  List<IEnumerator>();
@@ -435,8 +436,25 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var agent = movingCharacter.GetAgent();
 		agent.AssignDestination(dest);
 
-		do yield return null;
+		var timeout = 3.0f;
+		do
+		{
+			if (timeout <= 0f) break;
+			yield return null;
+			if (agent.velocity.sqrMagnitude < 0.1f)
+			{
+				timeout -= Time.deltaTime;
+				Debug.Log(timeout);
+			}
+			else timeout = 0f;
+		}
 		while (agent.pathPending);
+
+		if (!agent.hasPath)
+		{
+			Debug.LogWarning(agent + " has no path");
+			yield break;
+		}
 		
 		var path = agent.GetCurrentPath();
 		if (path.Length > 1)
@@ -457,8 +475,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		agent.SetCanMove(true);
 		
+		timeout = 3.0f;
 		do
 		{
+			if (timeout <= 0f) break;
 			if (movingCharacter.CanMove() == false)
 			{
 				agent.StopMovement();
@@ -472,6 +492,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			//var newRotation = movingCharacterView.GetRotation();
 			var newPosition = movingCharacter.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
+			if (deltaPos < 0.1f)
+			{
+				timeout -= Time.deltaTime;
+				Debug.Log(agent + " timeout=" + timeout);
+			}
+			else timeout = 0f;
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
 			//movingCharacter.SetPosition(newPosition);
@@ -517,7 +543,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (otherCharacter.InParty()) continue;
 
 			if (IsCharacterVisible(otherCharacter))
-				TopDownCamera.Instance.Focus(otherCharacter);
+				cameraPivot.Focus(otherCharacter);
 			else Debug.Log("Do not focus invisible character: " + otherCharacter);
 
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
@@ -600,7 +626,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		if (HasFocus())
 		{
-			TopDownCamera.Instance.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
+			cameraPivot.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
 		}
 
 		canvas.UpdateUI(this);
@@ -633,7 +659,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
-				TopDownCamera.Instance.Move(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime);
+				cameraPivot.Move(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime);
 			}
 
 			if (inputSystem.Player.MiddleClick.WasReleasedThisFrame()) holdMiddleClick = false;
@@ -646,10 +672,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (holdMiddleClick)
 			{
 				var delta = (middleClickMousePosition - mousePosition);
-//				Debug.Log(delta);
-				var topDownCamera = TopDownCamera.Instance;
-				topDownCamera.Rotate(delta.x * Time.deltaTime / Mathf.Pow(Mathf.PI, 1));
-				topDownCamera.Zoom(delta.y * Time.deltaTime / Mathf.Pow(Mathf.PI, 2));
+				cameraPivot.Rotate(delta.x * Time.deltaTime / Mathf.Pow(Mathf.PI, 1));
+				cameraPivot.Zoom(delta.y * Time.deltaTime / Mathf.Pow(Mathf.PI, 2));
 			}
 			//Debug.Log(delta);
 		}

@@ -2,7 +2,7 @@ using System.Linq;
 using UnityEngine;
 using LightType = UnityEngine.LightType;
 
-public class TopDownCamera : MonoBehaviour
+public class CameraPivot : MonoBehaviour
 {
 #if UNITY_EDITOR
     //public Object controllerObj;
@@ -39,18 +39,21 @@ public class TopDownCamera : MonoBehaviour
     void ResetFocus()
     {
         focusPosition = worldBounds.center;
+        editorFocusY = 0f;
+        editorFocusX = editorFocusZ = 0.5f;
+        Utils.SetDirty(this);
     }
 #endif
     
-    static private TopDownCamera instance;
+    static private CameraPivot instance;
 
-    static public TopDownCamera Instance
+    static public CameraPivot Instance
     {
         get
         {
             if (instance == null)
             {
-                instance = FindObjectsByType<TopDownCamera>(default).FirstOrDefault();
+                instance = FindObjectsByType<CameraPivot>(default).FirstOrDefault();
             }
             
             return instance;
@@ -286,28 +289,3 @@ public class TopDownCamera : MonoBehaviour
     
     #endregion
 }
-
-/*#if UNITY_EDITOR
-[UnityEditor.CustomEditor(typeof(TopDownCamera))]
-public class TopDownCameraEditor : UnityEditor.Editor
-{
-    static private GameObject editorCameraTarget;
-    private void DuringSceneGUI(object arg)
-    {
-        if(editorCameraTarget == null) editorCameraTarget = GameObject.Find("EditorCameraTarget");
-        if(editorCameraTarget == null) editorCameraTarget = new GameObject("EditorCameraTarget");
-        editorCameraTarget.hideFlags = HideFlags.DontSave;
-        (target as TopDownCamera).SetFocusPosition(editorCameraTarget.transform.position);
-    }
-
-    private void OnEnable()
-    {
-        UnityEditor.SceneView.duringSceneGui += DuringSceneGUI;
-    }
-
-    private void OnDisable()
-    {
-        UnityEditor.SceneView.duringSceneGui -= DuringSceneGUI;
-    }
-}
-#endif*/
