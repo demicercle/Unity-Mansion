@@ -121,11 +121,14 @@ public class CharacterController : MonoBehaviour
 
 	public void RotateTowards(Vector3 worldPosition, float f = -1f)
 	{
+		DebugGUI.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
 		LookDirection(worldPosition - GetPosition(), f);
 	}
 
 	public void LookDirection(Vector3 getDirection, float f = -1f)
 	{
+//		Debug.Log(this + " LookDirection " + f + " " + getDirection);
+		
 		getDirection.y = 0;
 		getDirection.Normalize();
 
@@ -208,6 +211,7 @@ public class CharacterController : MonoBehaviour
 
 	public void TakeDamage(float amount)
 	{
+		Debug.Log(this + " TakeDamage " + amount);
 		totalDamages += amount;
 		
 		onDamaged?.Invoke(amount);
@@ -239,7 +243,7 @@ public class CharacterController : MonoBehaviour
 
 	public bool TryGetAIBrain(out AIBrainData aiBrain)
 	{
-		aiBrains = aiBrains.OrderBy(b => b.GetPriority(this)).ToList();
+		aiBrains = aiBrains.OrderBy(b => -b.GetPriority(this)).ToList();
 		Debug.Log(this + " TryGetAIBrain " + Utils.ArrayStr(aiBrains));
 		return (aiBrain = aiBrains.FirstOrDefault()) != null;
 	}

@@ -395,7 +395,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log("WaitCharacterPerformAttack " + character + " " + target );
 		
-		yield return StartCoroutine(WaitCharacterLookPosition(character, target.GetPosition()));
+		yield return StartCoroutine(WaitCharacterLookPosition(character, target.GetCenterPosition()));
 
 		if (!character.CanAttack())
 		{
@@ -406,10 +406,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 		else
 		{
 			character.AttackAction();
-			yield return new WaitForSeconds(1.0f);
+			yield return new WaitForSeconds(1.0f);//TODO wait attack duration
 			// apply attack damage, etc
 			target.TakeDamage(character.GetLastAttackDamage());
 		}
+
+		Debug.Log("attack ends");
 	}
 
 	private IEnumerator WaitCharacterInteract(CharacterController character, PropComponent prop, Waypoint waypoint = null)
@@ -439,9 +441,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 	private IEnumerator WaitCharacterLookPosition(CharacterController character, Vector3 pos) => WaitCharacterLookDirection(character, (pos - character.GetPosition()).normalized);
 	private IEnumerator WaitCharacterLookDirection(CharacterController character, Vector3 dir)
 	{
+		character.StopAgent();
+		
 		while (!character.IsFacingDirection(dir))
 		{
-			character.RotateTowards(dir, Time.deltaTime);
+			character.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
 	}
@@ -474,7 +478,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var dir = (firstPoint - movingCharacter.GetPosition()).normalized;
 			while (!movingCharacter.IsFacingDirection(dir))
 			{
-				movingCharacter.RotateTowards(firstPoint, Time.deltaTime);
+				movingCharacter.LookDirection(dir, Time.deltaTime);
 				yield return null;
 			}
 		}

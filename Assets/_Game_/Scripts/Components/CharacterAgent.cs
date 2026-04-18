@@ -75,9 +75,9 @@ public class CharacterAgent : MonoBehaviour
 
 	public void StopMovement()
 	{
+		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
-		aiPath.isStopped = true;
 		Debug.Log(this + " StopMovement");
 		ClearDestination();
 	}
