@@ -61,8 +61,12 @@ public class TopDownCamera : MonoBehaviour
     
     [Header("Editor")] 
     [SerializeField] private bool enableEditorMovement;
+    [Space]
     [Range(0f,1f)] [SerializeField] private float editorFocusX = .5f;
     [Range(0f,1f)] [SerializeField] private float editorFocusZ = .5f;
+    [Space]
+    [Range(-180f, 180)][SerializeField]  private float yaw; 
+    [Space]
     [Range(0f,1f)] [SerializeField] private float editorZoom = 0f;
     
     [Header("Bounds")]
@@ -70,19 +74,14 @@ public class TopDownCamera : MonoBehaviour
     [SerializeField] private float worldY = 0f;
     [Min(0f)][SerializeField] private float worldHeight = 12f;
     
-    [Header("SpotLight")]
-    [SerializeField] private bool updateSpotLight = true;
-    [SerializeField] private float lightRange = 0.0f;
-    [SerializeField] private float lightRangeToAngle = Mathf.PI;
-    
-    [Header("Inputs")]
+    [Header("Movement")]
+    [SerializeField] private float lerpSpeed = 1.5f;
     [SerializeField] private float inputSpeed = 10.0f;
     [SerializeField] private float panSpeed = 8.0f;
     [SerializeField] private int screenPadding = 2;
     
-    [Header("Movement")]
+    [Header("Zoom")]
     [SerializeField] private float height = 1.5f;
-    [SerializeField] private float lerpSpeed = 1.5f;
     [SerializeField] private float zoomSpeed = 1.0f;
     [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
     
@@ -91,10 +90,18 @@ public class TopDownCamera : MonoBehaviour
     [SerializeField] private float rotationStepAngle = 90.0f;
     
     [Header("Heading Control")]
-    [SerializeField] private AnimationCurve heightForwardCurve = AnimationCurve.Constant(0f,0f,0f);
     [Min(0f)][SerializeField] private float forwardOffset = 0.0f;
-    [SerializeField] private Vector2 headingOffset = new Vector2(1.0f, 0.0f);
-    //[ReadOnly] [SerializeField] private bool updateSunLightPosition = true;
+    [SerializeField] private AnimationCurve zoomForwardCurve = AnimationCurve.Constant(0f,0f,0f);
+    [SerializeField] private Vector3 headingOffset = new Vector3(1.0f, 0.0f, 0.0f);
+    
+    [Header("SpotLight")]
+    [SerializeField] private bool updateSpotLight = true;
+    [SerializeField] private float lightRange = 0.0f;
+    //TODO [SerializeField] private float lightRangeMinAngle = -1f;
+    [SerializeField] private float lightRangeToAngle = Mathf.PI;
+    //TODO [SerializeField] private AnimationCurve lightRangeCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+    //TODO [SerializeField] private AnimationCurve lightIntensityCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+    //TODO [ReadOnly] [SerializeField] private bool updateSunLightPosition = true;
     
     #region PUBLIC
      public void SetFocusPosition(Vector3 pos, bool updatePosition = true)
@@ -132,7 +139,7 @@ public class TopDownCamera : MonoBehaviour
 
     public void Zoom(float delta)
     {
-        currentZoom = Mathf.Clamp01(currentZoom + zoomSpeed * delta);
+        currentZoom = Mathf.Clamp01(currentZoom + zoomSpeed * delta * 0.1f);
     }
 
     public void Rotate(float step)
@@ -175,25 +182,41 @@ public class TopDownCamera : MonoBehaviour
             }
         }
         
+        // clamp
         focusPosition.y = Mathf.Lerp(worldBounds.center.y - worldBounds.extents.y, worldBounds.center.y + worldBounds.extents.y, currentZoom);
-        
-        evaluatedHeight = heightForwardCurve.Evaluate(1f - currentZoom);
-        currentYaw = !Application.isPlaying ? yaw : Mathf.LerpAngle(currentYaw, yaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG);
         focusPosition = worldBounds.ClosestPoint(focusPosition);
+        
+        // lerp rotation
+        currentYaw = !Application.isPlaying ? yaw : Mathf.LerpAngle(currentYaw, yaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG * Mathf.PI);
+        
+        // zooming
+        evaluatedHeight = zoomForwardCurve.Evaluate(1f - currentZoom);
+        
+        // heading
         forwardValue = forwardOffset * evaluatedHeight;
         offsetedPosition = focusPosition - Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue;
         offsetedPosition.y += headingOffset.y * evaluatedHeight;
-        currentPosition = Vector3.Lerp(currentPosition, offsetedPosition,
-            Application.isPlaying ? Time.unscaledDeltaTime * lerpSpeed : 1);
-        transform.position = currentPosition + Vector3.up * height;
+        
+        // calculate desired rotation look at
         desiredRotation =
             Quaternion.LookRotation(((focusPosition + Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue * headingOffset.x) - (focusPosition + Vector3.up * height))
                 .normalized);
+        
+        // move forward
+        offsetedPosition += desiredRotation * Vector3.forward * headingOffset.z;
+        
+        // lerp
+        currentPosition = Vector3.Lerp(currentPosition, offsetedPosition,
+            Application.isPlaying ? Time.unscaledDeltaTime * lerpSpeed : 1);
+        
+        // set
+        transform.position = currentPosition + Vector3.up;
         transform.rotation = Application.isPlaying ? Quaternion.Lerp(transform.rotation, desiredRotation, rotationSpeed.x * Time.unscaledDeltaTime) : desiredRotation;
+       // transform.position += transform.rotation * Vector3.forward * headingOffset.z;
     }
     
     #endregion
-
+    
     [Header("Debug")]
     [ReadOnly] [SerializeField] private Vector3 currentPosition;
     [ReadOnly] [SerializeField] private Quaternion desiredRotation;
@@ -202,7 +225,6 @@ public class TopDownCamera : MonoBehaviour
     [ReadOnly] [SerializeField]  private Vector3 offsetedPosition;
     [ReadOnly] [SerializeField]  private float evaluatedHeight;
     [ReadOnly] [SerializeField]  private float currentYaw;
-    [ReadOnly] [SerializeField]  private float yaw; 
     [ReadOnly][SerializeField] private Light spotLight;
     
     #region PRIVATE
@@ -219,7 +241,7 @@ public class TopDownCamera : MonoBehaviour
     private void UpdateBounds()
     {
         if (worldHeight <= 0f) return;
-        worldBounds.center = Vector3.up * worldHeight;
+        worldBounds.center = Vector3.up * worldHeight + Vector3.up * worldY;
         worldBounds.extents = new Vector3(worldBounds.extents.x, worldHeight, worldBounds.extents.z);
     }
 
@@ -229,8 +251,10 @@ public class TopDownCamera : MonoBehaviour
         if (spotLight == null) spotLight = gameObject.GetComponent<Light>();
         if (spotLight == null) return;
         if (spotLight.type != LightType.Spot || !spotLight.enabled) return;
-        spotLight.range = currentPosition.y + height + lightRange;
-        spotLight.spotAngle = spotLight.range * lightRangeToAngle;
+        if (lightRange > 0f) spotLight.range = currentPosition.y + height + lightRange;
+        if (lightRangeToAngle > 0f) spotLight.spotAngle = spotLight.range * lightRangeToAngle;
+        //TODO if (lightRangeCurve.keys.Length>0) spotLight.spotAngle = Mathf.Lerp(lightRangeMinAngle, spotLight.range, lightRangeCurve.Evaluate(currentZoom));
+        //TODO if (lightIntensityCurve.keys.Length>0) spotLight.intensity = Mathf.Lerp(minIntensity, minIntensity + intensityDelta, lightIntensityCurve.Evaluate(currentZoom));
     }
     
     #endregion

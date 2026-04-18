@@ -1888,7 +1888,7 @@ MonoBehaviour:
   editorOnly: 1
   moveEditorCamera: 0
   moveGameCamera: 1
-  gameCameraZoom: 1
+  gameCameraZoom: 0.978
 --- !u!4 &464768273
 Transform:
   m_ObjectHideFlags: 0
@@ -1954,7 +1954,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00005340576}
+  m_AnchoredPosition: {x: 0, y: -0.000019073486}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &541877068
@@ -2923,7 +2923,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 884853961}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.78070164
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3203,8 +3203,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.33820888, y: 0, z: 0, w: 0.9410711}
-  m_LocalPosition: {x: -4.049999, y: 9.340358, z: -6.418831}
+  m_LocalRotation: {x: 0.58183986, y: 0, z: 0, w: 0.8133034}
+  m_LocalPosition: {x: -4.049999, y: 10.071782, z: -3.261204}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3222,36 +3222,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8e7b673e2d6ad842a3046edfefa8f92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusPosition: {x: -4.049999, y: 2.9168801, z: -2.1600008}
+  focusPosition: {x: -4.049999, y: 7.3015194, z: -2.1600008}
   enableEditorMovement: 1
   editorFocusX: 0.446
   editorFocusZ: 0.464
-  editorZoom: 0.202
+  yaw: 0
+  editorZoom: 0.304
   worldBounds:
-    m_Center: {x: 0, y: 7.22, z: 0}
-    m_Extent: {x: 37.5, y: 7.22, z: 30}
-  worldY: 0
-  worldHeight: 7.22
-  updateSpotLight: 1
-  lightRange: 4.3
-  lightRangeToAngle: 3.34
+    m_Center: {x: 0, y: 10.12, z: 0}
+    m_Extent: {x: 37.5, y: 7.19, z: 30}
+  worldY: 2.93
+  worldHeight: 7.19
+  lerpSpeed: 3
   inputSpeed: 20
   panSpeed: 20
   screenPadding: 2
-  height: 5.8
-  lerpSpeed: 3
-  zoomSpeed: 1
-  rotationSpeed: {x: 3, y: 12}
+  height: 2.2
+  zoomSpeed: 1.03
+  rotationSpeed: {x: 1, y: 24}
   canRotateY: 1
   rotationStepAngle: 90
-  heightForwardCurve:
+  forwardOffset: 1.04
+  zoomForwardCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 2
-      outSlope: 2
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -3259,8 +3258,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 0
-      outSlope: 0
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -3268,16 +3267,17 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  forwardOffset: 4.44
-  headingOffset: {x: 1.65, y: 0.65}
-  currentPosition: {x: -4.049999, y: 3.5403576, z: -6.418831}
-  desiredRotation: {x: 0.33820888, y: 0, z: 0, w: 0.9410711}
-  currentZoom: 0.202
-  forwardValue: 4.25883
-  offsetedPosition: {x: -4.049999, y: 3.5403576, z: -6.418831}
-  evaluatedHeight: 0.959196
+  headingOffset: {x: 1.49, y: 0.04, z: -1.85}
+  updateSpotLight: 1
+  lightRange: 2.71
+  lightRangeToAngle: 10.49
+  currentPosition: {x: -4.049999, y: 9.071782, z: -3.261204}
+  desiredRotation: {x: 0.58183986, y: 0, z: 0, w: 0.8133034}
+  currentZoom: 0.304
+  forwardValue: 0.5037926
+  offsetedPosition: {x: -4.049999, y: 9.071782, z: -3.261204}
+  evaluatedHeight: 0.48441598
   currentYaw: 0
-  yaw: 0
   spotLight: {fileID: 963194230}
 --- !u!108 &963194230
 Light:
@@ -3289,10 +3289,10 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 0.7924528, g: 0.7924528, b: 0.7924528, a: 1}
-  m_Intensity: 3.63
-  m_Range: 13.640358
-  m_SpotAngle: 45.558796
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 1.12
+  m_Range: 13.981782
+  m_SpotAngle: 146.66888
   m_InnerSpotAngle: 1
   m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
@@ -3321,7 +3321,7 @@ Light:
       e32: 0
       e33: 1
     m_UseCullingMatrixOverride: 0
-  m_Cookie: {fileID: 0}
+  m_Cookie: {fileID: 10300, guid: 0000000000000000f000000000000000, type: 0}
   m_DrawHalo: 0
   m_Flare: {fileID: 0}
   m_RenderMode: 0
@@ -3335,7 +3335,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.5912e-41, y: 0, z: 0, w: -9.623093e+30}
+  m_BoundingSphereOverride: {x: 0, y: NaN, z: 0, w: -0.00000025660847}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
