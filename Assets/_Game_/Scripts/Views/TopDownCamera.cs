@@ -12,6 +12,13 @@ public class TopDownCamera : MonoBehaviour
         Gizmos.DrawSphere(focusPosition, 0.5f);
         UpdatePosition();
         UpdateSpotLight();
+        UpdateBounds();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
     }
     
     [ContextMenu("UpdateSunLight")]
@@ -25,6 +32,12 @@ public class TopDownCamera : MonoBehaviour
         {
             sunLight.transform.rotation = transform.rotation;
         }
+    }
+
+    [ContextMenu("ResetFocus")]
+    void ResetFocus()
+    {
+        focusPosition = worldBounds.center;
     }
 #endif
     
@@ -43,46 +56,66 @@ public class TopDownCamera : MonoBehaviour
         }
     }
     
-    [Header("Editor")] [Range(0f,1f)] [SerializeField] private float editorFocusY = 0f;
+    
+    [ReadOnly] [SerializeField] private Vector3 focusPosition;
+    
+    [Header("Editor")] 
+    [SerializeField] private bool enableEditorMovement;
     [Range(0f,1f)] [SerializeField] private float editorFocusX = .5f;
     [Range(0f,1f)] [SerializeField] private float editorFocusZ = .5f;
-    [SerializeField] private bool editorLockFocus;
+    [Range(0f,1f)] [SerializeField] private float editorZoom = 0f;
     
-    [Header("Settings")]
-    [SerializeField] private Vector3 focusPosition;
+    [Header("Bounds")]
     [SerializeField] private Bounds worldBounds;
-    [SerializeField] private Vector2 worldMinMax = default;
-    [SerializeField] private float height = 1.5f;
-    [SerializeField] private float inputSpeed = 10.0f;
-    [SerializeField] private float lerpSpeed = 1.5f;
-    [SerializeField] private float panSpeed = 8.0f;
-    [SerializeField] private float zoomSpeed = 1.0f;
-    [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
+    [SerializeField] private float worldY = 0f;
+    [Min(0f)][SerializeField] private float worldHeight = 12f;
+    
+    [Header("SpotLight")]
+    [SerializeField] private bool updateSpotLight = true;
     [SerializeField] private float lightRange = 0.0f;
     [SerializeField] private float lightRangeToAngle = Mathf.PI;
+    
+    [Header("Inputs")]
+    [SerializeField] private float inputSpeed = 10.0f;
+    [SerializeField] private float panSpeed = 8.0f;
+    [SerializeField] private int screenPadding = 2;
+    
+    [Header("Movement")]
+    [SerializeField] private float height = 1.5f;
+    [SerializeField] private float lerpSpeed = 1.5f;
+    [SerializeField] private float zoomSpeed = 1.0f;
+    [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
+    
+    [Header("Yaw Control")]
+    [SerializeField] private bool canRotateY = true;
+    [SerializeField] private float rotationStepAngle = 90.0f;
+    
+    [Header("Heading Control")]
+    [SerializeField] private AnimationCurve heightForwardCurve = AnimationCurve.Constant(0f,0f,0f);
     [Min(0f)][SerializeField] private float forwardOffset = 0.0f;
     [SerializeField] private Vector2 headingOffset = new Vector2(1.0f, 0.0f);
-    [SerializeField] private bool canRotateY = true;
-    [SerializeField] private int screenPadding = 2;
-    [SerializeField] private AnimationCurve heightForwardCurve = AnimationCurve.Constant(0f,0f,0f);
-    [ReadOnly] [SerializeField] private float rotationStepAngle = 90.0f;
-    [ReadOnly] [SerializeField] private bool updateSpotLight = true;
     //[ReadOnly] [SerializeField] private bool updateSunLightPosition = true;
     
-    public void SetFocusPosition(Vector3 pos)
+    #region PUBLIC
+     public void SetFocusPosition(Vector3 pos, bool updatePosition = true)
     {
         focusPosition = pos;
-        UpdatePosition();
+        if(updatePosition) UpdatePosition();
     }
 
-    public void SetWorldBounds(Bounds bounds)
+    public void SetWorldBounds(Bounds bounds, bool updatePosition = true)
     {
         worldBounds = bounds;
-        UpdatePosition();
+        if(updatePosition) UpdatePosition();
+    }
+
+    public void Focus(UnityEngine.Object go)
+    {
+        if(go is Component) Focus(((Component)go).transform.position);
+        else if (go is GameObject) Focus(((GameObject)go).transform.position);
+        else Debug.LogWarning(this + " invalid object to focus: " + go);
     }
     
-    public void Focus(GameObject go) => Focus(go.transform.position);
-    public void Focus(Component comp) => Focus(comp.transform.position);
     public void Focus(Vector3 world)
     {
         focusPosition = world;
@@ -99,7 +132,7 @@ public class TopDownCamera : MonoBehaviour
 
     public void Zoom(float delta)
     {
-        focusPosition.y -= zoomSpeed * delta;
+        currentZoom = Mathf.Clamp01(currentZoom + zoomSpeed * delta);
     }
 
     public void Rotate(float step)
@@ -108,81 +141,7 @@ public class TopDownCamera : MonoBehaviour
         yaw = (yaw - rotationStepAngle * step) % 360;
     }
 
-    [Header("Debug")]
-    [ReadOnly] [SerializeField] private Vector3 currentPosition;
-    [ReadOnly] [SerializeField] private Quaternion desiredRotation;
-    [ReadOnly] [SerializeField]  private float forwardValue;
-    [ReadOnly] [SerializeField]  private Vector3 offsetedPosition;
-    [ReadOnly] [SerializeField]  private float evaluatedHeight;
-    [ReadOnly] [SerializeField]  private float currentYaw;
-    [ReadOnly] [SerializeField]  private float yaw; 
-    [ReadOnly][SerializeField] private Light spotLight;
-    
-    private Light sunLight; 
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
-    }
-
-    private void Update()
-    {
-        UpdatePosition();
-        UpdateSpotLight();
-    }
-
-    // Update is called once per frame
-    void UpdatePosition()
-    {
-        if (Application.isEditor && !Application.isPlaying) focusPosition.y = editorFocusY;
-        if (worldMinMax.sqrMagnitude > 0f)
-        {
-            worldMinMax.x = Mathf.Max(worldMinMax.x, worldMinMax.y);
-            worldMinMax.y = Mathf.Min(worldMinMax.x, worldMinMax.y);
-            focusPosition.y = Mathf.Clamp(focusPosition.y, worldMinMax.x, worldMinMax.y);
-            var extends = worldBounds.extents;
-            extends.y = Mathf.Lerp(worldMinMax.x, worldMinMax.y, 0.5f);
-            worldBounds.extents = extends;
-            if (Application.isEditor && !Application.isPlaying)
-            {
-                if (editorLockFocus)
-                {
-                    editorFocusY = 0;
-                    editorFocusX = editorFocusZ = 0.5f;
-                }
-                
-                focusPosition.y = Mathf.Lerp(worldMinMax.x, worldMinMax.y, editorFocusY);
-                focusPosition.x = Mathf.Lerp(worldBounds.center.x - worldBounds.extents.x, worldBounds.center.x + worldBounds.extents.x, editorFocusX);
-                focusPosition.y = Mathf.Lerp(worldBounds.center.z - worldBounds.extents.z, worldBounds.center.z + worldBounds.extents.z, editorFocusZ);
-            }
-        }
-        evaluatedHeight = heightForwardCurve.Evaluate(focusPosition.y);
-        currentYaw = !Application.isPlaying ? yaw : Mathf.LerpAngle(currentYaw, yaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG);
-        focusPosition = worldBounds.ClosestPoint(focusPosition);
-        forwardValue = forwardOffset * evaluatedHeight;
-        offsetedPosition = focusPosition - Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue;
-        offsetedPosition.y += headingOffset.y * evaluatedHeight;
-        currentPosition = Vector3.Lerp(currentPosition, offsetedPosition,
-            Application.isPlaying ? Time.unscaledDeltaTime * lerpSpeed : 1);
-        transform.position = currentPosition + Vector3.up * height;
-        desiredRotation =
-            Quaternion.LookRotation(((focusPosition + Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue * headingOffset.x) - (focusPosition + Vector3.up * height))
-                .normalized);
-        transform.rotation = Application.isPlaying ? Quaternion.Lerp(transform.rotation, desiredRotation, rotationSpeed.x * Time.unscaledDeltaTime) : desiredRotation;
-    }
-
-    void UpdateSpotLight()
-    {
-        if (!updateSpotLight) return;
-        if (spotLight == null) spotLight = gameObject.GetComponent<Light>();
-        if (spotLight == null) return;
-        if (spotLight.type != LightType.Spot || !spotLight.enabled) return;
-        spotLight.range = currentPosition.y + height + lightRange;
-        spotLight.spotAngle = spotLight.range * lightRangeToAngle;
-    }
-
-    public void MoveCameraWithCursor(Vector3 mousePosition, float scale)
+    public void PanWithMouse(Vector3 mousePosition, float scale)
     {
         if (mousePosition.x < 0 || mousePosition.y < 0) return;
         var screen = new Vector2(Screen.width, Screen.height);
@@ -198,6 +157,83 @@ public class TopDownCamera : MonoBehaviour
             focusPosition += Quaternion.Euler(0, yaw, 0) * motion * panSpeed * scale;
         }
     }
+    
+    public void UpdatePosition(float forcedEditorZoom = -1f)
+    {
+        if (Application.isEditor && !Application.isPlaying)
+        {
+            if (forcedEditorZoom >= 0f)
+            {
+                currentZoom = editorZoom = forcedEditorZoom;
+            }
+            else if (enableEditorMovement)
+            {
+                currentZoom = editorZoom;
+                
+                focusPosition.x = Mathf.Lerp(worldBounds.center.x - worldBounds.extents.x, worldBounds.center.x + worldBounds.extents.x, editorFocusX);
+                focusPosition.z = Mathf.Lerp(worldBounds.center.z - worldBounds.extents.z, worldBounds.center.z + worldBounds.extents.z, editorFocusZ);
+            }
+        }
+        
+        focusPosition.y = Mathf.Lerp(worldBounds.center.y - worldBounds.extents.y, worldBounds.center.y + worldBounds.extents.y, currentZoom);
+        
+        evaluatedHeight = heightForwardCurve.Evaluate(1f - currentZoom);
+        currentYaw = !Application.isPlaying ? yaw : Mathf.LerpAngle(currentYaw, yaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG);
+        focusPosition = worldBounds.ClosestPoint(focusPosition);
+        forwardValue = forwardOffset * evaluatedHeight;
+        offsetedPosition = focusPosition - Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue;
+        offsetedPosition.y += headingOffset.y * evaluatedHeight;
+        currentPosition = Vector3.Lerp(currentPosition, offsetedPosition,
+            Application.isPlaying ? Time.unscaledDeltaTime * lerpSpeed : 1);
+        transform.position = currentPosition + Vector3.up * height;
+        desiredRotation =
+            Quaternion.LookRotation(((focusPosition + Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue * headingOffset.x) - (focusPosition + Vector3.up * height))
+                .normalized);
+        transform.rotation = Application.isPlaying ? Quaternion.Lerp(transform.rotation, desiredRotation, rotationSpeed.x * Time.unscaledDeltaTime) : desiredRotation;
+    }
+    
+    #endregion
+
+    [Header("Debug")]
+    [ReadOnly] [SerializeField] private Vector3 currentPosition;
+    [ReadOnly] [SerializeField] private Quaternion desiredRotation;
+    [ReadOnly] [SerializeField]  private float currentZoom; 
+    [ReadOnly] [SerializeField]  private float forwardValue;
+    [ReadOnly] [SerializeField]  private Vector3 offsetedPosition;
+    [ReadOnly] [SerializeField]  private float evaluatedHeight;
+    [ReadOnly] [SerializeField]  private float currentYaw;
+    [ReadOnly] [SerializeField]  private float yaw; 
+    [ReadOnly][SerializeField] private Light spotLight;
+    
+    #region PRIVATE
+    
+    private Light sunLight; 
+
+    private void Update()
+    {
+        UpdateBounds();
+        UpdatePosition();
+        UpdateSpotLight();
+    }
+
+    private void UpdateBounds()
+    {
+        if (worldHeight <= 0f) return;
+        worldBounds.center = Vector3.up * worldHeight;
+        worldBounds.extents = new Vector3(worldBounds.extents.x, worldHeight, worldBounds.extents.z);
+    }
+
+    private void UpdateSpotLight()
+    {
+        if (!updateSpotLight) return;
+        if (spotLight == null) spotLight = gameObject.GetComponent<Light>();
+        if (spotLight == null) return;
+        if (spotLight.type != LightType.Spot || !spotLight.enabled) return;
+        spotLight.range = currentPosition.y + height + lightRange;
+        spotLight.spotAngle = spotLight.range * lightRangeToAngle;
+    }
+    
+    #endregion
 }
 
 /*#if UNITY_EDITOR

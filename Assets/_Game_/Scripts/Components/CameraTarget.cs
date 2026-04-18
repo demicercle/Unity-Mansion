@@ -22,18 +22,31 @@ public class CameraTarget : MonoBehaviour
 	}
 #endif
 	
-	public bool editorOnly = true;
+	[Header("Editor")]
+	[ReadOnly] public bool editorOnly = true;
 	public bool moveEditorCamera = false;
+	
+	[Header("Game")]
+	public bool moveGameCamera = false;
+	[Range(0f,1f)] [SerializeField] private float gameCameraZoom = 0f;
 	
 	private TopDownCamera topDownCamera;
 	private void OnDrawGizmosSelected()
 	{
 		if (editorOnly && (Application.isPlaying || !Application.isEditor)) return;
-		if (!topDownCamera) topDownCamera = FindObjectsByType<TopDownCamera>(default).FirstOrDefault();
-		if (!topDownCamera) return;
-		transform.position = Vector3.Scale(new Vector3(1, 0, 1), transform.position);
-		topDownCamera.SetFocusPosition(transform.position);
-		if(moveEditorCamera) MoveEditorCamera();
+		if (moveGameCamera)
+		{
+			if (!topDownCamera) topDownCamera = FindObjectsByType<TopDownCamera>(default).FirstOrDefault();
+			if (!topDownCamera) return;
+			transform.position = Vector3.Scale(new Vector3(1, 0, 1), transform.position);
+			topDownCamera.SetFocusPosition(transform.position, false);
+			topDownCamera.UpdatePosition(gameCameraZoom);
+		}
+
+		if (moveEditorCamera)
+		{
+			MoveEditorCamera();
+		}
 	}
 
 	private void Awake()

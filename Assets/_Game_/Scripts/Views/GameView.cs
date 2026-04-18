@@ -586,7 +586,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		if (HasFocus())
 		{
-			TopDownCamera.Instance.MoveCameraWithCursor(mousePosition, Time.unscaledDeltaTime);
+			TopDownCamera.Instance.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
 		}
 
 		canvas.UpdateUI(this);
