@@ -353,20 +353,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
 
-		var atAttackRange = attacker.IsAtAttackRange(target, losCheck);
-		if (!atAttackRange)
-		{
-			StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition(), null, () =>
-			{
-				atAttackRange = attacker.IsAtAttackRange(target, losCheck);
-				return !atAttackRange;
-			}));
-		}
-		
+		var atAttackRange = false;
 		while (!atAttackRange)
 		{
 			yield return null;
-			
+
+			atAttackRange = attacker.IsAtAttackRange(target, losCheck);
 			if (atAttackRange)
 			{
 				Debug.Log(attacker + " atAttackRange of " + target + ", StopAgent");
@@ -375,21 +367,23 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			else if (!attacker.IsMoving())
 			{
+				while (!attacker.HasMovePoints() && canUseRunAction && attacker.CanUseRunAction())
+				{
+					yield return StartCoroutine(WaitRunAction(attacker));
+				}
+				
 				if (!attacker.HasMovePoints())
 				{
-					if (canUseRunAction && attacker.CanUseRunAction())
-					{
-						yield return StartCoroutine(WaitRunAction(attacker));
-					}
-					else
-					{
-						Debug.Log(attacker + " has no move points, and can't use run action");
-					}
+					Debug.Log(attacker + " has no move points to reach target");
+					yield break;
 				}
-				else Debug.LogWarning(attacker + " has move points but is not at attack range and not moving");
+				
+				Debug.Log(attacker + " starts moving towards target");
+				StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition()));
+				yield return null;
 			}
 			
-			else Debug.LogWarning(this + " at attack range but stills moving");
+			//else Debug.Log(attacker + " moves towards " + target);
 		}
 		
 		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target));
@@ -463,7 +457,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	}
 
 	private const float TIMED_OUT = 3.0f;
-	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null, System.Func<bool> onUpdate = null)
+	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null)
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacter);
 		
@@ -498,9 +492,16 @@ public class GameView : MonoBehaviour, IView<GameController>
 				Debug.LogWarning(movingCharacter + " TIMED_OUT!");
 				break;
 			}
+
+			if (!movingCharacter.IsMoving())
+			{
+				Debug.Log(movingCharacter + " something stopped movement");
+				break;
+			}
 			
 			if (movingCharacter.HasMovePoints() == false)
 			{
+				Debug.Log(movingCharacter + " !HasMovePoints");
 				agent.StopMovement();
 				break;
 			}
@@ -515,12 +516,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (agent.ReachedDestination(dest))
 			{
 				Debug.Log(movingCharacter + " reached destination!");
-				break;
-			}
-
-			if (onUpdate != null && !onUpdate.Invoke())
-			{
-				Debug.Log(movingCharacter + " something stopped movement");
+				agent.StopMovement();
 				break;
 			}
 			
@@ -531,25 +527,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 			DebugGUI.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
 			yield return null;
 			
-			//var newRotation = movingCharacterView.GetRotation();
 			var newPosition = movingCharacter.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			if (deltaPos <= 0f) timeout += Time.deltaTime;
 			else timeout = 0f;
-//			Debug.Log(agent + " timeout=" + timeout);
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
-			//movingCharacter.SetPosition(newPosition);
-			
-			//var newRotation = movingCharacter.GetRotation();
-			//movingCharacter.SetRotation(newRotation);
 		}
-		
-		//movingCharacter.SetPosition(path.Last());
-		//movingCharacter.SetRotation(movingCharacter.GetRotation());
-		
-		Debug.Log(agent + " reached destination, end move");
-		agent.StopMovement();
 		
 		onComplete?.Invoke();
 	}
