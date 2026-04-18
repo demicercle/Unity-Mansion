@@ -84,7 +84,7 @@ public class CharacterController : MonoBehaviour
 		statsChanged?.Invoke();
 	}
 
-	public bool IsEnemyToPlayer() => characterData.faction == CharacterFaction.Enemy;
+	public bool IsEnemyToPlayer(CharacterController other = null) => characterData.faction == CharacterFaction.Enemy;
 	
 	public bool InParty() => partyIndex >= 0;
 	public int GetPartyIndex() => partyIndex;
@@ -228,7 +228,7 @@ public class CharacterController : MonoBehaviour
 
 	public float GetAttackRange() => characterData.attackRange;
 	
-	public bool CanAttack() => !characterData.noAttack && HasActions();
+	public bool CanAttack(bool checkActions = true) => !characterData.noAttack && (!checkActions || HasActions());
 
 	public bool TryGetAIBrain(out AIBrainData aiBrain)
 	{

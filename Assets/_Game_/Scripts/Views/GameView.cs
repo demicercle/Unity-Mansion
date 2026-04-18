@@ -168,12 +168,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if(GetController().IsPlayerTurn())
 				PlayerSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 		}
-		else if (clickedCharacter.IsEnemyToPlayer())
+		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
 		{
 			if (selectedCharacter != null)
 			{
 				// assign attack
-				if (selectedCharacter.CanAttack())
+				if (selectedCharacter.CanAttack(false))
 				{
 					AssignAttack(selectedCharacter, clickedCharacter, false, true);
 				}
