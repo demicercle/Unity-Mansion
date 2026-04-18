@@ -10,7 +10,6 @@ using UnityEngine.SceneManagement;
 [System.Serializable]
 public class GameView : MonoBehaviour, IView<GameController>
 {
-	static public event System.Action<GameView> onUpdate;
 	
 	override public string ToString() => "GameView";
 
@@ -18,7 +17,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	static private GameView instance;
 	static public GameView GetInstance()
 	{
-		if (instance == null) instance = FindObjectOfType<GameView>();
+		if (instance == null) instance = Utils.FindFirstObject<GameView>();
 		return instance;
 	}
 	
@@ -80,7 +79,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		yield return null; //
 		
-		var levelCharacters = FindObjectsOfType<CharacterController>()
+		var levelCharacters = Utils.FindObjects<CharacterController>()
 			.OrderBy(c => c.name)
 			.ToList();
 		
@@ -230,34 +229,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	}
 	
 	public System.Action<bool> routinesStarted;
-	
-	public static bool TryGetNearestNavPosition(Vector3 position, float maxDistance, out Vector3 navPosition)
-	{
-		navPosition = position;
-
-		if (AstarPath.active == null)
-			return false;
-
-		// Crée une contrainte pour nœuds walkables uniquement
-		Pathfinding.NNConstraint constraint = Pathfinding.NNConstraint.Walkable;
-		constraint.constrainWalkability = true;
-		constraint.walkable = true;
-
-		// Cherche le nœud le plus proche
-		Pathfinding.NNInfo nearest = AstarPath.active.GetNearest(position, constraint);
-
-		if (nearest.node != null && nearest.node.Walkable)
-		{
-			float distance = Vector3.Distance(position, (Vector3)nearest.position);
-			if (distance <= maxDistance)
-			{
-				navPosition = (Vector3)nearest.position;
-				return true;
-			}
-		}
-
-		return false;
-	}
 
 	public List<CharacterView> GetAllCharacters() =>  CharacterView.allInstances.ToList();
 
@@ -760,7 +731,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if(drawDebug) DbgDraw.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Quaternion.Euler(90,0,0),maxNavDistance, Color.blue);
 			Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
 
-			if (TryGetNearestNavPosition(hit.point, maxNavDistance, out var navPosition))
+			if (NavUtility.TryGetNearestNavPosition(hit.point, maxNavDistance, out var navPosition))
 			{
 				hit.point = navPosition;
 				if(drawDebug) DbgDraw.WireDisc(navPosition, Quaternion.identity,maxNavDistance * 0.5f, Color.cyan);

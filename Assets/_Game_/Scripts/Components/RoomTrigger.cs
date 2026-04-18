@@ -11,7 +11,7 @@ public class RoomTrigger : MonoBehaviour
 	[Header("Settings")]
 	[SerializeField] private List<PropComponent> doors = new List<PropComponent>();
 	[SerializeField] private List<CharacterTrigger> triggers =  new List<CharacterTrigger>();
-	[SerializeField] private float ceilingHeight = 1.5f;
+	[SerializeField] private float ceilingHeight = 0.1f;
 	
 	private List<BoxCollider> ceilings = new List<BoxCollider>();
 	
@@ -87,7 +87,7 @@ public class RoomTrigger : MonoBehaviour
 				
 				var newCenter = boxCollider.center;
 				newCenter.y += newSize.y / 2;
-				newSize.y = 0.1f;
+				newSize.y = ceilingHeight;
 				
 				var ceiling = new GameObject("ceiling_" + ceilings.Count).AddComponent<BoxCollider>();
 				ceiling.gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_WALL);

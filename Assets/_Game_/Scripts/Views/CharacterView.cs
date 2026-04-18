@@ -27,7 +27,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	
 	[Header("Collision")]
 	[SerializeField] private CapsuleCollider capsuleCollider;
-	[SerializeField] private Rigidbody rigidbody;
+	[SerializeField] private new Rigidbody rigidbody;
 	
 	[Header("Animation")]
 	[SerializeField] private Animator animator;

@@ -86,41 +86,9 @@ public static class Utils
 			yield return null;
 		}
 	}
-	
-	/// <summary>
-	/// Tente de trouver une position navigable sur le navmesh, proche du point donné.
-	/// </summary>
-	/// <param name="position">Position de départ.</param>
-	/// <param name="maxDistance">Distance maximale autorisée pour chercher un point navigable.</param>
-	/// <param name="navPosition">Position navigable retournée si succès.</param>
-	/// <returns>True si une position navigable valide a été trouvée.</returns>
-	public static bool TryGetNearestNavPosition(Vector3 position, float maxDistance, out Vector3 navPosition)
-	{
-		navPosition = position;
 
-		if (AstarPath.active == null)
-			return false;
-
-		// Crée une contrainte pour nœuds walkables uniquement
-		Pathfinding.NNConstraint constraint = Pathfinding.NNConstraint.Walkable;
-		constraint.constrainWalkability = true;
-		constraint.walkable = true;
-
-		// Cherche le nœud le plus proche
-		Pathfinding.NNInfo nearest = AstarPath.active.GetNearest(position, constraint);
-
-		if (nearest.node != null && nearest.node.Walkable)
-		{
-			float distance = Vector3.Distance(position, (Vector3)nearest.position);
-			if (distance <= maxDistance)
-			{
-				navPosition = (Vector3)nearest.position;
-				return true;
-			}
-		}
-
-		return false;
-	}
+	static public T[] FindObjects<T>() where T : Object => Object.FindObjectsByType<T>(default);
+	static public T FindFirstObject<T>() where T : Object => FindObjects<T>().FirstOrDefault();
 
 	public static void DrawGizmosPath(Vector3[] path, bool closedLoop)
 	{
