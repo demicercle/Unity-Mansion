@@ -354,28 +354,23 @@ public class GameView : MonoBehaviour, IView<GameController>
 		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
 
 		var atAttackRange = attacker.IsAtAttackRange(target, losCheck);
+		if (!atAttackRange)
+		{
+			StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition(), null, () =>
+			{
+				atAttackRange = attacker.IsAtAttackRange(target, losCheck);
+				return !atAttackRange;
+			}));
+		}
+		
 		while (!atAttackRange)
 		{
-			StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition()));
-
-			do
-			{
-				if (!attacker.CanMove())
-				{
-					Debug.Log(attacker + " cannot move!");
-					DebugGUI.FloatingText(attacker.GetCenterPosition(), "Can't");
-					break;
-				}
-				
-				yield return null;
-				atAttackRange = attacker.IsAtAttackRange(target, losCheck);
-			} while (!atAttackRange && attacker.IsMoving());
-
+			yield return null;
+			
 			if (atAttackRange)
 			{
 				Debug.Log(attacker + " atAttackRange of " + target + ", StopAgent");
 				attacker.StopAgent();
-				yield return null;
 			}
 			
 			else if (!attacker.IsMoving())
@@ -393,6 +388,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 				}
 				else Debug.LogWarning(attacker + " has move points but is not at attack range and not moving");
 			}
+			
+			else Debug.LogWarning(this + " at attack range but stills moving");
 		}
 		
 		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target));
@@ -466,27 +463,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 	}
 
 	private const float TIMED_OUT = 3.0f;
-	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null, System.Action onUpdate = null)
+	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null, System.Func<bool> onUpdate = null)
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacter);
-
-		var agent = movingCharacter.GetAgent();
-		agent.AssignDestination(dest); // WaitCharacterMoved
 		
-		var timeout = 0.0f;
-		do
-		{
-			if (timeout > TIMED_OUT) break;
-			yield return null;
-			timeout += Time.deltaTime;
-		}
-		while (agent.pathPending);
-
-		if (timeout >= TIMED_OUT)
-		{
-			Debug.LogWarning(agent + " pathPending timeout!");
-			yield break;
-		}
+		var agent = movingCharacter.GetAgent();
+		
+		yield return StartCoroutine(agent.SearchPathAsync(dest));
 		
 		var path = agent.GetCurrentPath();
 		if (path.Length > 1)
@@ -507,12 +490,18 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		agent.StartMove();
 		
-		timeout = 0.0f;
+		var timeout = 0.0f;
 		while(true)
 		{
 			if (timeout > TIMED_OUT)
 			{
-				Debug.LogWarning(agent + " timeout!");
+				Debug.LogWarning(movingCharacter + " TIMED_OUT!");
+				break;
+			}
+			
+			if (movingCharacter.HasMovePoints() == false)
+			{
+				agent.StopMovement();
 				break;
 			}
 			
@@ -526,6 +515,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (agent.ReachedDestination(dest))
 			{
 				Debug.Log(movingCharacter + " reached destination!");
+				break;
+			}
+
+			if (onUpdate != null && !onUpdate.Invoke())
+			{
+				Debug.Log(movingCharacter + " something stopped movement");
 				break;
 			}
 			
@@ -548,8 +543,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			//var newRotation = movingCharacter.GetRotation();
 			//movingCharacter.SetRotation(newRotation);
-			
-			onUpdate?.Invoke();
 		}
 		
 		//movingCharacter.SetPosition(path.Last());
