@@ -29,6 +29,7 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 	public bool rebuildNavigation;
 	[Min(0f)]public float autoTriggerDelay;
 	public string animatorTrigger;
+	
 	public UnityEvent interacted;
 
 	[ContextMenu("Update Obstacle")]

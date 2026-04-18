@@ -40,7 +40,7 @@ public class MainCamera : MonoBehaviour
     private float forwardValue;
     private Vector3 offsetedPosition;
 
-    public float yaw;
+    private float yaw; //TODO rotate camera?
 
     private void OnDrawGizmosSelected()
     {

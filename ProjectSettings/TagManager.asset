@@ -10,13 +10,13 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - HiddenInGame
   - Water
   - UI
   - Ground
   - Wall
   - Character
-  - 
+  - Trigger
   - 
   - 
   - 
