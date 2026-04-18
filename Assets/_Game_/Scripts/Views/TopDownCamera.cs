@@ -1,9 +1,6 @@
-using System;
 using System.Linq;
-using UnityEditor.Animations;
 using UnityEngine;
 using LightType = UnityEngine.LightType;
-using Object = UnityEngine.Object;
 
 public class TopDownCamera : MonoBehaviour
 {

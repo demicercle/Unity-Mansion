@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 262c467057e34eb994a448ba38a6ab6c, type: 3}
-  m_Name: PC_2
+  m_Name: PC_Default_Stats
   m_EditorClassIdentifier: 
-  displayName: John
-  portraitTexture: {fileID: 2800000, guid: 3fa5538c2bc3e5f46945b5125f3ad7ef, type: 3}
-  faction: 1
+  displayName: ???
+  portraitTexture: {fileID: 2800000, guid: 99bcc48f1d0bf744783459facaf8bd06, type: 3}
+  faction: 0
   maxActions: 1
-  maxMovePoints: 5
+  maxMovePoints: 12
   runActionExtraMovePoints: 3
   noAttack: 0
   attackRange: 0
-  maxHealth: 5
+  maxHealth: 1
   lastAttackDamage: 1
