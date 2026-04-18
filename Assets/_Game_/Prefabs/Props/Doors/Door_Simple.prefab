@@ -280,6 +280,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5703262471981040408}
   - component: {fileID: 2929305562459880157}
+  - component: {fileID: 756315268392118226}
   m_Layer: 0
   m_Name: DoorPivot
   m_TagString: Untagged
@@ -327,6 +328,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &756315268392118226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6607634341157206942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b757983c93e846ba82e0bb6e5038c6e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gizmos.DrawGizmoArrow
+  alwaysDraw: 1
+  offset: {x: 0.53, y: 1.22, z: 0}
+  scaleDirection: -1
+  color: {r: 0.042986836, g: 0.32363698, b: 0.3962264, a: 1}
+  length: 0.25
+  angle: 20
 --- !u!1001 &707329966676163594
 PrefabInstance:
   m_ObjectHideFlags: 0
