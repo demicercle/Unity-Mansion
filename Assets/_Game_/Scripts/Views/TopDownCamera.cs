@@ -5,6 +5,8 @@ using LightType = UnityEngine.LightType;
 
 public class TopDownCamera : MonoBehaviour
 {
+    
+    
     static private TopDownCamera instance;
 
     static public TopDownCamera Instance
