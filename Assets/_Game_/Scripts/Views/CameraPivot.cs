@@ -39,8 +39,10 @@ public class CameraPivot : MonoBehaviour
     void ResetFocus()
     {
         focusPosition = worldBounds.center;
+        editorYaw = 0;
         editorFocusY = 0f;
         editorFocusX = editorFocusZ = 0.5f;
+        UpdatePosition();
         Utils.SetDirty(this);
     }
 #endif
@@ -111,6 +113,8 @@ public class CameraPivot : MonoBehaviour
     [SerializeField] private Transform rotationPivot;
     
     #region PUBLIC
+
+    public Bounds GetWorldBounds() => worldBounds;
     public void SetWorldBounds(Bounds bounds, bool updatePosition = true)
     {
         worldBounds = bounds;
@@ -239,28 +243,10 @@ public class CameraPivot : MonoBehaviour
         }
 #endif
         
-        // clamp
-        //focusPosition.y = Mathf.Lerp(worldBounds.center.y - worldBounds.extents.y, worldBounds.center.y + worldBounds.extents.y, currentZoom);
         focusPosition = worldBounds.ClosestPoint(focusPosition);
         
         // lerp rotation
         currentYaw = !Application.isPlaying ? enableEditorMovement ? editorYaw : desiredYaw : Mathf.LerpAngle(currentYaw, desiredYaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG);
-        
-        // zooming
-       // evaluatedHeight = zoomForwardCurve.Evaluate(1f - currentZoom);
-        
-        // heading
-       // forwardValue = forwardOffset * evaluatedHeight;
-        //offsetedPosition = focusPosition - Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue;
-       // offsetedPosition.y += headingOffset.y * evaluatedHeight;
-        
-        // calculate desired rotation look at
-     /*   desiredRotation =
-            Quaternion.LookRotation(((focusPosition + Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue * headingOffset.x) - (focusPosition + Vector3.up * height))
-                .normalized);*/
-        
-        // move forward
-       // offsetedPosition += desiredRotation * Vector3.forward * headingOffset.z;
         
         // lerp
         currentPosition = Vector3.Lerp(currentPosition, focusPosition,
@@ -273,8 +259,6 @@ public class CameraPivot : MonoBehaviour
             currentYaw,
             transform.eulerAngles.z
         );
-        //transform.rotation = Application.isPlaying ? Quaternion.Lerp(transform.rotation, desiredRotation, rotationSpeed.x * Time.unscaledDeltaTime) : desiredRotation;
-        // transform.position += transform.rotation * Vector3.forward * headingOffset.z;
     }
 
    /* private void UpdateSpotLight()

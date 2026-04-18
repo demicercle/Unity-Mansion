@@ -267,14 +267,14 @@ public class CharacterController : MonoBehaviour
 	
 	public bool WaypointReached(Waypoint wp)
 	{
-		return GetDistanceTo(wp.GetPosition()) <= agent.reachDistance;
+		return agent.ReachedDestination(wp.GetPosition());
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	} 
 
 	public bool IsAtAttackRange(CharacterController target, bool losCheck, float drawDuration = 0.0f)
 	{
 		var atkRange = GetAttackRange();
-		atkRange = Mathf.Max(atkRange, agent.GetRadius() + target.agent.GetRadius() + CharacterAgent.minNavDistance);
+		atkRange = Mathf.Max(atkRange, agent.GetRadius() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
 		if (Vector3.Distance(GetPosition(), target.GetPosition()) <= atkRange)
 		{
 			return !losCheck || LOSCheck(target, drawDuration);

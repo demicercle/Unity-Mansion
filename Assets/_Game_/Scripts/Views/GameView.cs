@@ -201,8 +201,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			QueueRoutine(WaitCharacterMoved(character, bestWaypoint.GetPosition(), () =>
 			{
 				var agent = character.GetAgent();
-				var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
-				if (dist <= agent.reachDistance)
+				if (agent.ReachedDestination(bestWaypoint.GetPosition()))
 				{
 					// waypoint reach
 					if (character.CanInteract())
@@ -212,7 +211,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 				}
 				else
 				{
-					Debug.Log(character + " not at reach: " + dist + " / " + agent.reachDistance + " to " + bestWaypoint);
+					var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
+					Debug.Log(character + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
 				}
 			}));
 		}
@@ -441,21 +441,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 		{
 			if (timeout <= 0f) break;
 			yield return null;
-			if (agent.velocity.sqrMagnitude < 0.1f)
-			{
-				timeout -= Time.deltaTime;
-				Debug.Log(timeout);
-			}
-			else timeout = 0f;
+			timeout -= Time.deltaTime;
 		}
 		while (agent.pathPending);
 
-		if (!agent.hasPath)
-		{
-			Debug.LogWarning(agent + " has no path");
-			yield break;
-		}
-		
 		var path = agent.GetCurrentPath();
 		if (path.Length > 1)
 		{
@@ -486,7 +475,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 			
 			var oldPosition = movingCharacter.GetPosition();
-			
+
+			DebugGUI.Line(oldPosition, dest, Color.cyan, 0f);
+			DebugGUI.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
+			DebugGUI.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
 			yield return null;
 			
 			//var newRotation = movingCharacterView.GetRotation();
@@ -495,19 +487,19 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (deltaPos < 0.1f)
 			{
 				timeout -= Time.deltaTime;
-				Debug.Log(agent + " timeout=" + timeout);
+//				Debug.Log(agent + " timeout=" + timeout);
 			}
 			else timeout = 0f;
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
 			//movingCharacter.SetPosition(newPosition);
 			
-			var newRotation = movingCharacter.GetRotation();
+			//var newRotation = movingCharacter.GetRotation();
 			//movingCharacter.SetRotation(newRotation);
 			
 			onUpdate?.Invoke();
 			
-		} while (agent.isMoving && !agent.reachedDestination);
+		} while (agent.isMoving && !agent.ReachedDestination(dest));
 		
 		//movingCharacter.SetPosition(path.Last());
 		//movingCharacter.SetRotation(movingCharacter.GetRotation());

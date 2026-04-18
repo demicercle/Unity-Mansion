@@ -9,7 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6100771718776727966}
-  - component: {fileID: 851627715911137155}
+  - component: {fileID: 7609907940526296612}
+  - component: {fileID: 3993351974707439097}
   m_Layer: 0
   m_Name: LevelBase
   m_TagString: Untagged
@@ -37,7 +38,19 @@ Transform:
   - {fileID: 2752555749342996868}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &851627715911137155
+--- !u!156049354 &7609907940526296612
+Grid:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113469372072591625}
+  m_Enabled: 1
+  m_CellSize: {x: 2.5, y: 0, z: 2.5}
+  m_CellGap: {x: 0, y: 0, z: 0}
+  m_CellLayout: 0
+  m_CellSwizzle: 0
+--- !u!114 &3993351974707439097
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -51,7 +64,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1073741824
   data:
-    dataString: UEsDBBQAAAgIAAAIIewhPmQKsAIAAO4FAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGFVE1v4jAQ/SvI522V0LJt97YLlO6hLSpd9bD04NoTYmHsyHYKtOK/74xjSKCHlSIlem8+3nzlkynjKxDBuolT8t5KYD96jL7Zt15L3sGGL6yZqQ/Y27woGUoy4tHmiQdlEc/JzdsVBKfET7PQZJwhWBtVWLcaywUMrQ8e4YJrD0g5G8jbIPTZY5vksE3vD3r3dvglwARw/7OqjdB8VYEkta1xf5Cs+4NoZrCOZJGdEyes1sonGSxsq1jmkFe+xiLQQCqOZUUBVGUJalEGCth1fiwKDyGJcnw7Ug6700Rlv2zTshX3y0bZO9c15cn711FVE/T+C//9MtKFs6u7fd48oxyhVGL5xLeC+9DpaRceHQuvzZrrJX/T8FKCebATZ2sjkQyuJtfaQ3/UCXWobViCWLZ2jdYTsK6+zidv57OL1W9mAapDHdn5ZYv+8eBn2sbmp5DEJOSGQoLD0f3GeuLS+JQIUdKI/s980d2uRNwq5wNSSU9CyXaKEwIJRkDq+xkZGJL3ZmtHsdg4aqVm1GFonYEIJ4EVGK7DdooRw+kKnHAdXSfMLadDS+oSt7+fE5cIt/ZZdkJN7fowbIfL6+NG77/+vtIQfGnX9+DLxzpoZTrdJuIBGzy0xjSb223m3m1Wu4KLjluATagdjHjgMRvKwQWTXVfsZfQwtda0y7GAqAgLoOeV+ltyzKsjzB6siZd39I7yF7WSxxfCxGAghQAO/eI6v7jJzgbiMs/51RW8yYtrkd+weELKYLu5njb9SlPC7TJtLQbPZf8b7E0cr+LRSsfXE/Wxsp3JK1PYmXAA5rGJcCgWHCbB34scS4VlziAEZeJess8501YsQc4PgeaxseNNcHzeRpmzSr3bQMicDePPb84IPlwkru67gjUlPwoGGkcH8llpWPGKqGzHdv8AUEsDBBQAAAgIAAAIIexNkgtxbAAAAHcAAAAJACQAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0Bq1YqSy0qzszPU7JSMNUz0TPTUVBKL0osyCgGChiCOKWZKSB2tFKyqWlKcnJqYqpRmoWhsaWBrmmyiaFhorl5alKKsUWyoaVSLFB9SWVBql9ibipET0BiSUZaZl5KZl66nntRZoo7yGil2FoAUEsBAi0AFAAACAgAAAgh7CE+ZAqwAgAA7gUAAAsAJAAAAAAAAAAAAAAAAAAAAGdyYXBoMC5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsBAi0AFAAACAgAAAgh7E2SC3FsAAAAdwAAAAkAJAAAAAAAAAAAAAAA/QIAAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLBQYAAAAAAgACALgAAAC0AwAAAAA=
+    dataString: UEsDBBQAAAgIAAAIIeyP5cejsAIAAO4FAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGFVE1v4jAQ/SvI522V0LJt97YLlO6hLSpd9bDpwbUnxMLYkT8KtOK/79hxSKCHlZAS3ny9eTOTTyKUrYE5bWZG8HvNgfwYkPBOvg064x1s6VKrhfiA1udFcFcFJxp9nqgTGvE8hFm9BmcE+6mWMjhnCHolSm3WU76EsbbOIlxSaQFNRrsQrRD6HJBtCtil50d4Dvb4xkA5MP/z8opJuq6BB7ad86j1HjVuCvtIHtn5KGTXUgqbaBC3q2ObY1pbj02gAxcU24oEQpcViGXl8M+wH/xYlhZcImXobiIMqtNkJb90I9ma2lXD7J1KH+rkw+vIqkl6/8X+/TKaS6PXd23dPAs1XCXY6onuGLWup2kfnhwT92pD5Yq+SXipQD3omdFecTQ640OotzCc9FIdehtXwFadX8P1BPT11/nk3Xz2sfvtwkF96CM7v+zQPxbsQuoofkoZLAm5CSnB4Oh+Yz9xaWwqhGjgiPHPdNnfrmS4FcY6NCU+CQ2+c5wQcFAMku5nwUEFem/am5CLTCPXIIZ3Y20URDgRrEFR6XZzzOhOV+DE1uN1Yrml4dASu2Rr7+ckJMKdf5admOZ6cxi2weW1caPbt7+vYQi20pt7sNWjd1KontrB8IACj7VSzeb2xWzDFt6UlPXCHGydNzChjsZqSAcXjPdDUcsYobyUYZdjA5ERNhB+r0HfimJdGWHyoFW8vKNnpL/0gh9fCGGjEWcMKAzL6/ziJjsbscs8p1dX8MYvrll+Q+IJCYVyUzlv9EpTwu1SXS8Kz6X9DA5mhtbxaLmhm5n4WOve5IUq9YIZAPXYZDg0CwaL4OeFT7nANhfgnFBxL8lnQaRmK+DFIVERhZ1unaFFl6UgtXjXLiAFGcePX0ECfLhIXN13AZtQ/CgZSBwd8GchYU3rYMr2ZP8PUEsDBBQAAAgIAAAIIexNkgtxbAAAAHcAAAAJACQAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0Bq1YqSy0qzszPU7JSMNUz0TPTUVBKL0osyCgGChiCOKWZKSB2tFKyqWlKcnJqYqpRmoWhsaWBrmmyiaFhorl5alKKsUWyoaVSLFB9SWVBql9ibipET0BiSUZaZl5KZl66nntRZoo7yGil2FoAUEsBAi0AFAAACAgAAAgh7I/lx6OwAgAA7gUAAAsAJAAAAAAAAAAAAAAAAAAAAGdyYXBoMC5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsBAi0AFAAACAgAAAgh7E2SC3FsAAAAdwAAAAkAJAAAAAAAAAAAAAAA/QIAAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLBQYAAAAAAgACALgAAAC0AwAAAAA=
     file_cachedStartup: {fileID: 0}
     cacheStartup: 0
   showNavGraphs: 1
@@ -76,7 +89,39 @@ MonoBehaviour:
     _ConnectionLowLerp: {r: 0, g: 1, b: 0, a: 0.5}
     _ConnectionHighLerp: {r: 1, g: 0, b: 0, a: 0.5}
     _AreaColors: []
-  tagNames: []
+  tagNames:
+  - Basic Ground
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  - 21
+  - 22
+  - 23
+  - 24
+  - 25
+  - 26
+  - 27
+  - 28
+  - 29
+  - 30
+  - 31
   heuristic: 2
   heuristicScale: 1
   threadCount: 1
