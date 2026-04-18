@@ -10,9 +10,12 @@ public class MainCamera : MonoBehaviour
     public float speed = 1.5f;
     public float panSpeed = 8.0f;
     public float zoomSpeed = 1.0f;
+    public float rotationSpeed = 3.0f;
     public float lightRange = 0.0f;
     public float lightRangeToAngle = Mathf.PI;
-
+    [Min(0f)]public float forwardOffset = 0.0f;
+    public AnimationCurve heightForwardCurve = AnimationCurve.Constant(0f,0f,0f);
+    
     public void Focus(GameObject go) => Focus(go.transform.position);
     public void Focus(Component comp) => Focus(comp.transform.position);
     public void Focus(Vector3 world)
@@ -33,6 +36,7 @@ public class MainCamera : MonoBehaviour
     }
 
     private Vector3 currentPosition;
+    private Quaternion desiredRotation;
 
     private void OnDrawGizmosSelected()
     {
@@ -57,7 +61,10 @@ public class MainCamera : MonoBehaviour
         currentPosition = Vector3.Lerp(currentPosition, focusPosition,
             Application.isPlaying ? Time.unscaledDeltaTime * speed : 1);
         transform.position = currentPosition + Vector3.up * height;
-        transform.rotation = Quaternion.LookRotation(-Vector3.up);
+        desiredRotation =
+            Quaternion.LookRotation(((focusPosition + Vector3.forward * forwardOffset * heightForwardCurve.Evaluate(focusPosition.y)) - (focusPosition + Vector3.up * height))
+                .normalized);
+        transform.rotation = Application.isPlaying ? Quaternion.Lerp(transform.rotation, desiredRotation, rotationSpeed * Time.unscaledDeltaTime) : desiredRotation;
     }
 
     void UpdateSpotLight()

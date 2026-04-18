@@ -3149,7 +3149,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 4.59, y: 12, z: -7.77}
+  m_LocalPosition: {x: -1, y: 15, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3168,16 +3168,42 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spotLight: {fileID: 963194230}
-  focusPosition: {x: 4.59, y: 0, z: -7.77}
+  focusPosition: {x: -1, y: 3, z: -1}
   worldBounds:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 10, y: 3, z: 10}
+    m_Center: {x: 0, y: 1, z: 0}
+    m_Extent: {x: 16, y: 4, z: 14}
   height: 12
-  speed: 6
+  speed: 4
   panSpeed: 16
   zoomSpeed: 1
+  rotationSpeed: 2
   lightRange: 1.38
   lightRangeToAngle: 3.17
+  forwardOffset: 5
+  heightForwardCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -3
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 3
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!108 &963194230
 Light:
   m_ObjectHideFlags: 0
@@ -3190,9 +3216,9 @@ Light:
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 13.38
-  m_SpotAngle: 42.4146
-  m_InnerSpotAngle: 16.6223
+  m_Range: 16.38
+  m_SpotAngle: 51.9246
+  m_InnerSpotAngle: 7.5446005
   m_CookieSize: 10
   m_Shadows:
     m_Type: 0
@@ -3234,7 +3260,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 1.211e-42, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 3.04e-42, y: 2.524355e-29, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
