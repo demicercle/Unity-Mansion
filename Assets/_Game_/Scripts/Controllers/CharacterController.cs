@@ -26,6 +26,7 @@ public class CharacterController : MonoBehaviour
 	public event System.Action onMoved;
 	public event System.Action onRotate;
 	public event System.Action<CharacterController> onAttackAction;
+	public event System.Action onRunAction;
 	
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
@@ -304,6 +305,7 @@ public class CharacterController : MonoBehaviour
 	{
 		ConsumeActions(1);
 		usedMovePoints -= characterData.runActionExtraMovePoints;
+		onRunAction?.Invoke();
 	}
 
 	private void Awake()

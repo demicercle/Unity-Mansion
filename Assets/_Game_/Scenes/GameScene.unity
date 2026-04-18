@@ -3155,8 +3155,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -1, y: 15, z: -1}
+  m_LocalRotation: {x: 0.42237896, y: 0, z: 0, w: 0.90641934}
+  m_LocalPosition: {x: 4.7335887, y: 8.46, z: -14.820177}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3216,12 +3216,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   rotationStepAngle: 90
-  currentPosition: {x: 4.73359, y: -3.539996, z: -14.820171}
-  desiredRotation: {x: 0.42237896, y: 0.00000008575684, z: -0.000000039961506, w: 0.90641934}
+  currentPosition: {x: 4.7335887, y: -3.54, z: -14.820177}
+  desiredRotation: {x: 0.42237896, y: 0, z: 0, w: 0.90641934}
   forwardValue: 8
-  offsetedPosition: {x: 4.7335873, y: -3.54, z: -14.820177}
+  offsetedPosition: {x: 4.7335887, y: -3.54, z: -14.820177}
   evaluatedHeight: 1
-  currentYaw: 360
+  currentYaw: 0
   yaw: 0
 --- !u!108 &963194230
 Light:
@@ -3235,8 +3235,8 @@ Light:
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 16.38
-  m_SpotAngle: 51.9246
+  m_Range: 9.84
+  m_SpotAngle: 31.1928
   m_InnerSpotAngle: 7.5446005
   m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
@@ -3279,7 +3279,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.63e-43, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 9.1872e-41, z: 4.1363167e-25, w: 2.75612e-40}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

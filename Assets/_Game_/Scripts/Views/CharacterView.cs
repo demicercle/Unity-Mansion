@@ -102,6 +102,13 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 			// Debug.Log(this + " onRotate")
 		};
 
+		controller.onRunAction += () =>
+		{
+			animator.SetTrigger(AnimationParameters.Trigger);
+			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.ReloadTrigger);
+			FloatingText("Run!");
+		};
+
 		controller.onAttackAction += (target) =>
 		{
 			FloatingText("Take this!");

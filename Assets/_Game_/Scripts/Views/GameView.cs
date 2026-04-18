@@ -203,7 +203,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				}
 				else
 				{
-					Debug.Log(character + " not at reach");
+					Debug.Log(character + " not at reach: " + dist + " / " + agent.reachDistance + " to " + bestWaypoint);
 				}
 			}));
 		}
