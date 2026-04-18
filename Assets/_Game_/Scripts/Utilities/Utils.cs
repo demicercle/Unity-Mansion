@@ -5,13 +5,23 @@ using UnityEngine;
 
 public static class Utils
 {
+#if UNITY_EDITOR
+	[UnityEditor.MenuItem("Edit/Set Selection Dirty")]
+	static public void SetSelectionDirty()
+	{
+		SetDirty(UnityEditor.Selection.objects);
+	}
+#endif
 	static public void SetDirty(params Object[] objects)
 	{
 #if UNITY_EDITOR
 		if (!Application.isPlaying)
 		{
 			foreach (var obj in objects)
+			{
 				UnityEditor.EditorUtility.SetDirty(obj);
+				UnityEditor.AssetDatabase.SaveAssetIfDirty(obj);
+			}
 		}
 #endif
 	}
