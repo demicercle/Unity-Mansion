@@ -51,6 +51,7 @@ public class GameController : MonoBehaviour
 	{
 		currentTurn += 1;
 		playerTurn = true;
+		PlayerSelection.SetSelectionSetObstacle(true);
 		CharacterController.instances.ForEach(c => c.NewTurn(currentTurn));
 		Debug.Log(this + " NewTurn " + currentTurn);
 		turnStarted?.Invoke();
@@ -59,6 +60,7 @@ public class GameController : MonoBehaviour
 	public void EndTurn()
 	{
 		playerTurn = false;
+		PlayerSelection.SetSelectionSetObstacle(false);
 		Debug.Log(this + " EndTurn " + currentTurn);
 		turnEnded?.Invoke();
 	}

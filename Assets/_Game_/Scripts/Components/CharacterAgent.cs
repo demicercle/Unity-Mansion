@@ -40,9 +40,10 @@ public class CharacterAgent : MonoBehaviour
 
 	public void SetObstacle(bool value)
 	{
-		Debug.Log(this + " SetObstacle " + value);
-		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate))
+		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
 		{
+			if (graphUpdate.enabled == value) return;
+			Debug.Log(this + " SetObstacle " + value);
 			graphUpdate.enabled = value;
 			if (value)
 			{
@@ -55,7 +56,7 @@ public class CharacterAgent : MonoBehaviour
 				};
 			}
 		}
-		else Debug.LogWarning(this + " has no GraphUpdateScene component");
+		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
 	}
 
 	public Vector3[] GetCurrentPath()

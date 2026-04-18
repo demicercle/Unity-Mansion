@@ -66,7 +66,7 @@ public class CharacterController : MonoBehaviour
 	//public bool IsSelected() => isSelected;
 	public void NotifySelected(bool value)
 	{
-		agent.SetObstacle(!value);//todo not in selection
+		//agent.SetObstacle(!value);//todo not in selection
 		selectionChanged?.Invoke(value);
 	}
 
