@@ -37,6 +37,10 @@ public class MainCamera : MonoBehaviour
 
     private Vector3 currentPosition;
     private Quaternion desiredRotation;
+    private float forwardValue;
+    private Vector3 offsetedPosition;
+
+    public float yaw;
 
     private void OnDrawGizmosSelected()
     {
@@ -58,11 +62,13 @@ public class MainCamera : MonoBehaviour
     void UpdatePosition()
     {
         focusPosition = worldBounds.ClosestPoint(focusPosition);
-        currentPosition = Vector3.Lerp(currentPosition, focusPosition,
+        forwardValue = forwardOffset * heightForwardCurve.Evaluate(focusPosition.y);
+        offsetedPosition = focusPosition - Quaternion.Euler(0, yaw, 0) * Vector3.forward * forwardValue;
+        currentPosition = Vector3.Lerp(currentPosition, offsetedPosition,
             Application.isPlaying ? Time.unscaledDeltaTime * speed : 1);
         transform.position = currentPosition + Vector3.up * height;
         desiredRotation =
-            Quaternion.LookRotation(((focusPosition + Vector3.forward * forwardOffset * heightForwardCurve.Evaluate(focusPosition.y)) - (focusPosition + Vector3.up * height))
+            Quaternion.LookRotation(((focusPosition + Vector3.forward * forwardValue) - (focusPosition + Vector3.up * height))
                 .normalized);
         transform.rotation = Application.isPlaying ? Quaternion.Lerp(transform.rotation, desiredRotation, rotationSpeed * Time.unscaledDeltaTime) : desiredRotation;
     }

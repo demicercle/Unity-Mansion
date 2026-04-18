@@ -304,6 +304,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1238598711}
+  - component: {fileID: 1238598712}
   m_Layer: 0
   m_Name: Bedroom2
   m_TagString: Untagged
@@ -327,6 +328,24 @@ Transform:
   - {fileID: 3979366473141856157}
   m_Father: {fileID: 3011418813467701162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1238598712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1238598710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d507aef948730cd41bc7e9827fe04530, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  props:
+  - {fileID: 1266453806}
+  disableObject: 1
+  onTrigger:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1255030469
 GameObject:
   m_ObjectHideFlags: 0
@@ -384,6 +403,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 701814047783249712, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
   m_PrefabInstance: {fileID: 1576371291434912822}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1266453806 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8495298704536974578, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
+  m_PrefabInstance: {fileID: 1576371291434912822}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ddc7ec2695a47baa7e106ac9224a318, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1317130121 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 701814047783249712, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
