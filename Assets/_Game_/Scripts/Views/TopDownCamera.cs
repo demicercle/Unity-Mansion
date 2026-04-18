@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using UnityEngine;
 using LightType = UnityEngine.LightType;

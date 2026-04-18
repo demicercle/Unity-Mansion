@@ -1,5 +1,4 @@
-﻿using System;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -17,7 +16,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		Selection.SelectPartyCharacter(GetPartyIndex());
+		PlayerSelection.SelectPartyCharacter(GetPartyIndex());
 	}
 	
 	public void UpdateUI(CharacterController _assignedCharacter) // TODO use events
@@ -26,7 +25,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		{
 			gameObject.SetActive(true);
 			
-			toggle.isOn = Selection.IsCharacterSelected(_assignedCharacter);
+			toggle.isOn = PlayerSelection.IsCharacterSelected(_assignedCharacter);
 			toggle.interactable = _assignedCharacter.IsControllable();
 			
 			rawImage.texture = _assignedCharacter.GetPortraitTexture();

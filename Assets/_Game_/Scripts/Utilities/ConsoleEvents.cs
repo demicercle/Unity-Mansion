@@ -9,14 +9,14 @@ public class ConsoleEvents : MonoBehaviour
 	[ConsoleMethod("apply_dmg", "")]
 	static public void ApplyDamage(int amount)
 	{
-		if(Selection.TryGetSelectedCharacter(out CharacterController character))
+		if(PlayerSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.TakeDamage(amount);
 	}
 
 	[ConsoleMethod("heal", "")]
 	static public void Heal(int amount)
 	{
-		if(Selection.TryGetSelectedCharacter(out CharacterController character))
+		if(PlayerSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.Heal(amount);
 	}
 

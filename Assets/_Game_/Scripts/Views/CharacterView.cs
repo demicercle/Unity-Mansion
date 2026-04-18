@@ -1,12 +1,6 @@
-using System.Collections;
-using System.Linq;
 using System.Collections.Generic;
-using Oddworm.Framework;
-using Pathfinding;
-using Pathfinding.Drawing;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterController>
 {
@@ -143,7 +137,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		SetColor(killed ? deadColor : inParty ? partyColor : isEnemy ? enemyColor : defaultColor);
 	    
 		hasActions = controller.HasActions();
-		alphaColor = alphaCurve.Evaluate(Selection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
+		alphaColor = alphaCurve.Evaluate(PlayerSelection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
 	    
 		selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
 		movePointsCircle.SetColor(currentColor, alphaColor);
