@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
 public class RoomTrigger : MonoBehaviour
 {
+	static public List<RoomTrigger> activeRooms = new List<RoomTrigger>();
+	
 	[Header("Settings")]
 	[SerializeField] private List<PropComponent> doors = new List<PropComponent>();
 	[SerializeField] private List<CharacterTrigger> triggers =  new List<CharacterTrigger>();
 	[SerializeField] private float ceilingHeight = 1.5f;
 	
 	private List<BoxCollider> ceilings = new List<BoxCollider>();
+	
+	public bool HasCharacter(CharacterController character)
+	{
+		return triggers.Any(t => t.HasCharacter(character));
+	}
 	
 	[ContextMenu("Collect Triggers")]
 	void CollectTriggers()
@@ -32,6 +40,8 @@ public class RoomTrigger : MonoBehaviour
 
 	void OnEnable()
 	{
+		activeRooms.Add(this);
+		
 		foreach (var door in doors)
 		{
 			door.interacted.AddListener(OnDoorOpened);
@@ -40,6 +50,8 @@ public class RoomTrigger : MonoBehaviour
 
 	void OnDisable()
 	{
+		activeRooms.Remove(this);
+		
 		foreach (var door in doors)
 		{
 			door.interacted.RemoveListener(OnDoorOpened);

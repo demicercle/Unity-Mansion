@@ -6,6 +6,8 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Collider))]
 public class CharacterTrigger : MonoBehaviour
 {
+	static public List<CharacterTrigger> activeTriggers = new List<CharacterTrigger>();
+	
 	[Header("Settings")]
 	[SerializeField] private bool partyOnly = true;
 	[SerializeField] private bool triggerOnEnter = true;
@@ -16,7 +18,10 @@ public class CharacterTrigger : MonoBehaviour
 	
 	public event System.Action<CharacterTrigger> onTriggered;
 
-	public CharacterController[] GetOverlappingCharacters() => characters.ToArray();
+	public bool HasCharacter(CharacterController character)
+	{
+		return characters.Contains(character);
+	}
 
 	private new Collider collider;
 	private int triggerCount;
@@ -64,5 +69,15 @@ public class CharacterTrigger : MonoBehaviour
 	void Awake()
 	{
 		collider = GetComponent<Collider>();
+	}
+
+	private void OnEnable()
+	{
+		activeTriggers.Add(this);
+	}
+
+	private void OnDisable()
+	{
+		activeTriggers.Remove(this);
 	}
 }

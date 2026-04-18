@@ -398,9 +398,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (waypoint != null)
 		{
 			var wpDir = waypoint.GetDirection();
-			
+
 			while (!character.IsFacingDirection(wpDir))
+			{
 				character.LookDirection(wpDir, Time.deltaTime);
+				yield return null;
+			}
 			
 			if (prop.consumeActions > 0)
 				character.ConsumeActions(prop.consumeActions);
@@ -500,6 +503,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public bool CanEndTurn() => !HasCoroutines() && GetController().IsPlayerTurn();
 
+	public bool IsCharacterVisible(CharacterController character)
+	{
+		if (RoomTrigger.activeRooms.Any(t => t.HasCharacter(character)))
+			return false;
+
+		return true;
+	}
+
 	public void ClickEndTurn()
 	{
 		GetController().EndTurn();
@@ -515,7 +526,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var otherCharacter = otherCharacterView.GetController();
 			if (otherCharacter.InParty()) continue;
 
-			mainCamera.Focus(otherCharacter);
+			if (IsCharacterVisible(otherCharacter))
+				mainCamera.Focus(otherCharacter);
+			else Debug.Log("Do not focus invisible character: " + otherCharacter);
 
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
 			{
