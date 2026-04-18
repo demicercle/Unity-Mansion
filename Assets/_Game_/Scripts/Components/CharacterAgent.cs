@@ -31,19 +31,13 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.Teleport(newPos, true);
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 	}
-	
-	public void SetCanMove(bool value)
-	{
-		aiPath.simulateMovement = value;
-		aiPath.isStopped = !value;
-	}
 
 	public void SetObstacle(bool value)
 	{
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
 		{
 			if (graphUpdate.enabled == value) return;
-			Debug.Log(this + " SetObstacle " + value);
+//			Debug.Log(this + " SetObstacle " + value);
 			graphUpdate.enabled = value;
 			if (value)
 			{
@@ -55,6 +49,7 @@ public class CharacterAgent : MonoBehaviour
 					-Vector3.right * aiPath.radius,
 				};
 			}
+			NavUtility.RebuildNavigationAsync();
 		}
 		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
 	}
@@ -67,6 +62,23 @@ public class CharacterAgent : MonoBehaviour
 		var buffer = new List<Vector3>();
 		aiPath.GetRemainingPath(buffer, out var stale);
 		return buffer.ToArray();
+	}
+
+	public void StartMove()
+	{
+		aiPath.updatePosition = aiPath.updateRotation = true;
+		aiPath.simulateMovement = true;
+		aiPath.isStopped = false;
+		Debug.Log(this + " StartMove");
+	}
+
+	public void StopMovement()
+	{
+		aiPath.updatePosition = aiPath.updateRotation = false;
+		aiPath.simulateMovement = false;
+		aiPath.isStopped = true;
+		Debug.Log(this + " StopMovement");
+		ClearDestination();
 	}
 	
 	public void AssignDestination(Vector3 hitPoint)
@@ -85,12 +97,6 @@ public class CharacterAgent : MonoBehaviour
 	public void ClearDestination()
 	{
 		hasDestination = false;
-	}
-
-	public void StopMovement()
-	{
-		aiPath.isStopped = true;
-		ClearDestination();
 	}
 
 	public bool ReachedDestination(Vector3 dest)
@@ -131,11 +137,15 @@ public class CharacterAgent : MonoBehaviour
 		characterView = GetComponent<CharacterView>();
 		controller = characterView.GetController();
 		controller.selectionChanged += SelectionChanged;
-		
 		UpdateComponent();
-		StopMovement();
 	}
 
+	private void Start()
+	{
+		if(!hasDestination)
+			StopMovement();
+	}
+	
 	private void OnDestroy()
 	{
 		controller.selectionChanged -= SelectionChanged;

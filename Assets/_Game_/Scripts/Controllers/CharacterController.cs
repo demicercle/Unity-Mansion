@@ -100,6 +100,7 @@ public class CharacterController : MonoBehaviour
 	
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
 	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
+	public bool HasMovePoints() => GetRemainingMovePoints() > 0;
 
 	public bool CanMove() => GetRemainingMovePoints() > 0f;
 	
@@ -269,13 +270,13 @@ public class CharacterController : MonoBehaviour
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	} 
 
-	public bool IsAtAttackRange(CharacterController target, bool losCheck, float drawDuration = 0.0f)
+	public bool IsAtAttackRange(CharacterController target, bool losCheck)
 	{
 		var atkRange = GetAttackRange();
 		atkRange = Mathf.Max(atkRange, agent.GetRadius() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
 		if (Vector3.Distance(GetPosition(), target.GetPosition()) <= atkRange)
 		{
-			return !losCheck || LOSCheck(target, drawDuration);
+			return !losCheck || LOSCheck(target);
 		}
 		else
 		{
@@ -283,7 +284,7 @@ public class CharacterController : MonoBehaviour
 		}
 	}
 
-	public bool LOSCheck(CharacterController other, float drawDuration = 0.0f)
+	bool LOSCheck(CharacterController other)
 	{
 		var start = GetEyesPosition();
 		var end = other.GetEyesPosition();
@@ -291,11 +292,11 @@ public class CharacterController : MonoBehaviour
 			   LayerMask.GetMask(Consts.LAYER_WALL, Consts.LAYER_GROUND)))
 		{
 			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
-			DebugGUI.Line(start, end, Color.red, drawDuration);
+			//DebugGUI.Line(start, end, Color.red, drawDuration);
 			return false;
 		}
 
-		DebugGUI.Line(start, end, Color.green, drawDuration);
+		//DebugGUI.Line(start, end, Color.green, drawDuration);
 		return true;
 	}
 
@@ -325,7 +326,7 @@ public class CharacterController : MonoBehaviour
 
 	public void StopAgent()
 	{
-		GetAgent().StopMovement();
+		agent.StopMovement();
 	}
 
 	public Vector3 GetVelocity()

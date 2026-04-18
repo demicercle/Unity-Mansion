@@ -212,9 +212,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void AssignInteract(CharacterController character, PropComponent clickedProp) // TODO Prop Controller
 	{
-		Debug.Log(this + " AssignInteract " + character + " " + clickedProp);
 		if (clickedProp.GetBestWaypoint(character.GetPosition(), out var bestWaypoint))
 		{
+			Debug.Log(this + " AssignInteract " + character + " " + clickedProp);
 			QueueRoutine(WaitCharacterMoved(character, bestWaypoint.GetPosition(), () =>
 			{
 				var agent = character.GetAgent();
@@ -233,6 +233,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				}
 			}));
 		}
+		else Debug.LogWarning(this + " AssignInteract " + character + " " + clickedProp + " no waypoint!");
 	}
 
 	public void ClickNavigation(Vector3 navPosition)
@@ -352,38 +353,54 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
 
-		while (attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck))
+		var atAttackRange = attacker.IsAtAttackRange(target, losCheck);
+		while (!atAttackRange)
 		{
-			if (!attacker.IsAtAttackRange(target, losCheck))
+			StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition()));
+
+			do
 			{
-				yield return StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition(), null, () =>
+				if (!attacker.CanMove())
 				{
-					if (attacker.IsAtAttackRange(target, losCheck, 1.0f)) // at atk range
-					{
-						Debug.Log(attacker + " is at attack range");
-						attacker.StopAgent();
-					}
-				}));
-			}
+					Debug.Log(attacker + " cannot move!");
+					DebugGUI.FloatingText(attacker.GetCenterPosition(), "Can't");
+					break;
+				}
 				
-			if (canUseRunAction && !attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck, 1.0f) && attacker.CanUseRunAction())
+				yield return null;
+				atAttackRange = attacker.IsAtAttackRange(target, losCheck);
+			} while (!atAttackRange && attacker.IsMoving());
+
+			if (atAttackRange)
 			{
-				yield return StartCoroutine(WaitRunAction(attacker));
+				Debug.Log(attacker + " atAttackRange of " + target + ", StopAgent");
+				attacker.StopAgent();
+				yield return null;
 			}
 			
-			yield return null;
+			else if (!attacker.IsMoving())
+			{
+				if (!attacker.HasMovePoints())
+				{
+					if (canUseRunAction && attacker.CanUseRunAction())
+					{
+						yield return StartCoroutine(WaitRunAction(attacker));
+					}
+					else
+					{
+						Debug.Log(attacker + " has no move points, and can't use run action");
+					}
+				}
+				else Debug.LogWarning(attacker + " has move points but is not at attack range and not moving");
+			}
 		}
-		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target, true, losCheck));
+		
+		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target));
 	}
 
-	private IEnumerator WaitCharacterPerformAttack(CharacterController character, CharacterController target, bool rangeCheck = true, bool losCheck = true)
+	private IEnumerator WaitCharacterPerformAttack(CharacterController character, CharacterController target)
 	{
-		Debug.Log("WaitCharacterPerformAttack " + character + " " + target + " " + losCheck);
-		
-		if (rangeCheck && !character.IsAtAttackRange(target, losCheck))
-		{
-			yield break;
-		}
+		Debug.Log("WaitCharacterPerformAttack " + character + " " + target );
 		
 		yield return StartCoroutine(WaitCharacterLookPosition(character, target.GetPosition()));
 
@@ -454,8 +471,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		Debug.Log("WaitCharacterMoved " + movingCharacter);
 
 		var agent = movingCharacter.GetAgent();
-		agent.AssignDestination(dest);
-
+		agent.AssignDestination(dest); // WaitCharacterMoved
+		
 		var timeout = 0.0f;
 		do
 		{
@@ -470,7 +487,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			Debug.LogWarning(agent + " pathPending timeout!");
 			yield break;
 		}
-
+		
 		var path = agent.GetCurrentPath();
 		if (path.Length > 1)
 		{
@@ -488,7 +505,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			yield break;
 		}
 		
-		agent.SetCanMove(true);
+		agent.StartMove();
 		
 		timeout = 0.0f;
 		while(true)
@@ -539,7 +556,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		//movingCharacter.SetRotation(movingCharacter.GetRotation());
 		
 		Debug.Log(agent + " reached destination, end move");
-		agent.SetCanMove(false);
+		agent.StopMovement();
 		
 		onComplete?.Invoke();
 	}
@@ -730,9 +747,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			{
 				if (selectedCharacter != null)
 				{
-					if (CanControlCharacter(selectedCharacter)) // mouse over navigation
+					if (CanControlCharacter(selectedCharacter))
 					{
-						selectedCharacter.GetAgent().AssignDestination(hit.point);
+						selectedCharacter.GetAgent().AssignDestination(hit.point); // mouse over navigation
 					}
 					else if(debugCursor) Debug.Log("character not controllable");
 				}
@@ -745,7 +762,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 					var overCharacter = overCharacterView.GetController();
 					if (selectedCharacter != null)
 					{
-						if (CanControlCharacter(selectedCharacter)) // mouse over character
+						if (CanControlCharacter(selectedCharacter))
 						{
 							var agent = selectedCharacter.GetAgent();
 							if (overCharacter.InParty())
@@ -754,14 +771,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 							}
 							else
 							{
-								agent.AssignDestination(overCharacter.GetPosition());
+								agent.AssignDestination(overCharacter.GetPosition()); // mouse over character
 							}
 						}
 						else if(debugCursor) Debug.Log("character not controllable");
 					}
 					else if(debugCursor) Debug.Log("no selected character");
 				}
-				else if (hit.collider.TryGetComponent(out PropComponent overProp)) // mouse over prop
+				else if (hit.collider.TryGetComponent(out PropComponent overProp)) 
 				{
 					if (selectedCharacter != null)
 					{
@@ -770,7 +787,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
 								var agent = selectedCharacter.GetAgent();
-								agent.AssignDestination(bestWaypoint.GetPosition());
+								agent.AssignDestination(bestWaypoint.GetPosition()); // mouse over prop
 							}
 							else
 							{
