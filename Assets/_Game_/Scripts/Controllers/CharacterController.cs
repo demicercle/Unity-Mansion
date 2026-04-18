@@ -43,6 +43,9 @@ public class CharacterController : MonoBehaviour
 	[ReadOnly] [SerializeField] private Vector3 savedPosition;
 	[ReadOnly] [SerializeField] private bool isDead;
 	[ReadOnly] [SerializeField] private CharacterAgent agent;
+	[ReadOnly] [SerializeField] private int currentTurn;
+	
+	public int GetCurrentTurn() => currentTurn;
 	
 	public void Spawn()
 	{
@@ -70,10 +73,13 @@ public class CharacterController : MonoBehaviour
 		selectionChanged?.Invoke(value);
 	}
 
+
+	public void Restore() => NewTurn(-1);
 	public void NewTurn(int turn)
 	{
 		usedActions = 0;
 		usedMovePoints = 0;
+		if (turn >= 0) currentTurn = turn;
 	}
 
 	public bool HasActions() => usedActions < characterData.maxActions;

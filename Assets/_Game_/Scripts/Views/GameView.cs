@@ -47,9 +47,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 		DontDestroyOnLoad(gameObject);
 		name = ToString();
 		
-		hasFocus = !Application.isEditor;
+		OnApplicationFocus(!Application.isEditor);
 		//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
-		hasEditorFocus = false;
+		//hasEditorFocus = false;
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
@@ -65,15 +65,17 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	void CameraRL(bool left)
 	{
-		if(HasFocus())cameraPivot.RotateLR(left);
+		if(hasFocus)cameraPivot.RotateLR(left);
 	}
 	
 	void CameraZoom(float delta)
 	{
-		if (HasFocus()) cameraPivot.Zoom(delta);
+		if (hasFocus) cameraPivot.Zoom(delta);
 	}
 
 	[SerializeField] private List<string> scenesToLoad = new List<string>();
+
+	private bool isLoadingScenes;
 	
 	private IEnumerator Start()
 	{
@@ -83,8 +85,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 		canvas.UpdateUI(this);
 		
 		SetInputEnabled(false);
-		// TODO Fade In
+
+		isLoadingScenes = true;
 		yield return null;
+		// TODO Fade In
 
 		// load level
 		for(int i = 0; i < scenesToLoad.Count; i++)
@@ -127,8 +131,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		// TODO Fade Out
 		yield return null;
-		
-		SetInputEnabled(true);
+		isLoadingScenes = false;
 		
 		GetController().NewTurn();
 		
@@ -252,8 +255,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		Debug.Log(this + " AssignMove " + controller + " " + navPosition);
 		QueueRoutine(WaitCharacterMoved(controller, navPosition));
 	}
-
-
+	
 	public void AssignRunAction(CharacterController character)
 	{
 		Debug.Log(this + " AssignRunAction " + character);
@@ -279,7 +281,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	[Header("Debug")]
 	[ReadOnly][SerializeField] private bool hasFocus;
-	[ReadOnly][SerializeField] private bool hasEditorFocus;
+	//[ReadOnly][SerializeField] private bool hasEditorFocus;
 	[ReadOnly][SerializeField] private GameCanvas canvas;
 	[ReadOnly][SerializeField] private Vector2 mousePosition;
 	private Vector2 lastMousePosition;
@@ -316,7 +318,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		if (canvas.mouseOverViewport && value > 0f) // pressed
 		{
-			hasEditorFocus = true;
+			//hasEditorFocus = true;
 			
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
@@ -613,24 +615,31 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
+	private bool inputEnabled;
 	public void SetInputEnabled(bool value)
 	{
-		if (value)
+		if (inputEnabled != value)
 		{
-			inputSystem.Player.Enable();
-			inputSystem.UI.Enable();
-		}
-		else
-		{
-			inputSystem.Player.Disable();
-			inputSystem.UI.Disable();
+			inputEnabled = value;
+			Debug.Log(this + " inputEnabled=" + inputEnabled);
+			
+			if (inputEnabled)
+			{
+				inputSystem.Player.Enable();
+				inputSystem.UI.Enable();
+			}
+			else
+			{
+				inputSystem.Player.Disable();
+				inputSystem.UI.Disable();
+			}
 		}
 	}
 
 	public bool CanControlSelectedCharacter() => PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
-		return HasFocus() && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
+		return hasFocus && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
 	}
 	
 	
@@ -641,41 +650,33 @@ public class GameView : MonoBehaviour, IView<GameController>
 		character.RunAction();
 	}
 
-	private bool HasFocus() => hasFocus && (!Application.isEditor || hasEditorFocus);
+//	private bool HasFocus() => hasFocus && (!Application.isEditor || hasEditorFocus);
 	
 	private void LateUpdate()
 	{
-		if (HasFocus())
-		{
-			cameraPivot.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
-		}
-
 		canvas.UpdateUI(this);
 		lastMousePosition = mousePosition;
 	}
 
 	private void Update()
 	{
-		if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
-		{
-			hasFocus = hasEditorFocus = false;
-			//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
-		}
-
 		if (Application.isEditor)
 		{
-			if (!hasFocus)
-				hasEditorFocus = false;
+			if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
+			{
+				OnApplicationFocus(false);
+			}
 			
 			if (!hasFocus && inputSystem.UI.Click.WasPressedThisFrame())
 			{
-				hasFocus = hasEditorFocus = true;
-				//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
+				OnApplicationFocus(true);
 			}
 		}
 		
-		if (HasFocus())
+		if (hasFocus)
 		{
+			SetInputEnabled(!isLoadingScenes && !IngameDebugConsole.DebugLogManager.Instance.IsLogWindowVisible);
+			
 			Cursor.lockState = CursorLockMode.Confined;
 			Cursor.SetCursor(Resources.Load<Texture2D>("Cursors/cursor_none"), Vector2.zero, CursorMode.Auto);
 		
@@ -702,6 +703,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 		else
 		{
+			SetInputEnabled(false);
+			
 			Cursor.lockState = default;
 			Cursor.SetCursor(null,default,default);
 		}
@@ -792,9 +795,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-	private void OnApplicationFocus(bool value)
+	public void OnApplicationFocus(bool value)
 	{
-		hasFocus = hasEditorFocus = value;
+		if (hasFocus != value)
+		{
+			Debug.Log("OnApplicationFocus: " + value);
+			hasFocus = value;
+		}
+		//hasEditorFocus = value;
 		////Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
 	}
 

@@ -20,8 +20,9 @@ public class GameCanvas : MonoBehaviour
 		button_endTurn.onClick.AddListener( () => view.ClickEndTurn());
 		button_actionRun.onClick.AddListener(() => view.ClickRunAction());
 
-		Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject).onMouseOverChanged +=
-			(mouseOver) => mouseOverViewport = mouseOver;
+		var mouseHandler = Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject);
+		mouseHandler.onMouseOverChanged += (mouseOver) => mouseOverViewport = mouseOver;
+		mouseHandler.onClicked += () => GameView.GetInstance().OnApplicationFocus(Application.isEditor); // TODO
 		
 		if(portraits.Length == 0)
 			portraits = GetComponentsInChildren<CharacterPortrait>();
