@@ -34,12 +34,13 @@ public static class EditorTools
 
 	#region MakePrefabsFromSelection
 
-	[MenuItem("Tools/MakePrefabsFromSelection/MakeProp")]
-	static public void MakePrefabsFromSelection_MakeProp()
+	[MenuItem("Tools/MakePrefabsFromSelection/StaticProp")]
+	static public void MakePrefabsFromSelection_StaticProp()
 	{
 		MakePrefabsFromSelection("LD_", (go) =>
 		{
 			Utils.GetOrAddComponent<BoxCollider>(go);
+			go.isStatic = true;
 			go.gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_WALL);
 		});
 	}
