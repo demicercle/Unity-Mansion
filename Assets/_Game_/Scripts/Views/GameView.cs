@@ -56,7 +56,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
-		inputSystem.UI.ScrollWheel.performed += ctx => TopDownCamera.Instance.Zoom(ctx.ReadValue<Vector2>().y);
+		inputSystem.UI.ScrollWheel.performed += ctx => TopDownCamera.Instance.Zoom(-ctx.ReadValue<Vector2>().y);
 		inputSystem.Player.RotateLeft.performed += ctx => TopDownCamera.Instance.RotateLR(false);
 		inputSystem.Player.RotateRight.performed += ctx => TopDownCamera.Instance.RotateLR(true);
 		
@@ -636,8 +636,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (holdMiddleClick)
 			{
 				var delta = (middleClickMousePosition - mousePosition);
+//				Debug.Log(delta);
 				var topDownCamera = TopDownCamera.Instance;
-				topDownCamera.Rotate(delta.x * Time.deltaTime);
+				topDownCamera.Rotate(delta.x * Time.deltaTime / Mathf.Pow(Mathf.PI, 1));
 				topDownCamera.Zoom(delta.y * Time.deltaTime / Mathf.Pow(Mathf.PI, 2));
 			}
 			//Debug.Log(delta);
