@@ -48,6 +48,7 @@ public class CharacterController : MonoBehaviour
 	{
 		transform.SetParent(null, true);
 		gameObject.SetActive(true);
+		GetAgent().SetObstacle(true);
 	}
 	
 	public bool IsControllable() => isControllable && !isDead;
@@ -65,7 +66,7 @@ public class CharacterController : MonoBehaviour
 	//public bool IsSelected() => isSelected;
 	public void NotifySelected(bool value)
 	{
-		agent.SetObstacle(value);
+		agent.SetObstacle(!value);//todo not in selection
 		selectionChanged?.Invoke(value);
 	}
 
