@@ -89,8 +89,15 @@ public class GameView : MonoBehaviour, IView<GameController>
 		// load level
 		for(int i = 0; i < scenesToLoad.Count; i++)
 		{
+			var scene = scenesToLoad[i];
+			if (SceneManager.GetSceneByName(scene).isLoaded)
+			{
+				Debug.Log("load level: " + scene + " already loaded");
+				continue;
+			}
+			
 			var loadSceneMode = i > 0 ? UnityEngine.SceneManagement.LoadSceneMode.Additive : LoadSceneMode.Single;
-			var async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scenesToLoad[i], loadSceneMode);
+			var async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scene, loadSceneMode);
 			while (async.isDone == false) yield return null;
 		}
 		
@@ -266,6 +273,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public bool drawDebug = false;
 	[Range(0f,1f)] public float debugGUI = 0f;
 	//public float cameraSpeed = 1.0f;
+	[SerializeField] private float cameraDeltaY = 1f;
 	[Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
 
 	[Header("Debug")]
@@ -273,6 +281,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	[ReadOnly][SerializeField] private bool hasEditorFocus;
 	[ReadOnly][SerializeField] private GameCanvas canvas;
 	[ReadOnly][SerializeField] private Vector2 mousePosition;
+	private Vector2 lastMousePosition;
 
 	private CameraPivot cameraPivot => CameraPivot.Instance; // TODO
 	
@@ -648,8 +657,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 
 		canvas.UpdateUI(this);
+		lastMousePosition = mousePosition;
 	}
-	
+
 	private void Update()
 	{
 		if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
@@ -690,8 +700,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (holdMiddleClick)
 			{
 				var delta = (middleClickMousePosition - mousePosition);
-				cameraPivot.Rotate(delta.x * Time.deltaTime / Mathf.Pow(Mathf.PI, 1));
-				cameraPivot.Zoom(delta.y * Time.deltaTime / Mathf.Pow(Mathf.PI, 2));
+				delta.y = (lastMousePosition - mousePosition).y;
+				cameraPivot.Rotate(delta.x * Time.deltaTime / Mathf.PI);
+				cameraPivot.Zoom(cameraDeltaY * delta.y * Time.deltaTime / Mathf.PI);
 			}
 			//Debug.Log(delta);
 		}

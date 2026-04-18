@@ -1906,7 +1906,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00005340576}
+  m_AnchoredPosition: {x: 0, y: -0.000019073486}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &541877068
@@ -2728,7 +2728,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2573c8841a09f24488d74776bb16fd3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scenesToLoad: []
+  scenesToLoad:
+  - Level_0
+  - Level_0_Env
   drawDebug: 0
   debugGUI: 0
   maxNavDistance: 0.5
@@ -2736,6 +2738,7 @@ MonoBehaviour:
   hasEditorFocus: 0
   canvas: {fileID: 0}
   mousePosition: {x: 0, y: 0}
+  cameraDeltaY: 1
 --- !u!114 &792779172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5140,8 +5143,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1869206042}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0000013411053, y: -3.8116505e-20, z: 2.842171e-14, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalRotation: {x: -0.00000066411025, y: -0.8687812, z: 0.0000011651272, w: -0.49519616}
+  m_LocalPosition: {x: -8.890198, y: 0.000000014901161, z: -0.64591736}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5182,7 +5185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8e7b673e2d6ad842a3046edfefa8f92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusPosition: {x: 0, y: 3, z: 0}
+  focusPosition: {x: -8.890198, y: 0.000000014901161, z: -0.64591736}
   enableEditorMovement: 0
   editorFocusY: 0
   editorFocusX: 0.5
@@ -5194,21 +5197,21 @@ MonoBehaviour:
   worldY: 0
   worldHeight: 3
   lerpSpeed: 3
-  inputSpeed: 20
+  inputSpeed: 14
   panSpeed: 20
   screenPadding: 2
   startZoom: 0.5
   zoomSpeed: 1.03
-  rotationSpeed: {x: 1, y: 16, z: 1}
+  rotationSpeed: {x: 1, y: 16, z: 0.45}
   canRotateY: 1
   animator: {fileID: 1869206044}
   zoomParameter: Blend
   rotationPivot: {fileID: 702462659}
-  currentPosition: {x: 0, y: 3, z: 0}
+  currentPosition: {x: -8.890198, y: 0.000000014901161, z: -0.64591736}
   desiredRotation: {x: 0.58183986, y: 0, z: 0, w: 0.8133034}
-  currentZoom: 0.044
-  desiredYaw: 0
-  currentYaw: 0
+  currentZoom: 1
+  desiredYaw: -239.36539
+  currentYaw: -239.36539
 --- !u!1 &2007086560
 GameObject:
   m_ObjectHideFlags: 0
