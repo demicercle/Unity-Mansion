@@ -19,21 +19,24 @@ public class TopDownCamera : MonoBehaviour
         }
     }
     
-    public Light spotLight;
-    public Vector3 focusPosition;
-    public Bounds worldBounds;
-    public float height = 1.5f;
-    public float inputSpeed = 10.0f;
-    public float lerpSpeed = 1.5f;
-    public float panSpeed = 8.0f;
-    public float zoomSpeed = 1.0f;
-    public float rotationSpeed = 3.0f;
-    public float lightRange = 0.0f;
-    public float lightRangeToAngle = Mathf.PI;
-    [Min(0f)]public float forwardOffset = 0.0f;
-    public bool canRotateY = true;
-    public int screenPadding = 2;
-    public AnimationCurve heightForwardCurve = AnimationCurve.Constant(0f,0f,0f);
+    [Header("Settings")]
+    [SerializeField] private Light spotLight;
+    [SerializeField] private Vector3 focusPosition;
+    [SerializeField] private Bounds worldBounds;
+    [SerializeField] private float height = 1.5f;
+    [SerializeField] private float inputSpeed = 10.0f;
+    [SerializeField] private float lerpSpeed = 1.5f;
+    [SerializeField] private float panSpeed = 8.0f;
+    [SerializeField] private float zoomSpeed = 1.0f;
+    [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
+    [SerializeField] private float lightRange = 0.0f;
+    [SerializeField] private float lightRangeToAngle = Mathf.PI;
+    [Min(0f)][SerializeField] private float forwardOffset = 0.0f;
+    [SerializeField] private Vector2 headingOffset = new Vector2(1.0f, 0.0f);
+    [SerializeField] private bool canRotateY = true;
+    [SerializeField] private int screenPadding = 2;
+    [SerializeField] private AnimationCurve heightForwardCurve = AnimationCurve.Constant(0f,0f,0f);
+    [ReadOnly] [SerializeField] private float rotationStepAngle = 90.0f;
     
     public void Focus(GameObject go) => Focus(go.transform.position);
     public void Focus(Component comp) => Focus(comp.transform.position);
@@ -59,16 +62,17 @@ public class TopDownCamera : MonoBehaviour
     public void Rotate(float step)
     {
         if (!canRotateY) return;
-        yaw = (yaw + 90 * step) % 360;
+        yaw = (yaw - rotationStepAngle * step) % 360;
     }
 
-    private Vector3 currentPosition;
-    private Quaternion desiredRotation;
-    private float forwardValue;
-    private Vector3 offsetedPosition;
-
-    private float currentYaw;
-    private float yaw; //TODO rotate camera?
+    [Header("Debug")]
+    [ReadOnly] [SerializeField] private Vector3 currentPosition;
+    [ReadOnly] [SerializeField] private Quaternion desiredRotation;
+    [ReadOnly] [SerializeField]  private float forwardValue;
+    [ReadOnly] [SerializeField]  private Vector3 offsetedPosition;
+    [ReadOnly] [SerializeField]  private float evaluatedHeight;
+    [ReadOnly] [SerializeField]  private float currentYaw;
+    [ReadOnly] [SerializeField]  private float yaw; 
 
     private void OnDrawGizmosSelected()
     {
@@ -89,17 +93,19 @@ public class TopDownCamera : MonoBehaviour
     // Update is called once per frame
     void UpdatePosition()
     {
-        currentYaw = !Application.isPlaying ? yaw : Mathf.LerpAngle(currentYaw, yaw, Time.unscaledDeltaTime * rotationSpeed * Consts.RAD_TO_DEG);
+        evaluatedHeight = heightForwardCurve.Evaluate(focusPosition.y);
+        currentYaw = !Application.isPlaying ? yaw : Mathf.LerpAngle(currentYaw, yaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG);
         focusPosition = worldBounds.ClosestPoint(focusPosition);
-        forwardValue = forwardOffset * heightForwardCurve.Evaluate(focusPosition.y);
+        forwardValue = forwardOffset * evaluatedHeight;
         offsetedPosition = focusPosition - Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue;
+        offsetedPosition.y += headingOffset.y * evaluatedHeight;
         currentPosition = Vector3.Lerp(currentPosition, offsetedPosition,
             Application.isPlaying ? Time.unscaledDeltaTime * lerpSpeed : 1);
         transform.position = currentPosition + Vector3.up * height;
         desiredRotation =
-            Quaternion.LookRotation(((focusPosition + Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue) - (focusPosition + Vector3.up * height))
+            Quaternion.LookRotation(((focusPosition + Quaternion.Euler(0, currentYaw, 0) * Vector3.forward * forwardValue * headingOffset.x) - (focusPosition + Vector3.up * height))
                 .normalized);
-        transform.rotation = Application.isPlaying ? Quaternion.Lerp(transform.rotation, desiredRotation, rotationSpeed * Time.unscaledDeltaTime) : desiredRotation;
+        transform.rotation = Application.isPlaying ? Quaternion.Lerp(transform.rotation, desiredRotation, rotationSpeed.x * Time.unscaledDeltaTime) : desiredRotation;
     }
 
     void UpdateSpotLight()

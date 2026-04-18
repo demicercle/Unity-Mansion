@@ -3187,7 +3187,8 @@ MonoBehaviour:
   rotationSpeed: 3
   lightRange: 1.38
   lightRangeToAngle: 3.17
-  forwardOffset: 5
+  forwardOffset: 8
+  headingOffset: 1
   canRotateY: 1
   screenPadding: 2
   heightForwardCurve:
