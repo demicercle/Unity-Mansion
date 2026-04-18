@@ -501,16 +501,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 				break;
 			}
 			
-			if (movingCharacter.HasMovePoints() == false)
+			if (!movingCharacter.HasMovePoints())
 			{
 				Debug.Log(movingCharacter + " !HasMovePoints");
-				agent.StopMovement();
-				break;
-			}
-			
-			if (movingCharacter.CanMove() == false)
-			{
-				Debug.Log(movingCharacter + " cannot move!");
 				agent.StopMovement();
 				break;
 			}
@@ -654,6 +647,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	private void LateUpdate()
 	{
+		if (hasFocus)
+		{
+			cameraPivot.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
+		}
+		
 		canvas.UpdateUI(this);
 		lastMousePosition = mousePosition;
 	}

@@ -79,6 +79,7 @@ public class CharacterController : MonoBehaviour
 	{
 		usedActions = 0;
 		usedMovePoints = 0;
+		GetAgent().ClearDestination();
 		if (turn >= 0) currentTurn = turn;
 	}
 
@@ -107,8 +108,6 @@ public class CharacterController : MonoBehaviour
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
 	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
 	public bool HasMovePoints() => GetRemainingMovePoints() > 0;
-
-	public bool CanMove() => GetRemainingMovePoints() > 0f;
 	
 	public bool CanUseRunAction()
 	{

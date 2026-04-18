@@ -10,12 +10,6 @@ public class AIBrain_Patrol : AIBrainData
 	{
 		yield return new WaitForSeconds(1.0f);
 		
-		if (!character.CanMove())
-		{
-			Debug.Log(character + " cannot move");
-			yield break;
-		}
-		
 		if (!PatrolRoute.FindRoute(character, out PatrolRoute patrolRoute))
 		{
 			Debug.LogWarning(character + " has no patrol route");
@@ -23,9 +17,9 @@ public class AIBrain_Patrol : AIBrainData
 		}
 		
 		var waypoints = patrolRoute.waypoints;
-		
-		while (character.CanMove())
+		while (character.HasActions() && character.HasMovePoints())
 		{
+			yield return null;
 			patrolRoute.DebugDraw(0);
 				
 			if (lastWaypointToReach == null)
@@ -49,7 +43,7 @@ public class AIBrain_Patrol : AIBrainData
 					Debug.Log(this + " Move to patrol waypoint " + lastWaypointToReach);
 					gameView.MoveCharacterToWaypoint(character, lastWaypointToReach, () =>
 					{
-						if (!character.CanMove() && character.CanUseRunAction() && canUseRunAction)
+						if (!character.HasActions() && character.CanUseRunAction() && canUseRunAction)
 						{
 							gameView.AssignRunAction(character);
 						}
@@ -89,8 +83,6 @@ public class AIBrain_Patrol : AIBrainData
 				
 				yield return null;
 			}
-			
-			yield return null;
 		}
 	}
 

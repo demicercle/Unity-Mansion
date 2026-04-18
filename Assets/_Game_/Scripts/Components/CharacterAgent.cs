@@ -106,7 +106,6 @@ public class CharacterAgent : MonoBehaviour
 	}
 
 	private const float TIMED_OUT = 3f;
-
 	public IEnumerator SearchPathAsync(Vector3 dest, System.Action onComplete = null)
 	{
 		AssignDestination(dest); // WaitCharacterMoved
@@ -114,7 +113,7 @@ public class CharacterAgent : MonoBehaviour
 		var timeout = 0.0f;
 		do
 		{
-			if (timeout > TIMED_OUT) break;
+			if (timeout >= TIMED_OUT) break;
 			yield return null;
 			timeout += Time.deltaTime;
 		}
