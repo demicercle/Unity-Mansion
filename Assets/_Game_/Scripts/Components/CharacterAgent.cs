@@ -11,6 +11,7 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
+	[SerializeField] private List<LineRenderer> pathRenderers;
 
 	public System.Action onSearchPath
 	{
@@ -101,9 +102,13 @@ public class CharacterAgent : MonoBehaviour
 	public bool pathPending => aiPath.pathPending;
 
 	public float rotationSpeed => aiPath.rotationSpeed;
-	
+
+	private bool shouldDrawPath;
 	private bool hasDestination;
 	private AIPath aiPath;
+	private CharacterController controller;
+	private CharacterView characterView;
+	private Vector3[] lastPath;
 	
 	private void OnDrawGizmosSelected()
 	{
@@ -112,8 +117,22 @@ public class CharacterAgent : MonoBehaviour
 
 	private void Awake()
 	{
+		characterView = GetComponent<CharacterView>();
+		controller = characterView.GetController();
+		controller.selectionChanged += SelectionChanged;
+		
 		UpdateComponent();
 		StopMovement();
+	}
+
+	private void OnDestroy()
+	{
+		controller.selectionChanged -= SelectionChanged;
+	}
+
+	private void LateUpdate()
+	{
+		DrawPath();
 	}
 
 	private void UpdateComponent()
@@ -123,5 +142,40 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
 		aiPath.endReachedDistance = minNavDistance;
+	}
+
+	private void SelectionChanged(bool isSelected)
+	{
+		shouldDrawPath = isSelected && controller.IsControllable();
+	}
+	
+	private void DrawPath()
+	{
+		if (!shouldDrawPath || (lastPath = GetCurrentPath()).Length <= 1)
+		{
+			pathRenderers.ForEach(p => p.enabled = false);
+			return;
+		}
+
+		var pathColor = characterView.GetCurrentColor();
+		
+		if (pathRenderers.Count > 0)
+		{
+			pathRenderers[0].startColor = pathRenderers[0].endColor = pathColor;
+			pathRenderers[0].positionCount = lastPath.Length;
+			pathRenderers[0].useWorldSpace = true;
+			pathRenderers[0].SetPositions(lastPath);
+		}
+
+		if (pathRenderers.Count > 1)
+		{
+			lastPath = Utils.LimitPathTotalLength(lastPath, controller.GetRemainingMovePoints());
+			pathRenderers[1].startColor = pathRenderers[1].endColor = pathColor;
+			pathRenderers[1].positionCount = lastPath.Length;
+			pathRenderers[1].useWorldSpace = true;
+			pathRenderers[1].SetPositions(lastPath);
+		}
+
+		pathRenderers.ForEach(p => p.enabled = true);
 	}
 }

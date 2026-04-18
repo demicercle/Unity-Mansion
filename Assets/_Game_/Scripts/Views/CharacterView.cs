@@ -29,11 +29,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		currentColor = defaultColor;
 		
 		UpdateComponents();
-
-		controller.selectionChanged += (isSelected) =>
-		{
-			drawPath = isSelected && controller.IsControllable();
-		};
 		
 		controller.onHealed += (amount) =>
 		{
@@ -115,8 +110,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	[SerializeField] private CapsuleCollider capsuleCollider;
 	[SerializeField] private Rigidbody rigidbody;
 	
-	[Header("Navigation")]
-	[SerializeField] private List<LineRenderer> pathRenderers;
 	
 	[Header("Animation")]
 	[SerializeField] private Animator animator;
@@ -153,53 +146,19 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 			rigidbody.isKinematic = true;
 			rigidbody.useGravity = false;
 		}
-
-		foreach (var pathRenderer in pathRenderers)
-		{
-			pathRenderer.enabled = false;
-			pathRenderer.useWorldSpace = true;
-		}
 	}
-
-	public CharacterView GetClosestCharacter(IEnumerable<CharacterView> characters)
-	{
-		return characters.OrderBy(c => Vector3.Distance(GetPosition(), c.GetPosition())).FirstOrDefault();
-	}
+	
+	public Color GetCurrentColor() => currentColor;
 	
 	private Color currentColor;
 	private bool mouseOver;
 	private bool wasSelected;
 	private int partyIndex;
 	private Vector3[] lastPath;
-	
-	void DrawPath()
-	{
-		if (!drawPath || (lastPath = GetController().GetCurrentPath()).Length <= 1)
-		{
-			pathRenderers.ForEach(p => p.enabled = false);
-			return;
-		}
-		
-		if (pathRenderers.Count > 0)
-		{
-			pathRenderers[0].positionCount = lastPath.Length;
-			pathRenderers[0].SetPositions(lastPath);
-		}
-
-		if (pathRenderers.Count > 1)
-		{
-			lastPath = Utils.LimitPathTotalLength(lastPath, GetController().GetRemainingMovePoints());
-			pathRenderers[1].positionCount = lastPath.Length;
-			pathRenderers[1].SetPositions(lastPath);
-		}
-
-		pathRenderers.ForEach(p => p.enabled = true);
-	}
 
 	private void SetColor(Color newColor)
 	{
 		currentColor = newColor;
-		pathRenderers.ForEach(p => p.startColor = p.endColor = Utils.ColorAlpha(newColor, Mathf.Lerp(0.2f, 0.8f, (float)pathRenderers.IndexOf(p))));
 	}
 
     private void Start()
@@ -247,7 +206,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	    }
 
 	    mouseOver = false;
-	    DrawPath();
     }
 
     private void OnDrawGizmosSelected()

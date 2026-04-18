@@ -419,6 +419,7 @@ MonoBehaviour:
   triggers:
   - {fileID: 415387729}
   - {fileID: 746994454}
+  ceilingHeight: 1.5
 --- !u!4 &1266453804 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 701814047783249712, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
