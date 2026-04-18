@@ -3155,8 +3155,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.42237896, y: 0, z: 0, w: 0.90641934}
-  m_LocalPosition: {x: 4.7335887, y: 8.46, z: -14.820177}
+  m_LocalRotation: {x: 0.5505515, y: 0, z: 0, w: 0.83480126}
+  m_LocalPosition: {x: -3.75, y: 12.2346, z: -3.08}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3175,10 +3175,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spotLight: {fileID: 963194230}
-  focusPosition: {x: 4.7335887, y: -4, z: -6.8201766}
+  focusPosition: {x: -3.75, y: 0, z: 1}
   worldBounds:
-    m_Center: {x: 0, y: 6, z: 0}
-    m_Extent: {x: 16, y: 10, z: 14}
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 37.5, y: 0, z: 30}
   height: 12
   inputSpeed: 20
   lerpSpeed: 3
@@ -3216,11 +3216,11 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   rotationStepAngle: 90
-  currentPosition: {x: 4.7335887, y: -3.54, z: -14.820177}
-  desiredRotation: {x: 0.42237896, y: 0, z: 0, w: 0.90641934}
-  forwardValue: 8
-  offsetedPosition: {x: 4.7335887, y: -3.54, z: -14.820177}
-  evaluatedHeight: 1
+  currentPosition: {x: -3.75, y: 0.2346, z: -3.08}
+  desiredRotation: {x: 0.5505515, y: 0, z: 0, w: 0.83480126}
+  forwardValue: 4.08
+  offsetedPosition: {x: -3.75, y: 0.2346, z: -3.08}
+  evaluatedHeight: 0.51
   currentYaw: 0
   yaw: 0
 --- !u!108 &963194230
@@ -3235,8 +3235,8 @@ Light:
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 9.84
-  m_SpotAngle: 31.1928
+  m_Range: 13.6146
+  m_SpotAngle: 43.158283
   m_InnerSpotAngle: 7.5446005
   m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
@@ -3279,7 +3279,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 9.1872e-41, z: 4.1363167e-25, w: 2.75612e-40}
+  m_BoundingSphereOverride: {x: 4.5912e-41, y: 0, z: 0, w: -6.635216e-18}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

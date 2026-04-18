@@ -44,6 +44,13 @@ public class TopDownCamera : MonoBehaviour
         focusPosition = pos;
         UpdatePosition();
     }
+
+    public void SetWorldBounds(Bounds bounds)
+    {
+        worldBounds = bounds;
+        UpdatePosition();
+    }
+    
     public void Focus(GameObject go) => Focus(go.transform.position);
     public void Focus(Component comp) => Focus(comp.transform.position);
     public void Focus(Vector3 world)
@@ -82,12 +89,17 @@ public class TopDownCamera : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(focusPosition, 0.5f);
-        Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawSphere(focusPosition, 0.5f);
         if (spotLight == null) spotLight = gameObject.AddComponent<Light>();
         UpdatePosition();
         UpdateSpotLight();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
     }
 
     private void Update()
