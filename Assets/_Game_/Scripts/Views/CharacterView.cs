@@ -10,18 +10,58 @@ using UnityEngine.UI;
 
 public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterController>
 {
+	static public List<CharacterView> allInstances  = new List<CharacterView>();
+	
 	private CharacterController characterController;
-
 	public CharacterController GetController()
 	{
 		if(!characterController) characterController = GetComponent<CharacterController>();
 		return characterController;
 	}
-
-	private bool drawPath;
+	
+	[Header("Selection")]
+	[SerializeField] private CircleRenderer selectionCircle;
+	[SerializeField] private CircleRenderer movePointsCircle;
+	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red, disabledColor = Color.gray, deadColor = Color.black;
+	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
+	
+	[Header("Collision")]
+	[SerializeField] private CapsuleCollider capsuleCollider;
+	[SerializeField] private Rigidbody rigidbody;
+	
+	[Header("Animation")]
+	[SerializeField] private Animator animator;
+	[SerializeField] private float velocityScale = 1.0f;
+	
+	#region EDITOR
+	private void OnDrawGizmosSelected()
+	{
+		UpdateComponents();
+	}
+	#endregion
+	
+	#region PUBLIC
+	public Color GetCurrentColor() => currentColor;
+	
+	public void CursorOver()
+	{
+		mouseOver = true;
+	}
+	#endregion
+	
+	#region PRIVATE
 	private bool inParty;
 	private bool isEnemy;
-	void Awake()
+	private Color currentColor;
+	private bool mouseOver;
+	private bool wasSelected;
+	private int partyIndex;
+	private bool hasActions;
+	private float alphaColor;
+	private bool killed;
+	private Vector3[] lastPath;
+	
+	private void Awake()
 	{
 		var controller = GetController();
 		
@@ -72,48 +112,49 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	{
 		allInstances.Remove(this);
 	}
-
-	public void FloatingText(string msg) => DebugGUI.FloatingText(GetController().GetCenterPosition(), msg);
 	
-	static public List<CharacterView> allInstances  = new List<CharacterView>();
-	
-	
-
-	public Vector3 GetPosition() => transform.position;
-
-	public int GetRotation() => (int)transform.eulerAngles.y;
-
-	public void CursorOver()
+	private void Start()
 	{
-		mouseOver = true;
+		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
+		
+		if (animator != null)
+		{
+			animator.SetFloat(AnimationParameters.VelocityX, 0.0f);      
+			animator.SetFloat(AnimationParameters.VelocityZ, 0.0f);        
+			animator.SetInteger(AnimationParameters.Weapon, -1);
+			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+			animator.SetTrigger(AnimationParameters.Trigger);
+		}
 	}
-
-    public void OnGUIDebug()
-    {
+	void LateUpdate()//TODO optim
+	{
+		var controller = GetController();
 	    
-    }
+		inParty = controller.InParty();
+		isEnemy = controller.IsEnemyToPlayer();
+		killed = controller.IsDead();
+		SetColor(killed ? deadColor : inParty ? partyColor : isEnemy ? enemyColor : defaultColor);
+	    
+		hasActions = controller.HasActions();
+		alphaColor = alphaCurve.Evaluate(Selection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
+	    
+		selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
+		movePointsCircle.SetColor(currentColor, alphaColor);
+		movePointsCircle.SetProgress(controller.GetMovePointsProgress());
 
-    public IEnumerator PerformsAttack(CharacterView target)
-    {
-	    Debug.Log(this + " PerformsAttack " + target);
-	    DebugGUI.FloatingText(GetPosition(), "Take this!");
-	    yield return new WaitForSeconds(1.0f);
-    }
+		if (animator != null)
+		{
+			var localVelocity = controller.GetVelocity();
+			var isMoving = controller.IsMoving();
+			animator.SetFloat(AnimationParameters.VelocityX, 0);      
+			animator.SetFloat(AnimationParameters.VelocityZ, localVelocity.magnitude * velocityScale);  
+			animator.SetBool(AnimationParameters.Moving, isMoving);
+		}
+
+		mouseOver = false;
+	}
 	
-	[Header("Selection")]
-	[SerializeField] private CircleRenderer selectionCircle;
-	[SerializeField] private CircleRenderer movePointsCircle;
-	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red, disabledColor = Color.gray, deadColor = Color.black;
-	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
-	
-	[Header("Collision")]
-	[SerializeField] private CapsuleCollider capsuleCollider;
-	[SerializeField] private Rigidbody rigidbody;
-	
-	
-	[Header("Animation")]
-	[SerializeField] private Animator animator;
-	[SerializeField] private float velocityScale = 1.0f;
+	private void FloatingText(string msg) => DebugGUI.FloatingText(GetController().GetCenterPosition(), msg);
 
 	private void UpdateComponents()
 	{
@@ -147,69 +188,10 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 			rigidbody.useGravity = false;
 		}
 	}
-	
-	public Color GetCurrentColor() => currentColor;
-	
-	private Color currentColor;
-	private bool mouseOver;
-	private bool wasSelected;
-	private int partyIndex;
-	private Vector3[] lastPath;
 
 	private void SetColor(Color newColor)
 	{
-		currentColor = newColor;
+		currentColor = newColor; // TODO event "color changed"
 	}
-
-    private void Start()
-    {
-	    gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
-		
-	    if (animator != null)
-	    {
-		    animator.SetFloat(AnimationParameters.VelocityX, 0.0f);      
-		    animator.SetFloat(AnimationParameters.VelocityZ, 0.0f);        
-		    animator.SetInteger(AnimationParameters.Weapon, -1);
-		    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
-		    animator.SetTrigger(AnimationParameters.Trigger);
-	    }
-    }
-    
-    private bool hasActions;
-    private float alphaColor;
-    private bool killed;
-    
-    void LateUpdate()//TODO optim
-    {
-	    var view = GameView.GetInstance();
-	    var controller = GetController();
-	    
-	    inParty = controller.InParty();
-	    isEnemy = controller.IsEnemyToPlayer();
-	    killed = controller.IsDead();
-	    SetColor(killed ? deadColor : inParty ? partyColor : isEnemy ? enemyColor : defaultColor);
-	    
-	    hasActions = controller.HasActions();
-	    alphaColor = alphaCurve.Evaluate(Selection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
-	    
-	    selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
-	    movePointsCircle.SetColor(currentColor, alphaColor);
-	    movePointsCircle.SetProgress(controller.GetMovePointsProgress());
-
-	    if (animator != null)
-	    {
-		    var localVelocity = controller.GetVelocity();
-		    var isMoving = controller.IsMoving();
-		    animator.SetFloat(AnimationParameters.VelocityX, 0);      
-		    animator.SetFloat(AnimationParameters.VelocityZ, localVelocity.magnitude * velocityScale);  
-		    animator.SetBool(AnimationParameters.Moving, isMoving);
-	    }
-
-	    mouseOver = false;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-	    UpdateComponents();
-    }
+    #endregion
 }
