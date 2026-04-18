@@ -3156,7 +3156,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5505515, y: 0, z: 0, w: 0.83480126}
-  m_LocalPosition: {x: -3.75, y: 12.2346, z: -3.08}
+  m_LocalPosition: {x: -6.12, y: 12.2346, z: 0.17000008}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3175,7 +3175,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spotLight: {fileID: 963194230}
-  focusPosition: {x: -3.75, y: 0, z: 1}
+  focusPosition: {x: -6.12, y: 0, z: 4.25}
   worldBounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 37.5, y: 0, z: 30}
@@ -3216,10 +3216,10 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   rotationStepAngle: 90
-  currentPosition: {x: -3.75, y: 0.2346, z: -3.08}
+  currentPosition: {x: -6.12, y: 0.2346, z: 0.17000008}
   desiredRotation: {x: 0.5505515, y: 0, z: 0, w: 0.83480126}
   forwardValue: 4.08
-  offsetedPosition: {x: -3.75, y: 0.2346, z: -3.08}
+  offsetedPosition: {x: -6.12, y: 0.2346, z: 0.17000008}
   evaluatedHeight: 0.51
   currentYaw: 0
   yaw: 0
