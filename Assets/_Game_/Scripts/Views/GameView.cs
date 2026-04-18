@@ -58,6 +58,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => TopDownCamera.Instance.Zoom(ctx.ReadValue<Vector2>().y);
+		inputSystem.Player.RotateLeft.performed += ctx => TopDownCamera.Instance.Rotate(-1f);
+		inputSystem.Player.RotateRight.performed += ctx => TopDownCamera.Instance.Rotate(1f);
 		
 		Selection.selectionChanged += SelectionChanged;
 	}
@@ -244,7 +246,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public bool drawDebug = false;
 	[Range(0f,1f)] public float debugGUI = 0f;
-	public float cameraSpeed = 1.0f;
+	//public float cameraSpeed = 1.0f;
 	[Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
 
 	[Header("Debug")]
@@ -568,7 +570,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public bool CanControlSelectedCharacter() => Selection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
-		return !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
+		return HasFocus() && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
 	}
 	
 	
@@ -585,7 +587,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		if (HasFocus())
 		{
-			TopDownCamera.Instance.MoveCameraWithCursor(mousePosition);
+			TopDownCamera.Instance.MoveCameraWithCursor(mousePosition, Time.unscaledDeltaTime);
 		}
 
 		canvas.UpdateUI(this);
@@ -618,7 +620,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
-				TopDownCamera.Instance.Move(inputSystem.Player.Move.ReadValue<Vector2>() * cameraSpeed * Time.unscaledDeltaTime);
+				TopDownCamera.Instance.Move(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime);
 			}
 		}
 		else

@@ -2699,8 +2699,11 @@ MonoBehaviour:
   scenesToLoad: []
   drawDebug: 0
   debugGUI: 0
-  cameraSpeed: 1
   maxNavDistance: 0.5
+  hasFocus: 0
+  hasEditorFocus: 0
+  canvas: {fileID: 0}
+  mousePosition: {x: 0, y: 0}
 --- !u!114 &792779172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3177,13 +3180,16 @@ MonoBehaviour:
     m_Center: {x: 0, y: 1, z: 0}
     m_Extent: {x: 16, y: 4, z: 14}
   height: 12
-  speed: 4
-  panSpeed: 16
+  inputSpeed: 20
+  lerpSpeed: 3
+  panSpeed: 20
   zoomSpeed: 1
-  rotationSpeed: 2
+  rotationSpeed: 3
   lightRange: 1.38
   lightRangeToAngle: 3.17
   forwardOffset: 5
+  canRotateY: 1
+  screenPadding: 2
   heightForwardCurve:
     serializedVersion: 2
     m_Curve:
@@ -3198,7 +3204,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 3
-      value: 0
+      value: 0.02
       inSlope: 0
       outSlope: 0
       tangentMode: 0
