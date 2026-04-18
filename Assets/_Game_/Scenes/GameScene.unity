@@ -1954,7 +1954,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000019073486}
+  m_AnchoredPosition: {x: 0, y: -0.00005340576}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &541877068
@@ -3226,7 +3226,7 @@ MonoBehaviour:
   enableEditorMovement: 1
   editorFocusX: 0.446
   editorFocusZ: 0.464
-  yaw: 0
+  editorYaw: 0
   editorZoom: 0.304
   worldBounds:
     m_Center: {x: 0, y: 10.12, z: 0}
@@ -3239,7 +3239,7 @@ MonoBehaviour:
   screenPadding: 2
   height: 2.2
   zoomSpeed: 1.03
-  rotationSpeed: {x: 1, y: 24}
+  rotationSpeed: {x: 1, y: 16, z: 0}
   canRotateY: 1
   rotationStepAngle: 90
   forwardOffset: 1.04
@@ -3277,6 +3277,7 @@ MonoBehaviour:
   forwardValue: 0.5037926
   offsetedPosition: {x: -4.049999, y: 9.071782, z: -3.261204}
   evaluatedHeight: 0.48441598
+  desiredYaw: 0
   currentYaw: 0
   spotLight: {fileID: 963194230}
 --- !u!108 &963194230
@@ -3335,7 +3336,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: NaN, z: 0, w: -0.00000025660847}
+  m_BoundingSphereOverride: {x: 3.4710012e-29, y: 0, z: 0, w: 1.561265e-39}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

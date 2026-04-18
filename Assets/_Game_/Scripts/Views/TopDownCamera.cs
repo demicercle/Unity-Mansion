@@ -65,7 +65,7 @@ public class TopDownCamera : MonoBehaviour
     [Range(0f,1f)] [SerializeField] private float editorFocusX = .5f;
     [Range(0f,1f)] [SerializeField] private float editorFocusZ = .5f;
     [Space]
-    [Range(-180f, 180)][SerializeField]  private float yaw; 
+    [Range(-180f, 180)][SerializeField]  private float editorYaw; 
     [Space]
     [Range(0f,1f)] [SerializeField] private float editorZoom = 0f;
     
@@ -83,7 +83,7 @@ public class TopDownCamera : MonoBehaviour
     [Header("Zoom")]
     [SerializeField] private float height = 1.5f;
     [SerializeField] private float zoomSpeed = 1.0f;
-    [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
+    [SerializeField] private Vector3 rotationSpeed = new Vector2(3.0f, 6.0f);
     
     [Header("Yaw Control")]
     [SerializeField] private bool canRotateY = true;
@@ -131,7 +131,7 @@ public class TopDownCamera : MonoBehaviour
     public void Move(Vector2 readValue)
     {
         var world = new Vector3(readValue.x, 0, readValue.y);
-        world = Quaternion.Euler(0, yaw, 0) * world;
+        world = Quaternion.Euler(0, desiredYaw, 0) * world;
         //if (readValue.magnitude > 0.001f) Debug.Log(this + " Move " + readValue);
         focusPosition.x += world.x * inputSpeed;
         focusPosition.z += world.z * inputSpeed;
@@ -142,12 +142,20 @@ public class TopDownCamera : MonoBehaviour
         currentZoom = Mathf.Clamp01(currentZoom + zoomSpeed * delta * 0.1f);
     }
 
-    public void Rotate(float step)
+    public void RotateLR(bool left)
     {
         if (!canRotateY) return;
-        yaw = (yaw - rotationStepAngle * step) % 360;
+        desiredYaw = (desiredYaw - rotationStepAngle * (left ? -1 : 1));
+        desiredYaw %= 360;
     }
 
+    public void Rotate(float delta)
+    {
+        if (!canRotateY) return;
+        desiredYaw += delta * rotationSpeed.z;
+      // desiredYaw = Mathf.Clamp(-180)
+    }
+    
     public void PanWithMouse(Vector3 mousePosition, float scale)
     {
         if (mousePosition.x < 0 || mousePosition.y < 0) return;
@@ -160,8 +168,8 @@ public class TopDownCamera : MonoBehaviour
         if (mousePosition.y + screenPadding >= screen.y) motion.z = 1f;
         if (motion.sqrMagnitude > 0f)
         {
-            Debug.Log(this + " " + mousePosition + " " + screen + " " + motion);
-            focusPosition += Quaternion.Euler(0, yaw, 0) * motion * panSpeed * scale;
+            //Debug.Log(this + " " + mousePosition + " " + screen + " " + motion);
+            focusPosition += Quaternion.Euler(0, desiredYaw, 0) * motion * panSpeed * scale;
         }
     }
     
@@ -187,7 +195,7 @@ public class TopDownCamera : MonoBehaviour
         focusPosition = worldBounds.ClosestPoint(focusPosition);
         
         // lerp rotation
-        currentYaw = !Application.isPlaying ? yaw : Mathf.LerpAngle(currentYaw, yaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG * Mathf.PI);
+        currentYaw = !Application.isPlaying ? enableEditorMovement ? editorYaw : desiredYaw : Mathf.LerpAngle(currentYaw, desiredYaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG);
         
         // zooming
         evaluatedHeight = zoomForwardCurve.Evaluate(1f - currentZoom);
@@ -224,6 +232,7 @@ public class TopDownCamera : MonoBehaviour
     [ReadOnly] [SerializeField]  private float forwardValue;
     [ReadOnly] [SerializeField]  private Vector3 offsetedPosition;
     [ReadOnly] [SerializeField]  private float evaluatedHeight;
+    [ReadOnly] [SerializeField]  private float desiredYaw;
     [ReadOnly] [SerializeField]  private float currentYaw;
     [ReadOnly][SerializeField] private Light spotLight;
     

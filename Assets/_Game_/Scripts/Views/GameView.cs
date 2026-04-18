@@ -57,8 +57,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => TopDownCamera.Instance.Zoom(ctx.ReadValue<Vector2>().y);
-		inputSystem.Player.RotateLeft.performed += ctx => TopDownCamera.Instance.Rotate(-1f);
-		inputSystem.Player.RotateRight.performed += ctx => TopDownCamera.Instance.Rotate(1f);
+		inputSystem.Player.RotateLeft.performed += ctx => TopDownCamera.Instance.RotateLR(false);
+		inputSystem.Player.RotateRight.performed += ctx => TopDownCamera.Instance.RotateLR(true);
 		
 		PlayerSelection.selectionChanged += SelectionChanged;
 	}
@@ -253,6 +253,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 	[ReadOnly][SerializeField] private bool hasEditorFocus;
 	[ReadOnly][SerializeField] private GameCanvas canvas;
 	[ReadOnly][SerializeField] private Vector2 mousePosition;
+
+	private Vector2 middleClickMousePosition;
+
+	private bool holdMiddleClick;
 	//private TopDownCamera _topDownCamera;
 	public InputSystem_Actions inputSystem { get; private set; }
 	
@@ -621,6 +625,22 @@ public class GameView : MonoBehaviour, IView<GameController>
 			{
 				TopDownCamera.Instance.Move(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime);
 			}
+
+			if (inputSystem.Player.MiddleClick.WasReleasedThisFrame()) holdMiddleClick = false;
+			if (inputSystem.Player.MiddleClick.WasPressedThisFrame())
+			{
+				holdMiddleClick = true;
+				middleClickMousePosition = mousePosition;
+			}
+
+			if (holdMiddleClick)
+			{
+				var delta = (middleClickMousePosition - mousePosition);
+				var topDownCamera = TopDownCamera.Instance;
+				topDownCamera.Rotate(delta.x * Time.deltaTime);
+				topDownCamera.Zoom(delta.y * Time.deltaTime / Mathf.Pow(Mathf.PI, 2));
+			}
+			//Debug.Log(delta);
 		}
 		else
 		{
