@@ -3175,20 +3175,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spotLight: {fileID: 963194230}
-  focusPosition: {x: -1, y: 3, z: -1}
+  focusPosition: {x: 4.7335887, y: -4, z: -6.8201766}
   worldBounds:
-    m_Center: {x: 0, y: 1, z: 0}
-    m_Extent: {x: 16, y: 4, z: 14}
+    m_Center: {x: 0, y: 6, z: 0}
+    m_Extent: {x: 16, y: 10, z: 14}
   height: 12
   inputSpeed: 20
   lerpSpeed: 3
   panSpeed: 20
   zoomSpeed: 1
-  rotationSpeed: 3
+  rotationSpeed: {x: 3, y: 12}
   lightRange: 1.38
   lightRangeToAngle: 3.17
   forwardOffset: 8
-  headingOffset: 1
+  headingOffset: {x: 1.26, y: 0.46}
   canRotateY: 1
   screenPadding: 2
   heightForwardCurve:
@@ -3215,6 +3215,14 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  rotationStepAngle: 90
+  currentPosition: {x: 4.73359, y: -3.539996, z: -14.820171}
+  desiredRotation: {x: 0.42237896, y: 0.00000008575684, z: -0.000000039961506, w: 0.90641934}
+  forwardValue: 8
+  offsetedPosition: {x: 4.7335873, y: -3.54, z: -14.820177}
+  evaluatedHeight: 1
+  currentYaw: 360
+  yaw: 0
 --- !u!108 &963194230
 Light:
   m_ObjectHideFlags: 0
