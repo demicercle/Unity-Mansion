@@ -1,8 +1,10 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public static class EditorTools
 {
+	#region RevealInFinder
 	[MenuItem("Tools/RevealInFinder/persistentDataPath")]
 	private static void RevealInFinder_persistentDataPath()
 	{
@@ -28,4 +30,46 @@ public static class EditorTools
 	{
 		EditorUtility.RevealInFinder(Application.temporaryCachePath);
 	}
+	#endregion
+
+	#region MakePrefabsFromSelection
+
+	[MenuItem("Tools/MakePrefabsFromSelection/MakeProp")]
+	static public void MakePrefabsFromSelection_MakeProp()
+	{
+		MakePrefabsFromSelection("LD_", (go) =>
+		{
+			Utils.GetOrAddComponent<BoxCollider>(go);
+			go.gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_WALL);
+		});
+	}
+
+	static void MakePrefabsFromSelection(string prefix, System.Action<GameObject> process)
+	{
+		var selection = Selection.gameObjects;
+		if (selection.Length == 0) return;
+		var folder = EditorUtility.OpenFolderPanel("MakePrefabsFromSelection", "Assets/_Game_/Prefabs", "");
+		var excludeNames = new List<string>();
+		var newSelection = new List<Object>();
+		foreach (var go in selection)
+		{
+			var goName = go.name;
+			if (excludeNames.Contains(goName)) continue;
+			
+			if (process != null)
+			{
+				process.Invoke(go);
+				EditorUtility.SetDirty(go);
+			}
+			
+			var path = System.IO.Path.Combine(folder, prefix + goName + ".prefab");
+			excludeNames.Add(goName);
+			var prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
+			newSelection.Add(prefab);
+			EditorGUIUtility.PingObject(prefab);
+		}
+		AssetDatabase.SaveAssets();
+		Selection.objects = newSelection.ToArray();
+	}
+	#endregion
 }
