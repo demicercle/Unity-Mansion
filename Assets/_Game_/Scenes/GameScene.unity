@@ -3149,7 +3149,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 12, z: 0}
+  m_LocalPosition: {x: 4.59, y: 12, z: -7.77}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3168,7 +3168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spotLight: {fileID: 963194230}
-  focusPosition: {x: 0, y: 0, z: 0}
+  focusPosition: {x: 4.59, y: 0, z: -7.77}
   worldBounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 10, y: 3, z: 10}
@@ -3234,7 +3234,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.5e-43, y: 1.23e-43, z: 0, w: 4.3e-44}
+  m_BoundingSphereOverride: {x: 0, y: 1.211e-42, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

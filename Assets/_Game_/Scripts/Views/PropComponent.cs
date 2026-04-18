@@ -107,4 +107,15 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 			GetController().Interact();
 		}
 	}
+
+	public void DrawGizmoBox()
+	{
+		var boxCollider = GetComponent<BoxCollider>();
+		if (boxCollider != null)
+		{
+			var center = transform.TransformPoint(boxCollider.center);
+			var size = transform.TransformVector(boxCollider.size);
+			Gizmos.DrawCube(center, size);
+		}
+	}
 }
