@@ -86,11 +86,20 @@ public class GameView : MonoBehaviour, IView<GameController>
 		// TODO Fade In
 		yield return null;
 
+		// load level
 		for(int i = 0; i < scenesToLoad.Count; i++)
 		{
 			var loadSceneMode = i > 0 ? UnityEngine.SceneManagement.LoadSceneMode.Additive : LoadSceneMode.Single;
 			var async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scenesToLoad[i], loadSceneMode);
 			while (async.isDone == false) yield return null;
+		}
+		
+		yield return null; //
+		
+		//Debug.Log(this + " rebuild navigation async");
+		foreach (var progress in AstarPath.active.ScanAsync()) {
+			Debug.Log("AstarPath.active.ScanAsync " + progress.ToString());
+			yield return null;
 		}
 		
 		yield return null; //
@@ -104,6 +113,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var partyIndex = 0;
 		foreach (var character in levelCharacters)
 		{
+			character.Spawn();
 			if(character.CompareTag(Consts.TAG_PLAYER))
 				character.SetPartyIndex(partyIndex++);
 		}
@@ -428,7 +438,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 		}));
 	}
-	
+
+	private const float TIMED_OUT = 3.0f;
 	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null, System.Action onUpdate = null)
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacter);
@@ -436,14 +447,20 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var agent = movingCharacter.GetAgent();
 		agent.AssignDestination(dest);
 
-		var timeout = 3.0f;
+		var timeout = 0.0f;
 		do
 		{
-			if (timeout <= 0f) break;
+			if (timeout > TIMED_OUT) break;
 			yield return null;
-			timeout -= Time.deltaTime;
+			timeout += Time.deltaTime;
 		}
 		while (agent.pathPending);
+
+		if (timeout >= TIMED_OUT)
+		{
+			Debug.LogWarning(agent + " pathPending timeout!");
+			yield break;
+		}
 
 		var path = agent.GetCurrentPath();
 		if (path.Length > 1)
@@ -464,13 +481,25 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		agent.SetCanMove(true);
 		
-		timeout = 3.0f;
-		do
+		timeout = 0.0f;
+		while(true)
 		{
-			if (timeout <= 0f) break;
+			if (timeout > TIMED_OUT)
+			{
+				Debug.LogWarning(agent + " timeout!");
+				break;
+			}
+			
 			if (movingCharacter.CanMove() == false)
 			{
+				Debug.Log(movingCharacter + " cannot move!");
 				agent.StopMovement();
+				break;
+			}
+
+			if (agent.ReachedDestination(dest))
+			{
+				Debug.Log(movingCharacter + " reached destination!");
 				break;
 			}
 			
@@ -484,12 +513,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			//var newRotation = movingCharacterView.GetRotation();
 			var newPosition = movingCharacter.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
-			if (deltaPos < 0.1f)
-			{
-				timeout -= Time.deltaTime;
-//				Debug.Log(agent + " timeout=" + timeout);
-			}
+			if (deltaPos <= 0f) timeout += Time.deltaTime;
 			else timeout = 0f;
+//			Debug.Log(agent + " timeout=" + timeout);
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
 			//movingCharacter.SetPosition(newPosition);
@@ -498,12 +524,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			//movingCharacter.SetRotation(newRotation);
 			
 			onUpdate?.Invoke();
-			
-		} while (agent.isMoving && !agent.ReachedDestination(dest));
+		}
 		
 		//movingCharacter.SetPosition(path.Last());
 		//movingCharacter.SetRotation(movingCharacter.GetRotation());
 		
+		Debug.Log(agent + " reached destination, end move");
 		agent.SetCanMove(false);
 		
 		onComplete?.Invoke();

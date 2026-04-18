@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-	static public System.Action<CharacterController> created, destroyed;
 	static public List<CharacterController> instances = new List<CharacterController>();
 	static public IEnumerable<CharacterController> GetPartyCharacters() => instances.Where(c => c.InParty());
 	
@@ -44,7 +43,13 @@ public class CharacterController : MonoBehaviour
 	[ReadOnly] [SerializeField] private Vector3 savedPosition;
 	[ReadOnly] [SerializeField] private bool isDead;
 	[ReadOnly] [SerializeField] private CharacterAgent agent;
-
+	
+	public void Spawn()
+	{
+		transform.SetParent(null, true);
+		gameObject.SetActive(true);
+	}
+	
 	public bool IsControllable() => isControllable && !isDead;
 	
 	public CharacterAgent GetAgent()
@@ -60,15 +65,7 @@ public class CharacterController : MonoBehaviour
 	//public bool IsSelected() => isSelected;
 	public void NotifySelected(bool value)
 	{
-		if (value)
-		{
-			agent.SetObstacle(!IsControllable());
-		}
-		else
-		{
-			agent.SetObstacle(true);
-		}
-		
+		agent.SetObstacle(value);
 		selectionChanged?.Invoke(value);
 	}
 
@@ -316,14 +313,11 @@ public class CharacterController : MonoBehaviour
 			Debug.LogError(this + " has no character data");
 		
 		if(!aiBrains.OfType<AIBrain_Wait>().Any()) aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());//todo store instance static
-		
-		created?.Invoke(this);
 	}
 
 	private void OnDestroy()
 	{
 		instances.Remove(this);
-		destroyed?.Invoke(this);
 	}
 
 	public Vector3[] GetCurrentPath() => GetAgent().GetCurrentPath();

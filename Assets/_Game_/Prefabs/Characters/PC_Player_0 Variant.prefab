@@ -22,19 +22,15 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 4b33ba831b49b484594e40ec1584662c, type: 2}
     - target: {fileID: 2825705707412753727, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Height
-      value: 1.75
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2825705707412753727, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Center.y
-      value: 0.875
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 4054300530273574562, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: uniqueID
       value: 6208652644318357256
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131075226992206587, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
-      propertyPath: uniqueID
-      value: 1119742410900100416
       objectReference: {fileID: 0}
     - target: {fileID: 5745611760749173238, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: characterData
@@ -86,11 +82,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7962129871940298334, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: height
-      value: 1.75
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 7962129871940298334, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: maxSpeed
-      value: 5
+      value: 4.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
