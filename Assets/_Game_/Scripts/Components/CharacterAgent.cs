@@ -7,41 +7,88 @@ using UnityEngine;
 public class CharacterAgent : MonoBehaviour
 {
 	public const float minNavDistance = 0.1f; // put this in character view
-
-	
-	public bool PositionChanged(Vector3 p1, Vector3 p2) => p1.ToString() != p2.ToString();
 	
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 
+	public System.Action onSearchPath
+	{
+		get => aiPath.onSearchPath;
+		set => aiPath.onSearchPath = value;
+	}
+	
+	public bool PositionChanged(Vector3 p1, Vector3 p2) => p1.ToString() != p2.ToString();
+	
 	public float GetMaxSpeed() => moveSpeed;
 
 	public float GetRadius() => radius;
 
 	public float GetHeight() => height;
 
-	private void OnDrawGizmosSelected()
+	public void Teleport(Vector3 newPos, int newRot)
 	{
-		UpdateComponent();
+		aiPath.Teleport(newPos, true);
+		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
+	}
+	
+	public void SetCanMove(bool value)
+	{
+		aiPath.simulateMovement = value;
+		aiPath.isStopped = !value;
 	}
 
-	private void Awake()
+	public void SetObstacle(bool value)
 	{
-		UpdateComponent();
-		StopMovement();
+		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate))
+		{
+			graphUpdate.enabled = value;
+			if (value)
+			{
+				graphUpdate.points = new[]
+				{
+					Vector3.forward * aiPath.radius,
+					Vector3.right * aiPath.radius,
+					-Vector3.forward * aiPath.radius,
+					-Vector3.right * aiPath.radius,
+				};
+			}
+		}
 	}
 
-	void UpdateComponent()
+	public Vector3[] GetCurrentPath()
 	{
-		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
-		aiPath.radius = radius;
-		aiPath.height = height;
-		aiPath.maxSpeed = moveSpeed;
-		aiPath.endReachedDistance = minNavDistance;
+		if (!hasDestination)
+			return new Vector3[0];
+		
+		var buffer = new List<Vector3>();
+		aiPath.GetRemainingPath(buffer, out var stale);
+		return buffer.ToArray();
+	}
+	
+	public void AssignDestination(Vector3 hitPoint)
+	{
+		if (hasDestination && !PositionChanged(hitPoint, aiPath.destination))
+			return;
+	    
+		//Debug.Log(aiPath + " AssignDestination " + hitPoint);
+		aiPath.destination = hitPoint;
+		aiPath.SearchPath();
+		hasDestination = true;
+		onSearchPath?.Invoke();
+		DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Utils.ColorAlpha(Color.cyan, 0.2f), 0f);
 	}
 
-	private AIPath aiPath;
+	public void ClearDestination()
+	{
+		hasDestination = false;
+	}
+
+	public void StopMovement()
+	{
+		aiPath.isStopped = true;
+		ClearDestination();
+	}
 	
 	public Vector3 velocity => aiPath.velocity;
 	
@@ -54,77 +101,27 @@ public class CharacterAgent : MonoBehaviour
 	public bool pathPending => aiPath.pathPending;
 
 	public float rotationSpeed => aiPath.rotationSpeed;
-
-	    
+	
 	private bool hasDestination;
-
-    public System.Action onSearchPath
-    {
-	    get => aiPath.onSearchPath;
-	    set => aiPath.onSearchPath = value;
-    }
-
-    public void Teleport(Vector3 newPos, int newRot)
-    {
-	    aiPath.Teleport(newPos, true);
-	    aiPath.rotation = Quaternion.Euler(0, newRot, 0);
-    }
+	private AIPath aiPath;
 	
-    public void SetCanMove(bool value)
-    {
-	    aiPath.simulateMovement = value;
-	    aiPath.isStopped = !value;
-    }
+	private void OnDrawGizmosSelected()
+	{
+		UpdateComponent();
+	}
 
-    public void SetObstacle(bool value)
-    {
-	    if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate))
-	    {
-		    graphUpdate.enabled = value;
-		    if (value)
-		    {
-			    graphUpdate.points = new[]
-			    {
-				    Vector3.forward * aiPath.radius,
-				    Vector3.right * aiPath.radius,
-				    -Vector3.forward * aiPath.radius,
-				    -Vector3.right * aiPath.radius,
-			    };
-		    }
-	    }
-    }
+	private void Awake()
+	{
+		UpdateComponent();
+		StopMovement();
+	}
 
-    public Vector3[] GetCurrentPath()
-    {
-	    if (!hasDestination)
-		    return new Vector3[0];
-		
-	    var buffer = new List<Vector3>();
-	    aiPath.GetRemainingPath(buffer, out var stale);
-	    return buffer.ToArray();
-    }
-	
-    public void AssignDestination(Vector3 hitPoint)
-    {
-	    if (hasDestination && !PositionChanged(hitPoint, aiPath.destination))
-		    return;
-	    
-	    //Debug.Log(aiPath + " AssignDestination " + hitPoint);
-	    aiPath.destination = hitPoint;
-	    aiPath.SearchPath();
-	    hasDestination = true;
-	    onSearchPath?.Invoke();
-	    DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Utils.ColorAlpha(Color.cyan, 0.2f), 0f);
-    }
-
-    public void ClearDestination()
-    {
-	    hasDestination = false;
-    }
-
-    public void StopMovement()
-    {
-	    aiPath.isStopped = true;
-	    ClearDestination();
-    }
+	private void UpdateComponent()
+	{
+		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
+		aiPath.radius = radius;
+		aiPath.height = height;
+		aiPath.maxSpeed = moveSpeed;
+		aiPath.endReachedDistance = minNavDistance;
+	}
 }
