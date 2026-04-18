@@ -1,9 +1,34 @@
 fileFormatVersion: 2
 guid: 548fb0bfc11af3349bff1eb73582363f
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: glass
+    second: {fileID: 2100000, guid: dbfcef1243376e5419036922b5fa5691, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metal
+    second: {fileID: 2100000, guid: f3116ab97c936d94caeee5517c9d2df6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metalLight
+    second: {fileID: 2100000, guid: 6069e0f02b2be6442809e039eae287e0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wood
+    second: {fileID: 2100000, guid: 41830f1ca7871ee49bfa263ac0922527, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: woodDark
+    second: {fileID: 2100000, guid: 48004934687a08d488f241795e3f9025, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -56,6 +81,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8

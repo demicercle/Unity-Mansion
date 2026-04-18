@@ -777,8 +777,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		#if UNITY_EDITOR
 		return UnityEditor.ObjectNames.NicifyVariableName(label) + ": ";
-		#endif
+		#else
 		return label;
+		#endif
 	}
 }
 

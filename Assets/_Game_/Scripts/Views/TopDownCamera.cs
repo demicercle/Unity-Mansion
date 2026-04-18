@@ -5,7 +5,28 @@ using LightType = UnityEngine.LightType;
 
 public class TopDownCamera : MonoBehaviour
 {
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawSphere(focusPosition, 0.5f);
+        UpdatePosition();
+        UpdateSpotLight();
+    }
     
+    [ContextMenu("UpdateSunLight")]
+    void UpdateSunLight()
+    {
+        //if (!updateSunLightPosition) return;
+        if (!sunLight)
+            sunLight = FindObjectsByType<Light>(default)
+                .FirstOrDefault(l => l.type == LightType.Directional && l.CompareTag(Consts.TAG_PLAYER));
+        if (sunLight)
+        {
+            sunLight.transform.rotation = transform.rotation;
+        }
+    }
+#endif
     
     static private TopDownCamera instance;
 
@@ -22,10 +43,15 @@ public class TopDownCamera : MonoBehaviour
         }
     }
     
+    [Header("Editor")] [Range(0f,1f)] [SerializeField] private float editorFocusY = 0f;
+    [Range(0f,1f)] [SerializeField] private float editorFocusX = .5f;
+    [Range(0f,1f)] [SerializeField] private float editorFocusZ = .5f;
+    [SerializeField] private bool editorLockFocus;
+    
     [Header("Settings")]
-    [SerializeField] private Light spotLight;
     [SerializeField] private Vector3 focusPosition;
     [SerializeField] private Bounds worldBounds;
+    [SerializeField] private Vector2 worldMinMax = default;
     [SerializeField] private float height = 1.5f;
     [SerializeField] private float inputSpeed = 10.0f;
     [SerializeField] private float lerpSpeed = 1.5f;
@@ -40,7 +66,9 @@ public class TopDownCamera : MonoBehaviour
     [SerializeField] private int screenPadding = 2;
     [SerializeField] private AnimationCurve heightForwardCurve = AnimationCurve.Constant(0f,0f,0f);
     [ReadOnly] [SerializeField] private float rotationStepAngle = 90.0f;
-
+    [ReadOnly] [SerializeField] private bool updateSpotLight = true;
+    //[ReadOnly] [SerializeField] private bool updateSunLightPosition = true;
+    
     public void SetFocusPosition(Vector3 pos)
     {
         focusPosition = pos;
@@ -88,15 +116,9 @@ public class TopDownCamera : MonoBehaviour
     [ReadOnly] [SerializeField]  private float evaluatedHeight;
     [ReadOnly] [SerializeField]  private float currentYaw;
     [ReadOnly] [SerializeField]  private float yaw; 
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawSphere(focusPosition, 0.5f);
-        if (spotLight == null) spotLight = gameObject.AddComponent<Light>();
-        UpdatePosition();
-        UpdateSpotLight();
-    }
+    [ReadOnly][SerializeField] private Light spotLight;
+    
+    private Light sunLight; 
 
     private void OnDrawGizmos()
     {
@@ -113,6 +135,28 @@ public class TopDownCamera : MonoBehaviour
     // Update is called once per frame
     void UpdatePosition()
     {
+        if (Application.isEditor && !Application.isPlaying) focusPosition.y = editorFocusY;
+        if (worldMinMax.sqrMagnitude > 0f)
+        {
+            worldMinMax.x = Mathf.Max(worldMinMax.x, worldMinMax.y);
+            worldMinMax.y = Mathf.Min(worldMinMax.x, worldMinMax.y);
+            focusPosition.y = Mathf.Clamp(focusPosition.y, worldMinMax.x, worldMinMax.y);
+            var extends = worldBounds.extents;
+            extends.y = Mathf.Lerp(worldMinMax.x, worldMinMax.y, 0.5f);
+            worldBounds.extents = extends;
+            if (Application.isEditor && !Application.isPlaying)
+            {
+                if (editorLockFocus)
+                {
+                    editorFocusY = 0;
+                    editorFocusX = editorFocusZ = 0.5f;
+                }
+                
+                focusPosition.y = Mathf.Lerp(worldMinMax.x, worldMinMax.y, editorFocusY);
+                focusPosition.x = Mathf.Lerp(worldBounds.center.x - worldBounds.extents.x, worldBounds.center.x + worldBounds.extents.x, editorFocusX);
+                focusPosition.y = Mathf.Lerp(worldBounds.center.z - worldBounds.extents.z, worldBounds.center.z + worldBounds.extents.z, editorFocusZ);
+            }
+        }
         evaluatedHeight = heightForwardCurve.Evaluate(focusPosition.y);
         currentYaw = !Application.isPlaying ? yaw : Mathf.LerpAngle(currentYaw, yaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG);
         focusPosition = worldBounds.ClosestPoint(focusPosition);
@@ -130,8 +174,10 @@ public class TopDownCamera : MonoBehaviour
 
     void UpdateSpotLight()
     {
+        if (!updateSpotLight) return;
+        if (spotLight == null) spotLight = gameObject.GetComponent<Light>();
         if (spotLight == null) return;
-        spotLight.type = LightType.Spot;
+        if (spotLight.type != LightType.Spot || !spotLight.enabled) return;
         spotLight.range = currentPosition.y + height + lightRange;
         spotLight.spotAngle = spotLight.range * lightRangeToAngle;
     }
