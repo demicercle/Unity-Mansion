@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using LightType = UnityEngine.LightType;
@@ -37,7 +38,12 @@ public class TopDownCamera : MonoBehaviour
     [SerializeField] private int screenPadding = 2;
     [SerializeField] private AnimationCurve heightForwardCurve = AnimationCurve.Constant(0f,0f,0f);
     [ReadOnly] [SerializeField] private float rotationStepAngle = 90.0f;
-    
+
+    public void SetFocusPosition(Vector3 pos)
+    {
+        focusPosition = pos;
+        UpdatePosition();
+    }
     public void Focus(GameObject go) => Focus(go.transform.position);
     public void Focus(Component comp) => Focus(comp.transform.position);
     public void Focus(Vector3 world)
@@ -133,3 +139,28 @@ public class TopDownCamera : MonoBehaviour
         }
     }
 }
+
+/*#if UNITY_EDITOR
+[UnityEditor.CustomEditor(typeof(TopDownCamera))]
+public class TopDownCameraEditor : UnityEditor.Editor
+{
+    static private GameObject editorCameraTarget;
+    private void DuringSceneGUI(object arg)
+    {
+        if(editorCameraTarget == null) editorCameraTarget = GameObject.Find("EditorCameraTarget");
+        if(editorCameraTarget == null) editorCameraTarget = new GameObject("EditorCameraTarget");
+        editorCameraTarget.hideFlags = HideFlags.DontSave;
+        (target as TopDownCamera).SetFocusPosition(editorCameraTarget.transform.position);
+    }
+
+    private void OnEnable()
+    {
+        UnityEditor.SceneView.duringSceneGui += DuringSceneGUI;
+    }
+
+    private void OnDisable()
+    {
+        UnityEditor.SceneView.duringSceneGui -= DuringSceneGUI;
+    }
+}
+#endif*/
