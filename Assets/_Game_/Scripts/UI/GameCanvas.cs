@@ -2,7 +2,40 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
+[System.Serializable]
+public struct UILabelWrapper
+{
+	[SerializeField] private TMPro.TMP_Text tmpText;
+	public GameObject GetGameObject() => tmpText.gameObject;
+
+	public UILabelWrapper SetActive(bool value)
+	{
+		GetGameObject().SetActive(value);
+		return this;
+	}
+
+	public UILabelWrapper SetWorldPosition(Vector3 position)
+	{
+		GetGameObject().transform.position = position;
+		return this;
+	}
+	
+	public UILabelWrapper SetText(string newText)
+	{
+		tmpText.text = newText;
+		return this;
+	}
+
+	public UILabelWrapper Duplicate()
+	{
+		return new UILabelWrapper()
+		{
+			tmpText = Object.Instantiate(tmpText.gameObject).GetComponent<TMPro.TMP_Text>(),
+		};
+	}
+}
 
 public class GameCanvas : MonoBehaviour
 {
@@ -16,6 +49,7 @@ public class GameCanvas : MonoBehaviour
 	public Button button_actionRun;
 	public Button button_endTurn;
 	public CharacterPortrait[] portraits;
+	public UILabelWrapper floatingText;
 	
 	[Header("Animation")]
 	public Animator animator;
@@ -47,6 +81,24 @@ public class GameCanvas : MonoBehaviour
 		
 		if(portraits.Length == 0)
 			portraits = GetComponentsInChildren<CharacterPortrait>();
+		
+		floatingText.SetActive(false);
+	}
+
+	public void FloatingText(Object obj, string label)
+	{
+		if (obj is CharacterController)
+		{
+			FloatingText((obj as CharacterController).GetCenterPosition(), label);
+		}
+		else
+		{
+			Debug.LogWarning(this + " invalid floating text object: " + obj + " label=" + label);
+		}
+	}
+	public void FloatingText(Vector3 worldPosition, string label)
+	{
+		floatingText.Duplicate().SetWorldPosition(worldPosition).SetText(label);
 	}
 	
 	public void UpdateUI(GameView view)
