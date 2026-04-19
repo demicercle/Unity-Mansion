@@ -44,10 +44,26 @@ public static class ConsoleWrapper
 		}
 	}
 
+	[ConsoleMethod("tp", "")]
+	static public void Teleport() => Teleport(0);
+	[ConsoleMethod("teleport", "")]
+	static public void Teleport(int value)
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out CharacterController partyChar))
+		{
+			var gameView = GameView.GetInstance();
+			var result = gameView.CursorRaycast(out var hit);
+			if (result == GameView.CURSOR_RAYCAST_RESULT_NAVIGATION)
+			{
+				partyChar.Teleport(hit.point, value > 0);
+			}
+		}
+	}
+
 	static void UseCharacterAllActions(CharacterController partyChar)
 	{
 		partyChar.ConsumeMovePoints(partyChar.GetRemainingMovePoints());
-		partyChar.ConsumeActions(partyChar.GetRemaingActions());
+		partyChar.UseAction(CharacterAction.None);
 	}
 
 	[ConsoleMethod("debug_draw", "")]

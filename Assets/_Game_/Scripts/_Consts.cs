@@ -8,4 +8,7 @@
 	public const  string LAYER_WALL = "Wall";
 	public const  string LAYER_CHARACTER = "Character";
 	public const  string LAYER_IGNORE = "Ignore Raycast";
+
+	public const float MinTimeDuration = 0.25f;
+	public const float MinMagnitude = 0.01f;
 }

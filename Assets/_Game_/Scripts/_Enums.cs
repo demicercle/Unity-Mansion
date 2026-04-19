@@ -9,5 +9,6 @@ public enum CharacterAction
 {
 	None,
 	RunAction,
-	AttackAction
+	AttackAction,
+	InteractAction
 }

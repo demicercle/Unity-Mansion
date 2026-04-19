@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Oddworm.Framework;
 using Pathfinding;
+using Pathfinding.Drawing;
 using UnityEngine;
 
 public class CharacterAgent : MonoBehaviour
@@ -19,14 +20,8 @@ public class CharacterAgent : MonoBehaviour
 	
 	[Header("Circles")]
 	[SerializeField] private CircleRenderer moveTarget;
-
-	public System.Action onSearchPath
-	{
-		get => aiPath.onSearchPath;
-		set => aiPath.onSearchPath = value;
-	}
 	
-	public bool PositionChanged(Vector3 p1, Vector3 p2) => p1.ToString() != p2.ToString();
+	//public bool PositionChanged(Vector3 p1, Vector3 p2) => p1.ToString() != p2.ToString();
 	
 	public float GetMaxSpeed() => moveSpeed;
 
@@ -34,8 +29,9 @@ public class CharacterAgent : MonoBehaviour
 
 	public float GetHeight() => height;
 
-	public void Teleport(Vector3 newPos, int newRot)
+	public void Teleport(Vector3 newPos, int newRot, bool stopMovement = true)
 	{
+		if(stopMovement) StopMovement();
 		aiPath.Teleport(newPos, true);
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 	}
@@ -69,7 +65,7 @@ public class CharacterAgent : MonoBehaviour
 
 	public Vector3[] GetCurrentPath()
 	{
-		if (!hasDestination)
+		if (!hasDestination) // GetCurrentPath
 			return new Vector3[0];
 		
 		var buffer = new List<Vector3>();
@@ -82,6 +78,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.simulateMovement = true;
 		aiPath.isStopped = false;
+		UpdatePathAndTarget(true);
 		//Debug.Log(this + " StartMove");
 	}
 
@@ -96,21 +93,34 @@ public class CharacterAgent : MonoBehaviour
 	
 	public void AssignDestination(Vector3 hitPoint, bool force = false)
 	{
-		if (!force && hasDestination && !PositionChanged(hitPoint, aiPath.destination))
-			return;
-	
-		//Debug.Log(aiPath + " AssignDestination " + hitPoint);
-		aiPath.destination = hitPoint;
-		aiPath.SearchPath();
-		hasDestination = true;
-		isDrawingPath = false;
-		onSearchPath?.Invoke();
-		DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Utils.ColorAlpha(Color.cyan, 0.2f), 0f);
+		/*if (hasDestination // AssignDestination
+		    && !Utils.SnapCompareVector3(hitPoint, aiPath.destination, 0.1f))
+		{
+			hasDestination = false;
+			Debug.Log(aiPath + " SnapCompareVector3 hasDestination=" + hasDestination);
+		}*/
+		
+		if (force || !hasDestination)
+		{
+			hasDestination = true;
+			//lastAssignTime = Time.time;
+			//Debug.Log(aiPath + " hasDestination=" + hasDestination);
+			
+			aiPath.destination = hitPoint;
+			aiPath.SearchPath();
+			
+			UpdatePathAndTarget(true);
+		}
 	}
 
 	public void ClearDestination()
 	{
-		hasDestination = false;
+		if (hasDestination) // ClearDestination
+		{
+			hasDestination = false;
+//			Debug.Log(aiPath + " hasDestination=" + hasDestination);
+			UpdatePathAndTarget(true);
+		}
 	}
 
 	public bool ReachedDestination(Vector3 dest)
@@ -121,17 +131,20 @@ public class CharacterAgent : MonoBehaviour
 	private const float TIMED_OUT = 3f;
 	public IEnumerator SearchPathAsync(Vector3 dest, System.Action onComplete = null)
 	{
-		AssignDestination(dest); // WaitCharacterMoved
+		AssignDestination(dest, true); // WaitCharacterMoved
 		
 		var timeout = 0.0f;
 		do
 		{
+			UpdatePathAndTarget(true);
 			if (timeout >= TIMED_OUT) break;
 			yield return null;
 			timeout += Time.deltaTime;
 		}
 		while (pathPending);
 
+		UpdatePathAndTarget(true);
+		
 		if (timeout >= TIMED_OUT)
 		{
 			Debug.LogWarning(this + " pathPending timeout!");
@@ -145,10 +158,8 @@ public class CharacterAgent : MonoBehaviour
 	public bool hasPath => aiPath.hasPath;
 	
 	public Vector3 velocity => aiPath.velocity;
-	
-	public bool isMoving => !aiPath.isStopped;
-	    
-	//public bool reachedDestination => aiPath.reachedDestination;
+
+	public bool IsMoving() => !aiPath.isStopped /*&& !aiPath.pathPending && velocity.magnitude > Consts.MinMagnitude)*/;
 	   
 	public float GetMinReachDistance() => Mathf.Max(endReachDistance, aiPath.endReachedDistance);
 	   
@@ -156,7 +167,7 @@ public class CharacterAgent : MonoBehaviour
 
 	public float rotationSpeed => aiPath.rotationSpeed;
 
-	//private bool shouldDrawPath;
+	///private float lastAssignTime;
 	private bool hasDestination;
 	private AIPath aiPath;
 	private CharacterController controller;
@@ -170,6 +181,15 @@ public class CharacterAgent : MonoBehaviour
 		Utils.DrawGizmosCircle(transform.position, Vector3.up, GetMinReachDistance());
 	}
 
+	void UpdateComponent()
+	{
+		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
+		aiPath.radius = radius;
+		aiPath.height = height;
+		aiPath.maxSpeed = moveSpeed;
+		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
+	}
+
 	private void Awake()
 	{
 		_characterAnimation = GetComponent<CharacterAnimation>();
@@ -179,93 +199,97 @@ public class CharacterAgent : MonoBehaviour
 		
 		CharacterSelection.selectionChanged += SelectionChanged;
 	}
-
-	private void Start()
-	{
-		if (!hasDestination)
-		{
-			aiPath.isStopped = true;
-		}
-	}
 	
 	private void OnDestroy()
 	{
 		CharacterSelection.selectionChanged -= SelectionChanged;
 	}
 
+	private void Start()
+	{
+		if (!hasDestination) aiPath.isStopped = true; // Start
+		
+		UpdatePathAndTarget(true);
+	}
+
 	void SelectionChanged()
 	{
-		SetObstacle(!CharacterSelection.IsCharacterSelected(controller));
-		if(!isMoving) ClearDestination();
+		if (controller.IsSelected())
+		{
+			SetObstacle(!controller.IsControllableByPlayer());
+		}
+		else
+		{
+			SetObstacle(true);
+			if(!IsMoving()) ClearDestination();
+		}
+		
+		UpdatePathAndTarget(true);
 	}
 
 	private void LateUpdate()
 	{
-		UpdateMoveTarget();
-		DrawPath();
+		if (GameView.GetInstance().HasCoroutines()) // todo
+			UpdatePathAndTarget(true);
 	}
 
-	private void UpdateComponent()
+	private bool[] shouldDrawPath = new []{false,false};
+	private bool[] isDrawingPath = new []{false,false};
+	private void UpdatePathAndTarget(bool force)
 	{
-		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
-		aiPath.radius = radius;
-		aiPath.height = height;
-		aiPath.maxSpeed = moveSpeed;
-		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
+		//TODO: controller.IsActing(), controller.IsMoving(), controller.IsRotating()
+
+		shouldDrawPath[0] = hasDestination // "thin" path
+		                    && CharacterSelection.IsCharacterSelected(controller)
+		                    && controller.IsControllableByPlayer()
+		                    && (!GameView.GetInstance().HasCoroutines() || controller.IsMoving())
+		                    && (lastPath = GetCurrentPath()).Length > 1;
+
+		shouldDrawPath[1] = hasDestination  // "thin" path
+		                    && CharacterSelection.IsCharacterSelected(controller) 
+		                    && controller.IsControllableByPlayer() 
+		                    && !GameView.GetInstance().HasCoroutines()
+		                    && (lastPath = GetCurrentPath()).Length > 1;
+								//&& !controller.IsRotating()
+								//&& !controller.IsMoving();
+
+		if (force || shouldDrawPath[0] != isDrawingPath[0])
+		{
+			pathRenderers[0].enabled = isDrawingPath[0] = shouldDrawPath[0];
+			if (pathRenderers[0].enabled) // draw path thin
+			{
+				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor();
+				pathRenderers[0].positionCount = lastPath.Length;
+				pathRenderers[0].useWorldSpace = true;
+				pathRenderers[0].SetPositions(lastPath);
+			}
+		}
+
+		if (force || shouldDrawPath[1] != isDrawingPath[1])
+		{
+			pathRenderers[1].enabled = isDrawingPath[1] = shouldDrawPath[1];
+			if (pathRenderers[1].enabled) // draw path thick
+			{
+				lastPath = Utils.LimitPathTotalLength(lastPath, controller.GetRemainingMovePoints());
+				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(controller, true, true);
+				pathRenderers[1].positionCount = lastPath.Length;
+				pathRenderers[1].useWorldSpace = true;
+				pathRenderers[1].SetPositions(lastPath);
+			}
+		}
+		
+		UpdateMoveTarget(controller.IsMoving());
 	}
 
-	private bool shouldDrawPath;
-	private bool isDrawingPath;
-	private void DrawPath()
+	void UpdateMoveTarget(bool isBlinking)
 	{
-		shouldDrawPath = hasDestination 
-		                 && CharacterSelection.IsCharacterSelected(controller) 
-		                 && controller.IsControllable() 
-		                 && (lastPath = GetCurrentPath()).Length > 1;
-
-		if (shouldDrawPath == isDrawingPath)
-			return;
-		
-		//Debug.Log(this + " shouldDrawPath=" + shouldDrawPath + " path=" + lastPath);
-		
-		if (!shouldDrawPath)
-		{
-			isDrawingPath = false;
-			pathRenderers.ForEach(p => p.enabled = false);
-			return;
-		}
-		
-		if (pathRenderers.Count > 0)
-		{
-			pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor();
-			pathRenderers[0].positionCount = lastPath.Length;
-			pathRenderers[0].useWorldSpace = true;
-			pathRenderers[0].SetPositions(lastPath);
-		}
-
-		if (pathRenderers.Count > 1)
-		{
-			lastPath = Utils.LimitPathTotalLength(lastPath, controller.GetRemainingMovePoints());
-			pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(controller, true, true);
-			pathRenderers[1].positionCount = lastPath.Length;
-			pathRenderers[1].useWorldSpace = true;
-			pathRenderers[1].SetPositions(lastPath);
-		}
-
-		isDrawingPath = true;
-		pathRenderers.ForEach(p => p.enabled = true);
-	}
-
-	void UpdateMoveTarget()
-	{
-		if (!hasDestination)
+		if (!hasDestination || !aiPath.hasPath) //hide moveTarget !hasDestination && !aiPath.hasPath
 		{
 			moveTarget.gameObject.SetActive(false);
 			return;
 		}
-		
-		var isBlinking = isMoving;
 
+		//Debug.Log(this + " show moveTarget");
 		moveTarget.gameObject.SetActive(true);
 		moveTarget.transform.position = aiPath.destination;
 		moveTarget.SetColor(ColorSettings.GetCharacterColor(controller, true, true));

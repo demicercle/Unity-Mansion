@@ -14,9 +14,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 	static public void Focus(bool value) => GetInstance().OnApplicationFocus(value);
 	
 	static bool debugCursor = false;
-	const int CURSOR_RAYCAST_RESULT_NONE = 0;
-	const int CURSOR_RAYCAST_RESULT_NAVIGATION = 1;
-	const int CURSOR_RAYCAST_RESULT_CHARACTER = 2;
+	public const int CURSOR_RAYCAST_RESULT_NONE = 0;
+	public const int CURSOR_RAYCAST_RESULT_NAVIGATION = 1;
+	public const int CURSOR_RAYCAST_RESULT_CHARACTER = 2;
 	
 	override public string ToString() => "GameView";
 
@@ -190,9 +190,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 	//	//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (clickedCharacter.InParty())
 		{
-			if(GetController().IsPlayerTurn())
+			if (GetController().IsPlayerTurn())
+			{
 				CharacterSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
-			else Debug.Log("not in player turn");
+				return;
+			}
+			
+			Debug.Log("ClickCharacter: not in player turn");
+			return;
 		}
 		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
 		{
@@ -202,11 +207,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 				if (selectedCharacter.CanAttack(false))
 				{
 					AssignAttack(selectedCharacter, clickedCharacter, false, true);
+					return;
 				}
-				else
-				{
-					selectedCharacter.FloatingText("Can't");
-				}
+				
+				selectedCharacter.FloatingText("Can't");
+				return;
 			}
 		}
 		else
@@ -214,8 +219,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (selectedCharacter != null)
 			{
 				Debug.Log("TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
+				return;
 			}
 		}
+		
+		Debug.Log("ClickCharacter: ?");
 	}
 
 	public void AssignAttack(CharacterController attacker, CharacterController target, bool canUseRunAction, bool losCheck)
@@ -227,13 +235,15 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public void ClickProp(PropComponent clickedProp) // TODO Prop Controller
 	{
 		Debug.Log(this + " ClickProp " + clickedProp);
-		var gameController = GetController();
 		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
 			AssignInteract(selectedCharacter, clickedProp);
+			return;
 		}
+		
+		Debug.Log("ClickProp: no character selected");
 	}
 
 	public void AssignInteract(CharacterController character, PropComponent clickedProp) // TODO Prop Controller
@@ -278,7 +288,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
 			AssignMove(selectedCharacter, navPosition);
+			return;
 		}
+		
+		Debug.Log("ClickNavigation: no character selected");
 	}
 
 	public void AssignMove(CharacterController controller, Vector3 navPosition)
@@ -322,7 +335,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	private Vector2 middleClickMousePosition;
 
-	private bool holdMiddleClick;
+	private bool holdMiddleClick, mouseHasMoved;
 	public InputSystem_Actions inputSystem { get; private set; }
 	
 	private List<IEnumerator> coroutines = new  List<IEnumerator>();
@@ -330,6 +343,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public void MouseMove(Vector2 pos)
 	{
 		mousePosition = pos;
+		mouseHasMoved = true;
 	}
 
 	public void RightClick(float value)
@@ -459,9 +473,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 				character.LookDirection(wpDir, Time.deltaTime);
 				yield return null;
 			}
-			
-			if (prop.consumeActions > 0)
-				character.ConsumeActions(prop.consumeActions);
+
+			character.UseAction(prop.consumeAction);
 			
 			yield return new WaitForSeconds(prop.triggerDelay);
 
@@ -565,10 +578,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 			movingCharacter.ConsumeMovePoints(deltaPos);
 			
-			if (deltaPos <= 0f) timeout += Time.deltaTime;
+			if (deltaPos < Consts.MinMagnitude) timeout += Time.deltaTime;
 			else timeout = 0f;
 			
-			DebugDrawer.WorldLabel(movingCharacter.GetCenterPosition(), "moving:" + timeout.ToString("N2"));
+			if(timeout > 0f) DebugDrawer.WorldLabel(movingCharacter.GetCenterPosition(), "timeout=" + timeout.ToString("N2"));
+			else DebugDrawer.WorldLabel(movingCharacter.GetCenterPosition(), "deltaPos=" + deltaPos.ToString("N2"));
 		}
 		
 		onComplete?.Invoke();
@@ -635,7 +649,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		!HasCoroutines() && GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
 
 	public bool IsControlPanelVisible() =>
-		GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllable();
+		GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllableByPlayer();
 
 	//public CharacterController GetPartyCharacter(int index) => CharacterController.GetPartyCharacter(index);
 
@@ -702,7 +716,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
-		return hasFocus && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
+		return hasFocus && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllableByPlayer();
 	}
 	
 	
@@ -719,6 +733,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		canvas.UpdateUI(this);
 		lastMousePosition = mousePosition;
+		mouseHasMoved = false;
 	}
 
 	private void Update()
@@ -761,6 +776,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 			if (holdMiddleClick)
 			{
+				mouseHasMoved = true;
 				//cameraPivot.PanWithMouse(mousePosition.y, Time.unscaledDeltaTime);
 				cameraPivot.MoveFocus((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime, Space.World);
 
@@ -824,7 +840,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				{
 					if (CanControlCharacter(selectedCharacter))
 					{
-						selectedCharacter.GetAgent().AssignDestination(hit.point, false); // mouse over navigation
+						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
 					}
 					else if(debugCursor) Debug.Log("character not controllable");
 				}
@@ -846,7 +862,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 							}
 							else
 							{
-								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
+								agent.AssignDestination(overCharacter.GetPosition(), mouseHasMoved); // mouse over character
 							}
 						}
 						else if(debugCursor) Debug.Log("character not controllable");
@@ -862,7 +878,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
 								var agent = selectedCharacter.GetAgent();
-								agent.AssignDestination(bestWaypoint.GetPosition(), true); // mouse over prop
+								agent.AssignDestination(bestWaypoint.GetPosition(), mouseHasMoved); // mouse over prop
 							}
 							//else Debug.LogWarning("no waypoint found");
 						}
@@ -949,21 +965,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 
 		return CURSOR_RAYCAST_RESULT_NONE;
-	}
-
-	public void OnGUIDebug()
-	{
-		/*const float space = 0.5f;
-		GUILayout.FlexibleSpace();
-		GUILayout.Label(GetLabel("hasFocus") + hasFocus);
-		GUILayout.Label(GetLabel("coroutines") + coroutines.Count);
-		if (selectedCharacter)
-		{
-			GUILayout.Space(space);
-			GUILayout.BeginVertical("window");
-			selectedCharacter?.OnGUIDebug();
-			GUILayout.EndVertical();
-		}*/
 	}
 
 	string GetLabel(string label)

@@ -10,7 +10,79 @@
 - interact with npc
 - CantEvent
 - DebugGUI Draw Character stats (movePoints, etc)
+	> Right Click editor selects character under mouse
 - CharacterView > CharacterSelection
 - CharacterAnimation
 - RPGAnims (AnimationSettings)
 - "Forsaken" Startup scene
+- CursorSprite "Wait" during loading
+- CursorSprite "Hand" on Character or Prop
+- "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
+- GameView.Routines
+- GameView.Cursor
+- Editor tool "hide children in hierarchy if not in prefab stage"
+- rename "ColorSettings" in "GameSettings" (not user modifiable)
+- increase time during AI Think coroutine
+
+- RPGAnims 
+	> DrawWeapons
+	> SheathWeapons
+	> Attack
+	> GetHit
+
+- CharacterComponent
+	> allInstances
+
+- CharacterStates
+	> IdleState
+	> AssignState (for Player)
+	> ThinkState (for AI)
+	> MoveToState
+	> PerformsActionState
+	> DeadState
+
+- CharacterActions
+	> None
+	> RunAction
+	> AttackAction
+	> InteractAction
+	...
+	> TalkAction
+	> UseItemAction
+
+- PlayerInput
+	> HasFocus
+	> ClickNavigation
+	> ClickProp
+	> ClickCharacter
+	> MouseMove
+	> CameraMove
+	> CameraOrbit
+	...
+
+- PlayerParty
+	> AddCharacter
+	> RemoveCharacter
+	> AssignMove
+	> AssignInteract
+	> AssignRun
+	... ("assign action")
+
+- GameRoutines
+	> QueueRoutine
+	> routinesStarted
+	> routinesCompleted
+	> WaitMoveCharacter
+	> WaitRotateCharacter
+	...
+
+- GameMaster
+	> NewTurn
+	> EndTurn
+	> IsPlayerTurn
+	> IsCurrentTurn(faction)
+	> onTurnStarted
+	> onTurnEnded
+	> onGameOver
+	> onVictory
+	...

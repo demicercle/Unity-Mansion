@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+	static public GameController GetInstance() => GameView.GetInstance().GetController();
 	//public CharacterController GetSelectedCharacter() => allCharacters.FirstOrDefault(c => c.IsSelected());
 
 	//public CharacterController[] GetPartyCharacters() => allCharacters.Where(c => c.InParty()).ToArray();
@@ -52,7 +53,7 @@ public class GameController : MonoBehaviour
 	{
 		currentTurn += 1;
 		playerTurn = true;
-		CharacterController.instances.ForEach(c => c.NewTurn(currentTurn));
+		CharacterController.instances.ForEach(c => c.NewTurn(currentTurn));//TODO Event
 		Debug.Log(this + " NewTurn " + currentTurn);
 		turnStarted?.Invoke();
 	}
@@ -60,6 +61,7 @@ public class GameController : MonoBehaviour
 	public void EndTurn()
 	{
 		playerTurn = false;
+		CharacterController.instances.ForEach(c => c.EndTurn());//TODO Event
 		Debug.Log(this + " EndTurn " + currentTurn);
 		turnEnded?.Invoke();
 	}

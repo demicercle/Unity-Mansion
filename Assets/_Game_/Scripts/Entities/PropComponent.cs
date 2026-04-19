@@ -25,7 +25,8 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 	public Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
 
 	public bool onlyOnce;
-	[Min(0)] public int consumeActions;
+	[SerializeField] [ReadOnly] private CharacterAction TODO_consumeAction; // TODO = CharacterAction.InteractAction
+	public CharacterAction consumeAction => CharacterAction.InteractAction;
 	public bool rebuildNavigation;
 	[Min(0f)]public float autoTriggerDelay;
 	public string animatorTrigger;

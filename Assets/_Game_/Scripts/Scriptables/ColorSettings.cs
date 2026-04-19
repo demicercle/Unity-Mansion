@@ -25,6 +25,9 @@ public class ColorSettings : ScriptableObject
 		
 		if (character.InParty())
 		{
+			if (!character.IsCurrentTurn())
+				return Color.Lerp(GetDisabledColor(), GetFactionColor(character.GetCurrentFaction()), Instance.disabledToFaction);
+			
 			if (!character.HasUsedAction(CharacterAction.RunAction))
 			{
 				if (disabledIfNoActions && !character.HasActions()) 
@@ -46,7 +49,8 @@ public class ColorSettings : ScriptableObject
 		Color.green,
 		Color.red
 	};
-
-	public Color disabledColor = Color.gray;
+	
 	public Color deadColor = Color.black;
+	[Range(0f, 1f)] public float disabledToFaction = 0.5f;
+	public Color disabledColor = Color.gray;
 }

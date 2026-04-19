@@ -49,8 +49,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		controller.onKilled += OnKilled;
 		//controller.onMoved += () =>
 		//controller.onRotate += () =>
-		controller.onRunAction += OnRunAction;
-		controller.onAttackAction += OnAttackAction;
+		controller.onUseAction += OnUseAction;
 	}
 
 	private void OnDestroy()
@@ -61,8 +60,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		controller.onKilled -= OnKilled;
 		//controller.onMoved -= () =>
 		//controller.onRotate -= () =>
-		controller.onRunAction -= OnRunAction;
-		controller.onAttackAction -= OnAttackAction;
+		controller.onUseAction -= OnUseAction;
 	}
 
 	void OnHealed(float amount)
@@ -82,16 +80,19 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 	}
 
-	void OnRunAction()
+	void OnUseAction(CharacterAction actionType, object args = null)
 	{
-		animator.SetTrigger(AnimationParameters.Trigger);
-		animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.ReloadTrigger);
-		GetController().FloatingText("Run!");
-	}
-
-	void OnAttackAction(CharacterController other)
-	{
-		GetController().FloatingText("Take this!");
+		if (actionType == CharacterAction.RunAction)
+		{
+			animator.SetTrigger(AnimationParameters.Trigger);
+			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.ReloadTrigger);
+			GetController().FloatingText("Run!");
+		}
+		
+		else if (actionType == CharacterAction.AttackAction)
+		{
+			GetController().FloatingText("Take this!");
+		}
 	}
 	
 	private void Start()

@@ -19,8 +19,7 @@ public class CharacterController : MonoBehaviour
 	public event System.Action onKilled;
 	public event System.Action onMoved;
 	public event System.Action onRotate;
-	public event System.Action<CharacterController> onAttackAction;
-	public event System.Action onRunAction;
+	public event System.Action<CharacterAction, object> onUseAction;
 	
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
@@ -32,14 +31,18 @@ public class CharacterController : MonoBehaviour
 //	[ReadOnly] [SerializeField] private bool isSelected = false;
 	[ReadOnly] [SerializeField] private int partyIndex = -1;
 	[ReadOnly] [SerializeField] private float usedMovePoints;
-	[ReadOnly] [SerializeField] private int usedActions;
-	[ReadOnly] [SerializeField] private List<CharacterAction> usedActionList = new List<CharacterAction>();
+	//[ReadOnly] [SerializeField] private int usedActions;
+	[ReadOnly] [SerializeField] private List<CharacterAction> usedActions = new List<CharacterAction>();
 	[ReadOnly] [SerializeField] private float totalDamages;
 	[ReadOnly] [SerializeField] private int savedRotation;
 	[ReadOnly] [SerializeField] private Vector3 savedPosition;
 	[ReadOnly] [SerializeField] private bool isDead;
 	[ReadOnly] [SerializeField] private CharacterAgent agent;
 	[ReadOnly] [SerializeField] private int currentTurn;
+	[ReadOnly] [SerializeField] private CharacterFaction currentFaction;
+	[ReadOnly] [SerializeField] private CharacterFaction previousFaction;
+
+	[ReadOnly] [SerializeField] private float lastRotatedTime;
 	//[SerializeField] private ColorSettings colorSettings;
 	
 	public int GetCurrentTurn() => currentTurn;
@@ -51,7 +54,7 @@ public class CharacterController : MonoBehaviour
 		GetAgent().SetObstacle(true);
 	}
 	
-	public bool IsControllable() => isControllable && !isDead; // TODO: "IsPlayerTurn() && IsParty()"
+	public bool IsControllableByPlayer() => isControllable && !isDead; // TODO: "IsPlayerTurn() && IsParty()"
 	
 	public CharacterAgent GetAgent()
 	{
@@ -70,32 +73,43 @@ public class CharacterController : MonoBehaviour
 		selectionChanged?.Invoke(value);
 	}
 
+	public void EndTurn()
+	{
+		StopAgent();
+	}
 
 	public void Restore() => NewTurn(-1);
 	public void NewTurn(int turn)
 	{
-		usedActionList.Clear();
-		usedActions = 0;
+		usedActions.Clear();
 		usedMovePoints = 0;
 		GetAgent().ClearDestination();
 		if (turn >= 0) currentTurn = turn;
 	}
 
 
-	public int GetRemaingActions()
+	public int GetRemaingActions() // TODO GD
 	{
-		return characterData.maxActions - usedActions;
+		return characterData.maxActions - usedActions.Count;
 	}
 	
-	public bool HasActions() => usedActions < characterData.maxActions;
-
-	public void ConsumeActions(int actions = 1)
+	public bool HasActions() => usedActions.Count < characterData.maxActions;
+	
+	public void UseAction(CharacterAction actionType, object param = null)
 	{
-		usedActions += actions;
-		Debug.Log(this + " usedActions=" + usedActions);
+		usedActions.Add(actionType);
+		Debug.Log(this + " usedAction=" + usedActions.Last());
+		if (actionType == CharacterAction.RunAction)
+		{
+			usedMovePoints -= characterData.runActionExtraMovePoints;
+			//StopAgent();
+		}
+		onUseAction?.Invoke(actionType, param);
 		statsChanged?.Invoke();
 	}
 
+	public CharacterFaction GetCurrentFaction() => currentFaction;
+	public bool IsPlayer() => GetCurrentFaction() == CharacterFaction.Player;
 	public bool IsEnemyToPlayer(CharacterController other = null) => characterData.faction == CharacterFaction.Enemy;
 	
 	public bool InParty() => partyIndex >= 0;
@@ -105,9 +119,28 @@ public class CharacterController : MonoBehaviour
 	{
 		Debug.Log(this + " SetPartyIndex " + index);
 		partyIndex = index;
-		isControllable = index >= 0;
+		if (index >= 0)
+		{
+			isControllable = true;
+			SetCurrentFaction(CharacterFaction.Player);
+		}
+		else
+		{
+			isControllable = false;
+			SetCurrentFaction(previousFaction);
+		}
 		onPartyIndexChanged?.Invoke(index);
 	}
+
+	private void SetCurrentFaction(CharacterFaction faction)
+	{
+		if (currentFaction == previousFaction) return;
+		Debug.Log(this  + " SetCurrentFaction " + faction + " from " + previousFaction);
+		previousFaction = currentFaction;
+		currentFaction = faction;
+	}
+
+	public bool IsCurrentTurn() => GameController.GetInstance().IsPlayerTurn() && IsPlayer();
 	
 	public float GetMaxMovePoints() => characterData.maxMovePoints;
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
@@ -124,7 +157,7 @@ public class CharacterController : MonoBehaviour
 		return HasActions();
 	}
 
-	public void RotateTowards(Vector3 worldPosition, float f = -1f)
+	public void LookWorldPosition(Vector3 worldPosition, float f = -1f)
 	{
 		DebugDrawer.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
 		LookDirection(worldPosition - GetPosition(), f);
@@ -133,7 +166,8 @@ public class CharacterController : MonoBehaviour
 	public void LookDirection(Vector3 getDirection, float f = -1f)
 	{
 //		Debug.Log(this + " LookDirection " + f + " " + getDirection);
-		
+		lastRotatedTime = Time.time;		
+
 		getDirection.y = 0;
 		getDirection.Normalize();
 
@@ -169,10 +203,11 @@ public class CharacterController : MonoBehaviour
 	
 	public Vector3 GetPosition() => transform.position;
 
-	public void Teleport(Vector3 dest) => Teleport(dest, GetRotation());
-	public void Teleport(Vector3 dest, int newRot)
+	public void Teleport(Vector3 dest) => Teleport(dest, GetRotation(), true);
+	public void Teleport(Vector3 dest, bool stopMovement) => Teleport(dest, GetRotation(), stopMovement);
+	public void Teleport(Vector3 dest, int newRot, bool stopMovement)
 	{
-		GetAgent().Teleport(dest, newRot);
+		GetAgent().Teleport(dest, newRot, stopMovement);
 	}
 	public void SavePosition(Vector3 newPos)
 	{
@@ -316,13 +351,10 @@ public class CharacterController : MonoBehaviour
 
 	public void RunAction()
 	{
-		ConsumeActions(1);
-		usedMovePoints -= characterData.runActionExtraMovePoints;
-		usedActionList.Add(CharacterAction.RunAction);
-		onRunAction?.Invoke();
+		UseAction(CharacterAction.RunAction);
 	}
 
-	public bool HasUsedAction(CharacterAction action) => usedActionList.Contains(action);
+	public bool HasUsedAction(CharacterAction action) => usedActions.Contains(action);
 
 	private void Awake()
 	{
@@ -330,6 +362,8 @@ public class CharacterController : MonoBehaviour
 		
 		if(characterData == null)
 			Debug.LogError(this + " has no character data");
+
+		currentFaction = characterData.faction;
 		
 		if(!aiBrains.OfType<AIBrain_Wait>().Any()) aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());//todo store instance static
 	}
@@ -338,8 +372,6 @@ public class CharacterController : MonoBehaviour
 	{
 		instances.Remove(this);
 	}
-
-	public Vector3[] GetCurrentPath() => GetAgent().GetCurrentPath();
 
 	public void StopAgent()
 	{
@@ -351,18 +383,18 @@ public class CharacterController : MonoBehaviour
 		return GetAgent().velocity;
 	}
 
-	public bool IsMoving() => GetAgent().isMoving;
+	public bool IsMoving() => GetAgent().IsMoving();
+
+	public bool IsRotating() => Time.time - lastRotatedTime <= Consts.MinTimeDuration; // \o/ every character starts the game by rotating for a very short time
 
 	public float GetLastAttackDamage()
 	{
 		return characterData.lastAttackDamage;
 	}
 
-	public void AttackAction(CharacterController target = null)
+	public void AttackAction(CharacterController target = null, bool stopAgent = true)
 	{
-		ConsumeActions(1);
-		usedActionList.Add(CharacterAction.AttackAction);
-		onAttackAction?.Invoke(target);
+		UseAction(CharacterAction.AttackAction);
 	}
 
 	public void FloatingText(string canT) // TODO: in other component with events (CharacterView)
@@ -383,15 +415,10 @@ public class CharacterController : MonoBehaviour
 	{
 		return isDead ? GetDeadColor() : InParty() ? GetFactionColor() : GetDefaultColor();
 	}*/
-	
-	public CharacterFaction GetCurrentFaction() => characterData.faction;
-	
-	/*public Color GetFactionColor()
-	{
-		return ColorSettings.Instance.GetFactionColor(GetCurrentFaction());
-	}
 
-	public Color GetDisabledColor() => ColorSettings.Instance.disabledColor;
-	public Color GetDeadColor() => ColorSettings.Instance.deadColor;
-	public Color GetDefaultColor() => GetFactionColor();*/
+	
+	public bool IsSelected()
+	{
+		return CharacterSelection.IsCharacterSelected(this);
+	}
 }

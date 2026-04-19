@@ -203,11 +203,11 @@ public class CameraPivot : MonoBehaviour
     }
 
    // public void PanWithMouse(float mouseY, float scale) => PanWithMouse(new Vector2(Screen.width / 2f, mouseY), scale);
-    public void PanWithMouse(Vector2 mousePosition, float scale)
+    public bool PanWithMouse(Vector2 mousePosition, float scale)
     {
-        if (mousePosition.x < 0 || mousePosition.y < 0) return;
+        if (mousePosition.x < 0 || mousePosition.y < 0) return false;
         var screen = new Vector2(Screen.width, Screen.height);
-        if (mousePosition.x > screen.x || mousePosition.y > screen.y) return;
+        if (mousePosition.x > screen.x || mousePosition.y > screen.y) return false;
         var motion = new Vector3();
         if (mousePosition.x - screenPadding <= 0f) motion.x = -1f;
         if (mousePosition.x + screenPadding >= screen.x) motion.x = 1f;
@@ -217,7 +217,10 @@ public class CameraPivot : MonoBehaviour
         {
             //Debug.Log(this + " " + mousePosition + " " + screen + " " + motion);
             focusPosition += Quaternion.Euler(0, desiredYaw, 0) * motion * panSpeed * scale;
+            return true;
         }
+
+        return false;
     }
     
     #endregion
