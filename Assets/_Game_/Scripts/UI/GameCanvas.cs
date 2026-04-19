@@ -54,7 +54,16 @@ public struct UILabelWrapper
 public class GameCanvas : MonoBehaviour
 {
 	static private GameCanvas instance;
-	static public GameCanvas Instance => instance;
+
+	static public GameCanvas Instance
+	{
+		get
+		{
+			if (!instance) instance = Utils.FindFirstObject<GameCanvas>();
+			if (!instance) Debug.LogError("No Game Canvas!");
+			return instance;
+		}
+	}
 	
 	[Header("References")]
 	public RectTransform viewportRect;

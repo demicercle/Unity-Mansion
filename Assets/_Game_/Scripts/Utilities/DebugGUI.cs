@@ -84,11 +84,6 @@ public class DebugGUI : MonoBehaviour
 
 	private GUIStyle fadeStyle;
 	private Texture2D blackPixel;
-	
-	private void OnDrawGizmosSelected()
-	{
-		Update();
-	}
 
 	private void Awake()
 	{

@@ -1,10 +1,30 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public static class EditorTools
 {
+	#region OpenScenes
+
+	private const string SCENE_PATH = "Assets/_Game_/Scenes/";
+	
+	[MenuItem("Tools/OpenScenes/GameScenes/Level_0")]
+	static void OpenScenes_GameScene() => OpenScenes("GameScene", "Level_0", "Level_0_Env");
+	
+	[MenuItem("Tools/OpenScenes/StartScene")]
+	static void OpenScenes_StartScene() => OpenScenes("StartScene");
+
+	static void OpenScenes(params string[] scenes)
+	{
+		for (int i = 0; i < scenes.Length; i++)
+		{
+			EditorSceneManager.OpenScene(SCENE_PATH + scenes[i] + ".unity", i == 0 ? OpenSceneMode.Single : OpenSceneMode.Additive);
+		}
+	}
+	#endregion
+	
 	#region RevealInFinder
 	[MenuItem("Tools/RevealInFinder/persistentDataPath")]
 	private static void RevealInFinder_persistentDataPath()
