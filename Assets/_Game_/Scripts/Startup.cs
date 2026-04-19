@@ -2,7 +2,7 @@
 using UnityEngine.SceneManagement;
 
 
-public class GameStartup : MonoBehaviour
+public class Startup : MonoBehaviour
 {
 	[SerializeField] private string gameScene;
 	

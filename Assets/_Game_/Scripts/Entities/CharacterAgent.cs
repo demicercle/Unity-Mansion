@@ -177,7 +177,7 @@ public class CharacterAgent : MonoBehaviour
 		
 		UpdateComponent();
 		
-		PlayerSelection.selectionChanged += SelectionChanged;
+		CharacterSelection.selectionChanged += SelectionChanged;
 	}
 
 	private void Start()
@@ -190,12 +190,12 @@ public class CharacterAgent : MonoBehaviour
 	
 	private void OnDestroy()
 	{
-		PlayerSelection.selectionChanged -= SelectionChanged;
+		CharacterSelection.selectionChanged -= SelectionChanged;
 	}
 
 	void SelectionChanged()
 	{
-		SetObstacle(!PlayerSelection.IsCharacterSelected(controller));
+		SetObstacle(!CharacterSelection.IsCharacterSelected(controller));
 		if(!isMoving) ClearDestination();
 	}
 
@@ -219,7 +219,7 @@ public class CharacterAgent : MonoBehaviour
 	private void DrawPath()
 	{
 		shouldDrawPath = hasDestination 
-		                 && PlayerSelection.IsCharacterSelected(controller) 
+		                 && CharacterSelection.IsCharacterSelected(controller) 
 		                 && controller.IsControllable() 
 		                 && (lastPath = GetCurrentPath()).Length > 1;
 

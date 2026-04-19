@@ -78,7 +78,7 @@ public class Waypoint : MonoBehaviour
 
 		public void DrawDebug(float d =0f)
 		{
-			global::DrawDebug.WireArrow(GetPosition(), GetDirection(), radius * Vector3.one, color, d);
-			global::DrawDebug.WireDisc(GetPosition(), GetDirection(), radius, color, d);
+			global::DebugDrawer.WireArrow(GetPosition(), GetDirection(), radius * Vector3.one, color, d);
+			global::DebugDrawer.WireDisc(GetPosition(), GetDirection(), radius, color, d);
 		}
 }

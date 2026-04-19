@@ -37,7 +37,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	void SelectionChanged()
 	{
-		var selectedCharacter = PlayerSelection.GetSelectedCharacter();
+		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
 		if (selectedCharacter)
 		{
 			cameraPivot.Focus(selectedCharacter);
@@ -70,7 +70,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.Player.SelectNext.performed += ctx => ClickSelectNext();
 		inputSystem.Player.FocusSelected.performed += ctx => ClickFocusSelected();
 		
-		PlayerSelection.selectionChanged += SelectionChanged;
+		CharacterSelection.selectionChanged += SelectionChanged;
 		
 		FadeScreen.FadeIn(true);
 	}
@@ -151,7 +151,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		GetController().SceneLoaded();
 		
 		FadeScreen.FadeOut();
-		PlayerSelection.SelectNextCharacter();
+		CharacterSelection.SelectNextCharacter();
 
 		yield return new WaitForSeconds(.25f);
 		cameraPivot.SetStartZoom();
@@ -185,13 +185,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public void ClickCharacter(CharacterView clickedCharacterView)
 	{
 		Debug.Log(this + " ClickCharacter " + clickedCharacterView);
-		var selectedCharacter = PlayerSelection.GetSelectedCharacter();
+		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
 		var clickedCharacter = clickedCharacterView.GetController();
 	//	//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (clickedCharacter.InParty())
 		{
 			if(GetController().IsPlayerTurn())
-				PlayerSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
+				CharacterSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 			else Debug.Log("not in player turn");
 		}
 		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
@@ -228,7 +228,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log(this + " ClickProp " + clickedProp);
 		var gameController = GetController();
-		var selectedCharacter = PlayerSelection.GetSelectedCharacter();
+		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
@@ -273,7 +273,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public void ClickNavigation(Vector3 navPosition)
 	{
 		Debug.Log(this + " ClickNavigation " + navPosition);
-		var selectedCharacter = PlayerSelection.GetSelectedCharacter();
+		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
@@ -339,7 +339,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			if (GetController().IsPlayerTurn() && !HasCoroutines())
 			{
-				PlayerSelection.SelectCharacter(null); // deselect all
+				CharacterSelection.SelectCharacter(null); // deselect all
 			}
 		}
 	}
@@ -555,9 +555,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			var oldPosition = movingCharacter.GetPosition();
 
-			DrawDebug.Line(oldPosition, dest, Color.cyan, 0f);
-			DrawDebug.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
-			DrawDebug.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
+			DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
+			DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
+			DebugDrawer.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
 			yield return null;
 			
 			var newPosition = movingCharacter.GetPosition();
@@ -568,7 +568,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (deltaPos <= 0f) timeout += Time.deltaTime;
 			else timeout = 0f;
 			
-			DrawDebug.WorldLabel(movingCharacter.GetCenterPosition(), "moving:" + timeout.ToString("N2"));
+			DebugDrawer.WorldLabel(movingCharacter.GetCenterPosition(), "moving:" + timeout.ToString("N2"));
 		}
 		
 		onComplete?.Invoke();
@@ -628,14 +628,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		GetController().NewTurn();
 		
-		PlayerSelection.SelectNextCharacter();
+		CharacterSelection.SelectNextCharacter();
 	}
 
 	public bool CanUseRunAction() =>
-		!HasCoroutines() && GetController().IsPlayerTurn() && PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
+		!HasCoroutines() && GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
 
 	public bool IsControlPanelVisible() =>
-		GetController().IsPlayerTurn() && PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllable();
+		GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllable();
 
 	//public CharacterController GetPartyCharacter(int index) => CharacterController.GetPartyCharacter(index);
 
@@ -643,7 +643,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		if (GetController().IsPlayerTurn())
 		{
-			if(PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter))
+			if(CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 				cameraPivot.Focus(selectedCharacter);
 			else Debug.Log("no selected character");
 		}
@@ -654,14 +654,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		if (GetController().IsPlayerTurn())
 		{
-			PlayerSelection.SelectNextCharacter();
+			CharacterSelection.SelectNextCharacter();
 		}
 		else Debug.Log("not in player turn");
 	}
 	
 	public void ClickRunAction()
 	{
-		PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter);
+		CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter);
 		if (selectedCharacter == null)
 		{
 			Debug.Log("no selected character!");
@@ -699,7 +699,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-	public bool CanControlSelectedCharacter() => PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
+	public bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
 		return hasFocus && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
@@ -804,12 +804,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			Cursor.SetCursor(null,default,default);
 		}
 
-		PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter);
+		CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter);
 		if (selectedCharacter != null)
 		{
 			if (selectedCharacter.IsDead())
 			{
-				PlayerSelection.SelectNextCharacter();
+				CharacterSelection.SelectNextCharacter();
 			}
 		}
 		

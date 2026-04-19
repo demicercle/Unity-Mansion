@@ -126,7 +126,7 @@ public class CharacterController : MonoBehaviour
 
 	public void RotateTowards(Vector3 worldPosition, float f = -1f)
 	{
-		DrawDebug.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
+		DebugDrawer.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
 		LookDirection(worldPosition - GetPosition(), f);
 	}
 
@@ -146,12 +146,12 @@ public class CharacterController : MonoBehaviour
 		var radius = agent.GetRadius();
 		if (f < 0f)
 		{
-			DrawDebug.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
+			DebugDrawer.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
 			transform.rotation = Quaternion.LookRotation(getDirection);
 		}
 		else
 		{
-			DrawDebug.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
+			DebugDrawer.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 		}
 	}
@@ -257,7 +257,7 @@ public class CharacterController : MonoBehaviour
 	{
 		var outList = new List<CharacterController>();
 		var center = GetPosition();
-		DrawDebug.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
+		DebugDrawer.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
 		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
 		{
 			if (coll.TryGetComponent(out CharacterController otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())

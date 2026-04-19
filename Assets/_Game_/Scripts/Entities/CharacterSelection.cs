@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Linq;
 
-public static class PlayerSelection
+public static class CharacterSelection
 {
 	static CharacterController selectedCharacter;
 

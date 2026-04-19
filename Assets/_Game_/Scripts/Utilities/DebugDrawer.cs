@@ -4,19 +4,19 @@ using System.Linq;
 using Oddworm.Framework;
 using UnityEngine;
 
-public class DrawDebug : MonoBehaviour
+public class DebugDrawer : MonoBehaviour
 {
 	public static bool IsEnabled => Debug.isDebugBuild && UserSettings.GetCurrentSettings().drawDebug;
 
-	static public DrawDebug FloatingText(Vector3 position, string message, float duration = 1.0f, float speedY = 1.0f)
+	static public DebugDrawer FloatingText(Vector3 position, string message, float duration = 1.0f, float speedY = 1.0f)
 	{
 		return WorldLabel(position, message, duration, speedY);
 	}
 
-	static public DrawDebug WorldLabel(Vector3 position, string message, float duration = 0f, float speedY = 0f)
+	static public DebugDrawer WorldLabel(Vector3 position, string message, float duration = 0f, float speedY = 0f)
 	{
 		if (!IsEnabled) return null;
-		var label = new GameObject().AddComponent<DrawDebug>();
+		var label = new GameObject().AddComponent<DebugDrawer>();
 		label.duration = duration;
 		label.worldPosition = position;
 		label.worldOffset = Vector3.Lerp(Camera.main.transform.forward, Camera.main.transform.up, 0.9f) * speedY;

@@ -13,3 +13,4 @@
 - CharacterView > CharacterSelection
 - CharacterAnimation
 - RPGAnims (AnimationSettings)
+- "Forsaken" Startup scene

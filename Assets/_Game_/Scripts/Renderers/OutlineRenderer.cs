@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class OutlineComponent : MonoBehaviour, ICursorHandler
+public class OutlineRenderer : MonoBehaviour, ICursorHandler
 {
 	public void CursorOver()
 	{

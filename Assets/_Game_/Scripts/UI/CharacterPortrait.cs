@@ -16,7 +16,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		PlayerSelection.SelectPartyCharacter(GetPartyIndex());
+		CharacterSelection.SelectPartyCharacter(GetPartyIndex());
 	}
 	
 	public void UpdateUI(CharacterController _assignedCharacter) // TODO use events
@@ -25,7 +25,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		{
 			gameObject.SetActive(true);
 			
-			toggle.isOn = PlayerSelection.IsCharacterSelected(_assignedCharacter);
+			toggle.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
 			toggle.interactable = _assignedCharacter.IsControllable();
 			
 			rawImage.texture = _assignedCharacter.GetPortraitTexture();

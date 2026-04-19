@@ -10,21 +10,21 @@ public static class ConsoleWrapper
 	[ConsoleMethod("apply_dmg", "")]
 	static public void ApplyDamage(int amount)
 	{
-		if(PlayerSelection.TryGetSelectedCharacter(out CharacterController character))
+		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.TakeDamage(amount);
 	}
 
 	[ConsoleMethod("heal", "")]
 	static public void Heal(int amount)
 	{
-		if(PlayerSelection.TryGetSelectedCharacter(out CharacterController character))
+		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.Heal(amount);
 	}
 
 	[ConsoleMethod("restore", "")]
 	static public void Restore()
 	{
-		if(PlayerSelection.TryGetSelectedCharacter(out CharacterController character))
+		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.Restore();
 	}
 
@@ -34,7 +34,7 @@ public static class ConsoleWrapper
 		if (value == 0) return;
 		if (value == 1)
 		{
-			if (PlayerSelection.TryGetSelectedCharacter(out CharacterController partyChar))
+			if (CharacterSelection.TryGetSelectedCharacter(out CharacterController partyChar))
 				UseCharacterAllActions(partyChar);
 		}
 		else

@@ -6,50 +6,6 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-[System.Serializable]
-public struct UILabelWrapper
-{
-	[SerializeField] private TMPro.TMP_Text tmpText;
-	public GameObject GetGameObject() => tmpText.gameObject;
-
-	public UILabelWrapper SetActive(bool value = true)
-	{
-		GetGameObject().SetActive(value);
-		return this;
-	}
-
-	public UILabelWrapper SetWorldPosition(Vector3 position)
-	{
-		GetGameObject().transform.position = Camera.main.WorldToScreenPoint(position);
-		return this;
-	}
-
-	public UILabelWrapper SetFollows(Transform target)
-	{
-		Utils.GetOrAddComponent<ScreenFollowsWorld>(GetGameObject()).target = target;
-		return this;
-	}
-
-	public UILabelWrapper SetParent(Transform parent)
-	{
-		GetGameObject().transform.SetParent(parent);
-		return this;
-	}
-	
-	public UILabelWrapper SetText(string newText)
-	{
-		tmpText.text = newText;
-		return this;
-	}
-
-	public UILabelWrapper Duplicate()
-	{
-		return new UILabelWrapper()
-		{
-			tmpText = Object.Instantiate(tmpText.gameObject).GetComponent<TMPro.TMP_Text>(),
-		};
-	}
-}
 
 public class GameCanvas : MonoBehaviour
 {
@@ -72,7 +28,7 @@ public class GameCanvas : MonoBehaviour
 	public Button button_actionRun;
 	public Button button_endTurn;
 	public CharacterPortrait[] portraits;
-	public UILabelWrapper floatingText;
+	public TextReference floatingText;
 	
 	[Header("Animation")]
 	public Animator animator;
@@ -108,7 +64,7 @@ public class GameCanvas : MonoBehaviour
 		floatingText.SetActive(false);
 	}
 
-	public UILabelWrapper FloatingText(Object obj, string label)
+	public TextReference FloatingText(Object obj, string label)
 	{
 		if (obj is Component)
 		{
@@ -119,7 +75,7 @@ public class GameCanvas : MonoBehaviour
 		return default;
 	}
 	
-	public UILabelWrapper FloatingText(Vector3 worldPosition, string label)
+	public TextReference FloatingText(Vector3 worldPosition, string label)
 	{
 		return floatingText.Duplicate().SetParent(transform).SetWorldPosition(worldPosition).SetText(label).SetActive();
 	}

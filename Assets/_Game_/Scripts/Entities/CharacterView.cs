@@ -126,7 +126,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		var controller = GetController();
 		
 		currentColor = ColorSettings.GetCharacterColor(GetController(), true, false);
-		alphaColor = alphaCurve.Evaluate(PlayerSelection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
+		alphaColor = alphaCurve.Evaluate(CharacterSelection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
 		
 		if (selectionCircle)
 		{
