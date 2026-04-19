@@ -5143,7 +5143,7 @@ Transform:
   m_GameObject: {fileID: 1869206042}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 11.3, y: 0, z: -12.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5184,11 +5184,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8e7b673e2d6ad842a3046edfefa8f92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusPosition: {x: 0, y: 3, z: 0}
-  enableEditorMovement: 0
+  focusPosition: {x: 11.3, y: 0, z: -12.5}
+  enableEditorMovement: 1
   editorFocusY: 0
-  editorFocusX: 0.5
-  editorFocusZ: 0.5
+  editorFocusX: 0.726
+  editorFocusZ: 0.25
   editorYaw: 0
   worldBounds:
     m_Center: {x: 0, y: 3, z: 0}
@@ -5203,7 +5203,7 @@ MonoBehaviour:
   zoomSpeed: 1
   rotationStepAngle: 0
   rotationSpeed: {x: 1, y: 16}
-  orbitSpeed: {x: 6.28, y: 0}
+  orbitSpeed: {x: 9, y: 0}
   orbitDrag: 0
   canRotateY: 1
   animator: {fileID: 1869206044}
