@@ -430,6 +430,64 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &59975932
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 59975933}
+  - component: {fileID: 59975934}
+  m_Layer: 0
+  m_Name: DebugGUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &59975933
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 59975932}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 792779173}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &59975934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 59975932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a46c4acb69634a89b9a10b172cef26c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugGUI
+  viewX: 0
+  viewY: 0
+  viewWidth: 0.3
+  viewHeight: 0.5
+  debugObjects:
+  - {fileID: 11400000, guid: 0ef1874cf9e753c4ab1d4ad24303fa78, type: 2}
+  scrollValue: {x: 0, y: 0}
+  screenRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+  screenSize: {x: 0, y: 0}
 --- !u!1 &143337792
 GameObject:
   m_ObjectHideFlags: 0
@@ -2007,7 +2065,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000019073486}
+  m_AnchoredPosition: {x: 0, y: 0.00002670288}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &541877068
@@ -2863,6 +2921,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 347191395}
+  - {fileID: 59975933}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &792779174
@@ -5295,6 +5354,9 @@ MonoBehaviour:
     m_Extent: {x: 25, y: 3, z: 25}
   worldY: 0
   worldHeight: 3
+  startZoom: 0.75
+  canRotateY: 1
+  rotationStepAngle: 0
   userSettings: {fileID: 11400000, guid: 0ef1874cf9e753c4ab1d4ad24303fa78, type: 2}
   lerpSpeed: 6
   inputSpeed: 14
@@ -5304,9 +5366,6 @@ MonoBehaviour:
   rotationSpeed: {x: 1, y: 16}
   orbitSpeed: {x: 0.18, y: 0}
   orbitDrag: 0
-  startZoom: 0.75
-  canRotateY: 1
-  rotationStepAngle: 0
   animator: {fileID: 1869206044}
   zoomParameter: Blend
   rotationPivot: {fileID: 702462659}
@@ -6048,5 +6107,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 792779173}
   - {fileID: 1869206043}
-  - {fileID: 1140513726}
   - {fileID: 1467149466160358941}
+  - {fileID: 1140513726}

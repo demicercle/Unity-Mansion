@@ -26,9 +26,15 @@ public class ConsoleWrapper : MonoBehaviour
 			character.Restore();
 	}
 
-	[ConsoleMethod("draw_debug", "")]
-	static public void DrawDebug(bool value)
+	[ConsoleMethod("debug_draw", "")]
+	static public void DebugDraw(bool value)
 	{
 		global::DrawDebug.IsEnabled = value;
+	}
+
+	[ConsoleMethod("debug_gui", "")]
+	static public void DebugGUI(bool value)
+	{
+		global::DebugGUI.IsEnabled = value;
 	}
 }
