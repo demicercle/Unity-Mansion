@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Oddworm.Framework;
 using Pathfinding;
@@ -6,11 +7,10 @@ using UnityEngine;
 
 public class CharacterAgent : MonoBehaviour
 {
-	public const float minNavDistance = 0.1f; // put this in character view
-	
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
+	[SerializeField] [Min(0f)] private float endReachDistance = 0.0f;
 	[SerializeField] private List<LineRenderer> pathRenderers;
 
 	public System.Action onSearchPath
@@ -32,17 +32,13 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.Teleport(newPos, true);
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 	}
-	
-	public void SetCanMove(bool value)
-	{
-		aiPath.simulateMovement = value;
-		aiPath.isStopped = !value;
-	}
 
 	public void SetObstacle(bool value)
 	{
-		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate))
+		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
 		{
+			if (graphUpdate.enabled == value) return;
+//			Debug.Log(this + " SetObstacle " + value);
 			graphUpdate.enabled = value;
 			if (value)
 			{
@@ -54,7 +50,9 @@ public class CharacterAgent : MonoBehaviour
 					-Vector3.right * aiPath.radius,
 				};
 			}
+			NavUtility.RebuildNavigationAsync();
 		}
+		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
 	}
 
 	public Vector3[] GetCurrentPath()
@@ -65,6 +63,23 @@ public class CharacterAgent : MonoBehaviour
 		var buffer = new List<Vector3>();
 		aiPath.GetRemainingPath(buffer, out var stale);
 		return buffer.ToArray();
+	}
+
+	public void StartMove()
+	{
+		aiPath.updatePosition = aiPath.updateRotation = true;
+		aiPath.simulateMovement = true;
+		aiPath.isStopped = false;
+		Debug.Log(this + " StartMove");
+	}
+
+	public void StopMovement()
+	{
+		aiPath.isStopped = true;
+		aiPath.updatePosition = aiPath.updateRotation = false;
+		aiPath.simulateMovement = false;
+		Debug.Log(this + " StopMovement");
+		ClearDestination();
 	}
 	
 	public void AssignDestination(Vector3 hitPoint)
@@ -85,19 +100,44 @@ public class CharacterAgent : MonoBehaviour
 		hasDestination = false;
 	}
 
-	public void StopMovement()
+	public bool ReachedDestination(Vector3 dest)
 	{
-		aiPath.isStopped = true;
-		ClearDestination();
+		return aiPath.reachedDestination || Vector3.Distance(aiPath.position, dest) <= GetMinReachDistance();
 	}
+
+	private const float TIMED_OUT = 3f;
+	public IEnumerator SearchPathAsync(Vector3 dest, System.Action onComplete = null)
+	{
+		AssignDestination(dest); // WaitCharacterMoved
+		
+		var timeout = 0.0f;
+		do
+		{
+			if (timeout >= TIMED_OUT) break;
+			yield return null;
+			timeout += Time.deltaTime;
+		}
+		while (pathPending);
+
+		if (timeout >= TIMED_OUT)
+		{
+			Debug.LogWarning(this + " pathPending timeout!");
+			yield break;
+		}
+		
+		onComplete?.Invoke();
+		//var path = GetCurrentPath();
+	}
+	
+	public bool hasPath => aiPath.hasPath;
 	
 	public Vector3 velocity => aiPath.velocity;
 	
 	public bool isMoving => !aiPath.isStopped;
 	    
-	public bool reachedDestination => aiPath.reachedDestination;
+	//public bool reachedDestination => aiPath.reachedDestination;
 	   
-	public float reachDistance => aiPath.endReachedDistance;
+	public float GetMinReachDistance() => Mathf.Max(endReachDistance, aiPath.endReachedDistance);
 	   
 	public bool pathPending => aiPath.pathPending;
 
@@ -109,10 +149,12 @@ public class CharacterAgent : MonoBehaviour
 	private CharacterController controller;
 	private CharacterView characterView;
 	private Vector3[] lastPath;
-	
+
 	private void OnDrawGizmosSelected()
 	{
 		UpdateComponent();
+		Gizmos.color = Color.cyan;
+		Utils.DrawGizmosCircle(transform.position, Vector3.up, GetMinReachDistance());
 	}
 
 	private void Awake()
@@ -120,11 +162,15 @@ public class CharacterAgent : MonoBehaviour
 		characterView = GetComponent<CharacterView>();
 		controller = characterView.GetController();
 		controller.selectionChanged += SelectionChanged;
-		
 		UpdateComponent();
-		StopMovement();
 	}
 
+	private void Start()
+	{
+		if(!hasDestination)
+			StopMovement();
+	}
+	
 	private void OnDestroy()
 	{
 		controller.selectionChanged -= SelectionChanged;
@@ -141,7 +187,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.radius = radius;
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
-		aiPath.endReachedDistance = minNavDistance;
+		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
 	}
 
 	private void SelectionChanged(bool isSelected)

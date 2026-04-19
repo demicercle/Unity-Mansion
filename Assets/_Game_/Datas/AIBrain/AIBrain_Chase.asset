@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd19946aca184d628db79cab93306ec0, type: 3}
   m_Name: AIBrain_Chase
   m_EditorClassIdentifier: 
-  defaultPriority: 99
+  defaultPriority: 10
   noRun: 0
   noLOS: 0
   hearingColor: {r: 1, g: 0.8163534, b: 0, a: 1}

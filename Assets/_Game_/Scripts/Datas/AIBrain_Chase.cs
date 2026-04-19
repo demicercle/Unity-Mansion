@@ -15,21 +15,24 @@ public class AIBrain_Chase : AIBrainData
 	public override int GetPriority(CharacterController character)
 	{
 		UpdateTarget(character);
-		return lastTarget != null ? -1 : defaultPriority;
+		
+		return lastTarget == null ? -1 : defaultPriority;
 	}
 
 	public void UpdateTarget(CharacterController character)
 	{
 		if (lastTarget != null)
 		{
-			if (lastTarget.IsDead())// ai forget dead target
+			if (lastTarget.IsDead())// 
 			{
+				Debug.Log(this + " forget dead target");
 				lastTarget = null; 
 			}
 		}
 		
 		if (lastTarget == null)
 		{
+			Debug.Log(this + " finds target");
 			var closest = character.GetClosestCharacter(character.GetNearbyLivingCharacters(hearingDistance, 1.0f, hearingColor));
 			if (closest != null)
 			{

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Oddworm.Framework;
 using UnityEngine;
+using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
 using UnityEngine.SceneManagement;
-
 
 [System.Serializable]
 public class GameView : MonoBehaviour, IView<GameController>
@@ -37,7 +37,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var selectedCharacter = PlayerSelection.GetSelectedCharacter();
 		if (selectedCharacter)
 		{
-			TopDownCamera.Instance.Focus(selectedCharacter);
+			cameraPivot.Focus(selectedCharacter);
 		}
 	}
 	
@@ -47,23 +47,35 @@ public class GameView : MonoBehaviour, IView<GameController>
 		DontDestroyOnLoad(gameObject);
 		name = ToString();
 		
-		hasFocus = !Application.isEditor;
+		OnApplicationFocus(!Application.isEditor);
 		//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
-		hasEditorFocus = false;
+		//hasEditorFocus = false;
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
 		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
-		inputSystem.UI.ScrollWheel.performed += ctx => TopDownCamera.Instance.Zoom(ctx.ReadValue<Vector2>().y);
-		inputSystem.Player.RotateLeft.performed += ctx => TopDownCamera.Instance.RotateLR(false);
-		inputSystem.Player.RotateRight.performed += ctx => TopDownCamera.Instance.RotateLR(true);
+		inputSystem.UI.ScrollWheel.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y);
+		inputSystem.Player.RotateLeft.performed += ctx => CameraRotate(false);
+		inputSystem.Player.RotateRight.performed += ctx => CameraRotate(true);
 		
 		PlayerSelection.selectionChanged += SelectionChanged;
 	}
 
+	void CameraRotate(bool left)
+	{
+		if(hasFocus)cameraPivot.Rotate(left ? -1 : 1);
+	}
+	
+	void CameraZoom(float delta)
+	{
+		if (hasFocus) cameraPivot.Zoom(delta);
+	}
+
 	[SerializeField] private List<string> scenesToLoad = new List<string>();
+
+	private bool isLoadingScenes;
 	
 	private IEnumerator Start()
 	{
@@ -73,14 +85,32 @@ public class GameView : MonoBehaviour, IView<GameController>
 		canvas.UpdateUI(this);
 		
 		SetInputEnabled(false);
-		// TODO Fade In
-		yield return null;
 
+		isLoadingScenes = true;
+		yield return null;
+		// TODO Fade In
+
+		// load level
 		for(int i = 0; i < scenesToLoad.Count; i++)
 		{
+			var scene = scenesToLoad[i];
+			if (SceneManager.GetSceneByName(scene).isLoaded)
+			{
+				Debug.Log("load level: " + scene + " already loaded");
+				continue;
+			}
+			
 			var loadSceneMode = i > 0 ? UnityEngine.SceneManagement.LoadSceneMode.Additive : LoadSceneMode.Single;
-			var async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scenesToLoad[i], loadSceneMode);
+			var async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scene, loadSceneMode);
 			while (async.isDone == false) yield return null;
+		}
+		
+		yield return null; //
+		
+		//Debug.Log(this + " rebuild navigation async");
+		foreach (var progress in AstarPath.active.ScanAsync()) {
+			Debug.Log("AstarPath.active.ScanAsync " + progress.ToString());
+			yield return null;
 		}
 		
 		yield return null; //
@@ -94,14 +124,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var partyIndex = 0;
 		foreach (var character in levelCharacters)
 		{
+			character.Spawn();
 			if(character.CompareTag(Consts.TAG_PLAYER))
 				character.SetPartyIndex(partyIndex++);
 		}
 		
 		// TODO Fade Out
 		yield return null;
-		
-		SetInputEnabled(true);
+		isLoadingScenes = false;
 		
 		GetController().NewTurn();
 		
@@ -141,12 +171,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if(GetController().IsPlayerTurn())
 				PlayerSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 		}
-		else if (clickedCharacter.IsEnemyToPlayer())
+		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
 		{
 			if (selectedCharacter != null)
 			{
 				// assign attack
-				if (selectedCharacter.CanAttack())
+				if (selectedCharacter.CanAttack(false))
 				{
 					AssignAttack(selectedCharacter, clickedCharacter, false, true);
 				}
@@ -185,14 +215,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void AssignInteract(CharacterController character, PropComponent clickedProp) // TODO Prop Controller
 	{
-		Debug.Log(this + " AssignInteract " + character + " " + clickedProp);
 		if (clickedProp.GetBestWaypoint(character.GetPosition(), out var bestWaypoint))
 		{
+			Debug.Log(this + " AssignInteract " + character + " " + clickedProp);
 			QueueRoutine(WaitCharacterMoved(character, bestWaypoint.GetPosition(), () =>
 			{
 				var agent = character.GetAgent();
-				var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
-				if (dist <= agent.reachDistance)
+				if (agent.ReachedDestination(bestWaypoint.GetPosition()))
 				{
 					// waypoint reach
 					if (character.CanInteract())
@@ -202,10 +231,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 				}
 				else
 				{
-					Debug.Log(character + " not at reach: " + dist + " / " + agent.reachDistance + " to " + bestWaypoint);
+					var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
+					Debug.Log(character + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
 				}
 			}));
 		}
+		else Debug.LogWarning(this + " AssignInteract " + character + " " + clickedProp + " no waypoint!");
 	}
 
 	public void ClickNavigation(Vector3 navPosition)
@@ -224,8 +255,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		Debug.Log(this + " AssignMove " + controller + " " + navPosition);
 		QueueRoutine(WaitCharacterMoved(controller, navPosition));
 	}
-
-
+	
 	public void AssignRunAction(CharacterController character)
 	{
 		Debug.Log(this + " AssignRunAction " + character);
@@ -246,18 +276,21 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public bool drawDebug = false;
 	[Range(0f,1f)] public float debugGUI = 0f;
 	//public float cameraSpeed = 1.0f;
+	[SerializeField] private float cameraDeltaY = 1f;
 	[Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
 
 	[Header("Debug")]
 	[ReadOnly][SerializeField] private bool hasFocus;
-	[ReadOnly][SerializeField] private bool hasEditorFocus;
+	//[ReadOnly][SerializeField] private bool hasEditorFocus;
 	[ReadOnly][SerializeField] private GameCanvas canvas;
 	[ReadOnly][SerializeField] private Vector2 mousePosition;
+	private Vector2 lastMousePosition;
 
+	private CameraPivot cameraPivot => CameraPivot.Instance; // TODO
+	
 	private Vector2 middleClickMousePosition;
 
 	private bool holdMiddleClick;
-	//private TopDownCamera _topDownCamera;
 	public InputSystem_Actions inputSystem { get; private set; }
 	
 	private List<IEnumerator> coroutines = new  List<IEnumerator>();
@@ -285,7 +318,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		if (canvas.mouseOverViewport && value > 0f) // pressed
 		{
-			hasEditorFocus = true;
+			//hasEditorFocus = true;
 			
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
@@ -322,40 +355,47 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
 
-		while (attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck))
+		var atAttackRange = false;
+		while (!atAttackRange)
 		{
-			if (!attacker.IsAtAttackRange(target, losCheck))
+			yield return null;
+
+			atAttackRange = attacker.IsAtAttackRange(target, losCheck);
+			if (atAttackRange)
 			{
-				yield return StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition(), null, () =>
-				{
-					if (attacker.IsAtAttackRange(target, losCheck, 1.0f)) // at atk range
-					{
-						Debug.Log(attacker + " is at attack range");
-						attacker.StopAgent();
-					}
-				}));
-			}
-				
-			if (canUseRunAction && !attacker.CanMove() && !attacker.IsAtAttackRange(target, losCheck, 1.0f) && attacker.CanUseRunAction())
-			{
-				yield return StartCoroutine(WaitRunAction(attacker));
+				Debug.Log(attacker + " atAttackRange of " + target + ", StopAgent");
+				attacker.StopAgent();
 			}
 			
-			yield return null;
+			else if (!attacker.IsMoving())
+			{
+				while (!attacker.HasMovePoints() && canUseRunAction && attacker.CanUseRunAction())
+				{
+					yield return StartCoroutine(WaitRunAction(attacker));
+				}
+				
+				if (!attacker.HasMovePoints())
+				{
+					Debug.Log(attacker + " has no move points to reach target");
+					yield break;
+				}
+				
+				Debug.Log(attacker + " starts moving towards target");
+				StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition()));
+				yield return null;
+			}
+			
+			//else Debug.Log(attacker + " moves towards " + target);
 		}
-		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target, true, losCheck));
+		
+		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target));
 	}
 
-	private IEnumerator WaitCharacterPerformAttack(CharacterController character, CharacterController target, bool rangeCheck = true, bool losCheck = true)
+	private IEnumerator WaitCharacterPerformAttack(CharacterController character, CharacterController target)
 	{
-		Debug.Log("WaitCharacterPerformAttack " + character + " " + target + " " + losCheck);
+		Debug.Log("WaitCharacterPerformAttack " + character + " " + target );
 		
-		if (rangeCheck && !character.IsAtAttackRange(target, losCheck))
-		{
-			yield break;
-		}
-		
-		yield return StartCoroutine(WaitCharacterLookPosition(character, target.GetPosition()));
+		yield return StartCoroutine(WaitCharacterLookPosition(character, target.GetCenterPosition()));
 
 		if (!character.CanAttack())
 		{
@@ -366,10 +406,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 		else
 		{
 			character.AttackAction();
-			yield return new WaitForSeconds(1.0f);
+			yield return new WaitForSeconds(1.0f);//TODO wait attack duration
 			// apply attack damage, etc
 			target.TakeDamage(character.GetLastAttackDamage());
 		}
+
+		Debug.Log("attack ends");
 	}
 
 	private IEnumerator WaitCharacterInteract(CharacterController character, PropComponent prop, Waypoint waypoint = null)
@@ -399,9 +441,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 	private IEnumerator WaitCharacterLookPosition(CharacterController character, Vector3 pos) => WaitCharacterLookDirection(character, (pos - character.GetPosition()).normalized);
 	private IEnumerator WaitCharacterLookDirection(CharacterController character, Vector3 dir)
 	{
+		character.StopAgent();
+		
 		while (!character.IsFacingDirection(dir))
 		{
-			character.RotateTowards(dir, Time.deltaTime);
+			character.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
 	}
@@ -417,16 +461,15 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 		}));
 	}
-	
-	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null, System.Action onUpdate = null)
+
+	private const float TIMED_OUT = 3.0f;
+	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null)
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacter);
-
+		
 		var agent = movingCharacter.GetAgent();
-		agent.AssignDestination(dest);
-
-		do yield return null;
-		while (agent.pathPending);
+		
+		yield return StartCoroutine(agent.SearchPathAsync(dest));
 		
 		var path = agent.GetCurrentPath();
 		if (path.Length > 1)
@@ -435,7 +478,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var dir = (firstPoint - movingCharacter.GetPosition()).normalized;
 			while (!movingCharacter.IsFacingDirection(dir))
 			{
-				movingCharacter.RotateTowards(firstPoint, Time.deltaTime);
+				movingCharacter.LookDirection(dir, Time.deltaTime);
 				yield return null;
 			}
 		}
@@ -445,38 +488,51 @@ public class GameView : MonoBehaviour, IView<GameController>
 			yield break;
 		}
 		
-		agent.SetCanMove(true);
+		agent.StartMove();
 		
-		do
+		var timeout = 0.0f;
+		while(true)
 		{
-			if (movingCharacter.CanMove() == false)
+			if (timeout > TIMED_OUT)
 			{
+				Debug.LogWarning(movingCharacter + " TIMED_OUT!");
+				break;
+			}
+
+			if (!movingCharacter.IsMoving())
+			{
+				Debug.Log(movingCharacter + " something stopped movement");
+				break;
+			}
+			
+			if (!movingCharacter.HasMovePoints())
+			{
+				Debug.Log(movingCharacter + " !HasMovePoints");
+				agent.StopMovement();
+				break;
+			}
+
+			if (agent.ReachedDestination(dest))
+			{
+				Debug.Log(movingCharacter + " reached destination!");
 				agent.StopMovement();
 				break;
 			}
 			
 			var oldPosition = movingCharacter.GetPosition();
-			
+
+			DebugGUI.Line(oldPosition, dest, Color.cyan, 0f);
+			DebugGUI.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
+			DebugGUI.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
 			yield return null;
 			
-			//var newRotation = movingCharacterView.GetRotation();
 			var newPosition = movingCharacter.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
+			if (deltaPos <= 0f) timeout += Time.deltaTime;
+			else timeout = 0f;
 			
 			movingCharacter.ConsumeMovePoints(deltaPos);
-			//movingCharacter.SetPosition(newPosition);
-			
-			var newRotation = movingCharacter.GetRotation();
-			//movingCharacter.SetRotation(newRotation);
-			
-			onUpdate?.Invoke();
-			
-		} while (agent.isMoving && !agent.reachedDestination);
-		
-		//movingCharacter.SetPosition(path.Last());
-		//movingCharacter.SetRotation(movingCharacter.GetRotation());
-		
-		agent.SetCanMove(false);
+		}
 		
 		onComplete?.Invoke();
 	}
@@ -507,7 +563,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (otherCharacter.InParty()) continue;
 
 			if (IsCharacterVisible(otherCharacter))
-				TopDownCamera.Instance.Focus(otherCharacter);
+				cameraPivot.Focus(otherCharacter);
 			else Debug.Log("Do not focus invisible character: " + otherCharacter);
 
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
@@ -556,24 +612,31 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
+	private bool inputEnabled;
 	public void SetInputEnabled(bool value)
 	{
-		if (value)
+		if (inputEnabled != value)
 		{
-			inputSystem.Player.Enable();
-			inputSystem.UI.Enable();
-		}
-		else
-		{
-			inputSystem.Player.Disable();
-			inputSystem.UI.Disable();
+			inputEnabled = value;
+			Debug.Log(this + " inputEnabled=" + inputEnabled);
+			
+			if (inputEnabled)
+			{
+				inputSystem.Player.Enable();
+				inputSystem.UI.Enable();
+			}
+			else
+			{
+				inputSystem.Player.Disable();
+				inputSystem.UI.Disable();
+			}
 		}
 	}
 
 	public bool CanControlSelectedCharacter() => PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
-		return HasFocus() && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
+		return hasFocus && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllable();
 	}
 	
 	
@@ -584,49 +647,46 @@ public class GameView : MonoBehaviour, IView<GameController>
 		character.RunAction();
 	}
 
-	private bool HasFocus() => hasFocus && (!Application.isEditor || hasEditorFocus);
+//	private bool HasFocus() => hasFocus && (!Application.isEditor || hasEditorFocus);
 	
 	private void LateUpdate()
 	{
-		if (HasFocus())
-		{
-			TopDownCamera.Instance.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
-		}
-
 		canvas.UpdateUI(this);
+		lastMousePosition = mousePosition;
 	}
-	
+
 	private void Update()
 	{
-		if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
-		{
-			hasFocus = hasEditorFocus = false;
-			//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
-		}
-
 		if (Application.isEditor)
 		{
-			if (!hasFocus)
-				hasEditorFocus = false;
+			if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
+			{
+				OnApplicationFocus(false);
+			}
 			
 			if (!hasFocus && inputSystem.UI.Click.WasPressedThisFrame())
 			{
-				hasFocus = hasEditorFocus = true;
-				//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
+				OnApplicationFocus(true);
 			}
 		}
 		
-		if (HasFocus())
+		if (hasFocus)
 		{
+			SetInputEnabled(!isLoadingScenes && !IngameDebugConsole.DebugLogManager.Instance.IsLogWindowVisible);
+			
 			Cursor.lockState = CursorLockMode.Confined;
+			Cursor.visible = !holdMiddleClick;
 			Cursor.SetCursor(Resources.Load<Texture2D>("Cursors/cursor_none"), Vector2.zero, CursorMode.Auto);
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
-				TopDownCamera.Instance.Move(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime);
+				cameraPivot.MoveFocus(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime, Space.Self);
 			}
 
-			if (inputSystem.Player.MiddleClick.WasReleasedThisFrame()) holdMiddleClick = false;
+			if (inputSystem.Player.MiddleClick.WasReleasedThisFrame())
+			{
+				holdMiddleClick = false;
+			}
 			if (inputSystem.Player.MiddleClick.WasPressedThisFrame())
 			{
 				holdMiddleClick = true;
@@ -635,16 +695,22 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 			if (holdMiddleClick)
 			{
-				var delta = (middleClickMousePosition - mousePosition);
-				var topDownCamera = TopDownCamera.Instance;
-				topDownCamera.Rotate(delta.x * Time.deltaTime);
-				topDownCamera.Zoom(delta.y * Time.deltaTime / Mathf.Pow(Mathf.PI, 2));
+				//cameraPivot.PanWithMouse(mousePosition.y, Time.unscaledDeltaTime);
+				cameraPivot.MoveFocus((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime, Space.World);
+				cameraPivot.Orbit((middleClickMousePosition - mousePosition).x * Time.unscaledDeltaTime, 
+					(lastMousePosition - mousePosition).y * Time.unscaledDeltaTime);
 			}
-			//Debug.Log(delta);
+			else
+			{
+				cameraPivot.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
+			}
 		}
 		else
 		{
+			SetInputEnabled(false);
+			
 			Cursor.lockState = default;
+			Cursor.visible = true;
 			Cursor.SetCursor(null,default,default);
 		}
 
@@ -657,7 +723,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 		}
 		
-		if (canvas.mouseOverViewport) // process mouse over
+		if (canvas.mouseOverViewport && !holdMiddleClick) // process mouse over
 		{
 			//var selectedCharacter = gameController.GetSelectedCharacter();
 			var result = CursorRaycast(out var hit);
@@ -666,9 +732,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			{
 				if (selectedCharacter != null)
 				{
-					if (CanControlCharacter(selectedCharacter)) // mouse over navigation
+					if (CanControlCharacter(selectedCharacter))
 					{
-						selectedCharacter.GetAgent().AssignDestination(hit.point);
+						selectedCharacter.GetAgent().AssignDestination(hit.point); // mouse over navigation
 					}
 					else if(debugCursor) Debug.Log("character not controllable");
 				}
@@ -681,7 +747,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 					var overCharacter = overCharacterView.GetController();
 					if (selectedCharacter != null)
 					{
-						if (CanControlCharacter(selectedCharacter)) // mouse over character
+						if (CanControlCharacter(selectedCharacter))
 						{
 							var agent = selectedCharacter.GetAgent();
 							if (overCharacter.InParty())
@@ -690,14 +756,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 							}
 							else
 							{
-								agent.AssignDestination(overCharacter.GetPosition());
+								agent.AssignDestination(overCharacter.GetPosition()); // mouse over character
 							}
 						}
 						else if(debugCursor) Debug.Log("character not controllable");
 					}
 					else if(debugCursor) Debug.Log("no selected character");
 				}
-				else if (hit.collider.TryGetComponent(out PropComponent overProp)) // mouse over prop
+				else if (hit.collider.TryGetComponent(out PropComponent overProp)) 
 				{
 					if (selectedCharacter != null)
 					{
@@ -706,7 +772,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
 								var agent = selectedCharacter.GetAgent();
-								agent.AssignDestination(bestWaypoint.GetPosition());
+								agent.AssignDestination(bestWaypoint.GetPosition()); // mouse over prop
 							}
 							else
 							{
@@ -734,9 +800,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-	private void OnApplicationFocus(bool value)
+	public void OnApplicationFocus(bool value)
 	{
-		hasFocus = hasEditorFocus = value;
+		if (hasFocus != value)
+		{
+			Debug.Log("OnApplicationFocus: " + value);
+			hasFocus = value;
+		}
+		//hasEditorFocus = value;
 		////Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
 	}
 

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 
@@ -34,25 +35,31 @@ public class NavUtility : MonoBehaviour
 	}
 	
 	static private NavUtility instance;
-	static public void RebuildNavigationAsync(float delay)
+	static public void RebuildNavigationAsync(float delay=0f)
 	{
-		_delay = delay;
 		if(instance!=null)Destroy(instance.gameObject);
-			instance = new GameObject("NavUtility").AddComponent<NavUtility>();
+		instance = new GameObject("RebuildNavigationAsync").AddComponent<NavUtility>();
+		instance.delay = delay;
 	}
 
-	static float _delay;
+	private float delay;
+	//private float progressValue;
 	IEnumerator Start()
 	{
-		yield return new WaitForSeconds(_delay);
-		
-		Debug.Log(this + " rebuild navigation async");
+		Debug.Log(this + " RebuildNavigationAsync Start delay=" + delay);
+		if(delay >0f) yield return new WaitForSeconds(delay);
 		foreach (var progress in AstarPath.active.ScanAsync()) {
+			//progressValue = progress.progress;
+			name = "RebuildNavigationAsync (" + progress.progress.ToString("N2") + ")";
 //			Debug.Log("Scanning... " + progress.ToString());
 			yield return null;
 		}
-
-	//	Debug.Log(this + " complete");
 		Destroy(gameObject);
 	}
+
+	/*private void OnGUI()
+	{
+		if (!Debug.isDebugBuild) return;
+		GUILayout.Label(this + " rebuild navigation async: " + progressValue.ToString("N2"), new GUIStyle("textfield"));
+	}*/
 }

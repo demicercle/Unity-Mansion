@@ -20,9 +20,10 @@ public class ConsoleEvents : MonoBehaviour
 			character.Heal(amount);
 	}
 
-	[ConsoleMethod("end_turn", "")]
-	static public void EndTurn()
+	[ConsoleMethod("restore", "")]
+	static public void Restore()
 	{
-		GetController().EndTurn();
+		if(PlayerSelection.TryGetSelectedCharacter(out CharacterController character))
+			character.Restore();
 	}
 }

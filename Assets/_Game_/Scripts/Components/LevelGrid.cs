@@ -10,6 +10,7 @@ public class LevelGrid : MonoBehaviour
 	[SerializeField] private Color cellLineColor;
 	[SerializeField] private Vector2Int extends;
 	[SerializeField] private float cellSize = 2.5f;
+	[SerializeField] private float nodeSize = .5f;
 	[SerializeField] private Vector3 offset = Vector2.one * 2.5f / 2f;
 
 	private Grid grid;
@@ -17,12 +18,21 @@ public class LevelGrid : MonoBehaviour
 	[ContextMenu("Update AStar")]
 	void UpdateAStar()
 	{
-		foreach (var graph in AstarPath.active.graphs)
+		var astar = AstarPath.active;
+		if (!astar)
+		{
+			Debug.LogError(this + " AstarPath not found");
+			return;
+		}
+		
+		foreach (var graph in astar.graphs)
 		{
 			if (graph is GridGraph gridGraph)
 			{
 			//	gridGraph.center = offset;
-				gridGraph.SetDimensions(extends.x * 2, extends.y * 2, cellSize);
+			var gridDim = new Vector2(extends.x, extends.y) * 2;
+			if(nodeSize >0) gridDim *= cellSize / nodeSize;
+				gridGraph.SetDimensions((int)gridDim.x , (int)gridDim.y, nodeSize > 0f ?  nodeSize : gridGraph.nodeSize);
 				Utils.SetDirty(graph.active);
 			}
 		}
@@ -31,11 +41,11 @@ public class LevelGrid : MonoBehaviour
 	[ContextMenu("Update Camera Bounds")]
 	void UpdateCameraBounds()
 	{
-		var topDownCamera = FindObjectsByType<TopDownCamera>(default).FirstOrDefault();
-		if (topDownCamera != null)
+		var cameraPivot = FindObjectsByType<CameraPivot>(default).FirstOrDefault();
+		if (cameraPivot != null)
 		{ 
-			topDownCamera.SetWorldBounds(new Bounds(default, new Vector3(extends.x * 2 * cellSize, 0, extends.y * 2 * cellSize)));
-			Utils.SetDirty(topDownCamera);
+			cameraPivot.SetWorldBounds(new Bounds(default, new Vector3(extends.x * 2 * cellSize, cameraPivot.GetWorldBounds().size.y, extends.y * 2 * cellSize)));
+			Utils.SetDirty(cameraPivot);
 		}
 	}
 
