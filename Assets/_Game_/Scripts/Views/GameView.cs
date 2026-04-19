@@ -553,7 +553,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var newPosition = movingCharacter.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			
-			Debug.Log(movingCharacter + " move " + deltaPos);
+//			Debug.Log(movingCharacter + " move " + deltaPos);
 			movingCharacter.ConsumeMovePoints(deltaPos);
 			
 			if (deltaPos <= 0f) timeout += Time.deltaTime;
@@ -802,7 +802,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 		}
 		
-		if (canvas.mouseOverViewport && !holdMiddleClick) // process mouse over
+		if (canvas.mouseOverViewport && !holdMiddleClick) // mouse over
 		{
 			//var selectedCharacter = gameController.GetSelectedCharacter();
 			var result = CursorRaycast(out var hit);
@@ -813,7 +813,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				{
 					if (CanControlCharacter(selectedCharacter))
 					{
-						selectedCharacter.GetAgent().AssignDestination(hit.point); // mouse over navigation
+						selectedCharacter.GetAgent().AssignDestination(hit.point, false); // mouse over navigation
 					}
 					else if(debugCursor) Debug.Log("character not controllable");
 				}
@@ -835,7 +835,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 							}
 							else
 							{
-								agent.AssignDestination(overCharacter.GetPosition()); // mouse over character
+								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
 							}
 						}
 						else if(debugCursor) Debug.Log("character not controllable");
@@ -851,7 +851,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
 								var agent = selectedCharacter.GetAgent();
-								agent.AssignDestination(bestWaypoint.GetPosition()); // mouse over prop
+								agent.AssignDestination(bestWaypoint.GetPosition(), true); // mouse over prop
 							}
 							//else Debug.LogWarning("no waypoint found");
 						}

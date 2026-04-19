@@ -87,11 +87,11 @@ public class CharacterAgent : MonoBehaviour
 		ClearDestination();
 	}
 	
-	public void AssignDestination(Vector3 hitPoint)
+	public void AssignDestination(Vector3 hitPoint, bool force = false)
 	{
-		if (hasDestination && !PositionChanged(hitPoint, aiPath.destination))
+		if (!force && hasDestination && !PositionChanged(hitPoint, aiPath.destination))
 			return;
-	    
+	
 		//Debug.Log(aiPath + " AssignDestination " + hitPoint);
 		aiPath.destination = hitPoint;
 		aiPath.SearchPath();
@@ -218,7 +218,7 @@ public class CharacterAgent : MonoBehaviour
 		if (shouldDrawPath == isDrawingPath)
 			return;
 		
-//		Debug.Log(this + " shouldDrawPath=" + shouldDrawPath + " path=" + lastPath);
+		//Debug.Log(this + " shouldDrawPath=" + shouldDrawPath + " path=" + lastPath);
 		
 		if (!shouldDrawPath)
 		{
