@@ -34,7 +34,9 @@ public class GameCanvas : MonoBehaviour
 
 		var mouseHandler = Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject);
 		mouseHandler.onMouseOverChanged += (mouseOver) => mouseOverViewport = mouseOver;
+		#if UNITY_EDITOR
 		mouseHandler.onClicked += () => GameView.GetInstance().OnApplicationFocus(Application.isEditor); // TODO
+		#endif
 		
 		if(portraits.Length == 0)
 			portraits = GetComponentsInChildren<CharacterPortrait>();

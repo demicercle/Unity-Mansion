@@ -20,7 +20,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	static private GameView instance;
 	static public GameView GetInstance()
 	{
-		if (instance == null) instance = Utils.FindFirstObject<GameView>();
 		return instance;
 	}
 	
@@ -43,6 +42,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	void Awake()
 	{
+		if (instance != null)
+		{
+			Debug.LogError("duplicated game view!");
+			return;
+		}
+
+		Debug.Log(this + " Awake");
 		instance = this;
 		DontDestroyOnLoad(gameObject);
 		name = ToString();
@@ -79,6 +85,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	private IEnumerator Start()
 	{
+		Debug.Log(this + " Start");
+		
 		StartCoroutine(Coroutines());
 		
 		canvas.UpdateUI(this);
@@ -95,12 +103,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var scene = scenesToLoad[i];
 			if (SceneManager.GetSceneByName(scene).isLoaded)
 			{
-				Debug.Log("load level: " + scene + " already loaded");
+				Debug.Log("load scene: " + scene + " already loaded");
 				continue;
 			}
-			
-			var loadSceneMode = i > 0 ? UnityEngine.SceneManagement.LoadSceneMode.Additive : LoadSceneMode.Single;
-			var async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scene, loadSceneMode);
+
+			Debug.Log("load scene: " + scene);
+			var async = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
 			while (async.isDone == false) yield return null;
 		}
 		

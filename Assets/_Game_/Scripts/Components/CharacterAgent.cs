@@ -167,8 +167,10 @@ public class CharacterAgent : MonoBehaviour
 
 	private void Start()
 	{
-		if(!hasDestination)
-			StopMovement();
+		if (!hasDestination)
+		{
+			aiPath.isStopped = true;
+		}
 	}
 	
 	private void OnDestroy()

@@ -126,6 +126,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snap: 1
   ignoreY: 1
+  preventNegativeScale: 1
 --- !u!114 &6355173570402279760
 MonoBehaviour:
   m_ObjectHideFlags: 0

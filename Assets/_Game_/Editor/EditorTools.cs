@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -71,6 +72,27 @@ public static class EditorTools
 		}
 		AssetDatabase.SaveAssets();
 		Selection.objects = newSelection.ToArray();
+	}
+	#endregion
+	
+	#region MapCheck
+	[MenuItem("Tools/MapCheck/InvalidColliders")]
+	static void MapCheck_InvalidColliders()
+	{
+		var invalidColliders = new List<Object>();
+		var colliders = Object.FindObjectsByType<Collider>(default);
+		foreach (var collider in colliders)
+		{
+			var localScale = collider.transform.localScale;
+			if (localScale.x < 0 || localScale.y < 0 || localScale.z < 0)
+			{
+				invalidColliders.Add(collider.gameObject);
+				EditorGUIUtility.PingObject(invalidColliders.Last());
+			}
+		}
+
+		if (invalidColliders.Count > 0) Selection.objects = invalidColliders.ToArray();
+		Debug.Log("Found invalid colliders: " + invalidColliders.Count);
 	}
 	#endregion
 }
