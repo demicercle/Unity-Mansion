@@ -296,12 +296,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ad2752b5f14d4da12fd00fc2ea78c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ToggleChildren
-  nextOnEnable: 1
   currentIndex: 0
   children:
   - {fileID: 4575319083674749594}
   - {fileID: 8350782357324790678}
-  changed: 0
 --- !u!114 &1309593368171389536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -676,7 +674,7 @@ RectTransform:
   m_Father: {fileID: 6833649656114864165}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -695,7 +693,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4699849642767846572}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
@@ -722,7 +720,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4699849642767846572}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86710e43de46f6f4bac7c8e50813a599, type: 3}
   m_Name: 
@@ -743,6 +741,7 @@ GameObject:
   - component: {fileID: 4742009770716821865}
   - component: {fileID: 2941795032772678768}
   - component: {fileID: 973791791561246161}
+  - component: {fileID: 7816922449182842150}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -879,6 +878,48 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7816922449182842150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5406122567533382223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8645bed9eeb441218c68ab14cecd21c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameEventHandler
+  turnEnded:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 973791791561246161}
+        m_TargetAssemblyTypeName: UnityEngine.Animator, UnityEngine
+        m_MethodName: SetTrigger
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: TurnEnded
+          m_BoolArgument: 0
+        m_CallState: 2
+  turnStarted:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 973791791561246161}
+        m_TargetAssemblyTypeName: UnityEngine.Animator, UnityEngine
+        m_MethodName: SetTrigger
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: TurnStarted
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6805044113424152427
 GameObject:
   m_ObjectHideFlags: 0
