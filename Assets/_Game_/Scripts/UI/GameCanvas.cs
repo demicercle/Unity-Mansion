@@ -22,6 +22,12 @@ public struct UILabelWrapper
 		return this;
 	}
 
+	public UILabelWrapper SetFollows(Transform target)
+	{
+		Utils.GetOrAddComponent<ScreenFollowsWorld>(GetGameObject()).target = target;
+		return this;
+	}
+
 	public UILabelWrapper SetParent(Transform parent)
 	{
 		GetGameObject().transform.SetParent(parent);
@@ -93,9 +99,9 @@ public class GameCanvas : MonoBehaviour
 
 	public UILabelWrapper FloatingText(Object obj, string label)
 	{
-		if (obj is CharacterController)
+		if (obj is Component)
 		{
-			return FloatingText((obj as CharacterController).GetCenterPosition(), label);
+			return floatingText.Duplicate().SetParent(transform).SetFollows((obj as Component).transform).SetText(label).SetActive();
 		}
 		
 		Debug.LogWarning(this + " invalid floating text object: " + obj + " label=" + label);

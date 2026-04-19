@@ -18,7 +18,7 @@ public class SubCamera : MonoBehaviour
 		{
 			if (rtCopy) Destroy(rtCopy);
 			rtCopy = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
-			Debug.Log(this + " CreateRenderTexture " + rtCopy.width + " " + rtCopy.height);
+//			Debug.Log(this + " CreateRenderTexture " + rtCopy.width + " " + rtCopy.height);
 			selfCamera.targetTexture = rtCopy;
 			canvas.SetRenderTexture(rtCopy);
 		}
