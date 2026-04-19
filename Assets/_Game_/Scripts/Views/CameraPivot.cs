@@ -88,7 +88,10 @@ public class CameraPivot : MonoBehaviour
     [SerializeField] private int screenPadding = 2;
     [Range(0f,1f)] [SerializeField] private float startZoom = .5f;
     [SerializeField] private float zoomSpeed = 1.0f;
-    [SerializeField] private Vector3 rotationSpeed = new Vector2(3.0f, 6.0f);
+    [SerializeField] private float rotationStepAngle = 0.0f;
+    [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
+    [SerializeField] private Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
+    [SerializeField] private float orbitDrag = 0.1f;
     [SerializeField] private bool canRotateY = true;
     //[SerializeField] private float rotationStepAngle = 90.0f;
     
@@ -133,13 +136,20 @@ public class CameraPivot : MonoBehaviour
         focusPosition = world;
     }
     
-    public void Move(Vector2 readValue)
+    public void MoveFocus(Vector2 readValue, Space spaceTo)
     {
-        var world = new Vector3(readValue.x, 0, readValue.y);
-        world = Quaternion.Euler(0, desiredYaw, 0) * world;
-        //if (readValue.magnitude > 0.001f) Debug.Log(this + " Move " + readValue);
-        focusPosition.x += world.x * inputSpeed;
-        focusPosition.z += world.z * inputSpeed;
+        if (spaceTo == Space.World)
+        {
+            focusPosition.x += readValue.x / Screen.width * orbitDrag;
+            focusPosition.z += readValue.y / Screen.height * orbitDrag;
+        }
+        else
+        {
+            var world = new Vector3(readValue.x, 0, readValue.y);
+            world = Quaternion.Euler(0, desiredYaw, 0) * world;
+            focusPosition.x += world.x * inputSpeed;
+            focusPosition.z += world.z * inputSpeed;
+        }
     }
 
     public void Zoom(float delta)
@@ -148,22 +158,24 @@ public class CameraPivot : MonoBehaviour
         UpdateAnimator();
     }
 
-    public void RotateLR(bool left)
-    {
-        Debug.LogWarning("do nothing!");
-       // if (!canRotateY) return;
-      //  desiredYaw = (desiredYaw - rotationStepAngle * (left ? -1 : 1));
-      //  desiredYaw %= 360;
-    }
-
     public void Rotate(float delta)
     {
+        //Debug.LogWarning("do nothing!");
         if (!canRotateY) return;
-        desiredYaw += delta * rotationSpeed.z;
-      // desiredYaw = Mathf.Clamp(-180)
+        desiredYaw = (desiredYaw - rotationStepAngle * delta);
     }
-    
-    public void PanWithMouse(Vector3 mousePosition, float scale)
+
+    //public void Orbit(Vector2 delta) => Orbit(delta.x, delta.y);
+    public void Orbit(float deltaX, float deltaY)
+    {
+        if (!canRotateY) return;
+        desiredYaw += deltaX * orbitSpeed.x / Consts.RAD_TO_DEG;
+        Zoom(deltaY * orbitSpeed.y / Consts.RAD_TO_DEG);
+        // desiredYaw = Mathf.Clamp(-180)
+    }
+
+   // public void PanWithMouse(float mouseY, float scale) => PanWithMouse(new Vector2(Screen.width / 2f, mouseY), scale);
+    public void PanWithMouse(Vector2 mousePosition, float scale)
     {
         if (mousePosition.x < 0 || mousePosition.y < 0) return;
         var screen = new Vector2(Screen.width, Screen.height);
@@ -182,19 +194,14 @@ public class CameraPivot : MonoBehaviour
     
     #endregion
     
-    [Header("Debug")]
-    [ReadOnly] [SerializeField] private Vector3 currentPosition;
-    [ReadOnly] [SerializeField] private Quaternion desiredRotation;
-    [ReadOnly] [SerializeField]  private float currentZoom; 
-    //[ReadOnly] [SerializeField]  private float forwardValue;
-  //  [ReadOnly] [SerializeField]  private Vector3 offsetedPosition;
- //   [ReadOnly] [SerializeField]  private float evaluatedHeight;
-    [ReadOnly] [SerializeField]  private float desiredYaw;
-    [ReadOnly] [SerializeField]  private float currentYaw;
-    
     #region PRIVATE
     
     private Light sunLight;
+    private float desiredYaw;
+    private float currentYaw;
+    private float currentZoom;
+    private Quaternion desiredRotation;
+    private Vector3 currentPosition;
 
     void Awake()
     {
@@ -235,7 +242,6 @@ public class CameraPivot : MonoBehaviour
         {
             if (enableEditorMovement)
             {
-                currentYaw = editorYaw;
                 focusPosition.y = Mathf.Lerp(worldBounds.center.y - worldBounds.extents.y, worldBounds.center.y + worldBounds.extents.y, editorFocusY);
                 focusPosition.x = Mathf.Lerp(worldBounds.center.x - worldBounds.extents.x, worldBounds.center.x + worldBounds.extents.x, editorFocusX);
                 focusPosition.z = Mathf.Lerp(worldBounds.center.z - worldBounds.extents.z, worldBounds.center.z + worldBounds.extents.z, editorFocusZ);

@@ -57,15 +57,15 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.RightClick.performed += ctx => RightClick(ctx.ReadValue<float>());
 		inputSystem.UI.Point.performed += ctx => MouseMove(ctx.ReadValue<Vector2>());
 		inputSystem.UI.ScrollWheel.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y);
-		inputSystem.Player.RotateLeft.performed += ctx => CameraRL(false);
-		inputSystem.Player.RotateRight.performed += ctx => CameraRL(true);
+		inputSystem.Player.RotateLeft.performed += ctx => CameraRotate(false);
+		inputSystem.Player.RotateRight.performed += ctx => CameraRotate(true);
 		
 		PlayerSelection.selectionChanged += SelectionChanged;
 	}
 
-	void CameraRL(bool left)
+	void CameraRotate(bool left)
 	{
-		if(hasFocus)cameraPivot.RotateLR(left);
+		if(hasFocus)cameraPivot.Rotate(left ? -1 : 1);
 	}
 	
 	void CameraZoom(float delta)
@@ -651,11 +651,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	private void LateUpdate()
 	{
-		if (hasFocus)
-		{
-			cameraPivot.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
-		}
-		
 		canvas.UpdateUI(this);
 		lastMousePosition = mousePosition;
 	}
@@ -680,14 +675,18 @@ public class GameView : MonoBehaviour, IView<GameController>
 			SetInputEnabled(!isLoadingScenes && !IngameDebugConsole.DebugLogManager.Instance.IsLogWindowVisible);
 			
 			Cursor.lockState = CursorLockMode.Confined;
+			Cursor.visible = !holdMiddleClick;
 			Cursor.SetCursor(Resources.Load<Texture2D>("Cursors/cursor_none"), Vector2.zero, CursorMode.Auto);
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
-				cameraPivot.Move(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime);
+				cameraPivot.MoveFocus(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime, Space.Self);
 			}
 
-			if (inputSystem.Player.MiddleClick.WasReleasedThisFrame()) holdMiddleClick = false;
+			if (inputSystem.Player.MiddleClick.WasReleasedThisFrame())
+			{
+				holdMiddleClick = false;
+			}
 			if (inputSystem.Player.MiddleClick.WasPressedThisFrame())
 			{
 				holdMiddleClick = true;
@@ -696,18 +695,22 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 			if (holdMiddleClick)
 			{
-				var delta = (middleClickMousePosition - mousePosition);
-				delta.y = (lastMousePosition - mousePosition).y;
-				cameraPivot.Rotate(delta.x * Time.deltaTime / Mathf.PI);
-				cameraPivot.Zoom(cameraDeltaY * delta.y * Time.deltaTime / Mathf.PI);
+				//cameraPivot.PanWithMouse(mousePosition.y, Time.unscaledDeltaTime);
+				cameraPivot.MoveFocus((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime, Space.World);
+				cameraPivot.Orbit((middleClickMousePosition - mousePosition).x * Time.unscaledDeltaTime, 
+					(lastMousePosition - mousePosition).y * Time.unscaledDeltaTime);
 			}
-			//Debug.Log(delta);
+			else
+			{
+				cameraPivot.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
+			}
 		}
 		else
 		{
 			SetInputEnabled(false);
 			
 			Cursor.lockState = default;
+			Cursor.visible = true;
 			Cursor.SetCursor(null,default,default);
 		}
 
@@ -720,7 +723,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 		}
 		
-		if (canvas.mouseOverViewport) // process mouse over
+		if (canvas.mouseOverViewport && !holdMiddleClick) // process mouse over
 		{
 			//var selectedCharacter = gameController.GetSelectedCharacter();
 			var result = CursorRaycast(out var hit);
