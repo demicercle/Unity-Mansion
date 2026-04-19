@@ -54,7 +54,7 @@ public class CharacterController : MonoBehaviour
 		GetAgent().SetObstacle(true);
 	}
 	
-	public bool IsControllable() => isControllable && !isDead;
+	public bool IsControllable() => isControllable && !isDead; // TODO: "IsPlayerTurn() && IsParty()"
 	
 	public CharacterAgent GetAgent()
 	{

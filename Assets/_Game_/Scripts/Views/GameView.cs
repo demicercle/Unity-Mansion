@@ -798,6 +798,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 				else if(debugCursor) Debug.Log("no selected character");
 			}
 		}
+		else
+		{
+			if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
+			{
+				selectedCharacter.GetAgent().ClearDestination();
+			}
+		}
 	}
 
 	public void OnApplicationFocus(bool value)
