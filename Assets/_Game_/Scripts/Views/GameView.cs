@@ -81,7 +81,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 		StartCoroutine(Coroutines());
 		
-		canvas = FindObjectsByType<GameCanvas>(default).First();
 		canvas.UpdateUI(this);
 		
 		SetInputEnabled(false);
@@ -262,6 +261,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		QueueRoutine(WaitRunAction(character));
 	}
 	
+	public GameCanvas canvas => GameCanvas.Instance;
+	
 	public System.Action<bool> routinesStarted;
 
 	public List<CharacterView> GetAllCharacters() =>  CharacterView.allInstances.ToList();
@@ -281,8 +282,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	[Header("Debug")]
 	[ReadOnly][SerializeField] private bool hasFocus;
-	//[ReadOnly][SerializeField] private bool hasEditorFocus;
-	[ReadOnly][SerializeField] private GameCanvas canvas;
 	[ReadOnly][SerializeField] private Vector2 mousePosition;
 	private Vector2 lastMousePosition;
 
