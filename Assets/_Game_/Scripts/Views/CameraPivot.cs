@@ -1,9 +1,12 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using LightType = UnityEngine.LightType;
 
 public class CameraPivot : MonoBehaviour
 {
+    private const float AWAKE_ZOOM = 1.0f;
+    
 #if UNITY_EDITOR
     //public Object controllerObj;
     private void OnDrawGizmosSelected()
@@ -45,6 +48,24 @@ public class CameraPivot : MonoBehaviour
         UpdatePosition();
         Utils.SetDirty(this);
     }
+
+    [ContextMenu("FocusFirstCharacter")]
+    void FocusFirstCharacter()
+    {
+        var firstCharacter = Utils.FindObjects<CharacterController>()
+            .OrderBy(c => (c.CompareTag(Consts.TAG_PLAYER) ? 0 : 1) + c.transform.GetSiblingIndex())
+            .FirstOrDefault();
+        
+        if (firstCharacter)
+        {
+            enableEditorMovement = false;
+            Focus(firstCharacter);
+            UpdatePosition();
+            return;
+        }
+        
+        Debug.LogWarning("no character found!");
+    }
 #endif
     
     static private CameraPivot instance;
@@ -67,6 +88,7 @@ public class CameraPivot : MonoBehaviour
     
     [Header("Editor")] 
     [SerializeField] private bool enableEditorMovement;
+    [SerializeField] private Transform focusTransform;
     [Space]
     [Range(0f,1f)] [SerializeField] private float editorFocusY = 0f;
     [Range(0f,1f)] [SerializeField] private float editorFocusX = .5f;
@@ -153,7 +175,14 @@ public class CameraPivot : MonoBehaviour
 
     public void Zoom(float delta)
     {
-        currentZoom = Mathf.Clamp01(currentZoom + zoomSpeed * delta * 0.1f);
+        desiredZoom = Mathf.Clamp01(desiredZoom + zoomSpeed * delta * 0.1f);
+        UpdateAnimator();
+    }
+
+    public void SetStartZoom() => SetZoom(startZoom);
+    public void SetZoom(float value)
+    {
+        desiredZoom = Mathf.Clamp01(value);
         UpdateAnimator();
     }
 
@@ -201,14 +230,15 @@ public class CameraPivot : MonoBehaviour
     private float desiredYaw;
     private float currentYaw;
     private float currentZoom;
+    private float desiredZoom;
     private Quaternion desiredRotation;
     private Vector3 currentPosition;
 
     private UserSettings userSettings;
-    
+
     void Awake()
     {
-        currentYaw = desiredYaw = startZoom;
+        desiredZoom = currentZoom = AWAKE_ZOOM;
     }
 
     private void Start()
@@ -217,12 +247,12 @@ public class CameraPivot : MonoBehaviour
         UpdateAnimator();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         UpdateSettings();
         UpdateBounds();
         UpdatePosition();
-        //UpdateSpotLight();
+        UpdateAnimator();
     }
 
     private void UpdateAnimator()
@@ -242,9 +272,17 @@ public class CameraPivot : MonoBehaviour
     
     private void UpdatePosition()
     {
+        currentZoom = Mathf.Lerp(currentZoom, desiredZoom, Time.unscaledDeltaTime * Mathf.PI);
+        
 #if UNITY_EDITOR
         if (!Application.isPlaying)
         {
+            if (focusTransform)
+            {
+                Focus(focusTransform);
+                focusTransform = null;
+            }
+            
             if (enableEditorMovement)
             {
                 focusPosition.y = Mathf.Lerp(worldBounds.center.y - worldBounds.extents.y, worldBounds.center.y + worldBounds.extents.y, editorFocusY);
@@ -271,16 +309,6 @@ public class CameraPivot : MonoBehaviour
             transform.eulerAngles.z
         );
     }
-
-   /* private void UpdateSpotLight()
-    {
-        if (spotLight == null) return;
-        if (spotLight.type != LightType.Spot || !spotLight.enabled) return;
-        //if (lightRange > 0f) spotLight.range = currentPosition.y + height + lightRange;
-        if (lightRangeToAngle > 0f) spotLight.spotAngle = spotLight.range * lightRangeToAngle;
-        //TODO if (lightRangeCurve.keys.Length>0) spotLight.spotAngle = Mathf.Lerp(lightRangeMinAngle, spotLight.range, lightRangeCurve.Evaluate(currentZoom));
-        //TODO if (lightIntensityCurve.keys.Length>0) spotLight.intensity = Mathf.Lerp(minIntensity, minIntensity + intensityDelta, lightIntensityCurve.Evaluate(currentZoom));
-    }*/
     
     #endregion
 }

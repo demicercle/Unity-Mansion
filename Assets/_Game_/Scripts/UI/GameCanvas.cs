@@ -60,6 +60,7 @@ public class GameCanvas : MonoBehaviour
 		get
 		{
 			if (!instance) instance = Utils.FindFirstObject<GameCanvas>();
+			if (!instance) Instantiate(Resources.Load<GameObject>("GameCanvas")).TryGetComponent(out instance);
 			if (!instance) Debug.LogError("No Game Canvas!");
 			return instance;
 		}

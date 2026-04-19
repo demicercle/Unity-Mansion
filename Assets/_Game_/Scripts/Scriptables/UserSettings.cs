@@ -25,11 +25,13 @@ public class UserSettings : ScriptableObject, IDebugGUI
 	public float orbitDrag = 0.1f;
 	//public bool canRotateY = true;
 
+	private bool setDirtyEditor;
 	public void OnDebugGUI()
 	{
 		DebugGUI.BeginGroup("Debug GUI");
 		showDebugGUI = DebugGUI.Toggle(showDebugGUI, "showDebugGUI");
 		drawDebug = DebugGUI.Toggle(drawDebug, "drawDebug");
+		if (Application.isEditor) setDirtyEditor = DebugGUI.Toggle(setDirtyEditor, "setDirtyEditor");
 		DebugGUI.EndGroup();
 		
 		DebugGUI.BeginGroup("Camera Settings");
@@ -44,5 +46,7 @@ public class UserSettings : ScriptableObject, IDebugGUI
 		orbitSpeed.y = DebugGUI.Range(orbitSpeed.y, 0, 32, "orbitSpeedY");
 		orbitDrag = DebugGUI.Range(orbitDrag, 0, 1, "orbitDrag");
 		DebugGUI.EndGroup();
+		
+		if(setDirtyEditor) Utils.SetDirty(this);
 	}
 }

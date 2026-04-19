@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class FadeScreen : MonoBehaviour
 {
+	static public bool IsVisible => Instance.image.enabled;
+	
 	static void Create()
 	{
 		if (instance) return;

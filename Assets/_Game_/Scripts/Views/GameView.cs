@@ -145,12 +145,16 @@ public class GameView : MonoBehaviour, IView<GameController>
 				character.SetPartyIndex(partyIndex++);
 		}
 		
-		yield return FadeScreen.FadeOut();
 		isLoadingScenes = false;
 		
-		GetController().NewTurn();
-		
+		FadeScreen.FadeOut();
 		PlayerSelection.SelectNextCharacter();
+
+		yield return new WaitForSeconds(.25f);
+		cameraPivot.SetStartZoom();
+		
+		while (FadeScreen.IsVisible) yield return null;
+		GetController().NewTurn();
 	}
 	
 	private IEnumerator Coroutines()
