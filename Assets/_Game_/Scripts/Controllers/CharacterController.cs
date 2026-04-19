@@ -107,7 +107,7 @@ public class CharacterController : MonoBehaviour
 	
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
 	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
-	public bool HasMovePoints() => GetRemainingMovePoints() > 0;
+	public bool HasMovePoints() => GetRemainingMovePoints() > 0f;
 	
 	public bool CanUseRunAction()
 	{

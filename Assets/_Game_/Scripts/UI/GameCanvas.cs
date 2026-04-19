@@ -15,6 +15,9 @@ public class GameCanvas : MonoBehaviour
 	public Button button_endTurn;
 	public CharacterPortrait[] portraits;
 
+	private ColorBlock endTurnColors;
+	private Color normalColor;
+
 	public void SetRenderTexture(RenderTexture rt)
 	{
 		var rawImage = viewportRect.GetComponentInChildren<RawImage>();
@@ -40,6 +43,9 @@ public class GameCanvas : MonoBehaviour
 		
 		if(portraits.Length == 0)
 			portraits = GetComponentsInChildren<CharacterPortrait>();
+
+		endTurnColors = button_endTurn.colors;
+		normalColor = endTurnColors.normalColor;
 	}
 	
 	public void UpdateUI(GameView view)
@@ -52,6 +58,27 @@ public class GameCanvas : MonoBehaviour
 		
 		controlPanel.isOn = view.IsControlPanelVisible();
 		button_actionRun.interactable = view.CanUseRunAction();
-		button_endTurn.interactable = view.CanEndTurn();
+		
+		if (view.CanEndTurn())
+		{
+			button_endTurn.interactable = true;
+		}
+		else
+		{
+			button_endTurn.interactable = false;
+		}
+		
+		if (view.ShouldEndTurn())
+		{
+			endTurnColors.normalColor = Color.Lerp(Color.clear, normalColor, Mathf.PingPong(Time.time*Mathf.PI, 1));
+			button_endTurn.transform.localScale = Vector3.Lerp(Vector3.one * 1.1f, Vector3.one, Mathf.PingPong(Time.time*Mathf.PI, 1));
+		}
+		else
+		{
+			endTurnColors.normalColor = normalColor;
+			button_endTurn.transform.localScale = Vector3.one;
+		}
+		
+		button_endTurn.colors = endTurnColors;
 	}
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 using Oddworm.Framework;
 using UnityEngine;
 using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
@@ -297,10 +298,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	//public bool drawDebug { get; set; }
 	
-	[Range(0f,1f)] public float debugGUI = 0f;
+	[UnityEngine.Range(0f,1f)] public float debugGUI = 0f;
 	//public float cameraSpeed = 1.0f;
 	[SerializeField] private float cameraDeltaY = 1f;
-	[Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
+	[UnityEngine.Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
 
 	[Header("Debug")]
 	[ReadOnly][SerializeField] private bool hasFocus;
@@ -562,6 +563,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 		onComplete?.Invoke();
 	}
 
+	public bool ShouldEndTurn() => CanEndTurn() && CharacterController.GetPartyCharacters().All(pc =>
+	{
+		return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
+	});
+	
 	public bool CanEndTurn() => !HasCoroutines() && GetController().IsPlayerTurn();
 
 	public bool IsCharacterVisible(CharacterController character)
