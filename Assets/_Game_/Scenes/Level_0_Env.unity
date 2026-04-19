@@ -5128,6 +5128,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SnapScale
   snap: 0.5
   ignoreY: 0
+  preventNegativeScale: 0
 --- !u!1001 &1884145255
 PrefabInstance:
   m_ObjectHideFlags: 0

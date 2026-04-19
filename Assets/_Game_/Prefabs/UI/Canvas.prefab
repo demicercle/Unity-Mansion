@@ -518,6 +518,7 @@ GameObject:
   - component: {fileID: 4469177092325172019}
   - component: {fileID: 4742009770716821865}
   - component: {fileID: 2941795032772678768}
+  - component: {fileID: 973791791561246161}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -628,6 +629,31 @@ MonoBehaviour:
   button_actionRun: {fileID: 4559085250805307426}
   button_endTurn: {fileID: 6829224796664647201}
   portraits: []
+  animator: {fileID: 973791791561246161}
+  lerpSpeed: 3
+  endTurnLayer: 1
+--- !u!95 &973791791561246161
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5406122567533382223}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 81ea1f6e1684b074f8685cff0ea93e64, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &6805044113424152427
 GameObject:
   m_ObjectHideFlags: 0

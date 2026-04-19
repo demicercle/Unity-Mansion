@@ -26,15 +26,37 @@ public class ConsoleWrapper : MonoBehaviour
 			character.Restore();
 	}
 
-	[ConsoleMethod("debug_draw", "")]
-	static public void DebugDraw(bool value)
+	[ConsoleMethod("use_all_actions", "")]
+	static public void UseAllActions(int value)
 	{
-		global::DrawDebug.IsEnabled = value;
+		if (value == 0) return;
+		if (value == 1)
+		{
+			if (PlayerSelection.TryGetSelectedCharacter(out CharacterController partyChar))
+				UseCharacterAllActions(partyChar);
+		}
+		else
+		{
+			foreach(var partyChar in CharacterController.GetPartyCharacters())
+				UseCharacterAllActions(partyChar);
+		}
+	}
+
+	static void UseCharacterAllActions(CharacterController partyChar)
+	{
+		partyChar.ConsumeMovePoints(partyChar.GetRemainingMovePoints());
+		partyChar.ConsumeActions(partyChar.GetRemaingActions());
+	}
+
+	[ConsoleMethod("debug_draw", "")]
+	static public void DebugDraw(int value)
+	{
+		global::DrawDebug.IsEnabled = value > 0;
 	}
 
 	[ConsoleMethod("debug_gui", "")]
-	static public void DebugGUI(bool value)
+	static public void DebugGUI(int value)
 	{
-		global::DebugGUI.IsEnabled = value;
+		global::DebugGUI.IsEnabled = value > 0;
 	}
 }

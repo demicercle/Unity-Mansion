@@ -9,14 +9,18 @@ public class GameCanvas : MonoBehaviour
 	static private GameCanvas instance;
 	static public GameCanvas Instance => instance;
 	
+	
+	[Header("References")]
 	public RectTransform viewportRect;
 	public Toggle controlPanel;
 	public Button button_actionRun;
 	public Button button_endTurn;
 	public CharacterPortrait[] portraits;
-
-	private ColorBlock endTurnColors;
-	private Color normalColor;
+	
+	[Header("Animation")]
+	public Animator animator;
+	public float lerpSpeed;
+	public int endTurnLayer;
 
 	public void SetRenderTexture(RenderTexture rt)
 	{
@@ -43,9 +47,6 @@ public class GameCanvas : MonoBehaviour
 		
 		if(portraits.Length == 0)
 			portraits = GetComponentsInChildren<CharacterPortrait>();
-
-		endTurnColors = button_endTurn.colors;
-		normalColor = endTurnColors.normalColor;
 	}
 	
 	public void UpdateUI(GameView view)
@@ -67,18 +68,11 @@ public class GameCanvas : MonoBehaviour
 		{
 			button_endTurn.interactable = false;
 		}
-		
-		if (view.ShouldEndTurn())
+
+		if (animator && lerpSpeed > 0)
 		{
-			endTurnColors.normalColor = Color.Lerp(Color.clear, normalColor, Mathf.PingPong(Time.time*Mathf.PI, 1));
-			button_endTurn.transform.localScale = Vector3.Lerp(Vector3.one * 1.1f, Vector3.one, Mathf.PingPong(Time.time*Mathf.PI, 1));
+			if(endTurnLayer > 0) 
+				animator.SetLayerWeight(endTurnLayer, Mathf.Lerp(animator.GetLayerWeight(endTurnLayer), view.ShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed));
 		}
-		else
-		{
-			endTurnColors.normalColor = normalColor;
-			button_endTurn.transform.localScale = Vector3.one;
-		}
-		
-		button_endTurn.colors = endTurnColors;
 	}
 }

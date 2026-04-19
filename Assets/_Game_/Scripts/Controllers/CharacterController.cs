@@ -83,6 +83,12 @@ public class CharacterController : MonoBehaviour
 		if (turn >= 0) currentTurn = turn;
 	}
 
+
+	public int GetRemaingActions()
+	{
+		return characterData.maxActions - usedActions;
+	}
+	
 	public bool HasActions() => usedActions < characterData.maxActions;
 
 	public void ConsumeActions(int actions = 1)
