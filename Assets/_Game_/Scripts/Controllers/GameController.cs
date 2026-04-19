@@ -17,6 +17,7 @@ public class GameController : MonoBehaviour
 
 	public System.Action turnStarted, turnEnded, selectionChanged;
 	public System.Action<CharacterController[]> partyChanged;
+	public System.Action sceneLoaded;
 	
 	//[ReadOnly] [SerializeField] private List<CharacterController> allCharacters =  new List<CharacterController>();
 	[ReadOnly] [SerializeField] private int currentTurn;
@@ -62,4 +63,6 @@ public class GameController : MonoBehaviour
 		Debug.Log(this + " EndTurn " + currentTurn);
 		turnEnded?.Invoke();
 	}
+
+	public void SceneLoaded() => sceneLoaded?.Invoke();
 }

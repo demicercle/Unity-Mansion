@@ -92,6 +92,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Start");
+
+		if (!Application.isEditor) OnApplicationFocus(true);
 		
 		StartCoroutine(Coroutines());
 		
@@ -146,6 +148,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 		
 		isLoadingScenes = false;
+		GetController().SceneLoaded();
 		
 		FadeScreen.FadeOut();
 		PlayerSelection.SelectNextCharacter();

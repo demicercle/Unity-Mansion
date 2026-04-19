@@ -115,4 +115,19 @@ public static class EditorTools
 		Debug.Log("Found invalid colliders: " + invalidColliders.Count);
 	}
 	#endregion
+
+	#region Selection
+
+	[MenuItem("Tools/Selection/SetSelectionDirty")]
+	static void SetSelectionDirty()
+	{
+		foreach (var o in Selection.objects)
+		{
+			Debug.Log("SetSelectionDirty: ");
+			EditorUtility.SetDirty(o);
+		}
+	}
+	
+
+	#endregion
 }

@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 public class GameEventHandler : MonoBehaviour
 {
-	public UnityEvent turnEnded, turnStarted;
+	public UnityEvent turnEnded, turnStarted, sceneLoaded;
 
 	GameView gameView;
 	GameController gameController;

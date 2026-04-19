@@ -5,7 +5,6 @@ using LightType = UnityEngine.LightType;
 
 public class CameraPivot : MonoBehaviour
 {
-    private const float AWAKE_ZOOM = 1.0f;
     
 #if UNITY_EDITOR
     //public Object controllerObj;
@@ -95,16 +94,15 @@ public class CameraPivot : MonoBehaviour
     [Range(0f,1f)] [SerializeField] private float editorFocusZ = .5f;
     [Space]
     [Range(-180f, 180)][SerializeField]  private float editorYaw; 
-    //[Space]
-    //[Range(0f,1f)] [SerializeField] private float editorZoom = 0f;
-    
+    [Space]
     [Header("Bounds")]
     [SerializeField] private Bounds worldBounds;
     [SerializeField] private float worldY = 0f;
     [Min(0f)][SerializeField] private float worldHeight = 12f;
-    
-    [Header("Settings")]
+    [Space]
+    [Header("Scene Settings")]
     [Range(0f,1f)] [SerializeField] private float startZoom = .5f;
+    [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
     [SerializeField] private bool canRotateY = true;
     [SerializeField] private float rotationStepAngle = 0.0f;
     [Space]
@@ -238,7 +236,7 @@ public class CameraPivot : MonoBehaviour
 
     void Awake()
     {
-        desiredZoom = currentZoom = AWAKE_ZOOM;
+        desiredZoom = currentZoom = awakeZoom;
     }
 
     private void Start()

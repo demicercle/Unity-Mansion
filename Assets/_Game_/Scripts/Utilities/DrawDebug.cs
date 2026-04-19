@@ -15,6 +15,7 @@ public class DrawDebug : MonoBehaviour
 
 	static public DrawDebug WorldLabel(Vector3 position, string message, float duration = 0f, float speedY = 0f)
 	{
+		if (!IsEnabled) return null;
 		var label = new GameObject().AddComponent<DrawDebug>();
 		label.duration = duration;
 		label.worldPosition = position;

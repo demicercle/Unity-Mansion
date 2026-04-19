@@ -90,9 +90,12 @@ public class DebugGUI : MonoBehaviour
 		if(!Application.isEditor && !Debug.isDebugBuild)
 			Destroy(this);
 
-		fadeStyle = new GUIStyle();
-		blackPixel = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-		blackPixel.SetPixel(0, 0, Color.black);
+		else
+		{
+			fadeStyle = new GUIStyle();
+			blackPixel = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+			blackPixel.SetPixel(0, 0, Color.black);
+		}
 	}
 
 	void OnDestroy() => Destroy(blackPixel); // \o/
