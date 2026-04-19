@@ -23,6 +23,8 @@ public class FadeScreen : MonoBehaviour
 			return instance;
 		}
 	}
+	
+	static public void SetText(string text) => Instance.tmpTxt.text = text;
 
 	[IngameDebugConsole.ConsoleMethod("fade_in","")]
 	static public Coroutine FadeIn(bool instant = false) => Instance.FadeCoroutine(true,instant);
@@ -30,9 +32,10 @@ public class FadeScreen : MonoBehaviour
 	[IngameDebugConsole.ConsoleMethod("fade_out", "")]
 	static public Coroutine FadeOut(bool instant = false) => Instance.FadeCoroutine(false,instant);
 	
-	[Min(0f)]public float duration = 1f;
-	public Color color = Color.black;
-	public Image image;
+	[Min(0f)][SerializeField] private float duration = 1f;
+	[SerializeField] private Color color = Color.black;
+	[SerializeField] private Image image;
+	[SerializeField] private TMPro.TMP_Text tmpTxt;
 	
 	private float time;
 	private float fromAlpha, toAlpha;
@@ -61,10 +64,13 @@ public class FadeScreen : MonoBehaviour
 			transform.SetAsLastSibling();
 			image.enabled = true;
 			image.color = Utils.ColorScale(color, Mathf.Lerp(fromAlpha, toAlpha, time / duration));
+			tmpTxt.enabled = true;
+			tmpTxt.color = Utils.ColorScale(tmpTxt.color, image.color.a);
 			time += Time.unscaledDeltaTime;
 			yield return null;
 		}
 		image.enabled = fadeIn;
+		tmpTxt.enabled = fadeIn;
 	}
 
 	private void Awake()
