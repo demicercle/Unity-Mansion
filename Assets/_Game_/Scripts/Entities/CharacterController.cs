@@ -112,7 +112,7 @@ public class CharacterController : MonoBehaviour
 	public float GetMaxMovePoints() => characterData.maxMovePoints;
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
 	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
-	public bool HasMovePoints() => usedMovePoints < GetMaxMovePoints();
+	public bool HasMovePoints(float d = 0f) => usedMovePoints + d < GetMaxMovePoints();
 	
 	public bool CanUseRunAction()
 	{
@@ -361,6 +361,7 @@ public class CharacterController : MonoBehaviour
 	public void AttackAction(CharacterController target = null)
 	{
 		ConsumeActions(1);
+		usedActionList.Add(CharacterAction.AttackAction);
 		onAttackAction?.Invoke(target);
 	}
 

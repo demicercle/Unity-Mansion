@@ -8,5 +8,6 @@
 public enum CharacterAction
 {
 	None,
-	RunAction
+	RunAction,
+	AttackAction
 }

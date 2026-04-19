@@ -182,11 +182,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 	}
 
-	public void ClickCharacter(CharacterView clickedCharacterView)
+	public void ClickCharacter(CharacterAnimation clickedCharacterAnimation)
 	{
-		Debug.Log(this + " ClickCharacter " + clickedCharacterView);
+		Debug.Log(this + " ClickCharacter " + clickedCharacterAnimation);
 		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
-		var clickedCharacter = clickedCharacterView.GetController();
+		var clickedCharacter = clickedCharacterAnimation.GetController();
 	//	//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (clickedCharacter.InParty())
 		{
@@ -297,12 +297,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	public System.Action<bool> routinesStarted;
 
-	public List<CharacterView> GetAllCharacters() =>  CharacterView.allInstances.ToList();
+	public List<CharacterAnimation> GetAllCharacters() =>  CharacterAnimation.activeInstances.ToList();
 
-	public List<CharacterView> GetPartyCharacters() => CharacterView.allInstances.Where(c => c.GetController().InParty()).ToList();
+	public List<CharacterAnimation> GetPartyCharacters() => CharacterAnimation.activeInstances.Where(c => c.GetController().InParty()).ToList();
 
-	public int GetPartyCharacterIndex(CharacterView characterView) => GetPartyCharacters().IndexOf(characterView);
-	public int GetCharacterIndex(CharacterView characterView) => GetAllCharacters().IndexOf(characterView);
+	public int GetPartyCharacterIndex(CharacterAnimation characterAnimation) => GetPartyCharacters().IndexOf(characterAnimation);
+	public int GetCharacterIndex(CharacterAnimation characterAnimation) => GetAllCharacters().IndexOf(characterAnimation);
 
 	public bool HasCoroutines() => coroutines.Count > 0;
 
@@ -355,7 +355,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CURSOR_RAYCAST_RESULT_CHARACTER)
 			{
-				if (hit.collider.TryGetComponent(out CharacterView clickedCharacter)) // click character
+				if (hit.collider.TryGetComponent(out CharacterAnimation clickedCharacter)) // click character
 				{
 					ClickCharacter(clickedCharacter);
 				}
@@ -832,7 +832,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 			else if (result == CURSOR_RAYCAST_RESULT_CHARACTER) 
 			{
-				if (hit.collider.TryGetComponent(out CharacterView overCharacterView))
+				if (hit.collider.TryGetComponent(out CharacterAnimation overCharacterView))
 				{
 					var overCharacter = overCharacterView.GetController();
 					if (selectedCharacter != null)

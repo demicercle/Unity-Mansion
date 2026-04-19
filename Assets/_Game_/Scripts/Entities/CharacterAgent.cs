@@ -160,7 +160,7 @@ public class CharacterAgent : MonoBehaviour
 	private bool hasDestination;
 	private AIPath aiPath;
 	private CharacterController controller;
-	private CharacterView characterView;
+	private CharacterAnimation _characterAnimation;
 	private Vector3[] lastPath;
 
 	private void OnDrawGizmosSelected()
@@ -172,8 +172,8 @@ public class CharacterAgent : MonoBehaviour
 
 	private void Awake()
 	{
-		characterView = GetComponent<CharacterView>();
-		controller = characterView.GetController();
+		_characterAnimation = GetComponent<CharacterAnimation>();
+		controller = _characterAnimation.GetController();
 		
 		UpdateComponent();
 		
