@@ -25,6 +25,10 @@ public static class Utils
 		}
 #endif
 	}
+	public static string SplitCamelCase(string input)
+	{
+		return System.Text.RegularExpressions.Regex.Replace(input, "([A-Z])", " $1", System.Text.RegularExpressions.RegexOptions.Compiled).Trim();
+	}
 	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
 	static public Color ColorScale(Color color, float alpha) => new Color(color.r * alpha, color.g * alpha, color.b * alpha, color.a * alpha);
 

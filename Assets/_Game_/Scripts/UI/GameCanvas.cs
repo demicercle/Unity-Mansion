@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -87,9 +88,9 @@ public class GameCanvas : MonoBehaviour
 
 		var mouseHandler = Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject);
 		mouseHandler.onMouseOverChanged += (mouseOver) => mouseOverViewport = mouseOver;
-		#if UNITY_EDITOR
-		mouseHandler.onClicked += () => GameView.GetInstance().OnApplicationFocus(Application.isEditor); // TODO
-		#endif
+		//#if UNITY_EDITOR
+		mouseHandler.onClicked += () => GameView.GetInstance().OnApplicationFocus(true);
+		//#endif
 		
 		if(portraits.Length == 0)
 			portraits = GetComponentsInChildren<CharacterPortrait>();

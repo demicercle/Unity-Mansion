@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using IngameDebugConsole;
 using NUnit.Framework;
 using Oddworm.Framework;
 using UnityEngine;
@@ -51,7 +52,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		Debug.Log(this + " Awake");
 		instance = this;
-		DontDestroyOnLoad(gameObject);
+		//DontDestroyOnLoad(gameObject);
 		name = ToString();
 		
 		OnApplicationFocus(!Application.isEditor);
@@ -338,7 +339,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	{
 	//	Debug.Log("LeftClick: " + value);
 
-		if (canvas.mouseOverViewport && value > 0f) // pressed
+		if (hasFocus && canvas.mouseOverViewport && value > 0f) // pressed
 		{
 			//hasEditorFocus = true;
 			
@@ -803,7 +804,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 		}
 		
-		if (canvas.mouseOverViewport && !holdMiddleClick) // mouse over
+		if (hasFocus && canvas.mouseOverViewport && !holdMiddleClick) // mouse over
 		{
 			//var selectedCharacter = gameController.GetSelectedCharacter();
 			var result = CursorRaycast(out var hit);
@@ -886,11 +887,15 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void OnApplicationFocus(bool value)
 	{
+		if (DebugGUI.IsEnabled || DebugLogManager.Instance.IsLogWindowVisible)
+			value = false;
+		
 		if (hasFocus != value)
 		{
 			Debug.Log("OnApplicationFocus: " + value);
 			hasFocus = value;
 		}
+		
 		//hasEditorFocus = value;
 		////Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
 	}

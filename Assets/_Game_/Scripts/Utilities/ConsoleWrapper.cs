@@ -1,6 +1,7 @@
 ﻿using System;
 using IngameDebugConsole;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public static class ConsoleWrapper
 {
@@ -59,5 +60,17 @@ public static class ConsoleWrapper
 	static public void DebugGUI(int value)
 	{
 		UserSettings.GetCurrentSettings().showDebugGUI = value > 0;
+	}
+
+	[ConsoleMethod("quit_game", "")]
+	static public void QuitGame()
+	{
+		Application.Quit();
+	}
+
+	[ConsoleMethod("reset_game", "")]
+	static public void ResetGame()
+	{
+		SceneManager.LoadScene(0);
 	}
 }

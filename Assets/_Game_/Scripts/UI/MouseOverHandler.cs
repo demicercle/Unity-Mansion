@@ -17,8 +17,11 @@ public class MouseOverHandler : MonoBehaviour, IPointerEnterHandler, IPointerExi
 	}
 	
 	public event System.Action onClicked;
+	//public bool ignoreDebug = true;
+	
 	public void OnPointerClick(PointerEventData eventData)
 	{
+		//if (ignoreDebug && (DebugGUI.IsEnabled || IngameDebugConsole.DebugLogManager.Instance.IsLogWindowVisible)) return;
 		onClicked?.Invoke();
 	}
 	

@@ -474,21 +474,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a46c4acb69634a89b9a10b172cef26c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DebugGUI
-  viewX: 0
-  viewY: 0
+  viewX: 0.702
+  viewY: 0.022
   viewWidth: 0.5
-  viewHeight: 0.5
+  viewHeight: 0.818
   guiSkin: {fileID: 11400000, guid: 4393402c63a81b1419e1d2ccc7a8aeb0, type: 2}
+  guiTitle: 
   guiStyleName: 
   debugObjects:
   - {fileID: 11400000, guid: 0ef1874cf9e753c4ab1d4ad24303fa78, type: 2}
   scrollValue: {x: 0, y: 0}
   screenRect:
     serializedVersion: 2
-    x: 0
-    y: 0
+    x: 818.53204
+    y: 14.278
     width: 324.5
-    height: 324.5
+    height: 530.882
   screenSize: {x: 1166, y: 649}
 --- !u!1 &143337792
 GameObject:

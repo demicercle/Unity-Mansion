@@ -28,19 +28,21 @@ public class UserSettings : ScriptableObject, IDebugGUI
 	public void OnDebugGUI()
 	{
 		DebugGUI.BeginGroup("Debug GUI");
-		showDebugGUI = !DebugGUI.Toggle(!showDebugGUI, "<- CLOSE");
+		showDebugGUI = DebugGUI.Toggle(showDebugGUI, "showDebugGUI");
 		drawDebug = DebugGUI.Toggle(drawDebug, "drawDebug");
 		DebugGUI.EndGroup();
 		
 		DebugGUI.BeginGroup("Camera Settings");
-		lerpSpeed = DebugGUI.Field(lerpSpeed, "lerpSpeed");
-		inputSpeed = DebugGUI.Field(inputSpeed, "inputSpeed");
-		panSpeed = DebugGUI.Field(panSpeed, "panSpeed");
-		screenPadding = DebugGUI.Field(screenPadding, "screenPadding");
-		zoomSpeed = DebugGUI.Field(zoomSpeed, "zoomSpeed");
-		rotationSpeed = DebugGUI.Field(rotationSpeed, "rotationSpeed");
-		orbitDrag = DebugGUI.Field(orbitDrag, "orbitDrag");
-		orbitSpeed = DebugGUI.Field(orbitSpeed, "orbitSpeed");
+		lerpSpeed = DebugGUI.Range(lerpSpeed, 0, 16, "lerpSpeed");
+		inputSpeed = DebugGUI.Range(inputSpeed, 0, 32, "inputSpeed");
+		panSpeed = DebugGUI.Range(panSpeed, 0, 32, "panSpeed");
+		screenPadding = DebugGUI.Range(screenPadding, 0, 8, "screenPadding");
+		zoomSpeed = DebugGUI.Range(zoomSpeed, 0, 2, "zoomSpeed");
+		rotationSpeed.x = DebugGUI.Range(rotationSpeed.x, 0, 4, "rotationSpeedX");
+		rotationSpeed.y = DebugGUI.Range(rotationSpeed.y, 0, 32, "rotationSpeedY");
+		orbitSpeed.x = DebugGUI.Range(orbitSpeed.x, 0, 1, "orbitSpeedX");
+		orbitSpeed.y = DebugGUI.Range(orbitSpeed.y, 0, 32, "orbitSpeedY");
+		orbitDrag = DebugGUI.Range(orbitDrag, 0, 1, "orbitDrag");
 		DebugGUI.EndGroup();
 	}
 }
