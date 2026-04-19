@@ -2007,7 +2007,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000019073486}
+  m_AnchoredPosition: {x: 0, y: 0.0000038146973}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &541877068
@@ -2832,7 +2832,6 @@ MonoBehaviour:
   scenesToLoad:
   - Level_0
   - Level_0_Env
-  drawDebug: 0
   debugGUI: 0
   cameraDeltaY: 1
   maxNavDistance: 0.5
@@ -3008,7 +3007,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 884853962}
   m_HandleRect: {fileID: 884853961}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

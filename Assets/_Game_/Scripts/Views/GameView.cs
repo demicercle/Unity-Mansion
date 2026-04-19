@@ -65,6 +65,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.UI.ScrollWheel.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y);
 		inputSystem.Player.RotateLeft.performed += ctx => CameraRotate(false);
 		inputSystem.Player.RotateRight.performed += ctx => CameraRotate(true);
+		inputSystem.Player.EndTurn.performed += ctx => ClickEndTurn();
+		inputSystem.Player.Action_Run.performed += ctx => ClickRunAction();
+		inputSystem.Player.SelectNext.performed += ctx => ClickSelectNext();
+		inputSystem.Player.FocusSelected.performed += ctx => ClickFocusSelected();
 		
 		PlayerSelection.selectionChanged += SelectionChanged;
 	}
@@ -177,6 +181,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		{
 			if(GetController().IsPlayerTurn())
 				PlayerSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
+			else Debug.Log("not in player turn");
 		}
 		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
 		{
@@ -222,26 +227,34 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void AssignInteract(CharacterController character, PropComponent clickedProp) // TODO Prop Controller
 	{
+		Debug.Log(this + " AssignInteract " + character + " " + clickedProp);
+		QueueRoutine(WaitCharacterInteract(character, clickedProp));
+	}
+
+	private IEnumerator WaitCharacterInteract(CharacterController character, PropComponent clickedProp)
+	{
 		if (clickedProp.GetBestWaypoint(character.GetPosition(), out var bestWaypoint))
 		{
-			Debug.Log(this + " AssignInteract " + character + " " + clickedProp);
-			QueueRoutine(WaitCharacterMoved(character, bestWaypoint.GetPosition(), () =>
+			Debug.Log(this + " WaitCharacterInteract " + character + " " + clickedProp);
+			yield return StartCoroutine(WaitCharacterMoved(character, bestWaypoint.GetPosition()));
+			var agent = character.GetAgent();
+			if (agent.ReachedDestination(bestWaypoint.GetPosition()))
 			{
-				var agent = character.GetAgent();
-				if (agent.ReachedDestination(bestWaypoint.GetPosition()))
+				// waypoint reach
+				if (character.CanInteract())
 				{
-					// waypoint reach
-					if (character.CanInteract())
-					{
-						QueueRoutine(WaitCharacterInteract(character, clickedProp, bestWaypoint));
-					}
+					QueueRoutine(WaitCharacterInteract(character, clickedProp, bestWaypoint));
 				}
 				else
 				{
-					var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
-					Debug.Log(character + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
+					character.FloatingText("Can't");
 				}
-			}));
+			}
+			else
+			{
+				var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
+				Debug.Log(character + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
+			}
 		}
 		else Debug.LogWarning(this + " AssignInteract " + character + " " + clickedProp + " no waypoint!");
 	}
@@ -385,6 +398,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				if (!attacker.HasMovePoints())
 				{
 					Debug.Log(attacker + " has no move points to reach target");
+					attacker.FloatingText("Can't");
 					yield break;
 				}
 				
@@ -537,10 +551,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			var newPosition = movingCharacter.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
+			
+			Debug.Log(movingCharacter + " move " + deltaPos);
+			movingCharacter.ConsumeMovePoints(deltaPos);
+			
 			if (deltaPos <= 0f) timeout += Time.deltaTime;
 			else timeout = 0f;
-			
-			movingCharacter.ConsumeMovePoints(deltaPos);
 		}
 		
 		onComplete?.Invoke();
@@ -558,8 +574,12 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public void ClickEndTurn()
 	{
-		GetController().EndTurn();
-		StartCoroutine(EndTurnRoutine());
+		if (GetController().IsPlayerTurn())
+		{
+			GetController().EndTurn();
+			StartCoroutine(EndTurnRoutine());
+		}
+		else Debug.Log("not in player turn");
 	}
 	
 	private IEnumerator EndTurnRoutine()
@@ -601,13 +621,33 @@ public class GameView : MonoBehaviour, IView<GameController>
 		GetController().IsPlayerTurn() && PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllable();
 
 	//public CharacterController GetPartyCharacter(int index) => CharacterController.GetPartyCharacter(index);
+
+	public void ClickFocusSelected()
+	{
+		if (GetController().IsPlayerTurn())
+		{
+			if(PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter))
+				cameraPivot.Focus(selectedCharacter);
+			else Debug.Log("no selected character");
+		}
+		else Debug.Log("not in player turn");
+	}
+	
+	public void ClickSelectNext()
+	{
+		if (GetController().IsPlayerTurn())
+		{
+			PlayerSelection.SelectNextCharacter();
+		}
+		else Debug.Log("not in player turn");
+	}
 	
 	public void ClickRunAction()
 	{
 		PlayerSelection.TryGetSelectedCharacter(out var selectedCharacter);
 		if (selectedCharacter == null)
 		{
-			Debug.LogWarning("no selected character!");
+			Debug.Log("no selected character!");
 			return;
 		}
 		
@@ -807,10 +847,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 								var agent = selectedCharacter.GetAgent();
 								agent.AssignDestination(bestWaypoint.GetPosition()); // mouse over prop
 							}
-							else
-							{
-								Debug.LogWarning("no waypoint found");
-							}
+							//else Debug.LogWarning("no waypoint found");
 						}
 						else if(debugCursor) Debug.Log("character not controllable");
 					}

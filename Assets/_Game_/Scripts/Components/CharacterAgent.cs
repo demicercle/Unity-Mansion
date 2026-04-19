@@ -33,8 +33,13 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 	}
 
+	private bool isObstacle;
 	public void SetObstacle(bool value)
 	{
+		if (isObstacle == value)
+			return;
+
+		isObstacle = value;
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
 		{
 			if (graphUpdate.enabled == value) return;
@@ -70,7 +75,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.simulateMovement = true;
 		aiPath.isStopped = false;
-		Debug.Log(this + " StartMove");
+		//Debug.Log(this + " StartMove");
 	}
 
 	public void StopMovement()
@@ -78,7 +83,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
-		Debug.Log(this + " StopMovement");
+		//Debug.Log(this + " StopMovement");
 		ClearDestination();
 	}
 	
@@ -91,6 +96,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.destination = hitPoint;
 		aiPath.SearchPath();
 		hasDestination = true;
+		isDrawingPath = false;
 		onSearchPath?.Invoke();
 		DbgDraw.Disc(hitPoint, Quaternion.identity, aiPath.radius, Utils.ColorAlpha(Color.cyan, 0.2f), 0f);
 	}
@@ -143,7 +149,7 @@ public class CharacterAgent : MonoBehaviour
 
 	public float rotationSpeed => aiPath.rotationSpeed;
 
-	private bool shouldDrawPath;
+	//private bool shouldDrawPath;
 	private bool hasDestination;
 	private AIPath aiPath;
 	private CharacterController controller;
@@ -161,8 +167,10 @@ public class CharacterAgent : MonoBehaviour
 	{
 		characterView = GetComponent<CharacterView>();
 		controller = characterView.GetController();
-		controller.selectionChanged += SelectionChanged;
+		
 		UpdateComponent();
+		
+		PlayerSelection.selectionChanged += SelectionChanged;
 	}
 
 	private void Start()
@@ -175,7 +183,13 @@ public class CharacterAgent : MonoBehaviour
 	
 	private void OnDestroy()
 	{
-		controller.selectionChanged -= SelectionChanged;
+		PlayerSelection.selectionChanged -= SelectionChanged;
+	}
+
+	void SelectionChanged()
+	{
+		SetObstacle(!PlayerSelection.IsCharacterSelected(controller));
+		if(!isMoving) ClearDestination();
 	}
 
 	private void LateUpdate()
@@ -192,15 +206,23 @@ public class CharacterAgent : MonoBehaviour
 		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
 	}
 
-	private void SelectionChanged(bool isSelected)
-	{
-		shouldDrawPath = isSelected && controller.IsControllable();
-	}
-	
+	private bool shouldDrawPath;
+	private bool isDrawingPath;
 	private void DrawPath()
 	{
-		if (!shouldDrawPath || (lastPath = GetCurrentPath()).Length <= 1)
+		shouldDrawPath = hasDestination 
+		                 && PlayerSelection.IsCharacterSelected(controller) 
+		                 && controller.IsControllable() 
+		                 && (lastPath = GetCurrentPath()).Length > 1;
+
+		if (shouldDrawPath == isDrawingPath)
+			return;
+		
+//		Debug.Log(this + " shouldDrawPath=" + shouldDrawPath + " path=" + lastPath);
+		
+		if (!shouldDrawPath)
 		{
+			isDrawingPath = false;
 			pathRenderers.ForEach(p => p.enabled = false);
 			return;
 		}
@@ -222,6 +244,7 @@ public class CharacterAgent : MonoBehaviour
 			pathRenderers[1].SetPositions(lastPath);
 		}
 
+		isDrawingPath = true;
 		pathRenderers.ForEach(p => p.enabled = true);
 	}
 }

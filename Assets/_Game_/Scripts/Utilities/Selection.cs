@@ -4,21 +4,6 @@ using System.Linq;
 public static class PlayerSelection
 {
 	static CharacterController selectedCharacter;
-	private static bool selectionSetObstacle = true;
-
-	private static void UpdateAllCharacterAgents()
-	{
-		foreach(var character in CharacterController.instances) character.GetAgent().SetObstacle(!selectionSetObstacle || IsCharacterSelected(character));
-	}
-	
-	static public void SetSelectionSetObstacle(bool value)
-	{
-		if (value != selectionSetObstacle)
-		{
-			selectionSetObstacle = value;
-			UpdateAllCharacterAgents();
-		}
-	}
 
 	static public event System.Action selectionChanged;
 	
@@ -39,7 +24,7 @@ public static class PlayerSelection
 		if (selectedCharacter != null)
 		{
 			// deselect character
-			selectedCharacter.GetAgent().SetObstacle(true);
+			//selectedCharacter.GetAgent().SetObstacle(true);
 			selectedCharacter.NotifySelected(false);
 		}
 		
@@ -52,7 +37,6 @@ public static class PlayerSelection
 			selectedCharacter.NotifySelected(true);
 		}
 		
-		UpdateAllCharacterAgents();
 		selectionChanged?.Invoke();
 	}
 
@@ -78,12 +62,14 @@ public static class PlayerSelection
 			return;
 		}
 		
-		Debug.Log(" SelectNextCharacter " + startIndex);
 		var partyCount = party.Length;
+		Debug.Log(" SelectNextCharacter " + startIndex + " partyCount=" + partyCount);
 		while (partyCount-- > 0)
 		{
-			var newIndex = (partyCount + startIndex) % party.Length;
-//			Debug.Log(" ? " + newIndex);
+			startIndex++;
+			
+			var newIndex = startIndex % party.Length;
+			Debug.Log(" try select at " + newIndex);
 			var newChar = party[newIndex];
 			if (!newChar.IsDead())
 			{
