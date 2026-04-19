@@ -17,7 +17,9 @@ public class GameCanvas : MonoBehaviour
 
 	public void SetRenderTexture(RenderTexture rt)
 	{
-		viewportRect.GetComponentInChildren<RawImage>().texture = rt;
+		var rawImage = viewportRect.GetComponentInChildren<RawImage>();
+		rawImage.texture = rt;
+		rawImage.enabled = true;
 	}
 	
 	public bool mouseOverViewport { get; private set; }

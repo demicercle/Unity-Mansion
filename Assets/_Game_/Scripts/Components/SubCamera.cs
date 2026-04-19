@@ -25,7 +25,8 @@ public class SubCamera : MonoBehaviour
 
 		private void OnDrawGizmosSelected()
 		{
-			LateUpdate();
+			if(!Application.isPlaying)
+				LateUpdate();
 		}
 
 		private void LateUpdate()
@@ -37,11 +38,17 @@ public class SubCamera : MonoBehaviour
 				if(copyPosition) selfCamera.transform.position = otherCamera.transform.position;
 				if(copyRotation) selfCamera.transform.rotation = otherCamera.transform.rotation;
 				if(copyFOV) selfCamera.fieldOfView  = otherCamera.fieldOfView;
-				if (Application.isPlaying && resizeRT && (screenSize != new Vector2(Screen.width, Screen.height) || rtCopy == null))
+				
+				if (Application.isPlaying)
 				{
-					screenSize.x =  Screen.width;
-					screenSize.y = Screen.height;
-					CreateRenderTexture();
+					selfCamera.enabled = otherCamera.enabled;
+					
+					if (resizeRT && (screenSize != new Vector2(Screen.width, Screen.height) || rtCopy == null))
+					{
+						screenSize.x =  Screen.width;
+						screenSize.y = Screen.height;
+						CreateRenderTexture();
+					}
 				}
 			}
 		}
