@@ -11,6 +11,8 @@ using UnityEngine.SceneManagement;
 [System.Serializable]
 public class GameView : MonoBehaviour, IView<GameController>
 {
+	static public void Focus(bool value) => GetInstance().OnApplicationFocus(value);
+	
 	static bool debugCursor = false;
 	const int CURSOR_RAYCAST_RESULT_NONE = 0;
 	const int CURSOR_RAYCAST_RESULT_NAVIGATION = 1;
@@ -55,10 +57,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		//DontDestroyOnLoad(gameObject);
 		name = ToString();
 		
-		OnApplicationFocus(!Application.isEditor);
-		//Debug.Log("hasFocus=" + hasFocus + " hasEditorFocus=" + hasEditorFocus);
-		//hasEditorFocus = false;
-		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
 		inputSystem.UI.Click.performed += ctx => LeftClick(ctx.ReadValue<float>());
@@ -73,6 +71,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		inputSystem.Player.FocusSelected.performed += ctx => ClickFocusSelected();
 		
 		PlayerSelection.selectionChanged += SelectionChanged;
+		
+		FadeScreen.FadeIn(true);
 	}
 
 	void CameraRotate(bool left)
@@ -100,8 +100,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		SetInputEnabled(false);
 
 		isLoadingScenes = true;
-		yield return null;
-		// TODO Fade In
 
 		// load level
 		for(int i = 0; i < scenesToLoad.Count; i++)
@@ -115,14 +113,19 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 			Debug.Log("load scene: " + scene);
 			var async = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
-			while (async.isDone == false) yield return null;
+			while (async.isDone == false)
+			{
+				DebugGUI.FADE_PROGRESS = async.progress;
+				yield return null;
+			}
 		}
 		
 		yield return null; //
 		
 		//Debug.Log(this + " rebuild navigation async");
-		foreach (var progress in AstarPath.active.ScanAsync()) {
-			Debug.Log("AstarPath.active.ScanAsync " + progress.ToString());
+		foreach (var scanOp in AstarPath.active.ScanAsync()) {
+			//Debug.Log("AstarPath.active.ScanAsync " + progress.ToString());
+			DebugGUI.FADE_PROGRESS = scanOp.progress;
 			yield return null;
 		}
 		
@@ -142,8 +145,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				character.SetPartyIndex(partyIndex++);
 		}
 		
-		// TODO Fade Out
-		yield return null;
+		yield return FadeScreen.FadeOut();
 		isLoadingScenes = false;
 		
 		GetController().NewTurn();

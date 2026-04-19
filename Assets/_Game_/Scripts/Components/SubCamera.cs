@@ -23,16 +23,15 @@ public class SubCamera : MonoBehaviour
 			canvas.SetRenderTexture(rtCopy);
 		}
 
-		private void OnDrawGizmosSelected()
+		void Awake()
 		{
-			if(!Application.isPlaying)
-				LateUpdate();
+			selfCamera = GetComponent<Camera>();
+			otherCamera = GetComponentInParent<Camera>();
+			CreateRenderTexture();
 		}
 
 		private void LateUpdate()
 		{
-			if(!selfCamera) selfCamera = GetComponent<Camera>();
-			if(!otherCamera) otherCamera = GetComponentInParent<Camera>();
 			if (otherCamera)
 			{
 				if(copyPosition) selfCamera.transform.position = otherCamera.transform.position;

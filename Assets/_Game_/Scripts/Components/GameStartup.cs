@@ -8,6 +8,7 @@ public class GameStartup : MonoBehaviour
 	
 	void Start()
 	{
+		FadeScreen.FadeIn(true);
 		SceneManager.LoadScene(gameScene);
 	}
 }

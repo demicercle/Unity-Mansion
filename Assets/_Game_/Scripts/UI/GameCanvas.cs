@@ -2,6 +2,7 @@
 using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -54,7 +55,6 @@ public class GameCanvas : MonoBehaviour
 {
 	static private GameCanvas instance;
 	static public GameCanvas Instance => instance;
-	
 	
 	[Header("References")]
 	public RectTransform viewportRect;

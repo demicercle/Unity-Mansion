@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,9 +17,16 @@ public class DebugGUI : MonoBehaviour
 	static public bool IsEnabled
 	{
 		get => UserSettings.GetCurrentSettings().showDebugGUI;
-		set => UserSettings.GetCurrentSettings().showDebugGUI = value;
+		set
+		{
+			UserSettings.GetCurrentSettings().showDebugGUI = value;
+			GameView.Focus(!value);
+		}
 	}
 
+	public static float FADE_DURATION = 3.0f;
+	public static float FADE_PROGRESS = 0.0f;
+	
 	static public void FlexibleSpace() => GUILayout.FlexibleSpace();
 	static public void Space(float s = 5f) => GUILayout.Space(s);
 	static public void BeginGroup(string label) => GUILayout.BeginVertical(new GUIContent(GetLabel(label)), new GUIStyle("window"));
@@ -30,6 +39,22 @@ public class DebugGUI : MonoBehaviour
 	static public float Range(float value, float min, float max, string label) => RapidGUI.RGUI.Slider(value, min, max, GetLabel(label));
 	static public bool ToolButton( string label) => GUILayout.Button(GetLabel(label), GUILayout.ExpandWidth(false));
 
+	private static float fadeAlpha;
+	private static float fadeTime;
+	static public IEnumerator FadeIn(float d = -1)
+	{
+		fadeTime = d < 0 ? FADE_DURATION : d;
+		fadeAlpha = 1.0f;
+		yield return new WaitForSeconds(FADE_DURATION);
+	}
+	
+	static public IEnumerator FadeOut(float d = -1)
+	{
+		fadeTime = d < 0 ? FADE_DURATION : d;
+		fadeAlpha = 0.0f;
+		yield return new WaitForSeconds(FADE_DURATION);
+	}
+	
 	static string GetLabel(string label) => Utils.SplitCamelCase(label);
 	/*{
 		#if UNITY_EDITOR
@@ -48,8 +73,6 @@ public class DebugGUI : MonoBehaviour
 	[Range(0f, 1f)] public float viewWidth = 0.3f;
 	[Range(0f, 1f)] public float viewHeight = 0.5f;
 	public GUISkin guiSkin;
-	public string guiTitle;
-	public string guiStyleName;
 	
 	[Header("Debug Objects")]
 	public List<Object> debugObjects = new List<Object>();
@@ -58,8 +81,9 @@ public class DebugGUI : MonoBehaviour
 	[ReadOnly] [SerializeField] private Vector2 scrollValue;
 	[ReadOnly] [SerializeField] private Rect screenRect;
 	[ReadOnly] [SerializeField] private Vector2 screenSize;
-	
-	private GUIStyle guiStyle;
+
+	private GUIStyle fadeStyle;
+	private Texture2D blackPixel;
 	
 	private void OnDrawGizmosSelected()
 	{
@@ -71,14 +95,28 @@ public class DebugGUI : MonoBehaviour
 		if(!Application.isEditor && !Debug.isDebugBuild)
 			Destroy(this);
 
-		guiStyle = GUIStyle.none;
+		fadeStyle = new GUIStyle();
+		blackPixel = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+		blackPixel.SetPixel(0, 0, Color.black);
 	}
+
+	void OnDestroy() => Destroy(blackPixel); // \o/
 
 	private void Update()
 	{
+		if (!Debug.isDebugBuild) return;
+		
+		if (fadeTime > 0 || fadeAlpha > 0)
+		{
+			IsEnabled = true;
+			blackPixel.SetPixel(0, 0, Utils.ColorAlpha(Color.black, Mathf.Abs(fadeAlpha - fadeTime / FADE_DURATION))); 
+			fadeStyle.normal.background = blackPixel;
+			fadeStyle.normal.textColor = Color.white;
+			return;
+		}
+		
 		if (DebugLogManager.Instance.IsLogWindowVisible) IsEnabled = false;
 		if (!IsEnabled) return;
-		if (!string.IsNullOrEmpty(guiStyleName)) guiStyle = new GUIStyle(guiStyleName);
 		
 		screenSize.x = Screen.width;
 		screenSize.y = Screen.height;
@@ -91,17 +129,25 @@ public class DebugGUI : MonoBehaviour
 
 	private void OnGUI()
 	{
-		if (Debug.isDebugBuild || Application.isEditor)
+		if (!Debug.isDebugBuild) return;
+		
+		if (fadeTime > 0 || fadeAlpha > 0)
 		{
-			if (Event.current.type == EventType.KeyUp && Event.current.keyCode == toggleKey) // toggle debug GUI with F3
-			{
-				IsEnabled = !IsEnabled;
-				GameView.GetInstance().OnApplicationFocus(!IsEnabled); // force focus when closing debug gui
-			}
+			GUI.Label(new Rect(0,0,Screen.width, Screen.height), 
+				new GUIContent("Loading..." + (FADE_PROGRESS > 0 ? " (" + (int)(FADE_PROGRESS * 100) + "%)" : "")),
+				fadeStyle);
+			return;
 		}
+			
+		if (Event.current.type == EventType.KeyUp && Event.current.keyCode == toggleKey) // toggle debug GUI with F3
+		{
+			IsEnabled = !IsEnabled;
+		}
+		
 		if (!IsEnabled) return;
 		GUI.skin = guiSkin;
-		GUILayout.BeginArea(screenRect, new GUIContent(guiTitle), new GUIStyle(guiStyle));
+		
+		GUILayout.BeginArea(screenRect, GUIContent.none, GUIStyle.none);
 		//GUILayout.BeginHorizontal(); GUILayout.FlexibleSpace(); if(GUILayout.Button("CLOSE", GUILayout.ExpandWidth(false))) IsEnabled = false; GUILayout.EndHorizontal();
 		GUILayout.BeginHorizontal(new GUIStyle("box"), GUILayout.ExpandWidth(true)); DrawToolbar(); GUILayout.EndHorizontal();
 		scrollValue = GUILayout.BeginScrollView(scrollValue, GUILayout.ExpandHeight(false), GUILayout.ExpandWidth(false));
