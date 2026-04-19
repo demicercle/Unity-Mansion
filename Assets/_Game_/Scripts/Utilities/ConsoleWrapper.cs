@@ -58,6 +58,6 @@ public static class ConsoleWrapper
 	[ConsoleMethod("debug_gui", "")]
 	static public void DebugGUI(int value)
 	{
-		UserSettings.GetCurrentSettings().drawDebug = value > 0;
+		UserSettings.GetCurrentSettings().showDebugGUI = value > 0;
 	}
 }

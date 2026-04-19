@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a7c0b75586d4e5082186eb8a73f47e3, type: 3}
   m_Name: UserSettings
   m_EditorClassIdentifier: Assembly-CSharp::UserSettings
+  showDebugGUI: 1
+  drawDebug: 1
   lerpSpeed: 6
   inputSpeed: 14
   panSpeed: 20

@@ -476,8 +476,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DebugGUI
   viewX: 0
   viewY: 0
-  viewWidth: 0.3
+  viewWidth: 0.5
   viewHeight: 0.5
+  guiSkin: {fileID: 11400000, guid: 4393402c63a81b1419e1d2ccc7a8aeb0, type: 2}
+  guiStyleName: 
   debugObjects:
   - {fileID: 11400000, guid: 0ef1874cf9e753c4ab1d4ad24303fa78, type: 2}
   scrollValue: {x: 0, y: 0}
@@ -485,7 +487,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 194.70001
+    width: 324.5
     height: 324.5
   screenSize: {x: 1166, y: 649}
 --- !u!1 &143337792
