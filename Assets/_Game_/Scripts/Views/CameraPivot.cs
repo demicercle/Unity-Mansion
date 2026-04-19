@@ -81,37 +81,37 @@ public class CameraPivot : MonoBehaviour
     [SerializeField] private float worldY = 0f;
     [Min(0f)][SerializeField] private float worldHeight = 12f;
     
-    [Header("Movement")]
+    [Header("Settings")]
+    [Range(0f,1f)] [SerializeField] private float startZoom = .5f;
+    [SerializeField] private bool canRotateY = true;
+    [SerializeField] private float rotationStepAngle = 0.0f;
+    [Space]
+    [SerializeField] private UserSettings userSettings;
+    [Space]
     [SerializeField] private float lerpSpeed = 1.5f;
     [SerializeField] private float inputSpeed = 10.0f;
     [SerializeField] private float panSpeed = 8.0f;
     [SerializeField] private int screenPadding = 2;
-    [Range(0f,1f)] [SerializeField] private float startZoom = .5f;
     [SerializeField] private float zoomSpeed = 1.0f;
-    [SerializeField] private float rotationStepAngle = 0.0f;
     [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
     [SerializeField] private Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
     [SerializeField] private float orbitDrag = 0.1f;
-    [SerializeField] private bool canRotateY = true;
-    //[SerializeField] private float rotationStepAngle = 90.0f;
     
-    //[Header("Heading Control")]
-    //[Min(0f)][SerializeField] private float forwardOffset = 0.0f;
-    //[SerializeField] private AnimationCurve zoomForwardCurve = AnimationCurve.Constant(0f,0f,0f);
-    //[SerializeField] private Vector3 headingOffset = new Vector3(1.0f, 0.0f, 0.0f);
-    
-  /*  [Header("SpotLight")]
-    [SerializeField] private Light spotLight;
-    [SerializeField] private float lightRange = 0.0f;
-    //TODO [SerializeField] private float lightRangeMinAngle = -1f;
-    [SerializeField] private float lightRangeToAngle = Mathf.PI;
-    //TODO [SerializeField] private AnimationCurve lightRangeCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
-    //TODO [SerializeField] private AnimationCurve lightIntensityCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
-    //TODO [ReadOnly] [SerializeField] private bool updateSunLightPosition = true;*/
+    void UpdateSettings()
+    {
+        if (!userSettings) return;
+        lerpSpeed = userSettings.lerpSpeed;
+        inputSpeed = userSettings.inputSpeed;
+        panSpeed = userSettings.panSpeed;
+        screenPadding = userSettings.screenPadding;
+        zoomSpeed = userSettings.zoomSpeed;
+        rotationSpeed = userSettings.rotationSpeed;
+        orbitSpeed = userSettings.orbitSpeed;
+        orbitDrag = userSettings.orbitDrag;
+    }
 
     [Header("References")] 
     [SerializeField] private Animator animator;
-
     [SerializeField] private string zoomParameter;
     [SerializeField] private Transform rotationPivot;
     
@@ -217,6 +217,7 @@ public class CameraPivot : MonoBehaviour
 
     private void Update()
     {
+        UpdateSettings();
         UpdateBounds();
         UpdatePosition();
         //UpdateSpotLight();

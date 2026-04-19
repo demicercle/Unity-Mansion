@@ -2007,7 +2007,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.0000038146973}
+  m_AnchoredPosition: {x: 0, y: 0.000019073486}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &541877068
@@ -5295,17 +5295,18 @@ MonoBehaviour:
     m_Extent: {x: 25, y: 3, z: 25}
   worldY: 0
   worldHeight: 3
+  userSettings: {fileID: 11400000, guid: 0ef1874cf9e753c4ab1d4ad24303fa78, type: 2}
   lerpSpeed: 6
   inputSpeed: 14
   panSpeed: 20
   screenPadding: 2
-  startZoom: 0.75
   zoomSpeed: 1
-  rotationStepAngle: 0
   rotationSpeed: {x: 1, y: 16}
   orbitSpeed: {x: 0.18, y: 0}
   orbitDrag: 0
+  startZoom: 0.75
   canRotateY: 1
+  rotationStepAngle: 0
   animator: {fileID: 1869206044}
   zoomParameter: Blend
   rotationPivot: {fileID: 702462659}
