@@ -145,3 +145,4 @@ MonoBehaviour:
   triggered:
     m_PersistentCalls:
       m_Calls: []
+  characters: []

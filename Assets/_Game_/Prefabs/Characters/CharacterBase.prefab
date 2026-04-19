@@ -175,7 +175,7 @@ GameObject:
   m_Component:
   - component: {fileID: 856325405553852649}
   - component: {fileID: 5255465170416904580}
-  m_Layer: 8
+  m_Layer: 1
   m_Name: PathRenderer (0)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,6 +351,7 @@ Transform:
   - {fileID: 1271092804506467526}
   - {fileID: 856325405553852649}
   - {fileID: 9096084158670190266}
+  - {fileID: 8685941105244977515}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6410703130520739872
@@ -686,7 +687,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1073741824
-  uniqueID: 3737359445916031384
+  uniqueID: 2376117964963293209
   points: []
   convex: 1
   minBoundsHeight: 1
@@ -735,6 +736,76 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2682672067756541164}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5631688854807395945
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8685941105244977515}
+  - component: {fileID: 3961347030267546082}
+  - component: {fileID: 6768701302291083197}
+  m_Layer: 8
+  m_Name: HideInFog
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8685941105244977515
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631688854807395945}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2682672067756541164}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3961347030267546082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631688854807395945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e65e21edf4364c909eb7047d4a9555b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideInFog
+  character: {fileID: 1077634328985660634}
+  nodeSize: 0.5
+  renderers: []
+  defaultLayer: Character
+  hiddenLayer: HiddenInGame
+--- !u!114 &6768701302291083197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631688854807395945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e65e21edf4364c909eb7047d4a9555b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideInFog
+  character: {fileID: 1077634328985660634}
+  nodeSize: 0.5
+  renderers:
+  - {fileID: 4939472226289180237}
+  - {fileID: 5255465170416904580}
+  - {fileID: 2283550923626056868}
+  defaultLayer: TransparentFX
+  hiddenLayer: HiddenInGame
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0
@@ -746,7 +817,7 @@ GameObject:
   - component: {fileID: 3643033182041836861}
   - component: {fileID: 4939472226289180237}
   - component: {fileID: 5050193632537316992}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SelectionCircle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -921,7 +992,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9096084158670190266}
   - component: {fileID: 2283550923626056868}
-  m_Layer: 8
+  m_Layer: 1
   m_Name: PathRenderer (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
