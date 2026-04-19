@@ -1,0 +1,11 @@
+﻿public static class Consts
+{
+	public const float RAD_TO_DEG = 57.2958f;
+	
+	public const string TAG_PLAYER = "Player";
+	
+	public const string LAYER_GROUND = "Ground";
+	public const  string LAYER_WALL = "Wall";
+	public const  string LAYER_CHARACTER = "Character";
+	public const  string LAYER_IGNORE = "Ignore Raycast";
+}

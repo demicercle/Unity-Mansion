@@ -6,22 +6,37 @@ using UnityEngine.UI;
 
 public class GameCanvas : MonoBehaviour
 {
+	static private GameCanvas instance;
+	static public GameCanvas Instance => instance;
+	
 	public RectTransform viewportRect;
 	public Toggle controlPanel;
 	public Button button_actionRun;
 	public Button button_endTurn;
 	public CharacterPortrait[] portraits;
+
+	public void SetRenderTexture(RenderTexture rt)
+	{
+		var rawImage = viewportRect.GetComponentInChildren<RawImage>();
+		rawImage.texture = rt;
+		rawImage.enabled = true;
+	}
 	
 	public bool mouseOverViewport { get; private set; }
 	
 	void Awake()
 	{
+		instance = this;
+		
 		var view = GameView.GetInstance();
 		button_endTurn.onClick.AddListener( () => view.ClickEndTurn());
 		button_actionRun.onClick.AddListener(() => view.ClickRunAction());
 
-		Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject).onMouseOverChanged +=
-			(mouseOver) => mouseOverViewport = mouseOver;
+		var mouseHandler = Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject);
+		mouseHandler.onMouseOverChanged += (mouseOver) => mouseOverViewport = mouseOver;
+		#if UNITY_EDITOR
+		mouseHandler.onClicked += () => GameView.GetInstance().OnApplicationFocus(Application.isEditor); // TODO
+		#endif
 		
 		if(portraits.Length == 0)
 			portraits = GetComponentsInChildren<CharacterPortrait>();

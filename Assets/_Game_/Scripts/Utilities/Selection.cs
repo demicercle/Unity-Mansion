@@ -1,9 +1,24 @@
 ﻿using UnityEngine;
 using System.Linq;
 
-public static class Selection
+public static class PlayerSelection
 {
 	static CharacterController selectedCharacter;
+	private static bool selectionSetObstacle = true;
+
+	private static void UpdateAllCharacterAgents()
+	{
+		foreach(var character in CharacterController.instances) character.GetAgent().SetObstacle(!selectionSetObstacle || IsCharacterSelected(character));
+	}
+	
+	static public void SetSelectionSetObstacle(bool value)
+	{
+		if (value != selectionSetObstacle)
+		{
+			selectionSetObstacle = value;
+			UpdateAllCharacterAgents();
+		}
+	}
 
 	static public event System.Action selectionChanged;
 	
@@ -20,15 +35,24 @@ public static class Selection
 	static public void SelectCharacter(CharacterController character)
 	{
 		Debug.Log("SelectCharacter: " + character);
-		
-		if(selectedCharacter != null)
+
+		if (selectedCharacter != null)
+		{
+			// deselect character
+			selectedCharacter.GetAgent().SetObstacle(true);
 			selectedCharacter.NotifySelected(false);
+		}
 		
 		selectedCharacter = character;
-		
-		if(selectedCharacter != null)
+
+		if (selectedCharacter != null)
+		{
+			// select character
+			//if(selectionSetObstacle) selectedCharacter.GetAgent().SetObstacle(false);
 			selectedCharacter.NotifySelected(true);
+		}
 		
+		UpdateAllCharacterAgents();
 		selectionChanged?.Invoke();
 	}
 

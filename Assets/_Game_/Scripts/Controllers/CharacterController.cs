@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-	static public System.Action<CharacterController> created, destroyed;
 	static public List<CharacterController> instances = new List<CharacterController>();
 	static public IEnumerable<CharacterController> GetPartyCharacters() => instances.Where(c => c.InParty());
 	
@@ -26,6 +25,7 @@ public class CharacterController : MonoBehaviour
 	public event System.Action onMoved;
 	public event System.Action onRotate;
 	public event System.Action<CharacterController> onAttackAction;
+	public event System.Action onRunAction;
 	
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
@@ -43,8 +43,18 @@ public class CharacterController : MonoBehaviour
 	[ReadOnly] [SerializeField] private Vector3 savedPosition;
 	[ReadOnly] [SerializeField] private bool isDead;
 	[ReadOnly] [SerializeField] private CharacterAgent agent;
-
-	public bool IsControllable() => isControllable && !isDead;
+	[ReadOnly] [SerializeField] private int currentTurn;
+	
+	public int GetCurrentTurn() => currentTurn;
+	
+	public void Spawn()
+	{
+		transform.SetParent(null, true);
+		gameObject.SetActive(true);
+		GetAgent().SetObstacle(true);
+	}
+	
+	public bool IsControllable() => isControllable && !isDead; // TODO: "IsPlayerTurn() && IsParty()"
 	
 	public CharacterAgent GetAgent()
 	{
@@ -59,22 +69,18 @@ public class CharacterController : MonoBehaviour
 	//public bool IsSelected() => isSelected;
 	public void NotifySelected(bool value)
 	{
-		if (value)
-		{
-			agent.SetObstacle(!IsControllable());
-		}
-		else
-		{
-			agent.SetObstacle(true);
-		}
-		
+		//agent.SetObstacle(!value);//todo not in selection
 		selectionChanged?.Invoke(value);
 	}
 
+
+	public void Restore() => NewTurn(-1);
 	public void NewTurn(int turn)
 	{
 		usedActions = 0;
 		usedMovePoints = 0;
+		GetAgent().ClearDestination();
+		if (turn >= 0) currentTurn = turn;
 	}
 
 	public bool HasActions() => usedActions < characterData.maxActions;
@@ -86,7 +92,7 @@ public class CharacterController : MonoBehaviour
 		statsChanged?.Invoke();
 	}
 
-	public bool IsEnemyToPlayer() => characterData.faction == CharacterFaction.Enemy;
+	public bool IsEnemyToPlayer(CharacterController other = null) => characterData.faction == CharacterFaction.Enemy;
 	
 	public bool InParty() => partyIndex >= 0;
 	public int GetPartyIndex() => partyIndex;
@@ -101,8 +107,7 @@ public class CharacterController : MonoBehaviour
 	
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
 	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
-
-	public bool CanMove() => GetRemainingMovePoints() > 0f;
+	public bool HasMovePoints() => GetRemainingMovePoints() > 0;
 	
 	public bool CanUseRunAction()
 	{
@@ -116,11 +121,14 @@ public class CharacterController : MonoBehaviour
 
 	public void RotateTowards(Vector3 worldPosition, float f = -1f)
 	{
+		DrawDebug.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
 		LookDirection(worldPosition - GetPosition(), f);
 	}
 
 	public void LookDirection(Vector3 getDirection, float f = -1f)
 	{
+//		Debug.Log(this + " LookDirection " + f + " " + getDirection);
+		
 		getDirection.y = 0;
 		getDirection.Normalize();
 
@@ -133,12 +141,12 @@ public class CharacterController : MonoBehaviour
 		var radius = agent.GetRadius();
 		if (f < 0f)
 		{
-			DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
+			DrawDebug.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
 			transform.rotation = Quaternion.LookRotation(getDirection);
 		}
 		else
 		{
-			DebugGUI.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
+			DrawDebug.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 		}
 	}
@@ -203,6 +211,7 @@ public class CharacterController : MonoBehaviour
 
 	public void TakeDamage(float amount)
 	{
+		Debug.Log(this + " TakeDamage " + amount);
 		totalDamages += amount;
 		
 		onDamaged?.Invoke(amount);
@@ -230,11 +239,11 @@ public class CharacterController : MonoBehaviour
 
 	public float GetAttackRange() => characterData.attackRange;
 	
-	public bool CanAttack() => !characterData.noAttack && HasActions();
+	public bool CanAttack(bool checkActions = true) => !characterData.noAttack && (!checkActions || HasActions());
 
 	public bool TryGetAIBrain(out AIBrainData aiBrain)
 	{
-		aiBrains = aiBrains.OrderBy(b => b.GetPriority(this)).ToList();
+		aiBrains = aiBrains.OrderBy(b => -b.GetPriority(this)).ToList();
 		Debug.Log(this + " TryGetAIBrain " + Utils.ArrayStr(aiBrains));
 		return (aiBrain = aiBrains.FirstOrDefault()) != null;
 	}
@@ -243,8 +252,8 @@ public class CharacterController : MonoBehaviour
 	{
 		var outList = new List<CharacterController>();
 		var center = GetPosition();
-		DebugGUI.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
-		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(GameView.LAYER_CHARACTER)))
+		DrawDebug.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
+		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
 		{
 			if (coll.TryGetComponent(out CharacterController otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())
 			{
@@ -266,17 +275,17 @@ public class CharacterController : MonoBehaviour
 	
 	public bool WaypointReached(Waypoint wp)
 	{
-		return GetDistanceTo(wp.GetPosition()) <= agent.reachDistance;
+		return agent.ReachedDestination(wp.GetPosition());
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	} 
 
-	public bool IsAtAttackRange(CharacterController target, bool losCheck, float drawDuration = 0.0f)
+	public bool IsAtAttackRange(CharacterController target, bool losCheck)
 	{
 		var atkRange = GetAttackRange();
-		atkRange = Mathf.Max(atkRange, agent.GetRadius() + target.agent.GetRadius() + CharacterAgent.minNavDistance);
+		atkRange = Mathf.Max(atkRange, agent.GetRadius() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
 		if (Vector3.Distance(GetPosition(), target.GetPosition()) <= atkRange)
 		{
-			return !losCheck || LOSCheck(target, drawDuration);
+			return !losCheck || LOSCheck(target);
 		}
 		else
 		{
@@ -284,19 +293,19 @@ public class CharacterController : MonoBehaviour
 		}
 	}
 
-	public bool LOSCheck(CharacterController other, float drawDuration = 0.0f)
+	bool LOSCheck(CharacterController other)
 	{
 		var start = GetEyesPosition();
 		var end = other.GetEyesPosition();
 		if(Physics.Linecast(start, end, out var hit,
-			   LayerMask.GetMask(GameView.LAYER_WALL, GameView.LAYER_GROUND)))
+			   LayerMask.GetMask(Consts.LAYER_WALL, Consts.LAYER_GROUND)))
 		{
 			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
-			DebugGUI.Line(start, end, Color.red, drawDuration);
+			//DebugGUI.Line(start, end, Color.red, drawDuration);
 			return false;
 		}
 
-		DebugGUI.Line(start, end, Color.green, drawDuration);
+		//DebugGUI.Line(start, end, Color.green, drawDuration);
 		return true;
 	}
 
@@ -304,6 +313,7 @@ public class CharacterController : MonoBehaviour
 	{
 		ConsumeActions(1);
 		usedMovePoints -= characterData.runActionExtraMovePoints;
+		onRunAction?.Invoke();
 	}
 
 	private void Awake()
@@ -314,21 +324,18 @@ public class CharacterController : MonoBehaviour
 			Debug.LogError(this + " has no character data");
 		
 		if(!aiBrains.OfType<AIBrain_Wait>().Any()) aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());//todo store instance static
-		
-		created?.Invoke(this);
 	}
 
 	private void OnDestroy()
 	{
 		instances.Remove(this);
-		destroyed?.Invoke(this);
 	}
 
 	public Vector3[] GetCurrentPath() => GetAgent().GetCurrentPath();
 
 	public void StopAgent()
 	{
-		GetAgent().StopMovement();
+		agent.StopMovement();
 	}
 
 	public Vector3 GetVelocity()
@@ -347,6 +354,11 @@ public class CharacterController : MonoBehaviour
 	{
 		ConsumeActions(1);
 		onAttackAction?.Invoke(target);
+	}
+
+	public void FloatingText(string canT) // TODO: in other component with events (CharacterView)
+	{
+		DrawDebug.FloatingText(GetCenterPosition(), canT);
 	}
 
 	private void OnDrawGizmosSelected()

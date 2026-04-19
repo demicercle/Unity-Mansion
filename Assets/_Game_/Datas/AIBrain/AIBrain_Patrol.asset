@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2b2990dfebe487aa2b4898806443d8d, type: 3}
   m_Name: AIBrain_Patrol
   m_EditorClassIdentifier: 
-  defaultPriority: 0
+  defaultPriority: 2
+  canUseRunAction: 0

@@ -3,7 +3,7 @@
 - draw line no depth test
 - add namespaces
 - character use action with serializable "action parameter" info
-- add keyboard shortcut
+- add keyboard shortcut + turn UI popup
 - GameController
 - more delay between turn + popup
 - attack zombi (enemy to player)
