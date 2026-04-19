@@ -552,12 +552,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			var newPosition = movingCharacter.GetPosition();
 			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
-			
-//			Debug.Log(movingCharacter + " move " + deltaPos);
+
 			movingCharacter.ConsumeMovePoints(deltaPos);
 			
 			if (deltaPos <= 0f) timeout += Time.deltaTime;
 			else timeout = 0f;
+			
+			DrawDebug.WorldLabel(movingCharacter.GetCenterPosition(), "moving:" + timeout.ToString("N2"));
 		}
 		
 		onComplete?.Invoke();

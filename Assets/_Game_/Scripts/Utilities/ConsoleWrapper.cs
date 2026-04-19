@@ -1,7 +1,8 @@
-﻿using IngameDebugConsole;
+﻿using System;
+using IngameDebugConsole;
 using UnityEngine;
 
-public class ConsoleWrapper : MonoBehaviour
+public static class ConsoleWrapper
 {
 	static GameView gameView => GameView.GetInstance();
 
@@ -51,12 +52,12 @@ public class ConsoleWrapper : MonoBehaviour
 	[ConsoleMethod("debug_draw", "")]
 	static public void DebugDraw(int value)
 	{
-		global::DrawDebug.IsEnabled = value > 0;
+		UserSettings.GetCurrentSettings().drawDebug = value > 0;
 	}
 
 	[ConsoleMethod("debug_gui", "")]
 	static public void DebugGUI(int value)
 	{
-		global::DebugGUI.IsEnabled = value > 0;
+		UserSettings.GetCurrentSettings().drawDebug = value > 0;
 	}
 }

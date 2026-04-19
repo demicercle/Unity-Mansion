@@ -86,8 +86,7 @@ public class CameraPivot : MonoBehaviour
     [SerializeField] private bool canRotateY = true;
     [SerializeField] private float rotationStepAngle = 0.0f;
     [Space]
-    [SerializeField] private UserSettings userSettings;
-    [Space]
+    [Header("User Settings")]
     [SerializeField] private float lerpSpeed = 1.5f;
     [SerializeField] private float inputSpeed = 10.0f;
     [SerializeField] private float panSpeed = 8.0f;
@@ -205,6 +204,8 @@ public class CameraPivot : MonoBehaviour
     private Quaternion desiredRotation;
     private Vector3 currentPosition;
 
+    private UserSettings userSettings;
+    
     void Awake()
     {
         currentYaw = desiredYaw = startZoom;
@@ -212,6 +213,7 @@ public class CameraPivot : MonoBehaviour
 
     private void Start()
     {
+        userSettings = UserSettings.GetCurrentSettings();
         UpdateAnimator();
     }
 

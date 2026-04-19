@@ -1,8 +1,16 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using System.Linq;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "UserSettings", menuName = "UserSettings", order = 0)]
 public class UserSettings : ScriptableObject, IDebugGUI
 {
+	static public UserSettings GetCurrentSettings() => Resources.LoadAll<UserSettings>("").First();
+	
+	[Header("General")]
+	public bool drawDebug = true;
+	
 	[Header("Camera")]
 	public float lerpSpeed = 1.5f;
 	public float inputSpeed = 10.0f;

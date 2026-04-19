@@ -6,14 +6,19 @@ using UnityEngine;
 
 public class DrawDebug : MonoBehaviour
 {
-	public static bool IsEnabled { get; set; }
+	public static bool IsEnabled => Debug.isDebugBuild && UserSettings.GetCurrentSettings().drawDebug;
 
-	static public DrawDebug FloatingText(Vector3 position, string message, float duration = 1.0f, float off = 1.0f)
+	static public DrawDebug FloatingText(Vector3 position, string message, float duration = 1.0f, float speedY = 1.0f)
+	{
+		return WorldLabel(position, message, duration, speedY);
+	}
+
+	static public DrawDebug WorldLabel(Vector3 position, string message, float duration = 0f, float speedY = 0f)
 	{
 		var label = new GameObject().AddComponent<DrawDebug>();
 		label.duration = duration;
 		label.worldPosition = position;
-		label.worldOffset = Vector3.Lerp(Camera.main.transform.forward, Camera.main.transform.up, 0.9f) * off;
+		label.worldOffset = Vector3.Lerp(Camera.main.transform.forward, Camera.main.transform.up, 0.9f) * speedY;
 		label.onGUI += () =>
 		{
 			GUILayout.Label(message);
@@ -67,51 +72,51 @@ public class DrawDebug : MonoBehaviour
 		if (!IsEnabled) return;
 		DbgDraw.Line(start, end, color, duration);
 	}
-		public bool destroyGameObject = true;
-		public float duration = 0.0f;
-		public Transform target;
-		public Vector2 size = Vector2.one * 100;
-		public Vector3 worldPosition = Vector3.zero;
-		public Vector3 worldOffset = Vector3.zero;
+	
+	public bool destroyGameObject = true;
+	public float duration = 0.0f;
+	public Transform target;
+	public Vector2 size = Vector2.one * 100;
+	public Vector3 worldPosition = Vector3.zero;
+	public Vector3 worldOffset = Vector3.zero;
 
-		private Vector3 screenPosition;
-		
-		private IEnumerator Start()
+	private Vector3 screenPosition;
+	private System.Action onGUI;
+	
+	private IEnumerator Start()
+	{
+		if (duration < 0)
+			yield break;
+
+		if (target != null)
 		{
-			if (duration < 0)
-				yield break;
-
-			if (target != null)
-			{
-				transform.SetParent(target);
-				transform.localPosition = worldPosition;
-			}
-			else
-			{
-				transform.position = worldPosition;
-			}
-		
-			if (duration > 0f)
-				yield return new WaitForSeconds(duration);
-			else
-				yield return new WaitForEndOfFrame();
-		
-			if (destroyGameObject) Destroy(gameObject);
+			transform.SetParent(target);
+			transform.localPosition = worldPosition;
 		}
-
-		public System.Action onGUI;
-
-		private void LateUpdate()
+		else
 		{
-			worldPosition += worldOffset * Time.unscaledDeltaTime;
 			transform.position = worldPosition;
 		}
-
-		private void OnGUI()
-		{
-			screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
-			GUILayout.BeginArea(new Rect(screenPosition.x, Screen.height - screenPosition.y, size.x, size.y));
-			onGUI?.Invoke();
-			GUILayout.EndArea();
-		}
+	
+		if (duration > 0f)
+			yield return new WaitForSeconds(duration);
+		else
+			yield return new WaitForEndOfFrame();
+	
+		if (destroyGameObject) Destroy(gameObject);
+	}
+	
+	private void LateUpdate()
+	{
+		worldPosition += worldOffset * Time.unscaledDeltaTime;
+		transform.position = worldPosition;
+		screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
+	}
+	
+	private void OnGUI()
+	{
+		GUILayout.BeginArea(new Rect(screenPosition.x, Screen.height - screenPosition.y, size.x, size.y));
+		onGUI?.Invoke();
+		GUILayout.EndArea();
+	}
 }
