@@ -10,7 +10,7 @@ public struct UILabelWrapper
 	[SerializeField] private TMPro.TMP_Text tmpText;
 	public GameObject GetGameObject() => tmpText.gameObject;
 
-	public UILabelWrapper SetActive(bool value)
+	public UILabelWrapper SetActive(bool value = true)
 	{
 		GetGameObject().SetActive(value);
 		return this;
@@ -18,7 +18,13 @@ public struct UILabelWrapper
 
 	public UILabelWrapper SetWorldPosition(Vector3 position)
 	{
-		GetGameObject().transform.position = position;
+		GetGameObject().transform.position = Camera.main.WorldToScreenPoint(position);
+		return this;
+	}
+
+	public UILabelWrapper SetParent(Transform parent)
+	{
+		GetGameObject().transform.SetParent(parent);
 		return this;
 	}
 	
@@ -85,20 +91,20 @@ public class GameCanvas : MonoBehaviour
 		floatingText.SetActive(false);
 	}
 
-	public void FloatingText(Object obj, string label)
+	public UILabelWrapper FloatingText(Object obj, string label)
 	{
 		if (obj is CharacterController)
 		{
-			FloatingText((obj as CharacterController).GetCenterPosition(), label);
+			return FloatingText((obj as CharacterController).GetCenterPosition(), label);
 		}
-		else
-		{
-			Debug.LogWarning(this + " invalid floating text object: " + obj + " label=" + label);
-		}
+		
+		Debug.LogWarning(this + " invalid floating text object: " + obj + " label=" + label);
+		return default;
 	}
-	public void FloatingText(Vector3 worldPosition, string label)
+	
+	public UILabelWrapper FloatingText(Vector3 worldPosition, string label)
 	{
-		floatingText.Duplicate().SetWorldPosition(worldPosition).SetText(label);
+		return floatingText.Duplicate().SetParent(transform).SetWorldPosition(worldPosition).SetText(label).SetActive();
 	}
 	
 	public void UpdateUI(GameView view)

@@ -148,7 +148,7 @@ Animation:
   m_GameObject: {fileID: 177820837734958220}
   m_Enabled: 1
   serializedVersion: 4
-  m_Animation: {fileID: 0}
+  m_Animation: {fileID: 7400000, guid: 5a029557f0c6d484181ac9aa8581df44, type: 2}
   m_Animations:
   - {fileID: 7400000, guid: 5a029557f0c6d484181ac9aa8581df44, type: 2}
   m_WrapMode: 0
@@ -1028,6 +1028,8 @@ MonoBehaviour:
   button_actionRun: {fileID: 4559085250805307426}
   button_endTurn: {fileID: 6829224796664647201}
   portraits: []
+  floatingText:
+    tmpText: {fileID: 3801711341008438118}
   animator: {fileID: 973791791561246161}
   lerpSpeed: 3
   endTurnLayer: 1

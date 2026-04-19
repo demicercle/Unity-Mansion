@@ -364,7 +364,7 @@ public class CharacterController : MonoBehaviour
 
 	public void FloatingText(string canT) // TODO: in other component with events (CharacterView)
 	{
-		DrawDebug.FloatingText(GetCenterPosition(), canT);
+		GameCanvas.Instance.FloatingText(this, canT);
 	}
 
 	private void OnDrawGizmosSelected()
