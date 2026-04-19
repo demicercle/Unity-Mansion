@@ -16,26 +16,23 @@ public class ColorSettings : ScriptableObject
 	}
 
 	static public Color GetDeadColor() => Instance.deadColor;
-	static public Color GetDisabledColor() => Instance.disabledColor;
 	static public Color GetCharacterColor(CharacterController character, bool disabledIfNoActions, bool disabledIfNoMovePoints) => Instance.GetCurrentColor(character, disabledIfNoActions, disabledIfNoMovePoints);
+	static public Color GetDisabledColor(CharacterFaction faction) => Color.Lerp(Instance.disabledColor, Instance.GetFactionColor(faction), Instance.disabledToFaction);
 	public Color GetCurrentColor(CharacterController character, bool disabledIfNoActions, bool disabledIfNoMovePoints)
 	{
 		if (character.IsDead()) 
 			return GetDeadColor();
 		
-		if (character.InParty())
+		if (!character.IsCurrentTurn())
+			return GetDisabledColor(character.GetCurrentFaction());
+		
+		if (!character.HasUsedAction(CharacterAction.RunAction) || !character.HasMovePoints())
 		{
-			if (!character.IsCurrentTurn())
-				return Color.Lerp(GetDisabledColor(), GetFactionColor(character.GetCurrentFaction()), Instance.disabledToFaction);
+			if (disabledIfNoActions && !character.HasActions()) 
+				return GetDisabledColor(character.GetCurrentFaction());
 			
-			if (!character.HasUsedAction(CharacterAction.RunAction))
-			{
-				if (disabledIfNoActions && !character.HasActions()) 
-					return GetDisabledColor();
-			
-				if (disabledIfNoMovePoints && !character.HasMovePoints()) 
-					return GetDisabledColor();
-			}
+			if (disabledIfNoMovePoints && !character.HasMovePoints()) 
+				return GetDisabledColor(character.GetCurrentFaction());
 		}
 
 		return GetFactionColor(character.GetCurrentFaction());
@@ -49,8 +46,7 @@ public class ColorSettings : ScriptableObject
 		Color.green,
 		Color.red
 	};
-	
-	public Color deadColor = Color.black;
 	[Range(0f, 1f)] public float disabledToFaction = 0.5f;
 	public Color disabledColor = Color.gray;
+	public Color deadColor = Color.black;
 }

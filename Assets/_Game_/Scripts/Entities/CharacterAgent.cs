@@ -171,6 +171,7 @@ public class CharacterAgent : MonoBehaviour
 	private bool hasDestination;
 	private AIPath aiPath;
 	private CharacterController controller;
+	private GameController gameController; // TODO
 	private CharacterAnimation _characterAnimation;
 	private Vector3[] lastPath;
 
@@ -194,14 +195,21 @@ public class CharacterAgent : MonoBehaviour
 	{
 		_characterAnimation = GetComponent<CharacterAnimation>();
 		controller = _characterAnimation.GetController();
+		controller.onUseAction += OnUseAction;
+		
+		gameController = GameController.GetInstance();
+		gameController.turnEnded += UpdatePathAndTarget;
+		gameController.turnStarted += UpdatePathAndTarget;
+		CharacterSelection.selectionChanged += SelectionChanged;
 		
 		UpdateComponent();
-		
-		CharacterSelection.selectionChanged += SelectionChanged;
 	}
 	
 	private void OnDestroy()
 	{
+		controller.onUseAction -= OnUseAction;
+		gameController.turnEnded -= UpdatePathAndTarget;
+		gameController.turnStarted -= UpdatePathAndTarget;
 		CharacterSelection.selectionChanged -= SelectionChanged;
 	}
 
@@ -209,6 +217,13 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if (!hasDestination) aiPath.isStopped = true; // Start
 		
+		UpdatePathAndTarget(true);
+	}
+	
+
+	void OnUseAction(CharacterAction action, object param)
+	{
+		StopMovement();
 		UpdatePathAndTarget(true);
 	}
 
@@ -235,6 +250,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private bool[] shouldDrawPath = new []{false,false};
 	private bool[] isDrawingPath = new []{false,false};
+	void UpdatePathAndTarget() => UpdatePathAndTarget(true);
 	private void UpdatePathAndTarget(bool force)
 	{
 		//TODO: controller.IsActing(), controller.IsMoving(), controller.IsRotating()
@@ -258,7 +274,7 @@ public class CharacterAgent : MonoBehaviour
 			pathRenderers[0].enabled = isDrawingPath[0] = shouldDrawPath[0];
 			if (pathRenderers[0].enabled) // draw path thin
 			{
-				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor();
+				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(controller.GetCurrentFaction());
 				pathRenderers[0].positionCount = lastPath.Length;
 				pathRenderers[0].useWorldSpace = true;
 				pathRenderers[0].SetPositions(lastPath);

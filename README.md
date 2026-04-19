@@ -23,6 +23,7 @@
 - Editor tool "hide children in hierarchy if not in prefab stage"
 - rename "ColorSettings" in "GameSettings" (not user modifiable)
 - increase time during AI Think coroutine
+- camera render target not working anymore
 
 - RPGAnims 
 	> DrawWeapons
