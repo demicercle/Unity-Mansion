@@ -1,10 +1,9 @@
 ﻿using IngameDebugConsole;
 using UnityEngine;
 
-public class ConsoleEvents : MonoBehaviour
+public class ConsoleWrapper : MonoBehaviour
 {
 	static GameView gameView => GameView.GetInstance();
-	static GameController GetController() => gameView.GetController();
 
 	[ConsoleMethod("apply_dmg", "")]
 	static public void ApplyDamage(int amount)
@@ -25,5 +24,11 @@ public class ConsoleEvents : MonoBehaviour
 	{
 		if(PlayerSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.Restore();
+	}
+
+	[ConsoleMethod("draw_debug", "")]
+	static public void DrawDebug(bool value)
+	{
+		global::DrawDebug.IsEnabled = value;
 	}
 }

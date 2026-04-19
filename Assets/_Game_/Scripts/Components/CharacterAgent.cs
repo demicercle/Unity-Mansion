@@ -204,12 +204,10 @@ public class CharacterAgent : MonoBehaviour
 			pathRenderers.ForEach(p => p.enabled = false);
 			return;
 		}
-
-		var pathColor = characterView.GetCurrentColor();
 		
 		if (pathRenderers.Count > 0)
 		{
-			pathRenderers[0].startColor = pathRenderers[0].endColor = pathColor;
+			pathRenderers[0].startColor = pathRenderers[0].endColor = characterView.GetDisabledColor();
 			pathRenderers[0].positionCount = lastPath.Length;
 			pathRenderers[0].useWorldSpace = true;
 			pathRenderers[0].SetPositions(lastPath);
@@ -218,7 +216,7 @@ public class CharacterAgent : MonoBehaviour
 		if (pathRenderers.Count > 1)
 		{
 			lastPath = Utils.LimitPathTotalLength(lastPath, controller.GetRemainingMovePoints());
-			pathRenderers[1].startColor = pathRenderers[1].endColor = pathColor;
+			pathRenderers[1].startColor = pathRenderers[1].endColor = characterView.GetCurrentColor();
 			pathRenderers[1].positionCount = lastPath.Length;
 			pathRenderers[1].useWorldSpace = true;
 			pathRenderers[1].SetPositions(lastPath);

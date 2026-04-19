@@ -47,7 +47,7 @@ public class AIBrain_Chase : AIBrainData
 	{
 		Gizmos.color = hearingColor;
 		Utils.DrawGizmosCircle(character.GetEyesPosition(), default, hearingDistance);
-		if(Application.isPlaying && lastTarget != null) DebugGUI.Line(character.GetEyesPosition(), character.GetCenterPosition(), hearingColor, 0.0f);
+		if(Application.isPlaying && lastTarget != null) DrawDebug.Line(character.GetEyesPosition(), character.GetCenterPosition(), hearingColor, 0.0f);
 	}
 
 	public override IEnumerator Think(CharacterController character)
@@ -59,7 +59,7 @@ public class AIBrain_Chase : AIBrainData
 		{
 			while (character.CanAttack())
 			{
-				DebugGUI.Line(character.GetEyesPosition(), lastTarget.GetCenterPosition(), Color.red, 1.0f);
+				DrawDebug.Line(character.GetEyesPosition(), lastTarget.GetCenterPosition(), Color.red, 1.0f);
 				gameView.AssignAttack(character, lastTarget, !noRun, noLOS);
 				
 				while (gameView.HasCoroutines())

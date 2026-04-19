@@ -189,7 +189,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				}
 				else
 				{
-					DebugGUI.FloatingText(selectedCharacter.GetCenterPosition(), "Can't");
+					selectedCharacter.FloatingText("Can't");
 				}
 			}
 		}
@@ -282,7 +282,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public bool HasCoroutines() => coroutines.Count > 0;
 
-	public bool drawDebug = false;
+	//public bool drawDebug { get; set; }
+	
 	[Range(0f,1f)] public float debugGUI = 0f;
 	//public float cameraSpeed = 1.0f;
 	[SerializeField] private float cameraDeltaY = 1f;
@@ -407,7 +408,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (!character.CanAttack())
 		{
 			Debug.Log(character + " cannot attack!");
-			DebugGUI.FloatingText(character.GetPosition(), "Can't!");
+			character.FloatingText( "Can't!");
 			yield return new WaitForSeconds(1.0f);
 		}
 		else
@@ -515,6 +516,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (!movingCharacter.HasMovePoints())
 			{
 				Debug.Log(movingCharacter + " !HasMovePoints");
+				movingCharacter.FloatingText("Can't");
 				agent.StopMovement();
 				break;
 			}
@@ -528,9 +530,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 			
 			var oldPosition = movingCharacter.GetPosition();
 
-			DebugGUI.Line(oldPosition, dest, Color.cyan, 0f);
-			DebugGUI.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
-			DebugGUI.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
+			DrawDebug.Line(oldPosition, dest, Color.cyan, 0f);
+			DrawDebug.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
+			DrawDebug.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
 			yield return null;
 			
 			var newPosition = movingCharacter.GetPosition();
@@ -615,7 +617,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 		else
 		{
-			DebugGUI.FloatingText(selectedCharacter.GetCenterPosition(), "Can't");
+			selectedCharacter.FloatingText("Can't");
 		}
 	}
 
@@ -704,8 +706,32 @@ public class GameView : MonoBehaviour, IView<GameController>
 			{
 				//cameraPivot.PanWithMouse(mousePosition.y, Time.unscaledDeltaTime);
 				cameraPivot.MoveFocus((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime, Space.World);
-				cameraPivot.Orbit((middleClickMousePosition - mousePosition).x * Time.unscaledDeltaTime, 
-					(lastMousePosition - mousePosition).y * Time.unscaledDeltaTime);
+
+				// orbit camera
+				float deltaX = (middleClickMousePosition - mousePosition).x;
+				float deltaY = (middleClickMousePosition - mousePosition).y;
+				if (deltaX + deltaY != 0)
+				{
+					if (cameraPivot.OrbitCanZoom())
+					{
+						Debug.Log(this + " try orbit " + deltaX + " " + deltaY);
+						if (Mathf.Abs(deltaY) > Mathf.Abs(deltaX))
+						{
+							deltaX = 0;
+							deltaY = (lastMousePosition - mousePosition).y;
+						}
+						else
+						{
+							deltaY = 0;
+						}
+					}
+					else
+					{
+						deltaY = (lastMousePosition - mousePosition).y;
+					}
+					
+					cameraPivot.Orbit( deltaX * Time.unscaledDeltaTime, deltaY * Time.unscaledDeltaTime);
+				}
 			}
 			else
 			{
@@ -832,9 +858,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var cam = Camera.main;
 		var ray = cam.ScreenPointToRay(mousePosition);
 		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
-		{
+		{ 
 			//DebugGUI.Log("Hit Character: " + hit.collider);
-			if(drawDebug) DbgDraw.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
+			DrawDebug.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
 			Utils.DrawDebugCircle(hit.collider.transform.position, Vector3.up, 0.5f);
 
 			foreach (var cursorHandler in hit.collider.GetComponents<ICursorHandler>().Concat(hit.collider.GetComponentsInChildren<ICursorHandler>()))
@@ -848,16 +874,18 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(Consts.LAYER_GROUND, Consts.LAYER_WALL)))
 		{
 			//DebugGUI.Log("Hit Navigation: " + hit.point);
-			if(drawDebug) DbgDraw.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Quaternion.Euler(90,0,0),maxNavDistance, Color.blue);
 			Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
 
 			if (NavUtility.TryGetNearestNavPosition(hit.point, maxNavDistance, out var navPosition))
 			{
 				hit.point = navPosition;
-				if(drawDebug) DbgDraw.WireDisc(navPosition, Quaternion.identity,maxNavDistance * 0.5f, Color.cyan);
+				DrawDebug.WireDisc(navPosition, Vector3.up,maxNavDistance * 0.5f, Color.cyan);
 
 				return CURSOR_RAYCAST_RESULT_NAVIGATION;
 			}
+			
+			// mouse over something else
+			DrawDebug.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Vector3.up,maxNavDistance, Color.gray);
 		}
 
 		return CURSOR_RAYCAST_RESULT_NONE;

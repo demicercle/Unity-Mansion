@@ -35,6 +35,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	#endregion
 	
 	#region PUBLIC
+
+	public Color GetDisabledColor() => disabledColor;
 	public Color GetCurrentColor() => currentColor;
 	
 	public void CursorOver()
@@ -66,7 +68,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		
 		controller.onHealed += (amount) =>
 		{
-			FloatingText("Heal!");
+			GetController().FloatingText("Heal!");
 		};
 
 		controller.onPartyIndexChanged += (newIndex) =>
@@ -75,7 +77,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 
 		controller.onDamaged += (amount) =>
 		{
-			FloatingText(Mathf.CeilToInt(amount).ToString());
+			GetController().FloatingText(Mathf.CeilToInt(amount).ToString());
 		};
 
 		controller.onKilled += () =>
@@ -100,12 +102,12 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		{
 			animator.SetTrigger(AnimationParameters.Trigger);
 			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.ReloadTrigger);
-			FloatingText("Run!");
+			GetController().FloatingText("Run!");
 		};
 
 		controller.onAttackAction += (target) =>
 		{
-			FloatingText("Take this!");
+			GetController().FloatingText("Take this!");
 		};
 	}
 
@@ -155,7 +157,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		mouseOver = false;
 	}
 	
-	private void FloatingText(string msg) => DebugGUI.FloatingText(GetController().GetCenterPosition(), msg);
+//8	private void FloatingText(string msg) => GetController().Fl
 
 	private void UpdateComponents()
 	{

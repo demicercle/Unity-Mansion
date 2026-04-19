@@ -69,7 +69,7 @@ public class AIBrain_Patrol : AIBrainData
 					else
 					{
 						lastWaypointToReach = waypoints[wpIndex];
-						DebugGUI.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), patrolRoute.color, 1.0f);
+						DrawDebug.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), patrolRoute.color, 1.0f);
 					}
 				}
 			}

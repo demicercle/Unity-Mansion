@@ -165,12 +165,14 @@ public class CameraPivot : MonoBehaviour
         desiredYaw = (desiredYaw - rotationStepAngle * delta);
     }
 
+    public bool OrbitCanZoom() => orbitSpeed.y > 0;
+
     //public void Orbit(Vector2 delta) => Orbit(delta.x, delta.y);
     public void Orbit(float deltaX, float deltaY)
     {
         if (!canRotateY) return;
-        desiredYaw += deltaX * orbitSpeed.x / Consts.RAD_TO_DEG;
-        Zoom(deltaY * orbitSpeed.y / Consts.RAD_TO_DEG);
+        desiredYaw += deltaX * orbitSpeed.x;
+        Zoom(deltaY * orbitSpeed.y);
         // desiredYaw = Mathf.Clamp(-180)
     }
 

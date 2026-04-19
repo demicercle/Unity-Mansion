@@ -56,7 +56,7 @@ public class PatrolRoute : MonoBehaviour
 
 		public void DebugDraw(float duration = 0f)
 		{
-			DebugGUI.Path(GetPath(), closedLoop, color, duration);
+			DrawDebug.Path(GetPath(), closedLoop, color, duration);
 		}
 
 		private void Start() // TODO init patrol in GameData
