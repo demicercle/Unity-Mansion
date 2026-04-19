@@ -274,7 +274,7 @@ public class CharacterAgent : MonoBehaviour
 			pathRenderers[0].enabled = isDrawingPath[0] = shouldDrawPath[0];
 			if (pathRenderers[0].enabled) // draw path thin
 			{
-				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(controller.GetCurrentFaction());
+				pathRenderers[0].startColor = pathRenderers[0].endColor = GameSettings.GetDisabledColor(controller.GetCurrentFaction());
 				pathRenderers[0].positionCount = lastPath.Length;
 				pathRenderers[0].useWorldSpace = true;
 				pathRenderers[0].SetPositions(lastPath);
@@ -287,7 +287,7 @@ public class CharacterAgent : MonoBehaviour
 			if (pathRenderers[1].enabled) // draw path thick
 			{
 				lastPath = Utils.LimitPathTotalLength(lastPath, controller.GetRemainingMovePoints());
-				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(controller, true, true);
+				pathRenderers[1].startColor = pathRenderers[1].endColor = GameSettings.GetCharacterColor(controller, true, true);
 				pathRenderers[1].positionCount = lastPath.Length;
 				pathRenderers[1].useWorldSpace = true;
 				pathRenderers[1].SetPositions(lastPath);
@@ -308,7 +308,7 @@ public class CharacterAgent : MonoBehaviour
 		//Debug.Log(this + " show moveTarget");
 		moveTarget.gameObject.SetActive(true);
 		moveTarget.transform.position = aiPath.destination;
-		moveTarget.SetColor(ColorSettings.GetCharacterColor(controller, true, true));
+		moveTarget.SetColor(GameSettings.GetCharacterColor(controller, true, true));
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
 }

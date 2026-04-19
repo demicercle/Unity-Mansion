@@ -392,12 +392,19 @@ public class CharacterController : MonoBehaviour
 		return characterData.lastAttackDamage;
 	}
 
+	public float GetLastAttackHitTime() => characterData.lastAttackHitTime;
+	
 	public void AttackAction(CharacterController target = null, bool stopAgent = true)
 	{
 		UseAction(CharacterAction.AttackAction);
 	}
 
-	public void FloatingText(string canT) // TODO: in other component with events (CharacterView)
+	public void FloatingText_Cant() // TODO: in character animation
+	{
+		if(IsCurrentTurn()) FloatingText("Can't");
+	}
+	
+	public void FloatingText(string canT) // TODO: in character animation
 	{
 		GameCanvas.Instance.FloatingText(this, canT);
 	}

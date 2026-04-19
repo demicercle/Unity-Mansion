@@ -228,7 +228,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   onlyOnce: 1
-  consumeActions: 1
+  TODO_consumeAction: 0
   rebuildNavigation: 1
   autoTriggerDelay: 0
   animatorTrigger: Toggle
@@ -472,7 +472,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.5000084
+      value: 0.50000715
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.y
@@ -480,7 +480,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.50000155
+      value: -0.7500025
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalRotation.w
@@ -534,7 +534,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.5000113
+      value: 0.5000125
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.y
@@ -542,7 +542,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.49999857
+      value: 0.7499976
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalRotation.w

@@ -9,8 +9,23 @@ using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
 using UnityEngine.SceneManagement;
 
 [System.Serializable]
-public class GameView : MonoBehaviour, IView<GameController>
+public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 {
+
+	public void OnDebugGUI()
+	{
+		DebugGUI.BeginGroup("GameView");
+		if (HasCoroutines())
+		{
+			DebugGUI.Field(coroutines.Count, "coroutines");
+		}
+		else
+		{
+			DebugGUI.Label("...");
+		}
+		DebugGUI.EndGroup();
+	}
+	
 	static public void Focus(bool value) => GetInstance().OnApplicationFocus(value);
 	
 	static bool debugCursor = false;
@@ -95,7 +110,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		if (!Application.isEditor) OnApplicationFocus(true);
 		
-		StartCoroutine(Coroutines());
+		StartCoroutine(DoCoroutinesLoop());
 		
 		canvas.UpdateUI(this);
 		
@@ -117,7 +132,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var async = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
 			while (async.isDone == false)
 			{
-				DebugGUI.FADE_PROGRESS = async.progress;
+				//DebugGUI.FADE_PROGRESS = async.progress;
 				yield return null;
 			}
 		}
@@ -127,7 +142,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		//Debug.Log(this + " rebuild navigation async");
 		foreach (var scanOp in AstarPath.active.ScanAsync()) {
 			//Debug.Log("AstarPath.active.ScanAsync " + progress.ToString());
-			DebugGUI.FADE_PROGRESS = scanOp.progress;
+			//DebugGUI.FADE_PROGRESS = scanOp.progress;
 			yield return null;
 		}
 		
@@ -153,14 +168,14 @@ public class GameView : MonoBehaviour, IView<GameController>
 		FadeScreen.FadeOut();
 		CharacterSelection.SelectNextCharacter();
 
-		yield return new WaitForSeconds(.25f);
+		yield return new WaitForSeconds(GameSettings.GetCameraStartsSeconds());
 		cameraPivot.SetStartZoom();
 		
 		while (FadeScreen.IsVisible) yield return null;
 		GetController().NewTurn();
 	}
 	
-	private IEnumerator Coroutines()
+	private IEnumerator DoCoroutinesLoop()
 	{
 		while (true)
 		{
@@ -210,7 +225,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 					return;
 				}
 				
-				selectedCharacter.FloatingText("Can't");
+				selectedCharacter.FloatingText_Cant();
 				return;
 			}
 		}
@@ -268,7 +283,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				}
 				else
 				{
-					character.FloatingText("Can't");
+					character.FloatingText_Cant();
 				}
 			}
 			else
@@ -321,7 +336,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	//public bool drawDebug { get; set; }
 	
-	[UnityEngine.Range(0f,1f)] public float debugGUI = 0f;
+	//[UnityEngine.Range(0f,1f)] public float debugGUI = 0f;
 	//public float cameraSpeed = 1.0f;
 	[SerializeField] private float cameraDeltaY = 1f;
 	[UnityEngine.Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
@@ -423,7 +438,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				if (!attacker.HasMovePoints())
 				{
 					Debug.Log(attacker + " has no move points to reach target");
-					attacker.FloatingText("Can't");
+					attacker.FloatingText_Cant();
 					yield break;
 				}
 				
@@ -447,13 +462,13 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (!character.CanAttack())
 		{
 			Debug.Log(character + " cannot attack!");
-			character.FloatingText( "Can't!");
-			yield return new WaitForSeconds(1.0f);
+			character.FloatingText_Cant();
+			yield return new WaitForSeconds(Consts.CantSeconds);
 		}
 		else
 		{
 			character.AttackAction();
-			yield return new WaitForSeconds(1.0f);//TODO wait attack duration
+			yield return new WaitForSeconds(character.GetLastAttackHitTime());//TODO wait attack duration
 			// apply attack damage, etc
 			target.TakeDamage(character.GetLastAttackDamage());
 		}
@@ -508,7 +523,6 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}));
 	}
 
-	private const float TIMED_OUT = 3.0f;
 	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null)
 	{
 		Debug.Log("WaitCharacterMoved " + movingCharacter);
@@ -539,9 +553,10 @@ public class GameView : MonoBehaviour, IView<GameController>
 		var timeout = 0.0f;
 		while(true)
 		{
-			if (timeout > TIMED_OUT)
+			if (timeout > Consts.CharacterMovedTimeout)
 			{
 				Debug.LogWarning(movingCharacter + " TIMED_OUT!");
+				movingCharacter.FloatingText("TIMED_OUT!");
 				break;
 			}
 
@@ -554,7 +569,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			if (!movingCharacter.HasMovePoints())
 			{
 				Debug.Log(movingCharacter + " !HasMovePoints");
-				movingCharacter.FloatingText("Can't");
+				movingCharacter.FloatingText_Cant();
 				agent.StopMovement();
 				break;
 			}
@@ -616,31 +631,39 @@ public class GameView : MonoBehaviour, IView<GameController>
 	private IEnumerator EndTurnRoutine()
 	{
 		Debug.Log("Starts AI Routine: ");
+
+		yield return new WaitForSeconds(GameSettings.GetTurnChangedSeconds());
 		
 		foreach (var otherCharacterView in GetAllCharacters())
 		{
 			var otherCharacter = otherCharacterView.GetController();
 			if (otherCharacter.InParty()) continue;
-
+			
 			if (IsCharacterVisible(otherCharacter))
 				cameraPivot.Focus(otherCharacter);
 			else Debug.Log("Do not focus invisible character: " + otherCharacter);
 
+			yield return new WaitForSeconds(GameSettings.GetFocusCharacterSeconds());
+
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
 			{
 				Debug.LogWarning(otherCharacter + " has no aiBrain");
-				yield return new WaitForSeconds(1.0f);
+				yield return new WaitForSeconds(GameSettings.GetDefaultActionSeconds());
 				continue;
 			}
 
+			yield return new WaitForSeconds(GameSettings.GetAIThinksSeconds());
+			
 			Debug.Log("Think() " + aiBrain + " " + otherCharacter);
 			yield return StartCoroutine(aiBrain.Think(otherCharacter));
 			Debug.Log("End Think()");
+
+			yield return new WaitForSeconds(GameSettings.GetFocusCharacterSeconds());
 		}
 		
-		yield return new WaitForSeconds(1.0f);
-		
 		GetController().NewTurn();
+		
+		yield return new WaitForSeconds(GameSettings.GetTurnChangedSeconds());
 		
 		CharacterSelection.SelectNextCharacter();
 	}
@@ -688,7 +711,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		}
 		else
 		{
-			selectedCharacter.FloatingText("Can't");
+			selectedCharacter.FloatingText_Cant();
 		}
 	}
 
@@ -723,7 +746,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	private IEnumerator WaitRunAction(CharacterController character)
 	{
 		Debug.Log(">> WaitRunAction: " + character);
-		yield return new WaitForSeconds(1.0f);
+		yield return new WaitForSeconds(GameSettings.GetDefaultActionSeconds());
 		character.RunAction();
 	}
 

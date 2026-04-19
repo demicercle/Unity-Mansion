@@ -21,9 +21,10 @@
 - GameView.Routines
 - GameView.Cursor
 - Editor tool "hide children in hierarchy if not in prefab stage"
-- rename "ColorSettings" in "GameSettings" (not user modifiable)
+x rename "ColorSettings" in "GameSettings" (not user modifiable)
 - increase time during AI Think coroutine
 - camera render target not working anymore
+- change animation of characters during the mythos phase ("look around", "weapons ready", etc)
 
 - RPGAnims 
 	> DrawWeapons

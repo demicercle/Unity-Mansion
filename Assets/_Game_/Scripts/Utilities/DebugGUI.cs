@@ -26,7 +26,8 @@ public class DebugGUI : MonoBehaviour
 
 	public static float FADE_DURATION = 3.0f;
 	public static float FADE_PROGRESS = 0.0f;
-	
+
+	static public void Label(string label) => GUILayout.Label(GetLabel(label));
 	static public void FlexibleSpace() => GUILayout.FlexibleSpace();
 	static public void Space(float s = 5f) => GUILayout.Space(s);
 	static public void BeginGroup(string label) => GUILayout.BeginVertical(new GUIContent(GetLabel(label)), new GUIStyle("window"));

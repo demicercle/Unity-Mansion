@@ -30,4 +30,5 @@ public class CharacterData : ScriptableObject
 	[Header("Health")] 
 	[Range(1, 99)] public int maxHealth;
 	public float lastAttackDamage;
+	public float lastAttackHitTime;
 }
