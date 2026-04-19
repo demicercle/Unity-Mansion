@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Oddworm.Framework;
 using Pathfinding;
 using UnityEngine;
 
 public class CharacterAgent : MonoBehaviour
 {
+	[Header("Movement")]
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] [Min(0f)] private float endReachDistance = 0.0f;
+	
+	[Header("Rendering")]
 	[SerializeField] private List<LineRenderer> pathRenderers;
+	
+	[Header("Circles")]
+	[SerializeField] private CircleRenderer moveTarget;
 
 	public System.Action onSearchPath
 	{
@@ -194,6 +201,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void LateUpdate()
 	{
+		UpdateMoveTarget();
 		DrawPath();
 	}
 
@@ -229,7 +237,7 @@ public class CharacterAgent : MonoBehaviour
 		
 		if (pathRenderers.Count > 0)
 		{
-			pathRenderers[0].startColor = pathRenderers[0].endColor = characterView.GetDisabledColor();
+			pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor();
 			pathRenderers[0].positionCount = lastPath.Length;
 			pathRenderers[0].useWorldSpace = true;
 			pathRenderers[0].SetPositions(lastPath);
@@ -238,7 +246,7 @@ public class CharacterAgent : MonoBehaviour
 		if (pathRenderers.Count > 1)
 		{
 			lastPath = Utils.LimitPathTotalLength(lastPath, controller.GetRemainingMovePoints());
-			pathRenderers[1].startColor = pathRenderers[1].endColor = characterView.GetCurrentColor();
+			pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(controller, true, true);
 			pathRenderers[1].positionCount = lastPath.Length;
 			pathRenderers[1].useWorldSpace = true;
 			pathRenderers[1].SetPositions(lastPath);
@@ -246,5 +254,21 @@ public class CharacterAgent : MonoBehaviour
 
 		isDrawingPath = true;
 		pathRenderers.ForEach(p => p.enabled = true);
+	}
+
+	void UpdateMoveTarget()
+	{
+		if (!hasDestination)
+		{
+			moveTarget.gameObject.SetActive(false);
+			return;
+		}
+		
+		var isBlinking = isMoving;
+
+		moveTarget.gameObject.SetActive(true);
+		moveTarget.transform.position = aiPath.destination;
+		moveTarget.SetColor(ColorSettings.GetCharacterColor(controller, true, true));
+		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
 }

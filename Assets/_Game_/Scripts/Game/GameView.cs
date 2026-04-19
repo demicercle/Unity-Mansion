@@ -911,6 +911,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	public int CursorRaycast(out RaycastHit hit)
 	{
+		const float debugOffset = 0.1f;
+		
 		//TODO: if mouse over viewport
 		hit = default(RaycastHit);
 		var cam = Camera.main;
@@ -918,8 +920,8 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
 		{ 
 			//DebugGUI.Log("Hit Character: " + hit.collider);
-			DrawDebug.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
-			Utils.DrawDebugCircle(hit.collider.transform.position, Vector3.up, 0.5f);
+			//DrawDebug.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
+			//Utils.DrawDebugCircle(hit.collider.transform.position, Vector3.up, 0.5f);
 
 			foreach (var cursorHandler in hit.collider.GetComponents<ICursorHandler>().Concat(hit.collider.GetComponentsInChildren<ICursorHandler>()))
 			{
@@ -932,18 +934,18 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (Physics.Raycast(ray, out hit, 100f, LayerMask.GetMask(Consts.LAYER_GROUND, Consts.LAYER_WALL)))
 		{
 			//DebugGUI.Log("Hit Navigation: " + hit.point);
-			Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
+			//Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
 
 			if (NavUtility.TryGetNearestNavPosition(hit.point, maxNavDistance, out var navPosition))
 			{
 				hit.point = navPosition;
-				DrawDebug.WireDisc(navPosition, Vector3.up,maxNavDistance * 0.5f, Color.cyan);
+				//DrawDebug.WireDisc(navPosition + Vector3.up * debugOffset, Vector3.up,maxNavDistance * 0.5f, Color.cyan);
 
 				return CURSOR_RAYCAST_RESULT_NAVIGATION;
 			}
 			
 			// mouse over something else
-			DrawDebug.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Vector3.up,maxNavDistance, Color.gray);
+			//DrawDebug.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Vector3.up,maxNavDistance, Color.gray);
 		}
 
 		return CURSOR_RAYCAST_RESULT_NONE;

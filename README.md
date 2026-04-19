@@ -9,3 +9,7 @@
 - attack zombi (enemy to player)
 - interact with npc
 - CantEvent
+- DebugGUI Draw Character stats (movePoints, etc)
+- CharacterView > CharacterSelection
+- CharacterAnimation
+- RPGAnims (AnimationSettings)

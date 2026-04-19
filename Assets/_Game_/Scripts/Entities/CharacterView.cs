@@ -13,15 +13,15 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		return characterController;
 	}
 	
-	[Header("Selection")]
-	[SerializeField] private CircleRenderer selectionCircle;
-	[SerializeField] private CircleRenderer movePointsCircle;
-	[SerializeField] private Color defaultColor = Color.blue, partyColor = Color.green, enemyColor = Color.red, disabledColor = Color.gray, deadColor = Color.black;
-	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
-	
 	[Header("Collision")]
 	[SerializeField] private CapsuleCollider capsuleCollider;
 	[SerializeField] private new Rigidbody rigidbody;
+
+	[Header("Circles")] 
+	[ReadOnly][SerializeField] private float defaultScale = 1f;
+	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
+	[SerializeField] private CircleRenderer selectionCircle;
+	[SerializeField] private CircleRenderer movePointsCircle;
 	
 	[Header("Animation")]
 	[SerializeField] private Animator animator;
@@ -36,8 +36,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	
 	#region PUBLIC
 
-	public Color GetDisabledColor() => disabledColor;
-	public Color GetCurrentColor() => currentColor;
 	
 	public void CursorOver()
 	{
@@ -46,23 +44,18 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	#endregion
 	
 	#region PRIVATE
-	private bool inParty;
-	private bool isEnemy;
+	
 	private Color currentColor;
 	private bool mouseOver;
 	private bool wasSelected;
 	private int partyIndex;
-	private bool hasActions;
 	private float alphaColor;
-	private bool killed;
 	private Vector3[] lastPath;
-	
 	private void Awake()
 	{
 		var controller = GetController();
 		
 		allInstances.Add(this);
-		currentColor = defaultColor;
 		
 		UpdateComponents();
 		
@@ -85,7 +78,6 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 			animator.SetTrigger(AnimationParameters.Trigger);
 			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
 			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
-			SetColor(deadColor);
 		};
 
 		controller.onMoved += () =>
@@ -132,18 +124,20 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 	void LateUpdate()//TODO optim
 	{
 		var controller = GetController();
-	    
-		inParty = controller.InParty();
-		isEnemy = controller.IsEnemyToPlayer();
-		killed = controller.IsDead();
-		SetColor(killed ? deadColor : inParty ? partyColor : isEnemy ? enemyColor : defaultColor);
-	    
-		hasActions = controller.HasActions();
+		
+		currentColor = ColorSettings.GetCharacterColor(GetController(), true, false);
 		alphaColor = alphaCurve.Evaluate(PlayerSelection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
-	    
-		selectionCircle.SetColor(hasActions ? currentColor : disabledColor, alphaColor);
-		movePointsCircle.SetColor(currentColor, alphaColor);
-		movePointsCircle.SetProgress(controller.GetMovePointsProgress());
+		
+		if (selectionCircle)
+		{
+			selectionCircle.SetColor(currentColor, alphaColor);
+		}
+
+		if (movePointsCircle)
+		{
+			movePointsCircle.SetColor(currentColor, alphaColor);
+			movePointsCircle.SetProgress(controller.GetMovePointsProgress());
+		}
 
 		if (animator != null)
 		{
@@ -153,6 +147,8 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 			animator.SetFloat(AnimationParameters.VelocityZ, localVelocity.magnitude * velocityScale);  
 			animator.SetBool(AnimationParameters.Moving, isMoving);
 		}
+		
+		UpdateComponents();
 
 		mouseOver = false;
 	}
@@ -168,14 +164,7 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 
 		if (selectionCircle)
 		{
-			selectionCircle.radius = radius;
-			selectionCircle.UpdateCircle();
-		}
-
-		if (movePointsCircle)
-		{
-			movePointsCircle.radius = radius;
-			movePointsCircle.UpdateCircle();
+			selectionCircle.transform.localScale = Vector3.one * radius * defaultScale;
 		}
 		
 		if (capsuleCollider)
@@ -192,9 +181,9 @@ public class CharacterView : MonoBehaviour, ICursorHandler, IView<CharacterContr
 		}
 	}
 
-	private void SetColor(Color newColor)
+	/*private void SetColor(Color newColor)
 	{
 		currentColor = newColor; // TODO event "color changed"
-	}
+	}*/
     #endregion
 }

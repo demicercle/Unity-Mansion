@@ -6,15 +6,10 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
+	
 	static public List<CharacterController> instances = new List<CharacterController>();
 	static public IEnumerable<CharacterController> GetPartyCharacters() => instances.Where(c => c.InParty());
 	
-	/*public enum ActionType TODO
-	{
-		None,
-		InteractAction,
-		RunAction
-	}*/
 	
 	public event System.Action statsChanged;
 	public event System.Action<bool> selectionChanged;
@@ -38,12 +33,14 @@ public class CharacterController : MonoBehaviour
 	[ReadOnly] [SerializeField] private int partyIndex = -1;
 	[ReadOnly] [SerializeField] private float usedMovePoints;
 	[ReadOnly] [SerializeField] private int usedActions;
+	[ReadOnly] [SerializeField] private List<CharacterAction> usedActionList = new List<CharacterAction>();
 	[ReadOnly] [SerializeField] private float totalDamages;
 	[ReadOnly] [SerializeField] private int savedRotation;
 	[ReadOnly] [SerializeField] private Vector3 savedPosition;
 	[ReadOnly] [SerializeField] private bool isDead;
 	[ReadOnly] [SerializeField] private CharacterAgent agent;
 	[ReadOnly] [SerializeField] private int currentTurn;
+	//[SerializeField] private ColorSettings colorSettings;
 	
 	public int GetCurrentTurn() => currentTurn;
 	
@@ -77,6 +74,7 @@ public class CharacterController : MonoBehaviour
 	public void Restore() => NewTurn(-1);
 	public void NewTurn(int turn)
 	{
+		usedActionList.Clear();
 		usedActions = 0;
 		usedMovePoints = 0;
 		GetAgent().ClearDestination();
@@ -111,9 +109,10 @@ public class CharacterController : MonoBehaviour
 		onPartyIndexChanged?.Invoke(index);
 	}
 	
+	public float GetMaxMovePoints() => characterData.maxMovePoints;
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
 	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
-	public bool HasMovePoints() => GetRemainingMovePoints() > 0f;
+	public bool HasMovePoints() => usedMovePoints < GetMaxMovePoints();
 	
 	public bool CanUseRunAction()
 	{
@@ -319,8 +318,11 @@ public class CharacterController : MonoBehaviour
 	{
 		ConsumeActions(1);
 		usedMovePoints -= characterData.runActionExtraMovePoints;
+		usedActionList.Add(CharacterAction.RunAction);
 		onRunAction?.Invoke();
 	}
+
+	public bool HasUsedAction(CharacterAction action) => usedActionList.Contains(action);
 
 	private void Awake()
 	{
@@ -374,4 +376,21 @@ public class CharacterController : MonoBehaviour
 			b?.DrawGizmos(this);
 		});
 	}
+
+
+	/*public Color GetCurrentColor()
+	{
+		return isDead ? GetDeadColor() : InParty() ? GetFactionColor() : GetDefaultColor();
+	}*/
+	
+	public CharacterFaction GetCurrentFaction() => characterData.faction;
+	
+	/*public Color GetFactionColor()
+	{
+		return ColorSettings.Instance.GetFactionColor(GetCurrentFaction());
+	}
+
+	public Color GetDisabledColor() => ColorSettings.Instance.disabledColor;
+	public Color GetDeadColor() => ColorSettings.Instance.deadColor;
+	public Color GetDefaultColor() => GetFactionColor();*/
 }

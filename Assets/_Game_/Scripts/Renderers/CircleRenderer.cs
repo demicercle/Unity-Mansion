@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class CircleRenderer : MonoBehaviour
 {
+    
+    
     [Range(0f, 1f)] public float progress = 1.0f;
     public int pointsCount;
     public Vector3 rotation;
@@ -39,6 +41,15 @@ public class CircleRenderer : MonoBehaviour
         if (!Mathf.Approximately(p, progress))
         {
             progress = p;
+            UpdateCircle();
+        }
+    }
+
+    public void SetRadius(float newValue)
+    {
+        if (!Mathf.Approximately(newValue, radius))
+        {
+            radius = newValue;
             UpdateCircle();
         }
     }
