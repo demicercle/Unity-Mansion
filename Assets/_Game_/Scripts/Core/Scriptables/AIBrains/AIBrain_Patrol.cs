@@ -9,8 +9,6 @@ public class AIBrain_Patrol : AIBrainBase
 	
 	public override IEnumerator Think(CharacterController character)
 	{
-		yield return new WaitForSeconds(1.0f);
-		
 		if (!PatrolRoute.FindRoute(character, out PatrolRoute patrolRoute))
 		{
 			Debug.LogWarning(character + " has no patrol route");

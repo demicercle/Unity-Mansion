@@ -87,7 +87,6 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
-		//Debug.Log(this + " StopMovement");
 		ClearDestination();
 	}
 	
@@ -126,6 +125,19 @@ public class CharacterAgent : MonoBehaviour
 	public bool ReachedDestination(Vector3 dest)
 	{
 		return /*aiPath.reachedDestination ||*/ Vector3.Distance(aiPath.position, dest) <= GetMinReachDistance();
+	}
+
+	public void SetAgentActive(bool value)
+	{
+		StopMovement();
+		
+		Debug.Log(this + " SetAgentActive=" + value);
+		aiPath.enabled = value;
+		
+		if (aiPath.enabled)
+		{
+			aiPath.Teleport(transform.position);
+		}
 	}
 
 	private const float TIMED_OUT = 3f;
@@ -188,15 +200,6 @@ public class CharacterAgent : MonoBehaviour
 		Utils.DrawGizmosCircle(transform.position, Vector3.up, GetMinReachDistance());
 	}
 
-	void UpdateComponent()
-	{
-		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
-		aiPath.radius = radius;
-		aiPath.height = height;
-		aiPath.maxSpeed = moveSpeed;
-		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
-	}
-
 	private void Awake()
 	{
 		_characterAnimation = GetComponent<CharacterAnimation>();
@@ -209,6 +212,16 @@ public class CharacterAgent : MonoBehaviour
 		CharacterSelection.selectionChanged += SelectionChanged;
 		
 		UpdateComponent();
+	}
+
+	private void UpdateComponent()
+	{
+		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
+		aiPath.radius = radius;
+		aiPath.height = height;
+		aiPath.maxSpeed = moveSpeed;
+		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
+		if(Application.isPlaying) SetAgentActive(false);
 	}
 	
 	private void OnDestroy()
@@ -225,15 +238,14 @@ public class CharacterAgent : MonoBehaviour
 		
 		UpdatePathAndTarget(true);
 	}
-	
 
-	void OnUseAction(CharacterAction action, object param)
+	private void OnUseAction(CharacterAction action, object param)
 	{
 		StopMovement();
 		UpdatePathAndTarget(true);
 	}
 
-	void SelectionChanged()
+	private void SelectionChanged()
 	{
 		if (controller.IsSelected())
 		{

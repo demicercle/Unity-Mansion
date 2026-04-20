@@ -2407,7 +2407,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.runTrigger
-      value: Scream
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: 'aiBrains.Array.data[0]'
@@ -2432,6 +2432,10 @@ PrefabInstance:
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.getHitTrigger
       value: GetHit
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.switchOnTrigger
+      value: Scream
       objectReference: {fileID: 0}
     - target: {fileID: 6483927452517428826, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_LookAtBones.Array.data[0].m_Bone

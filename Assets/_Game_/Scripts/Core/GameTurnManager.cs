@@ -12,13 +12,19 @@ public class GameTurnManager : MonoBehaviour
 
 	public System.Action turnStarted, turnEnded;
 	public System.Action sceneLoaded;
-
+	
+	[Header("Turn Settings")]
 	[SerializeField] private string nextLevelName = "Level_0";
+	[SerializeField] private bool firstTurnIsPlayer = true;
+	[SerializeField] private bool skipInvisibleCharacters = true;
+	
+	[Header("Timings")]
+	[SerializeField] private float postLoadDuration = 1.0f;
 	[SerializeField] private float turnChangedSeconds = 3.0f;
 	[SerializeField] private  float focusCharacterSeconds = 1.5f;
 	[SerializeField] private  float noActionsSeconds = 3.0f;
 	[SerializeField] private float defaultActionsSeconds = 1.0f;
-	[SerializeField] private  float cameraStartsSeconds = 0.5f;
+	[SerializeField] private  float cameraStartsSeconds = 0.15f;
 	[SerializeField] private  float aiThinksSeconds = 0.5f;
 	
 	[ReadOnly] [SerializeField] private int currentTurn;
@@ -34,10 +40,11 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log(this + " EndTurn " + currentTurn);
 		turnEnded?.Invoke();
 	}
-
-	public void SceneLoaded() => sceneLoaded?.Invoke();
-
-	void Awake()
+	
+	#region PRIVATE
+	private CameraPivot cameraPivot => CameraPivot.Instance;
+	
+	private void Awake()
 	{
 		_instance = this;
 		Debug.Log(this + " Awake");
@@ -46,15 +53,20 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Starts");
-		
-		var cameraPivot = CameraPivot.Instance;
+
+		FadeScreen.FadeIn(true);
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
 		sceneLoader.SetSceneToLoad(nextLevelName, LoadSceneMode.Additive);
 
-		do
+		do // ensure that scenes are properly loaded
 		{
-			yield return null;
+			do
+			{
+				yield return null;
+			} while (SceneLoader.IsLoadingScene);
+
+			yield return new WaitForSeconds(postLoadDuration);
 		} while (SceneLoader.IsLoadingScene);
 		
 		var levelCharacters = Utils.FindObjects<CharacterController>()
@@ -71,18 +83,25 @@ public class GameTurnManager : MonoBehaviour
 				character.SetPartyIndex(partyIndex++);
 		}
 		
-		yield return FadeScreen.FadeOut();
+		FadeScreen.FadeOut();
+		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);
 		
 		while (true)
 		{
+			playerTurn = !firstTurnIsPlayer;
 			NewTurn();
 			
 			SelectBestPlayerCharacter();
 			
-			yield return new WaitForSeconds(focusCharacterSeconds);
-			
-			if(currentTurn == 1)
+			if (currentTurn == 1) // first turn animation
+			{
+				yield return new WaitForSeconds(cameraStartsSeconds);
 				CameraPivot.Instance.SetStartZoom();
+			}
+			else 
+			{
+				yield return new WaitForSeconds(focusCharacterSeconds);
+			}
 			
 			while (IsPlayerTurn())
 			{
@@ -90,6 +109,8 @@ public class GameTurnManager : MonoBehaviour
 			}
 
 			yield return new WaitForSeconds(turnChangedSeconds);
+			
+			yield return YieldRoutines();
 		
 			foreach (var otherCharacter in CharacterController.instances)
 			{
@@ -99,8 +120,11 @@ public class GameTurnManager : MonoBehaviour
 					cameraPivot.Focus(otherCharacter);
 				else
 				{
-					Debug.Log("Do not focus invisible character: " + otherCharacter);
-					yield return new WaitForSeconds(defaultActionsSeconds);
+					if (skipInvisibleCharacters)
+					{
+						Debug.Log("skipInvisibleCharacters: " + otherCharacter);
+						yield return new WaitForSeconds(defaultActionsSeconds);
+					}
 					continue;
 				}
 
@@ -119,9 +143,19 @@ public class GameTurnManager : MonoBehaviour
 				yield return StartCoroutine(aiBrain.Think(otherCharacter));
 				Debug.Log("End Think()");
 
-				yield return new WaitForSeconds(aiThinksSeconds);
+				var startTime = Time.time;
+				yield return YieldRoutines();
+				while (Time.time - startTime < aiThinksSeconds)
+					yield return null;
 			}
 		}
+	}
+
+	private Coroutine YieldRoutines() => StartCoroutine(WaitRoutines());
+	private IEnumerator WaitRoutines()
+	{
+		while(CharacterRoutines.AnyActiveRoutines())
+			yield return null;
 	}
 	
 	private void NewTurn()
@@ -135,7 +169,6 @@ public class GameTurnManager : MonoBehaviour
 
 	private void SelectBestPlayerCharacter()
 	{
-		var cameraPivot = CameraPivot.Instance;
 		var center = cameraPivot.GetFocusPosition();
 
 		var bestCharacter = CharacterController.GetPartyCharacters()
@@ -145,4 +178,5 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log(this + " SelectBestPlayerCharacter " + bestCharacter);
 		CharacterSelection.SelectCharacter(bestCharacter);
 	}
+	#endregion
 }

@@ -68,7 +68,7 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		if(activeInstances.Contains(this)) Debug.LogError(this + " _WaitComplete activeInstances.Contains(this)");
 		activeInstances.Add(this);
-		Debug.Log(this + " routine started " + activeInstances.Count + " > " + coroutine);
+//		Debug.Log(this + " routine started " + activeInstances.Count + " > " + coroutine);
 		yield return coroutine;
 		activeInstances.Remove(this);
 		Debug.Log(" routine ends " + activeInstances.Count);
@@ -104,11 +104,18 @@ public class CharacterRoutines : MonoBehaviour
 	
 	private IEnumerator WaitCharacterAttackCharacter(CharacterController target, bool canUseRunAction, bool losCheck)
 	{
-		Debug.Log("WaitCharacterAttackCharacter " + characterOwner + " " + target + " " + losCheck);
+		Debug.Log("WaitCharacterAttackCharacter " + characterOwner + " " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck);
 
 		if (characterOwner.TryGetAnimation(out var characterAnim))
 		{
-			yield return characterAnim.TrySwitchWeapons(true);
+			if (characterAnim.TrySwitchWeapons(true))
+			{
+				do
+				{
+					yield return null;
+				} while (characterAnim.IsSwitchingWeapons);
+				Debug.Log("weapons switched for attacking");
+			}
 		}
 
 		var atAttackRange = false;
@@ -165,7 +172,7 @@ public class CharacterRoutines : MonoBehaviour
 			characterOwner.AttackAction();
 			yield return characterOwner.WaitAnimationEvent(CharacterAnimation.EventType.Hit);
 			//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
-			// apply attack damage, etc
+			//TODO DamageInfo, hit check (GD)
 			target.TakeDamage(characterOwner.GetLastAttackDamage());
 		}
 
@@ -187,13 +194,13 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 		
-		characterOwner.UseAction(prop.consumeAction);
+		characterOwner.UseAction(prop.GetInteractAction());
 			
-		yield return new WaitForSeconds(prop.triggerDelay);
+		yield return new WaitForSeconds(prop.GetTriggerDelay());
 
-		prop.GetController().Interact();
+		prop.InteractedBy(characterOwner);
 		
-		yield return new WaitForSeconds(prop.animDuration);
+		yield return new WaitForSeconds(prop.GetAnimDuration());
 	}
 
 	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection((pos - characterOwner.GetPosition()).normalized);

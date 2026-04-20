@@ -43,8 +43,8 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		[Header("Reactions")]
 		public string deathTrigger;
 		public string getHitTrigger;
-		public string combatTrigger;
-		public string relaxTrigger;
+		public string switchOffTrigger;
+		public string switchOnTrigger;
 		[Header("RPG Anims")]
 		public string weapon;
 		public string triggerNumber;
@@ -85,9 +85,12 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	[SerializeField] private float roomsReveleadSeconds = 1.0f;
 
+	public bool IsSwitchingWeapons => isSwitchingWeapons;
+
 	public bool HasAnimationEvent(EventType eventType) => eventTypes.Contains(eventType);
 
 	public Coroutine WaitEvent(EventType eventType) => StartCoroutine(DoWaitEvent(eventType));
+	
 	private IEnumerator DoWaitEvent(EventType eventType)
 	{
 		waitForEvent = eventType;
@@ -96,36 +99,57 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			yield return null;
 		} while (waitForEvent != EventType.Undefined);
 	}
-	
-	public Coroutine TrySwitchWeapons(bool value) => StartCoroutine(DoWaitSwitchWeapons(value));
-	private IEnumerator DoWaitSwitchWeapons(bool value)
+
+	public bool TrySwitchWeapons(bool weaponsReady)
 	{
-		if (WeaponsSwitched() == value)
+		if (WeaponsSwitched() == weaponsReady)
 		{
-			//if(value) Debug.Log(this + " DoWaitSwitchWeapons=" + value + " already switched");
-			//else Debug.Log(this + " DoWaitSwitchWeapons=" + value + " already sheated");
-			yield break;
+			return false; // weapons already switched
 		}
 		
-		if ( (value && !string.IsNullOrEmpty(parameters.combatTrigger)) || (!value && !string.IsNullOrEmpty(parameters.relaxTrigger)) )
+		StopAllCoroutines();
+		isSwitchingWeapons = false;
+		
+		if (weaponsAnimation == null) // RPG Character Animation override
 		{
-			animator.SetTrigger(value ? parameters.combatTrigger : parameters.relaxTrigger);
+			if (weaponsReady && !hasSwitchOnTrigger) return false; // no animator parameter for true
+			if (!weaponsReady && !hasSwitchOffTrigger) return false; // no animator parameter for false
+		}
+		
+		isSwitchingWeapons = true;
+		StartCoroutine(DoWaitSwitchWeapons(weaponsReady)); // do not returns coroutine, use a bool "IsSwitchingWeapons"
+		return true;
+	}
+	
+	private IEnumerator DoWaitSwitchWeapons(bool weaponsReady)
+	{
+		if (!weaponsReady && hasSwitchOffTrigger)
+		{
+			Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOffTrigger " + parameters.switchOffTrigger);
+			animator.SetTrigger(parameters.switchOffTrigger);
 			yield return WaitEvent(EventType.WeaponSwitch);
+			isSwitchingWeapons = false;
+			if (hasSwitchOnTrigger) weaponSwitched = true;
+			yield break; // returns
 		}
-		
-		if (!weaponsAnimation)
+
+		if (weaponsReady && hasSwitchOnTrigger)
 		{
-			//Debug.Log(this + " DoWaitSwitchWeapons=" + value + " break ; no weaponsAnimation");
-			yield break;
+			Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOnTrigger " + parameters.switchOnTrigger);
+			animator.SetTrigger(parameters.switchOnTrigger);
+			yield return WaitEvent(EventType.WeaponSwitch);
+			isSwitchingWeapons = false;
+			if (hasSwitchOffTrigger) weaponSwitched = true;
+			yield break; // returns
 		}
 		
-		//Debug.Log(this + " DoWaitSwitchWeapons=" + value);
+		// RPG Character stuff
 		
-		if (value)
+		if (weaponsReady)
 			weaponsAnimation.UnsheathWeapon(weaponsAnimation.rightWeapon, false);
 		else
 			weaponsAnimation.SheathWeapon(weaponsAnimation.rightWeapon, Weapon.Relax, false);
-
+		
 		var startedTime = Time.time;
 		do
 		{
@@ -136,9 +160,10 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 				yield break;
 			}
 		} while (weaponsAnimation.IsSwitchingWeapons());
-
-		weaponsAnimation.ToggleSwitched();
-		Debug.Log(this + " Switched Weapons " + weaponsAnimation.Switched());
+		
+		weaponSwitched = weaponsReady;
+		Debug.Log(this + " weaponSwitched=" + weaponSwitched);
+		isSwitchingWeapons = false;
 	}
 
 	public bool WeaponsSwitched() => weaponSwitched;
@@ -146,7 +171,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
 	private EventType waitForEvent;
-	private bool weaponSwitched;
+	private bool weaponSwitched, hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
 	
 	private void Awake()
 	{
@@ -182,6 +207,9 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 
 	private void Start()
 	{
+		hasSwitchOnTrigger = !string.IsNullOrWhiteSpace(parameters.switchOnTrigger);
+		hasSwitchOffTrigger = !string.IsNullOrWhiteSpace(parameters.switchOffTrigger);
+		
 		TrySetFloat(parameters.velocityX, 0.0f);      
 		TrySetFloat(parameters.velocityZ, 0.0f);        
 		TrySetInteger(parameters.weapon, -1);
@@ -233,7 +261,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 
 	private void OnTurnEnded()
 	{
-		UpdateWeapons();
+		//UpdateWeapons();
 	}
 
 	private void OnRoomsChanged()

@@ -54,16 +54,13 @@ public class CharacterController : MonoBehaviour
 	{
 		transform.SetParent(null, true);
 		gameObject.SetActive(true);
-		GetAgent().SetObstacle(true);
+		agent.SetAgentActive(true);
+		agent.SetObstacle(true);
 	}
 	
 	public bool IsControllableByPlayer() => isControllable && !isDead; // TODO: "IsPlayerTurn() && IsParty()"
-	
-	public CharacterAgent GetAgent()
-	{
-		if (agent == null) agent = Utils.GetOrAddComponent<CharacterAgent>(gameObject);
-		return agent;
-	}
+
+	public CharacterAgent GetAgent() => agent;
 
 	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.9f;
     
@@ -308,7 +305,7 @@ public class CharacterController : MonoBehaviour
 		if (!IsDead())
 		{
 			isDead = true;
-			agent.StopMovement();
+			agent.SetAgentActive(false);
 			onKilled?.Invoke();
 			statsChanged?.Invoke();
 		}
@@ -394,6 +391,8 @@ public class CharacterController : MonoBehaviour
 
 	public bool HasUsedAction(CharacterAction action) => usedActions.Contains(action);
 
+	static private ScriptableObject defaultAIBrain;
+	
 	private void Awake()
 	{
 		if(characterData == null)
@@ -401,13 +400,24 @@ public class CharacterController : MonoBehaviour
 		
 		instances.Add(this);
 		
-		characterAnimation = GetComponent<CharacterAnimation>();
+		agent = GetComponent<CharacterAgent>();
+		if(!agent) agent = gameObject.AddComponent<CharacterAgent>();
+		
 		routines = GetComponent<CharacterRoutines>();
 		if(!routines) routines = gameObject.AddComponent<CharacterRoutines>();
 		
-		currentFaction = characterData.faction;
+		characterAnimation = GetComponent<CharacterAnimation>();
+		if(!characterAnimation) characterAnimation = gameObject.AddComponent<CharacterAnimation>();
 		
-		if(!aiBrains.OfType<AIBrain_Wait>().Any()) aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());//todo store instance static
+		currentFaction = characterData.faction;
+
+		if (!aiBrains.OfType<AIBrain_Wait>().Any())
+		{
+			if (!defaultAIBrain)
+				defaultAIBrain = ScriptableObject.CreateInstance<AIBrain_Wait>();
+			
+			aiBrains.Add(defaultAIBrain as AIBrainBase);
+		}
 	}
 
 	private void OnDestroy()

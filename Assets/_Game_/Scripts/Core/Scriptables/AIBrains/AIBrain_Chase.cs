@@ -53,7 +53,6 @@ public class AIBrain_Chase : AIBrainBase
 	public override IEnumerator Think(CharacterController character)
 	{
 		UpdateTarget(character);
-		yield return new WaitForSeconds(1.0f);
 
 		if (lastTarget != null)
 		{

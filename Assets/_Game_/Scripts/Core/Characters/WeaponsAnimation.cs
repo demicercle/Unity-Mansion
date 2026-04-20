@@ -24,7 +24,7 @@ public class WeaponsAnimation : MonoBehaviour // TODO clean this sh*t
 
     private IEnumerator _WeaponVisibility(Weapon weapon, bool isVisible, bool isDual)
     {
-	    Debug.Log(this + " _WeaponVisibility " + weapon + " " + isVisible + " " + isDual);
+//	    Debug.Log(this + " _WeaponVisibility " + weapon + " " + isVisible + " " + isDual);
 	    weaponVisibilityChanged?.Invoke(weapon, isVisible);
 	    yield break;
     }

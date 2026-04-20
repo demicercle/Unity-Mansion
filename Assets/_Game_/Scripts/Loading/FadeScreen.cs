@@ -7,6 +7,8 @@ using UnityEngine.UI;
 //TODO [RequireComponent(typeof(Animator))]
 public class FadeScreen : MonoBehaviour
 {
+	public static float FadeDuration = 1f;
+	
 	[IngameDebugConsole.ConsoleMethod("fade_in","")]
 	public static Coroutine FadeIn(bool instant = false) => GetInstance().FadeCoroutine(true,instant);
 
@@ -36,7 +38,6 @@ public class FadeScreen : MonoBehaviour
 		return instance;
 	}
 	
-	[Min(0f)][SerializeField] private float duration = 1f;
 	[SerializeField] private Color color = Color.black;
 	[SerializeField] private Image image;
 	[SerializeField] private TMPro.TMP_Text tmpTxt;
@@ -64,11 +65,11 @@ public class FadeScreen : MonoBehaviour
 		toAlpha = fadeIn ? 1f : 0f;
 		fromAlpha = 1f - toAlpha;
 		time = 0f;
-		while (time < duration)
+		while (time < FadeDuration)
 		{
 			transform.SetAsLastSibling();
 			image.enabled = true;
-			image.color = Utils.ColorScale(color, Mathf.Lerp(fromAlpha, toAlpha, time / duration));
+			image.color = Utils.ColorScale(color, Mathf.Lerp(fromAlpha, toAlpha, time / FadeDuration));
 			tmpTxt.enabled = true;
 			tmpTxt.color = Utils.ColorScale(tmpTxt.color, image.color.a);
 			progressSlider.value = loadingProgress;

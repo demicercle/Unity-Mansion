@@ -21,7 +21,7 @@ namespace RPGCharacterAnims.Extensions
         /// <param name="trigger">The type of trigger.</param>
         public static void SetAnimatorTrigger(this Animator animator, AnimatorTrigger trigger)
         {
-			Debug.Log($"SetAnimatorTrigger: {trigger} - {( int )trigger}");
+//			Debug.Log($"SetAnimatorTrigger: {trigger} - {( int )trigger}");
 			animator.SetInteger(AnimationParameters.TriggerNumber, (int)trigger);
             animator.SetTrigger(AnimationParameters.Trigger);
         }

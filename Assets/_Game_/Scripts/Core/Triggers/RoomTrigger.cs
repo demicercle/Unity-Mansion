@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class RoomTrigger : MonoBehaviour
 {
-	static public List<RoomTrigger> activeRooms = new List<RoomTrigger>();
+	public static List<RoomTrigger> activeRooms = new List<RoomTrigger>();
 
-	static public System.Action onChanged;
+	public static System.Action onChanged;
 	
 	[Header("Settings")]
 	[SerializeField] private List<PropComponent> doors = new List<PropComponent>();
@@ -23,14 +23,14 @@ public class RoomTrigger : MonoBehaviour
 	}
 	
 	[ContextMenu("Collect Triggers")]
-	void CollectTriggers()
+	private void CollectTriggers()
 	{
 		triggers.Clear();
 		triggers.AddRange(GetComponentsInChildren<CharacterTrigger>());
 		Utils.SetDirty(this);
 	}
 
-	void OnDrawGizmosSelected()
+	private void OnDrawGizmosSelected()
 	{
 		foreach (var door in doors)
 		{
@@ -40,38 +40,38 @@ public class RoomTrigger : MonoBehaviour
 		}
 	}
 
-	void OnEnable()
+	private void OnEnable()
 	{
 		activeRooms.Add(this);
 		
 		foreach (var door in doors)
 		{
-			door.interacted.AddListener(OnDoorOpened);
+			door.OnInteracted += OnDoorOpened;
 		}
 	}
 
-	void OnDisable()
+	private void OnDisable()
 	{
 		activeRooms.Remove(this);
 		
 		foreach (var door in doors)
 		{
-			door.interacted.RemoveListener(OnDoorOpened);
+			door.OnInteracted -= OnDoorOpened;
 		}
 	}
 
-	void Start()
+	private void Start()
 	{
 		CreateCeilings();
 	}
 
-	void OnDoorOpened()
+	private void OnDoorOpened()
 	{
 		gameObject.SetActive(false);
 		onChanged?.Invoke();
 	}
 
-	void CreateCeilings()
+	private void CreateCeilings()
 	{
 		var rebuildNav = ceilings.Count > 0;
 		while (ceilings.Count > 0)
