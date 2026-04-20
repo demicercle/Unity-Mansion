@@ -168,7 +168,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		FadeScreen.FadeOut();
 		CharacterSelection.SelectNextCharacter();
 
-		yield return new WaitForSeconds(GameSettings.GetCameraStartsSeconds());
+		yield return new WaitForSeconds(Consts.CameraStartsSeconds);
 		cameraPivot.SetStartZoom();
 		
 		while (FadeScreen.IsVisible) yield return null;
@@ -338,7 +338,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 	
 	//[UnityEngine.Range(0f,1f)] public float debugGUI = 0f;
 	//public float cameraSpeed = 1.0f;
-	[SerializeField] private float cameraDeltaY = 1f;
+	//[SerializeField] private float cameraDeltaY = 1f;
 	[UnityEngine.Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
 
 	[Header("Debug")]
@@ -669,7 +669,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 	{
 		Debug.Log("Starts AI Routine: ");
 
-		yield return new WaitForSeconds(GameSettings.GetTurnChangedSeconds());
+		yield return new WaitForSeconds(Consts.TurnChangedSeconds);
 		
 		foreach (var otherCharacterView in GetAllCharacters())
 		{
@@ -680,27 +680,27 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 				cameraPivot.Focus(otherCharacter);
 			else Debug.Log("Do not focus invisible character: " + otherCharacter);
 
-			yield return new WaitForSeconds(GameSettings.GetFocusCharacterSeconds());
+			yield return new WaitForSeconds(Consts.FocusCharacterSeconds);
 
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
 			{
 				Debug.LogWarning(otherCharacter + " has no aiBrain");
-				yield return new WaitForSeconds(GameSettings.GetDefaultActionSeconds());
+				yield return new WaitForSeconds(Consts.DefaultActionSeconds);
 				continue;
 			}
 
-			yield return new WaitForSeconds(GameSettings.GetAIThinksSeconds());
+			yield return new WaitForSeconds(Consts.AIThinksSeconds);
 			
 			Debug.Log("Think() " + aiBrain + " " + otherCharacter);
 			yield return StartCoroutine(aiBrain.Think(otherCharacter));
 			Debug.Log("End Think()");
 
-			yield return new WaitForSeconds(GameSettings.GetAIThinksSeconds());
+			yield return new WaitForSeconds(Consts.AIThinksSeconds);
 		}
 		
 		GetController().NewTurn();
 		
-		yield return new WaitForSeconds(GameSettings.GetTurnChangedSeconds());
+		yield return new WaitForSeconds(Consts.TurnChangedSeconds);
 		
 		CharacterSelection.SelectNextCharacter();
 	}
@@ -783,7 +783,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 	private IEnumerator WaitRunAction(CharacterController character)
 	{
 		Debug.Log(">> WaitRunAction: " + character);
-		yield return new WaitForSeconds(GameSettings.GetDefaultActionSeconds());
+		yield return new WaitForSeconds(Consts.DefaultActionSeconds);
 		character.RunAction();
 	}
 
@@ -1018,7 +1018,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 
 	public int CursorRaycast(out RaycastHit hit)
 	{
-		const float debugOffset = 0.1f;
+		//const float debugOffset = 0.1f;
 		
 		//TODO: if mouse over viewport
 		hit = default(RaycastHit);

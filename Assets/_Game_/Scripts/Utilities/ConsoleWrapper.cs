@@ -62,15 +62,15 @@ public static class ConsoleWrapper
 
 
 	[ConsoleMethod("debug_draw", "")]
-	static public void DebugDraw(int value)
+	static public void _DebugDraw(int value)
 	{
-		UserSettings.GetCurrentSettings().drawDebug = value > 0;
+		DebugDrawer.IsEnabled = value > 0;
 	}
 
 	[ConsoleMethod("debug_gui", "")]
-	static public void DebugGUI(int value)
+	static public void _DebugGUI(int value)
 	{
-		UserSettings.GetCurrentSettings().showDebugGUI = value > 0;
+		DebugGUI.IsEnabled = value > 0;
 	}
 
 	[ConsoleMethod("quit_game", "")]

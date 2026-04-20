@@ -34,7 +34,7 @@ public class CursorData : ScriptableObject
 	static void LoadCursors()
 	{
 		if (cursorDatas == null)
-			cursorDatas = Resources.LoadAll<CursorData>("Cursors");
+			cursorDatas = Resources.LoadAll<CursorData>(Consts.ResPath_Cursors);
 		
 		if (cursorDataLookup == null)
 		{

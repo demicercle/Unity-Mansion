@@ -3,14 +3,19 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "UserSettings", menuName = "UserSettings", order = 0)]
-public class UserSettings : ScriptableObject, IDebugGUI
+[CreateAssetMenu(fileName = "CameraSettings", menuName = "CameraSettings", order = 0)]
+public class CameraSettings : ScriptableObject, IDebugGUI
 {
-	static public UserSettings GetCurrentSettings() => Resources.LoadAll<UserSettings>("").First();
-	
-	[Header("General")]
-	public bool showDebugGUI = true;
-	public bool drawDebug = true;
+	static private CameraSettings defaultSettingsInstance;
+	static public CameraSettings DefaultSettings
+	{
+		get
+		{
+			if(!defaultSettingsInstance) defaultSettingsInstance = Resources.Load<CameraSettings>(Consts.ResPath_Settings);
+			if(!defaultSettingsInstance) defaultSettingsInstance = CreateInstance<CameraSettings>();
+			return defaultSettingsInstance;
+		}
+	}
 	
 	[Header("Camera")]
 	public float lerpSpeed = 1.5f;
@@ -26,15 +31,9 @@ public class UserSettings : ScriptableObject, IDebugGUI
 	[Min(0f)]public float cameraFocusLockTime = 1.0f;
 	//public bool canRotateY = true;
 
-	private bool setDirtyEditor;
+	//private bool setDirtyEditor;
 	public void OnDebugGUI()
 	{
-		DebugGUI.BeginGroup("Debug GUI");
-		showDebugGUI = DebugGUI.Toggle(showDebugGUI, "showDebugGUI");
-		drawDebug = DebugGUI.Toggle(drawDebug, "drawDebug");
-		if (Application.isEditor) setDirtyEditor = DebugGUI.Toggle(setDirtyEditor, "setDirtyEditor");
-		DebugGUI.EndGroup();
-		
 		DebugGUI.BeginGroup("Camera Settings");
 		lerpSpeed = DebugGUI.Range(lerpSpeed, 0, 16, "lerpSpeed");
 		inputSpeed = DebugGUI.Range(inputSpeed, 0, 32, "inputSpeed");
@@ -48,6 +47,6 @@ public class UserSettings : ScriptableObject, IDebugGUI
 		orbitDrag = DebugGUI.Range(orbitDrag, 0, 1, "orbitDrag");
 		DebugGUI.EndGroup();
 		
-		if(setDirtyEditor) Utils.SetDirty(this);
+		//if(setDirtyEditor) Utils.SetDirty(this);
 	}
 }

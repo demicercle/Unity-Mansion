@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AIBrain_Wait", menuName = "AIBrain/Wait", order = 0)]
-public class AIBrain_Wait : AIBrainData
+public class AIBrain_Wait : AIBrainBase
 {
 	public float time = 1.0f;
 	

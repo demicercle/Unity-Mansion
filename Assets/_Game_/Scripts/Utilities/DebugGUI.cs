@@ -14,15 +14,7 @@ public interface IDebugGUI
 
 public class DebugGUI : MonoBehaviour
 {
-	static public bool IsEnabled
-	{
-		get => UserSettings.GetCurrentSettings().showDebugGUI;
-		set
-		{
-			UserSettings.GetCurrentSettings().showDebugGUI = value;
-			GameView.Focus(!value);
-		}
-	}
+	static public bool IsEnabled { get; set; }
 
 	public static float FADE_DURATION = 3.0f;
 	public static float FADE_PROGRESS = 0.0f;
@@ -149,6 +141,12 @@ public class DebugGUI : MonoBehaviour
 		GUILayout.BeginArea(screenRect, GUIContent.none, GUIStyle.none);
 		//GUILayout.BeginHorizontal(); GUILayout.FlexibleSpace(); if(GUILayout.Button("CLOSE", GUILayout.ExpandWidth(false))) IsEnabled = false; GUILayout.EndHorizontal();
 		GUILayout.BeginHorizontal(new GUIStyle("box"), GUILayout.ExpandWidth(true)); DrawToolbar(); GUILayout.EndHorizontal();
+		
+		//eginGroup("Debug GUI");
+		DebugGUI.IsEnabled = DebugGUI.Toggle(IsEnabled, "DebugGUI");
+		DebugDrawer.IsEnabled = DebugGUI.Toggle(DebugDrawer.IsEnabled, "DebugDrawer");
+		//if (Application.isEditor) setDirtyEditor = DebugGUI.Toggle(setDirtyEditor, "setDirtyEditor");
+		//EndGroup();
 		scrollValue = GUILayout.BeginScrollView(scrollValue, GUILayout.ExpandHeight(false), GUILayout.ExpandWidth(false));
 		foreach (var obj in debugObjects)
 		{

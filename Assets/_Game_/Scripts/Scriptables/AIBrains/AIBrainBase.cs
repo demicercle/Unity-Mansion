@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "AIBrain", menuName = "AIBrain", order = 0)]
-public abstract class AIBrainData : ScriptableObject
+//[CreateAssetMenu(fileName = "AIBrain", menuName = "AIBrain", order = 0)]
+public abstract class AIBrainBase : ScriptableObject
 {
 	public GameView gameView => GameView.GetInstance();
 //	public GameData gameData => gameView.gameData;
@@ -10,7 +10,7 @@ public abstract class AIBrainData : ScriptableObject
 	
 	abstract public IEnumerator Think(CharacterController character);
 	
-	public AIBrainData Clone() => Instantiate(this);
+	public AIBrainBase Clone() => Instantiate(this);
 
 	/*public Coroutine WaitForRoutines() => gameView.StartCoroutine(DoWaitForRoutines());
 	

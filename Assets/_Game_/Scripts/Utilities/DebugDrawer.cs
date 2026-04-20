@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class DebugDrawer : MonoBehaviour
 {
-	public static bool IsEnabled => Debug.isDebugBuild && UserSettings.GetCurrentSettings().drawDebug;
+	public static bool IsEnabled { get; set; }
 
 	static public DebugDrawer FloatingText(Vector3 position, string message, float duration = 1.0f, float speedY = 1.0f)
 	{

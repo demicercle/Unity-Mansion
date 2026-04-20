@@ -430,67 +430,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &59975932
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 59975933}
-  - component: {fileID: 59975934}
-  m_Layer: 0
-  m_Name: DebugGUI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &59975933
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 59975932}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 792779173}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &59975934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 59975932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a46c4acb69634a89b9a10b172cef26c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DebugGUI
-  toggleKey: 282
-  viewX: 0.702
-  viewY: 0.022
-  viewWidth: 0.5
-  viewHeight: 0.818
-  guiSkin: {fileID: 11400000, guid: 4393402c63a81b1419e1d2ccc7a8aeb0, type: 2}
-  debugObjects:
-  - {fileID: 11400000, guid: 0ef1874cf9e753c4ab1d4ad24303fa78, type: 2}
-  - {fileID: 792779169}
-  scrollValue: {x: 0, y: 0}
-  screenRect:
-    serializedVersion: 2
-    x: 818.53204
-    y: 14.278
-    width: 324.5
-    height: 530.882
-  screenSize: {x: 1166, y: 649}
 --- !u!1 &143337792
 GameObject:
   m_ObjectHideFlags: 0
@@ -1441,7 +1380,7 @@ RectTransform:
   - {fileID: 266671609}
   - {fileID: 1666214}
   - {fileID: 331673146}
-  m_Father: {fileID: 792779173}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2870,8 +2809,9 @@ GameObject:
   - component: {fileID: 792779173}
   - component: {fileID: 792779171}
   - component: {fileID: 792779174}
+  - component: {fileID: 792779175}
   m_Layer: 0
-  m_Name: GameView
+  m_Name: GameController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2908,9 +2848,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 347191395}
-  - {fileID: 59975933}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &792779174
@@ -2927,6 +2865,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentTurn: 0
   playerTurn: 0
+--- !u!114 &792779175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 792779169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a46c4acb69634a89b9a10b172cef26c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugGUI
+  toggleKey: 282
+  viewX: 0.702
+  viewY: 0.022
+  viewWidth: 0.5
+  viewHeight: 0.818
+  guiSkin: {fileID: 11400000, guid: 4393402c63a81b1419e1d2ccc7a8aeb0, type: 2}
+  debugObjects:
+  - {fileID: 11400000, guid: 0ef1874cf9e753c4ab1d4ad24303fa78, type: 2}
+  - {fileID: 792779169}
+  scrollValue: {x: 0, y: 0}
+  screenRect:
+    serializedVersion: 2
+    x: 818.53204
+    y: 14.278
+    width: 324.5
+    height: 530.882
+  screenSize: {x: 1166, y: 649}
 --- !u!1 &838469007
 GameObject:
   m_ObjectHideFlags: 0
@@ -5823,5 +5790,6 @@ MonoBehaviour:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 347191395}
   - {fileID: 792779173}
   - {fileID: 1869206043}

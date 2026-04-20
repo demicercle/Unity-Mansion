@@ -146,7 +146,7 @@ public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICu
 
 	void LateUpdate()//TODO optim
 	{
-		currentColor = GameSettings.GetCharacterColor(GetController(), true, false);
+		currentColor = ColorSettings.GetCharacterColor(GetController(), true, false);
 		alphaColor = alphaCurve.Evaluate(CharacterSelection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
 		
 		if (selectionCircle)

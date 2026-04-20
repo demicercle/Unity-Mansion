@@ -22,10 +22,10 @@ public class CharacterController : MonoBehaviour
 	public event System.Action<CharacterAction, object> onUseAction;
 	
 	[SerializeField] private CharacterData characterData;
-	[SerializeField] private List<AIBrainData> aiBrains =  new List<AIBrainData>();
+	[SerializeField] private List<AIBrainBase> aiBrains =  new List<AIBrainBase>();
 	[SerializeField] private float visionRange = 2.0f;
 	public float GetVisionRange() => visionRange;
-	public List<AIBrainData> GetBrains() => aiBrains.ToList();
+	public List<AIBrainBase> GetBrains() => aiBrains.ToList();
 	
 	[ReadOnly] [SerializeField] private bool isControllable = false;
 //	[ReadOnly] [SerializeField] private bool isSelected = false;
@@ -287,7 +287,7 @@ public class CharacterController : MonoBehaviour
 	
 	public bool CanAttack(bool checkActions = true) => !characterData.noAttack && (!checkActions || HasActions());
 
-	public bool TryGetAIBrain(out AIBrainData aiBrain)
+	public bool TryGetAIBrain(out AIBrainBase aiBrain)
 	{
 		aiBrains = aiBrains.OrderBy(b => -b.GetPriority(this)).ToList();
 		Debug.Log(this + " TryGetAIBrain " + Utils.ArrayStr(aiBrains));

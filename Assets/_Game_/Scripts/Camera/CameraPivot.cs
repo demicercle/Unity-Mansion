@@ -118,15 +118,15 @@ public class CameraPivot : MonoBehaviour
     
     void UpdateSettings()
     {
-        if (!userSettings) return;
-        lerpSpeed = userSettings.lerpSpeed;
-        inputSpeed = userSettings.inputSpeed;
-        panSpeed = userSettings.panSpeed;
-        screenPadding = userSettings.screenPadding;
-        zoomSpeed = userSettings.zoomSpeed;
-        rotationSpeed = userSettings.rotationSpeed;
-        orbitSpeed = userSettings.orbitSpeed;
-        orbitDrag = userSettings.orbitDrag;
+        if (!_cameraSettings) return;
+        lerpSpeed = _cameraSettings.lerpSpeed;
+        inputSpeed = _cameraSettings.inputSpeed;
+        panSpeed = _cameraSettings.panSpeed;
+        screenPadding = _cameraSettings.screenPadding;
+        zoomSpeed = _cameraSettings.zoomSpeed;
+        rotationSpeed = _cameraSettings.rotationSpeed;
+        orbitSpeed = _cameraSettings.orbitSpeed;
+        orbitDrag = _cameraSettings.orbitDrag;
     }
 
     [Header("References")] 
@@ -206,7 +206,7 @@ public class CameraPivot : MonoBehaviour
    // public void PanWithMouse(float mouseY, float scale) => PanWithMouse(new Vector2(Screen.width / 2f, mouseY), scale);
     public bool PanWithMouse(Vector2 mousePosition, float scale)
     {
-        if (Time.realtimeSinceStartup - lastTimeFocused < UserSettings.GetCurrentSettings().cameraFocusLockTime) return false;
+        if (Time.realtimeSinceStartup - lastTimeFocused < CameraSettings.DefaultSettings.cameraFocusLockTime) return false;
         if (mousePosition.x < 0 || mousePosition.y < 0) return false;
         var screen = new Vector2(Screen.width, Screen.height);
         if (mousePosition.x > screen.x || mousePosition.y > screen.y) return false;
@@ -238,7 +238,7 @@ public class CameraPivot : MonoBehaviour
     private Quaternion desiredRotation;
     private Vector3 currentPosition;
 
-    private UserSettings userSettings;
+    private CameraSettings _cameraSettings;
 
     void Awake()
     {
@@ -247,7 +247,7 @@ public class CameraPivot : MonoBehaviour
 
     private void Start()
     {
-        userSettings = UserSettings.GetCurrentSettings();
+        _cameraSettings = CameraSettings.DefaultSettings;
         UpdateAnimator();
     }
 

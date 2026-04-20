@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 [CreateAssetMenu(fileName = "AIBrain_Chase", menuName = "AIBrain/Chase", order = 0)]
-public class AIBrain_Chase : AIBrainData
+public class AIBrain_Chase : AIBrainBase
 {
 	public bool noRun;
 	public bool noLOS;
