@@ -22,24 +22,29 @@ public class GameCanvas : MonoBehaviour
 		}
 	}
 	
-	[Header("References")]
+	[Header("Viewport")]
 	public RectTransform viewportRect;
+	public RawImage viewportOverlay;
+	[Header("Buttons")]
 	public Toggle controlPanel;
 	public Button button_actionRun;
 	public Button button_endTurn;
+	[Header("Portraits")]
 	public CharacterPortrait[] portraits;
-	public TextReference floatingText;
-	
+	[Space]
 	[Header("Animation")]
 	public Animator animator;
 	public float lerpSpeed;
 	public int endTurnLayer;
+	[Space]
+	public TextReference floatingText;
+	
 
 	public void SetRenderTexture(RenderTexture rt)
 	{
-		var rawImage = viewportRect.GetComponentInChildren<RawImage>();
-		rawImage.texture = rt;
-		rawImage.enabled = true;
+		if(viewportOverlay.texture && viewportOverlay.texture != rt) Destroy(viewportOverlay.texture);
+		viewportOverlay.texture = rt;
+		viewportOverlay.enabled = true;
 	}
 	
 	public bool mouseOverViewport { get; private set; }

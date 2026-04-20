@@ -2,6 +2,7 @@
 using UnityEngine;
 
 
+[RequireComponent(typeof(RectTransform))]
 public class ScreenFollowsWorld : MonoBehaviour
 {
 	public Camera mainCamera;
@@ -19,14 +20,16 @@ public class ScreenFollowsWorld : MonoBehaviour
 		worldOffset = world;
 		return this;
 	}
-	
+
+	private RectTransform rectTransform;
 	private void Awake()
 	{
+		rectTransform = GetComponent<RectTransform>();
 		if(!mainCamera) mainCamera = Camera.main;
 	}
 
 	private void Update()
 	{
-		if(target) transform.position = mainCamera.WorldToScreenPoint(target.position + worldOffset);
+		if(target) rectTransform.anchoredPosition = mainCamera.WorldToScreenPoint(target.position + worldOffset);
 	}
 }

@@ -695,7 +695,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 			yield return StartCoroutine(aiBrain.Think(otherCharacter));
 			Debug.Log("End Think()");
 
-			yield return new WaitForSeconds(GameSettings.GetFocusCharacterSeconds());
+			yield return new WaitForSeconds(GameSettings.GetAIThinksSeconds());
 		}
 		
 		GetController().NewTurn();

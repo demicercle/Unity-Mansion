@@ -125,7 +125,7 @@ public class CharacterAgent : MonoBehaviour
 
 	public bool ReachedDestination(Vector3 dest)
 	{
-		return aiPath.reachedDestination || Vector3.Distance(aiPath.position, dest) <= GetMinReachDistance();
+		return /*aiPath.reachedDestination ||*/ Vector3.Distance(aiPath.position, dest) <= GetMinReachDistance();
 	}
 
 	private const float TIMED_OUT = 3f;

@@ -23,6 +23,7 @@ public class UserSettings : ScriptableObject, IDebugGUI
 	public Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
 	public Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
 	public float orbitDrag = 0.1f;
+	[Min(0f)]public float cameraFocusLockTime = 1.0f;
 	//public bool canRotateY = true;
 
 	private bool setDirtyEditor;

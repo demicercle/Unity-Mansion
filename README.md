@@ -1,29 +1,20 @@
 # Unity-Mansion
 
-- draw line no depth test
 - add namespaces
-- character use action with serializable "action parameter" info
-- add keyboard shortcut + turn UI popup
-- GameController
-- more delay between turn + popup
-- attack zombi (enemy to player)
-- interact with npc
-- CantEvent
+- Talk Action
 - DebugGUI Draw Character stats (movePoints, etc)
 	> Right Click editor selects character under mouse
-- CharacterView > CharacterSelection
-- CharacterAnimation
-- RPGAnims (AnimationSettings)
 - "Forsaken" Startup scene
-- CursorSprite "Wait" during loading
-- CursorSprite "Hand" on Character or Prop
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
 - GameView.Routines
 - GameView.Cursor
-- camera render target not working anymore
+- BUG! camera render target not working anymore
 - change animation of characters during the mythos phase ("look around", "weapons ready", etcs)
 - OpportunityAttacks
 - DefaultAnims
+- "explore" command
+- BUG! selection circle alpha when AI turns
+- assign action on release click
 
 - RpgAnims 
 	> DrawWeapons

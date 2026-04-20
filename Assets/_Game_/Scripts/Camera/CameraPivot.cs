@@ -153,6 +153,7 @@ public class CameraPivot : MonoBehaviour
     public void Focus(Vector3 world)
     {
         focusPosition = world;
+        lastTimeFocused = Time.realtimeSinceStartup;
     }
     
     public void MoveFocus(Vector2 readValue, Space spaceTo)
@@ -205,6 +206,7 @@ public class CameraPivot : MonoBehaviour
    // public void PanWithMouse(float mouseY, float scale) => PanWithMouse(new Vector2(Screen.width / 2f, mouseY), scale);
     public bool PanWithMouse(Vector2 mousePosition, float scale)
     {
+        if (Time.realtimeSinceStartup - lastTimeFocused < UserSettings.GetCurrentSettings().cameraFocusLockTime) return false;
         if (mousePosition.x < 0 || mousePosition.y < 0) return false;
         var screen = new Vector2(Screen.width, Screen.height);
         if (mousePosition.x > screen.x || mousePosition.y > screen.y) return false;
@@ -232,6 +234,7 @@ public class CameraPivot : MonoBehaviour
     private float currentYaw;
     private float currentZoom;
     private float desiredZoom;
+    private float lastTimeFocused;
     private Quaternion desiredRotation;
     private Vector3 currentPosition;
 
