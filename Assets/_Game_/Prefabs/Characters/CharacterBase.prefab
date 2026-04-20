@@ -338,6 +338,7 @@ GameObject:
   - component: {fileID: 3402239913564902258}
   - component: {fileID: 8722277412283640718}
   - component: {fileID: 467592031822895063}
+  - component: {fileID: 7123389619300229274}
   m_Layer: 8
   m_Name: CharacterBase
   m_TagString: Player
@@ -383,14 +384,16 @@ MonoBehaviour:
   isControllable: 0
   partyIndex: -1
   usedMovePoints: 0
-  usedActions: 0
-  usedActionList: 
+  usedActions: 
   totalDamages: 0
   savedRotation: 0
   savedPosition: {x: 0, y: 0, z: 0}
   isDead: 0
   agent: {fileID: 2515140718575658048}
   currentTurn: 0
+  currentFaction: 0
+  previousFaction: 0
+  lastRotatedTime: 0
 --- !u!114 &7088883598136014318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -466,6 +469,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
   velocityScale: 1
+  minMovePointsToRun: 0.1
 --- !u!54 &6072534866263412361
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -726,6 +730,19 @@ MonoBehaviour:
   legacyMode: 0
   legacyUseWorldSpace: 0
   setTagCompatibility: -1
+--- !u!114 &7123389619300229274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837400758454604685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1 &3549809914347783905
 GameObject:
   m_ObjectHideFlags: 0

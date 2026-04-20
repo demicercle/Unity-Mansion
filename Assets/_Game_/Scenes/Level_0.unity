@@ -404,10 +404,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Prop_Door_Simple (2)
       objectReference: {fileID: 0}
-    - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
-      propertyPath: uniqueID
-      value: 4375304536273734385
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
