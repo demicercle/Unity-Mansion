@@ -1,11 +1,19 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 {
+	public enum EventType
+	{
+		Undefined,
+		Hit,
+	}
+	
+	//public const string EventHit = "Hit";
+	
 	static public List<CharacterAnimation> activeInstances  = new List<CharacterAnimation>();
 	
 	private CharacterController controller;
@@ -15,7 +23,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		return controller;
 	}
 	
-	[SerializeField] private Animator[] animators;
+	[SerializeField] private Animator animator;
 	
 	[System.Serializable]
 	public struct Parameters
@@ -36,6 +44,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	}
 	
 	[SerializeField] private Parameters parameters;
+	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
 
 #if UNITY_EDITOR
 	[ContextMenu("SetParameters/RPGCharacter")]
@@ -66,6 +75,58 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	[Header("Animation Settings")]
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
+
+	public bool HasAnimationEvent(EventType eventType) => eventTypes.Contains(eventType);
+
+	public Coroutine WaitEvent(EventType eventType) => StartCoroutine(DoWaitEvent(eventType));
+	private IEnumerator DoWaitEvent(EventType eventType)
+	{
+		if (!animator)
+		{
+			Debug.LogWarning(this + " DoWaitEvent error: no animator!");
+			yield break;
+		}
+	
+		var animEventHandler = Utils.GetOrAddComponent<AnimationEventHandler>(animator.gameObject);
+		var action = default(UnityEvent);
+		
+		if (eventType == EventType.Hit) 
+			action = animEventHandler.onHit;
+		else
+		{
+			Debug.LogError(this + " DoWaitEvent unsupported type: "  + eventType);
+			yield break;
+		}
+		
+		if (action != null)
+		{
+			var eventTriggered = false;
+			var handler = new System.Action(() =>
+			{
+				eventTriggered = true;
+			});
+			
+			Debug.Log(this + " DoWaitEvent: "  + eventType + " AddListener");
+			action.AddListener(handler.Invoke);
+
+			var startTime = Time.time;
+			while (!eventTriggered)
+			{
+				yield return null;
+				if (Time.time - startTime > Consts.CharacterWaitEventTimeout)
+				{
+					Debug.LogWarning(this + " Timed out! " + eventType);
+					break;
+				}
+			}
+
+			if (eventTriggered)
+			{
+				Debug.Log(this + " event triggered: " + eventType);
+				action.RemoveListener(handler.Invoke);
+			}
+		}
+	}
 	
 	#region PRIVATE
 	private void OnEnable()
@@ -110,14 +171,14 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	void OnDamaged(float amount)
 	{
 		GetController().FloatingText(Mathf.CeilToInt(amount).ToString());
-		SetTriggerAnimators(parameters.getHitTrigger);
+		TrySetTriggerAnimators(parameters.getHitTrigger);
 	}
 
 	void OnKilled()
 	{
-		SetTriggerAnimators(parameters.trigger);
-		SetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
-		SetTriggerAnimators(parameters.deathTrigger);
+		TrySetTriggerAnimators(parameters.trigger);
+		TrySetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
+		TrySetTriggerAnimators(parameters.deathTrigger);
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 	}
 
@@ -125,35 +186,35 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	{
 		if (actionType == CharacterAction.RunAction)
 		{
-			SetTriggerAnimators(parameters.trigger);
-			SetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
-			SetTriggerAnimators(parameters.runTrigger);
+			TrySetTriggerAnimators(parameters.trigger);
+			TrySetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
+			TrySetTriggerAnimators(parameters.runTrigger);
 			GetController().FloatingText("Run!");
 		}
 		
 		else if (actionType == CharacterAction.AttackAction)
 		{
-			SetTriggerAnimators(parameters.attackTrigger);
+			TrySetTriggerAnimators(parameters.attackTrigger);
 			GetController().FloatingText("Take this!");
 		}
 	}
 	
 	private void Start()
 	{
-		enabled = animators.Length > 0;
+		enabled = animator != null;
 		
 		if (!enabled)
 		{
-			Debug.LogWarning(this + " disabled because no animators");
+			Debug.LogWarning(this + " disabled because no animator");
 			return;
 		}
 		
-		SetFloatAnimators(parameters.velocityX, 0.0f);      
-		SetFloatAnimators(parameters.velocityZ, 0.0f);        
-		SetIntegerAnimators(parameters.weapon, -1);
-		SetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
-		SetTriggerAnimators(parameters.trigger);
-		SetBoolAnimators(parameters.moving, false);
+		TrySetFloatAnimators(parameters.velocityX, 0.0f);      
+		TrySetFloatAnimators(parameters.velocityZ, 0.0f);        
+		TrySetIntegerAnimators(parameters.weapon, -1);
+		TrySetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+		TrySetTriggerAnimators(parameters.trigger);
+		TrySetBoolAnimators(parameters.moving, false);
 	}
 	
 	void LateUpdate()
@@ -165,40 +226,45 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			isMoving = true;
 			localVelocity = Vector3.forward * controller.GetAgent().GetMaxSpeed();
 		}
-		SetFloatAnimators(parameters.velocityX, 0);      
-		SetFloatAnimators(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
-		SetBoolAnimators(parameters.moving, isMoving);
+		TrySetFloatAnimators(parameters.velocityX, 0);      
+		TrySetFloatAnimators(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
+		TrySetBoolAnimators(parameters.moving, isMoving);
 	}
 
 	// TODO keep for later?
-	void SetFloatAnimators(string param, float value)
+	bool TrySetFloatAnimators(string param, float value)
 	{
-		if (string.IsNullOrWhiteSpace(param)) return;
-		foreach(var animator in animators) animator.SetFloat(param, value);
+		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.SetFloat(param, value);
+		return true;
 	}
 
-	void SetBoolAnimators(string param, bool value)
+	bool TrySetBoolAnimators(string param, bool value)
 	{
-		if (string.IsNullOrWhiteSpace(param)) return;
-		foreach(var animator in animators) animator.SetBool(param, value);
+		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.SetBool(param, value);
+		return true;
 	}
 
-	void SetIntegerAnimators(string param, int value)
+	bool TrySetIntegerAnimators(string param, int value)
 	{
-		if (string.IsNullOrWhiteSpace(param)) return;
-		foreach(var animator in animators) animator.SetInteger(param, value);
+		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.SetInteger(param, value);
+		return true;
 	}
 
-	void SetTriggerAnimators(string param)
+	bool TrySetTriggerAnimators(string param)
 	{
-		if (string.IsNullOrWhiteSpace(param)) return;
-		foreach(var animator in animators) animator.SetTrigger(param);
+		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.SetTrigger(param);
+		return true;
 	}
 
-	void ResetTriggerAnimators(string param)
+	bool TryResetTriggerAnimators(string param)
 	{
-		if (string.IsNullOrWhiteSpace(param)) return;
-		foreach(var animator in animators) animator.ResetTrigger(param);
+		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.ResetTrigger(param);
+		return true;
 	}
 
 	//void SetFloat(int param, float value) => AnimatorUtils.TrySetFloat(param, value, animators);

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -24,6 +24,7 @@ public class CharacterController : MonoBehaviour
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainBase> aiBrains =  new List<AIBrainBase>();
 	[SerializeField] private float visionRange = 2.0f;
+	[Min(0f)] public float defaultAttackHitTime = 1f;
 	public float GetVisionRange() => visionRange;
 	public List<AIBrainBase> GetBrains() => aiBrains.ToList();
 	
@@ -78,11 +79,15 @@ public class CharacterController : MonoBehaviour
 		StopAgent();
 	}
 
-	public void Restore() => NewTurn(-1);
-	public void NewTurn(int turn)
+	public void Rest()
 	{
 		usedActions.Clear();
 		usedMovePoints = 0;
+	}
+	
+	public void NewTurn(int turn)
+	{
+		Rest();
 		GetAgent().ClearDestination();
 		if (turn >= 0) currentTurn = turn;
 	}
@@ -364,11 +369,13 @@ public class CharacterController : MonoBehaviour
 
 	private void Awake()
 	{
-		instances.Add(this);
-		
 		if(characterData == null)
 			Debug.LogError(this + " has no character data");
-
+		
+		instances.Add(this);
+		
+		characterAnimation = GetComponent<CharacterAnimation>();
+		
 		currentFaction = characterData.faction;
 		
 		if(!aiBrains.OfType<AIBrain_Wait>().Any()) aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());//todo store instance static
@@ -398,7 +405,7 @@ public class CharacterController : MonoBehaviour
 		return characterData.lastAttackDamage;
 	}
 
-	public float GetLastAttackHitTime() => characterData.lastAttackHitTime;
+	public float GetDefaultAttackHitTime() => defaultAttackHitTime;
 	
 	public void AttackAction(CharacterController target = null, bool stopAgent = true)
 	{
@@ -433,5 +440,27 @@ public class CharacterController : MonoBehaviour
 	public bool IsSelected()
 	{
 		return CharacterSelection.IsCharacterSelected(this);
+	}
+
+	public Coroutine WaitAttackHit() => StartCoroutine(DoWaitAnimationEvent(CharacterAnimation.EventType.Hit));
+
+	private CharacterAnimation characterAnimation;
+
+	public bool TryGetAnimation(out CharacterAnimation outAnimation)
+	{
+		outAnimation = characterAnimation;
+		return outAnimation != null;
+	}
+	
+	public Coroutine WaitAnimationEvent(CharacterAnimation.EventType eventType) => StartCoroutine(DoWaitAnimationEvent(eventType));
+	
+	private IEnumerator DoWaitAnimationEvent(CharacterAnimation.EventType eventType)
+	{
+		if (characterAnimation == null || !characterAnimation.HasAnimationEvent(CharacterAnimation.EventType.Hit))
+			yield return new WaitForSeconds(GetDefaultAttackHitTime());
+		else
+		{
+			yield return characterAnimation.WaitEvent(eventType);
+		}
 	}
 }

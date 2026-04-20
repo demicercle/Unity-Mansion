@@ -21,11 +21,11 @@ public static class ConsoleWrapper
 			character.Heal(amount);
 	}
 
-	[ConsoleMethod("restore", "")]
-	static public void Restore()
+	[ConsoleMethod("rest", "")]
+	static public void Rest()
 	{
 		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
-			character.Restore();
+			character.Rest();
 	}
 
 	[ConsoleMethod("use_all_actions", "")]

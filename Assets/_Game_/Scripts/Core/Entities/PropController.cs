@@ -8,6 +8,7 @@ public class PropController : MonoBehaviour
 	public System.Action<int> onInteract;
 	public void Interact()
 	{
+		Debug.Log(this + " Interact " + interactionCount);
 		interactionCount++;
 		onInteract?.Invoke(interactionCount);
 	}

@@ -43,7 +43,7 @@ public static class CharacterRoutines
 				// waypoint reach
 				if (character.CanInteract())
 				{
-					QueueRoutine(WaitCharacterInteract(character, clickedProp, bestWaypoint));
+					yield return character.StartCoroutine(WaitCharacterInteract(character, clickedProp, bestWaypoint));
 				}
 				else
 				{
@@ -115,7 +115,8 @@ public static class CharacterRoutines
 		else
 		{
 			character.AttackAction();
-			yield return new WaitForSeconds(character.GetLastAttackHitTime());//TODO wait attack duration
+			yield return character.WaitAnimationEvent(CharacterAnimation.EventType.Hit);
+			//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 			// apply attack damage, etc
 			target.TakeDamage(character.GetLastAttackDamage());
 		}
@@ -126,6 +127,7 @@ public static class CharacterRoutines
 	private static IEnumerator WaitCharacterInteract(CharacterController character, PropComponent prop, Waypoint waypoint = null)
 	{
 		Debug.Log("WaitCharacterInteract " + character + " > " + prop + " @ " + waypoint);
+		
 		if (waypoint != null)
 		{
 			var wpDir = waypoint.GetDirection();
@@ -135,15 +137,15 @@ public static class CharacterRoutines
 				character.LookDirection(wpDir, Time.deltaTime);
 				yield return null;
 			}
-
-			character.UseAction(prop.consumeAction);
-			
-			yield return new WaitForSeconds(prop.triggerDelay);
-
-			prop.GetController().Interact();
-		
-			yield return new WaitForSeconds(prop.animDuration);
 		}
+		
+		character.UseAction(prop.consumeAction);
+			
+		yield return new WaitForSeconds(prop.triggerDelay);
+
+		prop.GetController().Interact();
+		
+		yield return new WaitForSeconds(prop.animDuration);
 	}
 
 	private static IEnumerator WaitCharacterLookPosition(CharacterController character, Vector3 pos) => WaitCharacterLookDirection(character, (pos - character.GetPosition()).normalized);
@@ -271,6 +273,21 @@ public static class CharacterRoutines
 		character.RunAction();
 		yield return new WaitForSeconds(Consts.DefaultActionsSeconds);
 	}
+
+	/*private static IEnumerator WaitAnimationEvent(CharacterController character, CharacterAnimation.EventType eventType)
+	{
+		if (!character.TryGetAnimation(out var characterAnimation))
+		{
+			if (eventType == CharacterAnimation.EventType.Hit)
+				yield return new WaitForSeconds(character.GetDefaultAttackHitTime());
+			else
+				yield return new WaitForSeconds(Consts.DefaultActionsSeconds);
+		}
+		else
+		{
+			yield return characterAnimation.WaitEvent(eventType);
+		}
+	}*/
 
 	private static CoroutineScheduler coroutineScheduler;
 

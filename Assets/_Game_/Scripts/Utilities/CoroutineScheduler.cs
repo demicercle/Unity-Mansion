@@ -35,9 +35,11 @@ public class CoroutineScheduler : MonoBehaviour
 			if(debugLog) Debug.Log(this + " StartCoroutine: " + coroutines.Count);
 			lastCoroutine = StartCoroutine(coroutines[0]);
 			yield return lastCoroutine;
+			if(debugLog) Debug.Log(this + " ended, remove");
 			coroutines.RemoveAt(0);
 		}
-		
+
+		if (debugLog) Debug.Log(this + " Destroy");
 		Destroy(gameObject);
 	}
 	
@@ -47,13 +49,12 @@ public class CoroutineScheduler : MonoBehaviour
 	
 	private void Awake()
 	{
-		if(debugLog) Debug.Log(this + " Awake");
+		//if(debugLog) Debug.Log(this + " Awake");
 		_instances.Add(this);
 	}
 
 	private void OnDestroy()
 	{
-		if(debugLog) Debug.Log(this + " OnDestroy");
 		_instances.Remove(this);
 	}
 }

@@ -3,23 +3,15 @@ using UnityEngine.Events;
 
 public class AnimationEventHandler : MonoBehaviour
 {
-	public void Shoot()
-	{
-		
-	}
-	
-	public void Hit()
-	{
-		
-	}
-	
-	public void FootL()
-	{
-		
-	}
+	public UnityEvent onShoot = new();
+	public void Shoot() => onShoot.Invoke();
 
-	public void FootR()
-	{
-		
-	}
+	public UnityEvent onHit = new();
+	public void Hit() => onHit.Invoke();
+
+	public UnityEvent onFootL = new();
+	public void FootL() => onFootL.Invoke();
+
+	public UnityEvent onFootR = new();
+	public void FootR() => onFootR?.Invoke();
 }
