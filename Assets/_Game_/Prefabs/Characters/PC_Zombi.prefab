@@ -2426,6 +2426,10 @@ PrefabInstance:
       value: Attack
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.combatTrigger
+      value: Scream
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.getHitTrigger
       value: GetHit
       objectReference: {fileID: 0}
@@ -2665,6 +2669,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d4d5807a91944b4822368cfe984b1ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onFootL:
+    m_PersistentCalls:
+      m_Calls: []
+  onFootR:
+    m_PersistentCalls:
+      m_Calls: []
+  onWeaponSwitch:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &5757940252884301857 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400204, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}

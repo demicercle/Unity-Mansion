@@ -39,8 +39,11 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		[Header("Actions")]
 		public string runTrigger;
 		public string attackTrigger;
+		[Header("Reactions")]
 		public string deathTrigger;
 		public string getHitTrigger;
+		public string combatTrigger;
+		public string relaxTrigger;
 		[Header("RPG Anims")]
 		public string weapon;
 		public string triggerNumber;
@@ -76,7 +79,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	}
 #endif
 	
-	[Header("Animation Settings")]
+	[Space]
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 
@@ -95,16 +98,22 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	public Coroutine TrySwitchWeapons(bool value) => StartCoroutine(DoWaitSwitchWeapons(value));
 	private IEnumerator DoWaitSwitchWeapons(bool value)
 	{
-		if (!weaponsAnimation)
-		{
-			//Debug.Log(this + " DoWaitSwitchWeapons=" + value + " break ; no weaponsAnimation");
-			yield break;
-		}
-
-		if (weaponsAnimation.Switched() == value)
+		if (WeaponsSwitched() == value)
 		{
 			//if(value) Debug.Log(this + " DoWaitSwitchWeapons=" + value + " already switched");
 			//else Debug.Log(this + " DoWaitSwitchWeapons=" + value + " already sheated");
+			yield break;
+		}
+		
+		if ( (value && !string.IsNullOrEmpty(parameters.combatTrigger)) || (!value && !string.IsNullOrEmpty(parameters.relaxTrigger)) )
+		{
+			animator.SetTrigger(value ? parameters.combatTrigger : parameters.relaxTrigger);
+			yield return WaitEvent(EventType.WeaponSwitch);
+		}
+		
+		if (!weaponsAnimation)
+		{
+			//Debug.Log(this + " DoWaitSwitchWeapons=" + value + " break ; no weaponsAnimation");
 			yield break;
 		}
 		
@@ -129,10 +138,13 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		weaponsAnimation.ToggleSwitched();
 		Debug.Log(this + " Switched Weapons " + weaponsAnimation.Switched());
 	}
+
+	public bool WeaponsSwitched() => weaponSwitched;
 	
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
 	private EventType waitForEvent;
+	private bool weaponSwitched;
 	
 	private void Awake()
 	{
@@ -166,6 +178,19 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		activeInstances.Add(this);
 	}
 
+	private void Start()
+	{
+		TrySetFloat(parameters.velocityX, 0.0f);      
+		TrySetFloat(parameters.velocityZ, 0.0f);        
+		TrySetInteger(parameters.weapon, -1);
+		TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+		TrySetTrigger(parameters.trigger);
+		TrySetBool(parameters.moving, false);
+
+		TrySwitchWeapons(weaponSwitched);
+		if(waitForEvent != EventType.Undefined) Debug.LogError(this + " has waitForEvent on start " + waitForEvent);
+	}
+
 	private void OnDisable()
 	{
 		activeInstances.Remove(this);
@@ -188,7 +213,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		_characterAnimationEvent.onCharacterAnimationEvent -= OnCharacterAnimationEvent;
 	}
 
-	void OnCharacterAnimationEvent(EventType eventType)
+	private void OnCharacterAnimationEvent(EventType eventType)
 	{
 		if (waitForEvent != EventType.Undefined)
 		{
@@ -199,23 +224,22 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		}
 	}
 	
-	void OnTurnStarted()
-	{
-		//CanSeeAnyEnemyAround
-		UpdateWeapons();
-	}
-
-	void OnTurnEnded()
+	private void OnTurnStarted()
 	{
 		UpdateWeapons();
 	}
 
-	void OnRoomsChanged()
+	private void OnTurnEnded()
+	{
+		UpdateWeapons();
+	}
+
+	private void OnRoomsChanged()
 	{
 		Invoke("UpdateWeapons", Consts.DefaultActionsSeconds);
 	}
 
-	void UpdateWeapons()
+	private void UpdateWeapons()
 	{
 		CancelInvoke("UpdateWeapons");
 		//var seeEnemies = controller.CanSeeAnyEnemyAround();
@@ -223,38 +247,38 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		TrySwitchWeapons(controller.CanSeeAnyEnemyAround());
 	}
 
-	void OnHealed(float amount)
+	private void OnHealed(float amount)
 	{
 		GetController().FloatingText("Heal!");
 	}
 
-	void OnDamaged(float amount)
+	private void OnDamaged(float amount)
 	{
 		GetController().FloatingText(Mathf.CeilToInt(amount).ToString());
-		TrySetTriggerAnimators(parameters.getHitTrigger);
+		TrySetTrigger(parameters.getHitTrigger);
 	}
 
-	void OnKilled()
+	private void OnKilled()
 	{
-		TrySetTriggerAnimators(parameters.trigger);
-		TrySetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
-		TrySetTriggerAnimators(parameters.deathTrigger);
+		TrySetTrigger(parameters.trigger);
+		TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
+		TrySetTrigger(parameters.deathTrigger);
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 	}
 
-	void OnUseAction(CharacterAction actionType, object args = null)
+	private void OnUseAction(CharacterAction actionType, object args = null)
 	{
 		if (actionType == CharacterAction.RunAction)
 		{
-			TrySetTriggerAnimators(parameters.trigger);
-			TrySetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
-			TrySetTriggerAnimators(parameters.runTrigger);
+			TrySetTrigger(parameters.trigger);
+			TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
+			TrySetTrigger(parameters.runTrigger);
 			GetController().FloatingText("Run!");
 		}
 		
 		else if (actionType == CharacterAction.AttackAction)
 		{
-			TrySetTriggerAnimators(parameters.attackTrigger);
+			TrySetTrigger(parameters.attackTrigger);
 			//TrySetTriggerAnimators(parameters.trigger);
 			//TrySetIntegerAnimators(parameters.triggerNumber, (int)Animator)
 
@@ -268,17 +292,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		}
 	}
 	
-	private void Start()
-	{
-		TrySetFloatAnimators(parameters.velocityX, 0.0f);      
-		TrySetFloatAnimators(parameters.velocityZ, 0.0f);        
-		TrySetIntegerAnimators(parameters.weapon, -1);
-		TrySetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
-		TrySetTriggerAnimators(parameters.trigger);
-		TrySetBoolAnimators(parameters.moving, false);
-	}
-	
-	void LateUpdate()
+	private void LateUpdate()
 	{
 		var localVelocity = controller.GetVelocity();
 		var isMoving = controller.IsMoving();
@@ -287,13 +301,13 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			isMoving = true;
 			localVelocity = Vector3.forward * controller.GetAgent().GetMaxSpeed();
 		}
-		TrySetFloatAnimators(parameters.velocityX, 0);      
-		TrySetFloatAnimators(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
-		TrySetBoolAnimators(parameters.moving, isMoving);
+		TrySetFloat(parameters.velocityX, 0);      
+		TrySetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
+		TrySetBool(parameters.moving, isMoving);
 	}
 
 	// TODO keep for later?
-	bool TrySetFloatAnimators(string param, float value)
+	bool TrySetFloat(string param, float value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.enabled = true;
@@ -301,7 +315,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		return true;
 	}
 
-	bool TrySetBoolAnimators(string param, bool value)
+	bool TrySetBool(string param, bool value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.enabled = true;
@@ -309,7 +323,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		return true;
 	}
 
-	bool TrySetIntegerAnimators(string param, int value)
+	bool TrySetInteger(string param, int value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.enabled = true;
@@ -317,7 +331,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		return true;
 	}
 
-	bool TrySetTriggerAnimators(string param)
+	bool TrySetTrigger(string param)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.enabled = true;
@@ -325,7 +339,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		return true;
 	}
 
-	bool TryResetTriggerAnimators(string param)
+	bool TryResetTrigger(string param)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.ResetTrigger(param);

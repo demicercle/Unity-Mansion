@@ -22,6 +22,7 @@ UpdateWeapons on End movement
 add debug key to speed up time
 Zombi Scream = Weapon Switch true
 SelectNextCharacter after Mythos Phase should pick the closest character to camera
+UpdateWeapons on "AI Thinks"
 
 - RpgAnims 
 	> DrawWeapons

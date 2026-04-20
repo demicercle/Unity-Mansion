@@ -79,10 +79,10 @@ public class WeaponsAnimation : MonoBehaviour // TODO clean this sh*t
         animatorEvents.onWeaponSwitch.AddListener(WeaponSwitch); // TODO dispose it
 	}
 
-    private void OnDestroy()
+   /* private void OnDestroy()
     {
 	    Debug.Log(this + " OnDestroy");
-    }
+    }*/
 
     /// <summary>
     /// Add a callback to the coroutine queue to be executed in sequence.
