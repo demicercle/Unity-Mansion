@@ -24,6 +24,10 @@ Zombi Scream = Weapon Switch true
 SelectNextCharacter after Mythos Phase should pick the closest character to camera
 UpdateWeapons on "AI Thinks"
 
+		[o/	needed to go to "-10" in Execution Order Settings
+		
+		Si je suis venu chez toi, FadeScreen.cs, c'est qu'il y avait quelque chose à rajouter
+
 - RpgAnims 
 	> DrawWeapons
 	> SheathWeapons

@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -28,27 +30,43 @@ public class SceneLoader : MonoBehaviour
 
 	void Awake()
 	{
+		Debug.Log(this + " Awake");
 		activeInstances.Add(this);
 	}
-	
+
+	private void OnDisable()
+	{
+		Debug.Log(this + " OnDisable");
+		activeInstances.Remove(this);
+	}
+
 	private IEnumerator Start()
 	{
-		while (activeInstances[0] != this)
+		while (activeInstances.First() != this)
+		{
 			yield return null; // wait other scene loaders
+		}
 
 		if (!string.IsNullOrWhiteSpace(sceneToLoad))
 		{
-			var asyncOp = SceneManager.LoadSceneAsync(sceneToLoad, loadSceneMode);
-			while (!asyncOp.isDone)
+			if (SceneManager.GetSceneByName(sceneToLoad).isLoaded)
 			{
-				currentProgress = asyncOp.progress;
-				FadeScreen.SetLoadingProgress(currentProgress);
-				yield return null;
+				Debug.Log(this + " skips load scene: " + sceneToLoad + " because already loaded");
+			}
+			else
+			{
+				Debug.Log(this + " loads scene: " + sceneToLoad + " " + loadSceneMode);
+				var asyncOp = SceneManager.LoadSceneAsync(sceneToLoad, loadSceneMode);
+				while (!asyncOp.isDone)
+				{
+					currentProgress = asyncOp.progress;
+					FadeScreen.SetLoadingProgress(currentProgress);
+					yield return null;
+				}
 			}
 		}
-		else Debug.LogWarning(this + " cannot load empty scene name");
+		else Debug.LogWarning(this + " cannot loads empty scene name");
 
-		activeInstances.Remove(this);
 		enabled = false;
 	}
 }

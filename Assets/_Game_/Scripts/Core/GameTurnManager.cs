@@ -8,16 +8,7 @@ using UnityEngine.SceneManagement;
 public class GameTurnManager : MonoBehaviour
 {
 	static private GameTurnManager _instance;
-
-	static public GameTurnManager Instance
-	{
-		get
-		{
-			if(!_instance) _instance = Utils.FindFirstObject<GameTurnManager>();
-			if(!_instance) Debug.LogError("No GameTurnManager found!");
-			return _instance;
-		}
-	}
+	static public GameTurnManager Instance => _instance;
 
 	public System.Action turnStarted, turnEnded;
 	public System.Action sceneLoaded;
@@ -45,13 +36,21 @@ public class GameTurnManager : MonoBehaviour
 	}
 
 	public void SceneLoaded() => sceneLoaded?.Invoke();
+
+	void Awake()
+	{
+		_instance = this;
+		Debug.Log(this + " Awake");
+	} 
 	
 	private IEnumerator Start()
 	{
+		Debug.Log(this + " Starts");
+		
 		var cameraPivot = CameraPivot.Instance;
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
-		sceneLoader.SetSceneToLoad(nextLevelName, LoadSceneMode.Single);
+		sceneLoader.SetSceneToLoad(nextLevelName, LoadSceneMode.Additive);
 
 		do
 		{

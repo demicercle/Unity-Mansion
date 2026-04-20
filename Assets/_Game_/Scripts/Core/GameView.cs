@@ -17,8 +17,6 @@ public class GameView : MonoBehaviour
 	public const int CURSOR_RAYCAST_RESULT_NONE = 0;
 	public const int CURSOR_RAYCAST_RESULT_NAVIGATION = 1;
 	public const int CURSOR_RAYCAST_RESULT_CHARACTER = 2;
-	
-	override public string ToString() => "GameView";
 
 	
 	static private GameView instance;
@@ -48,7 +46,6 @@ public class GameView : MonoBehaviour
 
 		Debug.Log(this + " Awake");
 		instance = this;
-		name = ToString();
 		
 		gameTurnManager = GameTurnManager.Instance;
 		
@@ -311,7 +308,7 @@ public class GameView : MonoBehaviour
 		if (inputEnabled != value)
 		{
 			inputEnabled = value;
-			Debug.Log(this + " inputEnabled=" + inputEnabled);
+			Debug.Log(" inputEnabled=" + inputEnabled);
 			
 			if (inputEnabled)
 			{

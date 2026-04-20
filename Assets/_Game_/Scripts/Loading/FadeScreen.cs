@@ -1,44 +1,40 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//TODO [RequireComponent(typeof(Animator))]
 public class FadeScreen : MonoBehaviour
 {
-	static public bool IsFadingOrVisible => Instance.image.enabled;
+	[IngameDebugConsole.ConsoleMethod("fade_in","")]
+	public static Coroutine FadeIn(bool instant = false) => GetInstance().FadeCoroutine(true,instant);
 
-	static private float loadingProgress;
+	[IngameDebugConsole.ConsoleMethod("fade_out", "")]
+	public static Coroutine FadeOut(bool instant = false) => GetInstance().FadeCoroutine(false,instant);
 	public static void SetLoadingProgress(float progress)
 	{
 		loadingProgress = progress;
 	}
-	
-	static void Create()
+	public static void SetText(string text) => GetInstance().tmpTxt.text = text; //TODO: not in use
+	public static bool IsFadingOrVisible => GetInstance().image.enabled; //TODO: not in use
+	private static void Create()
 	{
 		if (instance) return;
-		Instantiate(Resources.Load<GameObject>("FadeScreen"));
+		Instantiate(Resources.Load<GameObject>("FadeScreen")); //TODO Pathing issue
 	}
 	
-	static private FadeScreen instance;
+	#region PRIVATE
+	private static FadeScreen instance;
+	private static float loadingProgress;
 
-	static public FadeScreen Instance
+	private static FadeScreen GetInstance()
 	{
-		get
-		{
-			if (!instance) instance = Utils.FindFirstObject<FadeScreen>();
-			if (!instance) Create();
-			if (!instance) Debug.LogError("No Fade Screen!");
-			return instance;
-		}
+		if (!instance) instance = Utils.FindFirstObject<FadeScreen>();
+		if (!instance) Create();
+		if (!instance) Debug.LogError("No Fade Screen!");
+		return instance;
 	}
-	
-	static public void SetText(string text) => Instance.tmpTxt.text = text;
-
-	[IngameDebugConsole.ConsoleMethod("fade_in","")]
-	static public Coroutine FadeIn(bool instant = false) => Instance.FadeCoroutine(true,instant);
-
-	[IngameDebugConsole.ConsoleMethod("fade_out", "")]
-	static public Coroutine FadeOut(bool instant = false) => Instance.FadeCoroutine(false,instant);
 	
 	[Min(0f)][SerializeField] private float duration = 1f;
 	[SerializeField] private Color color = Color.black;
@@ -75,7 +71,6 @@ public class FadeScreen : MonoBehaviour
 			image.color = Utils.ColorScale(color, Mathf.Lerp(fromAlpha, toAlpha, time / duration));
 			tmpTxt.enabled = true;
 			tmpTxt.color = Utils.ColorScale(tmpTxt.color, image.color.a);
-			progressSlider.gameObject.SetActive(loadingProgress > 0);
 			progressSlider.value = loadingProgress;
 			time += Time.unscaledDeltaTime;
 			yield return null;
@@ -88,4 +83,5 @@ public class FadeScreen : MonoBehaviour
 	{
 		instance = this;
 	}
+	#endregion
 }
