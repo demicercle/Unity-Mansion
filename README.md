@@ -5,24 +5,18 @@
 - Talk Action
 - DebugGUI Draw Character stats (movePoints, etc)
 	> Right Click editor selects character under mouse
-- "Forsaken" Startup scene
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
-- GameView.Routines
-- GameView.Cursor
 - change animation of characters during the mythos phase ("look around", "weapons ready", etcs)
 - OpportunityAttacks
-- "explore" command
 - tweaks! selection circle alpha when AI turns
 - assign action on release click
 - rename "NavUtility" into component "NavMeshRebuilder"
-		
+- GameView is GameInput
+
 AnimationEventHandler "onAnimEvent<EventType>" DoWaitEvent
 OpenDoor Animation
 UpdateWeapons on End movement
 add debug key to speed up time
-Zombi Scream = Weapon Switch true
-SelectNextCharacter after Mythos Phase should pick the closest character to camera
-UpdateWeapons on "AI Thinks"
 
 		[o/	needed to go to "-10" in Execution Order Settings
 		

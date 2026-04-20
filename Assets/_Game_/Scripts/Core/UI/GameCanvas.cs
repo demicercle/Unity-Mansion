@@ -23,51 +23,23 @@ public class GameCanvas : MonoBehaviour
 	}
 	
 	[Header("Viewport")]
-	public RectTransform viewportRect;
-	public RawImage viewportOverlay;
+	[SerializeField] private RectTransform viewportRect;
+	[SerializeField] private RawImage viewportOverlay;
 	[Header("Buttons")]
-	public Toggle controlPanel;
-	public Button button_actionRun;
-	public Button button_endTurn;
+	[SerializeField] private Toggle controlPanel;
+	[SerializeField] private Button button_actionRun;
+	[SerializeField] private Button button_endTurn;
 	[Header("Portraits")]
-	public CharacterPortrait[] portraits;
+	[SerializeField] private CharacterPortrait[] portraits;
 	[Space]
 	[Header("Animation")]
-	public Animator animator;
-	public float lerpSpeed;
-	public int endTurnLayer;
+	[SerializeField] private Animator animator;
+	[SerializeField] private float lerpSpeed;
+	[SerializeField] private int endTurnLayer;
 	[Space]
-	public TextReference floatingText;
-	
-
-	public void SetRenderTexture(RenderTexture rt)
-	{
-		if(viewportOverlay.texture && viewportOverlay.texture != rt) Destroy(viewportOverlay.texture);
-		viewportOverlay.texture = rt;
-		viewportOverlay.enabled = true;
-	}
+	[SerializeField] private TextReference floatingText;
 	
 	public bool mouseOverViewport { get; private set; }
-	
-	void Awake()
-	{
-		instance = this;
-		
-		var view = GameView.GetInstance();
-		button_endTurn.onClick.AddListener( () => view.ClickEndTurn());
-		button_actionRun.onClick.AddListener(() => view.ClickRunAction());
-
-		var mouseHandler = Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject);
-		mouseHandler.onMouseOverChanged += (mouseOver) => mouseOverViewport = mouseOver;
-		//#if UNITY_EDITOR
-		mouseHandler.onClicked += () => GameView.GetInstance().OnApplicationFocus(true);
-		//#endif
-		
-		if(portraits.Length == 0)
-			portraits = GetComponentsInChildren<CharacterPortrait>();
-		
-		floatingText.SetActive(false);
-	}
 
 	public TextReference FloatingText(Object obj, string label)
 	{
@@ -90,6 +62,13 @@ public class GameCanvas : MonoBehaviour
 	public TextReference FloatingText(Vector3 worldPosition, string label)
 	{
 		return floatingText.Duplicate().SetParent(transform).SetWorldPosition(worldPosition).SetText(label).SetActive();
+	}
+
+	public void SetOverlayRenderTexture(RenderTexture rt)
+	{
+		if(viewportOverlay.texture && viewportOverlay.texture != rt) Destroy(viewportOverlay.texture);
+		viewportOverlay.texture = rt;
+		viewportOverlay.enabled = true;
 	}
 	
 	public void UpdateUI(GameView view)
@@ -118,4 +97,26 @@ public class GameCanvas : MonoBehaviour
 				animator.SetLayerWeight(endTurnLayer, Mathf.Lerp(animator.GetLayerWeight(endTurnLayer), view.ShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed));
 		}
 	}
+	
+	#region PRIVATE
+	private void Awake()
+	{
+		instance = this;
+		
+		var view = GameView.GetInstance();
+		button_endTurn.onClick.AddListener( () => view.ClickEndTurn());
+		button_actionRun.onClick.AddListener(() => view.ClickRunAction());
+
+		var mouseHandler = Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject);
+		mouseHandler.onMouseOverChanged += (mouseOver) => mouseOverViewport = mouseOver;
+		//#if UNITY_EDITOR
+		mouseHandler.onClicked += () => GameView.GetInstance().OnApplicationFocus(true);
+		//#endif
+		
+		if(portraits.Length == 0)
+			portraits = GetComponentsInChildren<CharacterPortrait>();
+		
+		floatingText.SetActive(false);
+	}
+	#endregion
 }

@@ -100,11 +100,11 @@ MonoBehaviour:
   nextLevelName: Level_0
   firstTurnIsPlayer: 1
   skipInvisibleCharacters: 1
+  cameraStartZoom: 0.204
+  postLoadDuration: 1
   turnChangedSeconds: 2
   focusCharacterSeconds: 1
   noActionsSeconds: 3
   defaultActionsSeconds: 1
   cameraStartsSeconds: 0.5
   aiThinksSeconds: 0.5
-  currentTurn: 2
-  playerTurn: 1

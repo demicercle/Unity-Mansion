@@ -11,12 +11,11 @@ public class GameTurnManager : MonoBehaviour
 	static public GameTurnManager Instance => _instance;
 
 	public System.Action turnStarted, turnEnded;
-	public System.Action sceneLoaded;
 	
-	[Header("Turn Settings")]
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool firstTurnIsPlayer = true;
 	[SerializeField] private bool skipInvisibleCharacters = true;
+	[Range(0f,1f)] [SerializeField] private float cameraStartZoom = .5f;
 	
 	[Header("Timings")]
 	[SerializeField] private float postLoadDuration = 1.0f;
@@ -27,11 +26,11 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private  float cameraStartsSeconds = 0.15f;
 	[SerializeField] private  float aiThinksSeconds = 0.5f;
 	
-	[ReadOnly] [SerializeField] private int currentTurn;
-	[ReadOnly] [SerializeField] private bool playerTurn;
-	
-	public int GetCurrentTurn() => currentTurn;
 	public bool IsPlayerTurn() => playerTurn;
+
+	public int GetCurrentTurn() => currentTurn;
+
+	public bool IsLoading() => SceneLoader.IsLoadingScene || NavUtility.IsRebuildingAsync();
 
 	public void EndTurn()
 	{
@@ -43,6 +42,8 @@ public class GameTurnManager : MonoBehaviour
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
+	private int currentTurn;
+	private bool playerTurn;
 	
 	private void Awake()
 	{
@@ -59,15 +60,19 @@ public class GameTurnManager : MonoBehaviour
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
 		sceneLoader.SetSceneToLoad(nextLevelName, LoadSceneMode.Additive);
 
-		do // ensure that scenes are properly loaded
+		Debug.Log(this + " loading...");
+		
+		do // ensure that everything is properly loaded
 		{
 			do
 			{
 				yield return null;
-			} while (SceneLoader.IsLoadingScene);
+			} while (IsLoading());
 
 			yield return new WaitForSeconds(postLoadDuration);
-		} while (SceneLoader.IsLoadingScene);
+		} while (IsLoading());
+
+		Debug.Log(" loading complete");
 		
 		var levelCharacters = Utils.FindObjects<CharacterController>()
 			.OrderBy(c => c.name)
@@ -96,7 +101,7 @@ public class GameTurnManager : MonoBehaviour
 			if (currentTurn == 1) // first turn animation
 			{
 				yield return new WaitForSeconds(cameraStartsSeconds);
-				CameraPivot.Instance.SetStartZoom();
+				CameraPivot.Instance.SetZoom(cameraStartZoom);
 			}
 			else 
 			{
@@ -150,7 +155,7 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 	}
-
+	
 	private Coroutine YieldRoutines() => StartCoroutine(WaitRoutines());
 	private IEnumerator WaitRoutines()
 	{

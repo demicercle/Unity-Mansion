@@ -131,7 +131,7 @@ public class CharacterAgent : MonoBehaviour
 	{
 		StopMovement();
 		
-		Debug.Log(this + " SetAgentActive=" + value);
+//		Debug.Log(this + " SetAgentActive=" + value);
 		aiPath.enabled = value;
 		
 		if (aiPath.enabled)

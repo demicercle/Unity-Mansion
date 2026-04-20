@@ -107,4 +107,13 @@ public static class ConsoleWrapper
 	{
 		Time.timeScale = Mathf.Clamp(value, 0.1f, 10.0f);
 	}
+
+	[ConsoleMethod("explore", "")]
+	static public void _Explore(float value)
+	{
+		RoomTrigger.activeRooms.ForEach((room) =>
+		{
+			room.Explore();
+		});
+	}
 }

@@ -97,7 +97,7 @@ public class CharacterController : MonoBehaviour
 	{
 		if (RoomTrigger.activeRooms.Any(t => t.HasCharacter(this)))
 			return false;
-
+		
 		return true;
 	}
 	

@@ -16,6 +16,18 @@ public class RoomTrigger : MonoBehaviour
 	[SerializeField] private float ceilingHeight = 0.1f;
 	
 	private List<BoxCollider> ceilings = new List<BoxCollider>();
+
+	public void Explore()
+	{
+		if (!gameObject.activeSelf)
+		{
+			Debug.Log(this + " already explored");
+			return;
+		}
+		
+		gameObject.SetActive(false);
+		onChanged?.Invoke();
+	}
 	
 	public bool HasCharacter(CharacterController character)
 	{
@@ -46,7 +58,7 @@ public class RoomTrigger : MonoBehaviour
 		
 		foreach (var door in doors)
 		{
-			door.OnInteracted += OnDoorOpened;
+			door.OnInteracted += Explore;
 		}
 	}
 
@@ -56,19 +68,13 @@ public class RoomTrigger : MonoBehaviour
 		
 		foreach (var door in doors)
 		{
-			door.OnInteracted -= OnDoorOpened;
+			door.OnInteracted -= Explore;
 		}
 	}
 
 	private void Start()
 	{
 		CreateCeilings();
-	}
-
-	private void OnDoorOpened()
-	{
-		gameObject.SetActive(false);
-		onChanged?.Invoke();
 	}
 
 	private void CreateCeilings()

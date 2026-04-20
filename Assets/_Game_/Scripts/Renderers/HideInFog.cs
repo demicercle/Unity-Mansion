@@ -10,7 +10,6 @@ public class HideInFog : MonoBehaviour
 	[SerializeField] private List<Renderer> renderers = new List<Renderer>();
 	[SerializeField] private string defaultLayer, hiddenLayer;
 
-	private GameView gameView;
 	private Vector3 lastPosition, newPosition;
 	private int activeRoomsCount;
 	private bool isHidden;
@@ -28,13 +27,7 @@ public class HideInFog : MonoBehaviour
 
 	private void UpdateVisibility(bool force)
 	{
-		if(!gameView) gameView= GameView.GetInstance();
-		
-		if (character)
-		{
-			isHidden = !(character.InParty() || character.IsCharacterVisible());
-		}
-		
+		isHidden = character && !(character.InParty() || character.IsCharacterVisible());
 		renderers.ForEach(r => r.gameObject.layer = LayerMask.NameToLayer(isHidden ? hiddenLayer : defaultLayer));
 	}
 }

@@ -101,7 +101,6 @@ public class CameraPivot : MonoBehaviour
     [Min(0f)][SerializeField] private float worldHeight = 12f;
     [Space]
     [Header("Settings")]
-    [Range(0f,1f)] [SerializeField] private float startZoom = .5f;
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
     [SerializeField] private bool canRotateY = true;
     [SerializeField] private float clampedRotationAngle = 0.0f;
@@ -180,9 +179,9 @@ public class CameraPivot : MonoBehaviour
         UpdateAnimator();
     }
 
-    public void SetStartZoom() => SetZoom(startZoom);
     public void SetZoom(float value)
     {
+        Debug.Log(this + " SetZoom " + value);
         desiredZoom = Mathf.Clamp01(value);
         UpdateAnimator();
     }
