@@ -314,13 +314,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	public bool CanEndTurn() => !CharacterRoutines.HasCoroutines() && GetController().IsPlayerTurn();
 
-	public bool IsCharacterVisible(CharacterController character)
-	{
-		if (RoomTrigger.activeRooms.Any(t => t.HasCharacter(character)))
-			return false;
-
-		return true;
-	}
+	
 
 	public void ClickEndTurn()
 	{
@@ -343,7 +337,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			var otherCharacter = otherCharacterView.GetController();
 			if (otherCharacter.InParty()) continue;
 			
-			if (IsCharacterVisible(otherCharacter))
+			if (otherCharacter.IsCharacterVisible())
 				cameraPivot.Focus(otherCharacter);
 			else Debug.Log("Do not focus invisible character: " + otherCharacter);
 

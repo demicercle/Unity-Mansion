@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
 using UnityEngine.Events;
+using RPGCharacterAnims.Extensions;
 
 public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 {
@@ -24,6 +25,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	}
 	
 	[SerializeField] private Animator animator;
+	[SerializeField] private WeaponsAnimation weaponsAnimation;
 	
 	[System.Serializable]
 	public struct Parameters
@@ -113,7 +115,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			while (!eventTriggered)
 			{
 				yield return null;
-				if (Time.time - startTime > Consts.CharacterWaitEventTimeout)
+				if (Time.time - startTime > Consts.CharacterAnimTimeout)
 				{
 					Debug.LogWarning(this + " Timed out! " + eventType);
 					break;
@@ -128,7 +130,46 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		}
 	}
 	
+	public Coroutine TrySwitchWeapons(bool value) => StartCoroutine(DoWaitSwitchWeapons(value));
+	private IEnumerator DoWaitSwitchWeapons(bool value)
+	{
+		if (!weaponsAnimation)
+		{
+			//Debug.Log(this + " DoWaitSwitchWeapons=" + value + " break ; no weaponsAnimation");
+			yield break;
+		}
+
+		if (weaponsAnimation.Switched() == value)
+		{
+			//if(value) Debug.Log(this + " DoWaitSwitchWeapons=" + value + " already switched");
+			//else Debug.Log(this + " DoWaitSwitchWeapons=" + value + " already sheated");
+			yield break;
+		}
+		
+		//Debug.Log(this + " DoWaitSwitchWeapons=" + value);
+		
+		if (value)
+			weaponsAnimation.UnsheathWeapon(weaponsAnimation.rightWeapon, false);
+		else
+			weaponsAnimation.SheathWeapon(weaponsAnimation.rightWeapon, Weapon.Relax, false);
+
+		var startedTime = Time.time;
+		do
+		{
+			yield return null;
+			if (Time.time - startedTime > Consts.CharacterAnimTimeout)
+			{
+				Debug.LogWarning(this + " DoWaitSwitchWeapons timedout!");
+				yield break;
+			}
+		} while (weaponsAnimation.IsSwitchingWeapons());
+
+		weaponsAnimation.ToggleSwitched();
+		Debug.Log(this + " Switched Weapons " + weaponsAnimation.Switched());
+	}
+	
 	#region PRIVATE
+	
 	private void OnEnable()
 	{
 		activeInstances.Add(this);
@@ -150,6 +191,10 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		//controller.onMoved += () =>
 		//controller.onRotate += () =>
 		controller.onUseAction += OnUseAction;
+		controller.turnStarted += OnTurnStarted;
+		controller.turnEnded += OnTurnEnded;
+
+		RoomTrigger.onChanged += OnRoomsChanged;
 	}
 
 	private void OnDestroy()
@@ -161,6 +206,34 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		//controller.onMoved -= () =>
 		//controller.onRotate -= () =>
 		controller.onUseAction -= OnUseAction;
+		controller.turnStarted -= OnTurnStarted;
+		controller.turnEnded -= OnTurnEnded;
+		
+		RoomTrigger.onChanged -= OnRoomsChanged;
+	}
+
+	void OnTurnStarted()
+	{
+		//CanSeeAnyEnemyAround
+		UpdateWeapons();
+	}
+
+	void OnTurnEnded()
+	{
+		UpdateWeapons();
+	}
+
+	void OnRoomsChanged()
+	{
+		Invoke("UpdateWeapons", Consts.DefaultActionsSeconds);
+	}
+
+	void UpdateWeapons()
+	{
+		CancelInvoke("UpdateWeapons");
+		//var seeEnemies = controller.CanSeeAnyEnemyAround();
+		//Debug.Log(this + " TryRelax seeEnemies=" + seeEnemies);
+		TrySwitchWeapons(controller.CanSeeAnyEnemyAround());
 	}
 
 	void OnHealed(float amount)
@@ -195,6 +268,15 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		else if (actionType == CharacterAction.AttackAction)
 		{
 			TrySetTriggerAnimators(parameters.attackTrigger);
+			//TrySetTriggerAnimators(parameters.trigger);
+			//TrySetIntegerAnimators(parameters.triggerNumber, (int)Animator)
+
+			if (weaponsAnimation && !string.IsNullOrEmpty(parameters.trigger) && !string.IsNullOrWhiteSpace(parameters.triggerNumber))
+			{
+				animator.SetActionTrigger(weaponsAnimation.hasDualWeapons ? AnimatorTrigger.AttackDualTrigger : AnimatorTrigger.AttackTrigger,
+					1); // TODO attack number
+			}
+			
 			GetController().FloatingText("Take this!");
 		}
 	}
@@ -235,6 +317,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	bool TrySetFloatAnimators(string param, float value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.enabled = true;
 		animator.SetFloat(param, value);
 		return true;
 	}
@@ -242,6 +325,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	bool TrySetBoolAnimators(string param, bool value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.enabled = true;
 		animator.SetBool(param, value);
 		return true;
 	}
@@ -249,6 +333,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	bool TrySetIntegerAnimators(string param, int value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.enabled = true;
 		animator.SetInteger(param, value);
 		return true;
 	}
@@ -256,6 +341,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	bool TrySetTriggerAnimators(string param)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
+		animator.enabled = true;
 		animator.SetTrigger(param);
 		return true;
 	}
@@ -273,3 +359,4 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	//void SetTrigger(int param) => AnimatorUtils.TrySetTrigger(param, animators);
 	#endregion
 }
+

@@ -20,10 +20,12 @@ public class CharacterController : MonoBehaviour
 	public event System.Action onMoved;
 	public event System.Action onRotate;
 	public event System.Action<CharacterAction, object> onUseAction;
+	public event System.Action turnStarted;
+	public event System.Action turnEnded;
 	
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainBase> aiBrains =  new List<AIBrainBase>();
-	[SerializeField] private float visionRange = 2.0f;
+	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f;
 	[Min(0f)] public float defaultAttackHitTime = 1f;
 	public float GetVisionRange() => visionRange;
 	public List<AIBrainBase> GetBrains() => aiBrains.ToList();
@@ -77,6 +79,7 @@ public class CharacterController : MonoBehaviour
 	public void EndTurn()
 	{
 		StopAgent();
+		turnEnded?.Invoke();
 	}
 
 	public void Rest()
@@ -90,7 +93,23 @@ public class CharacterController : MonoBehaviour
 		Rest();
 		GetAgent().ClearDestination();
 		if (turn >= 0) currentTurn = turn;
+		turnStarted?.Invoke();
 	}
+
+	public bool IsCharacterVisible()
+	{
+		if (RoomTrigger.activeRooms.Any(t => t.HasCharacter(this)))
+			return false;
+
+		return true;
+	}
+	
+	public bool CanSeeAnyEnemyAround() => instances.FirstOrDefault((other) =>
+	{
+		if (!IsEnemyTo(other.GetCurrentFaction())) return false;
+		if (!other.IsCharacterVisible()) return false;
+		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
+	});
 
 
 	public int GetRemaingActions() // TODO GD
@@ -122,6 +141,14 @@ public class CharacterController : MonoBehaviour
 	public CharacterFaction GetCurrentFaction() => currentFaction;
 	public bool IsPlayer() => GetCurrentFaction() == CharacterFaction.Player;
 	public bool IsEnemyToPlayer(CharacterController other = null) => characterData.faction == CharacterFaction.Enemy;
+
+	public bool IsEnemyTo(CharacterFaction faction)
+	{
+		if (currentFaction == CharacterFaction.Enemy)
+			return faction != CharacterFaction.Enemy;
+		else
+			return faction == CharacterFaction.Enemy;
+	}
 	
 	public bool InParty() => partyIndex >= 0;
 	public int GetPartyIndex() => partyIndex;
@@ -428,6 +455,9 @@ public class CharacterController : MonoBehaviour
 		{
 			b?.DrawGizmos(this);
 		});
+
+		Gizmos.color = Color.magenta;
+		Utils.DrawGizmosCircle(transform.position, Vector3.up, visionRange);
 	}
 
 

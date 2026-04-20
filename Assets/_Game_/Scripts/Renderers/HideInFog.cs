@@ -32,7 +32,7 @@ public class HideInFog : MonoBehaviour
 		
 		if (character)
 		{
-			isHidden = !(character.InParty() || gameView.IsCharacterVisible(character));
+			isHidden = !(character.InParty() || character.IsCharacterVisible());
 		}
 		
 		renderers.ForEach(r => r.gameObject.layer = LayerMask.NameToLayer(isHidden ? hiddenLayer : defaultLayer));

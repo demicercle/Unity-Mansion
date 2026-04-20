@@ -14,4 +14,9 @@ public class AnimationEventHandler : MonoBehaviour
 
 	public UnityEvent onFootR = new();
 	public void FootR() => onFootR?.Invoke();
+
+	public UnityEvent onWeaponSwitch = new();
+	public void WeaponSwitch() => onWeaponSwitch?.Invoke();
+	
+	public void DisableAnimator() => GetComponent<Animator>().enabled = false;
 }

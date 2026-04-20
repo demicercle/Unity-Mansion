@@ -63,6 +63,11 @@ public static class CharacterRoutines
 	{
 		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
 
+		if (attacker.TryGetAnimation(out var characterAnim))
+		{
+			yield return characterAnim.TrySwitchWeapons(true);
+		}
+
 		var atAttackRange = false;
 		while (!atAttackRange)
 		{

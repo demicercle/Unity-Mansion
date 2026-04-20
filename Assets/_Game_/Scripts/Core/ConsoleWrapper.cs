@@ -14,6 +14,23 @@ public static class ConsoleWrapper
 			character.TakeDamage(amount);
 	}
 
+	[ConsoleMethod("kill_all", "")]
+	static public void KillAll(float range)
+	{
+		var center = CameraPivot.Instance.GetFocusPosition();
+		foreach (var character in CharacterController.instances)
+		{
+			if (!character.IsDead() && character.IsEnemyToPlayer())
+			{
+				var dist = Vector3.Distance(character.GetPosition(), center);
+				if (dist <= range)
+				{
+					character.TryKill();
+				}
+			}
+		}
+	}
+
 	[ConsoleMethod("heal", "")]
 	static public void Heal(int amount)
 	{
@@ -79,7 +96,7 @@ public static class ConsoleWrapper
 		Application.Quit();
 	}
 
-	[ConsoleMethod("reset_game", "")]
+	[ConsoleMethod("hard_reset", "")]
 	static public void ResetGame()
 	{
 		SceneManager.LoadScene(0);

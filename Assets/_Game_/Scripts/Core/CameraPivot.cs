@@ -136,7 +136,10 @@ public class CameraPivot : MonoBehaviour
     [SerializeField] private Transform rotationPivot;
     
     #region PUBLIC
-
+    public Vector3 GetFocusPosition()
+    {
+        return focusPosition;
+    }
     public Bounds GetWorldBounds() => worldBounds;
     public void SetWorldBounds(Bounds bounds, bool updatePosition = true)
     {
@@ -316,4 +319,6 @@ public class CameraPivot : MonoBehaviour
     }
     
     #endregion
+
+    
 }

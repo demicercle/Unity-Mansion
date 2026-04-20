@@ -2133,6 +2133,10 @@ PrefabInstance:
       propertyPath: moveSpeed
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: visionRange
+      value: 7.96
+      objectReference: {fileID: 0}
     - target: {fileID: 1837400758454604685, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_Name
       value: PC_Player Variant
@@ -2213,6 +2217,10 @@ PrefabInstance:
       propertyPath: movePoints
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: weaponsAnimation
+      value: 
+      objectReference: {fileID: 6536868086427863390}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.moving
       value: Moving
@@ -2454,6 +2462,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1264564751954845138}
+    - targetCorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6536868086427863390}
   m_SourcePrefab: {fileID: 100100000, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
 --- !u!1 &5757940252883871167 stripped
 GameObject:
@@ -2502,6 +2513,26 @@ MonoBehaviour:
   onFootR:
     m_PersistentCalls:
       m_Calls: []
+  onWeaponSwitch:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &6536868086427863390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5757940252883871167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3765089aabc3449390b6aa844cae9ec2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponsAnimation
+  leftWeapon: 0
+  rightWeapon: 0
+  debugWalkthrough: 0
+  debugDoWeaponSwitch: 0
+  debugSetAnimator: 0
 --- !u!4 &5757940252884301857 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400204, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}

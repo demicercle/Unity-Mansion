@@ -7,6 +7,8 @@ using UnityEngine;
 public class RoomTrigger : MonoBehaviour
 {
 	static public List<RoomTrigger> activeRooms = new List<RoomTrigger>();
+
+	static public System.Action onChanged;
 	
 	[Header("Settings")]
 	[SerializeField] private List<PropComponent> doors = new List<PropComponent>();
@@ -66,6 +68,7 @@ public class RoomTrigger : MonoBehaviour
 	void OnDoorOpened()
 	{
 		gameObject.SetActive(false);
+		onChanged?.Invoke();
 	}
 
 	void CreateCeilings()
