@@ -92,7 +92,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 
 	void CameraRotate(bool left)
 	{
-		if(hasFocus)cameraPivot.Rotate(left ? -1 : 1);
+		if(hasFocus)cameraPivot.ClampedRotation(left ? -1 : 1);
 	}
 	
 	void CameraZoom(float delta)
@@ -797,7 +797,9 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		mouseDown = false;
 	}
 
-	private bool mouseDown;
+	[ReadOnly] [SerializeField] private bool mouseDown, orbitWithInputs;
+	[ReadOnly][SerializeField] private Vector2 orbitAxis;
+	[ReadOnly][SerializeField] private Vector2 orbitDelta;
 	private void Update()
 	{
 		if (Application.isEditor)
@@ -831,7 +833,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
-				cameraPivot.MoveFocus(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime, Space.Self);
+				cameraPivot.MoveFromInput(inputSystem.Player.Move.ReadValue<Vector2>() * Time.unscaledDeltaTime);
 			}
 
 			if (inputSystem.Player.MiddleClick.WasReleasedThisFrame())
@@ -844,41 +846,56 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 				middleClickMousePosition = mousePosition;
 			}
 
-			if (holdMiddleClick)
+			orbitAxis = inputSystem.Player.Orbit.ReadValue<Vector2>();
+			orbitWithInputs = orbitAxis.magnitude >= Consts.MinMagnitude;
+			
+			if (orbitWithInputs)
 			{
-				mouseHasMoved = true;
-				//cameraPivot.PanWithMouse(mousePosition.y, Time.unscaledDeltaTime);
-				cameraPivot.MoveFocus((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime, Space.World);
-
-				// orbit camera
-				float deltaX = (middleClickMousePosition - mousePosition).x;
-				float deltaY = (middleClickMousePosition - mousePosition).y;
-				if (deltaX + deltaY != 0)
+				orbitDelta = orbitAxis;
+				orbitDelta *= Time.unscaledDeltaTime;
+				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, true);
+			}
+			else if (holdMiddleClick)
+			{
+				if (cameraPivot.OrbitFromScreenCenter())
 				{
-					if (cameraPivot.OrbitCanZoom())
-					{
+					orbitDelta.x = Screen.width / 2f - mousePosition.x;
+					orbitDelta.y = Screen.height / 2f - mousePosition.y;
+				}
+				else
+				{
+					orbitDelta.x = (middleClickMousePosition - mousePosition).x;
+					orbitDelta.y = (middleClickMousePosition - mousePosition).y;
+				}
+				
+				if (cameraPivot.OrbitCanZoom())
+				{
 //						Debug.Log(this + " try orbit " + deltaX + " " + deltaY);
-						if (Mathf.Abs(deltaY) > Mathf.Abs(deltaX))
-						{
-							deltaX = 0;
-							deltaY = (lastMousePosition - mousePosition).y;
-						}
-						else
-						{
-							deltaY = 0;
-						}
+					if (Mathf.Abs(orbitDelta.x) > Mathf.Abs(orbitDelta.y))
+					{
+						orbitDelta.x = 0;
+						orbitDelta.y = (lastMousePosition - mousePosition).y;
 					}
 					else
 					{
-						deltaY = (lastMousePosition - mousePosition).y;
+						orbitDelta.y = 0;
 					}
-					
-					cameraPivot.Orbit( deltaX / Screen.width, deltaY / Screen.height);
 				}
+				else
+				{
+					orbitDelta.y = (lastMousePosition - mousePosition).y;
+				}
+				
+				orbitDelta.x /= Screen.width;
+				orbitDelta.y /= Screen.height;
+				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, false);
+				
+				mouseHasMoved = true;
+				cameraPivot.OrbitDrag((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime);
 			}
 			else
 			{
-				cameraPivot.PanWithMouse(mousePosition, Time.unscaledDeltaTime);
+				cameraPivot.TryPanWithMouse(mousePosition, Time.unscaledDeltaTime);
 			}
 		}
 		else

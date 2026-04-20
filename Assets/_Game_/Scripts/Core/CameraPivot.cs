@@ -100,21 +100,22 @@ public class CameraPivot : MonoBehaviour
     [SerializeField] private float worldY = 0f;
     [Min(0f)][SerializeField] private float worldHeight = 12f;
     [Space]
-    [Header("Scene Settings")]
+    [Header("Settings")]
     [Range(0f,1f)] [SerializeField] private float startZoom = .5f;
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
     [SerializeField] private bool canRotateY = true;
-    [SerializeField] private float rotationStepAngle = 0.0f;
+    [SerializeField] private float clampedRotationAngle = 0.0f;
+    [SerializeField] private bool orbitFromScreenCenter = true; // TODO in Settings
     [Space]
-    [Header("User Settings")]
-    [SerializeField] private float lerpSpeed = 1.5f;
-    [SerializeField] private float inputSpeed = 10.0f;
-    [SerializeField] private float panSpeed = 8.0f;
-    [SerializeField] private int screenPadding = 2;
-    [SerializeField] private float zoomSpeed = 1.0f;
-    [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
-    [SerializeField] private Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
-    [SerializeField] private float orbitDrag = 0.1f;
+    [Header("ReadOnly")]
+    [ReadOnly] [SerializeField] private float lerpSpeed = 1.5f;
+    [ReadOnly] [SerializeField] private float inputSpeed = 10.0f;
+    [ReadOnly] [SerializeField] private float panSpeed = 8.0f;
+    [ReadOnly] [SerializeField] private int screenPadding = 2;
+    [ReadOnly] [SerializeField] private float zoomSpeed = 1.0f;
+    [ReadOnly] [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
+    [ReadOnly] [SerializeField] private Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
+    [ReadOnly] [SerializeField] private float orbitDrag = 0.1f;
     
     void UpdateSettings()
     {
@@ -156,20 +157,18 @@ public class CameraPivot : MonoBehaviour
         lastTimeFocused = Time.realtimeSinceStartup;
     }
     
-    public void MoveFocus(Vector2 readValue, Space spaceTo)
+    public void OrbitDrag(Vector2 readValue)
     {
-        if (spaceTo == Space.World)
-        {
-            focusPosition.x += readValue.x / Screen.width * orbitDrag;
-            focusPosition.z += readValue.y / Screen.height * orbitDrag;
-        }
-        else
-        {
-            var world = new Vector3(readValue.x, 0, readValue.y);
-            world = Quaternion.Euler(0, desiredYaw, 0) * world;
-            focusPosition.x += world.x * inputSpeed;
-            focusPosition.z += world.z * inputSpeed;
-        }
+        focusPosition.x += readValue.x / Screen.width * orbitDrag;
+        focusPosition.z += readValue.y / Screen.height * orbitDrag;
+    }
+
+    public void MoveFromInput(Vector2 readValue)
+    {
+        var world = new Vector3(readValue.x, 0, readValue.y);
+        world = Quaternion.Euler(0, desiredYaw, 0) * world;
+        focusPosition.x += world.x * inputSpeed;
+        focusPosition.z += world.z * inputSpeed;
     }
 
     public void Zoom(float delta)
@@ -185,26 +184,28 @@ public class CameraPivot : MonoBehaviour
         UpdateAnimator();
     }
 
-    public void Rotate(float delta)
+    public void ClampedRotation(float delta)
     {
         //Debug.LogWarning("do nothing!");
         if (!canRotateY) return;
-        desiredYaw = (desiredYaw - rotationStepAngle * delta);
+        desiredYaw = (desiredYaw - clampedRotationAngle * delta);
     }
 
     public bool OrbitCanZoom() => orbitSpeed.y > 0;
 
+    public bool OrbitFromScreenCenter() => orbitFromScreenCenter;
+
     //public void Orbit(Vector2 delta) => Orbit(delta.x, delta.y);
-    public void Orbit(float deltaX, float deltaY)
+    public void Orbit(float deltaX, float deltaY, bool scaleWithInputs)
     {
         if (!canRotateY) return;
-        desiredYaw += deltaX * orbitSpeed.x;
+        desiredYaw += deltaX * orbitSpeed.x * (scaleWithInputs ? inputSpeed * Mathf.PI : 1.0f);
         Zoom(deltaY * orbitSpeed.y);
         // desiredYaw = Mathf.Clamp(-180)
     }
 
    // public void PanWithMouse(float mouseY, float scale) => PanWithMouse(new Vector2(Screen.width / 2f, mouseY), scale);
-    public bool PanWithMouse(Vector2 mousePosition, float scale)
+    public bool TryPanWithMouse(Vector2 mousePosition, float scale)
     {
         if (Time.realtimeSinceStartup - lastTimeFocused < CameraSettings.DefaultSettings.cameraFocusLockTime) return false;
         if (mousePosition.x < 0 || mousePosition.y < 0) return false;
