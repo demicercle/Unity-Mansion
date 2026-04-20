@@ -9,8 +9,12 @@ public class ColorSettings : ScriptableObject
 	{
 		get
 		{
-			if(!defaultSettingsInstance) defaultSettingsInstance = Resources.Load<ColorSettings>(Consts.ResPath_Settings);
-			if(!defaultSettingsInstance) defaultSettingsInstance = CreateInstance<ColorSettings>();
+			if(!defaultSettingsInstance) defaultSettingsInstance = Resources.LoadAll<ColorSettings>(Consts.ResPath_Settings).FirstOrDefault();
+			if (!defaultSettingsInstance)
+			{
+				Debug.LogWarning("no ColorSettings found, create new one");
+				defaultSettingsInstance = CreateInstance<ColorSettings>();
+			}
 			return defaultSettingsInstance;
 		}
 	}

@@ -5,8 +5,6 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class CircleRenderer : MonoBehaviour
 {
-    
-    
     [Range(0f, 1f)] public float progress = 1.0f;
     public int pointsCount;
     public Vector3 rotation;

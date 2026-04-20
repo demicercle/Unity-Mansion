@@ -9,8 +9,8 @@
 	public const  string LAYER_CHARACTER = "Character";
 	public const  string LAYER_IGNORE = "Ignore Raycast";
 
-	public const string ResPath_Settings = "Settings";
-	public const string ResPath_Cursors = "Cursors";
+	public const string ResPath_Settings = "Settings/";
+	public const string ResPath_Cursors = "Cursors/";
 
 	public const float MinTimeDuration = 0.25f;
 	public const float MinMagnitude = 0.01f;

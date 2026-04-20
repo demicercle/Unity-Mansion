@@ -791,15 +791,15 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 	
 	private void LateUpdate()
 	{
-		canvas.UpdateUI(this);
+		canvas.UpdateUI(this); //TODO remove
 		lastMousePosition = mousePosition;
 		mouseHasMoved = false;
+		mouseDown = false;
 	}
 
 	private bool mouseDown;
 	private void Update()
 	{
-		mouseDown = inputSystem.UI.Click.IsPressed();
 		if (Application.isEditor)
 		{
 			if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
@@ -812,9 +812,16 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 				OnApplicationFocus(true);
 			}
 		}
+
+		if (DebugGUI.IsEnabled)
+		{
+			OnApplicationFocus(false);
+		}
 		
 		if (hasFocus)
 		{
+			mouseDown = inputSystem.UI.Click.IsPressed();
+			
 			SetInputEnabled(!isLoadingScenes && !IngameDebugConsole.DebugLogManager.Instance.IsLogWindowVisible);
 			
 			Cursor.lockState = CursorLockMode.Confined;
@@ -850,7 +857,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 				{
 					if (cameraPivot.OrbitCanZoom())
 					{
-						Debug.Log(this + " try orbit " + deltaX + " " + deltaY);
+//						Debug.Log(this + " try orbit " + deltaX + " " + deltaY);
 						if (Mathf.Abs(deltaY) > Mathf.Abs(deltaX))
 						{
 							deltaX = 0;
@@ -866,7 +873,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 						deltaY = (lastMousePosition - mousePosition).y;
 					}
 					
-					cameraPivot.Orbit( deltaX * Time.unscaledDeltaTime, deltaY * Time.unscaledDeltaTime);
+					cameraPivot.Orbit( deltaX / Screen.width, deltaY / Screen.height);
 				}
 			}
 			else

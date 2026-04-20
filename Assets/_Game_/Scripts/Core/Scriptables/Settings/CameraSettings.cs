@@ -11,8 +11,12 @@ public class CameraSettings : ScriptableObject, IDebugGUI
 	{
 		get
 		{
-			if(!defaultSettingsInstance) defaultSettingsInstance = Resources.Load<CameraSettings>(Consts.ResPath_Settings);
-			if(!defaultSettingsInstance) defaultSettingsInstance = CreateInstance<CameraSettings>();
+			if(!defaultSettingsInstance) defaultSettingsInstance = Resources.LoadAll<CameraSettings>(Consts.ResPath_Settings).FirstOrDefault();
+			if (!defaultSettingsInstance)
+			{
+				Debug.LogWarning("no CameraSettings found, create new one");
+				defaultSettingsInstance = CreateInstance<CameraSettings>();
+			}
 			return defaultSettingsInstance;
 		}
 	}
