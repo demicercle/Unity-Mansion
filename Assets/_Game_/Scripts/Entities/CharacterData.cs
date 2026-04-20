@@ -21,8 +21,8 @@ public class CharacterData : ScriptableObject
 	public CharacterFaction faction;
 	
 	[Header("Actions")]
-	public int maxActions;
-	public float maxMovePoints;
+	public int maxActions = 1;
+	public float maxMovePoints = 3.0f;
 	public float runActionExtraMovePoints = 3.0f;
 	public bool noAttack;
 	[Range(0f, 10f)] public float attackRange = 0.0f;
@@ -30,5 +30,5 @@ public class CharacterData : ScriptableObject
 	[Header("Health")] 
 	[Range(1, 99)] public int maxHealth;
 	public float lastAttackDamage;
-	public float lastAttackHitTime;
+	[Min(0f)]public float lastAttackHitTime = 1f;
 }

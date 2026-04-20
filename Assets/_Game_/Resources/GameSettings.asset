@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c4ae8488c7734473bfad038d13e7dd95, type: 3}
-  m_Name: ColorSettings
+  m_Name: GameSettings
   m_EditorClassIdentifier: Assembly-CSharp::ColorSettings
   factionColors:
   - {r: 0, g: 0, b: 1, a: 1}
@@ -20,7 +20,7 @@ MonoBehaviour:
   disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   deadColor: {r: 0, g: 0, b: 0, a: 1}
   whenCameraStarts: 0.25
-  whenTurnChanged: 4
-  whenFocusNextCharacter: 3
-  whenAIThinks: 1.5
+  whenTurnChanged: 3
+  whenFocusNextCharacter: 2.5
+  whenAIThinks: 0.5
   defaultActionSeconds: 3

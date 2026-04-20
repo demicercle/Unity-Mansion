@@ -41,13 +41,7 @@ public class AIBrain_Patrol : AIBrainData
 				if (!character.WaypointReached(lastWaypointToReach))
 				{
 					Debug.Log(this + " Move to patrol waypoint " + lastWaypointToReach);
-					gameView.MoveCharacterToWaypoint(character, lastWaypointToReach, () =>
-					{
-						if (!character.HasActions() && character.CanUseRunAction() && canUseRunAction)
-						{
-							gameView.AssignRunAction(character);
-						}
-					}); // patrol move
+					gameView.MoveCharacterToWaypoint(character, lastWaypointToReach, canUseRunAction);
 				}
 				
 				else
@@ -64,13 +58,19 @@ public class AIBrain_Patrol : AIBrainData
 					if (wpIndex >= waypoints.Count)
 					{
 						Debug.Log(character + " reached last waypoint " + wpIndex);
-						yield break;
+						//yield break;
 					}
 					else
 					{
 						lastWaypointToReach = waypoints[wpIndex];
+						Debug.Log(character + " picked next waypoint " + wpIndex + " " + lastWaypointToReach);
 						DebugDrawer.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), patrolRoute.color, 1.0f);
 					}
+
+					yield return new WaitForSeconds(GameSettings.GetAIThinksSeconds());
+					
+					character.UseAllActions();
+					yield break;
 				}
 			}
 

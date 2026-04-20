@@ -35,12 +35,12 @@ public static class ConsoleWrapper
 		if (value == 1)
 		{
 			if (CharacterSelection.TryGetSelectedCharacter(out CharacterController partyChar))
-				UseCharacterAllActions(partyChar);
+				partyChar.UseAllActions();
 		}
 		else
 		{
 			foreach(var partyChar in CharacterController.GetPartyCharacters())
-				UseCharacterAllActions(partyChar);
+				partyChar.UseAllActions();
 		}
 	}
 
@@ -60,11 +60,6 @@ public static class ConsoleWrapper
 		}
 	}
 
-	static void UseCharacterAllActions(CharacterController partyChar)
-	{
-		partyChar.ConsumeMovePoints(partyChar.GetRemainingMovePoints());
-		partyChar.UseAction(CharacterAction.None);
-	}
 
 	[ConsoleMethod("debug_draw", "")]
 	static public void DebugDraw(int value)

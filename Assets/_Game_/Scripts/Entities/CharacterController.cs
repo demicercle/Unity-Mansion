@@ -107,6 +107,12 @@ public class CharacterController : MonoBehaviour
 		onUseAction?.Invoke(actionType, param);
 		statsChanged?.Invoke();
 	}
+	
+	public void UseAllActions()
+	{
+		ConsumeMovePoints(GetRemainingMovePoints());
+		UseAction(CharacterAction.None);
+	}
 
 	public CharacterFaction GetCurrentFaction() => currentFaction;
 	public bool IsPlayer() => GetCurrentFaction() == CharacterFaction.Player;

@@ -24,9 +24,11 @@
 x rename "ColorSettings" in "GameSettings" (not user modifiable)
 - increase time during AI Think coroutine
 - camera render target not working anymore
-- change animation of characters during the mythos phase ("look around", "weapons ready", etc)
+- change animation of characters during the mythos phase ("look around", "weapons ready", etcs)
 
-- RPGAnims 
+- DefaultAnims
+
+- RpgAnims 
 	> DrawWeapons
 	> SheathWeapons
 	> Attack

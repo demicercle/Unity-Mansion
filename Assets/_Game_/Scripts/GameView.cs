@@ -401,6 +401,12 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		}
 	}
 
+	public IEnumerator WaitQueueRoutine(IEnumerator routine)
+	{
+		QueueRoutine(routine);
+		while(HasCoroutines()) yield return null;
+	}
+	
 	public void QueueRoutine(IEnumerator coroutine)
 	{
 //		Debug.Log("QueueRoutine: " + coroutines.Count);
@@ -511,7 +517,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		}
 	}
 
-	public void MoveCharacterToWaypoint(CharacterController character, Waypoint waypoint,
+	/*public void MoveCharacterToWaypoint(CharacterController character, Waypoint waypoint,
 		System.Action onComplete = null)
 	{
 		QueueRoutine(WaitCharacterMoved(character, waypoint.GetPosition(), () =>
@@ -521,6 +527,37 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 				QueueRoutine(WaitCharacterLookDirection(character, waypoint.GetDirection()));
 			}
 		}));
+	}*/
+
+	public void MoveCharacterToWaypoint(CharacterController character, Waypoint waypoint, bool canUseRunAction)
+	{
+		QueueRoutine(WaitMoveCharacterToWaypoint(character, waypoint, canUseRunAction));
+	}
+	
+	private IEnumerator WaitMoveCharacterToWaypoint(CharacterController character, Waypoint waypoint,
+		bool canUseRunAction)
+	{
+		Debug.Log(this + " WaitMoveCharacterToWaypoint " + character + " " + waypoint + " canUseRunAction=" + canUseRunAction);
+		yield return StartCoroutine(WaitCharacterMoved(character, waypoint.GetPosition()));
+		
+		if (character.WaypointReached(waypoint))
+		{
+			yield return StartCoroutine(WaitCharacterLookDirection(character, waypoint.GetDirection()));
+		}
+		else
+		{
+			if (canUseRunAction)
+			{
+				if (!character.HasActions() && character.CanUseRunAction())
+				{
+					yield return StartCoroutine(WaitRunAction(character));
+					yield return WaitMoveCharacterToWaypoint(character, waypoint, false);//TODO: multiple run actions??
+					yield break;
+				}
+			}
+		}
+		
+		Debug.Log(character + " did not reach waypoint");
 	}
 
 	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null)

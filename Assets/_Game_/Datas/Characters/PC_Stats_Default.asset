@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 262c467057e34eb994a448ba38a6ab6c, type: 3}
-  m_Name: PC_Default_Stats
+  m_Name: PC_Stats_Default
   m_EditorClassIdentifier: 
   displayName: ???
   portraitTexture: {fileID: 2800000, guid: 99bcc48f1d0bf744783459facaf8bd06, type: 3}

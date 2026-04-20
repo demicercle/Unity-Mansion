@@ -12,7 +12,12 @@ public abstract class AIBrainData : ScriptableObject
 	
 	public AIBrainData Clone() => Instantiate(this);
 
-	public void StartCoroutine(IEnumerator routine) => gameView.QueueRoutine(routine);
+	/*public Coroutine WaitForRoutines() => gameView.StartCoroutine(DoWaitForRoutines());
+	
+	IEnumerator DoWaitForRoutines()
+	{
+		while(gameView.HasCoroutines()) yield return null;
+	}*/
 
 	virtual public int GetPriority(CharacterController character) => defaultPriority;
 
