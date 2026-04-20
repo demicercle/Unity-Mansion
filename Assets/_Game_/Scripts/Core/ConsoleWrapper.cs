@@ -101,4 +101,10 @@ public static class ConsoleWrapper
 	{
 		SceneManager.LoadScene(0);
 	}
+
+	[ConsoleMethod("dtset", "")]
+	static public void _DtSet(float value)
+	{
+		Time.timeScale = Mathf.Clamp(value, 0.1f, 10.0f);
+	}
 }
