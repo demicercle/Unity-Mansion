@@ -14,6 +14,14 @@
 - GameView is GameInput
 - if no actions, change the cursor
 
+
+
+PC_Player_2 (CharacterController) !HasMovePoints
+UnityEngine.Debug:Log (object)
+CharacterRoutines/<WaitCharacterMoved>d__21:MoveNext () (at Assets/_Game_/Scripts/Core/Characters/CharacterRoutines.cs:290)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+
 AnimationEventHandler "onAnimEvent<EventType>" DoWaitEvent
 OpenDoor Animation
 UpdateWeapons on End movement

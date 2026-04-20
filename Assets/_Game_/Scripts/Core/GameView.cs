@@ -11,6 +11,8 @@ using UnityEngine.SceneManagement;
 [System.Serializable]
 public class GameView : MonoBehaviour
 {
+	//public const int CursorTypeValueForActions = 5;
+	
 	static public void Focus(bool value) => GetInstance().OnApplicationFocus(value);
 	
 	static bool debugCursor = false;
@@ -93,6 +95,7 @@ public class GameView : MonoBehaviour
 	{
 		if (!Application.isEditor) OnApplicationFocus(true);
 		SetInputEnabled(false);
+		hasNoActionsCursor = CursorData.HasCursor(CursorType.NoActions);
 	}
 
 	private void ClickCharacter(CharacterAnimation clickedCharacterAnimation)
@@ -119,7 +122,10 @@ public class GameView : MonoBehaviour
 				// assign attack
 				if (selectedCharacter.CanAttack(false))
 				{
-					selectedCharacter.Routines.AssignAttack(clickedCharacter, false, true);
+					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.AttackAction))
+						selectedCharacter.FloatingText_Cant();
+					else
+						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, true);
 					return;
 				}
 				
@@ -146,7 +152,10 @@ public class GameView : MonoBehaviour
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
-			selectedCharacter.Routines.AssignInteract(clickedProp);
+			if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.InteractAction))
+				selectedCharacter.FloatingText_Cant();
+			else
+				selectedCharacter.Routines.AssignInteract(clickedProp);
 			return;
 		}
 		
@@ -183,9 +192,9 @@ public class GameView : MonoBehaviour
 	//[SerializeField] private float cameraDeltaY = 1f;
 	[UnityEngine.Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
 
-	[Header("Debug")]
-	[ReadOnly][SerializeField] private bool hasFocus;
-	[ReadOnly][SerializeField] private Vector2 mousePosition;
+	private bool hasNoActionsCursor;
+	private bool hasFocus;
+	private Vector2 mousePosition;
 	private Vector2 lastMousePosition;
 
 	private CameraPivot cameraPivot => CameraPivot.Instance; // TODO
@@ -471,12 +480,12 @@ public class GameView : MonoBehaviour
 							else if (overCharacter.IsEnemyToPlayer())
 							{
 								agent.AssignDestination(overCharacter.GetPosition(), mouseHasMoved); // mouse over enemy
-								SetCurrentCursorType(CursorType.Attack);
+								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
 							}
 							else
 							{
 								agent.AssignDestination(overCharacter.GetPosition(), mouseHasMoved); // mouse over character
-								SetCurrentCursorType(CursorType.Talk);
+								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
 							}
 						}
 						else if(debugCursor) Debug.Log("character not controllable");
@@ -493,7 +502,8 @@ public class GameView : MonoBehaviour
 							{
 								var agent = selectedCharacter.GetAgent();
 								agent.AssignDestination(bestWaypoint.GetPosition(), mouseHasMoved); // mouse over prop
-								SetCurrentCursorType(overProp.GetCursorType());
+								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
+									: overProp.GetCursorType());
 							}
 							//else Debug.LogWarning("no waypoint found");
 						}
@@ -533,9 +543,11 @@ public class GameView : MonoBehaviour
 		{
 			SetCurrentCursorType(CursorType.Waiting);
 		}
-		
-		if(Cursor.lockState != CursorLockMode.None)
+
+		if (Cursor.lockState != CursorLockMode.None)
+		{
 			CursorData.GetCursorData(currentCursor).Apply(mouseDown);
+		}
 	}
 
 	private CursorType currentCursor;

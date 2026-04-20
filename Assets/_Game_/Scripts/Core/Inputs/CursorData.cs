@@ -6,10 +6,14 @@ using UnityEngine.UI;
 public enum CursorType
 {
 	DefaultArrow,
+	
 	WaitArrow,
 	Waiting,
+	
 	Navigate,
 	Select,
+	NoActions,
+	
 	OpenDoor,
 	Attack,
 	Talk,
@@ -22,16 +26,22 @@ public class CursorData : ScriptableObject
 	{
 		LoadCursors();
 		if(cursorDataLookup.ContainsKey(cursorType))
-			return  cursorDataLookup[cursorType];
-		Debug.LogWarning("cursor type not found: " + cursorType+", get default one");
+			return cursorDataLookup[cursorType];
+		Debug.LogWarning("cursor type not found: " + cursorType);
 		if(!defaultCursor) defaultCursor = ScriptableObject.CreateInstance<CursorData>();
 		return defaultCursor;
+	}
+
+	public static bool HasCursor(CursorType cursorType)
+	{
+		LoadCursors();
+		return cursorDataLookup.ContainsKey(cursorType);
 	}
 
 	private static CursorData defaultCursor;
 	private static CursorData[] cursorDatas;
 	private static Dictionary<CursorType, CursorData> cursorDataLookup;
-	static void LoadCursors()
+	private static void LoadCursors()
 	{
 		if (cursorDatas == null)
 			cursorDatas = Resources.LoadAll<CursorData>(Consts.ResPath_Cursors);

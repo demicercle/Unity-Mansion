@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05aa0dffbdc9400ca36fafd9c0ceb4f2, type: 3}
-  m_Name: Cursor_5_OpenDoor
+  m_Name: Cursor_8_Talk
   m_EditorClassIdentifier: Assembly-CSharp::CursorData
-  cursorType: 5
+  cursorType: 8
   textures:
-  - {fileID: 2800000, guid: a96804c08dbd1f145a0a379e4b496d3b, type: 3}
+  - {fileID: 2800000, guid: 9fb66313c5f1dda408767deb5fed5116, type: 3}
   hotspot: {x: 0, y: 0}
   animationSpeed: 1
   loopAnimation: 0

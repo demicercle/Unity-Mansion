@@ -192,7 +192,7 @@ GameObject:
   - component: {fileID: 2209946154352752973}
   - component: {fileID: 450696110728905939}
   m_Layer: 0
-  m_Name: Door_Simple
+  m_Name: Prop_Door_Simple
   m_TagString: Untagged
   m_Icon: {fileID: -5397416234189338067, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
