@@ -5,6 +5,45 @@ using UnityEngine;
 
 public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 {
+	[System.Serializable]
+	public struct Parameters
+	{
+		public string moving;
+		public string velocityX;
+		public string velocityZ;
+		public string weapon;
+		public string triggerNumber;
+		public string trigger;
+	}
+
+	[SerializeField] private Parameters parameters;
+
+#if UNITY_EDITOR
+	[ContextMenu("SetParameters/RPGCharacter")]
+	void SetParameters_RPGCharacter()
+	{
+		UnityEditor.Undo.RecordObject(this, "SetParameters/RPGCharacter");
+		parameters = new Parameters()
+		{
+			moving = "Moving",
+			velocityX = "VelocityX",
+			velocityZ = "VelocityZ",
+			weapon = "Weapon",
+			triggerNumber = "TriggerNumber",
+			trigger = "Trigger"
+		};
+		Utils.SetDirty(this);
+	}
+	
+	[ContextMenu("ClearParameters")]
+	void ClearParameters()
+	{
+		UnityEditor.Undo.RecordObject(this, "ClearParameters");
+		parameters = new Parameters();
+		Utils.SetDirty(this);
+	}
+#endif
+	
 	static public List<CharacterAnimation> activeInstances  = new List<CharacterAnimation>();
 	
 	private CharacterController controller;
@@ -15,7 +54,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	}
 	
 	[Header("Animation")]
-	[SerializeField] private Animator animator;
+	[SerializeField] private Animator[] animators;
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	
@@ -33,15 +72,6 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	private void Awake()
 	{
 		controller = GetController();
-
-		if (!animator) animator = GetComponent<Animator>();
-		if (!animator) animator = GetComponentInChildren<Animator>();
-		if (!animator)
-		{
-			Debug.LogWarning(this + " has no animator!");
-			enabled = false;
-			return;
-		}
 
 		controller.onHealed += OnHealed;
 		//controller.onPartyIndexChanged += (newIndex) =>
@@ -75,8 +105,8 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 
 	void OnKilled()
 	{
-		animator.SetTrigger(AnimationParameters.Trigger);
-		animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.DeathTrigger);
+		SetTrigger(parameters.trigger);
+		SetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 	}
 
@@ -84,8 +114,8 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	{
 		if (actionType == CharacterAction.RunAction)
 		{
-			animator.SetTrigger(AnimationParameters.Trigger);
-			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.ReloadTrigger);
+			SetTrigger(parameters.trigger);
+			SetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
 			GetController().FloatingText("Run!");
 		}
 		
@@ -97,32 +127,44 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	
 	private void Start()
 	{
-		if (animator != null)
+		enabled = animators.Length > 0;
+		
+		if (!enabled)
 		{
-			animator.SetFloat(AnimationParameters.VelocityX, 0.0f);      
-			animator.SetFloat(AnimationParameters.VelocityZ, 0.0f);        
-			animator.SetInteger(AnimationParameters.Weapon, -1);
-			animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
-			animator.SetTrigger(AnimationParameters.Trigger);
+			Debug.LogWarning(this + " disabled because no animators");
+			return;
 		}
+		
+		SetFloat(parameters.velocityX, 0.0f);      
+		SetFloat(parameters.velocityZ, 0.0f);        
+		SetInteger(parameters.weapon, -1);
+		SetInteger(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+		SetTrigger(parameters.trigger);
 	}
 	
 	void LateUpdate()
 	{
-		if (animator != null)
+		var localVelocity = controller.GetVelocity();
+		var isMoving = controller.IsMoving();
+		if (minMovePointsToRun >= 0f && controller.HasUsedAction(CharacterAction.RunAction) && controller.HasMovePoints(minMovePointsToRun))
 		{
-			var localVelocity = controller.GetVelocity();
-			var isMoving = controller.IsMoving();
-			if (minMovePointsToRun >= 0f && controller.HasUsedAction(CharacterAction.RunAction) && controller.HasMovePoints(minMovePointsToRun))
-			{
-				isMoving = true;
-				localVelocity = Vector3.forward * controller.GetAgent().GetMaxSpeed();
-			}
-			animator.SetFloat(AnimationParameters.VelocityX, 0);      
-			animator.SetFloat(AnimationParameters.VelocityZ, localVelocity.magnitude * velocityScale);  
-			animator.SetBool(AnimationParameters.Moving, isMoving);
+			isMoving = true;
+			localVelocity = Vector3.forward * controller.GetAgent().GetMaxSpeed();
 		}
+		SetFloat(parameters.velocityX, 0);      
+		SetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
+		SetBool(parameters.moving, isMoving);
 	}
-	
-    #endregion
+
+	// TODO keep for later?
+	void SetFloat(string param, float value) => AnimatorUtils.TrySetFloat(param, value, animators);
+	void SetBool(string param, bool value) => AnimatorUtils.TrySetBool(param, value, animators);
+	void SetInteger(string param, int value) => AnimatorUtils.TrySetInteger(param, value, animators);
+	void SetTrigger(string param) => AnimatorUtils.TrySetTrigger(param, animators);
+
+	//void SetFloat(int param, float value) => AnimatorUtils.TrySetFloat(param, value, animators);
+	//void SetBool(int param, bool value) => AnimatorUtils.TrySetBool(param, value, animators);
+	//void SetInteger(int param, int value) => AnimatorUtils.TrySetInteger(param, value, animators);
+	//void SetTrigger(int param) => AnimatorUtils.TrySetTrigger(param, animators);
+	#endregion
 }
