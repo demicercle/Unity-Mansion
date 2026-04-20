@@ -250,7 +250,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (CharacterRoutines.HasCoroutines()) // todo
+		if (CharacterRoutines.AnyActiveRoutines()) // todo
 			UpdatePathAndTarget(true);
 	}
 
@@ -264,13 +264,13 @@ public class CharacterAgent : MonoBehaviour
 		shouldDrawPath[0] = hasDestination // "thin" path
 		                    && CharacterSelection.IsCharacterSelected(controller)
 		                    && controller.IsControllableByPlayer()
-		                    && (!CharacterRoutines.HasCoroutines() || controller.IsMoving())
+		                    && (!CharacterRoutines.AnyActiveRoutines() || controller.IsMoving())
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 
 		shouldDrawPath[1] = hasDestination  // "thin" path
 		                    && CharacterSelection.IsCharacterSelected(controller) 
 		                    && controller.IsControllableByPlayer() 
-		                    && !CharacterRoutines.HasCoroutines()
+		                    && !CharacterRoutines.AnyActiveRoutines()
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();

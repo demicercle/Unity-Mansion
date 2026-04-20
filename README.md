@@ -1,6 +1,7 @@
 # Unity-Mansion
 
 - add namespaces
+
 - Talk Action
 - DebugGUI Draw Character stats (movePoints, etc)
 	> Right Click editor selects character under mouse
@@ -8,13 +9,21 @@
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
 - GameView.Routines
 - GameView.Cursor
-- BUG! camera render target not working anymore
 - change animation of characters during the mythos phase ("look around", "weapons ready", etcs)
 - OpportunityAttacks
-- DefaultAnims
 - "explore" command
-- BUG! selection circle alpha when AI turns
+- tweaks! selection circle alpha when AI turns
 - assign action on release click
+- rename "NavUtility" into component "NavMeshRebuilder"
+
+		HELLO ASSO
+		
+AnimationEventHandler "onAnimEvent<EventType>"
+CharacterRoutines as MonoBehaviour
+OpenDoor Animation
+
+UpdateWeapons on End movement
+add debug key to speed up time
 
 - RpgAnims 
 	> DrawWeapons

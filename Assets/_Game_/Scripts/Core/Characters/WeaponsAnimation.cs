@@ -5,7 +5,7 @@ using RPGCharacterAnims.Lookups;
 using RPGCharacterAnims.Extensions;
 using UnityEngine;
 
-public class WeaponsAnimation : MonoBehaviour
+public class WeaponsAnimation : MonoBehaviour // TODO clean this sh*t
 {
 	// Components.
     //private RPGCharacterController rpgCharacterController;
@@ -20,12 +20,12 @@ public class WeaponsAnimation : MonoBehaviour
 
     public Weapon leftWeapon, rightWeapon;
 
-    public System.Action<Weapon> weaponVisibilityChanged;
+    public System.Action<Weapon, bool> weaponVisibilityChanged;
 
     private IEnumerator _WeaponVisibility(Weapon weapon, bool isVisible, bool isDual)
     {
 	    Debug.Log(this + " _WeaponVisibility " + weapon + " " + isVisible + " " + isDual);
-	    weaponVisibilityChanged?.Invoke(weapon);
+	    weaponVisibilityChanged?.Invoke(weapon, isVisible);
 	    yield break;
     }
     

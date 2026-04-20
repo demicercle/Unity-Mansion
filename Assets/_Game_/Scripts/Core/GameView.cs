@@ -183,7 +183,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 				// assign attack
 				if (selectedCharacter.CanAttack(false))
 				{
-					CharacterRoutines.AssignAttack(selectedCharacter, clickedCharacter, false, true);
+					selectedCharacter.Routines.AssignAttack(clickedCharacter, false, true);
 					return;
 				}
 				
@@ -210,7 +210,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
-			CharacterRoutines.AssignInteract(selectedCharacter, clickedProp);
+			selectedCharacter.Routines.AssignInteract(clickedProp);
 			return;
 		}
 		
@@ -224,7 +224,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
-			CharacterRoutines.AssignMoveToDestination(selectedCharacter, navPosition);
+			selectedCharacter.Routines.AssignMoveToDestination(navPosition);
 			return;
 		}
 		
@@ -270,7 +270,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (value > 0) // pressed
 		{
 			
-			if (GetController().IsPlayerTurn() && !CharacterRoutines.HasCoroutines())
+			if (GetController().IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines())
 			{
 				CharacterSelection.SelectCharacter(null); // deselect all
 			}
@@ -312,7 +312,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
 	});
 	
-	public bool CanEndTurn() => !CharacterRoutines.HasCoroutines() && GetController().IsPlayerTurn();
+	public bool CanEndTurn() => !CharacterRoutines.AnyActiveRoutines() && GetController().IsPlayerTurn();
 
 	
 
@@ -367,7 +367,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	}
 
 	public bool CanUseRunAction() =>
-		!CharacterRoutines.HasCoroutines() && GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
+		!CharacterRoutines.AnyActiveRoutines() && GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
 
 	public bool IsControlPanelVisible() =>
 		GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllableByPlayer();
@@ -405,7 +405,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		
 		if (selectedCharacter.CanUseRunAction())
 		{
-			CharacterRoutines.AssignRunAction(selectedCharacter);
+			selectedCharacter.Routines.AssignRunAction();
 		}
 		else
 		{
@@ -437,7 +437,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
-		return hasFocus && !CharacterRoutines.HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllableByPlayer();
+		return hasFocus && !CharacterRoutines.AnyActiveRoutines() && GetController().IsPlayerTurn() && character.IsControllableByPlayer();
 	}
 	
 	
@@ -660,7 +660,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 			}
 		}
 
-		if (CharacterRoutines.HasCoroutines())
+		if (CharacterRoutines.AnyActiveRoutines())
 		{
 			SetCurrentCursorType(CursorType.WaitArrow);
 		}

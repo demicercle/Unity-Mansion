@@ -42,7 +42,7 @@ public class AIBrain_Patrol : AIBrainBase
 				if (!character.WaypointReached(lastWaypointToReach))
 				{
 					Debug.Log(this + " !WaypointReached, patrols towards lastWaypointToReach " + lastWaypointToReach);
-					CharacterRoutines.AssignMoveToWaypoint(character, lastWaypointToReach, canUseRunAction);
+					character.Routines.AssignMoveToWaypoint(lastWaypointToReach, canUseRunAction);
 				}
 				
 				else
@@ -74,7 +74,7 @@ public class AIBrain_Patrol : AIBrainBase
 				}
 			}
 
-			while (CharacterRoutines.HasCoroutines())
+			while (CharacterRoutines.AnyActiveRoutines())
 			{
 				if (lastWaypointToReach != null)
 				{

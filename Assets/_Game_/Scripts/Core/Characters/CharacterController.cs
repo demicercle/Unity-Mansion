@@ -402,6 +402,8 @@ public class CharacterController : MonoBehaviour
 		instances.Add(this);
 		
 		characterAnimation = GetComponent<CharacterAnimation>();
+		routines = GetComponent<CharacterRoutines>();
+		if(!routines) routines = gameObject.AddComponent<CharacterRoutines>();
 		
 		currentFaction = characterData.faction;
 		
@@ -493,4 +495,7 @@ public class CharacterController : MonoBehaviour
 			yield return characterAnimation.WaitEvent(eventType);
 		}
 	}
+	
+	private CharacterRoutines routines;
+	public CharacterRoutines Routines => routines;
 }
