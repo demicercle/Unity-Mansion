@@ -15,15 +15,13 @@
 - tweaks! selection circle alpha when AI turns
 - assign action on release click
 - rename "NavUtility" into component "NavMeshRebuilder"
-
-		HELLO ASSO
 		
-AnimationEventHandler "onAnimEvent<EventType>"
-CharacterRoutines as MonoBehaviour
+AnimationEventHandler "onAnimEvent<EventType>" DoWaitEvent
 OpenDoor Animation
-
 UpdateWeapons on End movement
 add debug key to speed up time
+Zombi Scream = Weapon Switch true
+SelectNextCharacter after Mythos Phase should pick the closest character to camera
 
 - RpgAnims 
 	> DrawWeapons

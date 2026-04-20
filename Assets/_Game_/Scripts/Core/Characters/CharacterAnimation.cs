@@ -11,6 +11,8 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	{
 		Undefined,
 		Hit,
+		Shoot,
+		WeaponSwitch,
 	}
 	
 	//public const string EventHit = "Hit";
@@ -83,51 +85,11 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	public Coroutine WaitEvent(EventType eventType) => StartCoroutine(DoWaitEvent(eventType));
 	private IEnumerator DoWaitEvent(EventType eventType)
 	{
-		if (!animator)
+		waitForEvent = eventType;
+		do
 		{
-			Debug.LogWarning(this + " DoWaitEvent error: no animator!");
-			yield break;
-		}
-	
-		var animEventHandler = Utils.GetOrAddComponent<AnimationEventHandler>(animator.gameObject);
-		var action = default(UnityEvent);
-		
-		if (eventType == EventType.Hit) 
-			action = animEventHandler.onHit;
-		else
-		{
-			Debug.LogError(this + " DoWaitEvent unsupported type: "  + eventType);
-			yield break;
-		}
-		
-		if (action != null)
-		{
-			var eventTriggered = false;
-			var handler = new System.Action(() =>
-			{
-				eventTriggered = true;
-			});
-			
-			Debug.Log(this + " DoWaitEvent: "  + eventType + " AddListener");
-			action.AddListener(handler.Invoke);
-
-			var startTime = Time.time;
-			while (!eventTriggered)
-			{
-				yield return null;
-				if (Time.time - startTime > Consts.CharacterAnimTimeout)
-				{
-					Debug.LogWarning(this + " Timed out! " + eventType);
-					break;
-				}
-			}
-
-			if (eventTriggered)
-			{
-				Debug.Log(this + " event triggered: " + eventType);
-				action.RemoveListener(handler.Invoke);
-			}
-		}
+			yield return null;
+		} while (waitForEvent != EventType.Undefined);
 	}
 	
 	public Coroutine TrySwitchWeapons(bool value) => StartCoroutine(DoWaitSwitchWeapons(value));
@@ -169,21 +131,23 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	}
 	
 	#region PRIVATE
-	
-	private void OnEnable()
-	{
-		activeInstances.Add(this);
-	}
-
-	private void OnDisable()
-	{
-		activeInstances.Remove(this);
-	}
+	private CharacterAnimationEvent _characterAnimationEvent;
+	private EventType waitForEvent;
 	
 	private void Awake()
 	{
-		controller = GetController();
+		enabled = animator != null;
+		if (!enabled)
+		{
+			Debug.LogWarning(this + " disabled because no animator assigned");
+			return;
+		}
+		
+		_characterAnimationEvent = animator.GetComponent<CharacterAnimationEvent>();
+		if(!_characterAnimationEvent) _characterAnimationEvent = animator.gameObject.AddComponent<CharacterAnimationEvent>();
+		_characterAnimationEvent.onCharacterAnimationEvent += OnCharacterAnimationEvent;
 
+		controller = GetController();
 		controller.onHealed += OnHealed;
 		//controller.onPartyIndexChanged += (newIndex) =>
 		controller.onDamaged += OnDamaged;
@@ -196,9 +160,21 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 
 		RoomTrigger.onChanged += OnRoomsChanged;
 	}
+	
+	private void OnEnable()
+	{
+		activeInstances.Add(this);
+	}
+
+	private void OnDisable()
+	{
+		activeInstances.Remove(this);
+	}
 
 	private void OnDestroy()
 	{
+		RoomTrigger.onChanged -= OnRoomsChanged;
+		
 		controller.onHealed -= OnHealed;
 		//controller.onPartyIndexChanged -= (newIndex) =>
 		controller.onDamaged -= OnDamaged;
@@ -209,9 +185,20 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		controller.turnStarted -= OnTurnStarted;
 		controller.turnEnded -= OnTurnEnded;
 		
-		RoomTrigger.onChanged -= OnRoomsChanged;
+		_characterAnimationEvent.onCharacterAnimationEvent -= OnCharacterAnimationEvent;
 	}
 
+	void OnCharacterAnimationEvent(EventType eventType)
+	{
+		if (waitForEvent != EventType.Undefined)
+		{
+			if (waitForEvent == eventType)
+			{
+				waitForEvent = EventType.Undefined;
+			}
+		}
+	}
+	
 	void OnTurnStarted()
 	{
 		//CanSeeAnyEnemyAround
@@ -283,14 +270,6 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	
 	private void Start()
 	{
-		enabled = animator != null;
-		
-		if (!enabled)
-		{
-			Debug.LogWarning(this + " disabled because no animator");
-			return;
-		}
-		
 		TrySetFloatAnimators(parameters.velocityX, 0.0f);      
 		TrySetFloatAnimators(parameters.velocityZ, 0.0f);        
 		TrySetIntegerAnimators(parameters.weapon, -1);

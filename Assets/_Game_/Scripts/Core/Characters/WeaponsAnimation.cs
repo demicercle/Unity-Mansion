@@ -75,7 +75,7 @@ public class WeaponsAnimation : MonoBehaviour // TODO clean this sh*t
     private void Start()
     {
         // Listen for the animator's weapon switch event.
-        var animatorEvents = Utils.GetOrAddComponent<AnimationEventHandler>(animator.gameObject);
+        var animatorEvents = Utils.GetOrAddComponent<CharacterAnimationEvent>(animator.gameObject);
         animatorEvents.onWeaponSwitch.AddListener(WeaponSwitch); // TODO dispose it
 	}
 
