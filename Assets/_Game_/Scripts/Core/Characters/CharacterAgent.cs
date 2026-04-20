@@ -129,7 +129,13 @@ public class CharacterAgent : MonoBehaviour
 	}
 
 	private const float TIMED_OUT = 3f;
-	public IEnumerator SearchPathAsync(Vector3 dest, System.Action onComplete = null)
+
+	public Coroutine SearchPathAsync(Vector3 dest, System.Action onComplete = null)
+	{
+		return StartCoroutine(DoSearchPathAsync(dest, onComplete));
+	}
+	
+	private IEnumerator DoSearchPathAsync(Vector3 dest, System.Action onComplete = null)
 	{
 		AssignDestination(dest, true); // WaitCharacterMoved
 		
@@ -244,7 +250,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (GameView.GetInstance().HasCoroutines()) // todo
+		if (CharacterRoutines.HasCoroutines()) // todo
 			UpdatePathAndTarget(true);
 	}
 
@@ -258,13 +264,13 @@ public class CharacterAgent : MonoBehaviour
 		shouldDrawPath[0] = hasDestination // "thin" path
 		                    && CharacterSelection.IsCharacterSelected(controller)
 		                    && controller.IsControllableByPlayer()
-		                    && (!GameView.GetInstance().HasCoroutines() || controller.IsMoving())
+		                    && (!CharacterRoutines.HasCoroutines() || controller.IsMoving())
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 
 		shouldDrawPath[1] = hasDestination  // "thin" path
 		                    && CharacterSelection.IsCharacterSelected(controller) 
 		                    && controller.IsControllableByPlayer() 
-		                    && !GameView.GetInstance().HasCoroutines()
+		                    && !CharacterRoutines.HasCoroutines()
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();

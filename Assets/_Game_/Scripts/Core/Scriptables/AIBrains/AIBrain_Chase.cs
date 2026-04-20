@@ -60,9 +60,9 @@ public class AIBrain_Chase : AIBrainBase
 			while (character.CanAttack())
 			{
 				DebugDrawer.Line(character.GetEyesPosition(), lastTarget.GetCenterPosition(), Color.red, 1.0f);
-				gameView.AssignAttack(character, lastTarget, !noRun, noLOS);
+				CharacterRoutines.AssignAttack(character, lastTarget, !noRun, noLOS);
 				
-				while (gameView.HasCoroutines())
+				while (CharacterRoutines.HasCoroutines())
 				{
 					yield return null;
 				}

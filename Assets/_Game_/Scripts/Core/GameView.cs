@@ -9,23 +9,9 @@ using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
 using UnityEngine.SceneManagement;
 
 [System.Serializable]
-public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
+public class GameView : MonoBehaviour, IView<GameController>
 {
 
-	public void OnDebugGUI()
-	{
-		DebugGUI.BeginGroup("GameView");
-		if (HasCoroutines())
-		{
-			DebugGUI.Field(coroutines.Count, "coroutines");
-		}
-		else
-		{
-			DebugGUI.Label("...");
-		}
-		DebugGUI.EndGroup();
-	}
-	
 	static public void Focus(bool value) => GetInstance().OnApplicationFocus(value);
 	
 	static bool debugCursor = false;
@@ -110,8 +96,6 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 
 		if (!Application.isEditor) OnApplicationFocus(true);
 		
-		StartCoroutine(DoCoroutinesLoop());
-		
 		canvas.UpdateUI(this);
 		
 		SetInputEnabled(false);
@@ -174,28 +158,6 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		while (FadeScreen.IsVisible) yield return null;
 		GetController().NewTurn();
 	}
-	
-	private IEnumerator DoCoroutinesLoop()
-	{
-		while (true)
-		{
-			if (coroutines.Count > 0)
-			{
-				while (coroutines.Count > 0)
-				{
-					var next =  coroutines[0];
-					Debug.Log("StartCoroutine: " + coroutines.Count);
-					yield return StartCoroutine(next);
-					coroutines.RemoveAt(0);
-				}
-		
-				routinesStarted?.Invoke(false);
-				Debug.Log("End Coroutines");
-			}
-			
-			yield return null;
-		}
-	}
 
 	public void ClickCharacter(CharacterAnimation clickedCharacterAnimation)
 	{
@@ -221,7 +183,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 				// assign attack
 				if (selectedCharacter.CanAttack(false))
 				{
-					AssignAttack(selectedCharacter, clickedCharacter, false, true);
+					CharacterRoutines.AssignAttack(selectedCharacter, clickedCharacter, false, true);
 					return;
 				}
 				
@@ -241,12 +203,6 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		Debug.Log("ClickCharacter: ?");
 	}
 
-	public void AssignAttack(CharacterController attacker, CharacterController target, bool canUseRunAction, bool losCheck)
-	{
-		Debug.Log(this + " AssignAttack " + attacker + " " + target+ " " + canUseRunAction + " " + losCheck);
-		QueueRoutine(WaitCharacterAttackCharacter(attacker, target, canUseRunAction, losCheck));
-	}
-
 	public void ClickProp(PropComponent clickedProp) // TODO Prop Controller
 	{
 		Debug.Log(this + " ClickProp " + clickedProp);
@@ -254,45 +210,11 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
-			AssignInteract(selectedCharacter, clickedProp);
+			CharacterRoutines.AssignInteract(selectedCharacter, clickedProp);
 			return;
 		}
 		
 		Debug.Log("ClickProp: no character selected");
-	}
-
-	public void AssignInteract(CharacterController character, PropComponent clickedProp) // TODO Prop Controller
-	{
-		Debug.Log(this + " AssignInteract " + character + " " + clickedProp);
-		QueueRoutine(WaitCharacterInteract(character, clickedProp));
-	}
-
-	private IEnumerator WaitCharacterInteract(CharacterController character, PropComponent clickedProp)
-	{
-		if (clickedProp.GetBestWaypoint(character.GetPosition(), out var bestWaypoint))
-		{
-			Debug.Log(this + " WaitCharacterInteract " + character + " " + clickedProp);
-			yield return StartCoroutine(WaitCharacterMoved(character, bestWaypoint.GetPosition()));
-			var agent = character.GetAgent();
-			if (agent.ReachedDestination(bestWaypoint.GetPosition()))
-			{
-				// waypoint reach
-				if (character.CanInteract())
-				{
-					QueueRoutine(WaitCharacterInteract(character, clickedProp, bestWaypoint));
-				}
-				else
-				{
-					character.FloatingText_Cant();
-				}
-			}
-			else
-			{
-				var dist = Vector3.Distance(character.GetPosition(), bestWaypoint.GetPosition());
-				Debug.Log(character + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
-			}
-		}
-		else Debug.LogWarning(this + " AssignInteract " + character + " " + clickedProp + " no waypoint!");
 	}
 
 	public void ClickNavigation(Vector3 navPosition)
@@ -302,28 +224,14 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (selectedCharacter != null && CanControlCharacter(selectedCharacter))
 		{
-			AssignMove(selectedCharacter, navPosition);
+			CharacterRoutines.AssignMoveToDestination(selectedCharacter, navPosition);
 			return;
 		}
 		
 		Debug.Log("ClickNavigation: no character selected");
 	}
 
-	public void AssignMove(CharacterController controller, Vector3 navPosition)
-	{
-		Debug.Log(this + " AssignMove " + controller + " " + navPosition);
-		QueueRoutine(WaitCharacterMoved(controller, navPosition));
-	}
-	
-	public void AssignRunAction(CharacterController character)
-	{
-		Debug.Log(this + " AssignRunAction " + character);
-		QueueRoutine(WaitRunAction(character));
-	}
-	
 	public GameCanvas canvas => GameCanvas.Instance;
-	
-	public System.Action<bool> routinesStarted;
 
 	public List<CharacterAnimation> GetAllCharacters() =>  CharacterAnimation.activeInstances.ToList();
 
@@ -331,8 +239,6 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 
 	public int GetPartyCharacterIndex(CharacterAnimation characterAnimation) => GetPartyCharacters().IndexOf(characterAnimation);
 	public int GetCharacterIndex(CharacterAnimation characterAnimation) => GetAllCharacters().IndexOf(characterAnimation);
-
-	public bool HasCoroutines() => coroutines.Count > 0;
 
 	//public bool drawDebug { get; set; }
 	
@@ -352,8 +258,6 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 
 	private bool holdMiddleClick, mouseHasMoved;
 	public InputSystem_Actions inputSystem { get; private set; }
-	
-	private List<IEnumerator> coroutines = new  List<IEnumerator>();
 
 	public void MouseMove(Vector2 pos)
 	{
@@ -366,7 +270,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		if (value > 0) // pressed
 		{
 			
-			if (GetController().IsPlayerTurn() && !HasCoroutines())
+			if (GetController().IsPlayerTurn() && !CharacterRoutines.HasCoroutines())
 			{
 				CharacterSelection.SelectCharacter(null); // deselect all
 			}
@@ -401,251 +305,14 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		}
 	}
 
-	public IEnumerator WaitQueueRoutine(IEnumerator routine)
-	{
-		QueueRoutine(routine);
-		while(HasCoroutines()) yield return null;
-	}
 	
-	public void QueueRoutine(IEnumerator coroutine)
-	{
-//		Debug.Log("QueueRoutine: " + coroutines.Count);
-		coroutines.Add(coroutine);
-		if (coroutines.Count == 1)
-		{
-			Debug.Log("Start Coroutines");
-			routinesStarted?.Invoke(true);
-		}
-	}
-
-	private IEnumerator WaitCharacterAttackCharacter(CharacterController attacker, CharacterController target, bool canUseRunAction, bool losCheck)
-	{
-		Debug.Log("WaitCharacterAttackCharacter " + attacker + " " + target + " " + losCheck);
-
-		var atAttackRange = false;
-		while (!atAttackRange)
-		{
-			yield return null;
-
-			atAttackRange = attacker.IsAtAttackRange(target, losCheck);
-			if (atAttackRange)
-			{
-				Debug.Log(attacker + " atAttackRange of " + target + ", StopAgent");
-				attacker.StopAgent();
-			}
-			
-			else if (!attacker.IsMoving())
-			{
-				while (!attacker.HasMovePoints() && canUseRunAction && attacker.CanUseRunAction())
-				{
-					yield return StartCoroutine(WaitRunAction(attacker));
-				}
-				
-				if (!attacker.HasMovePoints())
-				{
-					Debug.Log(attacker + " has no move points to reach target");
-					attacker.FloatingText_Cant();
-					yield break;
-				}
-				
-				Debug.Log(attacker + " starts moving towards target");
-				StartCoroutine(WaitCharacterMoved(attacker, target.GetPosition()));
-				yield return null;
-			}
-			
-			//else Debug.Log(attacker + " moves towards " + target);
-		}
-		
-		yield return StartCoroutine(WaitCharacterPerformAttack(attacker, target));
-	}
-
-	private IEnumerator WaitCharacterPerformAttack(CharacterController character, CharacterController target)
-	{
-		Debug.Log("WaitCharacterPerformAttack " + character + " " + target );
-		
-		yield return StartCoroutine(WaitCharacterLookPosition(character, target.GetCenterPosition()));
-
-		if (!character.CanAttack())
-		{
-			Debug.Log(character + " cannot attack!");
-			character.FloatingText_Cant();
-			yield return new WaitForSeconds(Consts.CantSeconds);
-		}
-		else
-		{
-			character.AttackAction();
-			yield return new WaitForSeconds(character.GetLastAttackHitTime());//TODO wait attack duration
-			// apply attack damage, etc
-			target.TakeDamage(character.GetLastAttackDamage());
-		}
-
-		Debug.Log("attack ends");
-	}
-
-	private IEnumerator WaitCharacterInteract(CharacterController character, PropComponent prop, Waypoint waypoint = null)
-	{
-		Debug.Log("WaitCharacterInteract " + character + " > " + prop + " @ " + waypoint);
-		if (waypoint != null)
-		{
-			var wpDir = waypoint.GetDirection();
-
-			while (!character.IsFacingDirection(wpDir))
-			{
-				character.LookDirection(wpDir, Time.deltaTime);
-				yield return null;
-			}
-
-			character.UseAction(prop.consumeAction);
-			
-			yield return new WaitForSeconds(prop.triggerDelay);
-
-			prop.GetController().Interact();
-		
-			yield return new WaitForSeconds(prop.animDuration);
-		}
-	}
-
-	private IEnumerator WaitCharacterLookPosition(CharacterController character, Vector3 pos) => WaitCharacterLookDirection(character, (pos - character.GetPosition()).normalized);
-	private IEnumerator WaitCharacterLookDirection(CharacterController character, Vector3 dir)
-	{
-		character.StopAgent();
-		
-		while (!character.IsFacingDirection(dir))
-		{
-			character.LookDirection(dir, Time.deltaTime);
-			yield return null;
-		}
-	}
-
-	/*public void MoveCharacterToWaypoint(CharacterController character, Waypoint waypoint,
-		System.Action onComplete = null)
-	{
-		QueueRoutine(WaitCharacterMoved(character, waypoint.GetPosition(), () =>
-		{
-			if (character.WaypointReached(waypoint))
-			{
-				QueueRoutine(WaitCharacterLookDirection(character, waypoint.GetDirection()));
-			}
-		}));
-	}*/
-
-	public void MoveCharacterToWaypoint(CharacterController character, Waypoint waypoint, bool canUseRunAction)
-	{
-		QueueRoutine(WaitMoveCharacterToWaypoint(character, waypoint, canUseRunAction));
-	}
-	
-	private IEnumerator WaitMoveCharacterToWaypoint(CharacterController character, Waypoint waypoint,
-		bool canUseRunAction)
-	{
-		Debug.Log(this + " WaitMoveCharacterToWaypoint " + character + " " + waypoint + " canUseRunAction=" + canUseRunAction);
-		yield return StartCoroutine(WaitCharacterMoved(character, waypoint.GetPosition()));
-		
-		if (character.WaypointReached(waypoint))
-		{
-			yield return StartCoroutine(WaitCharacterLookDirection(character, waypoint.GetDirection()));
-		}
-		else
-		{
-			if (canUseRunAction)
-			{
-				if (!character.HasActions() && character.CanUseRunAction())
-				{
-					yield return StartCoroutine(WaitRunAction(character));
-					yield return WaitMoveCharacterToWaypoint(character, waypoint, false);//TODO: multiple run actions??
-					yield break;
-				}
-			}
-		}
-		
-		Debug.Log(character + " did not reach waypoint");
-	}
-
-	private IEnumerator WaitCharacterMoved(CharacterController movingCharacter, Vector3 dest, System.Action onComplete = null)
-	{
-		Debug.Log("WaitCharacterMoved " + movingCharacter);
-		
-		var agent = movingCharacter.GetAgent();
-		
-		yield return StartCoroutine(agent.SearchPathAsync(dest));
-		
-		var path = agent.GetCurrentPath();
-		if (path.Length > 1)
-		{
-			var firstPoint = path[1];
-			var dir = (firstPoint - movingCharacter.GetPosition()).normalized;
-			while (!movingCharacter.IsFacingDirection(dir))
-			{
-				movingCharacter.LookDirection(dir, Time.deltaTime);
-				yield return null;
-			}
-		}
-		else
-		{
-			Debug.LogWarning(movingCharacter + " has wrong path: length=" + path.Length);
-			yield break;
-		}
-		
-		agent.StartMove();
-		
-		var timeout = 0.0f;
-		while(true)
-		{
-			if (timeout > Consts.CharacterMovedTimeout)
-			{
-				Debug.LogWarning(movingCharacter + " TIMED_OUT!");
-				movingCharacter.FloatingText("TIMED_OUT!");
-				break;
-			}
-
-			if (!movingCharacter.IsMoving())
-			{
-				Debug.Log(movingCharacter + " something stopped movement");
-				break;
-			}
-			
-			if (!movingCharacter.HasMovePoints())
-			{
-				Debug.Log(movingCharacter + " !HasMovePoints");
-				movingCharacter.FloatingText_Cant();
-				agent.StopMovement();
-				break;
-			}
-
-			if (agent.ReachedDestination(dest))
-			{
-				Debug.Log(movingCharacter + " reached destination!");
-				agent.StopMovement();
-				break;
-			}
-			
-			var oldPosition = movingCharacter.GetPosition();
-
-			DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
-			DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
-			DebugDrawer.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
-			yield return null;
-			
-			var newPosition = movingCharacter.GetPosition();
-			var deltaPos = (newPosition -  oldPosition).magnitude; // TODO: use length squared and recalculate move points
-
-			movingCharacter.ConsumeMovePoints(deltaPos);
-			
-			if (deltaPos < Consts.MinMagnitude) timeout += Time.deltaTime;
-			else timeout = 0f;
-			
-			if(timeout > 0f) DebugDrawer.WorldLabel(movingCharacter.GetCenterPosition(), "timeout=" + timeout.ToString("N2"));
-			else DebugDrawer.WorldLabel(movingCharacter.GetCenterPosition(), "deltaPos=" + deltaPos.ToString("N2"));
-		}
-		
-		onComplete?.Invoke();
-	}
 
 	public bool ShouldEndTurn() => CanEndTurn() && CharacterController.GetPartyCharacters().All(pc =>
 	{
 		return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
 	});
 	
-	public bool CanEndTurn() => !HasCoroutines() && GetController().IsPlayerTurn();
+	public bool CanEndTurn() => !CharacterRoutines.HasCoroutines() && GetController().IsPlayerTurn();
 
 	public bool IsCharacterVisible(CharacterController character)
 	{
@@ -685,7 +352,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
 			{
 				Debug.LogWarning(otherCharacter + " has no aiBrain");
-				yield return new WaitForSeconds(Consts.DefaultActionSeconds);
+				yield return new WaitForSeconds(Consts.NoActionsSeconds);
 				continue;
 			}
 
@@ -706,7 +373,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 	}
 
 	public bool CanUseRunAction() =>
-		!HasCoroutines() && GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
+		!CharacterRoutines.HasCoroutines() && GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
 
 	public bool IsControlPanelVisible() =>
 		GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllableByPlayer();
@@ -744,7 +411,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		
 		if (selectedCharacter.CanUseRunAction())
 		{
-			AssignRunAction(selectedCharacter);
+			CharacterRoutines.AssignRunAction(selectedCharacter);
 		}
 		else
 		{
@@ -776,16 +443,10 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 	public bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
-		return hasFocus && !HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllableByPlayer();
+		return hasFocus && !CharacterRoutines.HasCoroutines() && GetController().IsPlayerTurn() && character.IsControllableByPlayer();
 	}
 	
 	
-	private IEnumerator WaitRunAction(CharacterController character)
-	{
-		Debug.Log(">> WaitRunAction: " + character);
-		yield return new WaitForSeconds(Consts.DefaultActionSeconds);
-		character.RunAction();
-	}
 
 //	private bool HasFocus() => hasFocus && (!Application.isEditor || hasEditorFocus);
 	
@@ -1005,7 +666,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 			}
 		}
 
-		if (HasCoroutines())
+		if (CharacterRoutines.HasCoroutines())
 		{
 			SetCurrentCursorType(CursorType.WaitArrow);
 		}
