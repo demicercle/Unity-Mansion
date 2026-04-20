@@ -4,7 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AIBrain_Patrol", menuName = "AIBrain/Patrol", order = 0)]
 public class AIBrain_Patrol : AIBrainBase
 {
-	public bool canUseRunAction;
+	[SerializeField] private float waypointWaitSeconds = 2.0f;
+	[SerializeField] private bool canUseRunAction;
 	
 	public override IEnumerator Think(CharacterController character)
 	{
@@ -60,8 +61,6 @@ public class AIBrain_Patrol : AIBrainBase
 					{
 						Debug.Log(character + " reached last waypoint " + wpIndex + ", use all actions");
 						character.UseAllActions();
-						yield return new WaitForSeconds(Consts.AIThinksSeconds);
-						yield break;
 					}
 					else
 					{
@@ -70,7 +69,7 @@ public class AIBrain_Patrol : AIBrainBase
 						DebugDrawer.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), patrolRoute.color, 1.0f);
 					}
 					
-					yield return new WaitForSeconds(Consts.AIThinksSeconds); // TODO Patrol point "wait time"
+					yield return new WaitForSeconds(waypointWaitSeconds);
 				}
 			}
 

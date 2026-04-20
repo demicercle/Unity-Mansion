@@ -177,7 +177,7 @@ public class CharacterAgent : MonoBehaviour
 	private bool hasDestination;
 	private AIPath aiPath;
 	private CharacterController controller;
-	private GameController gameController; // TODO
+	private GameTurnManager _gameTurnManager; // TODO
 	private CharacterAnimation _characterAnimation;
 	private Vector3[] lastPath;
 
@@ -203,9 +203,9 @@ public class CharacterAgent : MonoBehaviour
 		controller = _characterAnimation.GetController();
 		controller.onUseAction += OnUseAction;
 		
-		gameController = GameController.GetInstance();
-		gameController.turnEnded += UpdatePathAndTarget;
-		gameController.turnStarted += UpdatePathAndTarget;
+		_gameTurnManager = GameTurnManager.Instance;
+		_gameTurnManager.turnEnded += UpdatePathAndTarget;
+		_gameTurnManager.turnStarted += UpdatePathAndTarget;
 		CharacterSelection.selectionChanged += SelectionChanged;
 		
 		UpdateComponent();
@@ -214,8 +214,8 @@ public class CharacterAgent : MonoBehaviour
 	private void OnDestroy()
 	{
 		controller.onUseAction -= OnUseAction;
-		gameController.turnEnded -= UpdatePathAndTarget;
-		gameController.turnStarted -= UpdatePathAndTarget;
+		_gameTurnManager.turnEnded -= UpdatePathAndTarget;
+		_gameTurnManager.turnStarted -= UpdatePathAndTarget;
 		CharacterSelection.selectionChanged -= SelectionChanged;
 	}
 

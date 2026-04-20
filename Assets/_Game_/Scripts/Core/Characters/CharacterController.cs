@@ -178,7 +178,7 @@ public class CharacterController : MonoBehaviour
 		currentFaction = faction;
 	}
 
-	public bool IsCurrentTurn() => GameController.GetInstance().IsPlayerTurn() && IsPlayer();
+	public bool IsCurrentTurn() => GameTurnManager.Instance.IsPlayerTurn() && IsPlayer();
 	
 	public float GetMaxMovePoints() => characterData.maxMovePoints;
 	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);

@@ -9,9 +9,8 @@ using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
 using UnityEngine.SceneManagement;
 
 [System.Serializable]
-public class GameView : MonoBehaviour, IView<GameController>
+public class GameView : MonoBehaviour
 {
-
 	static public void Focus(bool value) => GetInstance().OnApplicationFocus(value);
 	
 	static bool debugCursor = false;
@@ -28,13 +27,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		return instance;
 	}
 	
-	private GameController characterController;
-
-	public GameController GetController()
-	{
-		if(!characterController) characterController = GetComponent<GameController>();
-		return characterController;
-	}
+	private GameTurnManager gameTurnManager;
 	
 	void SelectionChanged()
 	{
@@ -55,8 +48,9 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 		Debug.Log(this + " Awake");
 		instance = this;
-		//DontDestroyOnLoad(gameObject);
 		name = ToString();
+		
+		gameTurnManager = GameTurnManager.Instance;
 		
 		// init inputs
 		inputSystem = new InputSystem_Actions();
@@ -90,73 +84,11 @@ public class GameView : MonoBehaviour, IView<GameController>
 
 	private bool isLoadingScenes;
 	
-	private IEnumerator Start()
+	private void Start()
 	{
-		Debug.Log(this + " Start");
-
 		if (!Application.isEditor) OnApplicationFocus(true);
-		
 		canvas.UpdateUI(this);
-		
 		SetInputEnabled(false);
-
-		isLoadingScenes = true;
-
-		// load level
-		for(int i = 0; i < scenesToLoad.Count; i++)
-		{
-			var scene = scenesToLoad[i];
-			if (SceneManager.GetSceneByName(scene).isLoaded)
-			{
-				Debug.Log("load scene: " + scene + " already loaded");
-				continue;
-			}
-
-			Debug.Log("load scene: " + scene);
-			var async = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
-			while (async.isDone == false)
-			{
-				//DebugGUI.FADE_PROGRESS = async.progress;
-				yield return null;
-			}
-		}
-		
-		yield return null; //
-		
-		//Debug.Log(this + " rebuild navigation async");
-		foreach (var scanOp in AstarPath.active.ScanAsync()) {
-			//Debug.Log("AstarPath.active.ScanAsync " + progress.ToString());
-			//DebugGUI.FADE_PROGRESS = scanOp.progress;
-			yield return null;
-		}
-		
-		yield return null; //
-		
-		var levelCharacters = Utils.FindObjects<CharacterController>()
-			.OrderBy(c => c.name)
-			.ToList();
-		
-		Debug.Log(this + " LevelLoaded: levelCharacters=" + levelCharacters.Count);
-		
-		var partyIndex = 0;
-		foreach (var character in levelCharacters)
-		{
-			character.Spawn();
-			if(character.CompareTag(Consts.TAG_PLAYER))
-				character.SetPartyIndex(partyIndex++);
-		}
-		
-		isLoadingScenes = false;
-		GetController().SceneLoaded();
-		
-		FadeScreen.FadeOut();
-		CharacterSelection.SelectNextCharacter();
-
-		yield return new WaitForSeconds(Consts.CameraStartsSeconds);
-		cameraPivot.SetStartZoom();
-		
-		while (FadeScreen.IsVisible) yield return null;
-		GetController().NewTurn();
 	}
 
 	public void ClickCharacter(CharacterAnimation clickedCharacterAnimation)
@@ -167,7 +99,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	//	//var selectedCharacter = gameController.GetSelectedCharacter();
 		if (clickedCharacter.InParty())
 		{
-			if (GetController().IsPlayerTurn())
+			if (gameTurnManager.IsPlayerTurn())
 			{
 				CharacterSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 				return;
@@ -270,7 +202,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 		if (value > 0) // pressed
 		{
 			
-			if (GetController().IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines())
+			if (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines())
 			{
 				CharacterSelection.SelectCharacter(null); // deselect all
 			}
@@ -312,71 +244,31 @@ public class GameView : MonoBehaviour, IView<GameController>
 		return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
 	});
 	
-	public bool CanEndTurn() => !CharacterRoutines.AnyActiveRoutines() && GetController().IsPlayerTurn();
+	public bool CanEndTurn() => !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn();
 
 	
 
 	public void ClickEndTurn()
 	{
-		if (GetController().IsPlayerTurn())
+		if (gameTurnManager.IsPlayerTurn())
 		{
-			GetController().EndTurn();
-			StartCoroutine(EndTurnRoutine());
+			gameTurnManager.EndTurn();
 		}
 		else Debug.Log("not in player turn");
 	}
 	
-	private IEnumerator EndTurnRoutine()
-	{
-		Debug.Log("Starts AI Routine: ");
-
-		yield return new WaitForSeconds(Consts.TurnChangedSeconds);
-		
-		foreach (var otherCharacterView in GetAllCharacters())
-		{
-			var otherCharacter = otherCharacterView.GetController();
-			if (otherCharacter.InParty()) continue;
-			
-			if (otherCharacter.IsCharacterVisible())
-				cameraPivot.Focus(otherCharacter);
-			else Debug.Log("Do not focus invisible character: " + otherCharacter);
-
-			yield return new WaitForSeconds(Consts.FocusCharacterSeconds);
-
-			if (!otherCharacter.TryGetAIBrain(out var aiBrain))
-			{
-				Debug.LogWarning(otherCharacter + " has no aiBrain");
-				yield return new WaitForSeconds(Consts.NoActionsSeconds);
-				continue;
-			}
-
-			yield return new WaitForSeconds(Consts.AIThinksSeconds);
-			
-			Debug.Log("Think() " + aiBrain + " " + otherCharacter);
-			yield return StartCoroutine(aiBrain.Think(otherCharacter));
-			Debug.Log("End Think()");
-
-			yield return new WaitForSeconds(Consts.AIThinksSeconds);
-		}
-		
-		GetController().NewTurn();
-		
-		yield return new WaitForSeconds(Consts.TurnChangedSeconds);
-		
-		CharacterSelection.SelectNextCharacter();
-	}
 
 	public bool CanUseRunAction() =>
-		!CharacterRoutines.AnyActiveRoutines() && GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
+		!CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
 
 	public bool IsControlPanelVisible() =>
-		GetController().IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllableByPlayer();
+		gameTurnManager.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllableByPlayer();
 
 	//public CharacterController GetPartyCharacter(int index) => CharacterController.GetPartyCharacter(index);
 
 	public void ClickFocusSelected()
 	{
-		if (GetController().IsPlayerTurn())
+		if (gameTurnManager.IsPlayerTurn())
 		{
 			if(CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 				cameraPivot.Focus(selectedCharacter);
@@ -387,7 +279,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	
 	public void ClickSelectNext()
 	{
-		if (GetController().IsPlayerTurn())
+		if (gameTurnManager.IsPlayerTurn())
 		{
 			CharacterSelection.SelectNextCharacter();
 		}
@@ -437,7 +329,7 @@ public class GameView : MonoBehaviour, IView<GameController>
 	public bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	public bool CanControlCharacter(CharacterController character)
 	{
-		return hasFocus && !CharacterRoutines.AnyActiveRoutines() && GetController().IsPlayerTurn() && character.IsControllableByPlayer();
+		return hasFocus && !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && character.IsControllableByPlayer();
 	}
 	
 	

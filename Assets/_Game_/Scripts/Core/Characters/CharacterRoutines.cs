@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public class CharacterRoutines : MonoBehaviour
 {
+	public const float DefaultWaitSeconds = 1.0f;
+	
 	static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
 	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
@@ -310,9 +312,8 @@ public class CharacterRoutines : MonoBehaviour
 	private IEnumerator WaitRunAction()
 	{
 		Debug.Log(">> WaitRunAction: " + this);
-		yield return new WaitForSeconds(Consts.DefaultActionsSeconds);
 		characterOwner.RunAction();
-		yield return new WaitForSeconds(Consts.DefaultActionsSeconds);
+		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 	#endregion
 }

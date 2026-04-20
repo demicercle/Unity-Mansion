@@ -5,7 +5,13 @@ using UnityEngine.UI;
 
 public class FadeScreen : MonoBehaviour
 {
-	static public bool IsVisible => Instance.image.enabled;
+	static public bool IsFadingOrVisible => Instance.image.enabled;
+
+	static private float loadingProgress;
+	public static void SetLoadingProgress(float progress)
+	{
+		loadingProgress = progress;
+	}
 	
 	static void Create()
 	{
@@ -38,6 +44,7 @@ public class FadeScreen : MonoBehaviour
 	[SerializeField] private Color color = Color.black;
 	[SerializeField] private Image image;
 	[SerializeField] private TMPro.TMP_Text tmpTxt;
+	[SerializeField] private Slider progressSlider;
 	
 	private float time;
 	private float fromAlpha, toAlpha;
@@ -68,6 +75,8 @@ public class FadeScreen : MonoBehaviour
 			image.color = Utils.ColorScale(color, Mathf.Lerp(fromAlpha, toAlpha, time / duration));
 			tmpTxt.enabled = true;
 			tmpTxt.color = Utils.ColorScale(tmpTxt.color, image.color.a);
+			progressSlider.gameObject.SetActive(loadingProgress > 0);
+			progressSlider.value = loadingProgress;
 			time += Time.unscaledDeltaTime;
 			yield return null;
 		}

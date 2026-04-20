@@ -7,6 +7,7 @@ using RPGCharacterAnims.Extensions;
 
 public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 {
+	
 	public enum EventType
 	{
 		Undefined,
@@ -82,6 +83,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	[Space]
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
+	[SerializeField] private float roomsReveleadSeconds = 1.0f;
 
 	public bool HasAnimationEvent(EventType eventType) => eventTypes.Contains(eventType);
 
@@ -236,7 +238,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 
 	private void OnRoomsChanged()
 	{
-		Invoke("UpdateWeapons", Consts.DefaultActionsSeconds);
+		Invoke("UpdateWeapons", roomsReveleadSeconds);
 	}
 
 	private void UpdateWeapons()

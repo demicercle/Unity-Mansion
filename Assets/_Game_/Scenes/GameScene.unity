@@ -2007,7 +2007,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000015258789}
+  m_AnchoredPosition: {x: 0, y: -0.00002670288}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &541877068
@@ -2811,7 +2811,7 @@ GameObject:
   - component: {fileID: 792779174}
   - component: {fileID: 792779175}
   m_Layer: 0
-  m_Name: GameController
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2832,10 +2832,13 @@ MonoBehaviour:
   scenesToLoad:
   - Level_0
   - Level_0_Env
-  cameraDeltaY: 1
   maxNavDistance: 0.5
   hasFocus: 0
   mousePosition: {x: 0, y: 0}
+  mouseDown: 0
+  orbitWithInputs: 0
+  orbitAxis: {x: 0, y: 0}
+  orbitDelta: {x: 0, y: 0}
 --- !u!4 &792779173
 Transform:
   m_ObjectHideFlags: 0
@@ -2863,6 +2866,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7729333bcd8a4aae93c93ec2c73e3e27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  turnChangedSeconds: 3
+  focusCharacterSeconds: 1.5
+  noActionsSeconds: 3
+  defaultActionsSeconds: 1
+  cameraStartsSeconds: 0.5
+  aiThinksSeconds: 0.5
   currentTurn: 0
   playerTurn: 0
 --- !u!114 &792779175
@@ -3022,7 +3031,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 884853962}
   m_HandleRect: {fileID: 884853961}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -5238,7 +5247,8 @@ MonoBehaviour:
   startZoom: 0.3
   awakeZoom: 1
   canRotateY: 1
-  rotationStepAngle: 0
+  clampedRotationAngle: 0
+  orbitFromScreenCenter: 1
   lerpSpeed: 6
   inputSpeed: 14
   panSpeed: 20
