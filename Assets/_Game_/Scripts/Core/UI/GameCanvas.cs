@@ -3,6 +3,7 @@ using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -16,7 +17,7 @@ public class GameCanvas : MonoBehaviour
 		get
 		{
 			if (!instance) instance = Utils.FindFirstObject<GameCanvas>();
-			if (!instance) Instantiate(Resources.Load<GameObject>("GameCanvas")).TryGetComponent(out instance);
+			//if (!instance) Instantiate(Resources.Load<GameObject>("GameCanvas")).TryGetComponent(out instance);
 			if (!instance) Debug.LogError("No Game Canvas!");
 			return instance;
 		}
@@ -71,18 +72,105 @@ public class GameCanvas : MonoBehaviour
 		viewportOverlay.enabled = true;
 	}
 	
-	public void UpdateUI(GameView view)
+	#region PRIVATE
+	private static GameTurnManager gameTurnManager => GameTurnManager.Instance;
+
+	private CharacterController[] partyCharacters;
+	private MouseOverHandler mouseHandler;
+	
+	private void Awake()
 	{
-		var party = CharacterController.GetPartyCharacters().ToArray();
-		for (int i = 0; i < portraits.Length; i++)
+		instance = this;
+		
+		button_endTurn.onClick.AddListener( ClickEndTurn);
+		button_actionRun.onClick.AddListener(ClickRunAction);
+
+		mouseHandler = viewportRect.GetComponent<MouseOverHandler>();
+		if(!mouseHandler) mouseHandler = viewportRect.gameObject.AddComponent<MouseOverHandler>();
+		mouseHandler.onMouseOverChanged += OnMouseOverViewport;
+		mouseHandler.onClicked += OnViewportClicked;
+		
+		floatingText.SetActive(false);
+
+		CharacterController.partyChanged += UpdatePortraits;
+	}
+
+	private void OnDestroy()
+	{
+		button_endTurn.onClick.RemoveListener( ClickEndTurn);
+		button_actionRun.onClick.RemoveListener(ClickRunAction);
+		
+		mouseHandler.onMouseOverChanged -= OnMouseOverViewport;
+		mouseHandler.onClicked -= OnViewportClicked;
+		
+		CharacterController.partyChanged -= UpdatePortraits;
+	}
+
+	private void Start()
+	{
+		// event system checks
+		var selfEventSystem = GetComponentInChildren<EventSystem>();
+		if (selfEventSystem)
 		{
-			portraits[i].UpdateUI(i < party.Length ? party[i] : null);
+			foreach (var otherEventSystem in FindObjectsByType<EventSystem>(default))
+			{
+				if (otherEventSystem != selfEventSystem)
+				{
+					Debug.Log(this + " destroys duplicated event system: " + selfEventSystem);
+					Destroy(selfEventSystem.gameObject);
+					break;
+				}
+			}
+		}
+	}
+
+	private void LateUpdate()
+	{
+		UpdateButtons();
+	}
+
+	private void OnViewportClicked()
+	{
+		GameView.GetInstance().OnApplicationFocus(true);
+	}
+
+	private void OnMouseOverViewport(bool value)
+	{
+		mouseOverViewport = value;
+	}
+
+	private void ClickRunAction()
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out var selected))
+		{
+			selected.TryUseAction(CharacterAction.RunAction, true);
+		}
+	}
+
+	private void ClickEndTurn() => gameTurnManager.TryEndPlayerTurn();
+
+	private void UpdatePortraits()
+	{
+		if (portraits.Length == 0)
+		{
+			Debug.LogWarning(this + " has no portraits assigned in inspector!");
+			return;
 		}
 		
-		controlPanel.isOn = view.IsControlPanelVisible();
-		button_actionRun.interactable = view.CanUseRunAction();
+		partyCharacters = CharacterController.GetPartyCharacters().ToArray();
+		//Debug.Log(this + " UpdatePortraits partyCharacters=" + partyCharacters.Length);
+		for (int i = 0; i < portraits.Length; i++)
+		{
+			portraits[i].AssignCharacter(i < partyCharacters.Length ? partyCharacters[i] : null);
+		}
+	}
+
+	private void UpdateButtons()
+	{
+		controlPanel.isOn = IsControlPanelVisible();
+		button_actionRun.interactable = CanUseRunAction();
 		
-		if (view.CanEndTurn())
+		if (CanEndTurn())
 		{
 			button_endTurn.interactable = true;
 		}
@@ -94,29 +182,21 @@ public class GameCanvas : MonoBehaviour
 		if (animator && lerpSpeed > 0)
 		{
 			if(endTurnLayer > 0) 
-				animator.SetLayerWeight(endTurnLayer, Mathf.Lerp(animator.GetLayerWeight(endTurnLayer), view.ShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed));
+				animator.SetLayerWeight(endTurnLayer, Mathf.Lerp(animator.GetLayerWeight(endTurnLayer), ShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed));
 		}
 	}
-	
-	#region PRIVATE
-	private void Awake()
-	{
-		instance = this;
-		
-		var view = GameView.GetInstance();
-		button_endTurn.onClick.AddListener( () => view.ClickEndTurn());
-		button_actionRun.onClick.AddListener(() => view.ClickRunAction());
 
-		var mouseHandler = Utils.GetOrAddComponent<MouseOverHandler>(viewportRect.gameObject);
-		mouseHandler.onMouseOverChanged += (mouseOver) => mouseOverViewport = mouseOver;
-		//#if UNITY_EDITOR
-		mouseHandler.onClicked += () => GameView.GetInstance().OnApplicationFocus(true);
-		//#endif
-		
-		if(portraits.Length == 0)
-			portraits = GetComponentsInChildren<CharacterPortrait>();
-		
-		floatingText.SetActive(false);
-	}
+	private bool IsControlPanelVisible() =>
+		gameTurnManager.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllableByPlayer();
+	
+	private bool CanUseRunAction() =>
+		!CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.RunAction);
+	
+	private bool ShouldEndTurn() => CanEndTurn() && CharacterController.GetPartyCharacters().All(pc =>
+	{
+		return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
+	});
+	
+	private bool CanEndTurn() => !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn();
 	#endregion
 }

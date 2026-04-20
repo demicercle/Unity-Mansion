@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 public class SceneLoader : MonoBehaviour
 {
 	private static List<SceneLoader> activeInstances = new List<SceneLoader>();
-	public static bool IsLoadingScene => activeInstances.Count > 0;
+	public static bool AnyInstanceActive => activeInstances.Count > 0;
 
 	public void SetSceneToLoad(string sceneName, LoadSceneMode mode)
 	{

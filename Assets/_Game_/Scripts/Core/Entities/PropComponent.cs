@@ -7,8 +7,8 @@ using UnityEngine.Events;
 
 public class PropComponent : MonoBehaviour
 {
-	public System.Action OnInteracted;
-	public System.Action<CharacterController> OnInteractedBy;
+	public System.Action onInteracted;
+	public System.Action<CharacterController> onInteractedBy;
 	
 	[Header("Interaction")]
 	[SerializeField] private CursorType cursorType = CursorType.OpenDoor;
@@ -23,7 +23,7 @@ public class PropComponent : MonoBehaviour
 	[SerializeField] private float animDuration = 1.0f;
 	
 	[Header("Unity Events")]
-	[SerializeField] private UnityEvent interacted;
+	[SerializeField] private UnityEvent _interacted;
 	
 	[Header("ReadOnly")]
 	[SerializeField] [ReadOnly] private int interactionCount;
@@ -51,9 +51,9 @@ public class PropComponent : MonoBehaviour
 			}
 		}
 		
-		OnInteracted?.Invoke();
-		OnInteractedBy?.Invoke(characterInstigator);
-		interacted?.Invoke(); //TODO in Unity
+		onInteracted?.Invoke();
+		onInteractedBy?.Invoke(characterInstigator);
+		_interacted?.Invoke(); //TODO in Unity
 	}
 
 	public bool GetBestWaypoint(Vector3 worldPos, out Waypoint bestWaypoint) // TODO "fake" public

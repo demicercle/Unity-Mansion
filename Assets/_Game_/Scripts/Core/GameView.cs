@@ -24,6 +24,8 @@ public class GameView : MonoBehaviour
 	{
 		return instance;
 	}
+
+	private bool isLoadingScenes => gameTurnManager.IsLoading();
 	
 	private GameTurnManager gameTurnManager;
 	
@@ -57,38 +59,43 @@ public class GameView : MonoBehaviour
 		inputSystem.UI.ScrollWheel.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y);
 		inputSystem.Player.RotateLeft.performed += ctx => CameraRotate(false);
 		inputSystem.Player.RotateRight.performed += ctx => CameraRotate(true);
-		inputSystem.Player.EndTurn.performed += ctx => ClickEndTurn();
-		inputSystem.Player.Action_Run.performed += ctx => ClickRunAction();
-		inputSystem.Player.SelectNext.performed += ctx => ClickSelectNext();
-		inputSystem.Player.FocusSelected.performed += ctx => ClickFocusSelected();
+		inputSystem.Player.EndTurn.performed += ctx => InputEndTurnPerformed();
+		inputSystem.Player.Action_Run.performed += ctx => InputRunPerformed();
+		inputSystem.Player.SelectNext.performed += ctx => InputSelectNextPerformed();
+		inputSystem.Player.FocusSelected.performed += ctx => InputFocusSelectedPerformed();
 		
 		CharacterSelection.selectionChanged += SelectionChanged;
 		
 		FadeScreen.FadeIn(true);
 	}
 
-	void CameraRotate(bool left)
+	private void InputEndTurnPerformed() => gameTurnManager.TryEndPlayerTurn();
+
+	private void InputRunPerformed()
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		{
+			selectedCharacter.TryUseAction(CharacterAction.RunAction, true);
+		}
+	}
+
+	private void CameraRotate(bool left)
 	{
 		if(hasFocus)cameraPivot.ClampedRotation(left ? -1 : 1);
 	}
 	
-	void CameraZoom(float delta)
+	private void CameraZoom(float delta)
 	{
 		if (hasFocus) cameraPivot.Zoom(delta);
 	}
-
-	[SerializeField] private List<string> scenesToLoad = new List<string>();
-
-	private bool isLoadingScenes;
 	
 	private void Start()
 	{
 		if (!Application.isEditor) OnApplicationFocus(true);
-		canvas.UpdateUI(this);
 		SetInputEnabled(false);
 	}
 
-	public void ClickCharacter(CharacterAnimation clickedCharacterAnimation)
+	private void ClickCharacter(CharacterAnimation clickedCharacterAnimation)
 	{
 		Debug.Log(this + " ClickCharacter " + clickedCharacterAnimation);
 		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
@@ -236,34 +243,25 @@ public class GameView : MonoBehaviour
 
 	
 
-	public bool ShouldEndTurn() => CanEndTurn() && CharacterController.GetPartyCharacters().All(pc =>
-	{
-		return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
-	});
 	
-	public bool CanEndTurn() => !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn();
 
 	
 
-	public void ClickEndTurn()
+	/*public void ClickEndTurn()
 	{
 		if (gameTurnManager.IsPlayerTurn())
 		{
 			gameTurnManager.EndTurn();
 		}
 		else Debug.Log("not in player turn");
-	}
+	}*/
 	
 
-	public bool CanUseRunAction() =>
-		!CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseRunAction();
-
-	public bool IsControlPanelVisible() =>
-		gameTurnManager.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllableByPlayer();
-
+	
+	
 	//public CharacterController GetPartyCharacter(int index) => CharacterController.GetPartyCharacter(index);
 
-	public void ClickFocusSelected()
+	public void InputFocusSelectedPerformed()
 	{
 		if (gameTurnManager.IsPlayerTurn())
 		{
@@ -274,7 +272,7 @@ public class GameView : MonoBehaviour
 		else Debug.Log("not in player turn");
 	}
 	
-	public void ClickSelectNext()
+	public void InputSelectNextPerformed()
 	{
 		if (gameTurnManager.IsPlayerTurn())
 		{
@@ -283,24 +281,6 @@ public class GameView : MonoBehaviour
 		else Debug.Log("not in player turn");
 	}
 	
-	public void ClickRunAction()
-	{
-		CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter);
-		if (selectedCharacter == null)
-		{
-			Debug.Log("no selected character!");
-			return;
-		}
-		
-		if (selectedCharacter.CanUseRunAction())
-		{
-			selectedCharacter.Routines.AssignRunAction();
-		}
-		else
-		{
-			selectedCharacter.FloatingText_Cant();
-		}
-	}
 
 	private bool inputEnabled;
 	public void SetInputEnabled(bool value)
@@ -329,13 +309,8 @@ public class GameView : MonoBehaviour
 		return hasFocus && !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && character.IsControllableByPlayer();
 	}
 	
-	
-
-//	private bool HasFocus() => hasFocus && (!Application.isEditor || hasEditorFocus);
-	
 	private void LateUpdate()
 	{
-		canvas.UpdateUI(this); //TODO remove
 		lastMousePosition = mousePosition;
 		mouseHasMoved = false;
 		mouseDown = false;
@@ -346,6 +321,8 @@ public class GameView : MonoBehaviour
 	[ReadOnly][SerializeField] private Vector2 orbitDelta;
 	private void Update()
 	{
+		SetInputEnabled(hasFocus && !isLoadingScenes && !DebugLogManager.Instance.IsLogWindowVisible);
+		
 		if (Application.isEditor)
 		{
 			if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
@@ -367,8 +344,6 @@ public class GameView : MonoBehaviour
 		if (hasFocus)
 		{
 			mouseDown = inputSystem.UI.Click.IsPressed();
-			
-			SetInputEnabled(!isLoadingScenes && !IngameDebugConsole.DebugLogManager.Instance.IsLogWindowVisible);
 			
 			Cursor.lockState = CursorLockMode.Confined;
 			Cursor.visible = !holdMiddleClick;

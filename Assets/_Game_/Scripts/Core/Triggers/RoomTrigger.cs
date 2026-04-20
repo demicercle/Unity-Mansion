@@ -58,7 +58,7 @@ public class RoomTrigger : MonoBehaviour
 		
 		foreach (var door in doors)
 		{
-			door.OnInteracted += Explore;
+			door.onInteracted += Explore;
 		}
 	}
 
@@ -68,7 +68,7 @@ public class RoomTrigger : MonoBehaviour
 		
 		foreach (var door in doors)
 		{
-			door.OnInteracted -= Explore;
+			door.onInteracted -= Explore;
 		}
 	}
 

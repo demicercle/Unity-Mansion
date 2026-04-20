@@ -16,7 +16,6 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private bool firstTurnIsPlayer = true;
 	[SerializeField] private bool skipInvisibleCharacters = true;
 	[Range(0f,1f)] [SerializeField] private float cameraStartZoom = .5f;
-	
 	[Header("Timings")]
 	[SerializeField] private float postLoadDuration = 1.0f;
 	[SerializeField] private float turnChangedSeconds = 3.0f;
@@ -25,17 +24,31 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private float defaultActionsSeconds = 1.0f;
 	[SerializeField] private  float cameraStartsSeconds = 0.15f;
 	[SerializeField] private  float aiThinksSeconds = 0.5f;
+	[Space]
+	[SerializeField] private GameObject[] startupObjects = new GameObject[0];
 	
 	public bool IsPlayerTurn() => playerTurn;
 
 	public int GetCurrentTurn() => currentTurn;
 
-	public bool IsLoading() => SceneLoader.IsLoadingScene || NavUtility.IsRebuildingAsync();
+	public bool IsLoading() => isLoading;
 
+	public void TryEndPlayerTurn()
+	{
+		if (IsPlayerTurn())
+		{
+			EndTurn();
+		}
+		else
+		{
+			Debug.Log(this + " TryEndPlayerTurn failed: not in player turn");
+		}
+	}
+	
 	public void EndTurn()
 	{
 		playerTurn = false;
-		CharacterController.instances.ForEach(c => c.EndTurn());//TODO Event
+		CharacterController.AllCharacters.ForEach(c => c.EndTurn());//TODO Event
 		Debug.Log(this + " EndTurn " + currentTurn);
 		turnEnded?.Invoke();
 	}
@@ -44,6 +57,7 @@ public class GameTurnManager : MonoBehaviour
 	private CameraPivot cameraPivot => CameraPivot.Instance;
 	private int currentTurn;
 	private bool playerTurn;
+	private bool isLoading;
 	
 	private void Awake()
 	{
@@ -56,10 +70,17 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log(this + " Starts");
 
 		FadeScreen.FadeIn(true);
+
+		foreach (var go in startupObjects)
+		{
+			Debug.Log(this + " Instantiate startupObjects " + go);
+			Instantiate(go);
+		}
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
 		sceneLoader.SetSceneToLoad(nextLevelName, LoadSceneMode.Additive);
 
+		isLoading = true;
 		Debug.Log(this + " loading...");
 		
 		do // ensure that everything is properly loaded
@@ -67,12 +88,15 @@ public class GameTurnManager : MonoBehaviour
 			do
 			{
 				yield return null;
-			} while (IsLoading());
+			} while (SceneLoader.AnyInstanceActive);
 
 			yield return new WaitForSeconds(postLoadDuration);
-		} while (IsLoading());
+		} while (SceneLoader.AnyInstanceActive);
 
-		Debug.Log(" loading complete");
+		while(NavUtility.IsRebuildingAsync()) 
+			yield return null;
+		
+		Debug.Log(" loading scene complete");
 		
 		var levelCharacters = Utils.FindObjects<CharacterController>()
 			.OrderBy(c => c.name)
@@ -87,6 +111,9 @@ public class GameTurnManager : MonoBehaviour
 			if(character.CompareTag(Consts.TAG_PLAYER))
 				character.SetPartyIndex(partyIndex++);
 		}
+		
+		Debug.Log("level ready");
+		isLoading = false;
 		
 		FadeScreen.FadeOut();
 		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);
@@ -117,7 +144,7 @@ public class GameTurnManager : MonoBehaviour
 			
 			yield return YieldRoutines();
 		
-			foreach (var otherCharacter in CharacterController.instances)
+			foreach (var otherCharacter in CharacterController.AllCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
 			
@@ -167,7 +194,7 @@ public class GameTurnManager : MonoBehaviour
 	{
 		currentTurn += 1;
 		playerTurn = true;
-		CharacterController.instances.ForEach(c => c.NewTurn(currentTurn));//TODO Event
+		CharacterController.AllCharacters.ForEach(c => c.NewTurn(currentTurn));//TODO Event
 		Debug.Log(this + " NewTurn " + currentTurn);
 		turnStarted?.Invoke();
 	}

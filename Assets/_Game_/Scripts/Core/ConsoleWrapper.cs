@@ -18,7 +18,7 @@ public static class ConsoleWrapper
 	static public void KillAll(float range)
 	{
 		var center = CameraPivot.Instance.GetFocusPosition();
-		foreach (var character in CharacterController.instances)
+		foreach (var character in CharacterController.AllCharacters)
 		{
 			if (!character.IsDead() && character.IsEnemyToPlayer())
 			{

@@ -5,7 +5,6 @@ using System.Linq;
 public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICursorHandler
 {
 	#region Static Selection Methods
-	static CharacterController selectedCharacter;
 	public static event System.Action selectionChanged;
 	
 	public static CharacterController GetSelectedCharacter() => selectedCharacter;
@@ -83,8 +82,9 @@ public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICu
 	}
 	#endregion
 	
+	private static CharacterController selectedCharacter;
 	private CharacterController controller;
-	public CharacterController GetController()
+	public CharacterController GetController() // TODO Remove
 	{
 		if(!controller) controller = GetComponent<CharacterController>();
 		return controller;

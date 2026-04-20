@@ -162,7 +162,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		} while (weaponsAnimation.IsSwitchingWeapons());
 		
 		weaponSwitched = weaponsReady;
-		Debug.Log(this + " weaponSwitched=" + weaponSwitched);
+//		Debug.Log(this + " weaponSwitched=" + weaponSwitched);
 		isSwitchingWeapons = false;
 	}
 

@@ -4,14 +4,12 @@ using UnityEngine.Events;
 
 public class GameEventHandler : MonoBehaviour
 {
-	public UnityEvent turnEnded, turnStarted, sceneLoaded;
+	public UnityEvent turnEnded, turnStarted;
 
-	GameView gameView;
 	GameTurnManager _gameTurnManager;
 	
 	private void Awake()
 	{
-		gameView = GameView.GetInstance();
 		_gameTurnManager = GameTurnManager.Instance;
 
 		_gameTurnManager.turnEnded += TurnEnded;

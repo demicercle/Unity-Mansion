@@ -43,9 +43,6 @@ GameObject:
   - component: {fileID: 6873523688060535263}
   - component: {fileID: 8422079425768255504}
   - component: {fileID: 6476284808873527906}
-  - component: {fileID: 8381913650164952804}
-  - component: {fileID: 7114349291519938963}
-  - component: {fileID: 6448026860638161089}
   m_Layer: 0
   m_Name: CameraPivot
   m_TagString: Untagged
@@ -130,71 +127,6 @@ MonoBehaviour:
   animator: {fileID: 8422079425768255504}
   zoomParameter: Blend
   rotationPivot: {fileID: 1017557397532967885}
---- !u!111 &8381913650164952804
-Animation:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2004986410560552663}
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Animation: {fileID: 7400000, guid: d6d6544a45c64fb499a03b9507d573fc, type: 2}
-  m_Animations:
-  - {fileID: 7400000, guid: d6d6544a45c64fb499a03b9507d573fc, type: 2}
-  m_WrapMode: 0
-  m_PlayAutomatically: 1
-  m_AnimatePhysics: 0
-  m_UpdateMode: 0
-  m_CullingType: 0
---- !u!114 &7114349291519938963
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2004986410560552663}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e08ce87101b4960942b0e34fbf8bb89, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AnimationLegacySampler
-  animation: {fileID: 8381913650164952804}
-  normalizedTime: 0.2
-  sample: 0
---- !u!114 &6448026860638161089
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2004986410560552663}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8645bed9eeb441218c68ab14cecd21c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameEventHandler
-  turnEnded:
-    m_PersistentCalls:
-      m_Calls: []
-  turnStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  sceneLoaded:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 7114349291519938963}
-        m_TargetAssemblyTypeName: AnimationLegacySampler, Assembly-CSharp
-        m_MethodName: Sample
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1 &8751710906931499399
 GameObject:
   m_ObjectHideFlags: 0

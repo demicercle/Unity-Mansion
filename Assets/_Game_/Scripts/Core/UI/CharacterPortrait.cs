@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,32 +12,35 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	public Toggle toggle;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
-
-	public int GetPartyIndex() => transform.GetSiblingIndex();
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		CharacterSelection.SelectPartyCharacter(GetPartyIndex());
+		CharacterSelection.SelectPartyCharacter( transform.GetSiblingIndex());
 	}
 	
-	public void UpdateUI(CharacterController _assignedCharacter) // TODO use events
+	public void AssignCharacter(CharacterController character)
 	{
-		if (_assignedCharacter)
+		_assignedCharacter = character;
+		gameObject.SetActive(true);
+	}
+	
+	private CharacterController _assignedCharacter;
+
+	private void LateUpdate()
+	{
+		if (_assignedCharacter == null)
 		{
-			gameObject.SetActive(true);
-			
-			toggle.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
-			toggle.interactable = _assignedCharacter.IsControllableByPlayer();
-			
-			rawImage.texture = _assignedCharacter.GetPortraitTexture();
-			nameLabel.text = _assignedCharacter.GetDisplayName();
-			healthSprite.fillAmount = 1f - _assignedCharacter.GetDamageProgress();
-			healthLabel.text = _assignedCharacter.GetCurrentHealthInt() + "/" +
-			                   _assignedCharacter.GetMaxHealth();
+			gameObject.SetActive(false);
 			return;
 		}
-		
-//		Debug.Log(this + " No party character");
-		gameObject?.SetActive(false);
+			
+		toggle.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
+		toggle.interactable = _assignedCharacter.IsControllableByPlayer();
+			
+		rawImage.texture = _assignedCharacter.GetPortraitTexture();
+		nameLabel.text = _assignedCharacter.GetDisplayName();
+		healthSprite.fillAmount = 1f - _assignedCharacter.GetDamageProgress();
+		healthLabel.text = _assignedCharacter.GetCurrentHealthInt() + "/" +
+		                   _assignedCharacter.GetMaxHealth();
 	}
 }

@@ -1,15 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
 public class CharacterController : MonoBehaviour
 {
+	const float MinFacingDot = 0.9f;
 	
-	static public List<CharacterController> instances = new List<CharacterController>();
-	static public IEnumerable<CharacterController> GetPartyCharacters() => instances.Where(c => c.InParty());
+	public static List<CharacterController> AllCharacters => _allCharacters;
+	public static IEnumerable<CharacterController> GetPartyCharacters() => _allCharacters.Where(c => c.InParty());
 	
+	public static event System.Action partyChanged;
 	
 	public event System.Action statsChanged;
 	public event System.Action<bool> selectionChanged;
@@ -26,29 +29,17 @@ public class CharacterController : MonoBehaviour
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private List<AIBrainBase> aiBrains =  new List<AIBrainBase>();
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f;
-	[Min(0f)] public float defaultAttackHitTime = 1f;
-	public float GetVisionRange() => visionRange;
-	public List<AIBrainBase> GetBrains() => aiBrains.ToList();
+	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	
-	[ReadOnly] [SerializeField] private bool isControllable = false;
-//	[ReadOnly] [SerializeField] private bool isSelected = false;
-	[ReadOnly] [SerializeField] private int partyIndex = -1;
-	[ReadOnly] [SerializeField] private float usedMovePoints;
-	//[ReadOnly] [SerializeField] private int usedActions;
-	[ReadOnly] [SerializeField] private List<CharacterAction> usedActions = new List<CharacterAction>();
-	[ReadOnly] [SerializeField] private float totalDamages;
-	[ReadOnly] [SerializeField] private int savedRotation;
-	[ReadOnly] [SerializeField] private Vector3 savedPosition;
-	[ReadOnly] [SerializeField] private bool isDead;
-	[ReadOnly] [SerializeField] private CharacterAgent agent;
-	[ReadOnly] [SerializeField] private int currentTurn;
-	[ReadOnly] [SerializeField] private CharacterFaction currentFaction;
-	[ReadOnly] [SerializeField] private CharacterFaction previousFaction;
-
-	[ReadOnly] [SerializeField] private float lastRotatedTime;
-	//[SerializeField] private ColorSettings colorSettings;
+	public void FloatingText_Cant() // TODO: in character animation
+	{
+		if(IsCurrentTurn()) FloatingText(!HasActions() ? "No actions!" : "Can't");
+	}
 	
-	public int GetCurrentTurn() => currentTurn;
+	public void FloatingText(string canT) // TODO: in character animation
+	{
+		GameCanvas.Instance.FloatingText(this, canT);
+	}
 	
 	public void Spawn()
 	{
@@ -58,15 +49,15 @@ public class CharacterController : MonoBehaviour
 		agent.SetObstacle(true);
 	}
 	
-	public bool IsControllableByPlayer() => isControllable && !isDead; // TODO: "IsPlayerTurn() && IsParty()"
-
+	public CharacterRoutines Routines => routines;
 	public CharacterAgent GetAgent() => agent;
-
-	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.9f;
-    
-	public Vector3 GetCenterPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * agent.GetHeight() * 0.5f;
-
-	//public bool IsSelected() => isSelected;
+	public bool IsControllableByPlayer() => isControllable && !isDead;
+	
+	public bool IsSelected()
+	{
+		return CharacterSelection.IsCharacterSelected(this);
+	}
+	
 	public void NotifySelected(bool value)
 	{
 		//agent.SetObstacle(!value);//todo not in selection
@@ -78,12 +69,6 @@ public class CharacterController : MonoBehaviour
 		StopAgent();
 		turnEnded?.Invoke();
 	}
-
-	public void Rest()
-	{
-		usedActions.Clear();
-		usedMovePoints = 0;
-	}
 	
 	public void NewTurn(int turn)
 	{
@@ -93,28 +78,39 @@ public class CharacterController : MonoBehaviour
 		turnStarted?.Invoke();
 	}
 
-	public bool IsCharacterVisible()
+	public void Rest()
 	{
-		if (RoomTrigger.activeRooms.Any(t => t.HasCharacter(this)))
-			return false;
-		
-		return true;
-	}
-	
-	public bool CanSeeAnyEnemyAround() => instances.FirstOrDefault((other) =>
-	{
-		if (!IsEnemyTo(other.GetCurrentFaction())) return false;
-		if (!other.IsCharacterVisible()) return false;
-		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
-	});
-
-
-	public int GetRemaingActions() // TODO GD
-	{
-		return characterData.maxActions - usedActions.Count;
+		usedActions.Clear();
+		usedMovePoints = 0;
 	}
 	
 	public bool HasActions() => usedActions.Count < characterData.maxActions;
+
+	public bool HasUsedAction(CharacterAction action) => usedActions.Contains(action);
+
+	public bool CanUseAction(CharacterAction _) // TODO
+	{
+		return HasActions();
+	}
+	
+	public bool TryUseAction(CharacterAction action, bool floatingText)
+	{
+		if (CanUseAction(action))
+		{
+			UseAction(action);
+			return true;
+		}
+
+		Debug.Log(this + " TryUseAction " + action + " failed");
+		if(floatingText) FloatingText_Cant();
+		return false;
+	}
+	
+	
+	public void AttackAction(CharacterController target = null, bool stopAgent = true)
+	{
+		UseAction(CharacterAction.AttackAction, target);
+	}
 	
 	public void UseAction(CharacterAction actionType, object param = null)
 	{
@@ -123,7 +119,7 @@ public class CharacterController : MonoBehaviour
 		if (actionType == CharacterAction.RunAction)
 		{
 			usedMovePoints -= characterData.runActionExtraMovePoints;
-			//StopAgent();
+			Routines.AssignRunAction();
 		}
 		onUseAction?.Invoke(actionType, param);
 		statsChanged?.Invoke();
@@ -134,9 +130,11 @@ public class CharacterController : MonoBehaviour
 		ConsumeMovePoints(GetRemainingMovePoints());
 		UseAction(CharacterAction.None);
 	}
-
+	
 	public CharacterFaction GetCurrentFaction() => currentFaction;
+	
 	public bool IsPlayer() => GetCurrentFaction() == CharacterFaction.Player;
+	
 	public bool IsEnemyToPlayer(CharacterController other = null) => characterData.faction == CharacterFaction.Enemy;
 
 	public bool IsEnemyTo(CharacterFaction faction)
@@ -148,6 +146,7 @@ public class CharacterController : MonoBehaviour
 	}
 	
 	public bool InParty() => partyIndex >= 0;
+	
 	public int GetPartyIndex() => partyIndex;
 
 	public void SetPartyIndex(int index)
@@ -165,6 +164,7 @@ public class CharacterController : MonoBehaviour
 			SetCurrentFaction(previousFaction);
 		}
 		onPartyIndexChanged?.Invoke(index);
+		partyChanged?.Invoke();
 	}
 
 	private void SetCurrentFaction(CharacterFaction faction)
@@ -178,14 +178,12 @@ public class CharacterController : MonoBehaviour
 	public bool IsCurrentTurn() => GameTurnManager.Instance.IsPlayerTurn() && IsPlayer();
 	
 	public float GetMaxMovePoints() => characterData.maxMovePoints;
-	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
-	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
-	public bool HasMovePoints(float d = 0f) => usedMovePoints + d < GetMaxMovePoints();
 	
-	public bool CanUseRunAction()
-	{
-		return  HasActions();
-	}
+	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
+	
+	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
+	
+	public bool HasMovePoints(float d = 0f) => usedMovePoints + d < GetMaxMovePoints();
 	
 	public bool CanInteract()
 	{
@@ -196,7 +194,7 @@ public class CharacterController : MonoBehaviour
 	{
 		DebugDrawer.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
 		LookDirection(worldPosition - GetPosition(), f);
-	}
+	} // TODO not in use
 
 	public void LookDirection(Vector3 getDirection, float f = -1f)
 	{
@@ -225,7 +223,6 @@ public class CharacterController : MonoBehaviour
 		}
 	}
     
-	const float MIN_FACING_DOT = 0.9f;
 	public bool IsFacingDirection(Vector3 dir)
 	{
 		dir.y = 0;
@@ -233,10 +230,24 @@ public class CharacterController : MonoBehaviour
 		var dot = Vector3.Dot(dir, transform.forward);
 		//Debug.Log(dot);
 		// DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
-		return dot >= MIN_FACING_DOT;
+		return dot >= MinFacingDot;
 	}
 	
 	public Vector3 GetPosition() => transform.position;
+	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.9f;
+	public Vector3 GetCenterPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * agent.GetHeight() * 0.5f;
+
+	public bool IsMoving() => GetAgent().IsMoving();
+	
+	public void StopAgent()
+	{
+		agent.StopMovement();
+	}
+
+	public Vector3 GetVelocity()
+	{
+		return GetAgent().velocity;
+	}
 
 	public void Teleport(Vector3 dest) => Teleport(dest, GetRotation(), true);
 	public void Teleport(Vector3 dest, bool stopMovement) => Teleport(dest, GetRotation(), stopMovement);
@@ -244,19 +255,8 @@ public class CharacterController : MonoBehaviour
 	{
 		GetAgent().Teleport(dest, newRot, stopMovement);
 	}
-	public void SavePosition(Vector3 newPos)
-	{
-		savedPosition = newPos;
-		onMoved?.Invoke();
-	}
 
 	public int GetRotation() => (int)transform.eulerAngles.y;
-	public void SaveRotation(int newRot)
-	{
-		savedRotation = newRot;
-		onRotate?.Invoke();
-	}
-	
 	public void ConsumeMovePoints(float amount)
 	{
 		usedMovePoints += amount;
@@ -283,7 +283,6 @@ public class CharacterController : MonoBehaviour
 		onHealed?.Invoke(amount);
 		statsChanged?.Invoke();
 	}
-
 	public void TakeDamage(float amount)
 	{
 		Debug.Log(this + " TakeDamage " + amount);
@@ -299,7 +298,6 @@ public class CharacterController : MonoBehaviour
 		
 		statsChanged?.Invoke();
 	}
-
 	public void TryKill()
 	{
 		if (!IsDead())
@@ -313,35 +311,13 @@ public class CharacterController : MonoBehaviour
 	
 
 	public float GetAttackRange() => characterData.attackRange;
-	
 	public bool CanAttack(bool checkActions = true) => !characterData.noAttack && (!checkActions || HasActions());
-
+	
 	public bool TryGetAIBrain(out AIBrainBase aiBrain)
 	{
 		aiBrains = aiBrains.OrderBy(b => -b.GetPriority(this)).ToList();
 		Debug.Log(this + " TryGetAIBrain " + Utils.ArrayStr(aiBrains));
 		return (aiBrain = aiBrains.FirstOrDefault()) != null;
-	}
-	
-	public List<CharacterController> GetNearbyLivingCharacters(float range, float drawDuration = 0f, Color drawColor = default)
-	{
-		var outList = new List<CharacterController>();
-		var center = GetPosition();
-		DebugDrawer.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
-		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
-		{
-			if (coll.TryGetComponent(out CharacterController otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())
-			{
-				outList.Add(otherCharacter);
-			}
-		}
-
-		return outList;
-	}
-
-	public CharacterController GetClosestCharacter(List<CharacterController> getNearbyLivingCharacters)
-	{
-		return getNearbyLivingCharacters.OrderBy(other => GetDistanceTo(other)).FirstOrDefault();
 	}
 
 	public float GetDistanceTo(Vector3 world) => Vector3.Distance(GetPosition(), world);
@@ -367,38 +343,92 @@ public class CharacterController : MonoBehaviour
 			return false;
 		}
 	}
-
-	bool LOSCheck(CharacterController other)
+	public float GetLastAttackDamage()
 	{
-		var start = GetEyesPosition();
-		var end = other.GetEyesPosition();
-		if(Physics.Linecast(start, end, out var hit,
-			   LayerMask.GetMask(Consts.LAYER_WALL, Consts.LAYER_GROUND)))
-		{
-			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
-			//DebugGUI.Line(start, end, Color.red, drawDuration);
-			return false;
-		}
+		return characterData.lastAttackDamage;
+	}
 
-		//DebugGUI.Line(start, end, Color.green, drawDuration);
+	public float GetDefaultAttackHitTime() => defaultAttackHitTime;
+	
+	public bool IsCharacterVisible()
+	{
+		if (RoomTrigger.activeRooms.Any(t => t.HasCharacter(this)))
+			return false;
+		
 		return true;
 	}
-
-	public void RunAction()
+	
+	public bool CanSeeAnyEnemyAround() => _allCharacters.FirstOrDefault((other) =>
 	{
-		UseAction(CharacterAction.RunAction);
+		if (!IsEnemyTo(other.GetCurrentFaction())) return false;
+		if (!other.IsCharacterVisible()) return false;
+		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
+	});
+
+	public CharacterController GetClosestCharacter(List<CharacterController> getNearbyLivingCharacters)
+	{
+		return getNearbyLivingCharacters.OrderBy(other => GetDistanceTo(other)).FirstOrDefault();
 	}
+	
+	public List<CharacterController> GetNearbyLivingCharacters(float range, float drawDuration = 0f, Color drawColor = default)
+	{
+		var outList = new List<CharacterController>();
+		var center = GetPosition();
+		DebugDrawer.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
+		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
+		{
+			if (coll.TryGetComponent(out CharacterController otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())
+			{
+				outList.Add(otherCharacter);
+			}
+		}
 
-	public bool HasUsedAction(CharacterAction action) => usedActions.Contains(action);
+		return outList;
+	}
+	
+	public bool TryGetAnimation(out CharacterAnimation outAnimation)
+	{
+		outAnimation = characterAnimation;
+		return outAnimation != null;
+	}
+	
+	public Coroutine WaitAnimationEvent(CharacterAnimation.EventType eventType) => StartCoroutine(DoWaitAnimationEvent(eventType));
+	
+	private IEnumerator DoWaitAnimationEvent(CharacterAnimation.EventType eventType)
+	{
+		if (characterAnimation == null || !characterAnimation.HasAnimationEvent(CharacterAnimation.EventType.Hit))
+			yield return new WaitForSeconds(GetDefaultAttackHitTime());
+		else
+		{
+			yield return characterAnimation.WaitEvent(eventType);
+		}
+	}
+	
+	#region PRIVATE
+	private static List<CharacterController> _allCharacters = new List<CharacterController>();
+	private static ScriptableObject defaultAIBrain;
 
-	static private ScriptableObject defaultAIBrain;
+	private int partyIndex = -1;
+	
+	private int currentTurn;
+	private bool isControllable;
+	private float usedMovePoints;
+	private List<CharacterAction> usedActions = new List<CharacterAction>();
+	private float totalDamages;
+	private float lastRotatedTime; // TODO not in use
+	private bool isDead;
+	private CharacterFaction currentFaction;
+	private CharacterFaction previousFaction;
+	private CharacterAgent agent;
+	private CharacterRoutines routines;
+	private CharacterAnimation characterAnimation;
 	
 	private void Awake()
 	{
 		if(characterData == null)
 			Debug.LogError(this + " has no character data");
 		
-		instances.Add(this);
+		_allCharacters.Add(this);
 		
 		agent = GetComponent<CharacterAgent>();
 		if(!agent) agent = gameObject.AddComponent<CharacterAgent>();
@@ -422,45 +452,27 @@ public class CharacterController : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		instances.Remove(this);
-	}
-
-	public void StopAgent()
-	{
-		agent.StopMovement();
-	}
-
-	public Vector3 GetVelocity()
-	{
-		return GetAgent().velocity;
-	}
-
-	public bool IsMoving() => GetAgent().IsMoving();
-
-	public bool IsRotating() => Time.time - lastRotatedTime <= Consts.MinTimeDuration; // \o/ every character starts the game by rotating for a very short time
-
-	public float GetLastAttackDamage()
-	{
-		return characterData.lastAttackDamage;
-	}
-
-	public float GetDefaultAttackHitTime() => defaultAttackHitTime;
-	
-	public void AttackAction(CharacterController target = null, bool stopAgent = true)
-	{
-		UseAction(CharacterAction.AttackAction);
-	}
-
-	public void FloatingText_Cant() // TODO: in character animation
-	{
-		if(IsCurrentTurn()) FloatingText(!HasActions() ? "No actions!" : "Can't");
+		_allCharacters.Remove(this);
 	}
 	
-	public void FloatingText(string canT) // TODO: in character animation
+	private bool LOSCheck(CharacterController other)
 	{
-		GameCanvas.Instance.FloatingText(this, canT);
-	}
+		var start = GetEyesPosition();
+		var end = other.GetEyesPosition();
+		if(Physics.Linecast(start, end, out var hit,
+			   LayerMask.GetMask(Consts.LAYER_WALL, Consts.LAYER_GROUND)))
+		{
+			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
+			//DebugGUI.Line(start, end, Color.red, drawDuration);
+			return false;
+		}
 
+		//DebugGUI.Line(start, end, Color.green, drawDuration);
+		return true;
+	}
+	#endregion
+
+	#if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
 		aiBrains.ForEach(b =>
@@ -471,41 +483,5 @@ public class CharacterController : MonoBehaviour
 		Gizmos.color = Color.magenta;
 		Utils.DrawGizmosCircle(transform.position, Vector3.up, visionRange);
 	}
-
-
-	/*public Color GetCurrentColor()
-	{
-		return isDead ? GetDeadColor() : InParty() ? GetFactionColor() : GetDefaultColor();
-	}*/
-
-	
-	public bool IsSelected()
-	{
-		return CharacterSelection.IsCharacterSelected(this);
-	}
-
-	public Coroutine WaitAttackHit() => StartCoroutine(DoWaitAnimationEvent(CharacterAnimation.EventType.Hit));
-
-	private CharacterAnimation characterAnimation;
-
-	public bool TryGetAnimation(out CharacterAnimation outAnimation)
-	{
-		outAnimation = characterAnimation;
-		return outAnimation != null;
-	}
-	
-	public Coroutine WaitAnimationEvent(CharacterAnimation.EventType eventType) => StartCoroutine(DoWaitAnimationEvent(eventType));
-	
-	private IEnumerator DoWaitAnimationEvent(CharacterAnimation.EventType eventType)
-	{
-		if (characterAnimation == null || !characterAnimation.HasAnimationEvent(CharacterAnimation.EventType.Hit))
-			yield return new WaitForSeconds(GetDefaultAttackHitTime());
-		else
-		{
-			yield return characterAnimation.WaitEvent(eventType);
-		}
-	}
-	
-	private CharacterRoutines routines;
-	public CharacterRoutines Routines => routines;
+	#endif
 }

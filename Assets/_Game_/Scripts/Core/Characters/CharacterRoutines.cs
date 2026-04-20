@@ -34,7 +34,8 @@ public class CharacterRoutines : MonoBehaviour
 	public void AssignRunAction()
 	{
 		Debug.Log(this + " AssignRunAction ");
-		StartNewRoutine(WaitRunAction());
+		characterOwner.UseAction(CharacterAction.RunAction);
+		StartNewRoutine(WaitAction(CharacterAction.RunAction));
 	}
 	
 #region PRIVATE
@@ -132,9 +133,9 @@ public class CharacterRoutines : MonoBehaviour
 			
 			else if (!characterOwner.IsMoving())
 			{
-				while (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.CanUseRunAction())
+				if (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.TryUseAction(CharacterAction.RunAction, false))
 				{
-					yield return characterOwner.StartCoroutine(WaitRunAction());
+					yield return characterOwner.StartCoroutine(WaitAction(CharacterAction.RunAction));
 				}
 				
 				if (!characterOwner.HasMovePoints())
@@ -229,9 +230,9 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			if (canUseRunAction)
 			{
-				if (!characterOwner.HasActions() && characterOwner.CanUseRunAction())
+				if (!characterOwner.HasActions() && characterOwner.TryUseAction(CharacterAction.RunAction, false))
 				{
-					yield return characterOwner.StartCoroutine(WaitRunAction());
+					yield return characterOwner.StartCoroutine(WaitAction(CharacterAction.RunAction));
 					yield return WaitMoveCharacterToWaypoint(waypoint, false);//TODO: multiple run actions??
 					yield break;
 				}
@@ -316,10 +317,10 @@ public class CharacterRoutines : MonoBehaviour
 		Debug.Log(characterOwner + " reached destination!");
 		agent.StopMovement();
 	}
-	private IEnumerator WaitRunAction()
+	
+	private IEnumerator WaitAction(CharacterAction action)
 	{
-		Debug.Log(">> WaitRunAction: " + this);
-		characterOwner.RunAction();
+		Debug.Log(">> WaitAction: " + this + " " + action);
 		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 	#endregion

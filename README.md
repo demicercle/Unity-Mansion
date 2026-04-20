@@ -12,6 +12,7 @@
 - assign action on release click
 - rename "NavUtility" into component "NavMeshRebuilder"
 - GameView is GameInput
+- if no actions, change the cursor
 
 AnimationEventHandler "onAnimEvent<EventType>" DoWaitEvent
 OpenDoor Animation

@@ -25,12 +25,12 @@ public class PropTrigger : MonoBehaviour // Used for rooms and "FogCube"
 
     private void OnEnable()
     {
-        props.ForEach(p => p.OnInteracted += PropInteracted);
+        props.ForEach(p => p.onInteracted += PropInteracted);
     }
 
     private void OnDisable()
     {
-        props.ForEach(p => p.OnInteracted -= PropInteracted);
+        props.ForEach(p => p.onInteracted -= PropInteracted);
     }
 
     private void PropInteracted()
