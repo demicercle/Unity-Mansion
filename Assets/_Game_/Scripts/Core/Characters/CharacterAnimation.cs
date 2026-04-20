@@ -1,21 +1,40 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
 
 public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 {
+	static public List<CharacterAnimation> activeInstances  = new List<CharacterAnimation>();
+	
+	private CharacterController controller;
+	public CharacterController GetController()
+	{
+		if(!controller) controller = GetComponent<CharacterController>();
+		return controller;
+	}
+	
+	[SerializeField] private Animator[] animators;
+	
 	[System.Serializable]
 	public struct Parameters
 	{
+		[Header("Movement")]
 		public string moving;
 		public string velocityX;
 		public string velocityZ;
+		[Header("Actions")]
+		public string runTrigger;
+		public string attackTrigger;
+		public string deathTrigger;
+		public string getHitTrigger;
+		[Header("RPG Anims")]
 		public string weapon;
 		public string triggerNumber;
 		public string trigger;
 	}
-
+	
 	[SerializeField] private Parameters parameters;
 
 #if UNITY_EDITOR
@@ -26,8 +45,8 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		parameters = new Parameters()
 		{
 			moving = "Moving",
-			velocityX = "VelocityX",
-			velocityZ = "VelocityZ",
+			velocityX = "Velocity X",
+			velocityZ = "Velocity Z",
 			weapon = "Weapon",
 			triggerNumber = "TriggerNumber",
 			trigger = "Trigger"
@@ -44,17 +63,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	}
 #endif
 	
-	static public List<CharacterAnimation> activeInstances  = new List<CharacterAnimation>();
-	
-	private CharacterController controller;
-	public CharacterController GetController()
-	{
-		if(!controller) controller = GetComponent<CharacterController>();
-		return controller;
-	}
-	
-	[Header("Animation")]
-	[SerializeField] private Animator[] animators;
+	[Header("Animation Settings")]
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	
@@ -101,12 +110,14 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	void OnDamaged(float amount)
 	{
 		GetController().FloatingText(Mathf.CeilToInt(amount).ToString());
+		SetTriggerAnimators(parameters.getHitTrigger);
 	}
 
 	void OnKilled()
 	{
-		SetTrigger(parameters.trigger);
-		SetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
+		SetTriggerAnimators(parameters.trigger);
+		SetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
+		SetTriggerAnimators(parameters.deathTrigger);
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 	}
 
@@ -114,13 +125,15 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	{
 		if (actionType == CharacterAction.RunAction)
 		{
-			SetTrigger(parameters.trigger);
-			SetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
+			SetTriggerAnimators(parameters.trigger);
+			SetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
+			SetTriggerAnimators(parameters.runTrigger);
 			GetController().FloatingText("Run!");
 		}
 		
 		else if (actionType == CharacterAction.AttackAction)
 		{
+			SetTriggerAnimators(parameters.attackTrigger);
 			GetController().FloatingText("Take this!");
 		}
 	}
@@ -135,11 +148,12 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			return;
 		}
 		
-		SetFloat(parameters.velocityX, 0.0f);      
-		SetFloat(parameters.velocityZ, 0.0f);        
-		SetInteger(parameters.weapon, -1);
-		SetInteger(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
-		SetTrigger(parameters.trigger);
+		SetFloatAnimators(parameters.velocityX, 0.0f);      
+		SetFloatAnimators(parameters.velocityZ, 0.0f);        
+		SetIntegerAnimators(parameters.weapon, -1);
+		SetIntegerAnimators(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+		SetTriggerAnimators(parameters.trigger);
+		SetBoolAnimators(parameters.moving, false);
 	}
 	
 	void LateUpdate()
@@ -151,16 +165,41 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			isMoving = true;
 			localVelocity = Vector3.forward * controller.GetAgent().GetMaxSpeed();
 		}
-		SetFloat(parameters.velocityX, 0);      
-		SetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
-		SetBool(parameters.moving, isMoving);
+		SetFloatAnimators(parameters.velocityX, 0);      
+		SetFloatAnimators(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
+		SetBoolAnimators(parameters.moving, isMoving);
 	}
 
 	// TODO keep for later?
-	void SetFloat(string param, float value) => AnimatorUtils.TrySetFloat(param, value, animators);
-	void SetBool(string param, bool value) => AnimatorUtils.TrySetBool(param, value, animators);
-	void SetInteger(string param, int value) => AnimatorUtils.TrySetInteger(param, value, animators);
-	void SetTrigger(string param) => AnimatorUtils.TrySetTrigger(param, animators);
+	void SetFloatAnimators(string param, float value)
+	{
+		if (string.IsNullOrWhiteSpace(param)) return;
+		foreach(var animator in animators) animator.SetFloat(param, value);
+	}
+
+	void SetBoolAnimators(string param, bool value)
+	{
+		if (string.IsNullOrWhiteSpace(param)) return;
+		foreach(var animator in animators) animator.SetBool(param, value);
+	}
+
+	void SetIntegerAnimators(string param, int value)
+	{
+		if (string.IsNullOrWhiteSpace(param)) return;
+		foreach(var animator in animators) animator.SetInteger(param, value);
+	}
+
+	void SetTriggerAnimators(string param)
+	{
+		if (string.IsNullOrWhiteSpace(param)) return;
+		foreach(var animator in animators) animator.SetTrigger(param);
+	}
+
+	void ResetTriggerAnimators(string param)
+	{
+		if (string.IsNullOrWhiteSpace(param)) return;
+		foreach(var animator in animators) animator.ResetTrigger(param);
+	}
 
 	//void SetFloat(int param, float value) => AnimatorUtils.TrySetFloat(param, value, animators);
 	//void SetBool(int param, bool value) => AnimatorUtils.TrySetBool(param, value, animators);
