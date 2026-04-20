@@ -24,6 +24,9 @@ public class PropComponent : MonoBehaviour, IView<PropController>
 
 	public Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
 
+	public CursorType GetCursorType() => cursorType;
+	[SerializeField] private CursorType cursorType = CursorType.OpenDoor;
+	
 	public bool onlyOnce;
 	[SerializeField] [ReadOnly] private CharacterAction TODO_consumeAction; // TODO = CharacterAction.InteractAction
 	public CharacterAction consumeAction => CharacterAction.InteractAction;

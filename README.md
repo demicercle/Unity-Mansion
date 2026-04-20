@@ -20,10 +20,9 @@
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
 - GameView.Routines
 - GameView.Cursor
-- Editor tool "hide children in hierarchy if not in prefab stage"
 - camera render target not working anymore
 - change animation of characters during the mythos phase ("look around", "weapons ready", etcs)
-
+- OpportunityAttacks
 - DefaultAnims
 
 - RpgAnims 
@@ -88,3 +87,8 @@
 	> onGameOver
 	> onVictory
 	...
+	
+	
+	### GD ###
+	
+	- "Can't" action

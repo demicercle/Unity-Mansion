@@ -64,7 +64,7 @@ public class CharacterController : MonoBehaviour
 
 	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.9f;
     
-	public Vector3 GetCenterPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.5f;
+	public Vector3 GetCenterPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * agent.GetHeight() * 0.5f;
 
 	//public bool IsSelected() => isSelected;
 	public void NotifySelected(bool value)
@@ -407,7 +407,7 @@ public class CharacterController : MonoBehaviour
 
 	public void FloatingText_Cant() // TODO: in character animation
 	{
-		if(IsCurrentTurn()) FloatingText("Can't");
+		if(IsCurrentTurn()) FloatingText(!HasActions() ? "No actions!" : "Can't");
 	}
 	
 	public void FloatingText(string canT) // TODO: in character animation

@@ -18,9 +18,11 @@ public struct TextReference
 		return this;
 	}
 
-	public TextReference SetFollows(Transform target)
+	public TextReference SetFollows(Transform target, Vector3 worldOffset)
 	{
-		Utils.GetOrAddComponent<ScreenFollowsWorld>(GetGameObject()).target = target;
+		Utils.GetOrAddComponent<ScreenFollowsWorld>(GetGameObject())
+			.SetTarget(target)
+			.SetWorldOffset(worldOffset);
 		return this;
 	}
 

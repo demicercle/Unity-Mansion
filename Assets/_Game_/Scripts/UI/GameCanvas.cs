@@ -66,9 +66,16 @@ public class GameCanvas : MonoBehaviour
 
 	public TextReference FloatingText(Object obj, string label)
 	{
+		if (obj is CharacterController)
+		{
+			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
+				.SetFollows((obj as CharacterController).transform, (obj as CharacterController).GetCenterPosition(true));
+		}
+		
 		if (obj is Component)
 		{
-			return floatingText.Duplicate().SetParent(transform).SetFollows((obj as Component).transform).SetText(label).SetActive();
+			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
+				.SetFollows((obj as Component).transform, default);
 		}
 		
 		Debug.LogWarning(this + " invalid floating text object: " + obj + " label=" + label);

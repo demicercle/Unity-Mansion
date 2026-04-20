@@ -796,8 +796,10 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 		mouseHasMoved = false;
 	}
 
+	private bool mouseDown;
 	private void Update()
 	{
+		mouseDown = inputSystem.UI.Click.IsPressed();
 		if (Application.isEditor)
 		{
 			if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
@@ -817,7 +819,8 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 			
 			Cursor.lockState = CursorLockMode.Confined;
 			Cursor.visible = !holdMiddleClick;
-			Cursor.SetCursor(Resources.Load<Texture2D>("Cursors/cursor_none"), Vector2.zero, CursorMode.Auto);
+			SetCurrentCursorType(CursorType.DefaultArrow);
+			//Cursor.SetCursor(Resources.Load<Texture2D>("Cursors/cursor_none"), Vector2.zero, CursorMode.Auto);
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
@@ -900,6 +903,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 				{
 					if (CanControlCharacter(selectedCharacter))
 					{
+						SetCurrentCursorType(CursorType.Navigate);
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
 					}
 					else if(debugCursor) Debug.Log("character not controllable");
@@ -918,11 +922,18 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 							var agent = selectedCharacter.GetAgent();
 							if (overCharacter.InParty())
 							{
-								agent.ClearDestination();
+								agent.ClearDestination();// mouse over another party member
+								SetCurrentCursorType(CursorType.Select);
+							}
+							else if (overCharacter.IsEnemyToPlayer())
+							{
+								agent.AssignDestination(overCharacter.GetPosition(), mouseHasMoved); // mouse over enemy
+								SetCurrentCursorType(CursorType.Attack);
 							}
 							else
 							{
 								agent.AssignDestination(overCharacter.GetPosition(), mouseHasMoved); // mouse over character
+								SetCurrentCursorType(CursorType.Talk);
 							}
 						}
 						else if(debugCursor) Debug.Log("character not controllable");
@@ -939,6 +950,7 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 							{
 								var agent = selectedCharacter.GetAgent();
 								agent.AssignDestination(bestWaypoint.GetPosition(), mouseHasMoved); // mouse over prop
+								SetCurrentCursorType(overProp.GetCursorType());
 							}
 							//else Debug.LogWarning("no waypoint found");
 						}
@@ -968,6 +980,25 @@ public class GameView : MonoBehaviour, IView<GameController>, IDebugGUI
 				selectedCharacter.GetAgent().ClearDestination();
 			}
 		}
+
+		if (HasCoroutines())
+		{
+			SetCurrentCursorType(CursorType.WaitArrow);
+		}
+
+		if (isLoadingScenes)
+		{
+			SetCurrentCursorType(CursorType.Waiting);
+		}
+		
+		if(Cursor.lockState != CursorLockMode.None)
+			CursorData.GetCursorData(currentCursor).Apply(mouseDown);
+	}
+
+	private CursorType currentCursor;
+	void SetCurrentCursorType(CursorType cursorType)
+	{
+		currentCursor = cursorType;
 	}
 
 	public void OnApplicationFocus(bool value)
