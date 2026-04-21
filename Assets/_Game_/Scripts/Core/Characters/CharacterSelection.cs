@@ -5,20 +5,19 @@ using System.Linq;
 public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICursorHandler
 {
 	#region Static Selection Methods
-	static CharacterController selectedCharacter;
-	static public event System.Action selectionChanged;
+	public static event System.Action selectionChanged;
 	
-	static public CharacterController GetSelectedCharacter() => selectedCharacter;
+	public static CharacterController GetSelectedCharacter() => selectedCharacter;
 
-	static public bool TryGetSelectedCharacter(out CharacterController character)
+	public static bool TryGetSelectedCharacter(out CharacterController character)
 	{
 		character = GetSelectedCharacter();
 		return character != null;
 	}
 
-	static public bool IsCharacterSelected(CharacterController character) => selectedCharacter == character;
+	public static bool IsCharacterSelected(CharacterController character) => selectedCharacter == character;
 
-	static public void SelectCharacter(CharacterController character)
+	public static void SelectCharacter(CharacterController character)
 	{
 		Debug.Log("SelectCharacter: " + character);
 
@@ -41,18 +40,18 @@ public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICu
 		selectionChanged?.Invoke();
 	}
 
-	static public void SelectPartyCharacter(int index)
+	public static void SelectPartyCharacter(int index)
 	{
 		var party = CharacterController.GetPartyCharacters().ToArray();
 		if(index >= 0 && index < party.Length) SelectCharacter(party[index]);
 	}
 	
-	static public int GetSelectedPartyCharacterIndex()
+	public static int GetSelectedPartyCharacterIndex()
 	{
 		return selectedCharacter == null ? -1 : CharacterController.GetPartyCharacters().ToList().IndexOf(selectedCharacter);
 	}
 	
-	static public void SelectNextCharacter()
+	public static void SelectNextCharacter()
 	{
 		var party = CharacterController.GetPartyCharacters().OrderBy(c => c.GetPartyIndex()).ToArray();
 		var startIndex = GetSelectedPartyCharacterIndex();
@@ -83,8 +82,9 @@ public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICu
 	}
 	#endregion
 	
+	private static CharacterController selectedCharacter;
 	private CharacterController controller;
-	public CharacterController GetController()
+	public CharacterController GetController() // TODO Remove
 	{
 		if(!controller) controller = GetComponent<CharacterController>();
 		return controller;

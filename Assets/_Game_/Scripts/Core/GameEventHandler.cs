@@ -4,24 +4,22 @@ using UnityEngine.Events;
 
 public class GameEventHandler : MonoBehaviour
 {
-	public UnityEvent turnEnded, turnStarted, sceneLoaded;
+	public UnityEvent turnEnded, turnStarted;
 
-	GameView gameView;
-	GameController gameController;
+	GameTurnManager _gameTurnManager;
 	
 	private void Awake()
 	{
-		gameView = GameView.GetInstance();
-		gameController = gameView.GetController();
+		_gameTurnManager = GameTurnManager.Instance;
 
-		gameController.turnEnded += TurnEnded;
-		gameController.turnStarted += TurnStarted;
+		_gameTurnManager.turnEnded += TurnEnded;
+		_gameTurnManager.turnStarted += TurnStarted;
 	}
 
 	private void OnDestroy()
 	{
-		gameController.turnEnded -= TurnEnded;
-		gameController.turnStarted -= TurnStarted;
+		_gameTurnManager.turnEnded -= TurnEnded;
+		_gameTurnManager.turnStarted -= TurnStarted;
 	}
 	
 	void TurnEnded() => turnEnded?.Invoke();

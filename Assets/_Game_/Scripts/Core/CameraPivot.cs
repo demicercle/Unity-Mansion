@@ -5,7 +5,6 @@ using LightType = UnityEngine.LightType;
 
 public class CameraPivot : MonoBehaviour
 {
-    
 #if UNITY_EDITOR
     //public Object controllerObj;
     private void OnDrawGizmosSelected()
@@ -23,9 +22,10 @@ public class CameraPivot : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
     }
+#endif
     
     [ContextMenu("UpdateSunLight")]
-    void UpdateSunLight()
+    public void UpdateSunLight()
     {
         //if (!updateSunLightPosition) return;
         if (!sunLight)
@@ -38,7 +38,7 @@ public class CameraPivot : MonoBehaviour
     }
 
     [ContextMenu("ResetFocus")]
-    void ResetFocus()
+    public void ResetFocus()
     {
         focusPosition = worldBounds.center;
         editorYaw = 0;
@@ -49,7 +49,7 @@ public class CameraPivot : MonoBehaviour
     }
 
     [ContextMenu("FocusFirstCharacter")]
-    void FocusFirstCharacter()
+    public void FocusFirstCharacter()
     {
         var firstCharacter = Utils.FindObjects<CharacterController>()
             .OrderBy(c => (c.CompareTag(Consts.TAG_PLAYER) ? 0 : 1) + c.transform.GetSiblingIndex())
@@ -65,23 +65,28 @@ public class CameraPivot : MonoBehaviour
         
         Debug.LogWarning("no character found!");
     }
-#endif
     
-    static private CameraPivot instance;
-
-    static public CameraPivot Instance
+    public void ApplySettings(CameraSettings newSettings = null)
     {
-        get
+        _cameraSettings = newSettings ? newSettings : CameraSettings.DefaultSettings;
+        if (!_cameraSettings)
         {
-            if (instance == null)
-            {
-                instance = FindObjectsByType<CameraPivot>(default).FirstOrDefault();
-            }
-            
-            return instance;
+            Debug.LogWarning(this + " no camera settings");
+            return;
         }
+        
+        lerpSpeed = _cameraSettings.lerpSpeed;
+        inputSpeed = _cameraSettings.inputSpeed;
+        panSpeed = _cameraSettings.panSpeed;
+        screenPadding = _cameraSettings.screenPadding;
+        zoomSpeed = _cameraSettings.zoomSpeed;
+        rotationSpeed = _cameraSettings.rotationSpeed;
+        orbitSpeed = _cameraSettings.orbitSpeed;
+        orbitMaxSpeed = _cameraSettings.orbitMaxSpeed;
+        orbitDrag = _cameraSettings.orbitDrag;
     }
     
+    public static CameraPivot Instance => instance;
     
     [ReadOnly] [SerializeField] private Vector3 focusPosition;
     
@@ -100,14 +105,16 @@ public class CameraPivot : MonoBehaviour
     [SerializeField] private float worldY = 0f;
     [Min(0f)][SerializeField] private float worldHeight = 12f;
     [Space]
-    [Header("Settings")]
-    [Range(0f,1f)] [SerializeField] private float startZoom = .5f;
+    [Header("Scene Settings")]
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
-    [SerializeField] private bool canRotateY = true;
     [SerializeField] private float clampedRotationAngle = 0.0f;
-    [SerializeField] private bool orbitFromScreenCenter = true; // TODO in Settings
     [Space]
-    [Header("ReadOnly")]
+    [Header("References")] 
+    [SerializeField] private Animator animator;
+    [SerializeField] private string zoomParameter;
+    [SerializeField] private Transform rotationPivot;
+    [Space]
+    [Header("ReadOnly (CameraSettings)")]
     [ReadOnly] [SerializeField] private float lerpSpeed = 1.5f;
     [ReadOnly] [SerializeField] private float inputSpeed = 10.0f;
     [ReadOnly] [SerializeField] private float panSpeed = 8.0f;
@@ -115,28 +122,15 @@ public class CameraPivot : MonoBehaviour
     [ReadOnly] [SerializeField] private float zoomSpeed = 1.0f;
     [ReadOnly] [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
     [ReadOnly] [SerializeField] private Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
+    [ReadOnly] [SerializeField] private Vector2 orbitMaxSpeed = new Vector2(-1f, -1f);
     [ReadOnly] [SerializeField] private float orbitDrag = 0.1f;
-    
-    void UpdateSettings()
-    {
-        if (!_cameraSettings) return;
-        lerpSpeed = _cameraSettings.lerpSpeed;
-        inputSpeed = _cameraSettings.inputSpeed;
-        panSpeed = _cameraSettings.panSpeed;
-        screenPadding = _cameraSettings.screenPadding;
-        zoomSpeed = _cameraSettings.zoomSpeed;
-        rotationSpeed = _cameraSettings.rotationSpeed;
-        orbitSpeed = _cameraSettings.orbitSpeed;
-        orbitDrag = _cameraSettings.orbitDrag;
-    }
 
-    [Header("References")] 
-    [SerializeField] private Animator animator;
-    [SerializeField] private string zoomParameter;
-    [SerializeField] private Transform rotationPivot;
     
     #region PUBLIC
-
+    public Vector3 GetFocusPosition()
+    {
+        return focusPosition;
+    }
     public Bounds GetWorldBounds() => worldBounds;
     public void SetWorldBounds(Bounds bounds, bool updatePosition = true)
     {
@@ -177,34 +171,27 @@ public class CameraPivot : MonoBehaviour
         UpdateAnimator();
     }
 
-    public void SetStartZoom() => SetZoom(startZoom);
     public void SetZoom(float value)
     {
+        Debug.Log(this + " SetZoom " + value);
         desiredZoom = Mathf.Clamp01(value);
         UpdateAnimator();
     }
 
     public void ClampedRotation(float delta)
     {
-        //Debug.LogWarning("do nothing!");
-        if (!canRotateY) return;
         desiredYaw = (desiredYaw - clampedRotationAngle * delta);
     }
-
-    public bool OrbitCanZoom() => orbitSpeed.y > 0;
-
-    public bool OrbitFromScreenCenter() => orbitFromScreenCenter;
-
-    //public void Orbit(Vector2 delta) => Orbit(delta.x, delta.y);
-    public void Orbit(float deltaX, float deltaY, bool scaleWithInputs)
+    
+    public void Orbit(float deltaX, float deltaY, float inputScale = 1f)
     {
-        if (!canRotateY) return;
-        desiredYaw += deltaX * orbitSpeed.x * (scaleWithInputs ? inputSpeed * Mathf.PI : 1.0f);
+        orbitScale = new Vector2(deltaX, deltaX) * inputScale;
+        if (orbitMaxSpeed.x > 0) orbitScale.x = Mathf.Min(orbitScale.x, -orbitMaxSpeed.x, orbitMaxSpeed.x);
+        if (orbitMaxSpeed.y > 0) orbitScale.y = Mathf.Min(orbitScale.y, -orbitMaxSpeed.y, orbitMaxSpeed.y);
+        desiredYaw += deltaX * orbitSpeed.x * orbitScale.x;
         Zoom(deltaY * orbitSpeed.y);
-        // desiredYaw = Mathf.Clamp(-180)
     }
-
-   // public void PanWithMouse(float mouseY, float scale) => PanWithMouse(new Vector2(Screen.width / 2f, mouseY), scale);
+    
     public bool TryPanWithMouse(Vector2 mousePosition, float scale)
     {
         if (Time.realtimeSinceStartup - lastTimeFocused < CameraSettings.DefaultSettings.cameraFocusLockTime) return false;
@@ -230,6 +217,9 @@ public class CameraPivot : MonoBehaviour
     
     #region PRIVATE
     
+    
+    private static CameraPivot instance;
+    
     private Light sunLight;
     private float desiredYaw;
     private float currentYaw;
@@ -238,28 +228,29 @@ public class CameraPivot : MonoBehaviour
     private float lastTimeFocused;
     private Quaternion desiredRotation;
     private Vector3 currentPosition;
-
+    private Vector2 orbitScale;
     private CameraSettings _cameraSettings;
 
-    void Awake()
+    private void Awake()
     {
+        if (instance) Debug.LogError(this + " duplicated!");
+        instance = this;
         desiredZoom = currentZoom = awakeZoom;
     }
 
     private void Start()
     {
-        _cameraSettings = CameraSettings.DefaultSettings;
+        ApplySettings();
         UpdateAnimator();
     }
 
     private void LateUpdate()
     {
-        UpdateSettings();
         UpdateBounds();
         UpdatePosition();
         UpdateAnimator();
     }
-
+    
     private void UpdateAnimator()
     {
         if (animator && !string.IsNullOrEmpty(zoomParameter))
@@ -316,4 +307,6 @@ public class CameraPivot : MonoBehaviour
     }
     
     #endregion
+
+    
 }

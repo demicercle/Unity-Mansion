@@ -1,7 +1,6 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-
+[ExecuteInEditMode]
 public class HideChildInPrefab : MonoBehaviour
 {
 	#if UNITY_EDITOR
@@ -44,13 +43,15 @@ public class HideChildInPrefab : MonoBehaviour
 
 	private void Awake()
 	{
-		SetHidden(false);
-		Destroy(this);
+		if (Application.isPlaying)
+		{
+			SetHidden(false);
+			Destroy(this);
+		}
 	}
 
-	private void OnDrawGizmos()
+	private void Update()
 	{
-		if (Application.isPlaying) return;
 		SetHidden(setHidden && !IsInPrefabStage());
 	}
 #endif

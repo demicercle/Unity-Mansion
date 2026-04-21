@@ -2203,7 +2203,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: maxSpeed
-      value: 4.5
+      value: 2.25
       objectReference: {fileID: 0}
     - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: endReachedDistance
@@ -2391,16 +2391,52 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 1073438ee4f0c4348946f744ef5176ad, type: 2}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: velocityScale
-      value: 0.5
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.moving
+      value: Moving
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: aiBrains.Array.size
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: animators.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.runTrigger
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: 'aiBrains.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: c748149b05c63454da88307adf411fb2, type: 2}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: 'animators.Array.data[0]'
+      value: 
+      objectReference: {fileID: 5757940252891256333}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.deathTrigger
+      value: Death
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.attackTrigger
+      value: Attack
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.combatTrigger
+      value: Scream
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.getHitTrigger
+      value: GetHit
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.switchOnTrigger
+      value: Scream
+      objectReference: {fileID: 0}
     - target: {fileID: 6483927452517428826, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_LookAtBones.Array.data[0].m_Bone
       value: 
@@ -2452,7 +2488,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       propertyPath: m_Name
-      value: RPG-Character
+      value: RPG-Character-Zombi
+      objectReference: {fileID: 0}
+    - target: {fileID: 100210, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
+      propertyPath: m_Name
+      value: RPG-Character-Mesh-Zombi
       objectReference: {fileID: 0}
     - target: {fileID: 100210, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       propertyPath: m_Layer
@@ -2521,7 +2561,7 @@ PrefabInstance:
     - target: {fileID: 9500000, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 7ff0cf27ed8e9684b9bdd381bab1f846, type: 2}
+      objectReference: {fileID: 9100000, guid: 6d78cd63520394e439cd66f48ba71f88, type: 2}
     - target: {fileID: 9500000, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
@@ -2633,6 +2673,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d4d5807a91944b4822368cfe984b1ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onFootL:
+    m_PersistentCalls:
+      m_Calls: []
+  onFootR:
+    m_PersistentCalls:
+      m_Calls: []
+  onWeaponSwitch:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &5757940252884301857 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400204, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}

@@ -4,12 +4,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AIBrain_Patrol", menuName = "AIBrain/Patrol", order = 0)]
 public class AIBrain_Patrol : AIBrainBase
 {
-	public bool canUseRunAction;
+	[SerializeField] private float waypointWaitSeconds = 2.0f;
+	[SerializeField] private bool canUseRunAction;
 	
 	public override IEnumerator Think(CharacterController character)
 	{
-		yield return new WaitForSeconds(1.0f);
-		
 		if (!PatrolRoute.FindRoute(character, out PatrolRoute patrolRoute))
 		{
 			Debug.LogWarning(character + " has no patrol route");
@@ -42,7 +41,7 @@ public class AIBrain_Patrol : AIBrainBase
 				if (!character.WaypointReached(lastWaypointToReach))
 				{
 					Debug.Log(this + " !WaypointReached, patrols towards lastWaypointToReach " + lastWaypointToReach);
-					gameView.MoveCharacterToWaypoint(character, lastWaypointToReach, canUseRunAction);
+					character.Routines.AssignMoveToWaypoint(lastWaypointToReach, canUseRunAction);
 				}
 				
 				else
@@ -60,8 +59,6 @@ public class AIBrain_Patrol : AIBrainBase
 					{
 						Debug.Log(character + " reached last waypoint " + wpIndex + ", use all actions");
 						character.UseAllActions();
-						yield return new WaitForSeconds(Consts.AIThinksSeconds);
-						yield break;
 					}
 					else
 					{
@@ -70,11 +67,11 @@ public class AIBrain_Patrol : AIBrainBase
 						DebugDrawer.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), patrolRoute.color, 1.0f);
 					}
 					
-					yield return new WaitForSeconds(Consts.AIThinksSeconds); // TODO Patrol point "wait time"
+					yield return new WaitForSeconds(waypointWaitSeconds);
 				}
 			}
 
-			while (gameView.HasCoroutines())
+			while (CharacterRoutines.AnyActiveRoutines())
 			{
 				if (lastWaypointToReach != null)
 				{

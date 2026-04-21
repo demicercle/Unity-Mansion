@@ -16,10 +16,6 @@
 	public const float MinMagnitude = 0.01f;
 	public const float CantSeconds = 1.0f;
 	public const float CharacterMovedTimeout = 5.0f;
+	public const float CharacterAnimTimeout = 5.0f;
 	
-	public const float TurnChangedSeconds = 3.0f;
-	public const float FocusCharacterSeconds = 1.5f;
-	public const float DefaultActionSeconds = 3.0f;
-	public const float CameraStartsSeconds = 0.5f;
-	public const float AIThinksSeconds = 0.5f;
 }

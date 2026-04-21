@@ -7,6 +7,7 @@ using Pathfinding;
 using Pathfinding.Drawing;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController))]
 public class CharacterAgent : MonoBehaviour
 {
 	[Header("Movement")]
@@ -87,7 +88,6 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
-		//Debug.Log(this + " StopMovement");
 		ClearDestination();
 	}
 	
@@ -128,8 +128,27 @@ public class CharacterAgent : MonoBehaviour
 		return /*aiPath.reachedDestination ||*/ Vector3.Distance(aiPath.position, dest) <= GetMinReachDistance();
 	}
 
+	public void SetAgentActive(bool value)
+	{
+		StopMovement();
+		
+//		Debug.Log(this + " SetAgentActive=" + value);
+		aiPath.enabled = value;
+		
+		if (aiPath.enabled)
+		{
+			aiPath.Teleport(transform.position);
+		}
+	}
+
 	private const float TIMED_OUT = 3f;
-	public IEnumerator SearchPathAsync(Vector3 dest, System.Action onComplete = null)
+
+	public Coroutine SearchPathAsync(Vector3 dest, System.Action onComplete = null)
+	{
+		return StartCoroutine(DoSearchPathAsync(dest, onComplete));
+	}
+	
+	private IEnumerator DoSearchPathAsync(Vector3 dest, System.Action onComplete = null)
 	{
 		AssignDestination(dest, true); // WaitCharacterMoved
 		
@@ -171,7 +190,7 @@ public class CharacterAgent : MonoBehaviour
 	private bool hasDestination;
 	private AIPath aiPath;
 	private CharacterController controller;
-	private GameController gameController; // TODO
+	private GameTurnManager _gameTurnManager; // TODO
 	private CharacterAnimation _characterAnimation;
 	private Vector3[] lastPath;
 
@@ -182,34 +201,35 @@ public class CharacterAgent : MonoBehaviour
 		Utils.DrawGizmosCircle(transform.position, Vector3.up, GetMinReachDistance());
 	}
 
-	void UpdateComponent()
-	{
-		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
-		aiPath.radius = radius;
-		aiPath.height = height;
-		aiPath.maxSpeed = moveSpeed;
-		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
-	}
-
 	private void Awake()
 	{
 		_characterAnimation = GetComponent<CharacterAnimation>();
 		controller = _characterAnimation.GetController();
 		controller.onUseAction += OnUseAction;
 		
-		gameController = GameController.GetInstance();
-		gameController.turnEnded += UpdatePathAndTarget;
-		gameController.turnStarted += UpdatePathAndTarget;
+		_gameTurnManager = GameTurnManager.Instance;
+		_gameTurnManager.turnEnded += UpdatePathAndTarget;
+		_gameTurnManager.turnStarted += UpdatePathAndTarget;
 		CharacterSelection.selectionChanged += SelectionChanged;
 		
 		UpdateComponent();
+	}
+
+	private void UpdateComponent()
+	{
+		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
+		aiPath.radius = radius;
+		aiPath.height = height;
+		aiPath.maxSpeed = moveSpeed;
+		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
+		if(Application.isPlaying) SetAgentActive(false);
 	}
 	
 	private void OnDestroy()
 	{
 		controller.onUseAction -= OnUseAction;
-		gameController.turnEnded -= UpdatePathAndTarget;
-		gameController.turnStarted -= UpdatePathAndTarget;
+		_gameTurnManager.turnEnded -= UpdatePathAndTarget;
+		_gameTurnManager.turnStarted -= UpdatePathAndTarget;
 		CharacterSelection.selectionChanged -= SelectionChanged;
 	}
 
@@ -219,15 +239,14 @@ public class CharacterAgent : MonoBehaviour
 		
 		UpdatePathAndTarget(true);
 	}
-	
 
-	void OnUseAction(CharacterAction action, object param)
+	private void OnUseAction(CharacterAction action, object param)
 	{
 		StopMovement();
 		UpdatePathAndTarget(true);
 	}
 
-	void SelectionChanged()
+	private void SelectionChanged()
 	{
 		if (controller.IsSelected())
 		{
@@ -244,7 +263,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (GameView.GetInstance().HasCoroutines()) // todo
+		if (CharacterRoutines.AnyActiveRoutines()) // todo
 			UpdatePathAndTarget(true);
 	}
 
@@ -258,13 +277,13 @@ public class CharacterAgent : MonoBehaviour
 		shouldDrawPath[0] = hasDestination // "thin" path
 		                    && CharacterSelection.IsCharacterSelected(controller)
 		                    && controller.IsControllableByPlayer()
-		                    && (!GameView.GetInstance().HasCoroutines() || controller.IsMoving())
+		                    && (!CharacterRoutines.AnyActiveRoutines() || controller.IsMoving())
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 
 		shouldDrawPath[1] = hasDestination  // "thin" path
 		                    && CharacterSelection.IsCharacterSelected(controller) 
 		                    && controller.IsControllableByPlayer() 
-		                    && !GameView.GetInstance().HasCoroutines()
+		                    && !CharacterRoutines.AnyActiveRoutines()
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();

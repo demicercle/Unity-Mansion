@@ -1,20 +1,40 @@
 # Unity-Mansion
 
 - add namespaces
+
 - Talk Action
 - DebugGUI Draw Character stats (movePoints, etc)
 	> Right Click editor selects character under mouse
-- "Forsaken" Startup scene
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
-- GameView.Routines
-- GameView.Cursor
-- BUG! camera render target not working anymore
 - change animation of characters during the mythos phase ("look around", "weapons ready", etcs)
 - OpportunityAttacks
-- DefaultAnims
-- "explore" command
-- BUG! selection circle alpha when AI turns
+- tweaks! selection circle alpha when AI turns
 - assign action on release click
+- rename "NavUtility" into component "NavMeshRebuilder"
+- GameView is GameInput
+- if no actions, change the cursor
+
+- custom asset post processor
+- update color of nav target depending on the action (red for enemies)
+
+NullReferenceException: Object reference not set to an instance of an object
+GameInput.OnDisable () (at Assets/_Game_/Scripts/Core/GameInput.cs:162)
+
+
+PC_Player_2 (CharacterController) !HasMovePoints
+UnityEngine.Debug:Log (object)
+CharacterRoutines/<WaitCharacterMoved>d__21:MoveNext () (at Assets/_Game_/Scripts/Core/Characters/CharacterRoutines.cs:290)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+
+AnimationEventHandler "onAnimEvent<EventType>" DoWaitEvent
+OpenDoor Animation
+UpdateWeapons on End movement
+add debug key to speed up time
+
+		[o/	needed to go to "-10" in Execution Order Settings
+		
+		Si je suis venu chez toi, FadeScreen.cs, c'est qu'il y avait quelque chose à rajouter
 
 - RpgAnims 
 	> DrawWeapons

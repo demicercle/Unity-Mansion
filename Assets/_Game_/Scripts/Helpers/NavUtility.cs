@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class NavUtility : MonoBehaviour
 {
+	public static bool IsRebuildingAsync() => instance != null;
 	
 	public static bool TryGetNearestNavPosition(Vector3 position, float maxDistance, out Vector3 navPosition)
 	{
@@ -33,6 +34,7 @@ public class NavUtility : MonoBehaviour
 
 		return false;
 	}
+	
 	
 	static private NavUtility instance;
 	static public void RebuildNavigationAsync(float delay=0f)

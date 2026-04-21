@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "CameraSettings", menuName = "CameraSettings", order = 0)]
-public class CameraSettings : ScriptableObject, IDebugGUI
+public class CameraSettings : ScriptableObject/*, IDebugGUI*/
 {
 	static private CameraSettings defaultSettingsInstance;
 	static public CameraSettings DefaultSettings
@@ -20,6 +20,10 @@ public class CameraSettings : ScriptableObject, IDebugGUI
 			return defaultSettingsInstance;
 		}
 	}
+
+	public bool editorUpdate;
+	
+	[Space]
 	
 	[Header("Movement")]
 	public float lerpSpeed = 1.5f;
@@ -32,10 +36,11 @@ public class CameraSettings : ScriptableObject, IDebugGUI
 	public float zoomSpeed = 1.0f;
 	public Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
 	public Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
+	public Vector2 orbitMaxSpeed = new Vector2(-1.0f, -1.0f);
 	public float orbitDrag = 0.1f;
 
 	//private bool setDirtyEditor;
-	public void OnDebugGUI()
+	/*public void OnDebugGUI()
 	{
 		DebugGUI.BeginGroup("Camera Settings");
 		lerpSpeed = DebugGUI.Range(lerpSpeed, 0, 16, "lerpSpeed");
@@ -49,7 +54,33 @@ public class CameraSettings : ScriptableObject, IDebugGUI
 		orbitSpeed.y = DebugGUI.Range(orbitSpeed.y, 0, 32, "orbitSpeedY");
 		orbitDrag = DebugGUI.Range(orbitDrag, 0, 1, "orbitDrag");
 		DebugGUI.EndGroup();
+	}*/
+}
+
+#if UNITY_EDITOR
+[UnityEditor.CustomEditor(typeof(CameraSettings))]
+public class CameraSettingsEditor : UnityEditor.Editor
+{
+	private CameraSettings cameraSettings => target as CameraSettings;
+	private CameraPivot cameraPivot;
+	
+	override public void OnInspectorGUI()
+	{
+		if (cameraSettings.editorUpdate)
+		{
+			if (!cameraPivot) cameraPivot = FindObjectsByType<CameraPivot>(default).FirstOrDefault();
+			if (!cameraPivot)
+			{
+				GUILayout.Label("no camera found", UnityEditor.EditorStyles.boldLabel);
+			}
+			else
+			{
+				cameraPivot.ApplySettings(cameraSettings);
+				UnityEditor.EditorUtility.SetDirty(cameraSettings);
+			}
+		}
 		
-		//if(setDirtyEditor) Utils.SetDirty(this);
+		base.OnInspectorGUI();
 	}
 }
+#endif
