@@ -6,11 +6,11 @@ public abstract class AIBrainBase : ScriptableObject
 {
 	public int defaultPriority;
 	
-	public abstract IEnumerator Think(CharacterController character);
+	public abstract IEnumerator Think(CharacterController selfCharacter);
 
-	public virtual int GetPriority(CharacterController character) => defaultPriority;
+	public virtual int GetPriority(CharacterController selfCharacter) => defaultPriority;
 
-	public virtual void DrawGizmos(CharacterController character)
+	public virtual void DrawGizmos(CharacterController selfCharacter)
 	{
 		
 	}

@@ -185,7 +185,7 @@ public class GameTurnManager : MonoBehaviour
 
 				yield return new WaitForSeconds(aiThinksSeconds);
 			
-				Debug.Log("Think() " + aiBrain + " " + otherCharacter);
+				Debug.Log(otherCharacter + " Think() " + aiBrain);
 				yield return StartCoroutine(aiBrain.Think(otherCharacter));
 				Debug.Log("End Think()");
 

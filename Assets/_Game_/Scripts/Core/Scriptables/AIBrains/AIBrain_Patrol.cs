@@ -7,41 +7,41 @@ public class AIBrain_Patrol : AIBrainBase
 	[SerializeField] private float waypointWaitSeconds = 2.0f;
 	[SerializeField] private bool canUseRunAction;
 	
-	public override IEnumerator Think(CharacterController character)
+	public override IEnumerator Think(CharacterController selfCharacter)
 	{
-		if (!PatrolRoute.FindRoute(character, out PatrolRoute patrolRoute))
+		if (!PatrolRoute.FindRoute(selfCharacter, out PatrolRoute patrolRoute))
 		{
-			Debug.LogWarning(character + " has no patrol route");
+			Debug.LogWarning(selfCharacter + " has no patrol route");
 			yield break;
 		}
 		
 		var waypoints = patrolRoute.waypoints;
-		while (character.HasActions() && character.HasMovePoints())
+		while (selfCharacter.HasActions() && selfCharacter.HasMovePoints())
 		{
 			yield return null;
 			patrolRoute.DebugDraw(0);
 				
 			if (lastWaypointToReach == null)
 			{
-				if (!Waypoint.GetBestWaypointFromPosition(character.GetPosition(), out var bestWaypoint,
+				if (!Waypoint.GetBestWaypointFromPosition(selfCharacter.GetPosition(), out var bestWaypoint,
 					    waypoints))
 				{
-					Debug.LogWarning(character + " cannot find next waypoint");
+					Debug.LogWarning(selfCharacter + " cannot find next waypoint");
 					yield break;
 				}
 				else
 				{
 					lastWaypointToReach = bestWaypoint;
-					Debug.Log(character + " picked bestWaypoint " + lastWaypointToReach);
+					Debug.Log(selfCharacter + " picked bestWaypoint " + lastWaypointToReach);
 				}
 			}
 
 			if (lastWaypointToReach != null)
 			{
-				if (!character.WaypointReached(lastWaypointToReach))
+				if (!selfCharacter.WaypointReached(lastWaypointToReach))
 				{
 					Debug.Log(this + " !WaypointReached, patrols towards lastWaypointToReach " + lastWaypointToReach);
-					character.Routines.AssignMoveToWaypoint(lastWaypointToReach, canUseRunAction);
+					selfCharacter.Routines.AssignMoveToWaypoint(lastWaypointToReach, canUseRunAction);
 				}
 				
 				else
@@ -57,14 +57,14 @@ public class AIBrain_Patrol : AIBrainBase
 
 					if (wpIndex >= waypoints.Count)
 					{
-						Debug.Log(character + " reached last waypoint " + wpIndex + ", use all actions");
-						character.UseAllActions();
+						Debug.Log(selfCharacter + " reached last waypoint " + wpIndex + ", use all actions");
+						selfCharacter.UseAllActions();
 					}
 					else
 					{
 						lastWaypointToReach = waypoints[wpIndex];
-						Debug.Log(character + " picked next waypoint " + wpIndex + " " + lastWaypointToReach);
-						DebugDrawer.Line(lastWaypointToReach.GetPosition(), character.GetPosition(), patrolRoute.color, 1.0f);
+						Debug.Log(selfCharacter + " picked next waypoint " + wpIndex + " " + lastWaypointToReach);
+						DebugDrawer.Line(lastWaypointToReach.GetPosition(), selfCharacter.GetPosition(), patrolRoute.color, 1.0f);
 					}
 					
 					yield return new WaitForSeconds(waypointWaitSeconds);

@@ -17,8 +17,10 @@ public class AIBrain_Chase : AIBrainBase
 	private CharacterController lastThinker;
 	private DetectionTrigger detectionTrigger;
 
-	public override int GetPriority(CharacterController character)
+	public override int GetPriority(CharacterController selfCharacter)
 	{
+		SetupThinker(selfCharacter);
+		
 		if (lastTarget != null)
 		{
 			if (detectionTrigger && !detectionTrigger.IsCharacterDetected(lastTarget))
@@ -32,11 +34,11 @@ public class AIBrain_Chase : AIBrainBase
 		{
 			if (!detectionTrigger)
 			{
-				InstantSearchTarget(character);
+				GetClosestTarget(selfCharacter);
 			}
 			else
 			{
-				if (detectionTrigger.TryGetClosestDetectedCharacter(character.GetPosition(), out var otherCharacter))
+				if (detectionTrigger.TryGetClosestDetectedCharacter(selfCharacter.GetPosition(), out var otherCharacter))
 				{
 					lastTarget = otherCharacter;
 				}
@@ -46,33 +48,30 @@ public class AIBrain_Chase : AIBrainBase
 		return !lastTarget ? -1 : defaultPriority;
 	}
 
-	public override IEnumerator Think(CharacterController character)
+	public override IEnumerator Think(CharacterController selfCharacter)
 	{
-		if (lastThinker != lastTarget) detectionTrigger = null; // for some reason, it's a new character thinking
-		
-		detectionTrigger = character.GetComponent<DetectionTrigger>();
-		if(!detectionTrigger) detectionTrigger = character.GetComponentInChildren<DetectionTrigger>();
-		if(!detectionTrigger) Debug.LogWarning(this + " has no detection trigger, will do instant search");
-		
-		lastThinker = character;
+		SetupThinker(selfCharacter);
 
-		yield return character.StartCoroutine(DoTargetUpdate(character));
-
+		if (!lastTarget && !detectionTrigger)
+		{
+			GetClosestTarget(selfCharacter);
+		}
+		
 		if (lastTarget != null)
 		{
-			if (!character.CanAttack())
+			if (!selfCharacter.CanAttack())
 			{
 				Debug.Log(this + " cannot attack !");
-				if (cantBarks) character.FloatingText_Cant();
+				if (cantBarks) selfCharacter.FloatingText_Cant();
 				yield return new WaitForSeconds(defaultWait);
 			}
 			
-			while (character.CanAttack())
+			while (selfCharacter.CanAttack())
 			{
 				Debug.Log(this + " chase " + lastTarget);
 				
-				DebugDrawer.Line(character.GetEyesPosition(), lastTarget.GetCenterPosition(), Color.red, 1.0f);
-				character.Routines.AssignAttack(lastTarget, !noRun, noLOS);
+				DebugDrawer.Line(selfCharacter.GetEyesPosition(), lastTarget.GetCenterPosition(), Color.red, 1.0f);
+				selfCharacter.Routines.AssignAttack(lastTarget, !noRun, noLOS);
 
 				do
 				{
@@ -81,87 +80,102 @@ public class AIBrain_Chase : AIBrainBase
 				} while (CharacterRoutines.AnyActiveRoutines());
 			}
 		}
-		else
+		else if (detectionTrigger)
 		{
-			Debug.Log(character + " did not find any target");
-			yield return new WaitForSeconds(defaultWait);
-		}
-	}
-	
-	public override void DrawGizmos(CharacterController character)
-	{
-		Gizmos.color = hearingColor;
-		Utils.DrawGizmosCircle(character.GetEyesPosition(), default, hearingDistance);
-		if(Application.isPlaying && lastTarget != null) DebugDrawer.Line(character.GetEyesPosition(), character.GetCenterPosition(), hearingColor, 0.0f);
-	}
-	
-	
-	
-
-	private IEnumerator DoTargetUpdate(CharacterController character)
-	{
-		if (lastTarget != null)
-		{
-			if (lastTarget.IsDead())// 
+			if (!detectionTrigger.IsCharacterDetected(lastTarget))
 			{
-				Debug.Log(this + " forget dead target");
-				lastTarget = null; 
-			}
-
-			if (detectionTrigger)
-			{
-				if (!detectionTrigger.IsCharacterDetected(lastTarget))
+				if (detectionTrigger.TryGetLastKnownPosition(lastTarget, out var lastKnownPosition))
 				{
-					if (detectionTrigger.TryGetLastKnownPosition(lastTarget, out var lastKnownPosition))
-					{
-						character.Routines.MoveToDestination(lastKnownPosition);
+					selfCharacter.Routines.MoveToDestination(lastKnownPosition);
 						
-						do
-						{
-							yield return null;
-						} while (!detectionTrigger.IsCharacterDetected(lastTarget));
+					do
+					{
+						yield return null;
+					} while (!detectionTrigger.IsCharacterDetected(lastTarget));
 
-						if (detectionTrigger.IsCharacterDetected(lastTarget))
-						{
-							Debug.Log(this + " detects AGAIN " + lastTarget);
-							// TODO something?
-						}
-						else
-						{
-							// TODO look around
-							lastTarget = null; // forget target
-						}
+					if (detectionTrigger.IsCharacterDetected(lastTarget))
+					{
+						Debug.Log(this + " detects AGAIN " + lastTarget);
+						// TODO something?
+					}
+					else
+					{
+						// TODO look around
+						lastTarget = null; // forget target
 					}
 				}
 			}
 		}
+	}
+	
+	public override void DrawGizmos(CharacterController selfCharacter)
+	{
+		Gizmos.color = hearingColor;
+		Utils.DrawGizmosCircle(selfCharacter.GetEyesPosition(), default, hearingDistance);
+		if(Application.isPlaying && lastTarget != null) DebugDrawer.Line(selfCharacter.GetEyesPosition(), selfCharacter.GetCenterPosition(), hearingColor, 0.0f);
+	}
 
-		if (!lastTarget)
+	private void SetupThinker(CharacterController selfCharacter)
+	{
+		if (lastThinker && selfCharacter == lastThinker)
 		{
-			if (!detectionTrigger)
+			Debug.Log(this + " Setup " + selfCharacter + "==" + lastThinker);
+			return;
+		}
+		
+		if (lastThinker != null)
+		{
+			if (detectionTrigger)
 			{
-				InstantSearchTarget(character);
+				detectionTrigger.onCharacterDetected -= OnCharacterDetected;
+				detectionTrigger.onCharacterLost -= OnCharacterLost;
+				detectionTrigger = null;
 			}
+		}
+
+
+		Debug.Log(this + " setup new " + lastThinker + " > " + selfCharacter);
+		lastThinker = selfCharacter;
+		
+		if (lastThinker != null)
+		{
+			detectionTrigger = lastThinker.GetComponent<DetectionTrigger>();
+			if(!detectionTrigger) detectionTrigger = lastThinker.GetComponentInChildren<DetectionTrigger>();
+			if(!detectionTrigger) Debug.LogWarning(this + " has no detection trigger, will do GetClosestTarget");
 			else
 			{
-				if (detectionTrigger.TryGetClosestDetectedCharacter(character.GetPosition(), out var other))
-				{
-					lastTarget = other;
-				}
-				
-				Debug.Log(this + " finds target: " + lastTarget);
+				detectionTrigger.onCharacterDetected += OnCharacterDetected;
+				detectionTrigger.onCharacterLost += OnCharacterLost;
 			}
 		}
 	}
 
-	private void InstantSearchTarget(CharacterController character)
+	private void OnCharacterDetected(CharacterController otherCharacter)
 	{
-		var closest = character.GetClosestCharacter(character.GetNearbyLivingCharacters(hearingDistance, 1.0f, hearingColor));
+		if (lastTarget == null && !otherCharacter.IsDead() && lastThinker.IsEnemyTo(otherCharacter))
+		{
+			lastTarget = otherCharacter;
+			Debug.Log(this + " OnCharacterDetected " + lastThinker + " detects " + lastTarget + " with " + detectionTrigger);
+		}
+	}
+
+	private void OnCharacterLost(CharacterController otherCharacter)
+	{
+		if (lastTarget == otherCharacter)
+		{
+			Debug.Log(this + " OnCharacterDetected " + lastThinker + " looses " + otherCharacter + " with " + detectionTrigger);
+			lastTarget = null;
+		}
+	}
+
+	private void GetClosestTarget(CharacterController selfCharacter)
+	{
+		var closest = selfCharacter.GetClosestCharacter(selfCharacter.GetNearbyLivingCharacters(hearingDistance, 1.0f, hearingColor));
 		if (closest != null)
 		{
 			lastTarget = closest;
 		}
 				
-		Debug.Log(this + " finds target (without detection trigger): " + lastTarget);
+		Debug.Log(this + " GetClosestTarget " + selfCharacter + " finds target: " + lastTarget);
 	}
 }

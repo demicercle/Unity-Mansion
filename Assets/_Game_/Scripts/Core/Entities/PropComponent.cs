@@ -58,6 +58,8 @@ public class PropComponent : MonoBehaviour
 		{
 			SetDisabled(true);
 		}
+		
+		if (rebuildNavigation) RebuildNavigationAsync();
 	}
 
 	public bool GetBestWaypoint(Vector3 worldPos, out Waypoint bestWaypoint) // TODO "fake" public

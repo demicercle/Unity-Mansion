@@ -6,7 +6,7 @@ public class AIBrain_Wait : AIBrainBase
 {
 	[SerializeField] private float waitTime = 1.0f;
 	
-	public override IEnumerator Think(CharacterController character)
+	public override IEnumerator Think(CharacterController selfCharacter)
 	{
 		yield return new WaitForSeconds(waitTime);
 	}

@@ -383,6 +383,8 @@ MonoBehaviour:
   characterData: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
   aiBrains:
   - {fileID: 11400000, guid: b0c82d13c6812d04dbae852e66e7de48, type: 2}
+  - {fileID: 11400000, guid: 7fdd958a7081f7244a15ffb7e5d0cf96, type: 2}
+  - {fileID: 11400000, guid: c748149b05c63454da88307adf411fb2, type: 2}
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
@@ -1133,6 +1135,7 @@ MonoBehaviour:
   seeingDistance: 8.5
   maxAngle: 70
   looseTargetTime: 0
+  tickTime: 0
   noLOS: 0
 --- !u!1 &7960376793328208188
 GameObject:

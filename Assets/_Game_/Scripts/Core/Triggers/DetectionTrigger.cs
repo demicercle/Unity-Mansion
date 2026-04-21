@@ -7,15 +7,17 @@ using UnityEngine;
 
 public class DetectionTrigger : MonoBehaviour
 {
-	private const float TICK_TIME = 0.5f;
-	
 	static public int debugMode { get; set; }
+
+	public System.Action<CharacterController> onCharacterDetected;
+	public System.Action<CharacterController> onCharacterLost;
 	
 	[SerializeField] private CharacterController selfCharacter;
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
-	[SerializeField][Range(0f, 360f)] private float looseTargetTime = 3.0f;
+	[SerializeField][Min(0)] private float looseTargetTime = 3.0f;
+	[SerializeField][Min(0)] private float tickTime = 0.5f;
 	[SerializeField] private bool noLOS = false;
 
 	public bool IsCharacterDetected(CharacterController character) => detectedCharacters.ContainsKey(character);
@@ -52,7 +54,7 @@ public class DetectionTrigger : MonoBehaviour
 	
 	#region PRIVATE
 
-	private bool detectionUsesTime => looseTargetTime > 0f || debugMode > 2;
+	private bool detectionUsesTime => tickTime > 0f || debugMode > 2;
 	
 	private string debugString;
 	private Dictionary<CharacterController, Vector4> detectedCharacters = new Dictionary<CharacterController, Vector4>(); //Vector4 z is time TODO
@@ -94,7 +96,11 @@ public class DetectionTrigger : MonoBehaviour
 		while (true)
 		{
 			DoUpdate();
-			yield return new WaitForSeconds(TICK_TIME);
+			
+			if (tickTime > 0) 
+				yield return new WaitForSeconds(tickTime);
+			else 
+				yield return new WaitForEndOfFrame();
 		}
 	}
 
@@ -137,15 +143,14 @@ public class DetectionTrigger : MonoBehaviour
 				}
 				else
 				{
-					if (detectionUsesTime) 
-						lastKnownPosition.z -= Time.deltaTime;
-					else 
-						lastKnownPosition.z = 0;
+					if (!detectionUsesTime)
+						lastKnownPosition.z = Time.time;
 
-					if (Time.time - lastKnownPosition.z >= looseTargetTime)
+					if (looseTargetTime > 0 && Time.time - lastKnownPosition.z >= looseTargetTime)
 					{
 						Debug.Log(selfCharacter + " forgets " + otherCharacter); // forgets
 						detectedCharacters.Remove(otherCharacter);
+						onCharacterLost?.Invoke(otherCharacter);
 
 						if (debugMode > 0)
 						{
@@ -181,6 +186,7 @@ public class DetectionTrigger : MonoBehaviour
 					var value = (Vector4)otherPosition;
 					value.z = Time.time;
 					detectedCharacters.Add(otherCharacter, value);
+					onCharacterDetected?.Invoke(otherCharacter);
 			
 					Debug.Log(selfCharacter + " detects " + otherCharacter);
 
