@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class DetectionTrigger : MonoBehaviour
 {
+	private const float TICK_TIME = 0.5f;
+	
 	static public int debugMode { get; set; }
 	
 	[SerializeField] private CharacterController selfCharacter;
@@ -15,8 +17,9 @@ public class DetectionTrigger : MonoBehaviour
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
 	[SerializeField][Range(0f, 360f)] private float looseTargetTime = 3.0f;
 	[SerializeField] private bool noLOS = false;
+
+	private bool detectionUsesTime => looseTargetTime > 0f || debugMode > 2;
 	
-#if UNITY_EDITOR
 	private string debugString;
 	private Dictionary<CharacterController, Vector4> detectedCharacters = new Dictionary<CharacterController, Vector4>(); //Vector4 z is time TODO
 
@@ -41,6 +44,124 @@ public class DetectionTrigger : MonoBehaviour
 		CharacterController.onCharacterUsesAction -= OnCharacterUsesAction;
 	}
 
+	private void OnEnable()
+	{
+		if (detectionUsesTime)
+			StartCoroutine(Ticks());
+	}
+
+	private void OnDisable()
+	{
+		StopAllCoroutines();
+	}
+
+	private IEnumerator Ticks()
+	{
+		while (true)
+		{
+			DoUpdate();
+			yield return new WaitForSeconds(TICK_TIME);
+		}
+	}
+
+	private void OnCharacterUsesAction(CharacterController otherCharacter, CharacterAction actionType)
+	{
+		DoUpdate();
+	}
+
+	private void OnCharacterMoved(CharacterController otherCharacter)
+	{
+		DoUpdate();
+	}
+
+	private void DoUpdate()
+	{
+		debugString = "";
+		foreach (var otherCharacter in CharacterController.AllCharacters)
+		{
+			if (otherCharacter == selfCharacter) continue;
+			if (detectedCharacters.ContainsKey(otherCharacter)) // character already detected
+			{
+				var lastKnownPosition = detectedCharacters[otherCharacter];
+
+				if (!string.IsNullOrEmpty(debugString)) debugString += "\n";
+				debugString += "\n>" + otherCharacter.name + " " + (Time.time - lastKnownPosition.z).ToString("N2");
+
+				if (IsCharacterVisible(otherCharacter))
+				{
+					// still visible
+					lastKnownPosition.z = Time.time;
+					detectedCharacters[otherCharacter] = lastKnownPosition;
+
+					if (debugMode > 0) // draw lines
+					{
+						var factionColor = ColorSettings.GetCharacterColor(selfCharacter, false, false);
+						DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetCenterPosition(),
+							factionColor, debugDrawTime);
+						DebugDrawCapsule(otherCharacter, Utils.ColorScale(factionColor, Mathf.PI * 0.1f), debugDrawTime);
+					}
+				}
+				else
+				{
+					if (detectionUsesTime) 
+						lastKnownPosition.z -= Time.deltaTime;
+					else 
+						lastKnownPosition.z = 0;
+
+					if (Time.time - lastKnownPosition.z >= looseTargetTime)
+					{
+						Debug.Log(selfCharacter + " forgets " + otherCharacter); // forgets
+						detectedCharacters.Remove(otherCharacter);
+
+						if (debugMode > 0)
+						{
+							DebugDrawCapsule(otherCharacter, Color.magenta, Mathf.PI);
+						}
+					}
+					else
+					{
+						detectedCharacters[otherCharacter] = lastKnownPosition; //set detection time
+
+						if (debugMode > 0) // draw lines with time label
+						{
+							DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetPosition(), Color.gray,
+								debugDrawTime);
+							DebugDrawer.WireDisc((Vector3)lastKnownPosition, Vector3.up, otherCharacter.GetRadius(),
+								Color.yellow, debugDrawTime);
+							DebugDrawer.WorldLabel(
+								(Vector3)lastKnownPosition + Vector3.up * otherCharacter.GetHeight() + Vector3.up / 2f,
+								lastKnownPosition.z.ToString("N2"), debugDrawTime, 0);
+						}
+					}
+				}
+			}
+
+			else
+			{
+				var eyesPosition = selfCharacter.GetEyesPosition();
+				var otherPosition = otherCharacter.GetPosition();
+				var otherCenter = otherCharacter.GetCenterPosition();
+
+				if (IsCharacterVisible(otherCharacter))
+				{
+					var value = (Vector4)otherPosition;
+					value.z = Time.time;
+					detectedCharacters.Add(otherCharacter, value);
+			
+					Debug.Log(selfCharacter + " detects " + otherCharacter);
+
+					if (debugMode > 0)
+					{
+						var factionColor = ColorSettings.GetCharacterColor(selfCharacter, false, false);
+						DebugDrawCapsule(otherCharacter, Utils.ColorScale(ColorSettings.GetCharacterColor(otherCharacter), Mathf.PI * 0.1f), Mathf.PI);
+						DebugDrawer.Line(eyesPosition, otherCenter, factionColor, Mathf.PI * 0.1f);
+					}
+				}
+			}
+			
+		}
+	}
+
 	private bool IsCharacterVisible(CharacterController otherCharacter)
 	{
 		if (selfCharacter.IsPlayer() && otherCharacter.IsPlayer()) return true;
@@ -58,158 +179,6 @@ public class DetectionTrigger : MonoBehaviour
 			return distance <= hearingDistance ||
 			       (distance <= seeingDistance && AngleCheck(otherCharacter) && LOSCheck(otherCharacter));
 		}
-	}
-
-	private void OnCharacterUsesAction(CharacterController otherCharacter, CharacterAction actionType)
-	{
-		if (otherCharacter != selfCharacter)
-			OnCharacterMoved(otherCharacter);
-	}
-
-	private void OnCharacterMoved(CharacterController otherCharacter)
-	{
-		if (otherCharacter == selfCharacter)
-		{
-			if (debugMode > 1) Debug.Log(selfCharacter + " OnSelfMoved");
-
-			foreach (var otherOther in CharacterController.AllCharacters)
-			{
-				if (otherOther == selfCharacter) continue;
-				OnCharacterMoved(otherOther);
-			}
-			
-			return;
-		}
-		
-		if (debugMode > 1) 
-			Debug.Log(selfCharacter + " OnCharacterMoved " + otherCharacter);
-		
-		if (detectedCharacters.ContainsKey(otherCharacter))
-			return; // character already visible
-		
-		var eyesPosition = selfCharacter.GetEyesPosition();
-		var otherPosition = otherCharacter.GetPosition();
-		var otherCenter = otherCharacter.GetCenterPosition();
-
-		if (IsCharacterVisible(otherCharacter))
-		{
-			var value = (Vector4)otherPosition;
-			value.z = Time.time;
-			detectedCharacters.Add(otherCharacter, value);
-			
-			Debug.Log(selfCharacter + " detects " + otherCharacter);
-
-			if (debugMode > 0)
-			{
-				var factionColor = ColorSettings.GetCharacterColor(selfCharacter, false, false);
-				DebugDrawCapsule(otherCharacter, Utils.ColorScale(ColorSettings.GetCharacterColor(otherCharacter), Mathf.PI * 0.1f), Mathf.PI);
-				DebugDrawer.Line(eyesPosition, otherCenter, factionColor, Mathf.PI * 0.1f);
-			}
-		}
-	}
-
-	private void Update()
-	{
-		debugString = "";
-		foreach (var otherCharacter in detectedCharacters.Keys.ToArray())
-		{
-			var lastKnownPosition = detectedCharacters[otherCharacter];
-
-			if (!string.IsNullOrEmpty(debugString)) debugString += "\n";
-			debugString += "\n>" + otherCharacter.name + " " + (Time.time - lastKnownPosition.z).ToString("N2");
-
- 			if (IsCharacterVisible(otherCharacter))
-			{
-				// still visible
-				lastKnownPosition.z = Time.time;
-				detectedCharacters[otherCharacter] = lastKnownPosition;
-
-				if (debugMode > 0) // draw lines
-				{
-					var factionColor = ColorSettings.GetCharacterColor(selfCharacter, false, false);
-					DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetCenterPosition(),
-						factionColor, debugDrawTime);
-					DebugDrawCapsule(otherCharacter, Utils.ColorScale(factionColor, Mathf.PI * 0.1f), debugDrawTime);
-				}
-			}
-			else
-			{
-				lastKnownPosition.z -= Time.deltaTime;
-
-				if (Time.time - lastKnownPosition.z >= looseTargetTime)
-				{
-					Debug.Log(selfCharacter + " forgets " + otherCharacter); // forgets
-					detectedCharacters.Remove(otherCharacter);
-
-					if (debugMode > 0)
-					{
-						DebugDrawCapsule(otherCharacter, Color.magenta, Mathf.PI);
-					}
-				}
-				else
-				{
-					detectedCharacters[otherCharacter] = lastKnownPosition; //set detection time
-
-					if (debugMode > 0) // draw lines with time label
-					{
-						DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetPosition(), Color.gray,
-							debugDrawTime);
-						DebugDrawer.WireDisc((Vector3)lastKnownPosition, Vector3.up, otherCharacter.GetRadius(),
-							Color.yellow, debugDrawTime);
-						DebugDrawer.WorldLabel(
-							(Vector3)lastKnownPosition + Vector3.up * otherCharacter.GetHeight() + Vector3.up / 2f,
-							lastKnownPosition.z.ToString("N2"), debugDrawTime, 0);
-					}
-				}
-			}
-		}
-	}
-	
-	#if UNITY_EDITOR
-	private void LateUpdate()
-	{
-		if (debugMode > 0)
-		{
-			var center = transform.position;
-			
-			DebugDrawer.WireDisc(center, transform.forward, hearingDistance, Color.yellow);
-			
-			Gizmos.color = Color.magenta;
-			if (maxAngle >= 360f)
-			{
-				DebugDrawer.WireDisc(center, transform.forward, seeingDistance, Color.yellow);
-				return;
-			}
-
-			var lineColor = Utils.ColorScale(ColorSettings.GetCharacterColor(selfCharacter, false, false),
-				Mathf.PI * 0.1f);
-			var forward = center + transform.forward * seeingDistance;
-			var left = center + transform.rotation * Quaternion.Euler(0, -maxAngle / 2f, 0) * Vector3.forward * seeingDistance;
-			var right =  center + transform.rotation * Quaternion.Euler(0, maxAngle / 2f, 0) * Vector3.forward * seeingDistance;
-			DebugDrawer.Line(center, forward, lineColor);
-			DebugDrawer.Line(center, left, lineColor);
-			DebugDrawer.Line(forward, right, lineColor);
-			DebugDrawer.Line(right, forward, lineColor);
-			DebugDrawer.Line(forward, left, lineColor);
-		}
-	}
-
-	private void OnGUI()
-	{
-		if (debugMode > 0)
-		{
-			Utils.DrawWorldGUI(transform.position, debugString);
-		}
-	}
-#endif
-
-	private void DebugDrawCapsule(CharacterController otherCharacter, Color color, float duration)
-	{
-		var eyesPosition = selfCharacter.GetEyesPosition();
-		var otherCenter = otherCharacter.GetCenterPosition();
-		DebugDrawer.Line(eyesPosition, otherCenter, color, duration);
-		DebugDrawer.WireCapsule(otherCenter, Quaternion.identity, otherCharacter.GetRadius(),
-			otherCharacter.GetHeight(), color, duration);
 	}
 
 	private bool AngleCheck(CharacterController other)
@@ -257,12 +226,57 @@ public class DetectionTrigger : MonoBehaviour
 
 		return true;
 	}
+
+	private void DebugDrawCapsule(CharacterController otherCharacter, Color color, float duration)
+	{
+		var eyesPosition = selfCharacter.GetEyesPosition();
+		var otherCenter = otherCharacter.GetCenterPosition();
+		DebugDrawer.Line(eyesPosition, otherCenter, color, duration);
+		DebugDrawer.WireCapsule(otherCenter, Quaternion.identity, otherCharacter.GetRadius(),
+			otherCharacter.GetHeight(), color, duration);
+	}
+	
+	#if UNITY_EDITOR
+	private void LateUpdate()
+	{
+		if (debugMode > 0)
+		{
+			var center = transform.position;
+			
+			DebugDrawer.WireDisc(center, transform.forward, hearingDistance, Color.yellow);
+			
+			Gizmos.color = Color.magenta;
+			if (maxAngle >= 360f)
+			{
+				DebugDrawer.WireDisc(center, transform.forward, seeingDistance, Color.yellow);
+				return;
+			}
+
+			var lineColor = Utils.ColorScale(ColorSettings.GetCharacterColor(selfCharacter, false, false),
+				Mathf.PI * 0.1f);
+			var forward = center + transform.forward * seeingDistance;
+			var left = center + transform.rotation * Quaternion.Euler(0, -maxAngle / 2f, 0) * Vector3.forward * seeingDistance;
+			var right =  center + transform.rotation * Quaternion.Euler(0, maxAngle / 2f, 0) * Vector3.forward * seeingDistance;
+			DebugDrawer.Line(center, forward, lineColor);
+			DebugDrawer.Line(center, left, lineColor);
+			DebugDrawer.Line(forward, right, lineColor);
+			DebugDrawer.Line(right, forward, lineColor);
+			DebugDrawer.Line(forward, left, lineColor);
+		}
+	}
+
+	private void OnGUI()
+	{
+		if (debugMode > 0)
+		{
+			Utils.DrawWorldGUI(transform.position, debugString);
+		}
+	}
 	
 	private void OnDrawGizmosSelected()
 	{
 		if (selfCharacter)
 		{
-			
 			if (maxAngle <= 0f) return;
 			
 			var center = transform.position;
@@ -291,7 +305,7 @@ public class DetectionTrigger : MonoBehaviour
 			//Gizmos.DrawWireSphere(selfCharacter.GetPosition(), selfCharacter.GetRadius() + triggerRangeOffset);
 		}
 	}
-#endif
-
+	#endif
+	
 	const float debugDrawTime = 0.00001f;
 }

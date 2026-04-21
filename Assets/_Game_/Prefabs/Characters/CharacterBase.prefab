@@ -1132,7 +1132,8 @@ MonoBehaviour:
   hearingDistance: 2.5
   seeingDistance: 8.5
   maxAngle: 70
-  looseTargetTime: 3
+  looseTargetTime: 0
+  noLOS: 0
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0
