@@ -90,7 +90,7 @@ public class GameCanvas : MonoBehaviour
 		floatingText.SetActive(false);
 
 		CharacterController.partyChanged += UpdatePortraits;
-
+		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
 	}
 

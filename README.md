@@ -14,7 +14,8 @@
 - GameView is GameInput
 - if no actions, change the cursor
 
-
+- custom asset post processor
+- update color of nav target depending on the action (red for enemies)
 
 PC_Player_2 (CharacterController) !HasMovePoints
 UnityEngine.Debug:Log (object)

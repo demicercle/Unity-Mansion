@@ -54,9 +54,7 @@ MonoBehaviour:
   viewWidth: 0.5
   viewHeight: 0.818
   guiSkin: {fileID: 11400000, guid: 4393402c63a81b1419e1d2ccc7a8aeb0, type: 2}
-  debugObjects:
-  - {fileID: 11400000, guid: 0ef1874cf9e753c4ab1d4ad24303fa78, type: 2}
-  - {fileID: 0}
+  debugObjects: []
   scrollValue: {x: 0, y: 0}
   screenRect:
     serializedVersion: 2

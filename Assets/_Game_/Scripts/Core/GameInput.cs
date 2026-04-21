@@ -1,14 +1,9 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using IngameDebugConsole;
-using NUnit.Framework;
-using Oddworm.Framework;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
-using UnityEngine.SceneManagement;
 
 public interface ICursorHandler
 {
@@ -27,8 +22,14 @@ public class GameInput : MonoBehaviour
 	
 	public static GameInput Instance => instance;
 	
-	[UnityEngine.Range(0.01f, 0.50f)] public float maxNavDistance = 0.50f;
+	[Header("Camera Control")]
+	[SerializeField] [Range(0f, 6f)] private float inputOrbitScale = 3.14f;
+	[SerializeField] private bool orbitCameraFromCenterScreen = false;
+	[SerializeField] private bool orbitCameraY = false;
 	[SerializeField] private bool cameraCanRotateClamped = false;
+	[Header("Character Control")]
+	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
+	[Space]
 	[SerializeField] private bool debugMode = false;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
@@ -74,7 +75,7 @@ public class GameInput : MonoBehaviour
 			// mouse over something else
 			//DrawDebug.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Vector3.up,maxNavDistance, Color.gray);
 		}
-
+		
 		return CursorRaycastResult_None;
 	}
 
@@ -88,7 +89,7 @@ public class GameInput : MonoBehaviour
 	private bool mouseDown, orbitWithInputs;
 	private Vector2 orbitAxis;
 	private Vector2 orbitDelta;
-	private float leftClickValue, rightClickValue;
+	private float leftClickValue, rightClickValue, ctxValue;
 	private bool hasNoActionsCursor;
 	private bool hasFocus;
 	private Vector2 mousePosition;
@@ -248,11 +249,11 @@ public class GameInput : MonoBehaviour
 			{
 				orbitDelta = orbitAxis;
 				orbitDelta *= Time.unscaledDeltaTime;
-				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, true);
+				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, inputOrbitScale);
 			}
 			else if (holdMiddleClick)
 			{
-				if (cameraPivot.OrbitFromScreenCenter())
+				if (orbitCameraFromCenterScreen)
 				{
 					orbitDelta.x = Screen.width / 2f - mousePosition.x;
 					orbitDelta.y = Screen.height / 2f - mousePosition.y;
@@ -263,7 +264,7 @@ public class GameInput : MonoBehaviour
 					orbitDelta.y = (middleClickMousePosition - mousePosition).y;
 				}
 				
-				if (cameraPivot.OrbitCanZoom())
+				if (orbitCameraY)
 				{
 //						Debug.Log(this + " try orbit " + deltaX + " " + deltaY);
 					if (Mathf.Abs(orbitDelta.x) > Mathf.Abs(orbitDelta.y))
@@ -283,7 +284,7 @@ public class GameInput : MonoBehaviour
 				
 				orbitDelta.x /= Screen.width;
 				orbitDelta.y /= Screen.height;
-				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, false);
+				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, 1f);
 				
 				mouseHasMoved = true;
 				cameraPivot.OrbitDrag((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime);
@@ -423,31 +424,9 @@ public class GameInput : MonoBehaviour
 		mouseHasMoved = false;
 		mouseDown = false;
 	}
-	
-	private void SetInputEnabled(bool value)
-	{
-		if (inputEnabled != value)
-		{
-			inputEnabled = value;
-			Debug.Log(" inputEnabled=" + inputEnabled);
-			
-			if (inputEnabled)
-			{
-				inputSystem.Player.Enable();
-				inputSystem.UI.Enable();
-			}
-			else
-			{
-				inputSystem.Player.Disable();
-				inputSystem.UI.Disable();
-			}
-		}
-	}
-	
-	private void OnLogWindowShown() => SetInputEnabled(false);
-	
-	private void OnLogWindowHidden() => SetInputEnabled(hasFocus);
 
+	// KEY INPUT
+	
 	private void OnInputEndTurn(CallbackContext ctx) => gameTurnManager.TryEndPlayerTurn();
 
 	private void OnInputAction_Run(CallbackContext ctx)
@@ -473,12 +452,6 @@ public class GameInput : MonoBehaviour
 		if (hasFocus) cameraPivot.Zoom(-ctx.ReadValue<Vector2>().y);
 	}
 	
-	private void OnInputMouseMove(CallbackContext ctx)
-	{
-		mousePosition = ctx.ReadValue<Vector2>();
-		mouseHasMoved = true;
-	}
-	
 	private void OnInputFocusSelected(CallbackContext ctx)
 	{
 		if (gameTurnManager.IsPlayerTurn())
@@ -498,25 +471,47 @@ public class GameInput : MonoBehaviour
 		}
 		else Debug.Log("not in player turn");
 	}
+	
+	// MOUSE INPUT
+	
+	private void OnInputMouseMove(CallbackContext ctx)
+	{
+		mousePosition = ctx.ReadValue<Vector2>();
+		mouseHasMoved = true;
+	}
 
 	private void OnInputRightClick(CallbackContext ctx)
 	{
-		rightClickValue = ctx.ReadValue<float>();
+		ctxValue = ctx.ReadValue<float>();
 		
-		if (rightClickValue > 0) // right click pressed
+		if (ctxValue > 0) // right click PRESSED
+		{
+			if (!hasFocus || !mouseOverViewport)
+				return;
+		}
+		
+		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
 		{
 			if (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines())
 			{
 				CharacterSelection.SelectCharacter(null); // deselect all
 			}
 		}
+		
+		rightClickValue = ctxValue;
 	}
 	
 	private void OnInputLeftClick(CallbackContext ctx)
 	{
-		leftClickValue = ctx.ReadValue<float>();
+		ctxValue = ctx.ReadValue<float>();
 
-		if (hasFocus && leftClickValue > 0f) // left click pressed
+		if (ctxValue > 0) // left click PRESSED
+		{
+			if (!hasFocus || !mouseOverViewport)
+				return;
+		}
+
+		if (hasFocus && ctxValue <= 0 && leftClickValue > 0) // left click RELEASED
 		{
 			if (!mouseOverViewport) return;
 			
@@ -538,17 +533,47 @@ public class GameInput : MonoBehaviour
 				ClickNavigation(hit.point);
 			}
 		}
+
+		leftClickValue = ctxValue;
 	}
 
 	private void OnMouseOverViewport(bool value) => mouseOverViewport = value;
 	
 	private void OnClickedViewport() => OnApplicationFocus(true);
+	
+	// Callbacks
+	
+	private void OnLogWindowShown() => SetInputEnabled(false);
+	
+	private void OnLogWindowHidden() => SetInputEnabled(hasFocus);
 
 	private void SelectionChanged()
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
 			cameraPivot.Focus(selectedCharacter);
+		}
+	}
+	
+	// others
+	
+	private void SetInputEnabled(bool value)
+	{
+		if (inputEnabled != value)
+		{
+			inputEnabled = value;
+			Debug.Log(" inputEnabled=" + inputEnabled);
+			
+			if (inputEnabled)
+			{
+				inputSystem.Player.Enable();
+				inputSystem.UI.Enable();
+			}
+			else
+			{
+				inputSystem.Player.Disable();
+				inputSystem.UI.Disable();
+			}
 		}
 	}
 
@@ -640,7 +665,6 @@ public class GameInput : MonoBehaviour
 	{
 		return hasFocus && !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && character.IsControllableByPlayer();
 	}
-
 	private void SetCurrentCursorType(CursorType cursorType)
 	{
 		currentCursor = cursorType;
