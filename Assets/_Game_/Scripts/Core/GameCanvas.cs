@@ -146,7 +146,14 @@ public class GameCanvas : MonoBehaviour
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out var selected))
 		{
-			selected.TryUseAction(CharacterAction.RunAction, true);
+			if (selected.CanUseAction(CharacterAction.RunAction))
+			{
+				selected.Routines.AssignRunAction();
+			}
+			else
+			{
+				selected.FloatingText_Cant();
+			}
 		}
 	}
 

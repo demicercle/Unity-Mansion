@@ -14,4 +14,12 @@ public abstract class AIBrainBase : ScriptableObject
 	{
 		
 	}
+
+	public virtual void Init(CharacterController selfCharacter)
+	{
+	}
+
+	public virtual void Dispose()
+	{
+	}
 }

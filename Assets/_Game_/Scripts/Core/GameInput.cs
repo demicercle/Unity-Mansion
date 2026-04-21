@@ -446,7 +446,8 @@ public class GameInput : MonoBehaviour
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			selectedCharacter.TryUseAction(CharacterAction.RunAction, true);
+			if(selectedCharacter.CanUseAction(CharacterAction.RunAction))
+				selectedCharacter.Routines.AssignRunAction();
 		}
 	}
 

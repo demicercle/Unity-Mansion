@@ -122,7 +122,7 @@ public class CharacterController : MonoBehaviour
 		return HasActions();
 	}
 	
-	public bool TryUseAction(CharacterAction action, bool floatingText)
+	/*public bool TryUseAction(CharacterAction action, bool floatingText)
 	{
 		if (CanUseAction(action))
 		{
@@ -133,7 +133,7 @@ public class CharacterController : MonoBehaviour
 		Debug.Log(this + " TryUseAction " + action + " failed");
 		if(floatingText) FloatingText_Cant();
 		return false;
-	}
+	}*/
 	
 	public void AttackAction(CharacterController target = null, bool stopAgent = true)
 	{
@@ -147,7 +147,6 @@ public class CharacterController : MonoBehaviour
 		if (actionType == CharacterAction.RunAction)
 		{
 			usedMovePoints -= characterData.runActionExtraMovePoints;
-			Routines.AssignRunAction();
 		}
 		onUseAction?.Invoke(actionType, param);
 		onCharacterUsesAction?.Invoke(this, actionType);
@@ -369,7 +368,15 @@ public class CharacterController : MonoBehaviour
 
 	public float GetAttackRange() => currentWeapon.attackRange;
 	
-	public bool CanAttack(bool checkActions = true) => !currentWeapon.noAttack && (!checkActions || HasActions());
+	public bool CanAttack(bool checkActions = true, bool checkMoves = true) => !isDead 
+																				&& !currentWeapon.noAttack 
+	                                                                           && (!checkActions || HasActions()) 
+	                                                                           && (!checkMoves || HasMovePoints()); // endless routines call if false
+
+	public bool CanAttackOther(CharacterController other)
+	{
+		return CanAttack() && !other.IsDead() && IsEnemyTo(other);
+	}
 	
 	public bool TryGetAIBrain(out AIBrainBase aiBrain)
 	{
@@ -388,7 +395,7 @@ public class CharacterController : MonoBehaviour
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	} 
 
-	public bool IsAtAttackRange(CharacterController target, bool losCheck)
+	public bool IsAtAttackRange(CharacterController target, bool losCheck = true)
 	{
 		var atkRange = GetAttackRange();
 		atkRange = Mathf.Max(atkRange, agent.GetRadius() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
@@ -507,6 +514,8 @@ public class CharacterController : MonoBehaviour
 			Debug.LogWarning(this + " has no aiBrains, CreateInstance default");
 			aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());
 		}
+		
+		aiBrains.ForEach(brain => brain.Init(this));
 
 		if (!defaultWeapon)
 		{
@@ -519,6 +528,7 @@ public class CharacterController : MonoBehaviour
 
 	private void OnDestroy()
 	{
+		aiBrains.ForEach(brain => brain.Dispose());
 		_allCharacters.Remove(this);
 	}
 	

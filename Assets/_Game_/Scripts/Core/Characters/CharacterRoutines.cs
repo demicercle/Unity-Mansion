@@ -141,7 +141,7 @@ public class CharacterRoutines : MonoBehaviour
 			
 			else if (!characterOwner.IsMoving())
 			{
-				if (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.TryUseAction(CharacterAction.RunAction, false))
+				if (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.CanUseAction(CharacterAction.RunAction))
 				{
 					yield return characterOwner.StartCoroutine(WaitAction(CharacterAction.RunAction));
 				}
@@ -238,7 +238,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			if (canUseRunAction)
 			{
-				if (!characterOwner.HasActions() && characterOwner.TryUseAction(CharacterAction.RunAction, false))
+				if (!characterOwner.HasActions() && characterOwner.CanUseAction(CharacterAction.RunAction))
 				{
 					yield return characterOwner.StartCoroutine(WaitAction(CharacterAction.RunAction));
 					yield return WaitMoveCharacterToWaypoint(waypoint, false);//TODO: multiple run actions??

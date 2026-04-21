@@ -9,6 +9,8 @@ public class DetectionTrigger : MonoBehaviour
 {
 	static public int debugMode { get; set; }
 
+	public static System.Action<CharacterController,CharacterController,bool> onDetectionChanged;
+	
 	public System.Action<CharacterController> onCharacterDetected;
 	public System.Action<CharacterController> onCharacterLost;
 	
@@ -16,7 +18,7 @@ public class DetectionTrigger : MonoBehaviour
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
-	[SerializeField][Min(0)] private float looseTargetTime = 3.0f;
+	[SerializeField][Min(-1f)] private float looseTargetTime = -1f;
 	[SerializeField][Min(0)] private float tickTime = 0.5f;
 	[SerializeField] private bool noLOS = false;
 
@@ -27,7 +29,8 @@ public class DetectionTrigger : MonoBehaviour
 		if (detectedCharacters.ContainsKey(character))
 		{
 			lastKnownPosition = (Vector3)detectedCharacters[character];
-			return true;
+			if (Time.time - lastKnownPosition.z < looseTargetTime)
+				return true;
 		}
 
 		lastKnownPosition = default;
@@ -151,6 +154,7 @@ public class DetectionTrigger : MonoBehaviour
 						Debug.Log(selfCharacter + " forgets " + otherCharacter); // forgets
 						detectedCharacters.Remove(otherCharacter);
 						onCharacterLost?.Invoke(otherCharacter);
+						onDetectionChanged?.Invoke(selfCharacter, otherCharacter, false);
 
 						if (debugMode > 0)
 						{
@@ -187,6 +191,7 @@ public class DetectionTrigger : MonoBehaviour
 					value.z = Time.time;
 					detectedCharacters.Add(otherCharacter, value);
 					onCharacterDetected?.Invoke(otherCharacter);
+					onDetectionChanged?.Invoke(selfCharacter, otherCharacter, true);
 			
 					Debug.Log(selfCharacter + " detects " + otherCharacter);
 
