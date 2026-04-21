@@ -5,6 +5,31 @@ using UnityEngine;
 
 public static class Utils
 {
+	public static bool TagCheck(string filters, object obj)
+	{
+		return obj == null || string.IsNullOrWhiteSpace(filters) ||
+		       filters.Split(',').ToList().Any(tag =>
+		       {
+			       if (obj is Component)
+				       return (obj as Component).CompareTag(tag);
+
+			       if (obj is GameObject)
+				       return (obj as GameObject).CompareTag(tag);
+
+			       return false;
+		       });
+	}
+
+	static public void DrawWorldGUI(Vector3 position, string debugString)
+	{
+		var guiContent = new GUIContent(debugString);
+		var guiStyle = new GUIStyle("textfield");
+		var guiRect = GUILayoutUtility.GetRect(guiContent, guiStyle);
+		var guiPosition = (Vector2)Camera.main.WorldToScreenPoint(position);
+		guiPosition.y = Screen.height - guiPosition.y;
+		GUI.Box(new Rect(guiPosition, guiRect.size), guiContent);
+	}
+	
 #if UNITY_EDITOR
 	[UnityEditor.MenuItem("Edit/Set Selection Dirty")]
 	static public void SetSelectionDirty()

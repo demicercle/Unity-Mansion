@@ -365,6 +365,7 @@ Transform:
   - {fileID: 9096084158670190266}
   - {fileID: 8685941105244977515}
   - {fileID: 7028977729492440801}
+  - {fileID: 4474169919750407066}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1077634328985660634
@@ -471,6 +472,7 @@ MonoBehaviour:
     getHitTrigger: 
     switchOffTrigger: 
     switchOnTrigger: 
+    instantSwitchTrigger: 
   eventTypes: 
   velocityScale: 1
   minMovePointsToRun: 0.1
@@ -964,7 +966,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7028977729492440801}
-  - component: {fileID: 3333914810703073205}
   - component: {fileID: 9077900241399537452}
   m_Layer: 9
   m_Name: OpportunityAttackTrigger
@@ -988,27 +989,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2682672067756541164}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &3333914810703073205
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4295644061673757802}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 256
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 767
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 1.092
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &9077900241399537452
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1031,6 +1011,7 @@ MonoBehaviour:
   isInstantAttack: 1
   stopAgent: 1
   useAttackAction: 0
+  requiresWeaponReady: 1
   maxTriggerCount: -1
   filters: 
 --- !u!1 &5631688854807395945
@@ -1103,6 +1084,55 @@ MonoBehaviour:
   - {fileID: 4939472226289180237}
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
+--- !u!1 &6574788176991368632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4474169919750407066}
+  - component: {fileID: 1853405886785808040}
+  m_Layer: 8
+  m_Name: DetectionTrigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4474169919750407066
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6574788176991368632}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2682672067756541164}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1853405886785808040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6574788176991368632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d1516f104e7430c8390f2077dc3c781, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DetectionTrigger
+  selfCharacter: {fileID: 1077634328985660634}
+  hearingDistance: 2.5
+  seeingDistance: 8.5
+  maxAngle: 70
+  looseTargetTime: 3
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0

@@ -44,7 +44,7 @@ public class CharacterEventHandler : MonoBehaviour
 
 	private void OnCharacterUseAction(CharacterAction action, object target)
 	{
-		if (action == actionType && GameUtils.TagCheck(filters, target))
+		if (action == actionType && Utils.TagCheck(filters, target))
 		{
 			Debug.Log(this + " OnCharacterUseAction onActionUsed.Invoke " + action);
 			onActionUsed.Invoke();

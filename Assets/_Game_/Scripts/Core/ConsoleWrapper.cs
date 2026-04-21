@@ -9,7 +9,7 @@ public static class ConsoleWrapper
 	public static void _ApplyDamage(int amount)
 	{
 		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
-			character.TakeDamage(amount, null);
+			character.TakeDamage(amount, character);
 	}
 
 	[ConsoleMethod("kill_all", "")]
@@ -77,13 +77,19 @@ public static class ConsoleWrapper
 	[ConsoleMethod("debug_draw", "")]
 	public static void _DebugDraw(int value)
 	{
-		DebugDrawer.IsEnabled = value > 0;
+		Debug.Log("DebugDrawer.debugMode=" + (DebugDrawer.debugMode = value>0));
 	}
 	
 	[ConsoleMethod("debug_cursor", "")]
 	public static void _DebugCursor(int value)
 	{
-		GameInput.debugMode = value;
+		Debug.Log("GameInput.debugMode=" + (GameInput.debugMode = value));
+	}
+	
+	[ConsoleMethod("debug_detection", "")]
+	public static void _DebugDetection(int value)
+	{
+		Debug.Log("DetectionTrigger.debugMode=" + (DetectionTrigger.debugMode = value));
 	}
 
 	/*[ConsoleMethod("debug_gui", "")]

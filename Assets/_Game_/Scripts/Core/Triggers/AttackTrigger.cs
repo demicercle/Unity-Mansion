@@ -32,7 +32,8 @@ public class AttackTrigger : MonoBehaviour
 			enabled = false;
 			return;
 		}
-		
+
+		sphereCollider.radius = selfCharacter.GetRadius() + triggerRangeOffset;
 		sphereCollider.isTrigger = true;
 	}
 
@@ -67,7 +68,7 @@ public class AttackTrigger : MonoBehaviour
 		
 		if (other.TryGetComponent(out CharacterController otherCharacter))
 		{
-			if (!otherCharacter.IsDead() && GameUtils.TagCheck(filters, otherCharacter))
+			if (!otherCharacter.IsDead() && Utils.TagCheck(filters, otherCharacter))
 			{
 				if (movingCharacterOnly && !otherCharacter.IsMoving()) 
 					return;
@@ -106,13 +107,11 @@ public class AttackTrigger : MonoBehaviour
 	#if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
-		sphereCollider = Utils.GetOrAddComponent<SphereCollider>(gameObject);
-		if (!Mathf.Approximately(sphereCollider.radius, triggerRangeOffset))
+		if (selfCharacter)
 		{
-			sphereCollider.isTrigger = true;
-			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_TRIGGER);
-			OnCharacterStatsChanged();
-			Utils.SetDirty(this);
+			Gizmos.color = Color.red;
+			Utils.DrawGizmosCircle(selfCharacter.GetPosition(), Vector3.up, selfCharacter.GetRadius() + triggerRangeOffset);
+			//Gizmos.DrawWireSphere(selfCharacter.GetPosition(), selfCharacter.GetRadius() + triggerRangeOffset);
 		}
 	}
 #endif

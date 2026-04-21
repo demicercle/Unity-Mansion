@@ -308,12 +308,9 @@ public class GameInput : MonoBehaviour
 		}
 
 		CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter);
-		if (selectedCharacter != null)
+		if (selectedCharacter && selectedCharacter.IsDead())
 		{
-			if (selectedCharacter.IsDead())
-			{
-				CharacterSelection.SelectNextCharacter();
-			}
+			CharacterSelection.SelectNextCharacter();
 		}
 
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;

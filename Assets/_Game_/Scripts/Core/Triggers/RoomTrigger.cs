@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -7,6 +6,14 @@ using UnityEngine;
 public class RoomTrigger : MonoBehaviour
 {
 	public static List<RoomTrigger> activeRooms = new List<RoomTrigger>();
+	
+	public static bool IsCharacterVisible(CharacterController character)
+	{
+		if (activeRooms.Any(t => t.HasCharacter(character)))
+			return false;
+		
+		return true;
+	}
 
 	public static System.Action onChanged;
 	

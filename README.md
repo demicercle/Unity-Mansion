@@ -6,19 +6,12 @@
 - DebugGUI Draw Character stats (movePoints, etc)
 	> Right Click editor selects character under mouse
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
-- change animation of characters during the mythos phase ("look around", "weapons ready", etcs)
-- OpportunityAttacks
 - tweaks! selection circle alpha when AI turns
-- assign action on release click
 - rename "NavUtility" into component "NavMeshRebuilder"
-- GameView is GameInput
-- if no actions, change the cursor
 
 - custom asset post processor
 - update color of nav target depending on the action (red for enemies)
 
-- assignation of target cursor mouse over issue
-- ai detection is important for triggering opportunity attack, because weapons ready
 - door nav rebuild
 - zombi should rotate on scream
 - zombi scream should be linked to ai detection and not weapon ready?

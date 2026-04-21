@@ -14,7 +14,7 @@ public interface IDebugGUI
 
 public class DebugGUI : MonoBehaviour
 {
-	static public bool IsEnabled { get; set; }
+	/*static public bool IsEnabled { get; set; }
 
 	public static float FADE_DURATION = 3.0f;
 	public static float FADE_PROGRESS = 0.0f;
@@ -46,15 +46,6 @@ public class DebugGUI : MonoBehaviour
 		fadeTime = d < 0 ? FADE_DURATION : d;
 		fadeAlpha = 0.0f;
 		yield return new WaitForSeconds(FADE_DURATION);
-	}
-	
-	static string GetLabel(string label) => Utils.SplitCamelCase(label);
-	/*{
-		#if UNITY_EDITOR
-		return UnityEditor.ObjectNames.NicifyVariableName(label);
-		#else
-		return label;
-		#endif
 	}*/
 
 	public KeyCode toggleKey = KeyCode.F3;
@@ -75,7 +66,7 @@ public class DebugGUI : MonoBehaviour
 	[ReadOnly] [SerializeField] private Rect screenRect;
 	[ReadOnly] [SerializeField] private Vector2 screenSize;
 
-	private GUIStyle fadeStyle;
+	/*private GUIStyle fadeStyle;
 	private Texture2D blackPixel;
 
 	private void Awake()
@@ -161,5 +152,5 @@ public class DebugGUI : MonoBehaviour
 		FlexibleSpace();
 		if (ToolButton("RESET")) ConsoleWrapper.ResetGame();
 		if (ToolButton("QUIT")) ConsoleWrapper.QuitGame();
-	}
+	}*/
 }

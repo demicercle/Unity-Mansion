@@ -126,7 +126,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	{
 		if (WeaponsSwitched() == weaponsReady)
 		{
-			Debug.Log(this +" weapons already switched" );
+//			Debug.Log(this +" weapons already switched" );
 			return false; 
 		}
 		
@@ -283,24 +283,23 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	
 	private void OnTurnStarted()
 	{
-//		UpdateWeapons();
+		StartCoroutine(CheckForEnemies());
 	}
 
 	private void OnTurnEnded()
 	{
-		//UpdateWeapons();
+		StartCoroutine(CheckForEnemies());
 	}
 
 	private void OnRoomsChanged()
 	{
-		Invoke("UpdateWeapons", roomsReveleadSeconds);
+		StartCoroutine(CheckForEnemies());
 	}
 
-	private void UpdateWeapons()
+	private IEnumerator CheckForEnemies()
 	{
-		CancelInvoke("UpdateWeapons");
-		//var seeEnemies = controller.CanSeeAnyEnemyAround();
-		//Debug.Log(this + " TryRelax seeEnemies=" + seeEnemies);
+		if (!weaponSwitched) yield break;
+		yield return new WaitForSeconds(roomsReveleadSeconds);
 		TrySwitchWeapons(controller.CanSeeAnyEnemyAround());
 	}
 

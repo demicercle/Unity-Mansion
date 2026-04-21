@@ -89,7 +89,7 @@ public class GameCanvas : MonoBehaviour
 		
 		floatingText.SetActive(false);
 
-		CharacterController.partyChanged += UpdatePortraits;
+		CharacterController.onPartyChanged += UpdatePortraits;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
 	}
@@ -102,7 +102,7 @@ public class GameCanvas : MonoBehaviour
 		viewportMouseHandler.onMouseOverChanged -= OnViewportRectMouseOver;
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
 		
-		CharacterController.partyChanged -= UpdatePortraits;
+		CharacterController.onPartyChanged -= UpdatePortraits;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
 	}

@@ -27,10 +27,13 @@ public class CharacterController : MonoBehaviour
 	public static List<CharacterController> AllCharacters => _allCharacters;
 	public static IEnumerable<CharacterController> GetPartyCharacters() => _allCharacters.Where(c => c.InParty());
 	
-	public static event System.Action partyChanged;
+	public static event System.Action onPartyChanged;
+	public static event System.Action<CharacterController> onCharacterMoved;
+	public static event System.Action<CharacterController, CharacterAction> onCharacterUsesAction;
 	
 	public event System.Action onStatsChanged;
-	public event System.Action<bool> selectionChanged;
+	public event System.Action onFactionChanged;
+	public event System.Action<bool> onSelectionChanged;
 	public event System.Action<float> onHealed;
 	public event System.Action<float> onDamaged;
 	public event System.Action<int> onPartyIndexChanged;
@@ -66,6 +69,7 @@ public class CharacterController : MonoBehaviour
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
+		onCharacterMoved?.Invoke(this);
 		onStatsChanged?.Invoke();
 	}
 
@@ -85,7 +89,7 @@ public class CharacterController : MonoBehaviour
 	public void NotifySelected(bool value)
 	{
 		//agent.SetObstacle(!value);//todo not in selection
-		selectionChanged?.Invoke(value);
+		onSelectionChanged?.Invoke(value);
 	}
 
 	public void EndTurn()
@@ -106,6 +110,7 @@ public class CharacterController : MonoBehaviour
 		Debug.Log(this + " Rest");
 		usedActions.Clear();
 		usedMovePoints = 0;
+		onStatsChanged?.Invoke();
 	}
 	
 	public bool HasActions() => usedActions.Count < characterData.maxActions;
@@ -145,12 +150,13 @@ public class CharacterController : MonoBehaviour
 			Routines.AssignRunAction();
 		}
 		onUseAction?.Invoke(actionType, param);
+		onCharacterUsesAction?.Invoke(this, actionType);
 		onStatsChanged?.Invoke();
 	}
 	
 	public void UseAllActions()
 	{
-		ConsumeMovePoints(GetRemainingMovePoints());
+		ConsumeMovePoints(GetRemainingMovePoints(), false);
 		UseAction(CharacterAction.None);
 	}
 	
@@ -188,7 +194,7 @@ public class CharacterController : MonoBehaviour
 			SetCurrentFaction(previousFaction);
 		}
 		onPartyIndexChanged?.Invoke(index);
-		partyChanged?.Invoke();
+		onPartyChanged?.Invoke();
 	}
 
 	private void SetCurrentFaction(CharacterFaction faction)
@@ -197,6 +203,7 @@ public class CharacterController : MonoBehaviour
 		Debug.Log(this  + " SetCurrentFaction " + faction + " from " + previousFaction);
 		previousFaction = currentFaction;
 		currentFaction = faction;
+		onFactionChanged?.Invoke();
 	}
 
 	public bool IsCurrentTurn() => GameTurnManager.Instance.IsPlayerTurn() && IsPlayer();
@@ -264,7 +271,7 @@ public class CharacterController : MonoBehaviour
 	public Vector3 GetCenterPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.5f;  // TODO "GetAgent()"
 	
 	public float GetRadius() => GetAgent().GetRadius();
-	
+	public float GetHeight() => GetAgent().GetHeight();
 	public bool IsMoving() => GetAgent().IsMoving();
 	
 	public void StopAgent()
@@ -284,14 +291,16 @@ public class CharacterController : MonoBehaviour
 	public void Teleport(Vector3 dest, int newRot, bool stopMovement)
 	{
 		GetAgent().Teleport(dest, newRot, stopMovement);
+		onCharacterMoved?.Invoke(this);
 	}
 
 	public int GetRotation() => (int)transform.eulerAngles.y;
 	
-	public void ConsumeMovePoints(float amount)
+	public void ConsumeMovePoints(float amount, bool notifyMoves)
 	{
 		usedMovePoints += amount;
 		onStatsChanged?.Invoke();
+		if(notifyMoves) onCharacterMoved?.Invoke(this);
 	}
 	
 	public float GetTotalDamages() => totalDamages;
@@ -321,31 +330,40 @@ public class CharacterController : MonoBehaviour
 		
 		if(stopAgent) StopAgent();
 
-		if (objectFrom is CharacterController)
-		{
-			if(TryGetAnimation(out var anim))
-				anim.InstantSwitchWeapons();
-		}
-
 		onDamaged?.Invoke(amount);
 		
 		if (GetCurrentHealth() <= 0f)
 		{
-			TryKill();
-			return;
+			if(TryKill())
+				return;
 		}
-		
+
 		onStatsChanged?.Invoke();
+		
+		if (objectFrom is CharacterController)
+		{
+			if(TryGetAnimation(out var anim))
+				anim.InstantSwitchWeapons();
+
+			if (!IsEnemyTo((objectFrom as CharacterController)))
+			{
+				anim.TrySwitchWeapons(false);
+			}
+		}
 	}
-	public void TryKill()
+	public bool TryKill()
 	{
 		if (!IsDead())
 		{
+			Debug.Log(this + " Killed!");
 			isDead = true;
 			agent.SetAgentActive(false);
 			onKilled?.Invoke();
 			onStatsChanged?.Invoke();
+			return true;
 		}
+
+		return false;
 	}
 
 
@@ -392,19 +410,13 @@ public class CharacterController : MonoBehaviour
 	public bool IsUsingRangeWeapon() => currentWeapon.isRanged;
 
 	public bool WeaponsReady() => characterAnimation && characterAnimation.WeaponsSwitched();
-	
-	public bool IsCharacterVisible()
-	{
-		if (RoomTrigger.activeRooms.Any(t => t.HasCharacter(this)))
-			return false;
-		
-		return true;
-	}
+
+	public bool IsCharacterRevealed() => RoomTrigger.IsCharacterVisible(this);
 	
 	public bool CanSeeAnyEnemyAround() => _allCharacters.FirstOrDefault((other) =>
 	{
 		if (!IsEnemyTo(other.GetCurrentFaction())) return false;
-		if (!other.IsCharacterVisible()) return false;
+		if (!other.IsCharacterRevealed()) return false;
 		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
 	});
 

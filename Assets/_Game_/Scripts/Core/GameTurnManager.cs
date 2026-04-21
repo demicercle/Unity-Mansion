@@ -162,7 +162,7 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (otherCharacter.InParty()) continue;
 			
-				if (otherCharacter.IsCharacterVisible())
+				if (otherCharacter.IsCharacterRevealed())
 					cameraPivot.Focus(otherCharacter);
 				else
 				{

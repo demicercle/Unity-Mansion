@@ -311,7 +311,7 @@ public class CharacterRoutines : MonoBehaviour
 			var deltaPos =
 				(newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
 
-			characterOwner.ConsumeMovePoints(deltaPos);
+			characterOwner.ConsumeMovePoints(deltaPos, true);
 
 			if (deltaPos < Consts.MinMagnitude) timeout += Time.deltaTime;
 			else timeout = 0f;
