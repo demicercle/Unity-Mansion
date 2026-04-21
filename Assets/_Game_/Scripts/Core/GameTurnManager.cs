@@ -65,14 +65,6 @@ public class GameTurnManager : MonoBehaviour
 		}
 	}
 	
-	public void EndTurn()
-	{
-		playerTurn = false;
-		CharacterController.AllCharacters.ForEach(c => c.EndTurn());//TODO Event
-		Debug.Log(this + " EndTurn " + currentTurn);
-		turnEnded?.Invoke();
-	}
-	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
 	private int currentTurn;
@@ -212,11 +204,27 @@ public class GameTurnManager : MonoBehaviour
 			yield return null;
 	}
 	
+	private void EndTurn()
+	{
+		playerTurn = false;
+		CharacterController.AllCharacters.ForEach((c) =>
+		{
+			c.EndTurn();
+			if (!c.IsPlayer()) c.Rest();
+		});
+		Debug.Log(this + " EndTurn " + currentTurn);
+		turnEnded?.Invoke();
+	}
+	
 	private void NewTurn()
 	{
 		currentTurn += 1;
 		playerTurn = true;
-		CharacterController.AllCharacters.ForEach(c => c.NewTurn(currentTurn));//TODO Event
+		CharacterController.AllCharacters.ForEach((c) =>
+		{
+			c.NewTurn(currentTurn);
+			if (c.IsPlayer()) c.Rest();
+		});
 		Debug.Log(this + " NewTurn " + currentTurn);
 		turnStarted?.Invoke();
 	}

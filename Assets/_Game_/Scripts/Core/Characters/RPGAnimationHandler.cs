@@ -45,6 +45,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	
 	[HideInInspector] bool isWeaponSwitching = false;
     [HideInInspector] bool dualSwitch;
+    [HideInInspector] bool isBlocking; // TODO
     
 
 	//[Header("Weapon Models")]
@@ -96,6 +97,29 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	    
     }*/
 
+    public void Death()
+    {
+	   // EndAction(HandlerTypes.Block);
+	    animator.SetAnimatorTrigger(AnimatorTrigger.DeathTrigger);
+	    Lock(true, true, false, 0.1f, 0f);
+	    SetIKOff();
+    }
+    
+    public void GetHit(int hitNumber = -1)
+    {
+	    if (hitNumber < 0) hitNumber = (int)AnimationVariations.Hits.TakeRandom();
+	    //GetAngry();
+	    animator.TriggerGettingHit(hitNumber);
+	    if (isBlocking) {
+		    Lock(true, true, false, 0f, 0f);
+		    SetIKOff();
+	    }
+	    else {
+		    Lock(true, true, true, 0.1f, 0.4f);
+		    SetIKPause(0.6f);
+	    }
+    }
+    
     #region WEAPONS
 
     public void Relax()
@@ -104,6 +128,8 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	    animator.SetTrigger(AnimationParameters.Trigger);
 	    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
     }
+
+    public void InstantWeaponSwitch() => InstantWeaponSwitch(rightWeapon);
     
     /// <summary>
     /// Queue a command to unsheath a weapon.
@@ -1047,10 +1073,21 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     #endregion
     
     // TODO RPG ?
+    
+    //public void EndAction(string action)
+   // { GetHandler(action).EndAction(this); }
 
     private void SetIKPause(float pauseTime)
     {
 	    if (ikHands && ikHands.isUsed) { ikHands.SetIKPause(pauseTime); }
+    }
+    
+    private void SetIKOff()
+    {
+	    if (!ikHands) return;
+	    ikHands.leftHandPositionWeight = 0;
+	    ikHands.leftHandRotationWeight = 0;
+	    ikHands.canBeUsed = false;
     }
     
     private void Unlock(bool movement, bool actions)

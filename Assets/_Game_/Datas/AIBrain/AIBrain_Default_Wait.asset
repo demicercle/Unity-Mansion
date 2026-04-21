@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 380a0e2f79ea4521806192fa258c132b, type: 3}
-  m_Name: AIBrain_Wait
+  m_Name: AIBrain_Default_Wait
   m_EditorClassIdentifier: 
   defaultPriority: 0
   time: 1

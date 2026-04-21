@@ -45,6 +45,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		public string getHitTrigger;
 		public string switchOffTrigger;
 		public string switchOnTrigger;
+		public string instantSwitchTrigger;
 		//[Header("RPG Anims")]
 		//public string weapon;
 		//public string triggerNumber;
@@ -108,15 +109,28 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		} while (waitForEvent != EventType.Undefined);
 	}
 
-	public bool TrySwitchWeapons(bool weaponsReady)
+	public void InstantSwitchWeapons()
+	{
+		if (WeaponsSwitched())
+		{
+			return;
+		}
+		
+		if (rpgAnimationHandler) rpgAnimationHandler.InstantWeaponSwitch();
+		TrySetTrigger(parameters.instantSwitchTrigger);
+		weaponSwitched = true;
+		Debug.Log(this + " InstantSwitchWeapons");
+	}
+
+	public bool TrySwitchWeapons(bool weaponsReady) // TODO instant switch weapons
 	{
 		if (WeaponsSwitched() == weaponsReady)
 		{
-			return false; // weapons already switched
+			Debug.Log(this +" weapons already switched" );
+			return false; 
 		}
 		
 		StopAllCoroutines();
-		isSwitchingWeapons = false;
 		
 		if (rpgAnimationHandler == null) // RPG Character Animation override
 		{
@@ -124,13 +138,14 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			if (!weaponsReady && !hasSwitchOffTrigger) return false; // no animator parameter for false
 		}
 		
-		isSwitchingWeapons = true;
 		StartCoroutine(DoWaitSwitchWeapons(weaponsReady)); // do not returns coroutine, use a bool "IsSwitchingWeapons"
 		return true;
 	}
 	
 	private IEnumerator DoWaitSwitchWeapons(bool weaponsReady)
 	{
+		isSwitchingWeapons = true;
+		
 		if (!weaponsReady && hasSwitchOffTrigger)
 		{
 			Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOffTrigger " + parameters.switchOffTrigger);
@@ -268,7 +283,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	
 	private void OnTurnStarted()
 	{
-		UpdateWeapons();
+//		UpdateWeapons();
 	}
 
 	private void OnTurnEnded()
@@ -298,6 +313,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	{
 		GetController().FloatingText(Mathf.CeilToInt(amount).ToString());
 		TrySetTrigger(parameters.getHitTrigger);
+		if (rpgAnimationHandler) rpgAnimationHandler.GetHit();
 	}
 
 	private void OnKilled()
@@ -305,6 +321,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		//TrySetTrigger(parameters.trigger);
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
+		if (rpgAnimationHandler) rpgAnimationHandler.Death();
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 	}
 

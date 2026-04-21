@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class CharacterRoutines : MonoBehaviour
 {
@@ -15,6 +16,11 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		Debug.Log(this + " AssignAttack " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck);
 		StartNewRoutine(WaitCharacterAttackCharacter(target, canUseRunAction, losCheck));
+	}
+	public void AssignAttackInstant(CharacterController target, bool useAction)
+	{
+		Debug.Log(this + " AssignAttackInstant " + target + " usesActions=" + useAction);
+		StartNewRoutine(WaitCharacterPerformAttack(target, useAction));
 	}
 	public void AssignInteract(PropComponent clickedProp) // TODO Prop Controller
 	{
@@ -69,10 +75,11 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		if(activeInstances.Contains(this)) Debug.LogError(this + " _WaitComplete activeInstances.Contains(this)");
 		activeInstances.Add(this);
-//		Debug.Log(this + " routine started " + activeInstances.Count + " > " + coroutine);
+		while (activeInstances[0] != this) yield return null; // wait other routines
+		Debug.Log(this + " routine started");
 		yield return coroutine;
 		activeInstances.Remove(this);
-		Debug.Log(" routine ends " + activeInstances.Count);
+		Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
 	}
 	
 	private IEnumerator WaitCharacterInteract( PropComponent clickedProp)
@@ -153,29 +160,27 @@ public class CharacterRoutines : MonoBehaviour
 			//else Debug.Log(characterOwner + " moves towards " + target);
 		}
 		
-		yield return characterOwner.StartCoroutine(WaitCharacterPerformAttack(target));
+		yield return characterOwner.StartCoroutine(WaitCharacterPerformAttack(target, true));
 	}
 
-	private IEnumerator WaitCharacterPerformAttack(CharacterController target)
+	private IEnumerator WaitCharacterPerformAttack(CharacterController target, bool useAction)
 	{
 		Debug.Log(this + " WaitCharacterPerformAttack " + target );
 		
 		yield return StartCoroutine(WaitCharacterLookPosition(target.GetCenterPosition()));
 
-		if (!characterOwner.CanAttack())
+		if (useAction && !characterOwner.HasActions())
 		{
-			Debug.Log(this + " cannot attack!");
+			Debug.Log(this + " cannot attack (no actions)");
 			characterOwner.FloatingText_Cant();
-			yield return new WaitForSeconds(Consts.CantSeconds);
+			yield return null;
 		}
-		else
-		{
-			characterOwner.AttackAction();
-			yield return characterOwner.WaitAnimationEvent(CharacterAnimation.EventType.Hit);
-			//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
-			//TODO DamageInfo, hit check (GD)
-			target.TakeDamage(characterOwner.GetLastAttackDamage());
-		}
+		
+		characterOwner.AttackAction();
+		yield return characterOwner.WaitAnimationEvent(CharacterAnimation.EventType.Hit);
+		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
+		//TODO DamageInfo, hit check (GD)
+		target.TakeDamage(characterOwner.GetLastAttackDamage(), characterOwner, true);
 
 		Debug.Log("attack ends");
 	}

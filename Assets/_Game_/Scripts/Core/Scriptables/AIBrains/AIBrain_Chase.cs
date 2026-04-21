@@ -7,8 +7,11 @@ public class AIBrain_Chase : AIBrainBase
 {
 	[SerializeField] private bool noRun;
 	[SerializeField] private bool noLOS;
+	[SerializeField] private bool cantBarks;
 	[SerializeField] private Color hearingColor = Color.magenta;
 	[SerializeField] private float hearingDistance = 1.0f;
+	[SerializeField] private float defaultWait = 1.0f;
+	[SerializeField] private float defaultTicks = 0.5f;
 	
 	private CharacterController lastTarget;
 
@@ -25,17 +28,25 @@ public class AIBrain_Chase : AIBrainBase
 
 		if (lastTarget != null)
 		{
+			if (!character.CanAttack())
+			{
+				Debug.Log(this + " cannot attack !");
+				if (cantBarks) character.FloatingText_Cant();
+				yield return new WaitForSeconds(defaultWait);
+			}
+			
 			while (character.CanAttack())
 			{
+				Debug.Log(this + " chase " + lastTarget);
+				
 				DebugDrawer.Line(character.GetEyesPosition(), lastTarget.GetCenterPosition(), Color.red, 1.0f);
 				character.Routines.AssignAttack(lastTarget, !noRun, noLOS);
-				
-				while (CharacterRoutines.AnyActiveRoutines())
+
+				do
 				{
-					yield return null;
-				}
-				
-				yield return new WaitForSeconds(1f);
+					yield return new WaitForSeconds(defaultTicks);
+					
+				} while (CharacterRoutines.AnyActiveRoutines());
 			}
 		}
 	}

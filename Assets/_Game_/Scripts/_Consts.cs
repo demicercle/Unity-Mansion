@@ -8,6 +8,7 @@
 	public const  string LAYER_WALL = "Wall";
 	public const  string LAYER_CHARACTER = "Character";
 	public const  string LAYER_IGNORE = "Ignore Raycast";
+	public const string LAYER_TRIGGER = "Trigger";
 
 	public const string ResPath_Settings = "Settings/";
 	public const string ResPath_Cursors = "Cursors/";

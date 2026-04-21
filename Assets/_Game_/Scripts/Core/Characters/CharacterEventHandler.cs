@@ -10,17 +10,7 @@ public class CharacterEventHandler : MonoBehaviour
 	[SerializeField] private CharacterAction actionType;
 	[SerializeField] private string filters;
 	
-	private bool CheckFilters(object obj) => obj == null || string.IsNullOrWhiteSpace(filters) ||
-	                               filters.Split(',').ToList().Any(tag =>
-	                               {
-		                               if (obj is Component)
-			                               return (obj as Component).CompareTag(tag);
-		                               
-		                               if (obj is GameObject)
-			                               return (obj as GameObject).CompareTag(tag);
-										
-		                               return false;
-	                               });
+	
 
 	[ContextMenu("Find Character")]
 	private void FindCharacter()
@@ -54,7 +44,7 @@ public class CharacterEventHandler : MonoBehaviour
 
 	private void OnCharacterUseAction(CharacterAction action, object target)
 	{
-		if (action == actionType && CheckFilters(target))
+		if (action == actionType && GameUtils.TagCheck(filters, target))
 		{
 			Debug.Log(this + " OnCharacterUseAction onActionUsed.Invoke " + action);
 			onActionUsed.Invoke();

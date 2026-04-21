@@ -29,7 +29,7 @@ public class CharacterController : MonoBehaviour
 	
 	public static event System.Action partyChanged;
 	
-	public event System.Action statsChanged;
+	public event System.Action onStatsChanged;
 	public event System.Action<bool> selectionChanged;
 	public event System.Action<float> onHealed;
 	public event System.Action<float> onDamaged;
@@ -66,6 +66,7 @@ public class CharacterController : MonoBehaviour
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
+		onStatsChanged?.Invoke();
 	}
 
 	public CharacterAgent GetAgent()
@@ -95,7 +96,6 @@ public class CharacterController : MonoBehaviour
 	
 	public void NewTurn(int turn)
 	{
-		Rest();
 		GetAgent().ClearDestination();
 		if (turn >= 0) currentTurn = turn;
 		turnStarted?.Invoke();
@@ -103,6 +103,7 @@ public class CharacterController : MonoBehaviour
 
 	public void Rest()
 	{
+		Debug.Log(this + " Rest");
 		usedActions.Clear();
 		usedMovePoints = 0;
 	}
@@ -144,7 +145,7 @@ public class CharacterController : MonoBehaviour
 			Routines.AssignRunAction();
 		}
 		onUseAction?.Invoke(actionType, param);
-		statsChanged?.Invoke();
+		onStatsChanged?.Invoke();
 	}
 	
 	public void UseAllActions()
@@ -159,6 +160,7 @@ public class CharacterController : MonoBehaviour
 	
 	public bool IsEnemyToPlayer(CharacterController other = null) => currentFaction == CharacterFaction.Enemy;
 
+	public bool IsEnemyTo(CharacterController other) => IsEnemyTo(other.GetCurrentFaction());
 	public bool IsEnemyTo(CharacterFaction faction)
 	{
 		if (currentFaction == CharacterFaction.Enemy)
@@ -261,6 +263,8 @@ public class CharacterController : MonoBehaviour
 	
 	public Vector3 GetCenterPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.5f;  // TODO "GetAgent()"
 	
+	public float GetRadius() => GetAgent().GetRadius();
+	
 	public bool IsMoving() => GetAgent().IsMoving();
 	
 	public void StopAgent()
@@ -287,7 +291,7 @@ public class CharacterController : MonoBehaviour
 	public void ConsumeMovePoints(float amount)
 	{
 		usedMovePoints += amount;
-		statsChanged?.Invoke();
+		onStatsChanged?.Invoke();
 	}
 	
 	public float GetTotalDamages() => totalDamages;
@@ -308,13 +312,21 @@ public class CharacterController : MonoBehaviour
 			totalDamages = Mathf.Max(0, totalDamages - amount);
 		
 		onHealed?.Invoke(amount);
-		statsChanged?.Invoke();
+		onStatsChanged?.Invoke();
 	}
-	public void TakeDamage(float amount)
+	public void TakeDamage(float amount, object objectFrom, bool stopAgent = true)
 	{
 		Debug.Log(this + " TakeDamage " + amount);
 		totalDamages += amount;
 		
+		if(stopAgent) StopAgent();
+
+		if (objectFrom is CharacterController)
+		{
+			if(TryGetAnimation(out var anim))
+				anim.InstantSwitchWeapons();
+		}
+
 		onDamaged?.Invoke(amount);
 		
 		if (GetCurrentHealth() <= 0f)
@@ -323,7 +335,7 @@ public class CharacterController : MonoBehaviour
 			return;
 		}
 		
-		statsChanged?.Invoke();
+		onStatsChanged?.Invoke();
 	}
 	public void TryKill()
 	{
@@ -332,7 +344,7 @@ public class CharacterController : MonoBehaviour
 			isDead = true;
 			agent.SetAgentActive(false);
 			onKilled?.Invoke();
-			statsChanged?.Invoke();
+			onStatsChanged?.Invoke();
 		}
 	}
 
@@ -377,7 +389,9 @@ public class CharacterController : MonoBehaviour
 		return currentWeapon.RollDamage();
 	}
 
-	public float GetDefaultAttackHitTime() => defaultAttackHitTime;
+	public bool IsUsingRangeWeapon() => currentWeapon.isRanged;
+
+	public bool WeaponsReady() => characterAnimation && characterAnimation.WeaponsSwitched();
 	
 	public bool IsCharacterVisible()
 	{
@@ -426,7 +440,7 @@ public class CharacterController : MonoBehaviour
 	private IEnumerator DoWaitAnimationEvent(CharacterAnimation.EventType eventType)
 	{
 		if (characterAnimation == null || !characterAnimation.HasAnimationEvent(CharacterAnimation.EventType.Hit))
-			yield return new WaitForSeconds(GetDefaultAttackHitTime());
+			yield return new WaitForSeconds(defaultAttackHitTime);
 		else
 		{
 			yield return characterAnimation.WaitEvent(eventType);
@@ -467,7 +481,7 @@ public class CharacterController : MonoBehaviour
 		if(!routines) routines = gameObject.AddComponent<CharacterRoutines>();
 		
 		characterAnimation = GetComponent<CharacterAnimation>();
-		if(!characterAnimation) characterAnimation = gameObject.AddComponent<CharacterAnimation>();
+		//if(!characterAnimation) characterAnimation = gameObject.AddComponent<CharacterAnimation>(); //TODO is it possible to have characters with no anims?
 		
 		currentFaction = characterData.faction;
 		if (factionOverride != CharacterFaction.None)

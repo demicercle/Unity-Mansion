@@ -17,6 +17,13 @@
 - custom asset post processor
 - update color of nav target depending on the action (red for enemies)
 
+- assignation of target cursor mouse over issue
+- ai detection is important for triggering opportunity attack, because weapons ready
+- door nav rebuild
+- zombi should rotate on scream
+- zombi scream should be linked to ai detection and not weapon ready?
+- "round" logic (characters rest on start round)
+
 NullReferenceException: Object reference not set to an instance of an object
 GameInput.OnDisable () (at Assets/_Game_/Scripts/Core/GameInput.cs:162)
 
