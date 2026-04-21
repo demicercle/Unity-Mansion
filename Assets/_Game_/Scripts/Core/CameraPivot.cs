@@ -102,7 +102,6 @@ public class CameraPivot : MonoBehaviour
     [Space]
     [Header("Settings")]
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
-    [SerializeField] private bool canRotateY = true;
     [SerializeField] private float clampedRotationAngle = 0.0f;
     [SerializeField] private bool orbitFromScreenCenter = true; // TODO in Settings
     [Space]
@@ -188,8 +187,6 @@ public class CameraPivot : MonoBehaviour
 
     public void ClampedRotation(float delta)
     {
-        //Debug.LogWarning("do nothing!");
-        if (!canRotateY) return;
         desiredYaw = (desiredYaw - clampedRotationAngle * delta);
     }
 
@@ -200,7 +197,6 @@ public class CameraPivot : MonoBehaviour
     //public void Orbit(Vector2 delta) => Orbit(delta.x, delta.y);
     public void Orbit(float deltaX, float deltaY, bool scaleWithInputs)
     {
-        if (!canRotateY) return;
         desiredYaw += deltaX * orbitSpeed.x * (scaleWithInputs ? inputSpeed * Mathf.PI : 1.0f);
         Zoom(deltaY * orbitSpeed.y);
         // desiredYaw = Mathf.Clamp(-180)

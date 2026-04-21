@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
@@ -10,18 +11,13 @@ using Object = UnityEngine.Object;
 
 public class GameCanvas : MonoBehaviour
 {
-	static private GameCanvas instance;
+	private static GameCanvas instance;
 
-	static public GameCanvas Instance
-	{
-		get
-		{
-			if (!instance) instance = Utils.FindFirstObject<GameCanvas>();
-			//if (!instance) Instantiate(Resources.Load<GameObject>("GameCanvas")).TryGetComponent(out instance);
-			if (!instance) Debug.LogError("No Game Canvas!");
-			return instance;
-		}
-	}
+	public static GameCanvas Instance => instance;
+
+	public event System.Action onViewportClicked;
+	
+	public event System.Action<bool> onViewportMouseOver;
 	
 	[Header("Viewport")]
 	[SerializeField] private RectTransform viewportRect;
@@ -40,7 +36,7 @@ public class GameCanvas : MonoBehaviour
 	[Space]
 	[SerializeField] private TextReference floatingText;
 	
-	public bool mouseOverViewport { get; private set; }
+	//public bool mouseOverViewport { get; private set; }
 
 	public TextReference FloatingText(Object obj, string label)
 	{
@@ -76,23 +72,26 @@ public class GameCanvas : MonoBehaviour
 	private static GameTurnManager gameTurnManager => GameTurnManager.Instance;
 
 	private CharacterController[] partyCharacters;
-	private MouseOverHandler mouseHandler;
+	private MouseOverHandler viewportMouseHandler;
 	
 	private void Awake()
 	{
+		if (instance) Debug.LogError(this + " duplicated!");
 		instance = this;
 		
-		button_endTurn.onClick.AddListener( ClickEndTurn);
+		button_endTurn.onClick.AddListener(ClickEndTurn);
 		button_actionRun.onClick.AddListener(ClickRunAction);
 
-		mouseHandler = viewportRect.GetComponent<MouseOverHandler>();
-		if(!mouseHandler) mouseHandler = viewportRect.gameObject.AddComponent<MouseOverHandler>();
-		mouseHandler.onMouseOverChanged += OnMouseOverViewport;
-		mouseHandler.onClicked += OnViewportClicked;
+		viewportMouseHandler = viewportRect.GetComponent<MouseOverHandler>();
+		if(!viewportMouseHandler) viewportMouseHandler = viewportRect.gameObject.AddComponent<MouseOverHandler>();
+		viewportMouseHandler.onMouseOverChanged += OnViewportRectMouseOver;
+		viewportMouseHandler.onClicked += OnViewportRectClicked;
 		
 		floatingText.SetActive(false);
 
 		CharacterController.partyChanged += UpdatePortraits;
+
+		gameTurnManager.onLoadingGame += OnLoadingGame;
 	}
 
 	private void OnDestroy()
@@ -100,10 +99,12 @@ public class GameCanvas : MonoBehaviour
 		button_endTurn.onClick.RemoveListener( ClickEndTurn);
 		button_actionRun.onClick.RemoveListener(ClickRunAction);
 		
-		mouseHandler.onMouseOverChanged -= OnMouseOverViewport;
-		mouseHandler.onClicked -= OnViewportClicked;
+		viewportMouseHandler.onMouseOverChanged -= OnViewportRectMouseOver;
+		viewportMouseHandler.onClicked -= OnViewportRectClicked;
 		
 		CharacterController.partyChanged -= UpdatePortraits;
+		
+		gameTurnManager.onLoadingGame -= OnLoadingGame;
 	}
 
 	private void Start()
@@ -126,17 +127,19 @@ public class GameCanvas : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		UpdateButtons();
+		UpdateButtons(); // TODO with events
+	}
+	
+	private void OnLoadingGame(bool isLoading) => gameObject.SetActive(!isLoading);
+
+	private void OnViewportRectClicked()
+	{
+		onViewportClicked?.Invoke();
 	}
 
-	private void OnViewportClicked()
+	private void OnViewportRectMouseOver(bool value)
 	{
-		GameView.GetInstance().OnApplicationFocus(true);
-	}
-
-	private void OnMouseOverViewport(bool value)
-	{
-		mouseOverViewport = value;
+		onViewportMouseOver?.Invoke(value);
 	}
 
 	private void ClickRunAction()
@@ -167,10 +170,10 @@ public class GameCanvas : MonoBehaviour
 
 	private void UpdateButtons()
 	{
-		controlPanel.isOn = IsControlPanelVisible();
-		button_actionRun.interactable = CanUseRunAction();
+		controlPanel.isOn = gameTurnManager.SelectedCharacterIsControllable();
+		button_actionRun.interactable = gameTurnManager.SelectedCharacterCanUseRunAction();
 		
-		if (CanEndTurn())
+		if (gameTurnManager.PlayerCanEndTurn())
 		{
 			button_endTurn.interactable = true;
 		}
@@ -182,21 +185,8 @@ public class GameCanvas : MonoBehaviour
 		if (animator && lerpSpeed > 0)
 		{
 			if(endTurnLayer > 0) 
-				animator.SetLayerWeight(endTurnLayer, Mathf.Lerp(animator.GetLayerWeight(endTurnLayer), ShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed));
+				animator.SetLayerWeight(endTurnLayer, Mathf.Lerp(animator.GetLayerWeight(endTurnLayer), gameTurnManager.PlayerShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed));
 		}
 	}
-
-	private bool IsControlPanelVisible() =>
-		gameTurnManager.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.IsControllableByPlayer();
-	
-	private bool CanUseRunAction() =>
-		!CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.RunAction);
-	
-	private bool ShouldEndTurn() => CanEndTurn() && CharacterController.GetPartyCharacters().All(pc =>
-	{
-		return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
-	});
-	
-	private bool CanEndTurn() => !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn();
 	#endregion
 }

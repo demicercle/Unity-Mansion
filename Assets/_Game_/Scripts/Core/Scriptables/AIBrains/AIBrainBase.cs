@@ -4,24 +4,13 @@ using UnityEngine;
 //[CreateAssetMenu(fileName = "AIBrain", menuName = "AIBrain", order = 0)]
 public abstract class AIBrainBase : ScriptableObject
 {
-	public GameView gameView => GameView.GetInstance();
-//	public GameData gameData => gameView.gameData;
 	public int defaultPriority;
 	
-	abstract public IEnumerator Think(CharacterController character);
-	
-	public AIBrainBase Clone() => Instantiate(this);
+	public abstract IEnumerator Think(CharacterController character);
 
-	/*public Coroutine WaitForRoutines() => gameView.StartCoroutine(DoWaitForRoutines());
-	
-	IEnumerator DoWaitForRoutines()
-	{
-		while(gameView.HasCoroutines()) yield return null;
-	}*/
+	public virtual int GetPriority(CharacterController character) => defaultPriority;
 
-	virtual public int GetPriority(CharacterController character) => defaultPriority;
-
-	virtual public void DrawGizmos(CharacterController character)
+	public virtual void DrawGizmos(CharacterController character)
 	{
 		
 	}

@@ -58,8 +58,8 @@ MonoBehaviour:
   aiThinksSeconds: 0.5
   startupObjects:
   - {fileID: 1235272970627628970, guid: ebc1fc7399cf6304d88ef4b6f671ba70, type: 3}
-  - {fileID: 1961438188781018041, guid: 1abf13e0d98417f43b67e3c232d68eba, type: 3}
   - {fileID: 5406122567533382223, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
+  - {fileID: 1961438188781018041, guid: 1abf13e0d98417f43b67e3c232d68eba, type: 3}
 --- !u!1001 &4690182601283876028
 PrefabInstance:
   m_ObjectHideFlags: 0

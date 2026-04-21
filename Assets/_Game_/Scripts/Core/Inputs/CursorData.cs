@@ -7,8 +7,8 @@ public enum CursorType
 {
 	DefaultArrow,
 	
-	WaitArrow,
 	Waiting,
+	Loading,
 	
 	Navigate,
 	Select,

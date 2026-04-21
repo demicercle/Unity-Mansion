@@ -10,6 +10,7 @@ public class GameTurnManager : MonoBehaviour
 	static private GameTurnManager _instance;
 	static public GameTurnManager Instance => _instance;
 
+	public System.Action<bool> onLoadingGame;
 	public System.Action turnStarted, turnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
@@ -29,6 +30,25 @@ public class GameTurnManager : MonoBehaviour
 	
 	public bool IsPlayerTurn() => playerTurn;
 
+	public bool AnyActiveRoutinesPlaying() => CharacterRoutines.AnyActiveRoutines();
+	
+	public bool PlayerCanEndTurn() => !AnyActiveRoutinesPlaying() && IsPlayerTurn();
+	
+	public bool PlayerShouldEndTurn() => PlayerCanEndTurn() 
+	                               && CharacterController.GetPartyCharacters().All(pc =>
+									{
+										return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
+									});
+	
+	public bool SelectedCharacterCanUseRunAction() =>
+		!CharacterRoutines.AnyActiveRoutines() && IsPlayerTurn() 
+		                                       && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
+		                                       && selectedCharacter.CanUseAction(CharacterAction.RunAction);
+
+	public bool SelectedCharacterIsControllable() => IsPlayerTurn() 
+	                                                 && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
+	                                                 && selectedCharacter.IsControllableByPlayer();
+	
 	public int GetCurrentTurn() => currentTurn;
 
 	public bool IsLoading() => isLoading;
@@ -68,7 +88,7 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Starts");
-
+		
 		FadeScreen.FadeIn(true);
 
 		foreach (var go in startupObjects)
@@ -82,6 +102,7 @@ public class GameTurnManager : MonoBehaviour
 
 		isLoading = true;
 		Debug.Log(this + " loading...");
+		onLoadingGame?.Invoke(true);
 		
 		do // ensure that everything is properly loaded
 		{
@@ -112,8 +133,9 @@ public class GameTurnManager : MonoBehaviour
 				character.SetPartyIndex(partyIndex++);
 		}
 		
-		Debug.Log("level ready");
+		Debug.Log("loading complete");
 		isLoading = false;
+		onLoadingGame?.Invoke(false);
 		
 		FadeScreen.FadeOut();
 		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);

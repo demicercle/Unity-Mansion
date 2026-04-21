@@ -5,8 +5,6 @@ using UnityEngine.SceneManagement;
 
 public static class ConsoleWrapper
 {
-	static GameView gameView => GameView.GetInstance();
-
 	[ConsoleMethod("apply_dmg", "")]
 	static public void ApplyDamage(int amount)
 	{
@@ -68,9 +66,8 @@ public static class ConsoleWrapper
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out CharacterController partyChar))
 		{
-			var gameView = GameView.GetInstance();
-			var result = gameView.CursorRaycast(out var hit);
-			if (result == GameView.CURSOR_RAYCAST_RESULT_NAVIGATION)
+			var result = GameInput.Instance.CursorRaycast(out var hit);
+			if (result == GameInput.CursorRaycastResult_Navigation)
 			{
 				partyChar.Teleport(hit.point, value > 0);
 			}
