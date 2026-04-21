@@ -193,7 +193,7 @@ GameObject:
   - component: {fileID: 450696110728905939}
   m_Layer: 0
   m_Name: Prop_Door_Simple
-  m_TagString: Untagged
+  m_TagString: Door
   m_Icon: {fileID: -5397416234189338067, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -228,28 +228,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ddc7ec2695a47baa7e106ac9224a318, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cursorType: 6
+  consumeAction: 3
   onlyOnce: 1
-  TODO_consumeAction: 0
   rebuildNavigation: 1
   autoTriggerDelay: 0
   animatorTrigger: Toggle
-  interacted:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2283852087915108632}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
   triggerDelay: 0.2
   animDuration: 2
+  animationEvent: 1
+  _interacted:
+    m_PersistentCalls:
+      m_Calls: []
+  interactionCount: 0
 --- !u!65 &2209946154352752973
 BoxCollider:
   m_ObjectHideFlags: 0

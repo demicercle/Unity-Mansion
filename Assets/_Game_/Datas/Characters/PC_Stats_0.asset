@@ -22,4 +22,3 @@ MonoBehaviour:
   attackRange: 0
   maxHealth: 5
   lastAttackDamage: 1
-  lastAttackHitTime: 1

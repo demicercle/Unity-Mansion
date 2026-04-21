@@ -195,13 +195,15 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 		
-		characterOwner.UseAction(prop.GetInteractAction());
-			
-		yield return new WaitForSeconds(prop.GetTriggerDelay());
-
-		prop.InteractedBy(characterOwner);
+		characterOwner.UseAction(prop.GetInteractAction(), prop);
+		yield return prop.WaitInteraction(characterOwner);
 		
-		yield return new WaitForSeconds(prop.GetAnimDuration());
+		prop.InteractedBy(characterOwner);
+
+		do
+		{
+			yield return null;
+		} while (!prop.AnimFinished());
 	}
 
 	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection((pos - characterOwner.GetPosition()).normalized);

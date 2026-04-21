@@ -2139,7 +2139,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1837400758454604685, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_Name
-      value: PC_Player Variant
+      value: PC_RPGCharacter
       objectReference: {fileID: 0}
     - target: {fileID: 2682672067756541164, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2291,7 +2291,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8722277412283640718, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: uniqueID
-      value: 4274835759549735246
+      value: 8622903504984775786
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4438104301555917016, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
@@ -2302,6 +2302,17 @@ PrefabInstance:
       addedObject: {fileID: 5757940252884302303}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+--- !u!114 &5745611760749173238 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+  m_PrefabInstance: {fileID: 4704016141573829932}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7371863386a46299d7e0db5a61d3cdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &7238060625527304640 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2682672067756541164, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
@@ -2465,6 +2476,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6536868086427863390}
+    - targetCorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7960912902921319732}
   m_SourcePrefab: {fileID: 100100000, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
 --- !u!1 &5757940252883871167 stripped
 GameObject:
@@ -2501,12 +2515,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d4d5807a91944b4822368cfe984b1ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onShoot:
-    m_PersistentCalls:
-      m_Calls: []
-  onHit:
-    m_PersistentCalls:
-      m_Calls: []
   onFootL:
     m_PersistentCalls:
       m_Calls: []
@@ -2514,6 +2522,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onWeaponSwitch:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
+  onShoot:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &6536868086427863390
@@ -2533,6 +2547,37 @@ MonoBehaviour:
   debugWalkthrough: 0
   debugDoWeaponSwitch: 0
   debugSetAnimator: 0
+  ikHands: {fileID: 8073295698513471931}
+--- !u!114 &7960912902921319732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5757940252883871167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd8bf315116540e8aace59c6f3be0352, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterEventHandler
+  character: {fileID: 5745611760749173238}
+  onActionUsed:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6536868086427863390}
+        m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
+        m_MethodName: Activate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  actionType: 3
+  filters: Door
 --- !u!4 &5757940252884301857 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400204, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}

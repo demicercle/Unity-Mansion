@@ -7,6 +7,7 @@ using Pathfinding;
 using Pathfinding.Drawing;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController))]
 public class CharacterAgent : MonoBehaviour
 {
 	[Header("Movement")]

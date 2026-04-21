@@ -17,6 +17,10 @@
 - custom asset post processor
 - update color of nav target depending on the action (red for enemies)
 
+NullReferenceException: Object reference not set to an instance of an object
+GameInput.OnDisable () (at Assets/_Game_/Scripts/Core/GameInput.cs:162)
+
+
 PC_Player_2 (CharacterController) !HasMovePoints
 UnityEngine.Debug:Log (object)
 CharacterRoutines/<WaitCharacterMoved>d__21:MoveNext () (at Assets/_Game_/Scripts/Core/Characters/CharacterRoutines.cs:290)

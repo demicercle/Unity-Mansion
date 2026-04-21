@@ -21,12 +21,15 @@ public class PropComponent : MonoBehaviour
 	[SerializeField] private string animatorTrigger;
 	[SerializeField] private float triggerDelay = 0.0f; // TODO use anim events
 	[SerializeField] private float animDuration = 1.0f;
+	[SerializeField] private CharacterAnimation.EventType animationEvent = default;
 	
 	[Header("Unity Events")]
 	[SerializeField] private UnityEvent _interacted;
 	
 	[Header("ReadOnly")]
 	[SerializeField] [ReadOnly] private int interactionCount;
+
+	public bool AnimFinished() => animFinished;
 	
 	public CursorType GetCursorType() => cursorType;
 
@@ -34,13 +37,6 @@ public class PropComponent : MonoBehaviour
 	{
 		Debug.Log(this + " InteractedBy " + characterInstigator + " " + interactionCount);
 		interactionCount++;
-		
-		if (rebuildNavigation) RebuildNavigationAsync();
-		
-		if (onlyOnce && interactionCount > 0)
-		{
-			SetDisabled(true);
-		}
 		
 		if (!string.IsNullOrEmpty(animatorTrigger))
 		{
@@ -51,9 +47,17 @@ public class PropComponent : MonoBehaviour
 			}
 		}
 		
+		animFinished = false;
+		Invoke("OnAnimFinished", Mathf.Max(animDuration, 0.1f));
+		
 		onInteracted?.Invoke();
 		onInteractedBy?.Invoke(characterInstigator);
 		_interacted?.Invoke(); //TODO in Unity
+		
+		if (onlyOnce && interactionCount > 0)
+		{
+			SetDisabled(true);
+		}
 	}
 
 	public bool GetBestWaypoint(Vector3 worldPos, out Waypoint bestWaypoint) // TODO "fake" public
@@ -66,8 +70,23 @@ public class PropComponent : MonoBehaviour
 	public float GetTriggerDelay() => triggerDelay;
 	
 	public float GetAnimDuration() => animDuration; // todo: read the animation itself using events etc
+
+	public Coroutine WaitInteraction(CharacterController characterInstigator) => StartCoroutine(DoWaitInteractionEvent(characterInstigator));
 	
 	#region PRIVATE
+	private bool animFinished;
+
+	private void OnAnimFinished()
+	{
+		CancelInvoke("OnAnimFinished");
+		animFinished = true;
+
+		if (rebuildNavigation)
+		{
+			RebuildNavigationAsync();
+		}
+	}
+	
 	private Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
 	
 	private void SetDisabled(bool value)
@@ -96,6 +115,26 @@ public class PropComponent : MonoBehaviour
 	}
 
 	private void RebuildNavigationAsync() => NavUtility.RebuildNavigationAsync(Mathf.Max(0.1f, animDuration));
+
+	private IEnumerator DoWaitInteractionEvent(CharacterController characterInstigator)
+	{
+		Debug.Log(this + " DoWaitInteractionEvent " + animationEvent + " instigator=" + characterInstigator);
+		
+		if (animationEvent != default)
+		{
+			if (characterInstigator && characterInstigator.TryGetAnimation(out var anim))
+			{
+				if (anim.HasAnimationEvent(animationEvent))
+				{
+					yield return anim.WaitEvent(animationEvent);
+					yield break;
+				}
+			}
+		}
+
+		Debug.Log("yield " + triggerDelay);
+		yield return new WaitForSeconds(triggerDelay);
+	}
 	#endregion
 	
 	#if UNITY_EDITOR

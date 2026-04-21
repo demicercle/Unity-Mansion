@@ -89,13 +89,21 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 
 	public bool HasAnimationEvent(EventType eventType) => eventTypes.Contains(eventType);
 
-	public Coroutine WaitEvent(EventType eventType) => StartCoroutine(DoWaitEvent(eventType));
+	public Coroutine WaitEvent(EventType eventType, float timeout = 6.0f) => StartCoroutine(DoWaitEvent(eventType, timeout));
 	
-	private IEnumerator DoWaitEvent(EventType eventType)
+	private IEnumerator DoWaitEvent(EventType eventType, float timeout)
 	{
+		var startTime = Time.time;
+		Debug.Log(this + " DoWaitEvent " + eventType);
 		waitForEvent = eventType;
 		do
 		{
+			if (timeout > 0f && Time.time - startTime > timeout)
+			{
+				Debug.LogWarning(this + " timeout! "  + eventType);
+				yield break;
+			}
+			
 			yield return null;
 		} while (waitForEvent != EventType.Undefined);
 	}

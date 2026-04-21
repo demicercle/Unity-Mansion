@@ -4,6 +4,21 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
+public enum CharacterFaction
+{
+	None = -1,
+	Neutral,
+	Player,
+	Enemy
+}
+
+public enum CharacterAction
+{
+	None,
+	RunAction,
+	AttackAction,
+	InteractAction
+}
 
 public class CharacterController : MonoBehaviour
 {
@@ -30,6 +45,7 @@ public class CharacterController : MonoBehaviour
 	[SerializeField] private List<AIBrainBase> aiBrains =  new List<AIBrainBase>();
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f;
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
+	[SerializeField] private CharacterFaction factionOverride;
 	
 	public void FloatingText_Cant() // TODO: in character animation
 	{
@@ -50,7 +66,13 @@ public class CharacterController : MonoBehaviour
 	}
 	
 	public CharacterRoutines Routines => routines;
-	public CharacterAgent GetAgent() => agent;
+
+	public CharacterAgent GetAgent()
+	{
+		if(!agent) agent = GetComponent<CharacterAgent>();
+		return agent;
+	}
+	
 	public bool IsControllableByPlayer() => isControllable && !isDead;
 	
 	public bool IsSelected()
@@ -115,7 +137,7 @@ public class CharacterController : MonoBehaviour
 	public void UseAction(CharacterAction actionType, object param = null)
 	{
 		usedActions.Add(actionType);
-		Debug.Log(this + " usedAction=" + usedActions.Last());
+		Debug.Log(this + " usedAction=" + usedActions.Last() + " param=" + param);
 		if (actionType == CharacterAction.RunAction)
 		{
 			usedMovePoints -= characterData.runActionExtraMovePoints;
@@ -135,7 +157,7 @@ public class CharacterController : MonoBehaviour
 	
 	public bool IsPlayer() => GetCurrentFaction() == CharacterFaction.Player;
 	
-	public bool IsEnemyToPlayer(CharacterController other = null) => characterData.faction == CharacterFaction.Enemy;
+	public bool IsEnemyToPlayer(CharacterController other = null) => currentFaction == CharacterFaction.Enemy;
 
 	public bool IsEnemyTo(CharacterFaction faction)
 	{
@@ -234,9 +256,11 @@ public class CharacterController : MonoBehaviour
 	}
 	
 	public Vector3 GetPosition() => transform.position;
-	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * agent.GetHeight() * 0.9f;
-	public Vector3 GetCenterPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * agent.GetHeight() * 0.5f;
-
+	
+	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * GetAgent().GetHeight() * 0.9f; // TODO "GetAgent()"
+	
+	public Vector3 GetCenterPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.5f;  // TODO "GetAgent()"
+	
 	public bool IsMoving() => GetAgent().IsMoving();
 	
 	public void StopAgent()
@@ -250,13 +274,16 @@ public class CharacterController : MonoBehaviour
 	}
 
 	public void Teleport(Vector3 dest) => Teleport(dest, GetRotation(), true);
+	
 	public void Teleport(Vector3 dest, bool stopMovement) => Teleport(dest, GetRotation(), stopMovement);
+	
 	public void Teleport(Vector3 dest, int newRot, bool stopMovement)
 	{
 		GetAgent().Teleport(dest, newRot, stopMovement);
 	}
 
 	public int GetRotation() => (int)transform.eulerAngles.y;
+	
 	public void ConsumeMovePoints(float amount)
 	{
 		usedMovePoints += amount;
@@ -410,7 +437,7 @@ public class CharacterController : MonoBehaviour
 
 	private int partyIndex = -1;
 	
-	private int currentTurn;
+	private int currentTurn; // TODO not in use
 	private bool isControllable;
 	private float usedMovePoints;
 	private List<CharacterAction> usedActions = new List<CharacterAction>();
@@ -440,6 +467,11 @@ public class CharacterController : MonoBehaviour
 		if(!characterAnimation) characterAnimation = gameObject.AddComponent<CharacterAnimation>();
 		
 		currentFaction = characterData.faction;
+		if (factionOverride != CharacterFaction.None)
+		{
+			Debug.Log(this + " factionOverride=" + factionOverride);
+			currentFaction = factionOverride;
+		}
 
 		if (!aiBrains.OfType<AIBrain_Wait>().Any())
 		{

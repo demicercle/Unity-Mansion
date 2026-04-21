@@ -146,6 +146,8 @@ public class GameInput : MonoBehaviour
 
 	private void OnDisable()
 	{
+		if (!Application.isPlaying) return;
+		
 		inputSystem.UI.Click.performed -= OnInputLeftClick;
 		inputSystem.UI.RightClick.performed -= OnInputRightClick;
 		inputSystem.UI.Point.performed -= OnInputMouseMove;

@@ -470,7 +470,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ad2752b5f14d4da12fd00fc2ea78c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ToggleChildren
-  currentIndex: 0
+  currentIndex: 1
   children:
   - {fileID: 4575319083674749594}
   - {fileID: 8350782357324790678}
@@ -1102,9 +1102,6 @@ MonoBehaviour:
           m_StringArgument: TurnStarted
           m_BoolArgument: 0
         m_CallState: 2
-  sceneLoaded:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &6805044113424152427
 GameObject:
   m_ObjectHideFlags: 0
