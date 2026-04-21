@@ -13,7 +13,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     private bool weaponsSwitched;
 
     public bool IsSwitchingWeapons() => isWeaponSwitching;
-
+    
     public bool Switched() => weaponsSwitched;
     public void ToggleSwitched() => weaponsSwitched = !weaponsSwitched;
 
@@ -41,6 +41,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	public bool debugSetAnimator = true;
 
 	public IKHands ikHands;
+	public int attackNumber = 1;
 	
 	[HideInInspector] bool isWeaponSwitching = false;
     [HideInInspector] bool dualSwitch;
@@ -96,6 +97,14 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     }*/
 
     #region WEAPONS
+
+    public void Relax()
+    {
+	    animator.SetInteger(AnimationParameters.Weapon, -1);
+	    animator.SetTrigger(AnimationParameters.Trigger);
+	    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+    }
+    
     /// <summary>
     /// Queue a command to unsheath a weapon.
     /// </summary>

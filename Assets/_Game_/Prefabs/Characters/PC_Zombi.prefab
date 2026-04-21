@@ -2134,6 +2134,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 1073438ee4f0c4348946f744ef5176ad, type: 2}
     - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: defaultWeapon
+      value: 
+      objectReference: {fileID: 11400000, guid: b282d0069fe14884792d3b641f58923c, type: 2}
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: aiBrains.Array.size
       value: 2
       objectReference: {fileID: 0}

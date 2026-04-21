@@ -54,7 +54,7 @@ public class CharacterEventHandler : MonoBehaviour
 
 	private void OnCharacterUseAction(CharacterAction action, object target)
 	{
-		if (CheckFilters(target))
+		if (action == actionType && CheckFilters(target))
 		{
 			Debug.Log(this + " OnCharacterUseAction onActionUsed.Invoke " + action);
 			onActionUsed.Invoke();

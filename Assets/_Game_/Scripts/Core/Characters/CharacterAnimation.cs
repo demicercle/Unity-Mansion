@@ -45,17 +45,17 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		public string getHitTrigger;
 		public string switchOffTrigger;
 		public string switchOnTrigger;
-		[Header("RPG Anims")]
-		public string weapon;
-		public string triggerNumber;
-		public string trigger;
+		//[Header("RPG Anims")]
+		//public string weapon;
+		//public string triggerNumber;
+		//public string trigger;
 	}
 	
 	[SerializeField] private Parameters parameters;
 	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
 
 #if UNITY_EDITOR
-	[ContextMenu("SetParameters/RPGCharacter")]
+	/*[ContextMenu("SetParameters/RPGCharacter")]
 	void SetParameters_RPGCharacter()
 	{
 		UnityEditor.Undo.RecordObject(this, "SetParameters/RPGCharacter");
@@ -69,7 +69,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			trigger = "Trigger"
 		};
 		Utils.SetDirty(this);
-	}
+	}*/
 	
 	[ContextMenu("ClearParameters")]
 	void ClearParameters()
@@ -137,7 +137,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			animator.SetTrigger(parameters.switchOffTrigger);
 			yield return WaitEvent(EventType.WeaponSwitch);
 			isSwitchingWeapons = false;
-			if (hasSwitchOnTrigger) weaponSwitched = true;
+			weaponSwitched = false;
 			yield break; // returns
 		}
 
@@ -147,7 +147,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			animator.SetTrigger(parameters.switchOnTrigger);
 			yield return WaitEvent(EventType.WeaponSwitch);
 			isSwitchingWeapons = false;
-			if (hasSwitchOffTrigger) weaponSwitched = true;
+			weaponSwitched = true;
 			yield break; // returns
 		}
 		
@@ -193,6 +193,9 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		_characterAnimationEvent = animator.GetComponent<CharacterAnimationEvent>();
 		if(!_characterAnimationEvent) _characterAnimationEvent = animator.gameObject.AddComponent<CharacterAnimationEvent>();
 		_characterAnimationEvent.onCharacterAnimationEvent += OnCharacterAnimationEvent;
+		
+		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponent<RPGAnimationHandler>();
+		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponentInChildren<RPGAnimationHandler>();
 
 		controller = GetController();
 		controller.onHealed += OnHealed;
@@ -220,13 +223,14 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		
 		TrySetFloat(parameters.velocityX, 0.0f);      
 		TrySetFloat(parameters.velocityZ, 0.0f);        
-		TrySetInteger(parameters.weapon, -1);
-		TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
-		TrySetTrigger(parameters.trigger);
+		//TrySetInteger(parameters.weapon, -1);
+		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+		//TrySetTrigger(parameters.trigger);
 		TrySetBool(parameters.moving, false);
 
-		TrySwitchWeapons(weaponSwitched);
-		if(waitForEvent != EventType.Undefined) Debug.LogError(this + " has waitForEvent on start " + waitForEvent);
+		if (rpgAnimationHandler) rpgAnimationHandler.Relax();
+		TrySwitchWeapons(weaponSwitched); // something can have ask to switch weapons
+		if (waitForEvent != EventType.Undefined) Debug.LogError(this + " has waitForEvent on start " + waitForEvent);
 	}
 
 	private void OnDisable()
@@ -298,8 +302,8 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 
 	private void OnKilled()
 	{
-		TrySetTrigger(parameters.trigger);
-		TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
+		//TrySetTrigger(parameters.trigger);
+		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
 	}
@@ -308,22 +312,21 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	{
 		if (actionType == CharacterAction.RunAction)
 		{
-			TrySetTrigger(parameters.trigger);
-			TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
+			//TrySetTrigger(parameters.trigger);
+			//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
 			TrySetTrigger(parameters.runTrigger);
 			GetController().FloatingText("Run!");
 		}
 		
 		else if (actionType == CharacterAction.AttackAction)
 		{
-			TrySetTrigger(parameters.attackTrigger);
-			//TrySetTriggerAnimators(parameters.trigger);
-			//TrySetIntegerAnimators(parameters.triggerNumber, (int)Animator)
-
-			if (rpgAnimationHandler && !string.IsNullOrEmpty(parameters.trigger) && !string.IsNullOrWhiteSpace(parameters.triggerNumber))
+			if (!TrySetTrigger(parameters.attackTrigger))
 			{
-				animator.SetActionTrigger(rpgAnimationHandler.hasDualWeapons ? AnimatorTrigger.AttackDualTrigger : AnimatorTrigger.AttackTrigger,
-					1); // TODO attack number
+				if (rpgAnimationHandler)
+				{
+					animator.SetActionTrigger(rpgAnimationHandler.hasDualWeapons ? AnimatorTrigger.AttackDualTrigger : AnimatorTrigger.AttackTrigger, 
+						rpgAnimationHandler.attackNumber); // TODO attack number
+				}
 			}
 			
 			GetController().FloatingText("Take this!");

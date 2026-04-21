@@ -46,6 +46,9 @@ public class CharacterController : MonoBehaviour
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f;
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
+	[SerializeField] private WeaponData defaultWeapon;
+	
+	public CharacterRoutines Routines => routines;
 	
 	public void FloatingText_Cant() // TODO: in character animation
 	{
@@ -64,8 +67,6 @@ public class CharacterController : MonoBehaviour
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
 	}
-	
-	public CharacterRoutines Routines => routines;
 
 	public CharacterAgent GetAgent()
 	{
@@ -127,7 +128,6 @@ public class CharacterController : MonoBehaviour
 		if(floatingText) FloatingText_Cant();
 		return false;
 	}
-	
 	
 	public void AttackAction(CharacterController target = null, bool stopAgent = true)
 	{
@@ -335,10 +335,11 @@ public class CharacterController : MonoBehaviour
 			statsChanged?.Invoke();
 		}
 	}
-	
 
-	public float GetAttackRange() => characterData.attackRange;
-	public bool CanAttack(bool checkActions = true) => !characterData.noAttack && (!checkActions || HasActions());
+
+	public float GetAttackRange() => currentWeapon.attackRange;
+	
+	public bool CanAttack(bool checkActions = true) => !currentWeapon.noAttack && (!checkActions || HasActions());
 	
 	public bool TryGetAIBrain(out AIBrainBase aiBrain)
 	{
@@ -370,9 +371,10 @@ public class CharacterController : MonoBehaviour
 			return false;
 		}
 	}
+	
 	public float GetLastAttackDamage()
 	{
-		return characterData.lastAttackDamage;
+		return currentWeapon.RollDamage();
 	}
 
 	public float GetDefaultAttackHitTime() => defaultAttackHitTime;
@@ -449,6 +451,7 @@ public class CharacterController : MonoBehaviour
 	private CharacterAgent agent;
 	private CharacterRoutines routines;
 	private CharacterAnimation characterAnimation;
+	private WeaponData currentWeapon;
 	
 	private void Awake()
 	{
@@ -475,11 +478,17 @@ public class CharacterController : MonoBehaviour
 
 		if (!aiBrains.OfType<AIBrain_Wait>().Any())
 		{
-			if (!defaultAIBrain)
-				defaultAIBrain = ScriptableObject.CreateInstance<AIBrain_Wait>();
-			
-			aiBrains.Add(defaultAIBrain as AIBrainBase);
+			Debug.LogWarning(this + " has no aiBrains, CreateInstance default");
+			aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());
 		}
+
+		if (!defaultWeapon)
+		{
+			Debug.LogWarning(this + " has no weapon, CreateInstance default");
+			defaultWeapon = WeaponData.CreateInstance<WeaponData>();
+		}
+
+		currentWeapon = defaultWeapon;
 	}
 
 	private void OnDestroy()
