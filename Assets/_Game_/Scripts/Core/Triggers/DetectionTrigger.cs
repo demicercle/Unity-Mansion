@@ -18,6 +18,40 @@ public class DetectionTrigger : MonoBehaviour
 	[SerializeField][Range(0f, 360f)] private float looseTargetTime = 3.0f;
 	[SerializeField] private bool noLOS = false;
 
+	public bool IsCharacterDetected(CharacterController character) => detectedCharacters.ContainsKey(character);
+
+	public bool TryGetLastKnownPosition(CharacterController character, out Vector3 lastKnownPosition)
+	{
+		if (detectedCharacters.ContainsKey(character))
+		{
+			lastKnownPosition = (Vector3)detectedCharacters[character];
+			return true;
+		}
+
+		lastKnownPosition = default;
+		return false;
+	}
+
+	public bool TryGetClosestDetectedCharacter(Vector3 worldPosition, out CharacterController otherCharacter)
+	{
+		var bestDist = 0f;
+
+		otherCharacter = default;
+		foreach (var detectedChar in detectedCharacters.Keys)
+		{
+			var dist = Vector3.Distance(detectedChar.GetPosition(), worldPosition);
+			if (otherCharacter == null || dist < bestDist)
+			{
+				bestDist = dist;
+				otherCharacter = detectedChar;
+			}
+		}
+
+		return otherCharacter != default;
+	}
+	
+	#region PRIVATE
+
 	private bool detectionUsesTime => looseTargetTime > 0f || debugMode > 2;
 	
 	private string debugString;
@@ -236,6 +270,9 @@ public class DetectionTrigger : MonoBehaviour
 			otherCharacter.GetHeight(), color, duration);
 	}
 	
+	const float debugDrawTime = 0.00001f;
+	#endregion
+	
 	#if UNITY_EDITOR
 	private void LateUpdate()
 	{
@@ -306,6 +343,4 @@ public class DetectionTrigger : MonoBehaviour
 		}
 	}
 	#endif
-	
-	const float debugDrawTime = 0.00001f;
 }

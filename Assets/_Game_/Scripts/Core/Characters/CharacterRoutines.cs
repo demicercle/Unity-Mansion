@@ -44,6 +44,7 @@ public class CharacterRoutines : MonoBehaviour
 		StartNewRoutine(WaitAction(CharacterAction.RunAction));
 	}
 	
+	public Coroutine MoveToDestination(Vector3 navPosition) => StartCoroutine(WaitCharacterMoved(navPosition));
 #region PRIVATE
 	private Coroutine coroutine;
 	private CharacterController characterOwner;
