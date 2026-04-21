@@ -5,10 +5,9 @@ using RPGCharacterAnims.Lookups;
 using RPGCharacterAnims.Extensions;
 using UnityEngine;
 
-public class WeaponsAnimation : MonoBehaviour // TODO clean this sh*t
-{
-	// Components.
-    //private RPGCharacterController rpgCharacterController;
+// TODO: interface "IAnimationHandler"
+public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Character Mechanim Pack" 
+{	
     private Animator animator; 
     private CoroutineQueue coroQueue;
     private bool weaponsSwitched;
@@ -41,6 +40,8 @@ public class WeaponsAnimation : MonoBehaviour // TODO clean this sh*t
 	public bool debugDoWeaponSwitch = true;
 	public bool debugSetAnimator = true;
 
+	public IKHands ikHands;
+	
 	[HideInInspector] bool isWeaponSwitching = false;
     [HideInInspector] bool dualSwitch;
     
@@ -94,6 +95,7 @@ public class WeaponsAnimation : MonoBehaviour // TODO clean this sh*t
 	    
     }*/
 
+    #region WEAPONS
     /// <summary>
     /// Queue a command to unsheath a weapon.
     /// </summary>
@@ -841,4 +843,223 @@ public class WeaponsAnimation : MonoBehaviour // TODO clean this sh*t
             case Weapon.RightSpear: SafeSetVisibility(spear, true); break;
         }
     }*/
+    #endregion
+    
+    #region EMOTES
+     public void Sit()
+    {
+        animator.TriggerEmote(EmoteType.Sit);
+        Lock(true, true, false, 0f, 0f);
+    }
+
+    /// <summary>
+    /// Lay down and sleep.
+    ///
+    /// Use the "Emote" action for a friendly interface.
+    /// </summary>
+    public void Laydown()
+    {
+		animator.TriggerEmote(EmoteType.Laydown);
+		Lock(true, true, false, 0f, 0f);
+	}
+
+    /// <summary>
+    /// Stand when sitting or sleeping.
+    ///
+    /// Use the "Emote" action for a friendly interface.
+    /// </summary>
+    public void Stand()
+    {
+        var currentActionType = animator.GetInteger(AnimationParameters.Action);
+
+		// Sitting.
+		if (currentActionType == 0)	{
+	        animator.TriggerEmote(EmoteType.StandFromSitting);
+	        Lock(true, true, true, 0f, 1f);
+        }
+		// Lying Down.
+		else if (currentActionType == 1) {
+	        animator.TriggerEmote(EmoteType.StandFromLaying);
+	        Lock(true, true, true, 0f, 2f);
+        }
+    }
+
+    /// <summary>
+    /// Pickup an item.
+    ///
+    /// Use the "EmoteCombat" action for a friendly interface.
+    /// </summary>
+    public void Pickup()
+    {
+		if (hasLeftWeapon) { animator.SetInteger("Side", 2); }
+		else { animator.SetInteger("Side", 1); }
+        animator.TriggerEmote(EmoteType.Pickup);
+        Lock(true, true, true, 0, 1.4f);
+		SetIKPause(1.2f);
+    }
+
+	/// <summary>
+	/// Activate a button or switch.
+	///
+	/// Use the "EmoteCombat" action for a friendly interface.
+	/// </summary>
+	public void Activate()
+	{
+		if (hasLeftWeapon) { animator.SetInteger("Side", 2); }
+		else { animator.SetInteger("Side", 1); }
+		animator.TriggerEmote(EmoteType.Activate);
+		Lock(true, true, true, 0, 1.2f);
+		SetIKPause(rightWeapon == Weapon.TwoHandAxe ? 1.4f : 1f);
+	}
+
+	/// <summary>
+	/// Take a swig.
+	///
+	/// Use the "Emote" action for a friendly interface.
+	/// </summary>
+	public void Drink()
+    {
+        animator.TriggerEmote(EmoteType.Drink);
+        Lock(true, true, true, 0, 1f);
+    }
+
+	/// <summary>
+	/// Take a bow.
+	///
+	/// Use the "Emote" action for a friendly interface.
+	/// </summary>
+	public void Bow()
+	{
+		var bowType = AnimationData.RandomBow();
+		animator.TriggerEmote(bowType);
+		Lock(true, true, true, 0, 3f);
+	}
+
+	/// <summary>
+	/// Shake head no.
+	///
+	/// Use the "Emote" action for a friendly interface.
+	/// </summary>
+	public void No()
+	{
+		animator.TriggerEmote(EmoteType.No);
+		Lock(true, true, true, 0, 1f);
+	}
+
+	/// <summary>
+	/// Nod head yes.
+	///
+	/// Use the "Emote" action for a friendly interface.
+	/// </summary>
+	public void Yes()
+	{
+		animator.TriggerEmote(EmoteType.Yes);
+		Lock(true, true, true, 0, 1f);
+	}
+
+	/// <summary>
+	/// Do a victorious leap.
+	///
+	/// Use the "EmoteCombat" action for a friendly interface.
+	/// </summary>
+	public void Boost()
+	{
+		SetIKPause(1f);
+		animator.TriggerEmote(EmoteType.Boost);
+		Lock(true, true, true, 0, 1f);
+	}
+
+	/// <summary>
+	/// Switch to the injured state.
+	///
+	/// Use the "Injure" action for a friendly interface.
+	/// </summary>
+	public void StartInjured()
+	{ animator.SetBool(AnimationParameters.Injured, true); }
+
+	/// <summary>
+	/// Recover from the injured state.
+	///
+	/// Use the "Injure" action for a friendly interface.
+	/// </summary>
+	public void EndInjured()
+    { animator.SetBool(AnimationParameters.Injured, false); }
+
+    /// <summary>
+    /// Crouch to move stealthily.
+    ///
+    /// Use the "Crouch" action for a friendly interface.
+    /// </summary>
+    public void StartCrouch()
+    { animator.SetBool(AnimationParameters.Crouch, true); }
+
+    /// <summary>
+    /// Stand from a crouching position
+    ///
+    /// Use the "Crouch" action for a friendly interface.
+    /// </summary>
+    public void EndCrouch()
+    { animator.SetBool(AnimationParameters.Crouch, false); }
+
+    /// <summary>
+    /// Start a conversation.
+    ///
+    /// Use the "Emote" action for a friendly interface.
+    /// </summary>
+    public void StartConversation()
+    {
+		Debug.Log("StartConversation.");
+        StartCoroutine(_PlayConversationClip());
+        Lock(true, true, false, 0f, 0f);
+    }
+
+    /// <summary>
+    /// Stop a conversation.
+    ///
+    /// Use the "Emote" action for a friendly interface.
+    /// </summary>
+    public void EndConversation()
+    {
+        animator.TriggerTalking(TalkType.None);
+        StopCoroutine(nameof(_PlayConversationClip));
+        Unlock(true, true);
+    }
+    #endregion
+    
+    #region Play Clips
+    private IEnumerator _PlayConversationClip()
+    {
+	   // if (!isTalking) { yield break; }
+	    var talkingType = AnimationVariations.Conversations.TakeRandom();
+	    animator.TriggerTalking(talkingType);
+	    yield return new WaitForSeconds(2f);
+	    StartCoroutine(_PlayConversationClip());
+    }
+    #endregion
+    
+    // TODO RPG ?
+
+    private void SetIKPause(float pauseTime)
+    {
+	    if (ikHands && ikHands.isUsed) { ikHands.SetIKPause(pauseTime); }
+    }
+    
+    private void Unlock(bool movement, bool actions)
+    {
+	    /*if (movement) {
+		    _canMove = true;
+		    OnUnlockMovement();
+	    }
+	    if (actions) {
+		    _canAction = true;
+		    if (_isAttacking) { _isAttacking = false; }
+		    OnUnlockActions();
+	    }*/
+    }
+    
+    private void Lock(bool lockMovement, bool lockAction, bool timed, float delayTime, float lockTime)
+    {
+	    //StopCoroutine("_Lock");
+	    //StartCoroutine(_Lock(lockMovement, lockAction, timed, delayTime, lockTime));
+    }
 }

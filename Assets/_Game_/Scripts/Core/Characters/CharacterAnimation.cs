@@ -28,7 +28,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	}
 	
 	[SerializeField] private Animator animator;
-	[SerializeField] private WeaponsAnimation weaponsAnimation;
+	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
 	
 	[System.Serializable]
 	public struct Parameters
@@ -110,7 +110,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		StopAllCoroutines();
 		isSwitchingWeapons = false;
 		
-		if (weaponsAnimation == null) // RPG Character Animation override
+		if (rpgAnimationHandler == null) // RPG Character Animation override
 		{
 			if (weaponsReady && !hasSwitchOnTrigger) return false; // no animator parameter for true
 			if (!weaponsReady && !hasSwitchOffTrigger) return false; // no animator parameter for false
@@ -146,9 +146,9 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		// RPG Character stuff
 		
 		if (weaponsReady)
-			weaponsAnimation.UnsheathWeapon(weaponsAnimation.rightWeapon, false);
+			rpgAnimationHandler.UnsheathWeapon(rpgAnimationHandler.rightWeapon, false);
 		else
-			weaponsAnimation.SheathWeapon(weaponsAnimation.rightWeapon, Weapon.Relax, false);
+			rpgAnimationHandler.SheathWeapon(rpgAnimationHandler.rightWeapon, Weapon.Relax, false);
 		
 		var startedTime = Time.time;
 		do
@@ -159,7 +159,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 				Debug.LogWarning(this + " DoWaitSwitchWeapons timedout!");
 				yield break;
 			}
-		} while (weaponsAnimation.IsSwitchingWeapons());
+		} while (rpgAnimationHandler.IsSwitchingWeapons());
 		
 		weaponSwitched = weaponsReady;
 //		Debug.Log(this + " weaponSwitched=" + weaponSwitched);
@@ -312,9 +312,9 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			//TrySetTriggerAnimators(parameters.trigger);
 			//TrySetIntegerAnimators(parameters.triggerNumber, (int)Animator)
 
-			if (weaponsAnimation && !string.IsNullOrEmpty(parameters.trigger) && !string.IsNullOrWhiteSpace(parameters.triggerNumber))
+			if (rpgAnimationHandler && !string.IsNullOrEmpty(parameters.trigger) && !string.IsNullOrWhiteSpace(parameters.triggerNumber))
 			{
-				animator.SetActionTrigger(weaponsAnimation.hasDualWeapons ? AnimatorTrigger.AttackDualTrigger : AnimatorTrigger.AttackTrigger,
+				animator.SetActionTrigger(rpgAnimationHandler.hasDualWeapons ? AnimatorTrigger.AttackDualTrigger : AnimatorTrigger.AttackTrigger,
 					1); // TODO attack number
 			}
 			
