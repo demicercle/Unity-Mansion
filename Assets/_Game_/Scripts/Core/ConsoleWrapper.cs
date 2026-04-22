@@ -74,10 +74,10 @@ public static class ConsoleWrapper
 		}
 	}
 
-	[ConsoleMethod("debug_draw", "")]
-	public static void _DebugDraw(int value)
+	[ConsoleMethod("debug_routines", "")]
+	public static void _DebugRoutines(int value)
 	{
-		Debug.Log("DebugDrawer.debugMode=" + (DebugDrawer.debugMode = value>0));
+		Debug.Log("CharacterRoutines.debugMode=" + (CharacterRoutines.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_cursor", "")]
@@ -92,11 +92,11 @@ public static class ConsoleWrapper
 		Debug.Log("DetectionTrigger.debugMode=" + (CharacterDetection.debugMode = value));
 	}
 
-	/*[ConsoleMethod("debug_gui", "")]
-	public static void _DebugGUI(int value)
+	[ConsoleMethod("debug_brains", "")]
+	public static void _DebugBrains(int value)
 	{
-		DebugGUI.IsEnabled = value > 0;
-	}*/
+		Debug.Log("CharacterBrain.debugMode=" + (CharacterBrain.debugMode = value));
+	}
 
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()

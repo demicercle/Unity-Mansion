@@ -8,7 +8,8 @@ public class CharacterRoutines : MonoBehaviour
 {
 	public const float DefaultWaitSeconds = 1.0f;
 	
-	static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
+	public static int debugMode { get; set; }
+	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
 	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
 	
@@ -42,6 +43,11 @@ public class CharacterRoutines : MonoBehaviour
 		Debug.Log(this + " AssignRunAction ");
 		characterOwner.UseAction(CharacterAction.RunAction);
 		StartNewRoutine(WaitAction(CharacterAction.RunAction));
+	}
+
+	public Coroutine LookPosition(Vector3 lookPosition)
+	{
+		return StartCoroutine(WaitCharacterLookPosition(lookPosition));
 	}
 	
 	public Coroutine MoveToDestination(Vector3 navPosition) => StartCoroutine(WaitCharacterMoved(navPosition));
@@ -306,9 +312,9 @@ public class CharacterRoutines : MonoBehaviour
 
 			var oldPosition = characterOwner.GetPosition();
 
-			DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
-			DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
-			DebugDrawer.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
+			if(debugMode > 0) DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
+			if(debugMode > 0) DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
+			if(debugMode > 0) DebugDrawer.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
 			yield return null;
 
 			var newPosition = characterOwner.GetPosition();
@@ -320,8 +326,11 @@ public class CharacterRoutines : MonoBehaviour
 			if (deltaPos < Consts.MinMagnitude) timeout += Time.deltaTime;
 			else timeout = 0f;
 
-			if (timeout > 0f) DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "timeout=" + timeout.ToString("N2"));
-			else DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "deltaPos=" + deltaPos.ToString("N2"));
+			if (debugMode > 0)
+			{
+				if (timeout > 0f) DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "timeout=" + timeout.ToString("N2"));
+				else DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "deltaPos=" + deltaPos.ToString("N2"));
+			}
 		}
 		while (!agent.ReachedDestination(dest));
 		

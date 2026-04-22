@@ -6,9 +6,8 @@ using UnityEngine;
 
 public class DebugDrawer : MonoBehaviour
 {
-	public static bool debugMode;//TODO
-	
-	private static bool shouldDraw => debugMode || (GameInput.debugMode + CharacterDetection.debugMode > 0);
+	//private static bool shouldDraw => (GameInput.debugMode + CharacterDetection.debugMode > 0);
+	private static bool shouldDraw => true;
 
 	static public DebugDrawer FloatingText(Vector3 position, string message, float duration = 1.0f, float speedY = 1.0f)
 	{

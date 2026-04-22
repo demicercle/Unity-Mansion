@@ -348,7 +348,7 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		var localVelocity = controller.GetVelocity();
 		var isMoving = controller.IsMoving();
-		if (minMovePointsToRun >= 0f && controller.HasUsedAction(CharacterAction.RunAction) && controller.HasMovePoints(minMovePointsToRun))
+		if (minMovePointsToRun >= 0f && controller.HasUsedAction(CharacterAction.RunAction) && controller.HasMovePoints(minMovePointsToRun) && controller.IsCurrentTurn())
 		{
 			isMoving = true;
 			localVelocity = Vector3.forward * controller.GetAgent().GetMaxSpeed();

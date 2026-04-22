@@ -8,7 +8,7 @@
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
 - tweaks! selection circle alpha when AI turns
 - rename "NavUtility" into component "NavMeshRebuilder"
-
+- SelectNext Tab bug
 - custom asset post processor
 - update color of nav target depending on the action (red for enemies)
 

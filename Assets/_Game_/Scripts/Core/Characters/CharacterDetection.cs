@@ -12,6 +12,8 @@ public class CharacterDetection : MonoBehaviour
 	
 	public bool IsCharacterDetected(CharacterController other) => detectedCharacters.Contains(other);
 	
+	public CharacterController[] GetDetectedCharacters() => detectedCharacters.ToArray();
+	
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
@@ -194,7 +196,7 @@ public class CharacterDetection : MonoBehaviour
 	{
 		if (debugMode > 0)
 		{
-			Utils.DrawWorldGUI(transform.position, debugString);
+			Utils.DrawWorldGUI(selfCharacter.GetEyesPosition(), debugString);
 		}
 	}
 	

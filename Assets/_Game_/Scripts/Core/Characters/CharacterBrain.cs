@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Pathfinding;
@@ -11,10 +12,13 @@ public interface ICharacterBrain
 
 public class CharacterBrain : MonoBehaviour, ICharacterBrain
 {
+	public static int debugMode { get; set; }
+	
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
 	[SerializeField] private bool canUseRunAction = false;
-	[SerializeField] private float defaultWait = 1.5f;
+	[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
+	[SerializeField] [Min(0f)] private float looseTargetTime = 1.5f;
 
 	public IEnumerator Think()
 	{
@@ -37,21 +41,66 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 
 	private IEnumerator TryChase()
 	{
-		if (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
+		if (!_selfCharacter.CanAttack())
+			yield break;
+		
+		if (_chaseCharacter && _chaseCharacter.IsDead())
 		{
-			Debug.Log(this + " chase " + _chaseCharacter);
-			_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, false);
-			
-			do
+			ForgetTarget();
+			if (!TryFindTarget())
+				yield break;
+		}
+		
+		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
+		{
+			if (!_targetDetected)
 			{
-				yield return null;
-			} while (CharacterRoutines.AnyActiveRoutines());
+				if (_selfCharacter.PositionReached(_lastTargetKnownPosition))
+				{
+					ForgetTarget();
+					if (!TryFindTarget())
+						yield break;
+				}
+				
+				Debug.Log(this + " go last known position " + _chaseCharacter);
+				_selfCharacter.Routines.AssignMoveToDestination((Vector3)_lastTargetKnownPosition); //TODO "canUseRunAction"
+
+				do
+				{
+					yield return null;
+
+					if (_targetDetected)
+					{
+						Debug.Log(this + " chase AGAIN " + _chaseCharacter);
+						break;
+					}
+				} while (CharacterRoutines.AnyActiveRoutines());
+			}
+			
+			if (_targetDetected)
+			{
+				Debug.Log(this + " chase " + _chaseCharacter);
+				_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, false);
+				
+				do
+				{
+					SaveTargetPosition();
+				
+					yield return null;
+				
+					if (!_targetDetected)
+						break;
+				
+				} while (CharacterRoutines.AnyActiveRoutines());
+			}
+
+			yield return null;
 		}
 	}
 
 	private IEnumerator TryPatrol()
 	{
-		if (!_selfCharacter.HasMovePoints()) 
+		if (!_selfCharacter.HasMovePoints() || !_selfCharacter.HasActions())
 			yield break;
 		
 		if (!_patrolRoute)
@@ -85,8 +134,15 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		
 		do
 		{
-			// todo: chase if character detected
 			yield return null;
+
+			if (_chaseCharacter && _targetDetected)
+			{
+				Debug.Log(this + " breaks patrol to chase");
+				yield return StartCoroutine(TryChase());
+				break;
+			}
+			
 		} while (CharacterRoutines.AnyActiveRoutines());
 	}
 	
@@ -96,6 +152,8 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	private PatrolRoute _patrolRoute;
 	private List<Waypoint> _waypointList;
 	private Waypoint _currentWaypoint;
+	private Vector3 _lastTargetKnownPosition;
+	private bool _targetDetected;
 	
 	private void Awake()
 	{
@@ -106,10 +164,20 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			enabled = false;
 			return;
 		}
+
+		_selfCharacter.onPartyIndexChanged += OnPartyIndexChanged;
 		
 		_waypointList = new List<Waypoint>();
-		
-		_characterDetection = GetComponent<CharacterDetection>();
+	}
+
+	private void OnDestroy()
+	{
+		_selfCharacter.onPartyIndexChanged -= OnPartyIndexChanged;
+	}
+
+	private void OnEnable()
+	{
+		if (!_characterDetection) _characterDetection = GetComponent<CharacterDetection>();
 		if (_characterDetection)
 		{
 			_characterDetection.onCharacterDetected += OnCharacterDetected;
@@ -117,7 +185,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		}
 	}
 
-	private void OnDestroy()
+	private void OnDisable()
 	{
 		if (_characterDetection)
 		{
@@ -126,21 +194,94 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		}
 	}
 
+	private void SaveTargetPosition()
+	{
+		if (!_chaseCharacter)
+		{
+			Debug.LogWarning(this + " SaveTargetPosition() no target");
+			return;
+		}
+		
+		_lastTargetKnownPosition = _chaseCharacter.GetPosition();
+	}
+
+	private void ForgetTarget()
+	{
+		if (!_chaseCharacter)
+		{
+			Debug.LogWarning(this + " ForgetTarget() no target");
+			return;
+		}
+
+		Debug.Log(this + " ForgetTarget " + _chaseCharacter);
+		_chaseCharacter = null;
+	}
+
+	private void OnPartyIndexChanged(int index)
+	{
+		enabled = index < 0; // not in party
+	}
+
 	private void OnCharacterDetected(CharacterController otherCharacter)
 	{
 		if (!_chaseCharacter && canChase && _selfCharacter.CanAttackOther(otherCharacter))
 		{
 			_chaseCharacter = otherCharacter;
+			_targetDetected = true;
+			SaveTargetPosition();
 			Debug.Log(this + " new _chaseCharacter=" + _chaseCharacter);
+			
+			_selfCharacter.Routines.LookPosition(_lastTargetKnownPosition);
 		}
 	}
 
 	private void OnCharacterLost(CharacterController otherCharacter)
 	{
-		if (_chaseCharacter == otherCharacter)
+		if (_targetDetected && _chaseCharacter == otherCharacter)
 		{
 			Debug.Log(this + " looses target " + _chaseCharacter);
-			_chaseCharacter = null;
+			SaveTargetPosition();
+			_targetDetected = false;
+		}
+	}
+
+	private bool TryFindTarget()
+	{
+		if (_characterDetection)
+		{
+			foreach (var otherCharacter in _characterDetection.GetDetectedCharacters())
+			{
+				OnCharacterDetected(otherCharacter);
+				
+				if (_chaseCharacter == otherCharacter)
+					return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private void LateUpdate()
+	{
+		if (debugMode > 0)
+		{
+			if (_chaseCharacter)
+			{
+				var color = _targetDetected ? Color.red : Color.orange;
+				DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), color);
+				DebugDrawer.WireDisc(_chaseCharacter.GetPosition(), _chaseCharacter.transform.forward, _chaseCharacter.GetRadius(), color);
+			}
+		}
+	}
+
+	private void OnGUI()
+	{
+		if (debugMode > 0)
+		{
+			if (_chaseCharacter)
+			{
+				Utils.DrawWorldGUI((Vector3)_lastTargetKnownPosition, _selfCharacter.name);
+			}
 		}
 	}
 }
