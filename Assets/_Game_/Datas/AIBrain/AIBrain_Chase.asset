@@ -14,6 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultPriority: 10
   noRun: 0
-  noLOS: 0
+  noLOS: 1
+  cantBarks: 0
   hearingColor: {r: 1, g: 0.8163534, b: 0, a: 1}
   hearingDistance: 3
+  defaultWait: 1
+  defaultTicks: 0.5
+  timeout: 6
+  maxTurnsToReachTarget: 1

@@ -308,10 +308,6 @@ public class GameInput : MonoBehaviour
 		}
 
 		CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter);
-		if (selectedCharacter && selectedCharacter.IsDead())
-		{
-			CharacterSelection.SelectNextCharacter();
-		}
 
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
 		if (hasFocus && mouseOverViewport && !holdMiddleClick) // mouse over
@@ -617,7 +613,7 @@ public class GameInput : MonoBehaviour
 					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.AttackAction))
 						selectedCharacter.FloatingText_Cant();
 					else
-						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, true);
+						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 					return;
 				}
 				

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using UnityEditor.UI;
 using UnityEngine;
 
@@ -29,56 +30,31 @@ public class AIBrain_Chase : AIBrainBase
 		initCharacter = selfCharacter;
 		detectionTrigger = initCharacter.GetComponent<DetectionTrigger>();
 		if (!detectionTrigger) detectionTrigger = initCharacter.GetComponentInChildren<DetectionTrigger>();
-		
-		DetectionTrigger.onDetectionChanged += OnDetectionChanged;
+		if (detectionTrigger)
+		{
+			detectionTrigger.onCharacterDetected += OnCharacterDetected;
+			detectionTrigger.onCharacterLost += OnCharacterLost;
+		}
 	}
 
 	public override void Dispose()
 	{
-		DetectionTrigger.onDetectionChanged -= OnDetectionChanged;
+		if (detectionTrigger)
+		{
+			detectionTrigger.onCharacterDetected -= OnCharacterDetected;
+			detectionTrigger.onCharacterLost -= OnCharacterLost;
+		}
 		
 		base.Dispose();
 	}
-
-	private void OnDetectionChanged(CharacterController c1, CharacterController c2, bool detected)
-	{
-		if (!initCharacter || initCharacter != c1) 
-			return;
-		
-		if (!chasingTarget)
-		{
-			if (detected && initCharacter.CanAttackOther(c2)) // TODO "Should Attack Target"
-			{
-				chasingTarget = c2;
-			}
-		}
-		else
-		{
-			if (c2 == chasingTarget && !detected)
-			{
-				chasingTarget = null;
-			}
-		}
-		
-		Debug.Log(this + " OnDetectionChanged " + detected + " chasingTarget=" + chasingTarget);
-	}
-
+	
 	public override int GetPriority(CharacterController selfCharacter)
 	{
 		//initCharacter = selfCharacter;
 		
-		if (chasingTarget)
+		if (chasingTarget && chasingTarget.IsDead())
 		{
-			if (detectionTrigger && !detectionTrigger.IsCharacterDetected(chasingTarget))
-			{
-				if (!detectionTrigger.TryGetLastKnownPosition(chasingTarget, out var _))
-					chasingTarget = null;
-			}
-
-			if (chasingTarget.IsDead())
-			{
-				chasingTarget = null;
-			}
+			chasingTarget = null;
 		}
 		
 		if (!chasingTarget)
@@ -89,9 +65,14 @@ public class AIBrain_Chase : AIBrainBase
 			}
 			else
 			{
-				if (detectionTrigger.TryGetClosestDetectedCharacter(selfCharacter.GetPosition(), out var otherCharacter))
+				foreach (var otherCharacter in detectionTrigger.GetDetectedCharacters()
+					         .OrderBy(c => Vector3.Distance(selfCharacter.GetPosition(), c.GetPosition())))
 				{
-					chasingTarget = otherCharacter;
+					if (!otherCharacter.IsDead() && selfCharacter.IsEnemyTo(otherCharacter))
+					{
+						chasingTarget = otherCharacter;
+						break;
+					}
 				}
 			}
 		}
@@ -102,48 +83,9 @@ public class AIBrain_Chase : AIBrainBase
 	public override IEnumerator Think(CharacterController selfCharacter)
 	{
 		//initCharacter = selfCharacter;
-
-		if (chasingTarget && detectionTrigger && !detectionTrigger.IsCharacterDetected(chasingTarget))
-		{
-			if (turnCount >= maxTurnsToReachTarget)
-			{
-				Debug.Log(this + " turnCount==" + turnCount + " loose target");
-				chasingTarget = null;
-			}
-			else if (detectionTrigger.TryGetLastKnownPosition(chasingTarget, out var lastKnownPosition))
-			{
-				turnCount += 1;
-				Debug.Log(this + " MoveToDestination lastKnownPosition " + chasingTarget + " turn #" + turnCount + "/" + maxTurnsToReachTarget);
-				
-				selfCharacter.Routines.MoveToDestination(lastKnownPosition);
-
-				var startTime = Time.time;
-				do
-				{
-					yield return new WaitForSeconds(Mathf.Max(0.1f, defaultTicks));
-
-					if (Time.time - startTime > timeout)
-					{
-						Debug.Log(this + " timeout!");
-						yield break;
-					}
-
-				} while (chasingTarget 
-				         && !chasingTarget.IsDead()
-				         && selfCharacter.HasMovePoints()
-				         && !detectionTrigger.IsCharacterDetected(chasingTarget)
-				        && !selfCharacter.IsAtAttackRange(chasingTarget) );
-			}
-			else
-			{
-				chasingTarget = null; // last known position forgot
-			}
-		}
 		
 		if (chasingTarget)
 		{
-			turnCount = 0;
-			
 			if (!selfCharacter.CanAttack())
 			{
 				Debug.Log(this + " cannot attack !");
@@ -156,7 +98,7 @@ public class AIBrain_Chase : AIBrainBase
 				Debug.Log(this + " chase " + chasingTarget);
 				
 				DebugDrawer.Line(selfCharacter.GetEyesPosition(), chasingTarget.GetCenterPosition(), Color.red, 1.0f);
-				selfCharacter.Routines.AssignAttack(chasingTarget, !noRun, noLOS);
+				selfCharacter.Routines.AssignAttack(chasingTarget, !noRun, !noLOS);
 
 				do
 				{
@@ -164,6 +106,11 @@ public class AIBrain_Chase : AIBrainBase
 					
 				} while (CharacterRoutines.AnyActiveRoutines());
 			}
+		}
+
+		if (chasingTarget && chasingTarget.IsDead())
+		{
+			chasingTarget = null;
 		}
 	}
 	
@@ -174,23 +121,23 @@ public class AIBrain_Chase : AIBrainBase
 		if(Application.isPlaying && chasingTarget != null) DebugDrawer.Line(selfCharacter.GetEyesPosition(), selfCharacter.GetCenterPosition(), hearingColor, 0.0f);
 	}
 
-	/*private void OnCharacterDetected(CharacterController otherCharacter)
+	private void OnCharacterDetected(CharacterController otherCharacter)
 	{
-		if (lastTarget == null && !otherCharacter.IsDead() && lastThinker.IsEnemyTo(otherCharacter))
+		if (chasingTarget == null && !otherCharacter.IsDead() && initCharacter.IsEnemyTo(otherCharacter))
 		{
-			lastTarget = otherCharacter;
-			Debug.Log(this + " OnCharacterDetected " + lastThinker + " detects " + lastTarget + " with " + detectionTrigger);
+			chasingTarget = otherCharacter;
+			Debug.Log(this + " OnCharacterDetected " + initCharacter + " detects " + chasingTarget + " with " + detectionTrigger);
 		}
-	}*/
+	}
 
-	/*private void OnCharacterLost(CharacterController otherCharacter)
+	private void OnCharacterLost(CharacterController otherCharacter)
 	{
-		if (lastTarget == otherCharacter)
+		if (chasingTarget == otherCharacter)
 		{
-			Debug.Log(this + " OnCharacterDetected " + lastThinker + " looses " + otherCharacter + " with " + detectionTrigger);
-			lastTarget = null;
+			Debug.Log(this + " OnCharacterDetected " + initCharacter + " looses " + chasingTarget + " with " + detectionTrigger);
+			chasingTarget = null;
 		}
-	}*/
+	}
 
 	private void DefaultGetClosestTarget(CharacterController selfCharacter)
 	{

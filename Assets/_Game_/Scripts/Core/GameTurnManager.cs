@@ -154,6 +154,8 @@ public class GameTurnManager : MonoBehaviour
 				yield return null;
 			}
 
+			CharacterSelection.SelectCharacter(null);
+			
 			yield return new WaitForSeconds(turnChangedSeconds);
 			
 			yield return YieldRoutines();
@@ -182,7 +184,7 @@ public class GameTurnManager : MonoBehaviour
 					yield return new WaitForSeconds(noActionsSeconds);
 					continue;
 				}
-
+				
 				yield return new WaitForSeconds(aiThinksSeconds);
 			
 				Debug.Log(otherCharacter + " Think() " + aiBrain);

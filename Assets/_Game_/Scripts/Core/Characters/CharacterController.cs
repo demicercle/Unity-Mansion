@@ -69,7 +69,6 @@ public class CharacterController : MonoBehaviour
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
-		onCharacterMoved?.Invoke(this);
 		onStatsChanged?.Invoke();
 	}
 
@@ -357,6 +356,7 @@ public class CharacterController : MonoBehaviour
 			Debug.Log(this + " Killed!");
 			isDead = true;
 			agent.SetAgentActive(false);
+			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			onKilled?.Invoke();
 			onStatsChanged?.Invoke();
 			return true;
@@ -398,8 +398,10 @@ public class CharacterController : MonoBehaviour
 	public bool IsAtAttackRange(CharacterController target, bool losCheck = true)
 	{
 		var atkRange = GetAttackRange();
-		atkRange = Mathf.Max(atkRange, agent.GetRadius() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
-		if (Vector3.Distance(GetPosition(), target.GetPosition()) <= atkRange)
+		atkRange = Mathf.Max(atkRange, agent.GetRadius() + agent.GetMinReachDistance() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
+		var dist = Vector3.Distance(GetPosition(), target.GetPosition());
+		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
+		if (dist <= atkRange)
 		{
 			return !losCheck || LOSCheck(target);
 		}

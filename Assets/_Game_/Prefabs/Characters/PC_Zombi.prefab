@@ -2194,8 +2194,16 @@ PrefabInstance:
       value: 2.25
       objectReference: {fileID: 0}
     - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: endReachedDistance
-      value: 0.1
+      propertyPath: gravity.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: gravity.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: gravity.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3858026444835299486, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_Positions.Array.data[0].z

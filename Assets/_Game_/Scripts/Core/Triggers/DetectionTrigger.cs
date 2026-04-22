@@ -37,23 +37,7 @@ public class DetectionTrigger : MonoBehaviour
 		return false;
 	}
 
-	public bool TryGetClosestDetectedCharacter(Vector3 worldPosition, out CharacterController otherCharacter)
-	{
-		var bestDist = 0f;
-
-		otherCharacter = default;
-		foreach (var detectedChar in detectedCharacters.Keys)
-		{
-			var dist = Vector3.Distance(detectedChar.GetPosition(), worldPosition);
-			if (otherCharacter == null || dist < bestDist)
-			{
-				bestDist = dist;
-				otherCharacter = detectedChar;
-			}
-		}
-
-		return otherCharacter != default;
-	}
+	public CharacterController[] GetDetectedCharacters() => detectedCharacters.Keys.ToArray();
 	
 	#region PRIVATE
 
@@ -83,18 +67,18 @@ public class DetectionTrigger : MonoBehaviour
 		CharacterController.onCharacterUsesAction -= OnCharacterUsesAction;
 	}
 
-	private void OnEnable()
+	/*private void OnEnable()
 	{
 		if (detectionUsesTime)
 			StartCoroutine(Ticks());
-	}
+	}*/
 
-	private void OnDisable()
+	/*private void OnDisable()
 	{
 		StopAllCoroutines();
-	}
+	}*/
 
-	private IEnumerator Ticks()
+	/*private IEnumerator Ticks()
 	{
 		while (true)
 		{
@@ -105,19 +89,65 @@ public class DetectionTrigger : MonoBehaviour
 			else 
 				yield return new WaitForEndOfFrame();
 		}
-	}
+	}*/
 
 	private void OnCharacterUsesAction(CharacterController otherCharacter, CharacterAction actionType)
 	{
-		DoUpdate();
+		//DoUpdate();
 	}
 
 	private void OnCharacterMoved(CharacterController otherCharacter)
 	{
-		DoUpdate();
+		//DoUpdate();
+
+		if (otherCharacter == selfCharacter)
+		{
+			SphereDetection();
+		}
+		else
+		{
+			//if (debugMode > 0)
+			//	DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetCenterPosition(), Color.magenta);
+			
+			if (detectedCharacters.ContainsKey(otherCharacter))
+			{
+				if (!IsCharacterVisible(otherCharacter))
+				{
+					Debug.Log(this + " OnCharacterMoved " + selfCharacter + " looses " + otherCharacter);
+					detectedCharacters.Remove(otherCharacter);
+					//DebugDrawCapsule(otherCharacter, Color.gray, 0.5f);
+				}
+			}
+			else
+			{
+				if (IsCharacterVisible(otherCharacter))
+				{
+					Debug.Log(this + " OnCharacterMoved " + selfCharacter + " detects " + otherCharacter);
+					detectedCharacters.Add(otherCharacter, (Vector4)otherCharacter.GetPosition());
+					//DebugDrawCapsule(otherCharacter, Color.magenta, 0.5f);
+				}
+			}
+		}
 	}
 
-	private void DoUpdate()
+	private void SphereDetection()
+	{
+		//if (debugMode > 0) DebugDrawer.WireDisc(selfCharacter.GetPosition(), Vector3.forward, hearingDistance, Color.yellow);
+		//if (debugMode > 0) DebugDrawer.WireDisc(selfCharacter.GetPosition(), Vector3.forward, seeingDistance, Color.magenta);
+		foreach (var coll in Physics.OverlapSphere(selfCharacter.GetPosition(),
+			         Mathf.Max(hearingDistance, seeingDistance), LayerMask.NameToLayer(Consts.LAYER_CHARACTER)))
+		{
+			if (coll.TryGetComponent(out CharacterController otherCharacter))
+			{
+				if (otherCharacter == selfCharacter) continue;
+				if (otherCharacter.IsDead()) continue;
+
+				OnCharacterMoved(otherCharacter);
+			}
+		}
+	}
+
+	/*private void DoUpdate()
 	{
 		debugString = "";
 		foreach (var otherCharacter in CharacterController.AllCharacters)
@@ -171,9 +201,6 @@ public class DetectionTrigger : MonoBehaviour
 								debugDrawTime);
 							DebugDrawer.WireDisc((Vector3)lastKnownPosition, Vector3.up, otherCharacter.GetRadius(),
 								Color.yellow, debugDrawTime);
-							DebugDrawer.WorldLabel(
-								(Vector3)lastKnownPosition + Vector3.up * otherCharacter.GetHeight() + Vector3.up / 2f,
-								lastKnownPosition.z.ToString("N2"), debugDrawTime, 0);
 						}
 					}
 				}
@@ -205,7 +232,7 @@ public class DetectionTrigger : MonoBehaviour
 			}
 			
 		}
-	}
+	}*/
 
 	private bool IsCharacterVisible(CharacterController otherCharacter)
 	{
@@ -219,11 +246,20 @@ public class DetectionTrigger : MonoBehaviour
 		{
 			return distance <= Mathf.Max(seeingDistance, hearingDistance) && otherCharacter.IsCharacterRevealed(); // characters player will see far and behind walls
 		}
-		else
+		
+		if (distance <= seeingDistance)
 		{
-			return distance <= hearingDistance ||
-			       (distance <= seeingDistance && AngleCheck(otherCharacter) && LOSCheck(otherCharacter));
+			if (LOSCheck(otherCharacter))
+			{
+				if (distance <= hearingDistance)
+					return true;
+
+				if (AngleCheck(otherCharacter))
+					return true;
+			}
 		}
+
+		return false;
 	}
 
 	private bool AngleCheck(CharacterController other)
@@ -241,8 +277,8 @@ public class DetectionTrigger : MonoBehaviour
 		forward.Normalize();
 		
 		var angle = Vector3.Angle(direction, forward);
-
-		if (debugMode > 1) DebugDrawer.WorldLabel(worldPosition, Mathf.RoundToInt(angle).ToString(), 0f, 0f);
+		//Debug.Log(selfCharacter + " angle to " + other + " = " + angle);
+		//if (debugMode > 0) Utils.DrawWorldGUI(worldPosition, angle.ToString("N2"));
 		
 		return angle <= maxAngle;
 	}
@@ -259,6 +295,7 @@ public class DetectionTrigger : MonoBehaviour
 			{
 				DebugDrawer.Line(eyesPos, otherPos, Color.gray);
 				DebugDrawer.Line(eyesPos, hit.point, Color.red);
+				Debug.Log(otherCharacter + " hit " + hit.collider);
 			}
 			
 			return false;
@@ -274,6 +311,7 @@ public class DetectionTrigger : MonoBehaviour
 
 	private void DebugDrawCapsule(CharacterController otherCharacter, Color color, float duration)
 	{
+		if (debugMode <= 0) return;
 		var eyesPosition = selfCharacter.GetEyesPosition();
 		var otherCenter = otherCharacter.GetCenterPosition();
 		DebugDrawer.Line(eyesPosition, otherCenter, color, duration);
@@ -310,6 +348,17 @@ public class DetectionTrigger : MonoBehaviour
 			DebugDrawer.Line(forward, right, lineColor);
 			DebugDrawer.Line(right, forward, lineColor);
 			DebugDrawer.Line(forward, left, lineColor);
+
+			debugString = "";
+			foreach (var otherCharacter in detectedCharacters.Keys)
+			{
+				if (!string.IsNullOrEmpty(debugString)) debugString += "\n";
+				debugString += ">" + otherCharacter.name;
+				if (debugMode > 0)
+					DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetCenterPosition(),
+						ColorSettings.GetCharacterColor(selfCharacter));
+				//DebugDrawCapsule(otherCharacter, Color.magenta);
+			}
 		}
 	}
 

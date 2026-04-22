@@ -63,6 +63,7 @@ public class AttackTrigger : MonoBehaviour
 
 	private void OnTrigger(Collider other)
 	{
+		if (selfCharacter.IsDead()) return;
 		if (maxTriggerCount >= 0 && triggerCount >= maxTriggerCount) return;
 		if (meleeWeaponOnly && selfCharacter.IsUsingRangeWeapon()) return;
 		

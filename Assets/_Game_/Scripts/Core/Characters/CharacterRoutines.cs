@@ -77,7 +77,7 @@ public class CharacterRoutines : MonoBehaviour
 		if(activeInstances.Contains(this)) Debug.LogError(this + " _WaitComplete activeInstances.Contains(this)");
 		activeInstances.Add(this);
 		while (activeInstances[0] != this) yield return null; // wait other routines
-		Debug.Log(this + " routine started");
+		Debug.Log(this + " routine started " + activeInstances.Count);
 		yield return coroutine;
 		activeInstances.Remove(this);
 		Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
@@ -155,7 +155,10 @@ public class CharacterRoutines : MonoBehaviour
 				
 				Debug.Log(characterOwner + " starts moving towards target");
 				characterOwner.StartCoroutine(WaitCharacterMoved(target.GetPosition()));
-				yield return null;
+				do
+				{
+					yield return null;
+				} while (!characterOwner.IsMoving()); // searching path
 			}
 			
 			//else Debug.Log(characterOwner + " moves towards " + target);
