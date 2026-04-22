@@ -33,6 +33,7 @@ public class CharacterAgent : MonoBehaviour
 	public void Teleport(Vector3 newPos, int newRot, bool stopMovement = true)
 	{
 		if(stopMovement) StopMovement();
+		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.Teleport(newPos, true);
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 	}

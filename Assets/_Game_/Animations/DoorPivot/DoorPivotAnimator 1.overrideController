@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: DoorPivotAnimator 1
+  m_Controller: {fileID: 9100000, guid: 5f2e5c3b82cc2164690e10af14c6dea9, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: a05719fda2c45774283f408b1c0c5045, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 27b9f809f9f1bf343a47e4f9a3bdca6f, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 892537d50bf33044db865082662fd8eb, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: b17e0463601551a408f3575bed1e2b7f, type: 2}

@@ -16,6 +16,6 @@ MonoBehaviour:
   textures:
   - {fileID: 2800000, guid: 7fa79ab960c190f42a8237e9b72e5efa, type: 3}
   - {fileID: 2800000, guid: efc884d58811d994a8b881c2187aaeb4, type: 3}
-  hotspot: {x: 32, y: 32}
+  hotspot: {x: 0, y: 0}
   animationSpeed: 1
   loopAnimation: 0
