@@ -19,13 +19,13 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
 	[SerializeField] [Range(0.1f,1f)] private float realTimeTicks = 0.5f;
-	[SerializeField] private float postLoadDuration = 1.0f;
-	[SerializeField] private float turnChangedSeconds = 3.0f;
-	[SerializeField] private  float focusCharacterSeconds = 1.5f;
-	[SerializeField] private  float noActionsSeconds = 3.0f;
-	[SerializeField] private float defaultActionsSeconds = 1.0f;
-	[SerializeField] private  float cameraStartsSeconds = 0.15f;
-	[SerializeField] private  float aiThinksSeconds = 0.5f;
+	[SerializeField] [Min(0.1f)] private float postLoadDuration = 1.0f;
+	[SerializeField] [Min(0.1f)] private float turnChangedSeconds = 3.0f;
+	[SerializeField] [Min(0.1f)]  private  float focusCharacterSeconds = 1.5f;
+	[SerializeField] [Min(0.1f)] private  float noActionsSeconds = 3.0f;
+	[SerializeField] [Min(0.1f)] private float defaultActionsSeconds = 1.0f;
+	[SerializeField] [Min(0.1f)] private  float firstTurnSeconds = 1.0f;
+	[SerializeField] [Min(0.1f)] private  float aiThinksSeconds = 0.5f;
 	[Space]
 	[SerializeField] private GameObject[] startupObjects = new GameObject[0];
 
@@ -170,9 +170,17 @@ public class GameTurnManager : MonoBehaviour
 			}
 			
 			NewTurn();
-
-			SelectBestPlayerCharacter();
-			yield return new WaitForSeconds(focusCharacterSeconds);
+			
+			if (currentTurn > 1) // it is not the first turn
+			{
+				SelectBestPlayerCharacter();
+				yield return new WaitForSeconds(focusCharacterSeconds); 
+			}
+			else
+			{
+				yield return new WaitForSeconds(firstTurnSeconds); 
+			}
+			
 			
 			while (IsPlayerTurn())
 			{
