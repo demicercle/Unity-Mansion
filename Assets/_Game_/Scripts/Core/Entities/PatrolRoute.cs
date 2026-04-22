@@ -49,7 +49,6 @@ public class PatrolRoute : MonoBehaviour
 	[SerializeField] private List<Waypoint> waypoints = new List<Waypoint>();
 	public bool closedLoop = false;
 	public Color color = Color.blue;
-	public AIBrain_Patrol defaultBrain = null;
 		
 	public Vector3[] GetPath() => waypoints
 			.Where(wp => wp != null)
