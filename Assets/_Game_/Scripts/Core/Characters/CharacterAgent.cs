@@ -301,12 +301,14 @@ public class CharacterAgent : MonoBehaviour
 		//TODO: controller.IsActing(), controller.IsMoving(), controller.IsRotating()
 
 		shouldDrawPath[0] = hasDestination // "thin" path
+		                    && !IsMoving()
 		                    && CharacterSelection.IsCharacterSelected(_character)
 		                    && _character.IsControllableByPlayer()
 		                    && (!CharacterRoutines.AnyActiveRoutines() || _character.IsMoving())
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 
 		shouldDrawPath[1] = hasDestination  // "thin" path
+		                    && !IsMoving()
 		                    && CharacterSelection.IsCharacterSelected(_character) 
 		                    && _character.IsControllableByPlayer() 
 		                    && !CharacterRoutines.AnyActiveRoutines()

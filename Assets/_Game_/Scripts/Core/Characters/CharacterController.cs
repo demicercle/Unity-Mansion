@@ -108,9 +108,9 @@ public class CharacterController : MonoBehaviour
 		turnStarted?.Invoke();
 	}
 
-	public void Rest()
+	public void Rest(bool verbose = true)
 	{
-		Debug.Log(this + " Rest");
+		if(verbose) Debug.Log(this + " Rest");
 		usedActions.Clear();
 		usedMovePoints = 0;
 		onStatsChanged?.Invoke();

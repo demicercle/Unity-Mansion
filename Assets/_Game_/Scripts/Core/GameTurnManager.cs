@@ -16,8 +16,9 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool firstTurnIsPlayer = true;
 	[SerializeField] private bool skipInvisibleCharacters = true;
-	[Range(0f,1f)] [SerializeField] private float cameraStartZoom = .5f;
+	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
+	[SerializeField] [Range(0.1f,1f)] private float realTimeTicks = 0.5f;
 	[SerializeField] private float postLoadDuration = 1.0f;
 	[SerializeField] private float turnChangedSeconds = 3.0f;
 	[SerializeField] private  float focusCharacterSeconds = 1.5f;
@@ -27,6 +28,8 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private  float aiThinksSeconds = 0.5f;
 	[Space]
 	[SerializeField] private GameObject[] startupObjects = new GameObject[0];
+
+	public bool IsTurnBasedMode() => turnBasedMode;
 	
 	public bool IsPlayerTurn() => playerTurn;
 
@@ -35,7 +38,7 @@ public class GameTurnManager : MonoBehaviour
 	public bool PlayerCanEndTurn() => !AnyActiveRoutinesPlaying() && IsPlayerTurn();
 	
 	public bool PlayerShouldEndTurn() => PlayerCanEndTurn() 
-	                               && CharacterController.GetPartyCharacters().All(pc =>
+	                               && partyCharacters.All(pc =>
 									{
 										return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
 									});
@@ -71,6 +74,7 @@ public class GameTurnManager : MonoBehaviour
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
+	private bool turnBasedMode;
 	
 	private void Awake()
 	{
@@ -137,20 +141,31 @@ public class GameTurnManager : MonoBehaviour
 		
 		while (true)
 		{
+			yield return StartCoroutine(RealTimeModeCoroutine());
+			yield return StartCoroutine(TurnModeCoroutine());
+		}
+	}
+
+	private IEnumerator TurnModeCoroutine()
+	{
+		Debug.Log(this + " Enters TurnModeCoroutine");
+		currentTurn = 0;
+		
+		while (turnBasedMode)
+		{
+			if (!IsAnyEnemyAroundCheck())
+			{
+				turnBasedMode = false;
+				Debug.Log(this + " Switch To RealTime");
+				break;
+			}
+			
+			
 			playerTurn = !firstTurnIsPlayer;
 			NewTurn();
-			
+
 			SelectBestPlayerCharacter();
-			
-			if (currentTurn == 1) // first turn animation
-			{
-				yield return new WaitForSeconds(cameraStartsSeconds);
-				CameraPivot.Instance.SetZoom(cameraStartZoom);
-			}
-			else 
-			{
-				yield return new WaitForSeconds(focusCharacterSeconds);
-			}
+			yield return new WaitForSeconds(focusCharacterSeconds);
 			
 			while (IsPlayerTurn())
 			{
@@ -197,6 +212,31 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 	}
+
+	private IEnumerator RealTimeModeCoroutine()
+	{
+		Debug.Log(this + " Enters RealTimeModeCoroutine");
+		
+		currentTurn = -1;
+		NewTurn();
+		
+		SelectBestPlayerCharacter();
+		CameraPivot.Instance.SetZoom(cameraStartZoom);
+
+		do
+		{
+			PartyRest(false);
+
+			yield return new WaitForSeconds(realTimeTicks);
+
+			if (IsAnyEnemyAroundCheck())
+			{
+				turnBasedMode = true;
+				Debug.Log(this + " Switch Turn Based Mode");
+			}
+			
+		} while (!turnBasedMode);
+	}
 	
 	private Coroutine YieldRoutines() => StartCoroutine(WaitRoutines());
 	private IEnumerator WaitRoutines()
@@ -234,12 +274,34 @@ public class GameTurnManager : MonoBehaviour
 	{
 		var center = cameraPivot.GetFocusPosition();
 
-		var bestCharacter = CharacterController.GetPartyCharacters()
+		var bestCharacter = partyCharacters
 			.OrderBy(pc => Vector3.Distance(pc.GetPosition(), center))
 			.FirstOrDefault();
 		
 		Debug.Log(this + " SelectBestPlayerCharacter " + bestCharacter);
 		CharacterSelection.SelectCharacter(bestCharacter);
 	}
+
+	private void PartyRest(bool verbose)
+	{
+		foreach (var character in partyCharacters)
+			character.Rest(verbose);
+	}
+
+	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
+
+	private bool IsAnyEnemyAroundCheck()
+	{
+		foreach (var character in levelCharacters)
+		{
+			if (character.IsEnemyToPlayer() && !character.IsDead() && character.IsCharacterRevealed())
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
 	#endregion
 }

@@ -308,7 +308,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter != null)
 				{
-					if (CanControlCharacter(selectedCharacter))
+					if (CanControlCharacter(selectedCharacter) && !selectedCharacter.IsMoving())
 					{
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
 						SetCurrentCursorType(CursorType.Navigate);
@@ -326,7 +326,7 @@ public class GameInput : MonoBehaviour
 					debugString += " (Character)";
 					if (selectedCharacter != null)
 					{
-						if (CanControlCharacter(selectedCharacter))
+						if (CanControlCharacter(selectedCharacter) && !selectedCharacter.IsMoving())
 						{
 							var agent = selectedCharacter.GetAgent();
 							if (overCharacter.InParty())
@@ -355,7 +355,7 @@ public class GameInput : MonoBehaviour
 					debugString += " (Prop)";
 					if (selectedCharacter != null)
 					{
-						if (CanControlCharacter(selectedCharacter)) // mouse over prop
+						if (CanControlCharacter(selectedCharacter) && !selectedCharacter.IsMoving()) // mouse over prop
 						{
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
@@ -377,7 +377,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter)
 				{
-					if (CanControlCharacter(selectedCharacter))
+					if (CanControlCharacter(selectedCharacter) && !selectedCharacter.IsMoving())
 					{
 						selectedCharacter.GetAgent().ClearDestination();
 						debugString += "\n>ClearDestination()";
@@ -664,11 +664,16 @@ public class GameInput : MonoBehaviour
 		else if(isDebugMode)  Debug.Log(" no character selected");
 	}
 	
-	private bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
+	private bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
+	                                              && CanControlCharacter(selectedCharacter);
+	
 	private bool CanControlCharacter(CharacterController character)
 	{
-		return hasFocus && !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && character.IsControllableByPlayer();
+		return hasFocus 
+		       && (!gameTurnManager.IsTurnBasedMode() || (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines()))
+		       && character.IsControllableByPlayer();
 	}
+	
 	private void SetCurrentCursorType(CursorType cursorType)
 	{
 		currentCursor = cursorType;

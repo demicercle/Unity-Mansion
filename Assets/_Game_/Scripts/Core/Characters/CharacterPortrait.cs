@@ -1,5 +1,6 @@
 ﻿using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -42,6 +43,8 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		_assignedCharacter.onStatsChanged += UpdateStats;
 		_assignedCharacter.onFactionChanged += UpdateStats;
 		_assignedCharacter.onSelectionChanged += OnSelectionChanged;
+
+		UpdateStats();
 	}
 	
 	private CharacterController _assignedCharacter;
