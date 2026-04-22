@@ -66,6 +66,7 @@ public class CharacterController : MonoBehaviour
 	
 	public void Spawn()
 	{
+		Debug.Log(this + " Spawn");
 		transform.SetParent(null, true);
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
@@ -515,6 +516,8 @@ public class CharacterController : MonoBehaviour
 		}
 
 		currentWeapon = defaultWeapon;
+		
+		gameObject.SetActive(false); // wait for "Spawn"
 	}
 
 	private void OnDestroy()

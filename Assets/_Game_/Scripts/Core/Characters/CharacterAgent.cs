@@ -219,7 +219,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void UpdateComponent()
 	{
-		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
+		aiPath = GetComponent<AIPath>();
 		aiPath.radius = radius;
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;

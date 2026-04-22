@@ -110,10 +110,8 @@ public class GameTurnManager : MonoBehaviour
 			yield return null;
 		
 		Debug.Log(" loading scene complete");
-		
-		var levelCharacters = Utils.FindObjects<CharacterController>()
-			.OrderBy(c => c.name)
-			.ToList();
+
+		var levelCharacters = CharacterController.AllCharacters;
 		
 		Debug.Log(this + " found levelCharacters=" + levelCharacters.Count);
 		
