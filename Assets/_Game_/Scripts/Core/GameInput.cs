@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,9 @@ public interface ICursorHandler
 [System.Serializable]
 public class GameInput : MonoBehaviour
 {
+	public static int debugMode { get; set; }
+
+	
 	public const int CursorRaycastResult_None = 0;
 	public const int CursorRaycastResult_Navigation = 1;
 	public const int CursorRaycastResult_Character = 2;
@@ -29,8 +33,6 @@ public class GameInput : MonoBehaviour
 	[SerializeField] private bool cameraCanRotateClamped = false;
 	[Header("Character Control")]
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
-	[Space]
-	[SerializeField] private bool debugMode = false;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
 	public int CursorRaycast(out RaycastHit raycastHit, Camera cam = null) 
@@ -64,7 +66,7 @@ public class GameInput : MonoBehaviour
 			//DebugGUI.Log("Hit Navigation: " + hit.point);
 			//Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
 
-			if (NavUtility.TryGetNearestNavPosition(raycastHit.point, maxNavDistance, out var navPosition))
+			if (NavUtils.TryGetNearestNavPosition(raycastHit.point, maxNavDistance, out var navPosition))
 			{
 				raycastHit.point = navPosition;
 				//DrawDebug.WireDisc(navPosition + Vector3.up * debugOffset, Vector3.up,maxNavDistance * 0.5f, Color.cyan);
@@ -85,6 +87,7 @@ public class GameInput : MonoBehaviour
 	private bool isLoading => gameTurnManager.IsLoading();
 	private GameCanvas canvas => GameCanvas.Instance;
 	private CameraPivot cameraPivot => CameraPivot.Instance;
+	private bool isDebugMode => debugMode > 0;
 	private GameTurnManager gameTurnManager;
 	private bool mouseDown, orbitWithInputs;
 	private Vector2 orbitAxis;
@@ -101,6 +104,7 @@ public class GameInput : MonoBehaviour
 	private CursorType currentCursor;
 	private Ray raycastRay;
 	private int lastCursorResult;
+	private string debugString;
 
 	private void Awake()
 	{
@@ -304,19 +308,13 @@ public class GameInput : MonoBehaviour
 		}
 
 		CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter);
-		if (selectedCharacter != null)
-		{
-			if (selectedCharacter.IsDead())
-			{
-				CharacterSelection.SelectNextCharacter();
-			}
-		}
-		
+
+		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
 		if (hasFocus && mouseOverViewport && !holdMiddleClick) // mouse over
 		{
 			lastCursorResult = CursorRaycast(out var hit);
-			
-			if (debugMode) Debug.Log("mouseOverViewport cursor result==" + lastCursorResult);
+
+			debugString += "\nresult==" + lastCursorResult + " " + (hit.collider ? hit.collider.name : "no hit");
 			
 			if (lastCursorResult == CursorRaycastResult_Navigation)
 			{
@@ -326,17 +324,18 @@ public class GameInput : MonoBehaviour
 					{
 						SetCurrentCursorType(CursorType.Navigate);
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
+						debugString += "\n>Navigate";
 					}
-					else if(debugMode) Debug.Log("character not controllable");
+					//else if(isDebugMode) Debug.Log("character not controllable");
 				}
-				else if(debugMode) Debug.Log("no selected character");
+				//else if(isDebugMode) Debug.Log("no selected character");
 			}
 			
 			else if (lastCursorResult == CursorRaycastResult_Character) 
 			{
-				if (hit.collider.TryGetComponent(out CharacterAnimation overCharacterView))
+				if (hit.collider.TryGetComponent(out CharacterController overCharacter))
 				{
-					var overCharacter = overCharacterView.GetController();
+					debugString += " (Character)";
 					if (selectedCharacter != null)
 					{
 						if (CanControlCharacter(selectedCharacter))
@@ -349,21 +348,23 @@ public class GameInput : MonoBehaviour
 							}
 							else if (overCharacter.IsEnemyToPlayer())
 							{
-								agent.AssignDestination(overCharacter.GetPosition(), mouseHasMoved); // mouse over enemy
+								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over enemy
 								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
 							}
 							else
 							{
-								agent.AssignDestination(overCharacter.GetPosition(), mouseHasMoved); // mouse over character
+								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
 								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
 							}
+							debugString += "\n>" + currentCursor;
 						}
-						else if(debugMode) Debug.Log("character not controllable");
+						//else if(isDebugMode) Debug.Log("character not controllable");
 					}
-					else if(debugMode) Debug.Log("no selected character");
+					//else if(isDebugMode) Debug.Log("no selected character");
 				}
 				else if (hit.collider.TryGetComponent(out PropComponent overProp)) 
 				{
+					debugString += " (Prop)";
 					if (selectedCharacter != null)
 					{
 						if (CanControlCharacter(selectedCharacter)) // mouse over prop
@@ -371,15 +372,16 @@ public class GameInput : MonoBehaviour
 							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 							{
 								var agent = selectedCharacter.GetAgent();
-								agent.AssignDestination(bestWaypoint.GetPosition(), mouseHasMoved); // mouse over prop
+								agent.AssignDestination(bestWaypoint.GetPosition(), true); // mouse over prop
 								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
 									: overProp.GetCursorType());
 							}
+							debugString += "\n>" + currentCursor;
 							//else Debug.LogWarning("no waypoint found");
 						}
-						else if(debugMode) Debug.Log("character not controllable");
+						//else if(isDebugMode) Debug.Log("character not controllable");
 					}
-					else if(debugMode) Debug.Log("no selected character");
+					//else if(isDebugMode) Debug.Log("no selected character");
 				}
 			}
 			
@@ -390,11 +392,14 @@ public class GameInput : MonoBehaviour
 					if (CanControlCharacter(selectedCharacter))
 					{
 						selectedCharacter.GetAgent().ClearDestination();
+						debugString += "\n>ClearDestination()";
 					}
-					else if(debugMode) Debug.Log("character not controllable");
+					//else if(isDebugMode) Debug.Log("character not controllable");
 				}
-				else if(debugMode) Debug.Log("no selected character");
+				//else if(isDebugMode) Debug.Log("no selected character");
 			}
+			
+			//if (debugMode) Debug.Log(debugString);
 		}
 		else
 		{
@@ -418,6 +423,8 @@ public class GameInput : MonoBehaviour
 		{
 			CursorData.GetCursorData(currentCursor).Apply(mouseDown);
 		}
+		
+		if (debugMode > 1) Debug.Log(debugString);
 	}
 	
 	private void LateUpdate()
@@ -435,7 +442,8 @@ public class GameInput : MonoBehaviour
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			selectedCharacter.TryUseAction(CharacterAction.RunAction, true);
+			if(selectedCharacter.CanUseAction(CharacterAction.RunAction))
+				selectedCharacter.Routines.AssignRunAction();
 		}
 	}
 
@@ -592,7 +600,7 @@ public class GameInput : MonoBehaviour
 				CharacterSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 				//return;
 			}
-			else if(debugMode) Debug.Log(clickedCharacter + " InParty not in player turn");
+			else if(isDebugMode) Debug.Log(clickedCharacter + " InParty not in player turn");
 		}
 		
 		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
@@ -605,13 +613,13 @@ public class GameInput : MonoBehaviour
 					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.AttackAction))
 						selectedCharacter.FloatingText_Cant();
 					else
-						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, true);
+						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 					return;
 				}
 				
 				selectedCharacter.FloatingText_Cant();
 			}
-			else if(debugMode)  Debug.Log(clickedCharacter + " IsEnemyToPlayer no selected character");
+			else if(isDebugMode)  Debug.Log(clickedCharacter + " IsEnemyToPlayer no selected character");
 		}
 		
 		else
@@ -620,7 +628,7 @@ public class GameInput : MonoBehaviour
 			{
 				Debug.LogWarning("//TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
 			}
-			else if(debugMode)  Debug.Log(clickedCharacter + " !IsEnemyToPlayer no selected character");
+			else if(isDebugMode)  Debug.Log(clickedCharacter + " !IsEnemyToPlayer no selected character");
 		}
 	}
 
@@ -637,9 +645,9 @@ public class GameInput : MonoBehaviour
 				else
 					selectedCharacter.Routines.AssignInteract(clickedProp);
 			}
-			else if(debugMode)  Debug.Log(" selected character not controllable");
+			else if(isDebugMode)  Debug.Log(" selected character not controllable");
 		}
-		else if(debugMode)  Debug.Log(" no character selected");
+		else if(isDebugMode)  Debug.Log(" no character selected");
 	}
 
 	private void ClickNavigation(Vector3 navPosition)
@@ -652,16 +660,12 @@ public class GameInput : MonoBehaviour
 			{
 				selectedCharacter.Routines.AssignMoveToDestination(navPosition);
 			}
-			else if(debugMode)  Debug.Log(" selected character not controllable");
+			else if(isDebugMode)  Debug.Log(" selected character not controllable");
 		}
 		
-		else if(debugMode)  Debug.Log(" no character selected");
+		else if(isDebugMode)  Debug.Log(" no character selected");
 	}
-
-	private List<CharacterAnimation> GetAllCharacters() =>  CharacterAnimation.activeInstances.ToList();
-	private List<CharacterAnimation> GetPartyCharacters() => CharacterAnimation.activeInstances.Where(c => c.GetController().InParty()).ToList();
-	private int GetPartyCharacterIndex(CharacterAnimation characterAnimation) => GetPartyCharacters().IndexOf(characterAnimation);
-	private int GetCharacterIndex(CharacterAnimation characterAnimation) => GetAllCharacters().IndexOf(characterAnimation);
+	
 	private bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	private bool CanControlCharacter(CharacterController character)
 	{
@@ -671,7 +675,16 @@ public class GameInput : MonoBehaviour
 	{
 		currentCursor = cursorType;
 	}
-	
+
+	private void OnGUI()
+	{
+		if (!isDebugMode) return;
+		var guiContent = new GUIContent(debugString);
+		var guiStyle = new GUIStyle("textfield");
+		var guiRect = GUILayoutUtility.GetRect(guiContent, guiStyle);
+		GUI.Box(new Rect(Event.current.mousePosition, guiRect.size), guiContent);
+	}
+
 	string GetLabel(string label)
 	{
 		#if UNITY_EDITOR

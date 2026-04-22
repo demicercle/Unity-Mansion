@@ -42,12 +42,13 @@ public class PatrolRoute : MonoBehaviour
 		waypoints.ForEach(wp => wp.transform.SetParent(transform, true));
 		Utils.SetDirty(gameObject);
 	}
+	
+	public Waypoint[] GetWaypoints() => waypoints.ToArray();
 
 	public CharacterController assignedCharacter;
-	public List<Waypoint> waypoints = new List<Waypoint>();
+	[SerializeField] private List<Waypoint> waypoints = new List<Waypoint>();
 	public bool closedLoop = false;
 	public Color color = Color.blue;
-	public AIBrain_Patrol defaultBrain = null;
 		
 	public Vector3[] GetPath() => waypoints
 			.Where(wp => wp != null)
@@ -79,7 +80,7 @@ public class PatrolRoute : MonoBehaviour
 			Utils.DrawGizmosPath(GetPath(), closedLoop);
 			if (assignedCharacter)
 			{
-				Gizmos.DrawLine(transform.position, assignedCharacter.GetPosition() + Vector3.up);
+				Gizmos.DrawLine(GetPath().FirstOrDefault(), assignedCharacter.GetPosition() + Vector3.up);
 				Utils.DrawGizmosCircle(assignedCharacter.GetPosition() + Vector3.up, Vector3.up, 1.0f);
 			}
 		}

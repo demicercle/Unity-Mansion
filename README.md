@@ -6,16 +6,16 @@
 - DebugGUI Draw Character stats (movePoints, etc)
 	> Right Click editor selects character under mouse
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
-- change animation of characters during the mythos phase ("look around", "weapons ready", etcs)
-- OpportunityAttacks
 - tweaks! selection circle alpha when AI turns
-- assign action on release click
 - rename "NavUtility" into component "NavMeshRebuilder"
-- GameView is GameInput
-- if no actions, change the cursor
-
+- SelectNext Tab bug
 - custom asset post processor
 - update color of nav target depending on the action (red for enemies)
+
+- door nav rebuild
+- zombi should rotate on scream
+- zombi scream should be linked to ai detection and not weapon ready?
+- "round" logic (characters rest on start round)
 
 NullReferenceException: Object reference not set to an instance of an object
 GameInput.OnDisable () (at Assets/_Game_/Scripts/Core/GameInput.cs:162)

@@ -5,6 +5,31 @@ using UnityEngine;
 
 public static class Utils
 {
+	public static bool TagCheck(string filters, object obj)
+	{
+		return obj == null || string.IsNullOrWhiteSpace(filters) ||
+		       filters.Split(',').ToList().Any(tag =>
+		       {
+			       if (obj is Component)
+				       return (obj as Component).CompareTag(tag);
+
+			       if (obj is GameObject)
+				       return (obj as GameObject).CompareTag(tag);
+
+			       return false;
+		       });
+	}
+
+	static public void DrawWorldGUI(Vector3 position, string debugString)
+	{
+		var guiContent = new GUIContent(debugString);
+		var guiStyle = new GUIStyle("textfield");
+		var guiRect = GUILayoutUtility.GetRect(guiContent, guiStyle);
+		var guiPosition = (Vector2)Camera.main.WorldToScreenPoint(position);
+		guiPosition.y = Screen.height - guiPosition.y;
+		GUI.Box(new Rect(guiPosition, guiRect.size), guiContent);
+	}
+	
 #if UNITY_EDITOR
 	[UnityEditor.MenuItem("Edit/Set Selection Dirty")]
 	static public void SetSelectionDirty()
@@ -249,5 +274,38 @@ public static class Utils
 		var t = gameObject.GetComponent<T>();
 		if (t == null) t= gameObject.AddComponent<T>();
 		return t;
+	}
+}
+
+public static class NavUtils
+{
+	
+	
+	public static bool TryGetNearestNavPosition(Vector3 position, float maxDistance, out Vector3 navPosition)
+	{
+		navPosition = position;
+
+		if (AstarPath.active == null)
+			return false;
+
+		// Crée une contrainte pour nœuds walkables uniquement
+		Pathfinding.NNConstraint constraint = Pathfinding.NNConstraint.Walkable;
+		constraint.constrainWalkability = true;
+		constraint.walkable = true;
+
+		// Cherche le nœud le plus proche
+		Pathfinding.NNInfo nearest = AstarPath.active.GetNearest(position, constraint);
+
+		if (nearest.node != null && nearest.node.Walkable)
+		{
+			float distance = Vector3.Distance(position, (Vector3)nearest.position);
+			if (distance <= maxDistance)
+			{
+				navPosition = (Vector3)nearest.position;
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

@@ -56,7 +56,7 @@ public class HideInFog : MonoBehaviour
 
 	private void UpdateVisibility()
 	{
-		isHidden = character && !(character.InParty() || character.IsCharacterVisible());
+		isHidden = character && !(character.InParty() || character.IsCharacterRevealed());
 		renderers.ForEach(r => r.gameObject.layer = LayerMask.NameToLayer(isHidden ? hiddenLayer : defaultLayer));
 	}
 }

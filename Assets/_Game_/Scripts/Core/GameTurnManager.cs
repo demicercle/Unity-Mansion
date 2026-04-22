@@ -65,14 +65,6 @@ public class GameTurnManager : MonoBehaviour
 		}
 	}
 	
-	public void EndTurn()
-	{
-		playerTurn = false;
-		CharacterController.AllCharacters.ForEach(c => c.EndTurn());//TODO Event
-		Debug.Log(this + " EndTurn " + currentTurn);
-		turnEnded?.Invoke();
-	}
-	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
 	private int currentTurn;
@@ -114,14 +106,12 @@ public class GameTurnManager : MonoBehaviour
 			yield return new WaitForSeconds(postLoadDuration);
 		} while (SceneLoader.AnyInstanceActive);
 
-		while(NavUtility.IsRebuildingAsync()) 
+		while(NavmeshRebuilder.IsRebuildingAsync()) 
 			yield return null;
 		
 		Debug.Log(" loading scene complete");
-		
-		var levelCharacters = Utils.FindObjects<CharacterController>()
-			.OrderBy(c => c.name)
-			.ToList();
+
+		var levelCharacters = CharacterController.AllCharacters;
 		
 		Debug.Log(this + " found levelCharacters=" + levelCharacters.Count);
 		
@@ -162,6 +152,8 @@ public class GameTurnManager : MonoBehaviour
 				yield return null;
 			}
 
+			CharacterSelection.SelectCharacter(null);
+			
 			yield return new WaitForSeconds(turnChangedSeconds);
 			
 			yield return YieldRoutines();
@@ -170,7 +162,7 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (otherCharacter.InParty()) continue;
 			
-				if (otherCharacter.IsCharacterVisible())
+				if (otherCharacter.IsCharacterRevealed())
 					cameraPivot.Focus(otherCharacter);
 				else
 				{
@@ -184,18 +176,14 @@ public class GameTurnManager : MonoBehaviour
 
 				yield return new WaitForSeconds(focusCharacterSeconds);
 
-				if (!otherCharacter.TryGetAIBrain(out var aiBrain))
+				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
 				{
-					Debug.LogWarning(otherCharacter + " has no aiBrain");
+					Debug.LogWarning(otherCharacter + " has no brain");
 					yield return new WaitForSeconds(noActionsSeconds);
 					continue;
 				}
 
-				yield return new WaitForSeconds(aiThinksSeconds);
-			
-				Debug.Log("Think() " + aiBrain + " " + otherCharacter);
-				yield return StartCoroutine(aiBrain.Think(otherCharacter));
-				Debug.Log("End Think()");
+				yield return StartCoroutine(otherBrain.Think());
 
 				var startTime = Time.time;
 				yield return YieldRoutines();
@@ -212,11 +200,27 @@ public class GameTurnManager : MonoBehaviour
 			yield return null;
 	}
 	
+	private void EndTurn()
+	{
+		playerTurn = false;
+		CharacterController.AllCharacters.ForEach((c) =>
+		{
+			c.EndTurn();
+			if (!c.IsPlayer()) c.Rest();
+		});
+		Debug.Log(this + " EndTurn " + currentTurn);
+		turnEnded?.Invoke();
+	}
+	
 	private void NewTurn()
 	{
 		currentTurn += 1;
 		playerTurn = true;
-		CharacterController.AllCharacters.ForEach(c => c.NewTurn(currentTurn));//TODO Event
+		CharacterController.AllCharacters.ForEach((c) =>
+		{
+			c.NewTurn(currentTurn);
+			if (c.IsPlayer()) c.Rest();
+		});
 		Debug.Log(this + " NewTurn " + currentTurn);
 		turnStarted?.Invoke();
 	}

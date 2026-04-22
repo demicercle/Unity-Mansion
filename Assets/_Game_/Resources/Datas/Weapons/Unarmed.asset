@@ -9,8 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 380a0e2f79ea4521806192fa258c132b, type: 3}
-  m_Name: AIBrain_Wait
-  m_EditorClassIdentifier: 
-  defaultPriority: 0
-  time: 1
+  m_Script: {fileID: 11500000, guid: 26b91483504440d7b3e2d5878f8dde34, type: 3}
+  m_Name: Unarmed
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  minDamage: 1
+  maxDamage: 1
+  isRanged: 0
+  attackRange: 0
+  noAttack: 0

@@ -31,7 +31,7 @@ public class ColorSettings : ScriptableObject
 	[SerializeField]private Color deadColor = Color.black;
 		
 	static public Color GetDeadColor() => DefaultSettings.deadColor;
-	static public Color GetCharacterColor(CharacterController character, bool disabledIfNoActions, bool disabledIfNoMovePoints) => DefaultSettings.GetCurrentColor(character, disabledIfNoActions, disabledIfNoMovePoints);
+	static public Color GetCharacterColor(CharacterController character, bool disabledIfNoActions = false, bool disabledIfNoMovePoints = false) => DefaultSettings.GetCurrentColor(character, disabledIfNoActions, disabledIfNoMovePoints);
 	static public Color GetDisabledColor(CharacterFaction faction) => Color.Lerp(DefaultSettings.disabledColor, DefaultSettings.GetFactionColor(faction), DefaultSettings.disabledToFaction);
 
 	

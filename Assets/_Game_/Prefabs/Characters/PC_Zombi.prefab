@@ -2134,21 +2134,9 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 1073438ee4f0c4348946f744ef5176ad, type: 2}
     - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: aiBrains.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: 'aiBrains.Array.data[0]'
+      propertyPath: defaultWeapon
       value: 
-      objectReference: {fileID: 11400000, guid: 7fdd958a7081f7244a15ffb7e5d0cf96, type: 2}
-    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: 'aiBrains.Array.data[1]'
-      value: 
-      objectReference: {fileID: 11400000, guid: c748149b05c63454da88307adf411fb2, type: 2}
-    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: 'aiBrains.Array.data[2]'
-      value: 
-      objectReference: {fileID: 11400000, guid: c748149b05c63454da88307adf411fb2, type: 2}
+      objectReference: {fileID: 11400000, guid: b282d0069fe14884792d3b641f58923c, type: 2}
     - target: {fileID: 1837400758454604685, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_Name
       value: PC_Zombi
@@ -2206,8 +2194,16 @@ PrefabInstance:
       value: 2.25
       objectReference: {fileID: 0}
     - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: endReachedDistance
-      value: 0.1
+      propertyPath: gravity.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: gravity.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3402239913564902258, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: gravity.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3858026444835299486, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: m_Positions.Array.data[0].z
@@ -2435,6 +2431,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.switchOnTrigger
+      value: Scream
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: parameters.instantSwitchTrigger
       value: Scream
       objectReference: {fileID: 0}
     - target: {fileID: 6483927452517428826, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}

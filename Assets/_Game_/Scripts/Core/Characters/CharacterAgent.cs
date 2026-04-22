@@ -47,7 +47,7 @@ public class CharacterAgent : MonoBehaviour
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
 		{
 			if (graphUpdate.enabled == value) return;
-//			Debug.Log(this + " SetObstacle " + value);
+			//Debug.Log(this + " SetObstacle " + value);
 			graphUpdate.enabled = value;
 			if (value)
 			{
@@ -59,7 +59,7 @@ public class CharacterAgent : MonoBehaviour
 					-Vector3.right * aiPath.radius,
 				};
 			}
-			NavUtility.RebuildNavigationAsync();
+			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 		}
 		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
 	}
@@ -76,6 +76,7 @@ public class CharacterAgent : MonoBehaviour
 
 	public void StartMove()
 	{
+		SetObstacle(false);
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.simulateMovement = true;
 		aiPath.isStopped = false;
@@ -85,6 +86,7 @@ public class CharacterAgent : MonoBehaviour
 
 	public void StopMovement()
 	{
+		SetObstacle(!_character.IsSelected());
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
@@ -189,7 +191,7 @@ public class CharacterAgent : MonoBehaviour
 	///private float lastAssignTime;
 	private bool hasDestination;
 	private AIPath aiPath;
-	private CharacterController controller;
+	private CharacterController _character;
 	private GameTurnManager _gameTurnManager; // TODO
 	private CharacterAnimation _characterAnimation;
 	private Vector3[] lastPath;
@@ -204,8 +206,8 @@ public class CharacterAgent : MonoBehaviour
 	private void Awake()
 	{
 		_characterAnimation = GetComponent<CharacterAnimation>();
-		controller = _characterAnimation.GetController();
-		controller.onUseAction += OnUseAction;
+		_character = GetComponent<CharacterController>();
+		_character.onUseAction += OnUseAction;
 		
 		_gameTurnManager = GameTurnManager.Instance;
 		_gameTurnManager.turnEnded += UpdatePathAndTarget;
@@ -217,7 +219,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void UpdateComponent()
 	{
-		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
+		aiPath = GetComponent<AIPath>();
 		aiPath.radius = radius;
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
@@ -227,7 +229,7 @@ public class CharacterAgent : MonoBehaviour
 	
 	private void OnDestroy()
 	{
-		controller.onUseAction -= OnUseAction;
+		_character.onUseAction -= OnUseAction;
 		_gameTurnManager.turnEnded -= UpdatePathAndTarget;
 		_gameTurnManager.turnStarted -= UpdatePathAndTarget;
 		CharacterSelection.selectionChanged -= SelectionChanged;
@@ -248,9 +250,9 @@ public class CharacterAgent : MonoBehaviour
 
 	private void SelectionChanged()
 	{
-		if (controller.IsSelected())
+		if (_character.IsSelected())
 		{
-			SetObstacle(!controller.IsControllableByPlayer());
+			SetObstacle(!_character.IsControllableByPlayer());
 		}
 		else
 		{
@@ -275,14 +277,14 @@ public class CharacterAgent : MonoBehaviour
 		//TODO: controller.IsActing(), controller.IsMoving(), controller.IsRotating()
 
 		shouldDrawPath[0] = hasDestination // "thin" path
-		                    && CharacterSelection.IsCharacterSelected(controller)
-		                    && controller.IsControllableByPlayer()
-		                    && (!CharacterRoutines.AnyActiveRoutines() || controller.IsMoving())
+		                    && CharacterSelection.IsCharacterSelected(_character)
+		                    && _character.IsControllableByPlayer()
+		                    && (!CharacterRoutines.AnyActiveRoutines() || _character.IsMoving())
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 
 		shouldDrawPath[1] = hasDestination  // "thin" path
-		                    && CharacterSelection.IsCharacterSelected(controller) 
-		                    && controller.IsControllableByPlayer() 
+		                    && CharacterSelection.IsCharacterSelected(_character) 
+		                    && _character.IsControllableByPlayer() 
 		                    && !CharacterRoutines.AnyActiveRoutines()
 		                    && (lastPath = GetCurrentPath()).Length > 1;
 								//&& !controller.IsRotating()
@@ -293,7 +295,7 @@ public class CharacterAgent : MonoBehaviour
 			pathRenderers[0].enabled = isDrawingPath[0] = shouldDrawPath[0];
 			if (pathRenderers[0].enabled) // draw path thin
 			{
-				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(controller.GetCurrentFaction());
+				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(_character.GetCurrentFaction());
 				pathRenderers[0].positionCount = lastPath.Length;
 				pathRenderers[0].useWorldSpace = true;
 				pathRenderers[0].SetPositions(lastPath);
@@ -305,15 +307,15 @@ public class CharacterAgent : MonoBehaviour
 			pathRenderers[1].enabled = isDrawingPath[1] = shouldDrawPath[1];
 			if (pathRenderers[1].enabled) // draw path thick
 			{
-				lastPath = Utils.LimitPathTotalLength(lastPath, controller.GetRemainingMovePoints());
-				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(controller, true, true);
+				lastPath = Utils.LimitPathTotalLength(lastPath, _character.GetRemainingMovePoints());
+				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_character, true, true);
 				pathRenderers[1].positionCount = lastPath.Length;
 				pathRenderers[1].useWorldSpace = true;
 				pathRenderers[1].SetPositions(lastPath);
 			}
 		}
 		
-		UpdateMoveTarget(controller.IsMoving());
+		UpdateMoveTarget(_character.IsMoving());
 	}
 
 	void UpdateMoveTarget(bool isBlinking)
@@ -327,7 +329,7 @@ public class CharacterAgent : MonoBehaviour
 		//Debug.Log(this + " show moveTarget");
 		moveTarget.gameObject.SetActive(true);
 		moveTarget.transform.position = aiPath.destination;
-		moveTarget.SetColor(ColorSettings.GetCharacterColor(controller, true, true));
+		moveTarget.SetColor(ColorSettings.GetCharacterColor(_character, true, true));
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
 }

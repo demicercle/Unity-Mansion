@@ -6,7 +6,8 @@ using UnityEngine;
 
 public class DebugDrawer : MonoBehaviour
 {
-	public static bool IsEnabled { get; set; }
+	//private static bool shouldDraw => (GameInput.debugMode + CharacterDetection.debugMode > 0);
+	private static bool shouldDraw => true;
 
 	static public DebugDrawer FloatingText(Vector3 position, string message, float duration = 1.0f, float speedY = 1.0f)
 	{
@@ -15,7 +16,7 @@ public class DebugDrawer : MonoBehaviour
 
 	static public DebugDrawer WorldLabel(Vector3 position, string message, float duration = 0f, float speedY = 0f)
 	{
-		if (!IsEnabled) return null;
+		if (!shouldDraw) return null;
 		var label = new GameObject().AddComponent<DebugDrawer>();
 		label.duration = duration;
 		label.worldPosition = position;
@@ -29,19 +30,19 @@ public class DebugDrawer : MonoBehaviour
 
 	static public void WireCapsule(Vector3 position, Quaternion rotation, float radius, float height, Color color, float duration = 0f)
 	{
-		if (!IsEnabled) return;
+		if (!shouldDraw) return;
 		DbgDraw.WireCapsule(position,rotation,radius,height,color,duration);
 	}
 	
 	static public void WireArrow(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
 	{
-		if (!IsEnabled) return;
+		if (!shouldDraw) return;
 		DbgDraw.WireArrow(position, Quaternion.LookRotation(direction), scale, color, duration);
 	}
 	
 	static public void Path(Vector3[] path, bool closedLoop, Color color, float duration = 0f)
 	{
-		if (!IsEnabled) return;
+		if (!shouldDraw) return;
 		if (path.Length <= 0)
 			return;
 		
@@ -58,19 +59,19 @@ public class DebugDrawer : MonoBehaviour
 	
 	static public void WireDisc(Vector3 position, Vector3 direction, float scale, Color color, float duration = 0f)
 	{
-		if (!IsEnabled) return;
+		if (!shouldDraw) return;
 		DbgDraw.WireDisc(position, Quaternion.LookRotation(direction), scale, color, duration);
 	}
 	
 	static public void WireDBox(Vector3 position, Quaternion rot, Vector3 size, Color color, float duration = 0f)
 	{
-		if (!IsEnabled) return;
+		if (!shouldDraw) return;
 		DbgDraw.WireCube(position, rot, size, color, duration);
 	}
 	
 	static public void Line(Vector3 start, Vector3 end, Color color, float duration = 0f)
 	{
-		if (!IsEnabled) return;
+		if (!shouldDraw) return;
 		DbgDraw.Line(start, end, color, duration);
 	}
 	

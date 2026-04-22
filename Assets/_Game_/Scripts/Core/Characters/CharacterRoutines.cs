@@ -2,12 +2,14 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class CharacterRoutines : MonoBehaviour
 {
 	public const float DefaultWaitSeconds = 1.0f;
 	
-	static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
+	public static int debugMode { get; set; }
+	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
 	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
 	
@@ -15,6 +17,11 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		Debug.Log(this + " AssignAttack " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck);
 		StartNewRoutine(WaitCharacterAttackCharacter(target, canUseRunAction, losCheck));
+	}
+	public void AssignAttackInstant(CharacterController target, bool useAction)
+	{
+		Debug.Log(this + " AssignAttackInstant " + target + " usesActions=" + useAction);
+		StartNewRoutine(WaitCharacterPerformAttack(target, useAction));
 	}
 	public void AssignInteract(PropComponent clickedProp) // TODO Prop Controller
 	{
@@ -37,7 +44,13 @@ public class CharacterRoutines : MonoBehaviour
 		characterOwner.UseAction(CharacterAction.RunAction);
 		StartNewRoutine(WaitAction(CharacterAction.RunAction));
 	}
+
+	public Coroutine LookPosition(Vector3 lookPosition)
+	{
+		return StartCoroutine(WaitCharacterLookPosition(lookPosition));
+	}
 	
+	public Coroutine MoveToDestination(Vector3 navPosition) => StartCoroutine(WaitCharacterMoved(navPosition));
 #region PRIVATE
 	private Coroutine coroutine;
 	private CharacterController characterOwner;
@@ -69,10 +82,11 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		if(activeInstances.Contains(this)) Debug.LogError(this + " _WaitComplete activeInstances.Contains(this)");
 		activeInstances.Add(this);
-//		Debug.Log(this + " routine started " + activeInstances.Count + " > " + coroutine);
+		while (activeInstances[0] != this) yield return null; // wait other routines
+		Debug.Log(this + " routine started " + activeInstances.Count);
 		yield return coroutine;
 		activeInstances.Remove(this);
-		Debug.Log(" routine ends " + activeInstances.Count);
+		Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
 	}
 	
 	private IEnumerator WaitCharacterInteract( PropComponent clickedProp)
@@ -133,7 +147,7 @@ public class CharacterRoutines : MonoBehaviour
 			
 			else if (!characterOwner.IsMoving())
 			{
-				if (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.TryUseAction(CharacterAction.RunAction, false))
+				if (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.CanUseAction(CharacterAction.RunAction))
 				{
 					yield return characterOwner.StartCoroutine(WaitAction(CharacterAction.RunAction));
 				}
@@ -147,35 +161,36 @@ public class CharacterRoutines : MonoBehaviour
 				
 				Debug.Log(characterOwner + " starts moving towards target");
 				characterOwner.StartCoroutine(WaitCharacterMoved(target.GetPosition()));
-				yield return null;
+				do
+				{
+					yield return null;
+				} while (!characterOwner.IsMoving()); // searching path
 			}
 			
 			//else Debug.Log(characterOwner + " moves towards " + target);
 		}
 		
-		yield return characterOwner.StartCoroutine(WaitCharacterPerformAttack(target));
+		yield return characterOwner.StartCoroutine(WaitCharacterPerformAttack(target, true));
 	}
 
-	private IEnumerator WaitCharacterPerformAttack(CharacterController target)
+	private IEnumerator WaitCharacterPerformAttack(CharacterController target, bool useAction)
 	{
 		Debug.Log(this + " WaitCharacterPerformAttack " + target );
 		
 		yield return StartCoroutine(WaitCharacterLookPosition(target.GetCenterPosition()));
 
-		if (!characterOwner.CanAttack())
+		if (useAction && !characterOwner.HasActions())
 		{
-			Debug.Log(this + " cannot attack!");
+			Debug.Log(this + " cannot attack (no actions)");
 			characterOwner.FloatingText_Cant();
-			yield return new WaitForSeconds(Consts.CantSeconds);
+			yield return null;
 		}
-		else
-		{
-			characterOwner.AttackAction();
-			yield return characterOwner.WaitAnimationEvent(CharacterAnimation.EventType.Hit);
-			//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
-			//TODO DamageInfo, hit check (GD)
-			target.TakeDamage(characterOwner.GetLastAttackDamage());
-		}
+		
+		characterOwner.AttackAction();
+		yield return characterOwner.WaitAnimationEvent(CharacterAnimation.EventType.Hit);
+		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
+		//TODO DamageInfo, hit check (GD)
+		target.TakeDamage(characterOwner.GetLastAttackDamage(), characterOwner, true);
 
 		Debug.Log("attack ends");
 	}
@@ -232,7 +247,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			if (canUseRunAction)
 			{
-				if (!characterOwner.HasActions() && characterOwner.TryUseAction(CharacterAction.RunAction, false))
+				if (!characterOwner.HasActions() && characterOwner.CanUseAction(CharacterAction.RunAction))
 				{
 					yield return characterOwner.StartCoroutine(WaitAction(CharacterAction.RunAction));
 					yield return WaitMoveCharacterToWaypoint(waypoint, false);//TODO: multiple run actions??
@@ -297,22 +312,25 @@ public class CharacterRoutines : MonoBehaviour
 
 			var oldPosition = characterOwner.GetPosition();
 
-			DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
-			DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
-			DebugDrawer.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
+			if(debugMode > 0) DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
+			if(debugMode > 0) DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
+			if(debugMode > 0) DebugDrawer.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
 			yield return null;
 
 			var newPosition = characterOwner.GetPosition();
 			var deltaPos =
 				(newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
 
-			characterOwner.ConsumeMovePoints(deltaPos);
+			characterOwner.ConsumeMovePoints(deltaPos, true);
 
 			if (deltaPos < Consts.MinMagnitude) timeout += Time.deltaTime;
 			else timeout = 0f;
 
-			if (timeout > 0f) DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "timeout=" + timeout.ToString("N2"));
-			else DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "deltaPos=" + deltaPos.ToString("N2"));
+			if (debugMode > 0)
+			{
+				if (timeout > 0f) DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "timeout=" + timeout.ToString("N2"));
+				else DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "deltaPos=" + deltaPos.ToString("N2"));
+			}
 		}
 		while (!agent.ReachedDestination(dest));
 		

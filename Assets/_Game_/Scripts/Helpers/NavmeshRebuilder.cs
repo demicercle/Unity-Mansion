@@ -1,0 +1,63 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+public class NavmeshRebuilder : MonoBehaviour
+{
+	public static int debugMode { get; set; }
+
+	public static bool IsRebuildingAsync() => instances.Count > 0;
+
+	public static void RebuildNavigationOn(GameObject go, float delay = 0f)
+	{
+		go.AddComponent<NavmeshRebuilder>().delay = delay;
+	}
+	
+	private static List<NavmeshRebuilder> instances = new List<NavmeshRebuilder>();
+	
+	public void Activate() => enabled = true; // To be used in unity animation
+
+	[SerializeField] private bool destroySelf = true;
+	[SerializeField] private bool destroyGameObject = false;
+	
+	private float delay;
+	private float progress;
+
+	private void OnEnable()
+	{
+		StartCoroutine(DoRebuild());
+	}
+
+	IEnumerator DoRebuild()
+	{
+		instances.Add(this);
+		Debug.Log(this + " RebuildNavigationAsync Start " + delay);
+		if(delay > 0f) yield return new WaitForSeconds(delay);
+		while (instances[0] != this) yield return null;
+		foreach (var scanOp in AstarPath.active.ScanAsync())
+		{
+			progress = scanOp.progress;
+			//name = "RebuildNavigationAsync (" + progress.progress.ToString("N2") + ")";
+			yield return null;
+		}
+
+		instances.Remove(this);
+		
+		if (destroyGameObject) 
+			Destroy(gameObject);
+		else if (destroySelf)
+			Destroy(this);
+		else
+			enabled = false;
+	}
+
+	private void OnGUI()
+	{
+		if (debugMode > 0)
+		{
+			Utils.DrawWorldGUI(transform.position, progress.ToString("N2"));
+		}
+	}
+}

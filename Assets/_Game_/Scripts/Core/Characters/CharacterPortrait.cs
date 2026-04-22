@@ -20,20 +20,40 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	
 	public void AssignCharacter(CharacterController character)
 	{
+		if (_assignedCharacter != null)
+		{
+			_assignedCharacter.onStatsChanged -= UpdateStats;
+			_assignedCharacter.onFactionChanged -= UpdateStats;
+			_assignedCharacter.onSelectionChanged -= OnSelectionChanged;
+		}
+		else
+		{
+			gameObject.SetActive(true);
+		}
+		
 		_assignedCharacter = character;
-		gameObject.SetActive(true);
-	}
-	
-	private CharacterController _assignedCharacter;
-
-	private void LateUpdate()
-	{
+		
 		if (_assignedCharacter == null)
 		{
 			gameObject.SetActive(false);
 			return;
 		}
-			
+		
+		_assignedCharacter.onStatsChanged += UpdateStats;
+		_assignedCharacter.onFactionChanged += UpdateStats;
+		_assignedCharacter.onSelectionChanged += OnSelectionChanged;
+	}
+	
+	private CharacterController _assignedCharacter;
+
+	private void OnSelectionChanged(bool selected)
+	{
+		toggle.isOn = selected;
+		//UpdateStats();
+	}
+
+	private void UpdateStats()
+	{
 		toggle.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
 		toggle.interactable = _assignedCharacter.IsControllableByPlayer();
 			
@@ -43,4 +63,10 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		healthLabel.text = _assignedCharacter.GetCurrentHealthInt() + "/" +
 		                   _assignedCharacter.GetMaxHealth();
 	}
+
+	private void OnDestroy()
+	{
+		if (_assignedCharacter != null) 
+			AssignCharacter(null); // dispose events
+	} 
 }
