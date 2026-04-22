@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AIBrain_Patrol", menuName = "AIBrain/Patrol", order = 0)]
@@ -14,8 +15,8 @@ public class AIBrain_Patrol : AIBrainBase
 			Debug.LogWarning(selfCharacter + " has no patrol route");
 			yield break;
 		}
-		
-		var waypoints = patrolRoute.waypoints;
+
+		var waypoints = patrolRoute.GetWaypoints().ToList();
 		while (selfCharacter.HasActions() && selfCharacter.HasMovePoints())
 		{
 			yield return null;

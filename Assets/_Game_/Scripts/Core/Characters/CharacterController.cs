@@ -366,12 +366,10 @@ public class CharacterController : MonoBehaviour
 
 
 	public float GetAttackRange() => currentWeapon.attackRange;
-	
-	public bool CanAttack(bool checkActions = true, bool checkMoves = true) => !isDead 
-																				&& !currentWeapon.noAttack 
-	                                                                           && (!checkActions || HasActions()) 
-	                                                                           && (!checkMoves || HasMovePoints()); // endless routines call if false
 
+	public bool CanAttack(bool checkActions = true, bool checkMoves = true) =>
+		!isDead && (!checkActions || HasActions()) && (!checkMoves || HasMovePoints());
+	
 	public bool CanAttackOther(CharacterController other)
 	{
 		return CanAttack() && !other.IsDead() && IsEnemyTo(other);

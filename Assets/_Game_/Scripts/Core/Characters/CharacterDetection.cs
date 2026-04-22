@@ -10,6 +10,8 @@ public class CharacterDetection : MonoBehaviour
 	public System.Action<CharacterController> onCharacterDetected;
 	public System.Action<CharacterController> onCharacterLost;
 	
+	public bool IsCharacterDetected(CharacterController other) => detectedCharacters.Contains(other);
+	
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;

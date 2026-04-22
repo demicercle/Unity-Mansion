@@ -42,9 +42,11 @@ public class PatrolRoute : MonoBehaviour
 		waypoints.ForEach(wp => wp.transform.SetParent(transform, true));
 		Utils.SetDirty(gameObject);
 	}
+	
+	public Waypoint[] GetWaypoints() => waypoints.ToArray();
 
 	public CharacterController assignedCharacter;
-	public List<Waypoint> waypoints = new List<Waypoint>();
+	[SerializeField] private List<Waypoint> waypoints = new List<Waypoint>();
 	public bool closedLoop = false;
 	public Color color = Color.blue;
 	public AIBrain_Patrol defaultBrain = null;
