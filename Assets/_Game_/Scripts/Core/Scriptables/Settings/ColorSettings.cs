@@ -4,8 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ColorSettings", menuName = "ColorSettings", order = 0)]
 public class ColorSettings : ScriptableObject
 {
-	static private ColorSettings defaultSettingsInstance;
-	static public ColorSettings DefaultSettings
+	private static ColorSettings defaultSettingsInstance;
+	public static ColorSettings DefaultSettings
 	{
 		get
 		{
@@ -30,10 +30,10 @@ public class ColorSettings : ScriptableObject
 	[SerializeField]private Color disabledColor = Color.gray;
 	[SerializeField]private Color deadColor = Color.black;
 		
-	static public Color GetDeadColor() => DefaultSettings.deadColor;
-	static public Color GetCharacterColor(CharacterController character, bool disabledIfNoActions = false, bool disabledIfNoMovePoints = false) => DefaultSettings.GetCurrentColor(character, disabledIfNoActions, disabledIfNoMovePoints);
-	static public Color GetDisabledColor(CharacterFaction faction) => Color.Lerp(DefaultSettings.disabledColor, DefaultSettings.GetFactionColor(faction), DefaultSettings.disabledToFaction);
-
+	public static Color GetDeadColor() => DefaultSettings.deadColor;
+	public static Color GetCharacterColor(CharacterController character, bool disabledIfNoActions = false, bool disabledIfNoMovePoints = false) => DefaultSettings.GetCurrentColor(character, disabledIfNoActions, disabledIfNoMovePoints);
+	public static Color GetDisabledColor(CharacterFaction faction) => Color.Lerp(DefaultSettings.disabledColor, DefaultSettings.GetFactionColor(faction), DefaultSettings.disabledToFaction);
+	public static Color GetDisabledColor() => DefaultSettings.disabledColor;
 	
 	//#region PRIVATE
 	private Color GetCurrentColor(CharacterController character, bool disabledIfNoActions, bool disabledIfNoMovePoints)

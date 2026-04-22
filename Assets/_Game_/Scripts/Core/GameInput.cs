@@ -310,8 +310,8 @@ public class GameInput : MonoBehaviour
 				{
 					if (CanControlCharacter(selectedCharacter))
 					{
-						SetCurrentCursorType(CursorType.Navigate);
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
+						SetCurrentCursorType(CursorType.Navigate);
 						debugString += "\n>Navigate";
 					}
 					//else if(isDebugMode) Debug.Log("character not controllable");
@@ -395,6 +395,12 @@ public class GameInput : MonoBehaviour
 			{
 				selectedCharacter.GetAgent().ClearDestination(); // to hide path drawing
 			}
+		}
+
+		if (lastCursorResult == CursorRaycastResult_Navigation && selectedCharacter &&
+		    !selectedCharacter.GetAgent().isPathValid)
+		{
+			SetCurrentCursorType(CursorType.Blocked);
 		}
 
 		if (CharacterRoutines.AnyActiveRoutines())
@@ -646,7 +652,11 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanControlCharacter(selectedCharacter))
 			{
-				selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+				if (selectedCharacter.GetAgent().isPathValid)
+				{
+					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+				}
+				else if(isDebugMode)  Debug.Log(" !isPathValid");
 			}
 			else if(isDebugMode)  Debug.Log(" selected character not controllable");
 		}

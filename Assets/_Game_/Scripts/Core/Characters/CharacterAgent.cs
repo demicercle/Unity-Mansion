@@ -68,12 +68,35 @@ public class CharacterAgent : MonoBehaviour
 	public Vector3[] GetCurrentPath()
 	{
 		if (!hasDestination) // GetCurrentPath
-			return new Vector3[0];
+			return Array.Empty<Vector3>();
 		
 		var buffer = new List<Vector3>();
 		aiPath.GetRemainingPath(buffer, out var stale);
+		
+		if (buffer.Count == 0)
+			return Array.Empty<Vector3>();
+
+		var dest = aiPath.destination;
+		var lastPoint = buffer.Last();
+		var maxNavDist = GameInput.Instance.maxNavDistance;
+		var drawColor = Color.deepSkyBlue;
+
+		if (Vector3.Distance(lastPoint, dest) > maxNavDist)
+		{
+			drawColor = Color.darkRed;
+			buffer.Clear();
+		}
+
+		if (NavmeshRebuilder.debugMode > 0)
+		{
+			DebugDrawer.WireDisc(lastPoint + Vector3.up * 0.1f, Vector3.forward, maxNavDist, drawColor);
+			DebugDrawer.Line(lastPoint + Vector3.up * 0.1f, dest + Vector3.up * 0.1f, drawColor);
+		}
+		
 		return buffer.ToArray();
 	}
+
+	public bool isPathValid => lastPath?.Length > 1;
 
 	public void StartMove()
 	{
@@ -330,7 +353,10 @@ public class CharacterAgent : MonoBehaviour
 		//Debug.Log(this + " show moveTarget");
 		moveTarget.gameObject.SetActive(true);
 		moveTarget.transform.position = aiPath.destination;
-		moveTarget.SetColor(ColorSettings.GetCharacterColor(_character, true, true));
+		if (isPathValid)
+			moveTarget.SetColor(ColorSettings.GetCharacterColor(_character, true, true));
+		else 
+			moveTarget.SetColor(ColorSettings.GetDisabledColor());
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
 }
