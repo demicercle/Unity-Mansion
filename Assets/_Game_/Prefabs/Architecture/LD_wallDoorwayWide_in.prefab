@@ -14,7 +14,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 01aa1aa0412bd654cb7dc136a6893198, type: 2}
     - target: {fileID: 1620576974461737627, guid: 479b544f6ad8cde43807efaf1aaafc80, type: 3}
       propertyPath: m_Name
-      value: LD_wallDoorwayWide Variant
+      value: LD_wallDoorwayWide_in
       objectReference: {fileID: 0}
     - target: {fileID: 2105048549019893793, guid: 479b544f6ad8cde43807efaf1aaafc80, type: 3}
       propertyPath: m_LocalPosition.x
