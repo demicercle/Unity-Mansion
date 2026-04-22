@@ -9,6 +9,7 @@
 - tweaks! selection circle alpha when AI turns
 - rename "NavUtility" into component "NavMeshRebuilder"
 - SelectNext Tab bug
+- if you end turn during a PC movement, it stops
 - custom asset post processor
 - update color of nav target depending on the action (red for enemies)
 
@@ -103,3 +104,11 @@ add debug key to speed up time
 	### GD ###
 	
 	- "Can't" action
+	
+	
+	
+	
+	
+	https://opengameart.org/content/medieval-props-textured
+	https://kaylousberg.itch.io/halloween-bits
+	https://kenney.nl/assets/retro-urban-kit
