@@ -10,7 +10,7 @@ public class NavmeshRebuilder : MonoBehaviour
 
 	public static bool IsRebuildingAsync() => instances.Count > 0;
 
-	public static void RebuildNavigationOn(GameObject go, float delay = 0f)
+	public static void RebuildNavigationOn(GameObject go, float delay = 0.1f)
 	{
 		go.AddComponent<NavmeshRebuilder>().delay = delay;
 	}
