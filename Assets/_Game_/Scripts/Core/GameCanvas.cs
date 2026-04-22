@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
@@ -29,13 +30,19 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private Button button_endTurn;
 	[Header("Portraits")]
 	[SerializeField] private CharacterPortrait[] portraits;
-	[Space]
-	[Header("Animation")]
-	[SerializeField] private Animator animator;
-	[SerializeField] private float lerpSpeed;
+
+	[Space] [Header("Animation")]
+	[SerializeField] [Tooltip("Blend Weight Layer1")] private List<Animator> endTurnAnimators;
 	[SerializeField] private int endTurnLayer;
+	[SerializeField] private float lerpSpeed;
 	[Space]
+	[SerializeField] private List<Animator> playerChangedAnimators;
+	[Space]
+	[Header("References")]
 	[SerializeField] private TextReference floatingText;
+	[Space]
+	[Header("UnityEvents")]
+	public UnityEvent<bool> onPlayerTurnChanged;
 	
 	//public bool mouseOverViewport { get; private set; }
 
@@ -94,6 +101,7 @@ public class GameCanvas : MonoBehaviour
 		CharacterSelection.selectionChanged += UpdateSelectables;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
+		gameTurnManager.onPlayerChanged += OnPlayerChanged;
 	}
 
 	private void OnDestroy()
@@ -108,6 +116,7 @@ public class GameCanvas : MonoBehaviour
 		CharacterSelection.selectionChanged -= UpdateSelectables;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
+		gameTurnManager.onPlayerChanged -= OnPlayerChanged;
 	}
 
 	private void OnEnable()
@@ -136,6 +145,13 @@ public class GameCanvas : MonoBehaviour
 	private void LateUpdate()
 	{
 		UpdateSelectables(); // TODO with events
+	}
+
+	private void OnPlayerChanged(bool isPlayerTurn)
+	{
+		Debug.Log(this + " OnPlayerChanged " + isPlayerTurn);
+		onPlayerTurnChanged?.Invoke(isPlayerTurn);
+		playerChangedAnimators.ForEach(anim => anim.SetBool("PlayerChanged", isPlayerTurn));
 	}
 
 	private void OnLoadingGame(bool isLoading)
@@ -201,10 +217,9 @@ public class GameCanvas : MonoBehaviour
 			button_endTurn.interactable = false;
 		}
 
-		if (animator && lerpSpeed > 0)
+		if (lerpSpeed > 0)
 		{
-			if(endTurnLayer > 0) 
-				animator.SetLayerWeight(endTurnLayer, Mathf.Lerp(animator.GetLayerWeight(endTurnLayer), gameTurnManager.PlayerShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed));
+			endTurnAnimators.ForEach(anim => anim.SetLayerWeight(endTurnLayer, Mathf.Lerp(anim.GetLayerWeight(endTurnLayer), gameTurnManager.PlayerShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed)));
 		}
 	}
 	#endregion

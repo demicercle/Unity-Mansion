@@ -15,6 +15,9 @@
 - zombi should rotate on scream
 - zombi scream should be linked to ai detection and not weapon ready?
 - "round" logic (characters rest on start round)
+- rename "Handlers" in "Listeners"
+- cmd "kill_all"
+- game turn manager "PartyRest" on NewTurn, and then Rest each otherCharacter one by one after
 
 NullReferenceException: Object reference not set to an instance of an object
 GameInput.OnDisable () (at Assets/_Game_/Scripts/Core/GameInput.cs:162)

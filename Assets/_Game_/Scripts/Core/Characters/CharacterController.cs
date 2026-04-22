@@ -95,11 +95,11 @@ public class CharacterController : MonoBehaviour
 		onSelectionChanged?.Invoke(value);
 	}
 
-	public void EndTurn()
+	/*public void EndTurn()
 	{
 		StopAgent();
 		turnEnded?.Invoke();
-	}
+	}*/
 	
 	public void NewTurn(int turn)
 	{
@@ -156,10 +156,13 @@ public class CharacterController : MonoBehaviour
 		onStatsChanged?.Invoke();
 	}
 	
-	public void UseAllActions()
+	public void UseAllActions(bool consumeMovePoints = true)
 	{
-		ConsumeMovePoints(GetRemainingMovePoints(), false);
-		UseAction(CharacterAction.None);
+		if(consumeMovePoints && HasMovePoints()) ConsumeMovePoints(GetRemainingMovePoints(), false);
+		while (HasActions())
+		{
+			usedActions.Add(CharacterAction.None);
+		}
 	}
 	
 	public CharacterFaction GetCurrentFaction() => currentFaction;

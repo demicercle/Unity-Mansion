@@ -10,8 +10,8 @@ public class GameTurnManager : MonoBehaviour
 	static private GameTurnManager _instance;
 	static public GameTurnManager Instance => _instance;
 
-	public System.Action<bool> onLoadingGame;
-	public System.Action turnStarted, turnEnded;
+	public System.Action<bool> onLoadingGame, onPlayerChanged;
+	public System.Action onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool firstTurnIsPlayer = true;
@@ -142,11 +142,11 @@ public class GameTurnManager : MonoBehaviour
 		while (true)
 		{
 			yield return StartCoroutine(RealTimeModeCoroutine());
-			yield return StartCoroutine(TurnModeCoroutine());
+			yield return StartCoroutine(TurnBasedCoroutine());
 		}
 	}
 
-	private IEnumerator TurnModeCoroutine()
+	private IEnumerator TurnBasedCoroutine()
 	{
 		Debug.Log(this + " Enters TurnModeCoroutine");
 		currentTurn = 0;
@@ -159,9 +159,16 @@ public class GameTurnManager : MonoBehaviour
 				Debug.Log(this + " Switch To RealTime");
 				break;
 			}
+
+			if (currentTurn == 0)
+			{
+				if (!playerTurn && firstTurnIsPlayer) // probably useless unless GD ("initiative")
+				{
+					playerTurn = true;
+					onPlayerChanged?.Invoke(true);
+				}
+			}
 			
-			
-			playerTurn = !firstTurnIsPlayer;
 			NewTurn();
 
 			SelectBestPlayerCharacter();
@@ -181,20 +188,20 @@ public class GameTurnManager : MonoBehaviour
 			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
-			
-				if (otherCharacter.IsCharacterRevealed())
-					cameraPivot.Focus(otherCharacter);
-				else
+				
+				otherCharacter.Rest(); // rest not player character
+
+				if (skipInvisibleCharacters && !otherCharacter.IsCharacterRevealed())
 				{
-					if (skipInvisibleCharacters)
-					{
-						Debug.Log("skipInvisibleCharacters: " + otherCharacter);
-						yield return new WaitForSeconds(defaultActionsSeconds);
-					}
+					Debug.Log("skipInvisibleCharacters: " + otherCharacter);
+					yield return new WaitForSeconds(defaultActionsSeconds);
 					continue;
 				}
-
+				
+				cameraPivot.Focus(otherCharacter);
+				//TODO "cameraPivot.Lock(true)"
 				yield return new WaitForSeconds(focusCharacterSeconds);
+				//TODO "cameraPivot.Lock(false)" ? if player can look around while another character is acting
 
 				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
 				{
@@ -248,26 +255,19 @@ public class GameTurnManager : MonoBehaviour
 	private void EndTurn()
 	{
 		playerTurn = false;
-		CharacterController.AllCharacters.ForEach((c) =>
-		{
-			c.EndTurn();
-			if (!c.IsPlayer()) c.Rest();
-		});
+		onPlayerChanged?.Invoke(false);
+		PartyRest(true);
 		Debug.Log(this + " EndTurn " + currentTurn);
-		turnEnded?.Invoke();
+		onTurnEnded?.Invoke();
 	}
 	
 	private void NewTurn()
 	{
 		currentTurn += 1;
 		playerTurn = true;
-		CharacterController.AllCharacters.ForEach((c) =>
-		{
-			c.NewTurn(currentTurn);
-			if (c.IsPlayer()) c.Rest();
-		});
+		onPlayerChanged?.Invoke(true);
 		Debug.Log(this + " NewTurn " + currentTurn);
-		if(currentTurn > 0) turnStarted?.Invoke();
+		if(currentTurn > 0) onTurnStarted?.Invoke();
 	}
 
 	private void SelectBestPlayerCharacter()

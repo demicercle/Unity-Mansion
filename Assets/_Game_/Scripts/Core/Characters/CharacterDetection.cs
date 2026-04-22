@@ -38,8 +38,8 @@ public class CharacterDetection : MonoBehaviour
 	{
 		CharacterController.onCharacterMoved += OnCharacterMoved;
 		CharacterController.onCharacterUsesAction += OnCharacterUsesAction;
-		GameTurnManager.Instance.turnStarted += OnTurnStarted;
-		GameTurnManager.Instance.turnEnded += OnTurnEnded;
+		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 	}
 
 	private void OnDisable()
@@ -48,8 +48,8 @@ public class CharacterDetection : MonoBehaviour
 		
 		CharacterController.onCharacterMoved -= OnCharacterMoved;
 		CharacterController.onCharacterUsesAction -= OnCharacterUsesAction;
-		GameTurnManager.Instance.turnStarted -= OnTurnStarted;
-		GameTurnManager.Instance.turnEnded -= OnTurnEnded;
+		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
 	}
 
 	private void OnTurnStarted()  => OnCharacterMoved(selfCharacter);

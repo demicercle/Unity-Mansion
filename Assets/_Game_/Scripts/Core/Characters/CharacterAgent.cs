@@ -234,8 +234,8 @@ public class CharacterAgent : MonoBehaviour
 		_character.onUseAction += OnUseAction;
 		
 		_gameTurnManager = GameTurnManager.Instance;
-		_gameTurnManager.turnEnded += UpdatePathAndTarget;
-		_gameTurnManager.turnStarted += UpdatePathAndTarget;
+		_gameTurnManager.onTurnEnded += UpdatePathAndTarget;
+		_gameTurnManager.onTurnStarted += UpdatePathAndTarget;
 		CharacterSelection.selectionChanged += SelectionChanged;
 		
 		UpdateComponent();
@@ -254,8 +254,8 @@ public class CharacterAgent : MonoBehaviour
 	private void OnDestroy()
 	{
 		_character.onUseAction -= OnUseAction;
-		_gameTurnManager.turnEnded -= UpdatePathAndTarget;
-		_gameTurnManager.turnStarted -= UpdatePathAndTarget;
+		_gameTurnManager.onTurnEnded -= UpdatePathAndTarget;
+		_gameTurnManager.onTurnStarted -= UpdatePathAndTarget;
 		CharacterSelection.selectionChanged -= SelectionChanged;
 	}
 
