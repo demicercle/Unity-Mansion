@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -47,7 +48,7 @@ public static class EditorTools
 		});
 	}
 
-	static void MakePrefabsFromSelection(string prefix, System.Action<GameObject> process)
+	private static void MakePrefabsFromSelection(string prefix, System.Action<GameObject> process)
 	{
 		var selection = Selection.gameObjects;
 		if (selection.Length == 0) return;
@@ -78,7 +79,7 @@ public static class EditorTools
 	
 	#region MapCheck
 	[MenuItem("Tools/MapCheck/InvalidColliders")]
-	static void MapCheck_InvalidColliders()
+	private static void MapCheck_InvalidColliders()
 	{
 		var invalidColliders = new List<Object>();
 		var colliders = Object.FindObjectsByType<Collider>(default);
@@ -100,7 +101,7 @@ public static class EditorTools
 	#region Selection
 
 	[MenuItem("Tools/Selection/SetSelectionDirty")]
-	static void SetSelectionDirty()
+	private static void SetSelectionDirty()
 	{
 		foreach (var o in Selection.objects)
 		{
@@ -109,6 +110,95 @@ public static class EditorTools
 		}
 	}
 	
+	[MenuItem("Tools/Selection/SelectParent")]
+	private static void SelectParent()
+	{
+		if (Selection.activeTransform && Selection.activeTransform.parent)
+		{
+			EditorGUIUtility.PingObject(Selection.activeGameObject = Selection.activeTransform.parent.gameObject);
+		}
+	}
+	
+	[MenuItem("Tools/Selection/UnfoldAllGameObjects")]
+	private static void UnfoldAllGameObjects()
+	{
+		// Récupère la fenêtre Hierarchy
+		EditorApplication.RepaintHierarchyWindow();
+		var hierarchyWindowType = typeof(EditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
+		var hierarchyWindow = EditorWindow.GetWindow(hierarchyWindowType);
 
+		// Récupère la liste des GameObjects dans la scène
+		GameObject[] allGameObjects = GameObject.FindObjectsOfType<GameObject>();
+
+		// Pour chaque GameObject, déploie son parent dans la Hierarchy
+		foreach (GameObject go in allGameObjects)
+		{
+			if (go.transform.parent != null)
+			{
+				SetExpandedRecursive(go.transform.parent, true);
+			}
+			else
+			{
+				SetExpandedRecursive(go.transform, true);
+			}
+		}
+		
+		hierarchyWindow.Repaint();
+	}
+	
+	private static void SetExpandedRecursive(Transform transform, bool expanded)
+	{
+		// Utilise la réflexion pour accéder à la propriété "expanded" de la Hierarchy
+		var sceneHierarchyWindowType = typeof(EditorWindow).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
+		var sceneHierarchyWindow = EditorWindow.GetWindow(sceneHierarchyWindowType);
+		var sceneHierarchyWindowClass = sceneHierarchyWindow.GetType();
+
+		// Récupère la méthode interne pour définir l'état "expanded"
+		MethodInfo setExpandedMethod = sceneHierarchyWindowClass.GetMethod(
+			"SetExpandedRecursive",
+			BindingFlags.NonPublic | BindingFlags.Instance
+		);
+
+		if (setExpandedMethod != null)
+		{
+			setExpandedMethod.Invoke(sceneHierarchyWindow, new object[] { transform.GetInstanceID(), expanded });
+		}
+	}
+	
+
+	#endregion
+	
+	#region Transforms
+
+	[MenuItem("Tools/Transform/SetParentOriginToFirstChild")]
+	private static void SetParentOriginToFirstChild()
+	{
+		var parent =  Selection.activeTransform;
+		if (parent)
+		{
+			Undo.RecordObject(parent, "SetParentOriginToFirstChild");
+			var newPosition = parent.position;
+			var newRotation = parent.rotation;
+			var children = new List<Transform>();
+			for (int i = 0; i < parent.childCount; i++)
+			{
+				children.Insert(0, parent.GetChild(i));
+				if (i == 0)
+				{
+					newPosition = children[0].position;
+					newRotation = children[0].rotation;
+				}
+				children[0].SetParent(null, true);
+			}
+
+			parent.position = newPosition;
+			parent.rotation = newRotation;
+
+			foreach (var child in children)
+				child.SetParent(parent, true);
+
+			EditorUtility.SetDirty(parent);
+		}
+	}
 	#endregion
 }
