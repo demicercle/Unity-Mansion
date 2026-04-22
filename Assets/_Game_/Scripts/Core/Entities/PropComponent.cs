@@ -59,7 +59,8 @@ public class PropComponent : MonoBehaviour
 			SetDisabled(true);
 		}
 		
-		if (rebuildNavigation) RebuildNavigationAsync();
+		if(rebuildNavigation) 
+			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 	}
 
 	public bool GetBestWaypoint(Vector3 worldPos, out Waypoint bestWaypoint) // TODO "fake" public
@@ -81,12 +82,11 @@ public class PropComponent : MonoBehaviour
 	private void OnAnimFinished()
 	{
 		CancelInvoke("OnAnimFinished");
+		
 		animFinished = true;
 
-		if (rebuildNavigation)
-		{
-			RebuildNavigationAsync();
-		}
+		if(rebuildNavigation) 
+			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 	}
 	
 	private Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
@@ -105,7 +105,8 @@ public class PropComponent : MonoBehaviour
 	
 	private IEnumerator Start()
 	{
-		if (rebuildNavigation) RebuildNavigationAsync();
+		if(rebuildNavigation) 
+			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 		
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
 
@@ -115,8 +116,6 @@ public class PropComponent : MonoBehaviour
 			InteractedBy(null);
 		}
 	}
-
-	private void RebuildNavigationAsync() => NavUtility.RebuildNavigationAsync(Mathf.Max(0.1f, animDuration));
 
 	private IEnumerator DoWaitInteractionEvent(CharacterController characterInstigator)
 	{

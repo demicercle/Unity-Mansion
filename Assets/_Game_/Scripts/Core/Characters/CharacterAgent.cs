@@ -59,7 +59,7 @@ public class CharacterAgent : MonoBehaviour
 					-Vector3.right * aiPath.radius,
 				};
 			}
-			NavUtility.RebuildNavigationAsync();
+			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 		}
 		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
 	}

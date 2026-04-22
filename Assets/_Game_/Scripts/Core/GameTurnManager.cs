@@ -106,7 +106,7 @@ public class GameTurnManager : MonoBehaviour
 			yield return new WaitForSeconds(postLoadDuration);
 		} while (SceneLoader.AnyInstanceActive);
 
-		while(NavUtility.IsRebuildingAsync()) 
+		while(NavmeshRebuilder.IsRebuildingAsync()) 
 			yield return null;
 		
 		Debug.Log(" loading scene complete");

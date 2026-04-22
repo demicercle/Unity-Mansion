@@ -116,6 +116,7 @@ public class RoomTrigger : MonoBehaviour
 			}
 		}
 
-		if(rebuildNav) NavUtility.RebuildNavigationAsync(0.1f);
+		if(rebuildNav) 
+			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 	}
 }

@@ -97,6 +97,12 @@ public static class ConsoleWrapper
 	{
 		Debug.Log("CharacterBrain.debugMode=" + (CharacterBrain.debugMode = value));
 	}
+	
+	[ConsoleMethod("debug_nav", "")]
+	public static void _DebugNav(int value)
+	{
+		Debug.Log("NavUtility.debugMode=" + (NavmeshRebuilder.debugMode = value));
+	}
 
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()

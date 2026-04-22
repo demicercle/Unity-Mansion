@@ -185,9 +185,8 @@ public class CharacterDetection : MonoBehaviour
 				if (!string.IsNullOrEmpty(debugString)) debugString += "\n";
 				debugString += ">" + otherCharacter.name;
 				if (debugMode > 0)
-					DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetCenterPosition(),
+					DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetCenterPosition(), 
 						ColorSettings.GetCharacterColor(selfCharacter));
-				//DebugDrawCapsule(otherCharacter, Color.magenta);
 			}
 		}
 	}

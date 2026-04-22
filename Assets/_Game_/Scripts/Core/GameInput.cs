@@ -66,7 +66,7 @@ public class GameInput : MonoBehaviour
 			//DebugGUI.Log("Hit Navigation: " + hit.point);
 			//Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
 
-			if (NavUtility.TryGetNearestNavPosition(raycastHit.point, maxNavDistance, out var navPosition))
+			if (NavUtils.TryGetNearestNavPosition(raycastHit.point, maxNavDistance, out var navPosition))
 			{
 				raycastHit.point = navPosition;
 				//DrawDebug.WireDisc(navPosition + Vector3.up * debugOffset, Vector3.up,maxNavDistance * 0.5f, Color.cyan);
