@@ -49,6 +49,7 @@ public class RoomTrigger : MonoBehaviour
 		Utils.SetDirty(this);
 	}
 
+	#if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
 		foreach (var door in doors)
@@ -58,6 +59,7 @@ public class RoomTrigger : MonoBehaviour
 			door.DrawGizmoBox();
 		}
 	}
+	#endif
 
 	private void OnEnable()
 	{

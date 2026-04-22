@@ -18,6 +18,7 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
 	[SerializeField] private LayerMask obstructionLayers;
+	[SerializeField] private bool drawGizmos;
 
 	private List<CharacterController> detectedCharacters = new List<CharacterController>();
 	private CharacterController selfCharacter;
@@ -201,6 +202,7 @@ public class CharacterDetection : MonoBehaviour
 	
 	private void OnDrawGizmosSelected()
 	{
+		if (!drawGizmos) return;
 		selfCharacter = GetComponent<CharacterController>();
 		if (selfCharacter)
 		{

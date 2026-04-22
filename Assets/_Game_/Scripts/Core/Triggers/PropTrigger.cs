@@ -10,6 +10,7 @@ public class PropTrigger : MonoBehaviour // Used for rooms and "FogCube"
     public bool disableObject;
     public UnityEvent onTrigger;
 
+    #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         props.ForEach(prop =>
@@ -22,6 +23,7 @@ public class PropTrigger : MonoBehaviour // Used for rooms and "FogCube"
             }
         });
     }
+    #endif
 
     private void OnEnable()
     {
