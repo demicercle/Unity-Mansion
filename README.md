@@ -11,7 +11,6 @@
 - custom asset post processor
 - update color of nav target depending on the action (red for enemies)
 - zombi timedout should stop the current turn
-- Doors in another layer
 - door nav rebuild
 - zombi should rotate on scream
 - zombi scream should be linked to ai detection and not weapon ready?

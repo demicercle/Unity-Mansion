@@ -67,6 +67,7 @@ public class GameTurnManager : MonoBehaviour
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
+	private CharacterController[] levelCharacters;
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
@@ -111,15 +112,17 @@ public class GameTurnManager : MonoBehaviour
 		
 		Debug.Log(" loading scene complete");
 
-		var levelCharacters = CharacterController.AllCharacters;
+		levelCharacters = CharacterController.AllCharacters
+			.OrderBy(c => c.transform.GetSiblingIndex())
+			.ToArray();
 		
-		Debug.Log(this + " found levelCharacters=" + levelCharacters.Count);
+		Debug.Log(this + " found levelCharacters=" + levelCharacters.Length);
 		
 		var partyIndex = 0;
 		foreach (var character in levelCharacters)
 		{
 			character.Spawn();
-			if(character.CompareTag(Consts.TAG_PLAYER))
+			if(character.CompareTag(Tags.TagPlayer))
 				character.SetPartyIndex(partyIndex++);
 		}
 		
@@ -158,7 +161,7 @@ public class GameTurnManager : MonoBehaviour
 			
 			yield return YieldRoutines();
 		
-			foreach (var otherCharacter in CharacterController.AllCharacters)
+			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
 			

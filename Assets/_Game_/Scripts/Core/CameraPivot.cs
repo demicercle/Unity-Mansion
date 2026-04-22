@@ -30,7 +30,7 @@ public class CameraPivot : MonoBehaviour
         //if (!updateSunLightPosition) return;
         if (!sunLight)
             sunLight = FindObjectsByType<Light>(default)
-                .FirstOrDefault(l => l.type == LightType.Directional && l.CompareTag(Consts.TAG_PLAYER));
+                .FirstOrDefault(l => l.type == LightType.Directional && l.CompareTag(Tags.TagPlayer));
         if (sunLight)
         {
             sunLight.transform.rotation = transform.rotation;
@@ -52,7 +52,7 @@ public class CameraPivot : MonoBehaviour
     public void FocusFirstCharacter()
     {
         var firstCharacter = Utils.FindObjects<CharacterController>()
-            .OrderBy(c => (c.CompareTag(Consts.TAG_PLAYER) ? 0 : 1) + c.transform.GetSiblingIndex())
+            .OrderBy(c => (c.CompareTag(Tags.TagPlayer) ? 0 : 1) + c.transform.GetSiblingIndex())
             .FirstOrDefault();
         
         if (firstCharacter)
