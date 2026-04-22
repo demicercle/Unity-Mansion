@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using RPGCharacterAnims.Extensions;
 
-public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
+public class CharacterAnimation : MonoBehaviour
 {
 	
 	public enum EventType
@@ -19,13 +19,6 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	//public const string EventHit = "Hit";
 	
 	static public List<CharacterAnimation> activeInstances  = new List<CharacterAnimation>();
-	
-	private CharacterController controller;
-	public CharacterController GetController()
-	{
-		if(!controller) controller = GetComponent<CharacterController>();
-		return controller;
-	}
 	
 	[SerializeField] private Animator animator;
 	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
@@ -193,15 +186,24 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 	
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
+	private CharacterController controller;
 	private EventType waitForEvent;
 	private bool weaponSwitched, hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
 	
 	private void Awake()
 	{
-		enabled = animator != null;
-		if (!enabled)
+		controller = GetComponent<CharacterController>();
+		if (!controller)
+		{
+			Debug.LogWarning(this + " has no CharacterController");
+			enabled = false;
+			return;
+		}
+		
+		if (!animator)
 		{
 			Debug.LogWarning(this + " disabled because no animator assigned");
+			enabled = false;
 			return;
 		}
 		
@@ -212,13 +214,9 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponent<RPGAnimationHandler>();
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponentInChildren<RPGAnimationHandler>();
 
-		controller = GetController();
 		controller.onHealed += OnHealed;
-		//controller.onPartyIndexChanged += (newIndex) =>
 		controller.onDamaged += OnDamaged;
 		controller.onKilled += OnKilled;
-		//controller.onMoved += () =>
-		//controller.onRotate += () =>
 		controller.onUseAction += OnUseAction;
 		controller.turnStarted += OnTurnStarted;
 		controller.turnEnded += OnTurnEnded;
@@ -238,9 +236,6 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 		
 		TrySetFloat(parameters.velocityX, 0.0f);      
 		TrySetFloat(parameters.velocityZ, 0.0f);        
-		//TrySetInteger(parameters.weapon, -1);
-		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
-		//TrySetTrigger(parameters.trigger);
 		TrySetBool(parameters.moving, false);
 
 		if (rpgAnimationHandler) rpgAnimationHandler.Relax();
@@ -305,12 +300,12 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 
 	private void OnHealed(float amount)
 	{
-		GetController().FloatingText("Heal!");
+		controller.FloatingText("Heal!");
 	}
 
 	private void OnDamaged(float amount)
 	{
-		GetController().FloatingText(Mathf.CeilToInt(amount).ToString());
+		controller.FloatingText(Mathf.CeilToInt(amount).ToString());
 		TrySetTrigger(parameters.getHitTrigger);
 		if (rpgAnimationHandler) rpgAnimationHandler.GetHit();
 	}
@@ -331,7 +326,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 			//TrySetTrigger(parameters.trigger);
 			//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
 			TrySetTrigger(parameters.runTrigger);
-			GetController().FloatingText("Run!");
+			controller.FloatingText("Run!");
 		}
 		
 		else if (actionType == CharacterAction.AttackAction)
@@ -345,7 +340,7 @@ public class CharacterAnimation : MonoBehaviour, IView<CharacterController>
 				}
 			}
 			
-			GetController().FloatingText("Take this!");
+			controller.FloatingText("Take this!");
 		}
 	}
 	

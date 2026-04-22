@@ -206,7 +206,7 @@ public class CharacterAgent : MonoBehaviour
 	private void Awake()
 	{
 		_characterAnimation = GetComponent<CharacterAnimation>();
-		_character = _characterAnimation.GetController();
+		_character = GetComponent<CharacterController>();
 		_character.onUseAction += OnUseAction;
 		
 		_gameTurnManager = GameTurnManager.Instance;

@@ -20,30 +20,30 @@ public class AIBrain_Chase : AIBrainBase
 	
 	private CharacterController chasingTarget;
 	private CharacterController initCharacter;
-	private DetectionTrigger detectionTrigger;
+	//private DetectionTrigger detectionTrigger;
 	private int turnCount;
 
 	public override void Init(CharacterController selfCharacter)
 	{
 		base.Init(selfCharacter);
 		
-		initCharacter = selfCharacter;
+		/*initCharacter = selfCharacter;
 		detectionTrigger = initCharacter.GetComponent<DetectionTrigger>();
 		if (!detectionTrigger) detectionTrigger = initCharacter.GetComponentInChildren<DetectionTrigger>();
 		if (detectionTrigger)
 		{
 			detectionTrigger.onCharacterDetected += OnCharacterDetected;
 			detectionTrigger.onCharacterLost += OnCharacterLost;
-		}
+		}*/
 	}
 
 	public override void Dispose()
 	{
-		if (detectionTrigger)
+		/*if (detectionTrigger)
 		{
 			detectionTrigger.onCharacterDetected -= OnCharacterDetected;
 			detectionTrigger.onCharacterLost -= OnCharacterLost;
-		}
+		}*/
 		
 		base.Dispose();
 	}
@@ -52,7 +52,7 @@ public class AIBrain_Chase : AIBrainBase
 	{
 		//initCharacter = selfCharacter;
 		
-		if (chasingTarget && chasingTarget.IsDead())
+		/*if (chasingTarget && chasingTarget.IsDead())
 		{
 			chasingTarget = null;
 		}
@@ -75,7 +75,7 @@ public class AIBrain_Chase : AIBrainBase
 					}
 				}
 			}
-		}
+		}*/
 		
 		return !chasingTarget ? -1 : defaultPriority;
 	}
@@ -84,7 +84,7 @@ public class AIBrain_Chase : AIBrainBase
 	{
 		//initCharacter = selfCharacter;
 		
-		if (chasingTarget)
+		/*if (chasingTarget)
 		{
 			if (!selfCharacter.CanAttack())
 			{
@@ -111,35 +111,37 @@ public class AIBrain_Chase : AIBrainBase
 		if (chasingTarget && chasingTarget.IsDead())
 		{
 			chasingTarget = null;
-		}
+		}*/
+		
+		yield return null;
 	}
 	
-	public override void DrawGizmos(CharacterController selfCharacter)
+	/*public override void DrawGizmos(CharacterController selfCharacter)
 	{
 		Gizmos.color = hearingColor;
 		Utils.DrawGizmosCircle(selfCharacter.GetEyesPosition(), default, hearingDistance);
 		if(Application.isPlaying && chasingTarget != null) DebugDrawer.Line(selfCharacter.GetEyesPosition(), selfCharacter.GetCenterPosition(), hearingColor, 0.0f);
-	}
+	}*/
 
-	private void OnCharacterDetected(CharacterController otherCharacter)
+	/*private void OnCharacterDetected(CharacterController otherCharacter)
 	{
 		if (chasingTarget == null && !otherCharacter.IsDead() && initCharacter.IsEnemyTo(otherCharacter))
 		{
 			chasingTarget = otherCharacter;
 			Debug.Log(this + " OnCharacterDetected " + initCharacter + " detects " + chasingTarget + " with " + detectionTrigger);
 		}
-	}
+	}*/
 
-	private void OnCharacterLost(CharacterController otherCharacter)
+	/*private void OnCharacterLost(CharacterController otherCharacter)
 	{
 		if (chasingTarget == otherCharacter)
 		{
 			Debug.Log(this + " OnCharacterDetected " + initCharacter + " looses " + chasingTarget + " with " + detectionTrigger);
 			chasingTarget = null;
 		}
-	}
+	}*/
 
-	private void DefaultGetClosestTarget(CharacterController selfCharacter)
+	/*private void DefaultGetClosestTarget(CharacterController selfCharacter)
 	{
 		var closest = selfCharacter.GetClosestCharacter(selfCharacter.GetNearbyLivingCharacters(hearingDistance, 1.0f, hearingColor));
 		if (closest != null)
@@ -148,5 +150,5 @@ public class AIBrain_Chase : AIBrainBase
 		}
 				
 		Debug.Log(this + " DefaultGetClosestTarget " + selfCharacter + " finds target: " + chasingTarget);
-	}
+	}*/
 }

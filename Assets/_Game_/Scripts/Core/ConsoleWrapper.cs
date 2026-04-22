@@ -89,7 +89,7 @@ public static class ConsoleWrapper
 	[ConsoleMethod("debug_detection", "")]
 	public static void _DebugDetection(int value)
 	{
-		Debug.Log("DetectionTrigger.debugMode=" + (DetectionTrigger.debugMode = value));
+		Debug.Log("DetectionTrigger.debugMode=" + (CharacterDetection.debugMode = value));
 	}
 
 	/*[ConsoleMethod("debug_gui", "")]

@@ -178,18 +178,14 @@ public class GameTurnManager : MonoBehaviour
 
 				yield return new WaitForSeconds(focusCharacterSeconds);
 
-				if (!otherCharacter.TryGetAIBrain(out var aiBrain))
+				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
 				{
-					Debug.LogWarning(otherCharacter + " has no aiBrain");
+					Debug.LogWarning(otherCharacter + " has no brain");
 					yield return new WaitForSeconds(noActionsSeconds);
 					continue;
 				}
-				
-				yield return new WaitForSeconds(aiThinksSeconds);
-			
-				Debug.Log(otherCharacter + " Think() " + aiBrain);
-				yield return StartCoroutine(aiBrain.Think(otherCharacter));
-				Debug.Log("End Think()");
+
+				yield return StartCoroutine(otherBrain.Think());
 
 				var startTime = Time.time;
 				yield return YieldRoutines();

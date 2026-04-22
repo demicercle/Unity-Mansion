@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Linq;
 
-public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICursorHandler
+public class CharacterSelection : MonoBehaviour
 {
 	#region Static Selection Methods
 	public static event System.Action selectionChanged;
@@ -84,11 +84,6 @@ public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICu
 	
 	private static CharacterController selectedCharacter;
 	private CharacterController controller;
-	public CharacterController GetController() // TODO Remove
-	{
-		if(!controller) controller = GetComponent<CharacterController>();
-		return controller;
-	}
 	
 	[Header("Collision")]
 	[SerializeField] private CapsuleCollider capsuleCollider;
@@ -114,7 +109,8 @@ public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICu
 	[ContextMenu("UpdateComponents")]
 	private void UpdateComponents()
 	{
-		var controller = GetController();
+		if (!controller) controller = GetComponent<CharacterController>();
+		if (!controller) return;
 		var agent = controller.GetAgent();
 		var radius = agent.GetRadius();
 		var height = agent.GetHeight();
@@ -140,13 +136,20 @@ public class CharacterSelection : MonoBehaviour, IView<CharacterController>, ICu
 
 	private void Awake()
 	{
-		controller = GetController();
+		controller = GetComponent<CharacterController>();
+		if (!controller)
+		{
+			Debug.LogWarning(this + " has no CharacterController");
+			enabled = false;
+			return;
+		}
+		
 		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
 	}
 
-	void LateUpdate()//TODO optim
+	private void LateUpdate()//TODO optim
 	{
-		currentColor = ColorSettings.GetCharacterColor(GetController(), true, false);
+		currentColor = ColorSettings.GetCharacterColor(controller, true, false);
 		alphaColor = alphaCurve.Evaluate(CharacterSelection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
 		
 		if (selectionCircle)

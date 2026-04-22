@@ -665,11 +665,7 @@ public class GameInput : MonoBehaviour
 		
 		else if(isDebugMode)  Debug.Log(" no character selected");
 	}
-
-	private List<CharacterAnimation> GetAllCharacters() =>  CharacterAnimation.activeInstances.ToList();
-	private List<CharacterAnimation> GetPartyCharacters() => CharacterAnimation.activeInstances.Where(c => c.GetController().InParty()).ToList();
-	private int GetPartyCharacterIndex(CharacterAnimation characterAnimation) => GetPartyCharacters().IndexOf(characterAnimation);
-	private int GetCharacterIndex(CharacterAnimation characterAnimation) => GetAllCharacters().IndexOf(characterAnimation);
+	
 	private bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
 	private bool CanControlCharacter(CharacterController character)
 	{

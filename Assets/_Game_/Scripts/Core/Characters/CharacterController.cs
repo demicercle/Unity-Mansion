@@ -45,7 +45,6 @@ public class CharacterController : MonoBehaviour
 	public event System.Action turnEnded;
 	
 	[SerializeField] private CharacterData characterData;
-	[SerializeField] private List<AIBrainBase> aiBrains =  new List<AIBrainBase>();
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f;
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
@@ -377,13 +376,6 @@ public class CharacterController : MonoBehaviour
 	{
 		return CanAttack() && !other.IsDead() && IsEnemyTo(other);
 	}
-	
-	public bool TryGetAIBrain(out AIBrainBase aiBrain)
-	{
-		aiBrains = aiBrains.OrderBy(b => -b.GetPriority(this)).ToList();
-		Debug.Log(this + " TryGetAIBrain " + Utils.ArrayStr(aiBrains));
-		return (aiBrain = aiBrains.FirstOrDefault()) != null;
-	}
 
 	public float GetDistanceTo(Vector3 world) => Vector3.Distance(GetPosition(), world);
 
@@ -511,14 +503,6 @@ public class CharacterController : MonoBehaviour
 			currentFaction = factionOverride;
 		}
 
-		if (!aiBrains.OfType<AIBrain_Wait>().Any())
-		{
-			Debug.LogWarning(this + " has no aiBrains, CreateInstance default");
-			aiBrains.Add(ScriptableObject.CreateInstance<AIBrain_Wait>());
-		}
-		
-		aiBrains.ForEach(brain => brain.Init(this));
-
 		if (!defaultWeapon)
 		{
 			Debug.LogWarning(this + " has no weapon, CreateInstance default");
@@ -530,7 +514,6 @@ public class CharacterController : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		aiBrains.ForEach(brain => brain.Dispose());
 		_allCharacters.Remove(this);
 	}
 	
@@ -554,11 +537,6 @@ public class CharacterController : MonoBehaviour
 	#if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
-		aiBrains.ForEach(b =>
-		{
-			b?.DrawGizmos(this);
-		});
-
 		Gizmos.color = Color.magenta;
 		Utils.DrawGizmosCircle(transform.position, Vector3.up, visionRange);
 	}
