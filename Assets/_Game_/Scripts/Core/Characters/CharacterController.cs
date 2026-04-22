@@ -25,7 +25,9 @@ public class CharacterController : MonoBehaviour
 	const float MinFacingDot = 0.9f;
 	
 	public static List<CharacterController> AllCharacters => _allCharacters;
-	public static IEnumerable<CharacterController> GetPartyCharacters() => _allCharacters.Where(c => c.InParty());
+
+	public static IEnumerable<CharacterController> GetPartyCharacters() =>
+		_allCharacters.Where(c => c.InParty()).OrderBy(c => c.GetPartyIndex());
 	
 	public static event System.Action onPartyChanged;
 	public static event System.Action<CharacterController> onCharacterMoved;

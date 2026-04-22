@@ -47,7 +47,7 @@ public class CharacterAgent : MonoBehaviour
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
 		{
 			if (graphUpdate.enabled == value) return;
-			Debug.Log(this + " SetObstacle " + value);
+			//Debug.Log(this + " SetObstacle " + value);
 			graphUpdate.enabled = value;
 			if (value)
 			{

@@ -17,23 +17,19 @@ public class CharacterSelection : MonoBehaviour
 
 	public static bool IsCharacterSelected(CharacterController character) => selectedCharacter == character;
 
-	public static void SelectCharacter(CharacterController character)
+	public static void SelectCharacter(CharacterController newCharacter)
 	{
-		Debug.Log("SelectCharacter: " + character);
+		Debug.Log("SelectCharacter: " + newCharacter);
 
 		if (selectedCharacter != null)
 		{
-			// deselect character
-			//selectedCharacter.GetAgent().SetObstacle(true);
 			selectedCharacter.NotifySelected(false);
 		}
 		
-		selectedCharacter = character;
+		selectedCharacter = newCharacter;
 
 		if (selectedCharacter != null)
 		{
-			// select character
-			//if(selectionSetObstacle) selectedCharacter.GetAgent().SetObstacle(false);
 			selectedCharacter.NotifySelected(true);
 		}
 		
@@ -50,20 +46,26 @@ public class CharacterSelection : MonoBehaviour
 	{
 		return selectedCharacter == null ? -1 : CharacterController.GetPartyCharacters().ToList().IndexOf(selectedCharacter);
 	}
+
+	public static void SelectFirstCharacter() =>
+		SelectCharacter(CharacterController.GetPartyCharacters().FirstOrDefault());
 	
 	public static void SelectNextCharacter()
 	{
-		var party = CharacterController.GetPartyCharacters().OrderBy(c => c.GetPartyIndex()).ToArray();
-		var startIndex = GetSelectedPartyCharacterIndex();
+		var startIndex = TryGetSelectedCharacter(out var selected) ? selected.GetPartyIndex() : -1;
 		if (startIndex < 0)
 		{
-			Debug.Log(" Select First Character");
-			SelectCharacter(party.FirstOrDefault());
+			SelectFirstCharacter();
 			return;
 		}
-		
+
+		var party = CharacterController.GetPartyCharacters().ToArray();
 		var partyCount = party.Length;
-		Debug.Log(" SelectNextCharacter " + startIndex + " partyCount=" + partyCount);
+		var newIndex = (startIndex + 1) % partyCount;
+		Debug.Log("SelectNextCharacter " + startIndex + " " + selected + " > " + newIndex);
+		SelectCharacter(party[newIndex]);
+			
+		/*Debug.Log(" SelectNextCharacter from " + startIndex + " (" + selected.name + ") partyCount=" + partyCount);
 		while (partyCount-- > 0)
 		{
 			startIndex++;
@@ -71,14 +73,14 @@ public class CharacterSelection : MonoBehaviour
 			var newIndex = startIndex % party.Length;
 			Debug.Log(" try select at " + newIndex);
 			var newChar = party[newIndex];
-			if (!newChar.IsDead())
+			if (newChar != selected && !newChar.IsDead())
 			{
 				SelectCharacter(newChar);
 				return;
 			}
 		}
 		
-		Debug.LogWarning(" Has no character to select next!");
+		Debug.LogWarning(" Has no character to select next!");*/
 	}
 	#endregion
 	
