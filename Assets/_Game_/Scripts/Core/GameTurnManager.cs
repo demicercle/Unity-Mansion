@@ -111,6 +111,8 @@ public class GameTurnManager : MonoBehaviour
 			yield return null;
 		
 		Debug.Log(" loading scene complete");
+		
+		yield return new WaitForSeconds(0.1f); // for triggers
 
 		levelCharacters = CharacterController.AllCharacters
 			.OrderBy(c => c.transform.GetSiblingIndex())

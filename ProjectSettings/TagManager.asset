@@ -11,7 +11,7 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - HiddenInGame
+  - Hidden
   - Water
   - UI
   - Ground
@@ -20,7 +20,7 @@ TagManager:
   - Trigger
   - NavBlocker
   - Prop
-  - 
+  - Fog
   - 
   - 
   - 

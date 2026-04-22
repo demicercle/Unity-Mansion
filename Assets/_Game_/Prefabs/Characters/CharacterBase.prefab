@@ -488,9 +488,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0eda272a8b5f4b69aa4137b69b616a7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
-  canPatrol: 1
   canChase: 1
+  canPatrol: 1
+  canUseRunAction: 0
   defaultWait: 1.5
+  looseTargetTime: 1.5
 --- !u!114 &7705601098757829042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -509,6 +511,7 @@ MonoBehaviour:
   obstructionLayers:
     serializedVersion: 2
     m_Bits: 192
+  drawGizmos: 0
 --- !u!54 &6072534866263412361
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1056,7 +1059,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8685941105244977515}
   - component: {fileID: 3961347030267546082}
-  - component: {fileID: 6768701302291083197}
   m_Layer: 8
   m_Name: HideInFog
   m_TagString: Untagged
@@ -1096,26 +1098,6 @@ MonoBehaviour:
   nodeSize: 0.5
   character: {fileID: 1077634328985660634}
   renderers: []
---- !u!114 &6768701302291083197
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5631688854807395945}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e65e21edf4364c909eb7047d4a9555b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HideInFog
-  defaultLayer: TransparentFX
-  hiddenLayer: HiddenInGame
-  nodeSize: 0.5
-  character: {fileID: 1077634328985660634}
-  renderers:
-  - {fileID: 4939472226289180237}
-  - {fileID: 5255465170416904580}
-  - {fileID: 2283550923626056868}
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0

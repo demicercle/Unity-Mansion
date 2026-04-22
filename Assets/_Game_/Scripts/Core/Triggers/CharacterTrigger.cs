@@ -6,13 +6,14 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Collider))]
 public class CharacterTrigger : MonoBehaviour
 {
-	static public List<CharacterTrigger> activeTriggers = new List<CharacterTrigger>();
+	public static List<CharacterTrigger> activeTriggers = new List<CharacterTrigger>();
 	
 	[Header("Settings")]
 	[SerializeField] private bool partyOnly = true;
 	[SerializeField] private bool triggerOnEnter = true;
 	[SerializeField] private bool triggerOnExit = false;
 	[Min(-1)] [SerializeField] private int maxCount = 1;
+	[SerializeField] private bool debugMode = false;
 	
 	[SerializeField] private UnityEvent triggered;
 	
@@ -21,6 +22,12 @@ public class CharacterTrigger : MonoBehaviour
 	public bool HasCharacter(CharacterController character)
 	{
 		return characters.Contains(character);
+	}
+
+	public Bounds GetWorldBounds()
+	{
+		if(!collider) collider = GetComponent<Collider>();
+		return collider.bounds;
 	}
 
 	private new Collider collider;
@@ -36,7 +43,7 @@ public class CharacterTrigger : MonoBehaviour
 		Utils.GetOrAddComponent<Collider>(gameObject).isTrigger = true;
 	}
 
-	void TriggerNow()
+	private void TriggerNow()
 	{
 		if (maxCount == 0) return;
 		triggerCount++;
@@ -48,27 +55,31 @@ public class CharacterTrigger : MonoBehaviour
 		}
 	}
 	
-	void OnTriggerEnter(Collider other)
+	private void OnTriggerEnter(Collider other)
 	{
 		if (other.TryGetComponent(out CharacterController character) && IsCharacterValid(character))
 		{
 			characters.Add(character);
+			if(debugMode) Debug.Log(this + " OnTriggerEnter " + character);
 			if(triggerOnEnter) TriggerNow();
 		}
 	}
 
-	void OnTriggerExit(Collider other)
+	private void OnTriggerExit(Collider other)
 	{
 		if (other.TryGetComponent(out CharacterController character))
 		{
 			characters.Remove(character);
+			if(debugMode) Debug.Log(this + " OnTriggerExit " + character);
 			if (triggerOnExit) TriggerNow();
 		}
 	}
 
-	void Awake()
+	private void Awake()
 	{
 		collider = GetComponent<Collider>();
+		collider.isTrigger = true;
+		collider.enabled = false;
 	}
 
 	private void OnEnable()
@@ -79,5 +90,10 @@ public class CharacterTrigger : MonoBehaviour
 	private void OnDisable()
 	{
 		activeTriggers.Remove(this);
+	}
+
+	private void Start()
+	{
+		collider.enabled = true; // refresh events
 	}
 }

@@ -33,6 +33,7 @@ public class CharacterController : MonoBehaviour
 	public static event System.Action<CharacterController> onCharacterMoved;
 	public static event System.Action<CharacterController, CharacterAction> onCharacterUsesAction;
 	
+	public event System.Action onSpawned;
 	public event System.Action onStatsChanged;
 	public event System.Action onFactionChanged;
 	public event System.Action<bool> onSelectionChanged;
@@ -71,6 +72,7 @@ public class CharacterController : MonoBehaviour
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
+		onSpawned?.Invoke();
 		onStatsChanged?.Invoke();
 	}
 
@@ -418,7 +420,7 @@ public class CharacterController : MonoBehaviour
 
 	public bool WeaponsReady() => characterAnimation && characterAnimation.WeaponsSwitched();
 
-	public bool IsCharacterRevealed() => RoomTrigger.IsCharacterVisible(this);
+	public bool IsCharacterRevealed() => InParty() || RoomTrigger.IsCharacterVisible(this);
 	
 	public bool CanSeeAnyEnemyAround() => _allCharacters.FirstOrDefault((other) =>
 	{

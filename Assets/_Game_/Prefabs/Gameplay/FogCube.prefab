@@ -63,14 +63,14 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 8e68e1839578e534ab4cfa5e4e91e612, type: 2}
+      objectReference: {fileID: 2100000, guid: 001b3d4f7eca15542b935b87c33e66a9, type: 2}
     - target: {fileID: 919132149155446097, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
       propertyPath: m_Name
       value: FogCube
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
       propertyPath: m_Layer
-      value: 9
+      value: 12
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

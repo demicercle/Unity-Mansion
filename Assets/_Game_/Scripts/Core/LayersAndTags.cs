@@ -8,13 +8,15 @@ public static class Layers
 	public static int LayerIgnore => LayerMask.NameToLayer("Ignore Raycast");
 	public static int LayerTrigger => LayerMask.NameToLayer("Trigger");
 	public static int LayerProp => LayerMask.NameToLayer("Prop");
+	public static int LayerHidden => LayerMask.NameToLayer("Hidden");
 	
 	public static int MaskInteraction => LayerMask.GetMask("Character", "Prop");
-	public static int MaskObstruction => LayerMask.GetMask("Ground", "Wall");
+	public static int MaskObstruction => LayerMask.GetMask("Ground", "Wall", "Fog");
 	public static int MaskNavigation => LayerMask.GetMask("Ground");
 }
 
 public static class Tags
 {
 	public const string TagPlayer = "Player";
+	public const string TagDoor = "Door";
 }
