@@ -23,7 +23,8 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private RectTransform viewportRect;
 	[SerializeField] private RawImage viewportOverlay;
 	[Header("Buttons")]
-	[SerializeField] private Toggle controlPanel;
+	[SerializeField] private Toggle toggleTurnBased;
+	[SerializeField] private Toggle toggleActions;
 	[SerializeField] private Button button_actionRun;
 	[SerializeField] private Button button_endTurn;
 	[Header("Portraits")]
@@ -90,6 +91,7 @@ public class GameCanvas : MonoBehaviour
 		floatingText.SetActive(false);
 
 		CharacterController.onPartyChanged += UpdatePortraits;
+		CharacterSelection.selectionChanged += UpdateSelectables;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
 	}
@@ -103,8 +105,14 @@ public class GameCanvas : MonoBehaviour
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
 		
 		CharacterController.onPartyChanged -= UpdatePortraits;
+		CharacterSelection.selectionChanged -= UpdateSelectables;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
+	}
+
+	private void OnEnable()
+	{
+		UpdateSelectables();
 	}
 
 	private void Start()
@@ -127,10 +135,13 @@ public class GameCanvas : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		UpdateButtons(); // TODO with events
+		UpdateSelectables(); // TODO with events
 	}
-	
-	private void OnLoadingGame(bool isLoading) => gameObject.SetActive(!isLoading);
+
+	private void OnLoadingGame(bool isLoading)
+	{
+		gameObject.SetActive(!isLoading);
+	}
 
 	private void OnViewportRectClicked()
 	{
@@ -175,9 +186,10 @@ public class GameCanvas : MonoBehaviour
 		}
 	}
 
-	private void UpdateButtons()
+	private void UpdateSelectables()
 	{
-		controlPanel.isOn = gameTurnManager.SelectedCharacterIsControllable();
+		toggleTurnBased.isOn = gameTurnManager.IsTurnBasedMode();
+		toggleActions.isOn = gameTurnManager.SelectedCharacterIsControllable();
 		button_actionRun.interactable = gameTurnManager.SelectedCharacterCanUseRunAction();
 		
 		if (gameTurnManager.PlayerCanEndTurn())

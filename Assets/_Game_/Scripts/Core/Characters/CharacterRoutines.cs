@@ -12,6 +12,11 @@ public class CharacterRoutines : MonoBehaviour
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
 	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
+
+	public bool AnyActive()
+	{
+		return activeInstances.Contains(this);
+	}
 	
 	public void AssignAttack(CharacterController target, bool canUseRunAction, bool losCheck)
 	{

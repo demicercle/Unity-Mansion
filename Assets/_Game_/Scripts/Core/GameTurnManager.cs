@@ -267,7 +267,7 @@ public class GameTurnManager : MonoBehaviour
 			if (c.IsPlayer()) c.Rest();
 		});
 		Debug.Log(this + " NewTurn " + currentTurn);
-		turnStarted?.Invoke();
+		if(currentTurn > 0) turnStarted?.Invoke();
 	}
 
 	private void SelectBestPlayerCharacter()

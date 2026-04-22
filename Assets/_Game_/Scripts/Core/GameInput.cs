@@ -25,6 +25,8 @@ public class GameInput : MonoBehaviour
 	public static void Focus(bool value) => instance.OnApplicationFocus(value);
 	
 	public static GameInput Instance => instance;
+
+	//[SerializeField] private bool debugLog;
 	
 	[Header("Camera Control")]
 	[SerializeField] [Range(0f, 6f)] private float inputOrbitScale = 3.14f;
@@ -306,15 +308,15 @@ public class GameInput : MonoBehaviour
 			
 			if (lastCursorResult == CursorRaycastResult_Navigation)
 			{
-				if (selectedCharacter != null)
+				if (selectedCharacter)
 				{
-					if (CanControlCharacter(selectedCharacter) && !selectedCharacter.IsMoving())
+					SetCurrentCursorType(CursorType.Navigate);
+					debugString += "\n>Navigate";
+					
+					if (CanAssignOnMouseOver(selectedCharacter))
 					{
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
-						SetCurrentCursorType(CursorType.Navigate);
-						debugString += "\n>Navigate";
 					}
-					//else if(isDebugMode) Debug.Log("character not controllable");
 				}
 				//else if(isDebugMode) Debug.Log("no selected character");
 			}
@@ -326,27 +328,30 @@ public class GameInput : MonoBehaviour
 					debugString += " (Character)";
 					if (selectedCharacter != null)
 					{
-						if (CanControlCharacter(selectedCharacter) && !selectedCharacter.IsMoving())
+						var agent = selectedCharacter.GetAgent();
+						if (overCharacter.InParty())
 						{
-							var agent = selectedCharacter.GetAgent();
-							if (overCharacter.InParty())
-							{
+							SetCurrentCursorType(CursorType.Select);
+							
+							if (CanAssignOnMouseOver(selectedCharacter))
 								agent.ClearDestination();// mouse over another party member
-								SetCurrentCursorType(CursorType.Select);
-							}
-							else if (overCharacter.IsEnemyToPlayer())
-							{
-								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over enemy
-								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
-							}
-							else
-							{
-								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
-								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
-							}
-							debugString += "\n>" + currentCursor;
+							
 						}
-						//else if(isDebugMode) Debug.Log("character not controllable");
+						else if (overCharacter.IsEnemyToPlayer())
+						{
+							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
+							
+							if (CanAssignOnMouseOver(selectedCharacter))
+								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over enemy
+						}
+						else
+						{
+							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
+							
+							if (CanAssignOnMouseOver(selectedCharacter))
+								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
+						}
+						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");
 				}
@@ -355,19 +360,19 @@ public class GameInput : MonoBehaviour
 					debugString += " (Prop)";
 					if (selectedCharacter != null)
 					{
-						if (CanControlCharacter(selectedCharacter) && !selectedCharacter.IsMoving()) // mouse over prop
+						if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
 						{
-							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
+							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
+								: overProp.GetCursorType());
+							
+							if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
 							{
 								var agent = selectedCharacter.GetAgent();
 								agent.AssignDestination(bestWaypoint.GetPosition(), true); // mouse over prop
-								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
-									: overProp.GetCursorType());
 							}
-							debugString += "\n>" + currentCursor;
-							//else Debug.LogWarning("no waypoint found");
 						}
-						//else if(isDebugMode) Debug.Log("character not controllable");
+						else Debug.LogWarning(this + " overProp " + overProp + " no waypoints!");
+						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");
 				}
@@ -377,21 +382,18 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter)
 				{
-					if (CanControlCharacter(selectedCharacter) && !selectedCharacter.IsMoving())
+					debugString += "\n>ClearDestination()";
+					
+					if (CanAssignOnMouseOver(selectedCharacter))
 					{
 						selectedCharacter.GetAgent().ClearDestination();
-						debugString += "\n>ClearDestination()";
 					}
-					//else if(isDebugMode) Debug.Log("character not controllable");
 				}
-				//else if(isDebugMode) Debug.Log("no selected character");
 			}
-			
-			//if (debugMode) Debug.Log(debugString);
 		}
 		else
 		{
-			if (selectedCharacter && CanControlCharacter(selectedCharacter))
+			if (selectedCharacter && CanAssignOnMouseOver(selectedCharacter))
 			{
 				selectedCharacter.GetAgent().ClearDestination(); // to hide path drawing
 			}
@@ -403,7 +405,7 @@ public class GameInput : MonoBehaviour
 			SetCurrentCursorType(CursorType.Blocked);
 		}
 
-		if (CharacterRoutines.AnyActiveRoutines())
+		if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
 		{
 			SetCurrentCursorType(CursorType.Waiting);
 		}
@@ -464,7 +466,7 @@ public class GameInput : MonoBehaviour
 				cameraPivot.Focus(selectedCharacter);
 			else Debug.Log("no selected character");
 		}
-		else Debug.Log("not in player turn");
+		else if(debugMode>0) Debug.Log("not in player turn");
 	}
 	
 	private void OnInputSelectNext(CallbackContext ctx)
@@ -496,7 +498,7 @@ public class GameInput : MonoBehaviour
 		
 		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
 		{
-			if (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines())
+			if (gameTurnManager.IsPlayerTurn())
 			{
 				CharacterSelection.SelectCharacter(null); // deselect all
 			}
@@ -632,7 +634,7 @@ public class GameInput : MonoBehaviour
 
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			if (CanControlCharacter(selectedCharacter))
+			if (CanAssignOnClick(selectedCharacter))
 			{
 				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.InteractAction))
 					selectedCharacter.FloatingText_Cant();
@@ -650,7 +652,7 @@ public class GameInput : MonoBehaviour
 
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			if (CanControlCharacter(selectedCharacter))
+			if (CanAssignOnClick(selectedCharacter))
 			{
 				if (selectedCharacter.GetAgent().isPathValid)
 				{
@@ -664,18 +666,24 @@ public class GameInput : MonoBehaviour
 		else if(isDebugMode)  Debug.Log(" no character selected");
 	}
 	
-	private bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
-	                                              && CanControlCharacter(selectedCharacter);
+	private bool CanAssignOnClickSelected() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
+	                                              && CanAssignOnClick(selectedCharacter);
 	
-	private bool CanControlCharacter(CharacterController character)
+	private bool CanAssignOnClick(CharacterController character)
 	{
 		return hasFocus 
 		       && (!gameTurnManager.IsTurnBasedMode() || (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines()))
 		       && character.IsControllableByPlayer();
 	}
+
+	private bool CanAssignOnMouseOver(CharacterController character)
+	{
+		return CanAssignOnClick(character) && !character.Routines.AnyActive();
+	}
 	
 	private void SetCurrentCursorType(CursorType cursorType)
 	{
+		if(debugMode>1) Debug.Log(this + " SetCurrentCursorType " + cursorType);
 		currentCursor = cursorType;
 	}
 
