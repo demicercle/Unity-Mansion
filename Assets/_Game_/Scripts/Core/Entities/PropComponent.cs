@@ -78,6 +78,7 @@ public class PropComponent : MonoBehaviour
 	
 	#region PRIVATE
 	private bool animFinished;
+	private int defaultLayer;
 
 	private void OnAnimFinished()
 	{
@@ -95,20 +96,23 @@ public class PropComponent : MonoBehaviour
 	{
 		if (value)
 		{
-			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
+			gameObject.layer = Layers.LayerIgnore;
 		}
 		else
 		{
-			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
+			gameObject.layer = defaultLayer;
 		}
+	}
+
+	private void Awake()
+	{
+		defaultLayer = gameObject.layer;
 	}
 	
 	private IEnumerator Start()
 	{
 		if(rebuildNavigation) 
 			NavmeshRebuilder.RebuildNavigationOn(gameObject);
-		
-		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
 
 		if (autoTriggerDelay > 0f)
 		{

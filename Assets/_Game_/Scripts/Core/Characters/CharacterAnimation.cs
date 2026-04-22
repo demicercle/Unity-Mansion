@@ -316,7 +316,7 @@ public class CharacterAnimation : MonoBehaviour
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
 		if (rpgAnimationHandler) rpgAnimationHandler.Death();
-		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
+		gameObject.layer = Layers.LayerIgnore;
 	}
 
 	private void OnUseAction(CharacterAction actionType, object args = null)

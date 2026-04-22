@@ -19,7 +19,7 @@ public class GameInput : MonoBehaviour
 	
 	public const int CursorRaycastResult_None = 0;
 	public const int CursorRaycastResult_Navigation = 1;
-	public const int CursorRaycastResult_Character = 2;
+	public const int CursorRaycastResult_Interaction = 2;
 	
 	public static bool IsConsoleVisible() => DebugLogManager.Instance.IsLogWindowVisible;
 	public static void Focus(bool value) => instance.OnApplicationFocus(value);
@@ -47,35 +47,23 @@ public class GameInput : MonoBehaviour
 		}
 		
 		raycastRay = cam.ScreenPointToRay(mousePosition);
-		if (Physics.Raycast(raycastRay, out raycastHit, 100f, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
+		if (Physics.Raycast(raycastRay, out raycastHit, 100f, Layers.MaskInteraction))
 		{ 
-			//DebugGUI.Log("Hit Character: " + hit.collider);
-			//DrawDebug.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
-			//Utils.DrawDebugCircle(hit.collider.transform.position, Vector3.up, 0.5f);
-
 			foreach (var cursorHandler in raycastHit.collider.GetComponents<ICursorHandler>().Concat(raycastHit.collider.GetComponentsInChildren<ICursorHandler>()))
 			{
 				cursorHandler.CursorOver();
 			}
 
-			return CursorRaycastResult_Character;
+			return CursorRaycastResult_Interaction;
 		}
 		
-		if (Physics.Raycast(raycastRay, out raycastHit, 100f, LayerMask.GetMask(Consts.LAYER_GROUND, Consts.LAYER_WALL)))
+		if (Physics.Raycast(raycastRay, out raycastHit, 100f, Layers.MaskNavigation))
 		{
-			//DebugGUI.Log("Hit Navigation: " + hit.point);
-			//Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
-
 			if (NavUtils.TryGetNearestNavPosition(raycastHit.point, maxNavDistance, out var navPosition))
 			{
 				raycastHit.point = navPosition;
-				//DrawDebug.WireDisc(navPosition + Vector3.up * debugOffset, Vector3.up,maxNavDistance * 0.5f, Color.cyan);
-
 				return CursorRaycastResult_Navigation;
 			}
-			
-			// mouse over something else
-			//DrawDebug.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Vector3.up,maxNavDistance, Color.gray);
 		}
 		
 		return CursorRaycastResult_None;
@@ -331,7 +319,7 @@ public class GameInput : MonoBehaviour
 				//else if(isDebugMode) Debug.Log("no selected character");
 			}
 			
-			else if (lastCursorResult == CursorRaycastResult_Character) 
+			else if (lastCursorResult == CursorRaycastResult_Interaction) 
 			{
 				if (hit.collider.TryGetComponent(out CharacterController overCharacter))
 				{
@@ -526,7 +514,7 @@ public class GameInput : MonoBehaviour
 			if (!mouseOverViewport) return;
 			
 			var raycastResult = CursorRaycast(out var hit);
-			if (raycastResult == CursorRaycastResult_Character)
+			if (raycastResult == CursorRaycastResult_Interaction)
 			{
 				if (hit.collider.TryGetComponent(out CharacterController clickedCharacter)) // click character
 				{

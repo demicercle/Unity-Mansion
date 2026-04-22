@@ -146,7 +146,7 @@ public class CharacterSelection : MonoBehaviour
 			return;
 		}
 		
-		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
+		gameObject.layer = Layers.LayerCharacter;
 	}
 
 	private void LateUpdate()//TODO optim

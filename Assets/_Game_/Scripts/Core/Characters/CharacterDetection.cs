@@ -147,9 +147,11 @@ public class CharacterDetection : MonoBehaviour
 		Vector3 otherPos =  otherCharacter.GetCenterPosition();
 		if(Physics.Linecast(eyesPos, otherPos, out var hit,obstructionLayers))
 		{
+			if (debugMode > 0) DebugDrawer.Line(eyesPos, hit.point, Color.red);
 			return false;
 		}
-
+		
+		if (debugMode > 0) DebugDrawer.Line(eyesPos, otherPos, Utils.ColorAlpha(Color.green, Mathf.PI * 0.1f));
 		return true;
 	}
 	

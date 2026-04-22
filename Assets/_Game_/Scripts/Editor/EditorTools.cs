@@ -44,7 +44,7 @@ public static class EditorTools
 		{
 			Utils.GetOrAddComponent<BoxCollider>(go);
 			go.isStatic = true;
-			go.gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_WALL);
+			go.gameObject.layer = Layers.LayerWall;
 		});
 	}
 

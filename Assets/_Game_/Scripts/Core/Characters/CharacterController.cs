@@ -426,27 +426,6 @@ public class CharacterController : MonoBehaviour
 		if (!other.IsCharacterRevealed()) return false;
 		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
 	});
-
-	public CharacterController GetClosestCharacter(List<CharacterController> getNearbyLivingCharacters)
-	{
-		return getNearbyLivingCharacters.OrderBy(other => GetDistanceTo(other)).FirstOrDefault();
-	}
-	
-	public List<CharacterController> GetNearbyLivingCharacters(float range, float drawDuration = 0f, Color drawColor = default)
-	{
-		var outList = new List<CharacterController>();
-		var center = GetPosition();
-		DebugDrawer.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
-		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
-		{
-			if (coll.TryGetComponent(out CharacterController otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())
-			{
-				outList.Add(otherCharacter);
-			}
-		}
-
-		return outList;
-	}
 	
 	public bool TryGetAnimation(out CharacterAnimation outAnimation)
 	{
@@ -529,8 +508,7 @@ public class CharacterController : MonoBehaviour
 	{
 		var start = GetEyesPosition();
 		var end = other.GetEyesPosition();
-		if(Physics.Linecast(start, end, out var hit,
-			   LayerMask.GetMask(Consts.LAYER_WALL, Consts.LAYER_GROUND)))
+		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
 		{
 			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
 			//DebugGUI.Line(start, end, Color.red, drawDuration);

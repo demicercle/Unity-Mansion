@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1073741824
-  uniqueID: 4375304536273734385
+  uniqueID: 289120362811736212
   points:
   - {x: 0.5165385, y: 0, z: 0.06443918}
   - {x: -0.56330657, y: 0, z: 0.064439036}
@@ -95,8 +95,8 @@ Transform:
   m_GameObject: {fileID: 2717041642884981971}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.541, y: 0.355, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 0.16254}
+  m_LocalPosition: {x: 0.541, y: 1.25, z: 0}
+  m_LocalScale: {x: 1, y: 2.5, z: 0.16254}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5703262471981040408}
@@ -191,7 +191,7 @@ GameObject:
   - component: {fileID: 8495298704536974578}
   - component: {fileID: 2209946154352752973}
   - component: {fileID: 450696110728905939}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Prop_Door_Simple
   m_TagString: Door
   m_Icon: {fileID: -5397416234189338067, guid: 0000000000000000d000000000000000, type: 0}

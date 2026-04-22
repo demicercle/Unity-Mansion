@@ -108,7 +108,7 @@ public class RoomTrigger : MonoBehaviour
 				newSize.y = ceilingHeight;
 				
 				var ceiling = new GameObject("ceiling_" + ceilings.Count).AddComponent<BoxCollider>();
-				ceiling.gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_WALL);
+				ceiling.gameObject.layer = Layers.LayerWall;
 				ceiling.transform.SetParent(trigger.transform, false);
 				ceiling.isTrigger = false;
 				ceiling.size = newSize;
