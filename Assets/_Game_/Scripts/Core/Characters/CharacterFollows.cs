@@ -60,6 +60,7 @@ public class CharacterFollows : MonoBehaviour
 		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead())
 		{
 			agent.AssignFollowTransform(leaderCharacter.transform, followDistance);
+			agent.SetObstacle(!agent.IsMoving());
 			
 			if (debugMode > 0)
 			{

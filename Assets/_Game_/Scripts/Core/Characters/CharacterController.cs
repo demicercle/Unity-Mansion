@@ -91,6 +91,7 @@ public class CharacterController : MonoBehaviour
 	public void NotifySelected(bool value)
 	{
 		//agent.SetObstacle(!value);//todo not in selection
+		if (value) StopFollow();
 		onSelectionChanged?.Invoke(value);
 	}
 
@@ -267,7 +268,13 @@ public class CharacterController : MonoBehaviour
 	
 	public void StopAgent()
 	{
+		StopFollow();
 		agent.StopMovement();
+	}
+
+	public void StopFollow()
+	{
+		follows.enabled = false;
 	}
 
 	public Vector3 GetVelocity()
@@ -455,6 +462,7 @@ public class CharacterController : MonoBehaviour
 	private CharacterAgent agent;
 	private CharacterRoutines routines;
 	private CharacterAnimation characterAnimation;
+	private CharacterFollows follows;
 	private WeaponData currentWeapon;
 	
 	private void Awake()
@@ -469,6 +477,9 @@ public class CharacterController : MonoBehaviour
 		
 		routines = GetComponent<CharacterRoutines>();
 		if(!routines) routines = gameObject.AddComponent<CharacterRoutines>();
+		
+		follows = GetComponent<CharacterFollows>();
+		if(!follows) follows = gameObject.AddComponent<CharacterFollows>();
 		
 		characterAnimation = GetComponent<CharacterAnimation>();
 		//if(!characterAnimation) characterAnimation = gameObject.AddComponent<CharacterAnimation>(); //TODO is it possible to have characters with no anims?

@@ -128,7 +128,8 @@ public class CharacterAgent : MonoBehaviour
 		{
 			AssignFollowTransform(null);
 			hasDestination = true;
-			
+
+			aiPath.endReachedDistance = endReachDistance;
 			aiPath.destination = hitPoint;
 			aiPath.SearchPath();
 			
@@ -143,7 +144,11 @@ public class CharacterAgent : MonoBehaviour
 		hasDestination = false;
 		if(!aiDestinationSetter) aiDestinationSetter = GetComponent<AIDestinationSetter>();
 		if(!aiDestinationSetter) aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
-		if (aiDestinationSetter.target != followTarget && IsMoving()) StopMovement();
+		if (aiDestinationSetter.target != followTarget && IsMoving())
+		{
+			StopMovement();
+			SetObstacle(true);
+		}
 		aiDestinationSetter.enabled = followTarget;
 		aiDestinationSetter.target = followTarget;
 		aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());

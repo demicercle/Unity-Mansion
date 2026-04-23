@@ -298,6 +298,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 2.5
       objectReference: {fileID: 0}
+    - target: {fileID: 3993351974707439097, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+      propertyPath: showGraphs
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4833798763918923341, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       propertyPath: extends.x
       value: 8

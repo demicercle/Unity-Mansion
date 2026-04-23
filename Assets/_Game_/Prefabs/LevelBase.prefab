@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6100771718776727966}
   - component: {fileID: 7609907940526296612}
   - component: {fileID: 3993351974707439097}
+  - component: {fileID: 3707570885431278476}
   - component: {fileID: 4833798763918923341}
   m_Layer: 0
   m_Name: LevelBase
@@ -138,6 +139,26 @@ MonoBehaviour:
     spreadOutCount: 10
   showGraphs: 1
   showGraphsInStandalonePlayer: 0
+--- !u!114 &3707570885431278476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113469372072591625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1764de1de43cc4d19af52679d3eaae06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.RVO.RVOSimulator
+  version: 1073741824
+  workerThreads: 2
+  doubleBuffering: 0
+  hardCollisions: 1
+  symmetryBreakingBias: 0.1
+  movementPlane: 0
+  useNavmeshAsObstacle: 0
+  drawQuadtree: 0
 --- !u!114 &4833798763918923341
 MonoBehaviour:
   m_ObjectHideFlags: 0
