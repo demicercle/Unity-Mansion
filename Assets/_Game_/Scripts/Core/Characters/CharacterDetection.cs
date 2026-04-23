@@ -77,7 +77,7 @@ public class CharacterDetection : MonoBehaviour
 				if (IsCharacterVisible(anyCharacter))
 				{
 					detectedCharacters.Add(anyCharacter);
-					Debug.Log(this + " detects " + anyCharacter);
+					if(debugMode > 0) Debug.Log(this + " detects " + anyCharacter);
 					onCharacterDetected?.Invoke(anyCharacter);
 				}
 			}
@@ -86,7 +86,7 @@ public class CharacterDetection : MonoBehaviour
 				if (!IsCharacterVisible(anyCharacter))
 				{
 					detectedCharacters.Remove(anyCharacter);
-					Debug.Log(this + " looses " + anyCharacter);
+					if(debugMode > 0) Debug.Log(this + " looses " + anyCharacter);
 					onCharacterLost?.Invoke(anyCharacter);
 				}
 			}

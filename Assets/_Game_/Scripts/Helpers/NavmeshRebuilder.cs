@@ -33,7 +33,7 @@ public class NavmeshRebuilder : MonoBehaviour
 	IEnumerator DoRebuild()
 	{
 		instances.Add(this);
-		Debug.Log(this + " RebuildNavigationAsync Start " + delay);
+		if(debugMode >0) Debug.Log(this + " RebuildNavigationAsync Start " + delay);
 		if(delay > 0f) yield return new WaitForSeconds(delay);
 		while (instances[0] != this) yield return null;
 		foreach (var scanOp in AstarPath.active.ScanAsync())

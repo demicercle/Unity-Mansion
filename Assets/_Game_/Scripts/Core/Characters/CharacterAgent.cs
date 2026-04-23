@@ -91,7 +91,7 @@ public class CharacterAgent : MonoBehaviour
 			buffer.Clear();
 		}
 
-		if (NavmeshRebuilder.debugMode > 0)
+		if (debugMode > 0)
 		{
 			DebugDrawer.WireDisc(lastPoint + Vector3.up * 0.1f, Vector3.forward, maxNavDist, drawColor);
 			DebugDrawer.Line(lastPoint + Vector3.up * 0.1f, dest + Vector3.up * 0.1f, drawColor);
@@ -141,10 +141,12 @@ public class CharacterAgent : MonoBehaviour
 
 	public void AssignFollowTransform(Transform followTarget, float distance = 0f)
 	{
-		hasDestination = false;
 		if(!aiDestinationSetter) aiDestinationSetter = GetComponent<AIDestinationSetter>();
 		if(!aiDestinationSetter) aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
-		if (aiDestinationSetter.target != followTarget && IsMoving())
+		if (aiDestinationSetter.target == followTarget) return;
+		if (debugMode > 0)Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
+		hasDestination = false;
+		if (IsMoving())
 		{
 			StopMovement();
 			SetObstacle(true);

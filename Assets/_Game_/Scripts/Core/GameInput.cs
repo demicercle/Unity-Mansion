@@ -146,6 +146,7 @@ public class GameInput : MonoBehaviour
 		inputSystem.Player.EndTurn.performed += OnInputEndTurn;
 		inputSystem.Player.SelectNext.performed += OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed += OnInputFocusSelected;
+		inputSystem.Player.ToggleGroup.performed += OnInputToggleGroup;
 		inputSystem.Player.Action_Run.performed += OnInputAction_Run; // TODO other actions inputs?
 		
 		CharacterSelection.selectionChanged += SelectionChanged;
@@ -168,9 +169,10 @@ public class GameInput : MonoBehaviour
 		inputSystem.Player.RotateLeft.performed -= OnInputCameraRotateLeft;
 		inputSystem.Player.RotateRight.performed -= OnInputCameraRotateRight;
 		inputSystem.Player.EndTurn.performed -= OnInputEndTurn;
-		inputSystem.Player.Action_Run.performed -= OnInputAction_Run;
 		inputSystem.Player.SelectNext.performed -= OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed -= OnInputFocusSelected;
+		inputSystem.Player.ToggleGroup.performed -= OnInputToggleGroup;
+		inputSystem.Player.Action_Run.performed -= OnInputAction_Run;
 		
 		CharacterSelection.selectionChanged -= SelectionChanged;
 
@@ -486,6 +488,14 @@ public class GameInput : MonoBehaviour
 			else Debug.Log("no selected character");
 		}
 		else if(debugMode>0) Debug.Log("not in player turn");
+	}
+
+	private void OnInputToggleGroup(CallbackContext ctx)
+	{
+		if (gameTurnManager.IsTurnBasedMode()) ungroupMode = true;
+		else if (ctx.ReadValueAsButton()) ungroupMode = !ungroupMode;
+		if(debugMode > 0) Debug.Log(this + " ungroupMode=" + ungroupMode);
+		canvas.NotifyChanged();
 	}
 	
 	private void OnInputSelectNext(CallbackContext ctx)

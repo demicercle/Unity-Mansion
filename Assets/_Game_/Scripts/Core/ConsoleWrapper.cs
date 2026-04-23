@@ -77,43 +77,49 @@ public static class ConsoleWrapper
 	[ConsoleMethod("debug_routines", "")]
 	public static void _DebugRoutines(int value)
 	{
-		Debug.Log("CharacterRoutines.debugMode=" + (CharacterRoutines.debugMode = value));
+		Debug.Log("debug_routines=" + (CharacterRoutines.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_cursor", "")]
 	public static void _DebugInput(int value)
 	{
-		Debug.Log("GameInput.debugMode=" + (GameInput.debugMode = value));
+		Debug.Log("debug_cursor=" + (GameInput.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_follows", "")]
 	public static void _DebugFollows(int value)
 	{
-		Debug.Log("CharacterFollows.debugMode=" + (CharacterFollows.debugMode = value));
+		Debug.Log("debug_follows=" + (CharacterFollows.debugMode = value));
+	}
+	
+	[ConsoleMethod("debug_camera", "")]
+	public static void _DebugCamera(int value)
+	{
+		Debug.Log("debug_camera=" + (CameraPivot.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_agent", "")]
 	public static void _DebugAgent(int value)
 	{
-		Debug.Log("CharacterAgent.debugMode=" + (CharacterAgent.debugMode = value));
+		Debug.Log("debug_agent=" + (CharacterAgent.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_detection", "")]
 	public static void _DebugDetection(int value)
 	{
-		Debug.Log("DetectionTrigger.debugMode=" + (CharacterDetection.debugMode = value));
+		Debug.Log("debug_detection=" + (CharacterDetection.debugMode = value));
 	}
 
 	[ConsoleMethod("debug_brains", "")]
 	public static void _DebugBrains(int value)
 	{
-		Debug.Log("CharacterBrain.debugMode=" + (CharacterBrain.debugMode = value));
+		Debug.Log("debug_brains=" + (CharacterBrain.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_nav", "")]
 	public static void _DebugNav(int value)
 	{
-		Debug.Log("NavUtility.debugMode=" + (NavmeshRebuilder.debugMode = value));
+		Debug.Log("debug_nav=" + (NavmeshRebuilder.debugMode = value));
 	}
 
 	[ConsoleMethod("quit_game", "")]

@@ -24,6 +24,7 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private RectTransform viewportRect;
 	[SerializeField] private RawImage viewportOverlay;
 	[Header("Buttons")]
+	[SerializeField] private Toggle toggleGroupMode;
 	[SerializeField] private Toggle toggleTurnBased;
 	[SerializeField] private Toggle toggleActions;
 	[SerializeField] private Button button_actionRun;
@@ -75,9 +76,15 @@ public class GameCanvas : MonoBehaviour
 		viewportOverlay.texture = rt;
 		viewportOverlay.enabled = true;
 	}
+
+	public void NotifyChanged()
+	{
+		UpdateSelectables();
+	}
 	
 	#region PRIVATE
 	private static GameTurnManager gameTurnManager => GameTurnManager.Instance;
+	private static GameInput gameInput => GameInput.Instance;
 
 	private CharacterController[] partyCharacters;
 	private MouseOverHandler viewportMouseHandler;
@@ -119,13 +126,10 @@ public class GameCanvas : MonoBehaviour
 		gameTurnManager.onPlayerChanged -= OnPlayerChanged;
 	}
 
-	private void OnEnable()
-	{
-		UpdateSelectables();
-	}
-
 	private void Start()
 	{
+		UpdateSelectables();
+		
 		// event system checks
 		var selfEventSystem = GetComponentInChildren<EventSystem>();
 		if (selfEventSystem)
@@ -202,8 +206,9 @@ public class GameCanvas : MonoBehaviour
 		}
 	}
 
-	private void UpdateSelectables()
+	private void UpdateSelectables() // todo LateUpdate?
 	{
+		toggleGroupMode.isOn = gameInput.IsLeaderMode();
 		toggleTurnBased.isOn = gameTurnManager.IsTurnBasedMode();
 		toggleActions.isOn = gameTurnManager.SelectedCharacterIsControllable();
 		button_actionRun.interactable = gameTurnManager.SelectedCharacterCanUseRunAction();

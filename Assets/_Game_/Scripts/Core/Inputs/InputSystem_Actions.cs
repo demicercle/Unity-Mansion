@@ -253,6 +253,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": ""ScaleVector2(x=-1,y=0)"",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ToggleGroup"",
+                    ""type"": ""Button"",
+                    ""id"": ""5e9b5283-27e5-4431-9888-b15704a742b1"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -772,6 +781,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""action"": ""Orbit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""14474181-f1ae-48a0-a726-ae4a0975460c"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleGroup"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""50567896-6292-4752-911b-6de851acdd25"",
+                    ""path"": ""<Keyboard>/g"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleGroup"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -1375,6 +1406,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_SelectNext = m_Player.FindAction("SelectNext", throwIfNotFound: true);
         m_Player_FocusSelected = m_Player.FindAction("FocusSelected", throwIfNotFound: true);
         m_Player_Orbit = m_Player.FindAction("Orbit", throwIfNotFound: true);
+        m_Player_ToggleGroup = m_Player.FindAction("ToggleGroup", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1486,6 +1518,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_SelectNext;
     private readonly InputAction m_Player_FocusSelected;
     private readonly InputAction m_Player_Orbit;
+    private readonly InputAction m_Player_ToggleGroup;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1570,6 +1603,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Orbit => m_Wrapper.m_Player_Orbit;
         /// <summary>
+        /// Provides access to the underlying input action "Player/ToggleGroup".
+        /// </summary>
+        public InputAction @ToggleGroup => m_Wrapper.m_Player_ToggleGroup;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1649,6 +1686,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Orbit.started += instance.OnOrbit;
             @Orbit.performed += instance.OnOrbit;
             @Orbit.canceled += instance.OnOrbit;
+            @ToggleGroup.started += instance.OnToggleGroup;
+            @ToggleGroup.performed += instance.OnToggleGroup;
+            @ToggleGroup.canceled += instance.OnToggleGroup;
         }
 
         /// <summary>
@@ -1714,6 +1754,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Orbit.started -= instance.OnOrbit;
             @Orbit.performed -= instance.OnOrbit;
             @Orbit.canceled -= instance.OnOrbit;
+            @ToggleGroup.started -= instance.OnToggleGroup;
+            @ToggleGroup.performed -= instance.OnToggleGroup;
+            @ToggleGroup.canceled -= instance.OnToggleGroup;
         }
 
         /// <summary>
@@ -2140,6 +2183,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnOrbit(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleGroup" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleGroup(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

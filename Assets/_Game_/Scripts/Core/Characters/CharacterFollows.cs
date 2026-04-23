@@ -57,7 +57,7 @@ public class CharacterFollows : MonoBehaviour
 	{
 		yield return null;
 		
-		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead())
+		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead() && GameInput.Instance.IsLeaderMode())
 		{
 			agent.AssignFollowTransform(leaderCharacter.transform, followDistance);
 			agent.SetObstacle(!agent.IsMoving());

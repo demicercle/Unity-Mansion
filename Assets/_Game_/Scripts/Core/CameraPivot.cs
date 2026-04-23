@@ -87,6 +87,7 @@ public class CameraPivot : MonoBehaviour
     }
     
     public static CameraPivot Instance => instance;
+    public static int debugMode { get; set; }
     
     [ReadOnly] [SerializeField] private Vector3 focusPosition;
     
@@ -173,7 +174,7 @@ public class CameraPivot : MonoBehaviour
 
     public void SetZoom(float value)
     {
-        Debug.Log(this + " SetZoom " + value);
+        if (debugMode > 0) Debug.Log(this + " SetZoom " + value);
         desiredZoom = Mathf.Clamp01(value);
         UpdateAnimator();
     }
