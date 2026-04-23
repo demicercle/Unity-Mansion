@@ -7,6 +7,7 @@ using System.Linq;
 public class CharacterRoutines : MonoBehaviour
 {
 	public const float SearchPathTimeout = 6.0f;
+	public const float AttackTargetTimeout = 12.0f;
 	public const float DefaultWaitSeconds = 1.0f;
 	
 	public static int debugMode { get; set; }
@@ -189,6 +190,7 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 
+		var startTime = Time.time;
 		var atAttackRange = false;
 		while (!atAttackRange)
 		{
@@ -218,6 +220,13 @@ public class CharacterRoutines : MonoBehaviour
 				var reachDistance = characterOwner.GetAttackRange(target);
 				if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
 				yield return characterOwner.StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance));
+			}
+			
+			else if (Time.time - startTime > AttackTargetTimeout)
+			{
+				characterOwner.FloatingText_Cant();
+				Debug.LogWarning(this + " timeout Attack target!");
+				yield break;
 			}
 			
 			else Debug.LogWarning(characterOwner + " cannot moves towards " + target);
@@ -339,11 +348,19 @@ public class CharacterRoutines : MonoBehaviour
 			if (Time.time - startTime > SearchPathTimeout)
 				break;
 		} while (true);
+
+		if (Time.time - startTime > SearchPathTimeout)
+		{
+			Debug.LogWarning(characterOwner + " TimedOut!");
+			yield return new WaitForSeconds(0.5f);
+			characterOwner.UseAllActions();
+			yield break;
+		}
 		
 		if (path.Length <= 1)
 		{
-			Debug.LogWarning(characterOwner + " TimedOut!      has wrong path: length=" + path.Length);
-			yield return new WaitForSeconds(1.5f);
+			Debug.LogWarning(characterOwner + " path invalid");
+			yield return new WaitForSeconds(0.5f);
 			characterOwner.UseAllActions();
 			yield break;
 		}
@@ -359,11 +376,11 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
 		agent.SetReachDistance(Mathf.Max(agent.GetMinReachDistance(), reachDistance));
 		agent.StartMove();
-		
-		var timeout = 0.0f;
+
+		startTime = Time.time;
 		do
 		{
-			if (timeout > Consts.CharacterMovedTimeout)
+			if (Time.time - startTime > SearchPathTimeout)
 			{
 				Debug.LogWarning(characterOwner + " TIMED_OUT!");
 				characterOwner.FloatingText_Cant();
@@ -399,15 +416,6 @@ public class CharacterRoutines : MonoBehaviour
 			
 			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			characterOwner.ConsumeMovePoints(deltaPos, true);
-
-			if (deltaPos < Consts.MinMagnitude) timeout += Time.deltaTime;
-			else timeout = 0f;
-
-			if (debugMode > 0)
-			{
-				if (timeout > 0f) DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "timeout=" + timeout.ToString("N2"));
-				else DebugDrawer.WorldLabel(characterOwner.GetCenterPosition(), "deltaPos=" + deltaPos.ToString("N2"));
-			}
 		}
 		while (!agent.ReachedDestination(dest));
 		

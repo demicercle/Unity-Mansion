@@ -16,11 +16,11 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
-	[SerializeField] private bool canUseRunAction = false;
 	[SerializeField] private bool lookAtDetectedEnemies = true;
 	[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
 	[SerializeField] [Min(0f)] private float looseTargetTime = 1.5f;
-
+	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
+	
 	public bool IsThinking { get; private set; }
 	
 	public void StopThinking()
