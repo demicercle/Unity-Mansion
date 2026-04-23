@@ -62,11 +62,6 @@ public class PropComponent : MonoBehaviour
 		if(rebuildNavigation) 
 			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 	}
-
-	public bool GetBestWaypoint(Vector3 worldPos, out Waypoint bestWaypoint) // TODO "fake" public
-	{
-		return Waypoint.GetBestWaypointFromPosition(worldPos, out bestWaypoint, GetWaypoints());
-	}
 	
 	public CharacterAction GetInteractAction() => consumeAction;
 	
@@ -89,8 +84,6 @@ public class PropComponent : MonoBehaviour
 		if(rebuildNavigation) 
 			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 	}
-	
-	private Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
 	
 	private void SetDisabled(bool value)
 	{

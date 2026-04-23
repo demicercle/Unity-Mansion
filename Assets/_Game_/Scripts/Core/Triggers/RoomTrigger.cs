@@ -6,6 +6,11 @@ using UnityEngine;
 public class RoomTrigger : MonoBehaviour
 {
 	public static List<RoomTrigger> activeRooms = new List<RoomTrigger>();
+
+	public static bool IsPositionVisible(Vector3 world)
+	{
+		return !activeRooms.Any(room => room.HasPosition(world));
+	}
 	
 	public static bool IsCharacterVisible(CharacterController character)
 	{
@@ -42,6 +47,11 @@ public class RoomTrigger : MonoBehaviour
 	public bool HasCharacter(CharacterController character)
 	{
 		return triggers.Any(t => t.HasCharacter(character));
+	}
+
+	public bool HasPosition(Vector3 world)
+	{
+		return triggers.Any(t => t.HasPosition(world));
 	}
 
 	#if UNITY_EDITOR

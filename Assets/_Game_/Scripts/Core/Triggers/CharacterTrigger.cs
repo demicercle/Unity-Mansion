@@ -25,14 +25,29 @@ public class CharacterTrigger : MonoBehaviour
 		return characters.Contains(character);
 	}
 
-	public Bounds GetWorldBounds()
+	public bool HasPosition(Vector3 world)
+	{
+		if (collider is SphereCollider)
+		{
+			return Vector3.Distance(transform.position, world) <= (collider as SphereCollider).radius;
+		}
+		else
+		{
+			return GetWorldBounds().Contains(world);
+		}
+	}
+
+	public Bounds GetWorldBounds(float grow = 0.1f) // TODO if it's a sphere
 	{
 		if(!collider) collider = GetComponent<Collider>();
-		return collider.bounds;
+		worldBounds = collider.bounds;
+		worldBounds.Expand(grow);
+		return worldBounds; // TODO optim calculate this before
 	}
 
 	private new Collider collider;
 	private int triggerCount;
+	private Bounds worldBounds;
 	
 	[Header("Debug")]
 	[ReadOnly][SerializeField] private List<CharacterController> characters = new List<CharacterController>();

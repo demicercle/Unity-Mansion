@@ -51,7 +51,7 @@ public class GameInput : MonoBehaviour
 		raycastRay = cam.ScreenPointToRay(mousePosition);
 		
 		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction);
-		if (hitInteractions)
+		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point))
 		{ 
 			foreach (var cursorHandler in interactionHit.collider.GetComponents<ICursorHandler>()
 				         .Concat(interactionHit.collider.GetComponentsInChildren<ICursorHandler>()))
@@ -64,7 +64,7 @@ public class GameInput : MonoBehaviour
 		}
 		
 		hitNavigation = Physics.Raycast(raycastRay, out navigationHit, 100f, Layers.MaskNavigation);
-		if (hitNavigation)
+		if (hitNavigation && RoomTrigger.IsPositionVisible(navigationHit.point))
 		{
 			if (NavUtils.TryGetNearestNavPosition(navigationHit.point, maxNavDistance, out var navPosition))
 			{
@@ -358,6 +358,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (hit.collider.TryGetComponent(out CharacterController overCharacter))
 				{
+					if (debugMode > 1) Debug.Log(this + " overCharacter=" + overCharacter);
 					debugString += " (Character)";
 					if (selectedCharacter != null)
 					{
@@ -390,20 +391,17 @@ public class GameInput : MonoBehaviour
 				}
 				else if (hit.collider.TryGetComponent(out PropComponent overProp)) 
 				{
+					if (debugMode > 1) Debug.Log(this + " overProp=" + overProp);
 					debugString += " (Prop)";
 					if (selectedCharacter != null)
 					{
-						if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
-						{
-							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
-								: overProp.GetCursorType());
+						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
+							: overProp.GetCursorType());
 							
-							if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
-							{
-								selectedCharacter.GetAgent().AssignDestination(bestWaypoint.GetPosition(), true); // mouse over prop
-							}
+						if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
+						{
+							selectedCharacter.GetAgent().AssignWaypointDestinationAsync(overProp); // mouse over prop
 						}
-						else Debug.LogWarning(this + " overProp " + overProp + " no waypoints!");
 						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");

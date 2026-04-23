@@ -702,7 +702,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  endReachedDistance: 0.2
+  endReachedDistance: 0.1
   whenCloseToDestination: 0
   rvoDensityBehavior:
     enabled: 1
@@ -800,8 +800,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b516620e7a5f4087a2b020d253b0edb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
-  followDistance: 3.5
+  followDistance: 1.9
   tickTime: 1
+  heading: -2.65
 --- !u!114 &-9001009375405151572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -821,7 +822,7 @@ MonoBehaviour:
   locked: 0
   lockWhenNotMoving: 1
   agentTimeHorizon: 1
-  obstacleTimeHorizon: 0.5
+  obstacleTimeHorizon: 0.25
   maxNeighbours: 10
   layer: 1
   collidesWith: -1

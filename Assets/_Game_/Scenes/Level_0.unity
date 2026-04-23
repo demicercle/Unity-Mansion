@@ -205,6 +205,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PC_Zombi_1
       objectReference: {fileID: 0}
+    - target: {fileID: 6356768765544130209, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7238060625527304640, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
       propertyPath: m_LocalPosition.x
       value: 11
@@ -300,6 +304,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3993351974707439097, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       propertyPath: showGraphs
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3993351974707439097, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+      propertyPath: showNavGraphs
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4833798763918923341, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
@@ -502,7 +510,6 @@ MonoBehaviour:
   - {fileID: 1084564897}
   - {fileID: 1379641676}
   ceilingHeight: 0.1
-  createCeilings: 0
 --- !u!1001 &484594141
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -937,7 +944,6 @@ MonoBehaviour:
   - {fileID: 1043568251}
   - {fileID: 1743780480}
   ceilingHeight: 0.1
-  createCeilings: 0
 --- !u!114 &760641095 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6355173570402279760, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
@@ -1266,7 +1272,6 @@ MonoBehaviour:
   triggers:
   - {fileID: 1892784961}
   ceilingHeight: 0.1
-  createCeilings: 0
 --- !u!114 &1084564897 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6355173570402279760, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
@@ -2099,6 +2104,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PC_Zombi_0
       objectReference: {fileID: 0}
+    - target: {fileID: 6356768765544130209, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7238060625527304640, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5.25
@@ -2341,7 +2350,6 @@ MonoBehaviour:
   - {fileID: 3485400608437727118}
   - {fileID: 5751301021199978205}
   ceilingHeight: 0.1
-  createCeilings: 0
 --- !u!1001 &4516975660671616201
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2630,7 +2638,6 @@ MonoBehaviour:
   triggers:
   - {fileID: 1582805122686828019}
   ceilingHeight: 0.1
-  createCeilings: 0
 --- !u!1001 &5751301021199978203
 PrefabInstance:
   m_ObjectHideFlags: 0

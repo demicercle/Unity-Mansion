@@ -134,31 +134,37 @@ public class CharacterRoutines : MonoBehaviour
 	
 	private IEnumerator WaitCharacterInteract( PropComponent clickedProp)
 	{
-		if (clickedProp.GetBestWaypoint(characterOwner.GetPosition(), out var bestWaypoint))
+		debugString = "WaitCharacterInteract";
+		
+		var agent = characterOwner.GetAgent();
+		yield return agent.AssignWaypointDestinationAsync(clickedProp);
+
+		var bestWaypoint = agent.GetBestWaypoint();
+		if (!bestWaypoint)
 		{
-			if(debugMode > 0) Debug.Log(characterOwner + " WaitCharacterInteract " + clickedProp);
-			yield return StartCoroutine(WaitCharacterMoved(bestWaypoint.GetPosition()));
-			debugString = "WaitCharacterInteract";
-			var agent = characterOwner.GetAgent();
-			if (agent.ReachedDestination(bestWaypoint.GetPosition()))
+			Debug.LogWarning(this + " no best waypoint, abort WaitCharacterInteract");
+			yield break;
+		}
+		
+		if(debugMode > 0) Debug.Log(characterOwner + " WaitCharacterInteract " + clickedProp);
+		yield return StartCoroutine(WaitCharacterMoved(bestWaypoint.GetPosition()));
+		if (agent.ReachedDestination(bestWaypoint.GetPosition()))
+		{
+			// waypoint reach
+			if (characterOwner.CanInteract())
 			{
-				// waypoint reach
-				if (characterOwner.CanInteract())
-				{
-					yield return StartCoroutine(WaitCharacterInteract(clickedProp, bestWaypoint));
-				}
-				else
-				{
-					characterOwner.FloatingText_Cant();
-				}
+				yield return StartCoroutine(WaitCharacterInteract(clickedProp, bestWaypoint));
 			}
-			else if(debugMode > 0) 
+			else
 			{
-				var dist = Vector3.Distance(characterOwner.GetPosition(), bestWaypoint.GetPosition());
-				Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
+				characterOwner.FloatingText_Cant();
 			}
 		}
-		else Debug.LogWarning(this + " AssignInteract " + clickedProp + " no waypoint!");
+		else if(debugMode > 0) 
+		{
+			var dist = Vector3.Distance(characterOwner.GetPosition(), bestWaypoint.GetPosition());
+			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
+		}
 	}
 	
 	private IEnumerator WaitCharacterAttackCharacter(CharacterController target, bool canUseRunAction, bool losCheck)
@@ -324,6 +330,7 @@ public class CharacterRoutines : MonoBehaviour
 		do
 		{
 			path = agent.GetCurrentPath();
+			if(debugMode > 1) Debug.Log("WaitCharacterMoved path=" + path.Length + " time=" + (Time.time - startTime) );
 			if (path.Length > 1) break;
 			yield return null;
 			if (Time.time - startTime > SearchPathTimeout)
@@ -346,6 +353,7 @@ public class CharacterRoutines : MonoBehaviour
 			yield return null;
 		}
 		
+		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
 		agent.StartMove();
 		
 		var timeout = 0.0f;
@@ -384,7 +392,8 @@ public class CharacterRoutines : MonoBehaviour
 			var newPosition = characterOwner.GetPosition();
 			var deltaPos =
 				(newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
-
+			
+			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			characterOwner.ConsumeMovePoints(deltaPos, true);
 
 			if (deltaPos < Consts.MinMagnitude) timeout += Time.deltaTime;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -155,7 +156,7 @@ public static class ConsoleWrapper
 	[ConsoleMethod("explore", "")]
 	public static void _Explore(float value)
 	{
-		RoomTrigger.activeRooms.ForEach((room) =>
+		RoomTrigger.activeRooms.ToList().ForEach((room) =>
 		{
 			room.Explore();
 		});

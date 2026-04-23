@@ -6,8 +6,9 @@ public class CharacterFollows : MonoBehaviour
 {
 	public static int debugMode { get; set; }
 	
-	[SerializeField] [Range(0.5f, 12.0f)] private float followDistance = 1.5f;
+	[SerializeField] [Range(0.5f, 12.0f)] private float followDistance = 3.0f;
 	[SerializeField] [Range(0.1f, 10f)] private float tickTime = 1.0f;
+	[SerializeField] [Range(-10f, 0f)] private float heading = 1.5f;
 
 	public void SetLeader(CharacterController newLeader)
 	{
@@ -17,10 +18,17 @@ public class CharacterFollows : MonoBehaviour
 	private CharacterController selfCharacter;
 	private CharacterController leaderCharacter;
 	private CharacterAgent agent;
+	private Transform dummy;
 
 	private void Awake()
 	{
 		enabled = false;
+		dummy = new GameObject("Follow Dummy").transform;
+	}
+
+	private void OnDestroy()
+	{
+		Destroy(dummy);
 	}
 
 	private void OnEnable()
@@ -59,7 +67,10 @@ public class CharacterFollows : MonoBehaviour
 		
 		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead() && GameInput.Instance.IsLeaderMode())
 		{
-			agent.AssignFollowTransform(leaderCharacter.transform, followDistance);
+			dummy.SetParent(leaderCharacter.transform, true);
+			dummy.transform.localPosition = Vector3.forward * heading;
+			
+			agent.AssignFollowTransform(dummy, followDistance);
 			agent.SetObstacle(!agent.IsMoving());
 			
 			if (debugMode > 0)
@@ -77,6 +88,7 @@ public class CharacterFollows : MonoBehaviour
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.softBlue;
-		Utils.DrawGizmosCircle(transform.position, Vector3.up, followDistance);
+		Gizmos.DrawLine(transform.position, transform.position + transform.forward * heading);
+		Utils.DrawGizmosCircle(transform.position + transform.forward * heading, Vector3.up, followDistance);
 	}
 }
