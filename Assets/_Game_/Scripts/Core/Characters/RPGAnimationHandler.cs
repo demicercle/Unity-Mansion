@@ -12,7 +12,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     private CoroutineQueue coroQueue;
     private bool weaponsSwitched;
 
-    public bool IsSwitchingWeapons() => isWeaponSwitching;
+    public bool IsSwitchingWeapons() => isWeaponSwitching && (int)rightWeapon > 0; // unarmed
     
     public bool Switched() => weaponsSwitched;
     public void ToggleSwitched() => weaponsSwitched = !weaponsSwitched;

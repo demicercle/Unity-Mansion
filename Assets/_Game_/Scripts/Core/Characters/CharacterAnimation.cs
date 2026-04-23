@@ -173,6 +173,7 @@ public class CharacterAnimation : MonoBehaviour
 			if (Time.time - startedTime > Consts.CharacterAnimTimeout)
 			{
 				Debug.LogWarning(this + " DoWaitSwitchWeapons timedout!");
+				isSwitchingWeapons = false;
 				yield break;
 			}
 		} while (rpgAnimationHandler.IsSwitchingWeapons());
@@ -216,7 +217,7 @@ public class CharacterAnimation : MonoBehaviour
 
 		controller.onHealed += OnHealed;
 		controller.onDamaged += OnDamaged;
-		controller.onKilled += OnKilled;
+		controller.onDead += OnDead;
 		controller.onUseAction += OnUseAction;
 		controller.turnStarted += OnTurnStarted;
 		controller.turnEnded += OnTurnEnded;
@@ -255,7 +256,7 @@ public class CharacterAnimation : MonoBehaviour
 		controller.onHealed -= OnHealed;
 		//controller.onPartyIndexChanged -= (newIndex) =>
 		controller.onDamaged -= OnDamaged;
-		controller.onKilled -= OnKilled;
+		controller.onDead -= OnDead;
 		//controller.onMoved -= () =>
 		//controller.onRotate -= () =>
 		controller.onUseAction -= OnUseAction;
@@ -310,18 +311,18 @@ public class CharacterAnimation : MonoBehaviour
 		if (rpgAnimationHandler) rpgAnimationHandler.GetHit();
 	}
 
-	private void OnKilled()
+	private void OnDead()
 	{
 		//TrySetTrigger(parameters.trigger);
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
 		if (rpgAnimationHandler) rpgAnimationHandler.Death();
-		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
+		gameObject.layer = Layers.LayerIgnore;
 	}
 
 	private void OnUseAction(CharacterAction actionType, object args = null)
 	{
-		if (actionType == CharacterAction.RunAction)
+		if (actionType == CharacterAction.Run)
 		{
 			//TrySetTrigger(parameters.trigger);
 			//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
@@ -329,7 +330,7 @@ public class CharacterAnimation : MonoBehaviour
 			controller.FloatingText("Run!");
 		}
 		
-		else if (actionType == CharacterAction.AttackAction)
+		else if (actionType == CharacterAction.Attack)
 		{
 			if (!TrySetTrigger(parameters.attackTrigger))
 			{
@@ -348,7 +349,7 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		var localVelocity = controller.GetVelocity();
 		var isMoving = controller.IsMoving();
-		if (minMovePointsToRun >= 0f && controller.HasUsedAction(CharacterAction.RunAction) && controller.HasMovePoints(minMovePointsToRun) && controller.IsCurrentTurn())
+		if (minMovePointsToRun >= 0f && controller.HasUsedAction(CharacterAction.Run) && controller.HasMovePoints(minMovePointsToRun) && controller.IsCurrentTurn())
 		{
 			isMoving = true;
 			localVelocity = Vector3.forward * controller.GetAgent().GetMaxSpeed();

@@ -341,6 +341,8 @@ GameObject:
   - component: {fileID: 8722277412283640718}
   - component: {fileID: 467592031822895063}
   - component: {fileID: 7123389619300229274}
+  - component: {fileID: 3491681411637616590}
+  - component: {fileID: -9001009375405151572}
   m_Layer: 8
   m_Name: CharacterBase
   m_TagString: Player
@@ -442,7 +444,7 @@ MonoBehaviour:
   moveSpeed: 4.5
   radius: 0.5
   height: 1.5
-  endReachDistance: 0
+  endReachDistance: 0.1
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
@@ -488,9 +490,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0eda272a8b5f4b69aa4137b69b616a7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
-  canPatrol: 1
   canChase: 1
+  canPatrol: 1
+  canUseRunAction: 0
+  lookAtDetectedEnemies: 1
   defaultWait: 1.5
+  looseTargetTime: 1.5
 --- !u!114 &7705601098757829042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -509,6 +514,7 @@ MonoBehaviour:
   obstructionLayers:
     serializedVersion: 2
     m_Bits: 192
+  drawGizmos: 0
 --- !u!54 &6072534866263412361
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -696,7 +702,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  endReachedDistance: 0.2
+  endReachedDistance: 0.1
   whenCloseToDestination: 0
   rvoDensityBehavior:
     enabled: 1
@@ -782,6 +788,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
   setHidden: 1
+--- !u!114 &3491681411637616590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837400758454604685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b516620e7a5f4087a2b020d253b0edb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
+  followDistance: 1.9
+  tickTime: 1
+  heading: -2.65
+--- !u!114 &-9001009375405151572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837400758454604685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 560112f876f5746c780eca0d404e7139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.RVO.RVOController
+  version: 1073741824
+  radiusBackingField: 0.5
+  heightBackingField: 2
+  centerBackingField: 1
+  locked: 0
+  lockWhenNotMoving: 1
+  agentTimeHorizon: 1
+  obstacleTimeHorizon: 0.25
+  maxNeighbours: 10
+  layer: 1
+  collidesWith: -1
+  wallAvoidForce: 1
+  wallAvoidFalloff: 1
+  priority: 0.5
+  debug: 0
 --- !u!1 &3549809914347783905
 GameObject:
   m_ObjectHideFlags: 0
@@ -1056,7 +1104,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8685941105244977515}
   - component: {fileID: 3961347030267546082}
-  - component: {fileID: 6768701302291083197}
   m_Layer: 8
   m_Name: HideInFog
   m_TagString: Untagged
@@ -1091,31 +1138,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e65e21edf4364c909eb7047d4a9555b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HideInFog
-  defaultLayer: Character
-  hiddenLayer: HiddenInGame
-  nodeSize: 0.5
   character: {fileID: 1077634328985660634}
-  renderers: []
---- !u!114 &6768701302291083197
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5631688854807395945}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e65e21edf4364c909eb7047d4a9555b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HideInFog
-  defaultLayer: TransparentFX
-  hiddenLayer: HiddenInGame
-  nodeSize: 0.5
-  character: {fileID: 1077634328985660634}
-  renderers:
+  transparentFX:
   - {fileID: 4939472226289180237}
+  - {fileID: 3858026444835299486}
+  - {fileID: 9033233991935084580}
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
+  renderers: []
+  colliders: []
+  debugLog: 0
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0

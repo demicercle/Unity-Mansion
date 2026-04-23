@@ -12,14 +12,14 @@ public class GameEventHandler : MonoBehaviour
 	{
 		_gameTurnManager = GameTurnManager.Instance;
 
-		_gameTurnManager.turnEnded += TurnEnded;
-		_gameTurnManager.turnStarted += TurnStarted;
+		_gameTurnManager.onTurnEnded += TurnEnded;
+		_gameTurnManager.onTurnStarted += TurnStarted;
 	}
 
 	private void OnDestroy()
 	{
-		_gameTurnManager.turnEnded -= TurnEnded;
-		_gameTurnManager.turnStarted -= TurnStarted;
+		_gameTurnManager.onTurnEnded -= TurnEnded;
+		_gameTurnManager.onTurnStarted -= TurnStarted;
 	}
 	
 	void TurnEnded() => turnEnded?.Invoke();

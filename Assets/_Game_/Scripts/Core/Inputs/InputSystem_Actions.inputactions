@@ -167,6 +167,15 @@
                     "processors": "ScaleVector2(x=-1,y=0)",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "ToggleGroup",
+                    "type": "Button",
+                    "id": "5e9b5283-27e5-4431-9888-b15704a742b1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -686,6 +695,28 @@
                     "action": "Orbit",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "14474181-f1ae-48a0-a726-ae4a0975460c",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleGroup",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "50567896-6292-4752-911b-6de851acdd25",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleGroup",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },

@@ -7,9 +7,17 @@ using Pathfinding;
 using Pathfinding.Drawing;
 using UnityEngine;
 
+
 [RequireComponent(typeof(CharacterController))]
 public class CharacterAgent : MonoBehaviour
 {
+	private const float TimeOut = 3f;
+	private const float WaypointMaxEndPointDistance = 0.2f;
+	private const int WaypointRoundDecimals = 1000;
+	private const float WaypointMaxSearchDistance = 10.0f;
+	
+	public static int debugMode { get; set; }
+	
 	[Header("Movement")]
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
@@ -33,6 +41,7 @@ public class CharacterAgent : MonoBehaviour
 	public void Teleport(Vector3 newPos, int newRot, bool stopMovement = true)
 	{
 		if(stopMovement) StopMovement();
+		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.Teleport(newPos, true);
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 	}
@@ -44,6 +53,7 @@ public class CharacterAgent : MonoBehaviour
 			return;
 
 		isObstacle = value;
+		if (debugMode > 0) Debug.Log(this + " SetObstacle " + isObstacle);
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
 		{
 			if (graphUpdate.enabled == value) return;
@@ -67,58 +77,228 @@ public class CharacterAgent : MonoBehaviour
 	public Vector3[] GetCurrentPath()
 	{
 		if (!hasDestination) // GetCurrentPath
-			return new Vector3[0];
+			return Array.Empty<Vector3>();
 		
 		var buffer = new List<Vector3>();
 		aiPath.GetRemainingPath(buffer, out var stale);
+		
+		if (buffer.Count == 0)
+			return Array.Empty<Vector3>();
+
+		var dest = aiPath.destination;
+		var lastPoint = buffer.Last();
+		var maxNavDist = GameInput.Instance.maxNavDistance;
+		var drawColor = Color.deepSkyBlue;
+
+		if (Vector3.Distance(lastPoint, dest) > maxNavDist)
+		{
+			drawColor = Color.darkRed;
+			buffer.Clear();
+		}
+
+		if (debugMode > 0)
+		{
+			DebugDrawer.WireDisc(lastPoint + Vector3.up * 0.1f, Vector3.forward, maxNavDist, drawColor);
+			DebugDrawer.Line(lastPoint + Vector3.up * 0.1f, dest + Vector3.up * 0.1f, drawColor);
+		}
+		
 		return buffer.ToArray();
 	}
 
+	public bool isPathValid => lastPath?.Length > 1 && RoomTrigger.IsPositionVisible(lastPath.Last());
+
 	public void StartMove()
 	{
+		if(debugMode > 0) Debug.Log(this + " StartMove");
 		SetObstacle(false);
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.simulateMovement = true;
 		aiPath.isStopped = false;
 		UpdatePathAndTarget(true);
-		//Debug.Log(this + " StartMove");
 	}
 
 	public void StopMovement()
 	{
+		if(debugMode > 0) Debug.Log(this + " StopMovement()");
 		SetObstacle(!_character.IsSelected());
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
 		ClearDestination();
 	}
+
+	public Waypoint GetBestWaypoint() => bestWaypoint;
 	
-	public void AssignDestination(Vector3 hitPoint, bool force = false)
+	public Coroutine AssignWaypointDestinationAsync(MonoBehaviour provider)
 	{
-		/*if (hasDestination // AssignDestination
-		    && !Utils.SnapCompareVector3(hitPoint, aiPath.destination, 0.1f))
+		if (waypointProvider)
 		{
-			hasDestination = false;
-			Debug.Log(aiPath + " SnapCompareVector3 hasDestination=" + hasDestination);
-		}*/
+			if (waypointProvider == provider)
+				return null;
+			//else
+			StopCoroutine("SearchBestWaypoint");
+		}
 		
+		waypointProvider = provider;
+		
+		if (!waypointProvider)
+			return null;
+		
+		return StartCoroutine("SearchBestWaypoint");
+	}
+
+	private IEnumerator SearchBestWaypoint()
+	{
+		float debugDrawDuration = 1.0f;
+		
+		bestWaypoint = null;
+		waypoints = waypointProvider.GetComponentsInChildren<Waypoint>();
+		
+		if (debugMode > 0)
+		{
+			Debug.Log(this + " SearchBestWaypoint from " + _character + " to " + waypointProvider + " waypoints=" + waypoints.Length);
+			DebugDrawer.Line(_character.GetCenterPosition(), waypointProvider.transform.position, Color.blueViolet, 1.0f);
+		}
+
+		var startPoint = _character.GetPosition();
+		var bestLength = 0f;
+		var index = 0;
+		foreach (var wp in waypoints)
+		{
+			var endPoint = wp.GetPosition();
+
+			if (Vector3.Distance(startPoint, endPoint) > WaypointMaxSearchDistance)
+				continue;
+				
+			// Crée une requête de chemin
+			ABPath path = ABPath.Construct(startPoint, endPoint, null);
+			path.calculatePartial = false;
+			
+			// Envoie la requête au système de pathfinding
+			AstarPath.StartPath(path);
+			
+			// Attends que le chemin soit calculé (asynchrone)
+			if (debugMode > 1) Debug.Log(" StartPath to " + wp + " pathRequest=" + path);
+			yield return StartCoroutine(path.WaitForPath());
+				
+			// Récupère le chemin calculé
+			if (path.error)
+			{
+				if (debugMode > 1) DebugDrawer.Line(startPoint, endPoint, Color.red, debugDrawDuration);
+				
+				Debug.LogWarning("Erreur lors du calcul du chemin : " + path.errorLog);
+			}
+			else
+			{
+				//if (debugMode > 1) DebugDrawer.Line(startPoint, endPoint, Color.darkBlue, debugDrawDuration);
+				Vector3[] pathPoints = path.vectorPath.ToArray();
+				bool isPartial = path.CompleteState == PathCompleteState.Partial || 
+				                 !NavUtils.TryGetNearestNavPosition(pathPoints.LastOrDefault(), WaypointMaxEndPointDistance, out var _);
+				
+				if (isPartial)
+				{
+					if (debugMode > 1) Debug.Log(index + " partialPath, skip it       pathPoints=" + pathPoints.Length);
+					if(debugMode > 1) DebugDrawer.Path(pathPoints, false, Color.darkRed, debugDrawDuration);
+				}
+				else
+				{
+					if(debugMode > 1) DebugDrawer.Path(pathPoints, false, Color.blueViolet, debugDrawDuration);
+					float pathLength = path.GetTotalLength();
+					if (bestWaypoint && (int)pathLength * WaypointRoundDecimals == (int)bestLength * WaypointRoundDecimals) // sometimes results are wrong, this is a hak
+					{
+						var bestDist = Vector3.Distance(startPoint, bestWaypoint.GetPosition());
+						var pathDist = Vector3.Distance(startPoint, endPoint);
+						if (bestDist < pathDist)
+							pathLength = -1f; // override path length because the path is actually not shorter
+					}
+					if(debugMode > 1) Debug.Log(index+ " bestWaypoint=" + bestWaypoint + " pathLength=" + pathLength + " from bestLength=" + bestLength + " path.Length=" + pathPoints.Length);
+					if (!bestWaypoint || (pathLength > 0 && pathLength < bestLength))
+					{
+						bestLength = pathLength;
+						bestWaypoint = wp;
+					}
+				}
+				
+				// Tu peux maintenant utiliser 'waypoints' comme tu le souhaites
+				index++;
+			}
+		}
+
+		if (!bestWaypoint)
+		{
+			if(debugMode > 0) Debug.Log(this + " no waypoint found! provider=" + waypointProvider + " count=" + waypoints.Length);
+		}
+		else
+		{
+			AssignDestination(bestWaypoint.GetPosition(), true);
+			
+			if (debugMode > 0)
+			{
+				Debug.Log("new destination set bestWaypoint=" + bestWaypoint);
+				DebugDrawer.Line(_character.GetCenterPosition(), bestWaypoint.GetPosition(), Color.cyan, debugDrawDuration);
+				DebugDrawer.WireDisc(bestWaypoint.GetPosition(), bestWaypoint.radius, Color.cyan, debugDrawDuration);
+				DebugDrawer.Line(bestWaypoint.GetPosition(), bestWaypoint.GetPosition() + Vector3.up, Color.cyan, debugDrawDuration);
+			}
+		}
+		
+		waypointProvider = null; // reset, TODO for optim
+	}
+
+	public void ClearWaypoint()
+	{
+		bestWaypoint = null;
+	}
+	
+	public void AssignDestination(Vector3 hitPoint, bool force)
+	{
 		if (force || !hasDestination)
 		{
-			hasDestination = true;
-			//lastAssignTime = Time.time;
-			//Debug.Log(aiPath + " hasDestination=" + hasDestination);
+			if(!hasDestination && debugMode > 0) Debug.Log(this + " Assign_new_Destination " + force);
 			
-			aiPath.destination = hitPoint;
-			aiPath.SearchPath();
+			if (IsFollowing()) 
+				AssignFollowTransform(null);
+
+			if (!hasDestination || Vector3.Distance(aiPath.destination, hitPoint) > 0.05f)
+			{
+				if(debugMode > 1) Debug.Log(this + " aiPath.SearchPath() ");
+				aiPath.endReachedDistance = endReachDistance;
+				aiPath.destination = hitPoint;
+				aiPath.canSearch = true;
+				aiPath.SearchPath();
+			}
+			
+			hasDestination = true;
 			
 			UpdatePathAndTarget(true);
 		}
+	}
+
+	public bool IsFollowing() => aiDestinationSetter && aiDestinationSetter.target;
+
+	public void AssignFollowTransform(Transform followTarget, float distance = 0f)
+	{
+		if(!aiDestinationSetter) aiDestinationSetter = GetComponent<AIDestinationSetter>();
+		if(!aiDestinationSetter) aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
+		if (aiDestinationSetter.target == followTarget) return;
+		if (debugMode > 0)Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
+		hasDestination = false;
+		if (IsMoving())
+		{
+			StopMovement();
+			SetObstacle(true);
+		}
+		aiDestinationSetter.enabled = followTarget;
+		aiDestinationSetter.target = followTarget;
+		aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
+		if (followTarget && !IsMoving()) StartMove();
+		UpdatePathAndTarget(true);
 	}
 
 	public void ClearDestination()
 	{
 		if (hasDestination) // ClearDestination
 		{
+			bestWaypoint = null;
 			hasDestination = false;
 //			Debug.Log(aiPath + " hasDestination=" + hasDestination);
 			UpdatePathAndTarget(true);
@@ -132,18 +312,28 @@ public class CharacterAgent : MonoBehaviour
 
 	public void SetAgentActive(bool value)
 	{
+		if(debugMode > 0) Debug.Log(this + " SetAgentActive=" + value);
+		
 		StopMovement();
 		
-//		Debug.Log(this + " SetAgentActive=" + value);
 		aiPath.enabled = value;
 		
 		if (aiPath.enabled)
 		{
 			aiPath.Teleport(transform.position);
 		}
+		else
+		{
+			SetObstacle(false);
+		}
 	}
 
-	private const float TIMED_OUT = 3f;
+	private void OnSearchPath()
+	{
+		lastPath = GetCurrentPath();
+		if (debugMode > 1) Debug.Log(this + " OnSearchPath lastPath=" + lastPath.Length);
+		UpdatePathAndTarget(true);
+	}
 
 	public Coroutine SearchPathAsync(Vector3 dest, System.Action onComplete = null)
 	{
@@ -158,7 +348,7 @@ public class CharacterAgent : MonoBehaviour
 		do
 		{
 			UpdatePathAndTarget(true);
-			if (timeout >= TIMED_OUT) break;
+			if (timeout >= TimeOut) break;
 			yield return null;
 			timeout += Time.deltaTime;
 		}
@@ -166,7 +356,7 @@ public class CharacterAgent : MonoBehaviour
 
 		UpdatePathAndTarget(true);
 		
-		if (timeout >= TIMED_OUT)
+		if (timeout >= TimeOut)
 		{
 			Debug.LogWarning(this + " pathPending timeout!");
 			yield break;
@@ -176,13 +366,15 @@ public class CharacterAgent : MonoBehaviour
 		//var path = GetCurrentPath();
 	}
 	
-	public bool hasPath => aiPath.hasPath;
-	
 	public Vector3 velocity => aiPath.velocity;
 
 	public bool IsMoving() => !aiPath.isStopped /*&& !aiPath.pathPending && velocity.magnitude > Consts.MinMagnitude)*/;
 	   
 	public float GetMinReachDistance() => Mathf.Max(endReachDistance, aiPath.endReachedDistance);
+
+	public void SetReachDistance(float value) => aiPath.endReachedDistance = value;
+
+	public void SetDefaultReachDistance() => aiPath.endReachedDistance = endReachDistance;
 	   
 	public bool pathPending => aiPath.pathPending;
 
@@ -190,11 +382,17 @@ public class CharacterAgent : MonoBehaviour
 
 	///private float lastAssignTime;
 	private bool hasDestination;
+
+	//private Transform followTarget;
+	private AIDestinationSetter aiDestinationSetter;
 	private AIPath aiPath;
 	private CharacterController _character;
 	private GameTurnManager _gameTurnManager; // TODO
 	private CharacterAnimation _characterAnimation;
-	private Vector3[] lastPath;
+	[HideInInspector] private Vector3[] lastPath; //hide in unity because it crashes (too much things to display probably)
+	private MonoBehaviour waypointProvider;
+	private Waypoint bestWaypoint;
+	private Waypoint[] waypoints;
 
 	private void OnDrawGizmosSelected()
 	{
@@ -210,11 +408,12 @@ public class CharacterAgent : MonoBehaviour
 		_character.onUseAction += OnUseAction;
 		
 		_gameTurnManager = GameTurnManager.Instance;
-		_gameTurnManager.turnEnded += UpdatePathAndTarget;
-		_gameTurnManager.turnStarted += UpdatePathAndTarget;
+		_gameTurnManager.onTurnEnded += UpdatePathAndTarget;
+		_gameTurnManager.onTurnStarted += UpdatePathAndTarget;
 		CharacterSelection.selectionChanged += SelectionChanged;
 		
 		UpdateComponent();
+		aiPath.onSearchPath += OnSearchPath;
 	}
 
 	private void UpdateComponent()
@@ -229,9 +428,10 @@ public class CharacterAgent : MonoBehaviour
 	
 	private void OnDestroy()
 	{
+		aiPath.onSearchPath -= OnSearchPath;
 		_character.onUseAction -= OnUseAction;
-		_gameTurnManager.turnEnded -= UpdatePathAndTarget;
-		_gameTurnManager.turnStarted -= UpdatePathAndTarget;
+		_gameTurnManager.onTurnEnded -= UpdatePathAndTarget;
+		_gameTurnManager.onTurnStarted -= UpdatePathAndTarget;
 		CharacterSelection.selectionChanged -= SelectionChanged;
 	}
 
@@ -265,28 +465,36 @@ public class CharacterAgent : MonoBehaviour
 
 	private void LateUpdate()
 	{
+		if (lastPath?.Length > 0 && debugMode > 0) DebugDrawer.Path(lastPath, false, isPathValid ? Color.cyan : Color.red);
+		
 		if (CharacterRoutines.AnyActiveRoutines()) // todo
 			UpdatePathAndTarget(true);
 	}
 
 	private bool[] shouldDrawPath = new []{false,false};
 	private bool[] isDrawingPath = new []{false,false};
-	void UpdatePathAndTarget() => UpdatePathAndTarget(true);
+	private void UpdatePathAndTarget() => UpdatePathAndTarget(true);
 	private void UpdatePathAndTarget(bool force)
 	{
 		//TODO: controller.IsActing(), controller.IsMoving(), controller.IsRotating()
 
 		shouldDrawPath[0] = hasDestination // "thin" path
+		                    && !IsFollowing()
+		                    && !IsMoving()
+		                    && GameTurnManager.Instance.IsTurnBasedMode()
 		                    && CharacterSelection.IsCharacterSelected(_character)
 		                    && _character.IsControllableByPlayer()
 		                    && (!CharacterRoutines.AnyActiveRoutines() || _character.IsMoving())
-		                    && (lastPath = GetCurrentPath()).Length > 1;
+		                    && lastPath.Length > 1;
 
 		shouldDrawPath[1] = hasDestination  // "thin" path
+		                    && !IsFollowing()
+		                    && !IsMoving()
+		                    && GameTurnManager.Instance.IsTurnBasedMode()
 		                    && CharacterSelection.IsCharacterSelected(_character) 
 		                    && _character.IsControllableByPlayer() 
 		                    && !CharacterRoutines.AnyActiveRoutines()
-		                    && (lastPath = GetCurrentPath()).Length > 1;
+		                    && lastPath.Length > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();
 
@@ -318,18 +526,27 @@ public class CharacterAgent : MonoBehaviour
 		UpdateMoveTarget(_character.IsMoving());
 	}
 
+	bool ShowMoveTarget()
+	{
+		if (IsFollowing() || !_character.IsPlayer())
+			return false;
+
+		if (bestWaypoint)
+			return true;
+
+		return hasDestination || IsMoving(); // show the target hak
+	}
+
 	void UpdateMoveTarget(bool isBlinking)
 	{
-		if (!hasDestination || !aiPath.hasPath) //hide moveTarget !hasDestination && !aiPath.hasPath
-		{
-			moveTarget.gameObject.SetActive(false);
+		moveTarget.gameObject.SetActive(ShowMoveTarget());
+		if (!moveTarget.gameObject.activeSelf)
 			return;
-		}
-
-		//Debug.Log(this + " show moveTarget");
-		moveTarget.gameObject.SetActive(true);
+		
 		moveTarget.transform.position = aiPath.destination;
-		moveTarget.SetColor(ColorSettings.GetCharacterColor(_character, true, true));
+		moveTarget.SetColor(isPathValid ? ColorSettings.GetCharacterColor(_character, true, true) 
+			: ColorSettings.GetDisabledColor(_character.GetCurrentFaction()));
+		
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
 }

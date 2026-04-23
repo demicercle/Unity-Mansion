@@ -10,23 +10,26 @@ public class GameTurnManager : MonoBehaviour
 	static private GameTurnManager _instance;
 	static public GameTurnManager Instance => _instance;
 
-	public System.Action<bool> onLoadingGame;
-	public System.Action turnStarted, turnEnded;
+	public System.Action<bool> onLoadingGame, onPlayerChanged;
+	public System.Action onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool firstTurnIsPlayer = true;
 	[SerializeField] private bool skipInvisibleCharacters = true;
-	[Range(0f,1f)] [SerializeField] private float cameraStartZoom = .5f;
+	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
-	[SerializeField] private float postLoadDuration = 1.0f;
-	[SerializeField] private float turnChangedSeconds = 3.0f;
-	[SerializeField] private  float focusCharacterSeconds = 1.5f;
-	[SerializeField] private  float noActionsSeconds = 3.0f;
-	[SerializeField] private float defaultActionsSeconds = 1.0f;
-	[SerializeField] private  float cameraStartsSeconds = 0.15f;
-	[SerializeField] private  float aiThinksSeconds = 0.5f;
+	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
+	[SerializeField] [Min(0.1f)] private float postLoadDuration = 1.0f;
+	[SerializeField] [Min(0.1f)] private float turnChangedSeconds = 3.0f;
+	[SerializeField] [Min(0.1f)]  private  float focusCharacterSeconds = 1.5f;
+	[SerializeField] [Min(0.1f)] private  float noActionsSeconds = 3.0f;
+	[SerializeField] [Min(0.1f)] private float defaultActionsSeconds = 1.0f;
+	[SerializeField] [Min(0.1f)] private  float firstTurnSeconds = 1.0f;
+	[SerializeField] [Min(0.1f)] private  float aiThinksSeconds = 0.5f;
 	[Space]
 	[SerializeField] private GameObject[] startupObjects = new GameObject[0];
+
+	public bool IsTurnBasedMode() => turnBasedMode;
 	
 	public bool IsPlayerTurn() => playerTurn;
 
@@ -35,7 +38,7 @@ public class GameTurnManager : MonoBehaviour
 	public bool PlayerCanEndTurn() => !AnyActiveRoutinesPlaying() && IsPlayerTurn();
 	
 	public bool PlayerShouldEndTurn() => PlayerCanEndTurn() 
-	                               && CharacterController.GetPartyCharacters().All(pc =>
+	                               && partyCharacters.All(pc =>
 									{
 										return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
 									});
@@ -43,7 +46,7 @@ public class GameTurnManager : MonoBehaviour
 	public bool SelectedCharacterCanUseRunAction() =>
 		!CharacterRoutines.AnyActiveRoutines() && IsPlayerTurn() 
 		                                       && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
-		                                       && selectedCharacter.CanUseAction(CharacterAction.RunAction);
+		                                       && selectedCharacter.CanUseAction(CharacterAction.Run);
 
 	public bool SelectedCharacterIsControllable() => IsPlayerTurn() 
 	                                                 && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
@@ -67,9 +70,13 @@ public class GameTurnManager : MonoBehaviour
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
+	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
+	
+	private CharacterController[] levelCharacters;
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
+	private bool turnBasedMode;
 	
 	private void Awake()
 	{
@@ -80,14 +87,14 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Starts");
-		
-		FadeScreen.FadeIn(true);
 
 		foreach (var go in startupObjects)
 		{
 			Debug.Log(this + " Instantiate startupObjects " + go);
 			Instantiate(go);
 		}
+		
+		FadeScreen.FadeIn(true);
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
 		sceneLoader.SetSceneToLoad(nextLevelName, LoadSceneMode.Additive);
@@ -106,20 +113,24 @@ public class GameTurnManager : MonoBehaviour
 			yield return new WaitForSeconds(postLoadDuration);
 		} while (SceneLoader.AnyInstanceActive);
 
-		while(NavmeshRebuilder.IsRebuildingAsync()) 
-			yield return null;
+		Debug.Log(" wait NavmeshRebuilder(s)");
+		do yield return null;	while (NavmeshRebuilder.IsRebuildingAsync()); // wait rebuild
 		
 		Debug.Log(" loading scene complete");
-
-		var levelCharacters = CharacterController.AllCharacters;
 		
-		Debug.Log(this + " found levelCharacters=" + levelCharacters.Count);
+		yield return new WaitForSeconds(0.1f); // for triggers
+
+		levelCharacters = CharacterController.AllCharacters
+			.OrderBy(c => c.transform.GetSiblingIndex())
+			.ToArray();
+		
+		Debug.Log(this + " found levelCharacters=" + levelCharacters.Length);
 		
 		var partyIndex = 0;
 		foreach (var character in levelCharacters)
 		{
 			character.Spawn();
-			if(character.CompareTag(Consts.TAG_PLAYER))
+			if(character.CompareTag(Tags.TagPlayer))
 				character.SetPartyIndex(partyIndex++);
 		}
 		
@@ -132,23 +143,79 @@ public class GameTurnManager : MonoBehaviour
 		
 		while (true)
 		{
-			playerTurn = !firstTurnIsPlayer;
+			yield return StartCoroutine(RealTimeCoroutine());
+			yield return StartCoroutine(TurnBasedCoroutine());
+			yield return null; // safety for loop
+		}
+	}
+
+	private IEnumerator TurnBasedCoroutine()
+	{
+		Debug.Log(this + " Enters TurnBasedCoroutine");
+		currentTurn = 0;
+		
+		while (turnBasedMode)
+		{
+			if (currentTurn == 0)
+			{
+				if (!playerTurn && firstTurnIsPlayer) // probably useless unless GD ("initiative")
+				{
+					playerTurn = true;
+					onPlayerChanged?.Invoke(true);
+				}
+			}
+			
 			NewTurn();
 			
-			SelectBestPlayerCharacter();
-			
-			if (currentTurn == 1) // first turn animation
+			if (currentTurn == 1) // it is the first turn
 			{
-				yield return new WaitForSeconds(cameraStartsSeconds);
-				CameraPivot.Instance.SetZoom(cameraStartZoom);
+				foreach (var otherCharacter in levelCharacters)
+				{
+					if (otherCharacter.InParty()) continue;
+					otherCharacter.StopAgent();
+					otherCharacter.Routines.StopAllRoutines();
+					otherCharacter.Rest();
+					
+					if (otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
+						otherBrain.StopThinking();
+
+					if (otherCharacter.TryGetAnimation(out CharacterAnimation otherAnimation))
+						otherAnimation.TrySwitchWeapons(true);
+				}
+				
+				foreach (var partyCharacter in partyCharacters) // stop agent and draw weapons
+				{
+					partyCharacter.StopAgent();
+					partyCharacter.Routines.StopAllRoutines();
+					partyCharacter.Rest();
+
+					if (partyCharacter.TryGetAnimation(out var anim))
+						anim.TrySwitchWeapons(true);
+				}
+				
+				Debug.Log(this + " first turn setup, wait weapon switch");
+				do
+				{
+					yield return null;
+				} while (levelCharacters.Any(c => c.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons));
+				
+				yield return new WaitForSeconds(firstTurnSeconds); 
 			}
-			else 
+			else // it is NOT the first turn
 			{
-				yield return new WaitForSeconds(focusCharacterSeconds);
+				SelectBestPlayerCharacter();
+				yield return new WaitForSeconds(focusCharacterSeconds); 
 			}
 			
 			while (IsPlayerTurn())
 			{
+				if (!IsAnyEnemyAroundCheck())
+				{
+					turnBasedMode = false;
+					Debug.Log(this + " Switch To RealTime");
+					yield break;
+				}
+				
 				yield return null;
 			}
 
@@ -158,23 +225,23 @@ public class GameTurnManager : MonoBehaviour
 			
 			yield return YieldRoutines();
 		
-			foreach (var otherCharacter in CharacterController.AllCharacters)
+			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
-			
-				if (otherCharacter.IsCharacterRevealed())
-					cameraPivot.Focus(otherCharacter);
-				else
+				
+				otherCharacter.Rest(); // rest not player character
+
+				if (skipInvisibleCharacters && !otherCharacter.IsCharacterRevealed())
 				{
-					if (skipInvisibleCharacters)
-					{
-						Debug.Log("skipInvisibleCharacters: " + otherCharacter);
-						yield return new WaitForSeconds(defaultActionsSeconds);
-					}
+					Debug.Log("skipInvisibleCharacters: " + otherCharacter);
+					yield return new WaitForSeconds(defaultActionsSeconds);
 					continue;
 				}
-
+				
+				cameraPivot.Focus(otherCharacter);
+				//TODO "cameraPivot.Lock(true)"
 				yield return new WaitForSeconds(focusCharacterSeconds);
+				//TODO "cameraPivot.Lock(false)" ? if player can look around while another character is acting
 
 				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
 				{
@@ -192,6 +259,43 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 	}
+
+	private IEnumerator RealTimeCoroutine()
+	{
+		Debug.Log(this + " Enters RealTimeCoroutine");
+		
+		currentTurn = -1;
+		NewTurn();
+		
+		SelectBestPlayerCharacter();
+		CameraPivot.Instance.SetZoom(cameraStartZoom);
+
+		do
+		{
+			PartyRest(false);
+
+			foreach (var otherCharacter in levelCharacters)
+			{
+				if (otherCharacter.InParty()) continue;
+				if (otherCharacter.IsDead()) continue;
+				otherCharacter.Rest(false);
+				if (otherCharacter.Routines.AnyActive()) continue;
+				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain)) continue;
+				
+				if (!otherBrain.IsThinking)
+					otherBrain.StartThink();
+			}
+
+			yield return new WaitForSeconds(realTimeTicks);
+
+			if (IsAnyEnemyAroundCheck())
+			{
+				turnBasedMode = true;
+				Debug.Log(this + " Switch Turn Based Mode");
+			}
+			
+		} while (!turnBasedMode);
+	}
 	
 	private Coroutine YieldRoutines() => StartCoroutine(WaitRoutines());
 	private IEnumerator WaitRoutines()
@@ -203,38 +307,72 @@ public class GameTurnManager : MonoBehaviour
 	private void EndTurn()
 	{
 		playerTurn = false;
-		CharacterController.AllCharacters.ForEach((c) =>
-		{
-			c.EndTurn();
-			if (!c.IsPlayer()) c.Rest();
-		});
+		onPlayerChanged?.Invoke(false);
+		PartyRest(true);
 		Debug.Log(this + " EndTurn " + currentTurn);
-		turnEnded?.Invoke();
+		onTurnEnded?.Invoke();
 	}
 	
 	private void NewTurn()
 	{
 		currentTurn += 1;
 		playerTurn = true;
-		CharacterController.AllCharacters.ForEach((c) =>
-		{
-			c.NewTurn(currentTurn);
-			if (c.IsPlayer()) c.Rest();
-		});
+		onPlayerChanged?.Invoke(true);
+		
 		Debug.Log(this + " NewTurn " + currentTurn);
-		turnStarted?.Invoke();
+
+		if (currentTurn == 0) // turn based
+		{
+			foreach (var partyChar in partyCharacters)
+			{
+				if (partyChar.TryGetAnimation(out var anim))
+					anim.TrySwitchWeapons(false); // relax after fight
+			}
+		}
+		
+		else if (currentTurn > 0)
+		{
+			onTurnStarted?.Invoke();
+		}
 	}
 
 	private void SelectBestPlayerCharacter()
 	{
 		var center = cameraPivot.GetFocusPosition();
 
-		var bestCharacter = CharacterController.GetPartyCharacters()
+		var bestCharacter = partyCharacters
 			.OrderBy(pc => Vector3.Distance(pc.GetPosition(), center))
 			.FirstOrDefault();
 		
 		Debug.Log(this + " SelectBestPlayerCharacter " + bestCharacter);
 		CharacterSelection.SelectCharacter(bestCharacter);
 	}
+
+	private void PartyRest(bool verbose)
+	{
+		foreach (var character in partyCharacters)
+			character.Rest(verbose);
+	}
+
+	private bool IsAnyEnemyAroundCheck()
+	{
+		foreach (var enemyCharacter in levelCharacters)
+		{
+			if (!enemyCharacter.IsEnemyToPlayer()) continue;
+			if (!enemyCharacter.IsDead() && enemyCharacter.IsCharacterRevealed())
+			{
+				foreach (var partyCharacter in partyCharacters)
+				{
+					if (enemyCharacter.HasDetectedOther(partyCharacter))
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+	
 	#endregion
 }

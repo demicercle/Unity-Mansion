@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Pathfinding;
 using UnityEngine;
 
 
@@ -10,7 +12,7 @@ public class NavmeshRebuilder : MonoBehaviour
 
 	public static bool IsRebuildingAsync() => instances.Count > 0;
 
-	public static void RebuildNavigationOn(GameObject go, float delay = 0f)
+	public static void RebuildNavigationOn(GameObject go, float delay = 0.1f)
 	{
 		go.AddComponent<NavmeshRebuilder>().delay = delay;
 	}
@@ -24,6 +26,7 @@ public class NavmeshRebuilder : MonoBehaviour
 	
 	private float delay;
 	private float progress;
+	private IEnumerable<Progress> scanProgress;
 
 	private void OnEnable()
 	{
@@ -33,13 +36,18 @@ public class NavmeshRebuilder : MonoBehaviour
 	IEnumerator DoRebuild()
 	{
 		instances.Add(this);
-		Debug.Log(this + " RebuildNavigationAsync Start " + delay);
-		if(delay > 0f) yield return new WaitForSeconds(delay);
-		while (instances[0] != this) yield return null;
-		foreach (var scanOp in AstarPath.active.ScanAsync())
+		if(debugMode >0) Debug.Log(this + " RebuildNavigationAsync Start " + delay);
+		
+		if(delay > 0f) 
+			yield return new WaitForSeconds(delay);
+		
+		while (instances[0] != this) 
+			yield return null;
+
+		foreach (Progress pr in AstarPath.active.ScanAsync())
 		{
-			progress = scanOp.progress;
-			//name = "RebuildNavigationAsync (" + progress.progress.ToString("N2") + ")";
+			progress = pr.progress;
+			if(debugMode > 0) Debug.Log(this + " Scanning... " + pr.ToString());
 			yield return null;
 		}
 

@@ -154,13 +154,53 @@ PrefabInstance:
       propertyPath: sceneLoaded.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: worldY
+      value: 3.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: lerpSpeed
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: worldHeight
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: orbitSpeed.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: focusPosition.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: orbitMaxSpeed.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: worldBounds.m_Center.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: worldBounds.m_Extent.x
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: worldBounds.m_Extent.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: worldBounds.m_Extent.z
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 6873523688060535263, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: m_LocalPosition.x
       value: 10.86133
       objectReference: {fileID: 0}
     - target: {fileID: 6873523688060535263, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6873523688060535263, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: m_LocalPosition.z

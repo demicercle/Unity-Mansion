@@ -12,7 +12,7 @@ public class PropComponent : MonoBehaviour
 	
 	[Header("Interaction")]
 	[SerializeField] private CursorType cursorType = CursorType.OpenDoor;
-	[SerializeField] private CharacterAction consumeAction = CharacterAction.InteractAction;
+	[SerializeField] private CharacterAction consumeAction = CharacterAction.Interact;
 	
 	[Header("Trigger")]
 	[SerializeField] private bool onlyOnce;
@@ -62,11 +62,6 @@ public class PropComponent : MonoBehaviour
 		if(rebuildNavigation) 
 			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 	}
-
-	public bool GetBestWaypoint(Vector3 worldPos, out Waypoint bestWaypoint) // TODO "fake" public
-	{
-		return Waypoint.GetBestWaypointFromPosition(worldPos, out bestWaypoint, GetWaypoints());
-	}
 	
 	public CharacterAction GetInteractAction() => consumeAction;
 	
@@ -78,6 +73,7 @@ public class PropComponent : MonoBehaviour
 	
 	#region PRIVATE
 	private bool animFinished;
+	private int defaultLayer;
 
 	private void OnAnimFinished()
 	{
@@ -89,26 +85,27 @@ public class PropComponent : MonoBehaviour
 			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 	}
 	
-	private Waypoint[] GetWaypoints() => GetComponentsInChildren<Waypoint>();
-	
 	private void SetDisabled(bool value)
 	{
 		if (value)
 		{
-			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_IGNORE);
+			gameObject.layer = Layers.LayerIgnore;
 		}
 		else
 		{
-			gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
+			gameObject.layer = defaultLayer;
 		}
+	}
+
+	private void Awake()
+	{
+		defaultLayer = gameObject.layer;
 	}
 	
 	private IEnumerator Start()
 	{
 		if(rebuildNavigation) 
 			NavmeshRebuilder.RebuildNavigationOn(gameObject);
-		
-		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
 
 		if (autoTriggerDelay > 0f)
 		{

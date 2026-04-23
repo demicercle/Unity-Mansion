@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 6100771718776727966}
   - component: {fileID: 7609907940526296612}
   - component: {fileID: 3993351974707439097}
+  - component: {fileID: 3707570885431278476}
+  - component: {fileID: 4833798763918923341}
   m_Layer: 0
   m_Name: LevelBase
   m_TagString: Untagged
@@ -64,7 +66,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1073741824
   data:
-    dataString: UEsDBBQAAAgIAAAIIeyP5cejsAIAAO4FAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGFVE1v4jAQ/SvI522V0LJt97YLlO6hLSpd9bDpwbUnxMLYkT8KtOK/79hxSKCHlZAS3ny9eTOTTyKUrYE5bWZG8HvNgfwYkPBOvg064x1s6VKrhfiA1udFcFcFJxp9nqgTGvE8hFm9BmcE+6mWMjhnCHolSm3WU76EsbbOIlxSaQFNRrsQrRD6HJBtCtil50d4Dvb4xkA5MP/z8opJuq6BB7ad86j1HjVuCvtIHtn5KGTXUgqbaBC3q2ObY1pbj02gAxcU24oEQpcViGXl8M+wH/xYlhZcImXobiIMqtNkJb90I9ma2lXD7J1KH+rkw+vIqkl6/8X+/TKaS6PXd23dPAs1XCXY6onuGLWup2kfnhwT92pD5Yq+SXipQD3omdFecTQ640OotzCc9FIdehtXwFadX8P1BPT11/nk3Xz2sfvtwkF96CM7v+zQPxbsQuoofkoZLAm5CSnB4Oh+Yz9xaWwqhGjgiPHPdNnfrmS4FcY6NCU+CQ2+c5wQcFAMku5nwUEFem/am5CLTCPXIIZ3Y20URDgRrEFR6XZzzOhOV+DE1uN1Yrml4dASu2Rr7+ckJMKdf5admOZ6cxi2weW1caPbt7+vYQi20pt7sNWjd1KontrB8IACj7VSzeb2xWzDFt6UlPXCHGydNzChjsZqSAcXjPdDUcsYobyUYZdjA5ERNhB+r0HfimJdGWHyoFW8vKNnpL/0gh9fCGGjEWcMKAzL6/ziJjsbscs8p1dX8MYvrll+Q+IJCYVyUzlv9EpTwu1SXS8Kz6X9DA5mhtbxaLmhm5n4WOve5IUq9YIZAPXYZDg0CwaL4OeFT7nANhfgnFBxL8lnQaRmK+DFIVERhZ1unaFFl6UgtXjXLiAFGcePX0ECfLhIXN13AZtQ/CgZSBwd8GchYU3rYMr2ZP8PUEsDBBQAAAgIAAAIIexNkgtxbAAAAHcAAAAJACQAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0Bq1YqSy0qzszPU7JSMNUz0TPTUVBKL0osyCgGChiCOKWZKSB2tFKyqWlKcnJqYqpRmoWhsaWBrmmyiaFhorl5alKKsUWyoaVSLFB9SWVBql9ibipET0BiSUZaZl5KZl66nntRZoo7yGil2FoAUEsBAi0AFAAACAgAAAgh7I/lx6OwAgAA7gUAAAsAJAAAAAAAAAAAAAAAAAAAAGdyYXBoMC5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsBAi0AFAAACAgAAAgh7E2SC3FsAAAAdwAAAAkAJAAAAAAAAAAAAAAA/QIAAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLBQYAAAAAAgACALgAAAC0AwAAAAA=
+    dataString: UEsDBBQAAAgIAAAIIezZIs2KyQIAACEGAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGFVNtuGjEQ/RXk5ybawHLrWwuEVGoSFFLloeTBWc+yFsZe+RIgEf/eGe8CC3mohPDqzJnxmZs/meI7sCMTtGffW51vLZYV3PLMg70DuSwITa5TxKV2JWTe2KmV4t4IQAujb9Y03sGWL42eyw84cF6k8AWReOQ8cS8N4jfk5swavJXZD71URE4QDFrmxq4nYgkj47xDOOfKAZqs8eStEfpssW3tsKvPDzpbe8oBNCbwP1bQmeLrEgSpPZHTA7tT0TTmUTOS63aXwhulpKt1ML8rY54jXrqAWSBBSI55RQWUZnGoZLvp/JjnDnytyvLdWFosTxWV/TRVzdbcrSpp71wFuqfbTgdRVxX1/guhl0Zzbs362MKbhC7xhcxWT3yXcecbVW3C43PlQW+4WvE3BS8F6AcztTgpAo3eBnINDtrjRqhjcqMCstWJV2m9AEP5tUM3pw7tY/rbuYfyYhRr9I8DN1cmVr8OSZYaGVJIsNi8X5hPHBtXX4AoaUT/Z75szldtuJXWeTSd04k7wxaBAJ1BXfcrImiS92aCpVhsErVSMYIfGashwrXAEjRXfjfDiP5yBi5sDV0XlltOq1arq22HDbpwifCJnyQXppnZHJttcXpdHOnD199XaoIrzOYeXPEYvJK6UW0yPGCBR0branSbxTy4zYPNedZw87D1wcKYex5vQzk4YKLpirWMHjooRbMcE4iKMAH6vVYvFd6rIswejI6rd3ZG+csgxfmGsBTaCfQ6wzyFwaDL+1eDfNjvddJuvz/spcN2xuIKSY3l5mpW1avuEk6XPuWicV0o4m96RkG06EHEP17G7RWWb6byY20aEyB1buaZBdCPVaRj0mDxMnxoxERITHcO3ksd55N9Lpgy2QrE4hhoEQs82XrLF6coC1bKd+MJWbBRfAYXjODjZuIIv0vY0OVnwUBhC0E8SwVrXpIp2bP9P1BLAwQUAAAICAAACCHs8cQd83EAAAB8AAAACQAkAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAatWKkstKs7Mz1OyUjDVM9Ez01FQSi9KLMgoBgoYgjilmSkgdrSSSaqRQaqZsWWaSaqFhWmiua5FmqW5mbGJqbm5pZmJpVGyUixQfUllQapfYm4qRE9AYklGWmZeSmZeup5PYmVqkXtRZoo7yHyl2FoAUEsBAi0AFAAACAgAAAgh7NkizYrJAgAAIQYAAAsAJAAAAAAAAAAAAAAAAAAAAGdyYXBoMC5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsBAi0AFAAACAgAAAgh7PHEHfNxAAAAfAAAAAkAJAAAAAAAAAAAAAAAFgMAAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLBQYAAAAAAgACALgAAADSAwAAAAA=
     file_cachedStartup: {fileID: 0}
     cacheStartup: 0
   showNavGraphs: 1
@@ -137,6 +139,44 @@ MonoBehaviour:
     spreadOutCount: 10
   showGraphs: 1
   showGraphsInStandalonePlayer: 0
+--- !u!114 &3707570885431278476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113469372072591625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1764de1de43cc4d19af52679d3eaae06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.RVO.RVOSimulator
+  version: 1073741824
+  workerThreads: 2
+  doubleBuffering: 0
+  hardCollisions: 1
+  symmetryBreakingBias: 0.1
+  movementPlane: 0
+  useNavmeshAsObstacle: 0
+  drawQuadtree: 0
+--- !u!114 &4833798763918923341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113469372072591625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cd40be529044b7eb331e8a191301869, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelGrid
+  cellFillColor: {r: 0, g: 0, b: 0, a: 0}
+  cellLineColor: {r: 0, g: 1, b: 0, a: 0.6117647}
+  extends: {x: 10, y: 10}
+  cellSize: 2.5
+  nodeSize: 0.25
+  offset: {x: 1.25, y: 1.25, z: 0}
 --- !u!1 &2247345808283683838
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,15 +6,13 @@ using UnityEngine;
 
 public class HideInFog : MonoBehaviour
 {
-	[SerializeField] private string defaultLayer, hiddenLayer;
-	[SerializeField] private float nodeSize = 0.5f;
 	[SerializeField] private CharacterController character;
+	[SerializeField] private List<Renderer> transparentFX = new List<Renderer>();
 	[SerializeField] private List<Renderer> renderers = new List<Renderer>();
-
-	private Vector3 lastPosition, newPosition;
-	private int activeRoomsCount;
+	[SerializeField] private List<Collider> colliders = new List<Collider>();
+	[SerializeField] private bool debugLog;
+	
 	private bool isHidden;
-	private bool doPositionCheck;
 
 	private void Awake()
 	{
@@ -23,40 +21,32 @@ public class HideInFog : MonoBehaviour
 			Debug.LogWarning(this + " has no character, disabling");
 			enabled = false;
 		}
-		
-		else if (string.IsNullOrEmpty(hiddenLayer) || string.IsNullOrEmpty(defaultLayer))
-		{
-			Debug.LogWarning(this + " has no layers set, disabling");
-			enabled = false;
-		}
 	}
 
-	private IEnumerator Start()
+	private void OnEnable()
 	{
-		do
-		{
-			yield return null;
-		} while (GameTurnManager.Instance.IsLoading());
-
-		UpdateVisibility();
-		doPositionCheck = true;
+		character.onSpawned += OnSpawned;
+		RoomTrigger.onChanged += UpdateVisibility;
 	}
 
-	private void LateUpdate()
+	private void OnDisable()
 	{
-		if (!doPositionCheck) return;
-		newPosition = Snapping.Snap(transform.position, Vector3.one * nodeSize) * 100;
-		if (newPosition != lastPosition || activeRoomsCount != RoomTrigger.activeRooms.Count)
-		{
-			UpdateVisibility();
-			lastPosition = newPosition;
-			activeRoomsCount = RoomTrigger.activeRooms.Count;
-		}
+		if (character) character.onSpawned -= OnSpawned;
+		RoomTrigger.onChanged -= UpdateVisibility;
+	}
+
+	private void OnSpawned()
+	{
+		Invoke("UpdateVisibility", 0.1f);
 	}
 
 	private void UpdateVisibility()
 	{
-		isHidden = character && !(character.InParty() || character.IsCharacterRevealed());
-		renderers.ForEach(r => r.gameObject.layer = LayerMask.NameToLayer(isHidden ? hiddenLayer : defaultLayer));
+		CancelInvoke("UpdateVisibility");
+		isHidden = !character.IsCharacterRevealed();
+		transparentFX.ForEach(r => r.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerTransparentFX);
+		renderers.ForEach(r => r.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerCharacter);
+		colliders.ForEach(c => c.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerCharacter);
+		if(debugLog) Debug.Log(this + " " + character + " UpdateVisibility " + isHidden);
 	}
 }

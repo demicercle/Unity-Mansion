@@ -7,15 +7,18 @@
 	> Right Click editor selects character under mouse
 - "PartyChanged" event for Character, allowing to remove LateUpdate in Portraits, Agent drawPath
 - tweaks! selection circle alpha when AI turns
-- rename "NavUtility" into component "NavMeshRebuilder"
-- SelectNext Tab bug
+- if you end turn during a PC movement, it stops
 - custom asset post processor
 - update color of nav target depending on the action (red for enemies)
-
+- zombi timedout should stop the current turn
 - door nav rebuild
 - zombi should rotate on scream
 - zombi scream should be linked to ai detection and not weapon ready?
 - "round" logic (characters rest on start round)
+- rename "Handlers" in "Listeners"
+- cmd "kill_all"
+- game turn manager "PartyRest" on NewTurn, and then Rest each otherCharacter one by one after
+- clean "CharacterController"
 
 NullReferenceException: Object reference not set to an instance of an object
 GameInput.OnDisable () (at Assets/_Game_/Scripts/Core/GameInput.cs:162)
@@ -103,3 +106,12 @@ add debug key to speed up time
 	### GD ###
 	
 	- "Can't" action
+	
+	
+	
+	
+	
+	https://opengameart.org/content/medieval-props-textured
+	https://kaylousberg.itch.io/halloween-bits
+	https://kenney.nl/assets/retro-urban-kit
+	https://pigeon-gang.itch.io/3d-fences

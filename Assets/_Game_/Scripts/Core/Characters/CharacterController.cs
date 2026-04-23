@@ -15,9 +15,9 @@ public enum CharacterFaction
 public enum CharacterAction
 {
 	None,
-	RunAction,
-	AttackAction,
-	InteractAction
+	Run,
+	Attack,
+	Interact
 }
 
 public class CharacterController : MonoBehaviour
@@ -26,20 +26,21 @@ public class CharacterController : MonoBehaviour
 	
 	public static List<CharacterController> AllCharacters => _allCharacters;
 
-	public static IEnumerable<CharacterController> GetPartyCharacters() =>
-		_allCharacters.Where(c => c.InParty()).OrderBy(c => c.GetPartyIndex());
+	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
 	
 	public static event System.Action onPartyChanged;
-	public static event System.Action<CharacterController> onCharacterMoved;
-	public static event System.Action<CharacterController, CharacterAction> onCharacterUsesAction;
+	public static event System.Action<CharacterController> onAnyCharacterMoved;
+	public static event System.Action<CharacterController> onAnyCharacterDead;
+	public static event System.Action<CharacterController, CharacterAction> onAnyCharacterUsesAction;
 	
+	public event System.Action onSpawned;
 	public event System.Action onStatsChanged;
 	public event System.Action onFactionChanged;
 	public event System.Action<bool> onSelectionChanged;
 	public event System.Action<float> onHealed;
 	public event System.Action<float> onDamaged;
 	public event System.Action<int> onPartyIndexChanged;
-	public event System.Action onKilled;
+	public event System.Action onDead;
 	public event System.Action onMoved;
 	public event System.Action onRotate;
 	public event System.Action<CharacterAction, object> onUseAction;
@@ -71,12 +72,13 @@ public class CharacterController : MonoBehaviour
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
+		onSpawned?.Invoke();
 		onStatsChanged?.Invoke();
 	}
 
 	public CharacterAgent GetAgent()
 	{
-		if(!agent) agent = GetComponent<CharacterAgent>();
+		if(!Application.isPlaying && !agent) agent = GetComponent<CharacterAgent>(); // for DrawGizmos stuff
 		return agent;
 	}
 	
@@ -90,25 +92,13 @@ public class CharacterController : MonoBehaviour
 	public void NotifySelected(bool value)
 	{
 		//agent.SetObstacle(!value);//todo not in selection
+		if (value) StopFollow();
 		onSelectionChanged?.Invoke(value);
 	}
 
-	public void EndTurn()
+	public void Rest(bool verbose = true)
 	{
-		StopAgent();
-		turnEnded?.Invoke();
-	}
-	
-	public void NewTurn(int turn)
-	{
-		GetAgent().ClearDestination();
-		if (turn >= 0) currentTurn = turn;
-		turnStarted?.Invoke();
-	}
-
-	public void Rest()
-	{
-		Debug.Log(this + " Rest");
+		if(verbose) Debug.Log(this + " Rest");
 		usedActions.Clear();
 		usedMovePoints = 0;
 		onStatsChanged?.Invoke();
@@ -123,41 +113,30 @@ public class CharacterController : MonoBehaviour
 		return HasActions();
 	}
 	
-	/*public bool TryUseAction(CharacterAction action, bool floatingText)
-	{
-		if (CanUseAction(action))
-		{
-			UseAction(action);
-			return true;
-		}
-
-		Debug.Log(this + " TryUseAction " + action + " failed");
-		if(floatingText) FloatingText_Cant();
-		return false;
-	}*/
-	
 	public void AttackAction(CharacterController target = null, bool stopAgent = true)
 	{
-		UseAction(CharacterAction.AttackAction, target);
+		UseAction(CharacterAction.Attack, target);
 	}
 	
 	public void UseAction(CharacterAction actionType, object param = null)
 	{
 		usedActions.Add(actionType);
 		Debug.Log(this + " usedAction=" + usedActions.Last() + " param=" + param);
-		if (actionType == CharacterAction.RunAction)
+		if (actionType == CharacterAction.Run)
 		{
 			usedMovePoints -= characterData.runActionExtraMovePoints;
 		}
 		onUseAction?.Invoke(actionType, param);
-		onCharacterUsesAction?.Invoke(this, actionType);
+		onAnyCharacterUsesAction?.Invoke(this, actionType);
 		onStatsChanged?.Invoke();
 	}
 	
-	public void UseAllActions()
+	public void UseAllActions(bool consumeMovePoints = true)
 	{
-		ConsumeMovePoints(GetRemainingMovePoints(), false);
-		UseAction(CharacterAction.None);
+		if(consumeMovePoints && HasMovePoints()) 
+			ConsumeMovePoints(GetRemainingMovePoints(), false);
+		
+		usedActions.Add(CharacterAction.None); // TODO
 	}
 	
 	public CharacterFaction GetCurrentFaction() => currentFaction;
@@ -174,6 +153,9 @@ public class CharacterController : MonoBehaviour
 		else
 			return faction == CharacterFaction.Enemy;
 	}
+
+	public bool IsLeaderOf(CharacterController other) => GameInput.Instance.IsLeaderMode() &&
+														InParty() && other.InParty() && IsSelected();
 	
 	public bool InParty() => partyIndex >= 0;
 	
@@ -186,11 +168,18 @@ public class CharacterController : MonoBehaviour
 		if (index >= 0)
 		{
 			isControllable = true;
-			SetCurrentFaction(CharacterFaction.Player);
 		}
 		else
 		{
 			isControllable = false;
+		}
+		_partyCharacters = _allCharacters.Where(c => c.InParty()).OrderBy(c => c.partyIndex).ToList();
+		if (index >= 0)
+		{
+			SetCurrentFaction(CharacterFaction.Player);
+		}
+		else
+		{
 			SetCurrentFaction(previousFaction);
 		}
 		onPartyIndexChanged?.Invoke(index);
@@ -263,6 +252,8 @@ public class CharacterController : MonoBehaviour
 		// DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
 		return dot >= MinFacingDot;
 	}
+
+	public Vector3 GetDirection() => transform.forward;
 	
 	public Vector3 GetPosition() => transform.position;
 	
@@ -273,10 +264,17 @@ public class CharacterController : MonoBehaviour
 	public float GetRadius() => GetAgent().GetRadius();
 	public float GetHeight() => GetAgent().GetHeight();
 	public bool IsMoving() => GetAgent().IsMoving();
+	public bool IsPathAssignable() =>  agent.isPathValid;
 	
 	public void StopAgent()
 	{
+		StopFollow();
 		agent.StopMovement();
+	}
+
+	public void StopFollow()
+	{
+		follows.enabled = false;
 	}
 
 	public Vector3 GetVelocity()
@@ -291,7 +289,7 @@ public class CharacterController : MonoBehaviour
 	public void Teleport(Vector3 dest, int newRot, bool stopMovement)
 	{
 		GetAgent().Teleport(dest, newRot, stopMovement);
-		onCharacterMoved?.Invoke(this);
+		onAnyCharacterMoved?.Invoke(this);
 	}
 
 	public int GetRotation() => (int)transform.eulerAngles.y;
@@ -300,7 +298,7 @@ public class CharacterController : MonoBehaviour
 	{
 		usedMovePoints += amount;
 		onStatsChanged?.Invoke();
-		if(notifyMoves) onCharacterMoved?.Invoke(this);
+		if(notifyMoves) onAnyCharacterMoved?.Invoke(this);
 	}
 	
 	public float GetTotalDamages() => totalDamages;
@@ -359,7 +357,9 @@ public class CharacterController : MonoBehaviour
 			isDead = true;
 			agent.SetAgentActive(false);
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
-			onKilled?.Invoke();
+			Routines.StopAllRoutines();
+			onDead?.Invoke();
+			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();
 			return true;
 		}
@@ -418,7 +418,7 @@ public class CharacterController : MonoBehaviour
 
 	public bool WeaponsReady() => characterAnimation && characterAnimation.WeaponsSwitched();
 
-	public bool IsCharacterRevealed() => RoomTrigger.IsCharacterVisible(this);
+	public bool IsCharacterRevealed() => InParty() || RoomTrigger.IsCharacterVisible(this);
 	
 	public bool CanSeeAnyEnemyAround() => _allCharacters.FirstOrDefault((other) =>
 	{
@@ -427,26 +427,9 @@ public class CharacterController : MonoBehaviour
 		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
 	});
 
-	public CharacterController GetClosestCharacter(List<CharacterController> getNearbyLivingCharacters)
-	{
-		return getNearbyLivingCharacters.OrderBy(other => GetDistanceTo(other)).FirstOrDefault();
-	}
+	public bool HasDetectedAnyPartyCharacter() => _partyCharacters.Any(HasDetectedOther);
 	
-	public List<CharacterController> GetNearbyLivingCharacters(float range, float drawDuration = 0f, Color drawColor = default)
-	{
-		var outList = new List<CharacterController>();
-		var center = GetPosition();
-		DebugDrawer.WireDisc(center, Vector3.up, range, drawColor, drawDuration);
-		foreach (var coll in Physics.OverlapSphere(center, range, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
-		{
-			if (coll.TryGetComponent(out CharacterController otherCharacter) && otherCharacter != this && !otherCharacter.IsDead())
-			{
-				outList.Add(otherCharacter);
-			}
-		}
-
-		return outList;
-	}
+	public bool HasDetectedOther(CharacterController other) => detection && detection.IsCharacterDetected(other);
 	
 	public bool TryGetAnimation(out CharacterAnimation outAnimation)
 	{
@@ -468,7 +451,7 @@ public class CharacterController : MonoBehaviour
 	
 	#region PRIVATE
 	private static List<CharacterController> _allCharacters = new List<CharacterController>();
-	private static ScriptableObject defaultAIBrain;
+	private static List<CharacterController> _partyCharacters = new List<CharacterController>();
 
 	private int partyIndex = -1;
 	
@@ -484,7 +467,9 @@ public class CharacterController : MonoBehaviour
 	private CharacterAgent agent;
 	private CharacterRoutines routines;
 	private CharacterAnimation characterAnimation;
+	private CharacterFollows follows;
 	private WeaponData currentWeapon;
+	private CharacterDetection detection;
 	
 	private void Awake()
 	{
@@ -498,6 +483,12 @@ public class CharacterController : MonoBehaviour
 		
 		routines = GetComponent<CharacterRoutines>();
 		if(!routines) routines = gameObject.AddComponent<CharacterRoutines>();
+		
+		follows = GetComponent<CharacterFollows>();
+		if(!follows) follows = gameObject.AddComponent<CharacterFollows>();
+		
+		detection = GetComponent<CharacterDetection>();
+		if (!detection) Debug.LogWarning(this + " has no detection component");
 		
 		characterAnimation = GetComponent<CharacterAnimation>();
 		//if(!characterAnimation) characterAnimation = gameObject.AddComponent<CharacterAnimation>(); //TODO is it possible to have characters with no anims?
@@ -529,8 +520,7 @@ public class CharacterController : MonoBehaviour
 	{
 		var start = GetEyesPosition();
 		var end = other.GetEyesPosition();
-		if(Physics.Linecast(start, end, out var hit,
-			   LayerMask.GetMask(Consts.LAYER_WALL, Consts.LAYER_GROUND)))
+		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
 		{
 			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
 			//DebugGUI.Line(start, end, Color.red, drawDuration);

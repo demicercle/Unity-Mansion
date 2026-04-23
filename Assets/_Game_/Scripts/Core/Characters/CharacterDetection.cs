@@ -18,6 +18,7 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
 	[SerializeField] private LayerMask obstructionLayers;
+	[SerializeField] private bool drawGizmos;
 
 	private List<CharacterController> detectedCharacters = new List<CharacterController>();
 	private CharacterController selfCharacter;
@@ -35,29 +36,29 @@ public class CharacterDetection : MonoBehaviour
 
 	private void OnEnable()
 	{
-		CharacterController.onCharacterMoved += OnCharacterMoved;
-		CharacterController.onCharacterUsesAction += OnCharacterUsesAction;
-		GameTurnManager.Instance.turnStarted += OnTurnStarted;
-		GameTurnManager.Instance.turnEnded += OnTurnEnded;
+		CharacterController.onAnyCharacterMoved += OnAnyCharacterMoved;
+		CharacterController.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
+		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 	}
 
 	private void OnDisable()
 	{
 		if (!selfCharacter) return;
 		
-		CharacterController.onCharacterMoved -= OnCharacterMoved;
-		CharacterController.onCharacterUsesAction -= OnCharacterUsesAction;
-		GameTurnManager.Instance.turnStarted -= OnTurnStarted;
-		GameTurnManager.Instance.turnEnded -= OnTurnEnded;
+		CharacterController.onAnyCharacterMoved -= OnAnyCharacterMoved;
+		CharacterController.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
+		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
 	}
 
-	private void OnTurnStarted()  => OnCharacterMoved(selfCharacter);
-	private void OnTurnEnded()  => OnCharacterMoved(selfCharacter);
+	private void OnTurnStarted()  => OnAnyCharacterMoved(selfCharacter);
+	private void OnTurnEnded()  => OnAnyCharacterMoved(selfCharacter);
 
-	private void OnCharacterUsesAction(CharacterController anyCharacter, CharacterAction _) =>
-		OnCharacterMoved(anyCharacter);
+	private void OnAnyCharacterUsesAction(CharacterController anyCharacter, CharacterAction _) =>
+		OnAnyCharacterMoved(anyCharacter);
 	
-	private void OnCharacterMoved(CharacterController anyCharacter)
+	private void OnAnyCharacterMoved(CharacterController anyCharacter)
 	{
 		if (anyCharacter.IsDead()) return;
 		
@@ -66,7 +67,7 @@ public class CharacterDetection : MonoBehaviour
 			foreach (var otherCharacter in CharacterController.AllCharacters)
 			{
 				if (otherCharacter == selfCharacter) continue;
-				OnCharacterMoved(otherCharacter);
+				OnAnyCharacterMoved(otherCharacter);
 			}
 		}
 		else
@@ -76,7 +77,7 @@ public class CharacterDetection : MonoBehaviour
 				if (IsCharacterVisible(anyCharacter))
 				{
 					detectedCharacters.Add(anyCharacter);
-					Debug.Log(this + " detects " + anyCharacter);
+					if(debugMode > 0) Debug.Log(this + " detects " + anyCharacter);
 					onCharacterDetected?.Invoke(anyCharacter);
 				}
 			}
@@ -85,7 +86,7 @@ public class CharacterDetection : MonoBehaviour
 				if (!IsCharacterVisible(anyCharacter))
 				{
 					detectedCharacters.Remove(anyCharacter);
-					Debug.Log(this + " looses " + anyCharacter);
+					if(debugMode > 0) Debug.Log(this + " looses " + anyCharacter);
 					onCharacterLost?.Invoke(anyCharacter);
 				}
 			}
@@ -146,9 +147,11 @@ public class CharacterDetection : MonoBehaviour
 		Vector3 otherPos =  otherCharacter.GetCenterPosition();
 		if(Physics.Linecast(eyesPos, otherPos, out var hit,obstructionLayers))
 		{
+			if (debugMode > 0) DebugDrawer.Line(eyesPos, hit.point, Color.red);
 			return false;
 		}
-
+		
+		if (debugMode > 0) DebugDrawer.Line(eyesPos, otherPos, Utils.ColorAlpha(Color.green, Mathf.PI * 0.1f));
 		return true;
 	}
 	
@@ -201,6 +204,7 @@ public class CharacterDetection : MonoBehaviour
 	
 	private void OnDrawGizmosSelected()
 	{
+		if (!drawGizmos) return;
 		selfCharacter = GetComponent<CharacterController>();
 		if (selfCharacter)
 		{

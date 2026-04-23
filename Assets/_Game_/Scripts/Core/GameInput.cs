@@ -16,16 +16,20 @@ public class GameInput : MonoBehaviour
 {
 	public static int debugMode { get; set; }
 
+	public const float MaxMouseDeltaToClick = 3.0f;
 	
 	public const int CursorRaycastResult_None = 0;
 	public const int CursorRaycastResult_Navigation = 1;
-	public const int CursorRaycastResult_Character = 2;
+	public const int CursorRaycastResult_Interaction = 2;
 	
 	public static bool IsConsoleVisible() => DebugLogManager.Instance.IsLogWindowVisible;
 	public static void Focus(bool value) => instance.OnApplicationFocus(value);
 	
 	public static GameInput Instance => instance;
-	
+
+	//[SerializeField] private bool debugLog;
+
+	[SerializeField] private CircleRenderer navigationTarget;
 	[Header("Camera Control")]
 	[SerializeField] [Range(0f, 6f)] private float inputOrbitScale = 3.14f;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
@@ -35,51 +39,57 @@ public class GameInput : MonoBehaviour
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
-	public int CursorRaycast(out RaycastHit raycastHit, Camera cam = null) 
+	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null)
 	{
-		raycastHit = default(RaycastHit);
+		outRaycast = default(RaycastHit);
 		
 		if (!cam) cam = Camera.main;
 		if (!cam)
 		{
 			Debug.LogWarning(this + "cannot do cursor raycast because no main camera");
+			outRaycast = default(RaycastHit);
 			return CursorRaycastResult_None;
 		}
 		
 		raycastRay = cam.ScreenPointToRay(mousePosition);
-		if (Physics.Raycast(raycastRay, out raycastHit, 100f, LayerMask.GetMask(Consts.LAYER_CHARACTER)))
+		
+		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction);
+		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point))
 		{ 
-			//DebugGUI.Log("Hit Character: " + hit.collider);
-			//DrawDebug.WireCapsule(hit.collider.transform.position, Quaternion.identity, 0.5f, 1.5f, Color.green);
-			//Utils.DrawDebugCircle(hit.collider.transform.position, Vector3.up, 0.5f);
-
-			foreach (var cursorHandler in raycastHit.collider.GetComponents<ICursorHandler>().Concat(raycastHit.collider.GetComponentsInChildren<ICursorHandler>()))
+			foreach (var cursorHandler in interactionHit.collider.GetComponents<ICursorHandler>()
+				         .Concat(interactionHit.collider.GetComponentsInChildren<ICursorHandler>()))
 			{
 				cursorHandler.CursorOver();
 			}
 
-			return CursorRaycastResult_Character;
+			outRaycast = interactionHit;
+			return CursorRaycastResult_Interaction;
 		}
 		
-		if (Physics.Raycast(raycastRay, out raycastHit, 100f, LayerMask.GetMask(Consts.LAYER_GROUND, Consts.LAYER_WALL)))
+		hitNavigation = Physics.Raycast(raycastRay, out navigationHit, 100f, Layers.MaskNavigation);
+		if (hitNavigation && RoomTrigger.IsPositionVisible(navigationHit.point))
 		{
-			//DebugGUI.Log("Hit Navigation: " + hit.point);
-			//Utils.DrawDebugCircle(hit.point, Vector3.up, maxNavDistance);
-
-			if (NavUtils.TryGetNearestNavPosition(raycastHit.point, maxNavDistance, out var navPosition))
+			if (NavUtils.TryGetNearestNavPosition(navigationHit.point, maxNavDistance, out var navPosition))
 			{
-				raycastHit.point = navPosition;
-				//DrawDebug.WireDisc(navPosition + Vector3.up * debugOffset, Vector3.up,maxNavDistance * 0.5f, Color.cyan);
-
-				return CursorRaycastResult_Navigation;
+				hitWalls = Physics.Linecast(navPosition, raycastRay.origin, out wallsHit, Layers.MaskWall);
+				if (!hitWalls)
+				{
+					outRaycast = navigationHit;
+					outRaycast.point = navPosition;
+					return CursorRaycastResult_Navigation;
+				}
+				else if (debugMode > 0)
+				{
+					DebugDrawer.Line(navPosition, wallsHit.point, Color.red);
+					DebugDrawer.Sphere(wallsHit.point, wallsHit.normal, Vector3.one * 0.1f, Color.red);
+				}
 			}
-			
-			// mouse over something else
-			//DrawDebug.WireDisc(hit.point, Quaternion.LookRotation(hit.normal) * Vector3.up,maxNavDistance, Color.gray);
 		}
 		
 		return CursorRaycastResult_None;
 	}
+
+	public bool IsLeaderMode() => !ungroupMode && !gameTurnManager.IsTurnBasedMode();
 
 	#region PRIVATE
 	private static GameInput instance;
@@ -87,8 +97,9 @@ public class GameInput : MonoBehaviour
 	private bool isLoading => gameTurnManager.IsLoading();
 	private GameCanvas canvas => GameCanvas.Instance;
 	private CameraPivot cameraPivot => CameraPivot.Instance;
+	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
 	private bool isDebugMode => debugMode > 0;
-	private GameTurnManager gameTurnManager;
+	private CharacterController selectedCharacter;
 	private bool mouseDown, orbitWithInputs;
 	private Vector2 orbitAxis;
 	private Vector2 orbitDelta;
@@ -96,6 +107,7 @@ public class GameInput : MonoBehaviour
 	private bool hasNoActionsCursor;
 	private bool hasFocus;
 	private Vector2 mousePosition;
+	private Vector2 lastClickPosition;
 	private Vector2 lastMousePosition;
 	private Vector2 middleClickMousePosition;
 	private bool holdMiddleClick, mouseHasMoved, mouseOverViewport;
@@ -103,8 +115,12 @@ public class GameInput : MonoBehaviour
 	private bool inputEnabled;
 	private CursorType currentCursor;
 	private Ray raycastRay;
+	private RaycastHit navigationHit, wallsHit, interactionHit;
+	private bool hitNavigation, hitWalls, hitInteractions;
 	private int lastCursorResult;
 	private string debugString;
+	private bool ungroupMode;
+	private bool hasConsoleEvents;
 
 	private void Awake()
 	{
@@ -117,11 +133,9 @@ public class GameInput : MonoBehaviour
 		Debug.Log(this + " Awake");
 		instance = this;
 
-		gameTurnManager = GameTurnManager.Instance;
-		if (!gameTurnManager) gameTurnManager = Utils.FindFirstObject<GameTurnManager>();
-		if (!gameTurnManager) Debug.LogError(this + " cannot find GameTurnManager!");
-
 		hasNoActionsCursor = CursorData.HasCursor(CursorType.NoActions);
+		
+		navigationTarget.gameObject.SetActive(false);
 	}
 	
 	private void OnEnable()
@@ -137,12 +151,17 @@ public class GameInput : MonoBehaviour
 		inputSystem.Player.EndTurn.performed += OnInputEndTurn;
 		inputSystem.Player.SelectNext.performed += OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed += OnInputFocusSelected;
+		inputSystem.Player.ToggleGroup.performed += OnInputToggleGroup;
 		inputSystem.Player.Action_Run.performed += OnInputAction_Run; // TODO other actions inputs?
 		
 		CharacterSelection.selectionChanged += SelectionChanged;
 
-		DebugLogManager.Instance.OnLogWindowShown += OnLogWindowShown;
-		DebugLogManager.Instance.OnLogWindowHidden += OnLogWindowHidden;
+		if (DebugLogManager.Instance)
+		{
+			hasConsoleEvents = true;
+			DebugLogManager.Instance.OnLogWindowShown += OnLogWindowShown;
+			DebugLogManager.Instance.OnLogWindowHidden += OnLogWindowHidden;
+		}
 
 		canvas.onViewportClicked += OnClickedViewport;
 		canvas.onViewportMouseOver += OnMouseOverViewport;
@@ -150,7 +169,9 @@ public class GameInput : MonoBehaviour
 
 	private void OnDisable()
 	{
+		#if UNITY_EDITOR
 		if (!Application.isPlaying) return;
+		#endif
 		
 		inputSystem.UI.Click.performed -= OnInputLeftClick;
 		inputSystem.UI.RightClick.performed -= OnInputRightClick;
@@ -159,14 +180,19 @@ public class GameInput : MonoBehaviour
 		inputSystem.Player.RotateLeft.performed -= OnInputCameraRotateLeft;
 		inputSystem.Player.RotateRight.performed -= OnInputCameraRotateRight;
 		inputSystem.Player.EndTurn.performed -= OnInputEndTurn;
-		inputSystem.Player.Action_Run.performed -= OnInputAction_Run;
 		inputSystem.Player.SelectNext.performed -= OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed -= OnInputFocusSelected;
+		inputSystem.Player.ToggleGroup.performed -= OnInputToggleGroup;
+		inputSystem.Player.Action_Run.performed -= OnInputAction_Run;
 		
 		CharacterSelection.selectionChanged -= SelectionChanged;
 
-		DebugLogManager.Instance.OnLogWindowShown -= OnLogWindowShown;
-		DebugLogManager.Instance.OnLogWindowHidden -= OnLogWindowHidden;
+		if (DebugLogManager.Instance && hasConsoleEvents)
+		{
+			hasConsoleEvents = false;
+			DebugLogManager.Instance.OnLogWindowShown -= OnLogWindowShown;
+			DebugLogManager.Instance.OnLogWindowHidden -= OnLogWindowHidden;
+		}
 		
 		canvas.onViewportClicked -= OnClickedViewport;
 		canvas.onViewportMouseOver -= OnMouseOverViewport;
@@ -307,7 +333,7 @@ public class GameInput : MonoBehaviour
 			Cursor.SetCursor(null,default,default);
 		}
 
-		CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter);
+		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
 		if (hasFocus && mouseOverViewport && !holdMiddleClick) // mouse over
@@ -318,68 +344,68 @@ public class GameInput : MonoBehaviour
 			
 			if (lastCursorResult == CursorRaycastResult_Navigation)
 			{
-				if (selectedCharacter != null)
+				if (selectedCharacter)
 				{
-					if (CanControlCharacter(selectedCharacter))
+					SetCurrentCursorType(CursorType.Navigate);
+					debugString += "\n>Navigate";
+					
+					if (CanAssignOnMouseOver(selectedCharacter))
 					{
-						SetCurrentCursorType(CursorType.Navigate);
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
-						debugString += "\n>Navigate";
 					}
-					//else if(isDebugMode) Debug.Log("character not controllable");
 				}
 				//else if(isDebugMode) Debug.Log("no selected character");
 			}
 			
-			else if (lastCursorResult == CursorRaycastResult_Character) 
+			else if (lastCursorResult == CursorRaycastResult_Interaction) 
 			{
 				if (hit.collider.TryGetComponent(out CharacterController overCharacter))
 				{
+					if (debugMode > 1) Debug.Log(this + " overCharacter=" + overCharacter);
 					debugString += " (Character)";
 					if (selectedCharacter != null)
 					{
-						if (CanControlCharacter(selectedCharacter))
+						var agent = selectedCharacter.GetAgent();
+						if (overCharacter.InParty())
 						{
-							var agent = selectedCharacter.GetAgent();
-							if (overCharacter.InParty())
-							{
+							SetCurrentCursorType(CursorType.Select);
+							
+							if (CanAssignOnMouseOver(selectedCharacter))
 								agent.ClearDestination();// mouse over another party member
-								SetCurrentCursorType(CursorType.Select);
-							}
-							else if (overCharacter.IsEnemyToPlayer())
-							{
-								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over enemy
-								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
-							}
-							else
-							{
-								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
-								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
-							}
-							debugString += "\n>" + currentCursor;
+							
 						}
-						//else if(isDebugMode) Debug.Log("character not controllable");
+						else if (overCharacter.IsEnemyToPlayer())
+						{
+							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
+							
+							if (CanAssignOnMouseOver(selectedCharacter))
+								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over enemy
+						}
+						else
+						{
+							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
+							
+							if (CanAssignOnMouseOver(selectedCharacter))
+								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
+						}
+						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");
 				}
 				else if (hit.collider.TryGetComponent(out PropComponent overProp)) 
 				{
+					if (debugMode > 1) Debug.Log(this + " overProp=" + overProp);
 					debugString += " (Prop)";
 					if (selectedCharacter != null)
 					{
-						if (CanControlCharacter(selectedCharacter)) // mouse over prop
+						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
+							: overProp.GetCursorType());
+							
+						if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
 						{
-							if (overProp.GetBestWaypoint(selectedCharacter.GetPosition(), out var bestWaypoint))
-							{
-								var agent = selectedCharacter.GetAgent();
-								agent.AssignDestination(bestWaypoint.GetPosition(), true); // mouse over prop
-								SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
-									: overProp.GetCursorType());
-							}
-							debugString += "\n>" + currentCursor;
-							//else Debug.LogWarning("no waypoint found");
+							selectedCharacter.GetAgent().AssignWaypointDestinationAsync(overProp); // mouse over prop
 						}
-						//else if(isDebugMode) Debug.Log("character not controllable");
+						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");
 				}
@@ -389,27 +415,30 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter)
 				{
-					if (CanControlCharacter(selectedCharacter))
+					debugString += "\n>ClearDestination()";
+					
+					if (CanAssignOnMouseOver(selectedCharacter))
 					{
 						selectedCharacter.GetAgent().ClearDestination();
-						debugString += "\n>ClearDestination()";
 					}
-					//else if(isDebugMode) Debug.Log("character not controllable");
 				}
-				//else if(isDebugMode) Debug.Log("no selected character");
 			}
-			
-			//if (debugMode) Debug.Log(debugString);
 		}
 		else
 		{
-			if (selectedCharacter && CanControlCharacter(selectedCharacter))
+			if (selectedCharacter && CanAssignOnMouseOver(selectedCharacter))
 			{
 				selectedCharacter.GetAgent().ClearDestination(); // to hide path drawing
 			}
 		}
 
-		if (CharacterRoutines.AnyActiveRoutines())
+		if (lastCursorResult == CursorRaycastResult_Navigation && selectedCharacter &&
+		    !selectedCharacter.GetAgent().isPathValid)
+		{
+			SetCurrentCursorType(CursorType.Blocked);
+		}
+
+		if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
 		{
 			SetCurrentCursorType(CursorType.Waiting);
 		}
@@ -429,6 +458,10 @@ public class GameInput : MonoBehaviour
 	
 	private void LateUpdate()
 	{
+		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation);
+		if(navigationTarget.gameObject.activeSelf) 
+			navigationTarget.transform.position = navigationHit.point;
+		
 		lastMousePosition = mousePosition;
 		mouseHasMoved = false;
 		mouseDown = false;
@@ -442,7 +475,7 @@ public class GameInput : MonoBehaviour
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			if(selectedCharacter.CanUseAction(CharacterAction.RunAction))
+			if(selectedCharacter.CanUseAction(CharacterAction.Run))
 				selectedCharacter.Routines.AssignRunAction();
 		}
 	}
@@ -470,7 +503,14 @@ public class GameInput : MonoBehaviour
 				cameraPivot.Focus(selectedCharacter);
 			else Debug.Log("no selected character");
 		}
-		else Debug.Log("not in player turn");
+		else if(debugMode>0) Debug.Log("not in player turn");
+	}
+
+	private void OnInputToggleGroup(CallbackContext ctx)
+	{
+		if (gameTurnManager.IsTurnBasedMode()) ungroupMode = true;
+		else if (ctx.ReadValueAsButton()) ungroupMode = !ungroupMode;
+		if(debugMode > 0) Debug.Log(this + " ungroupMode=" + ungroupMode);
 	}
 	
 	private void OnInputSelectNext(CallbackContext ctx)
@@ -488,6 +528,7 @@ public class GameInput : MonoBehaviour
 	{
 		mousePosition = ctx.ReadValue<Vector2>();
 		mouseHasMoved = true;
+		if(debugMode > 1) Debug.Log(this + " MouseClickDelta=" + MouseClickDelta.magnitude);
 	}
 
 	private void OnInputRightClick(CallbackContext ctx)
@@ -502,7 +543,7 @@ public class GameInput : MonoBehaviour
 		
 		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
 		{
-			if (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines())
+			if (gameTurnManager.IsPlayerTurn())
 			{
 				CharacterSelection.SelectCharacter(null); // deselect all
 			}
@@ -519,14 +560,17 @@ public class GameInput : MonoBehaviour
 		{
 			if (!hasFocus || !mouseOverViewport)
 				return;
+
+			lastClickPosition = mousePosition;
+			if(debugMode > 1) Debug.Log(this + " lastClickPosition=" + lastClickPosition);
 		}
 
-		if (hasFocus && ctxValue <= 0 && leftClickValue > 0) // left click RELEASED
+		if (hasFocus && ctxValue <= 0 && leftClickValue > 0 && MouseClickDelta.magnitude <= MaxMouseDeltaToClick) // left click RELEASED
 		{
 			if (!mouseOverViewport) return;
 			
 			var raycastResult = CursorRaycast(out var hit);
-			if (raycastResult == CursorRaycastResult_Character)
+			if (raycastResult == CursorRaycastResult_Interaction)
 			{
 				if (hit.collider.TryGetComponent(out CharacterController clickedCharacter)) // click character
 				{
@@ -566,6 +610,8 @@ public class GameInput : MonoBehaviour
 	}
 	
 	// others
+
+	private Vector2 MouseClickDelta => mousePosition - lastClickPosition;
 	
 	private void SetInputEnabled(bool value)
 	{
@@ -600,7 +646,7 @@ public class GameInput : MonoBehaviour
 				CharacterSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 				//return;
 			}
-			else if(isDebugMode) Debug.Log(clickedCharacter + " InParty not in player turn");
+			else if(isDebugMode) Debug.Log("> InParty not in player turn");
 		}
 		
 		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
@@ -610,7 +656,7 @@ public class GameInput : MonoBehaviour
 				// assign attack
 				if (selectedCharacter.CanAttack(false))
 				{
-					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.AttackAction))
+					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
 						selectedCharacter.FloatingText_Cant();
 					else
 						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
@@ -619,7 +665,7 @@ public class GameInput : MonoBehaviour
 				
 				selectedCharacter.FloatingText_Cant();
 			}
-			else if(isDebugMode)  Debug.Log(clickedCharacter + " IsEnemyToPlayer no selected character");
+			else if(isDebugMode)  Debug.Log("> IsEnemyToPlayer no selected character");
 		}
 		
 		else
@@ -628,7 +674,7 @@ public class GameInput : MonoBehaviour
 			{
 				Debug.LogWarning("//TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
 			}
-			else if(isDebugMode)  Debug.Log(clickedCharacter + " !IsEnemyToPlayer no selected character");
+			else if(isDebugMode)  Debug.Log("> !IsEnemyToPlayer no selected character");
 		}
 	}
 
@@ -638,16 +684,16 @@ public class GameInput : MonoBehaviour
 
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			if (CanControlCharacter(selectedCharacter))
+			if (CanAssignOnClick(selectedCharacter))
 			{
-				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.InteractAction))
+				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Interact))
 					selectedCharacter.FloatingText_Cant();
 				else
 					selectedCharacter.Routines.AssignInteract(clickedProp);
 			}
 			else if(isDebugMode)  Debug.Log(" selected character not controllable");
 		}
-		else if(isDebugMode)  Debug.Log(" no character selected");
+		else if(isDebugMode)  Debug.Log("> no character selected");
 	}
 
 	private void ClickNavigation(Vector3 navPosition)
@@ -656,23 +702,41 @@ public class GameInput : MonoBehaviour
 
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			if (CanControlCharacter(selectedCharacter))
+			if (CanAssignOnClick(selectedCharacter))
 			{
-				selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+				if (!gameTurnManager.IsTurnBasedMode())
+				{
+					if (!IsLeaderMode())
+						selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+					else
+						selectedCharacter.Routines.AssignMoveLeaderToDestination(navPosition);
+				}
+				else if(isDebugMode)  Debug.Log("> " + selectedCharacter + " !IsPathAssignable");
 			}
-			else if(isDebugMode)  Debug.Log(" selected character not controllable");
+			else if(isDebugMode)  Debug.Log("> selected character not controllable");
 		}
 		
-		else if(isDebugMode)  Debug.Log(" no character selected");
+		else if(isDebugMode)  Debug.Log("> no character selected");
 	}
 	
-	private bool CanControlSelectedCharacter() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) && selectedCharacter && CanControlCharacter(selectedCharacter);
-	private bool CanControlCharacter(CharacterController character)
+	private bool CanAssignOnClickSelected() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
+	                                              && CanAssignOnClick(selectedCharacter);
+	
+	private bool CanAssignOnClick(CharacterController character)
 	{
-		return hasFocus && !CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsPlayerTurn() && character.IsControllableByPlayer();
+		return hasFocus 
+		       && (!gameTurnManager.IsTurnBasedMode() || (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines()))
+		       && character.IsControllableByPlayer();
 	}
+
+	private bool CanAssignOnMouseOver(CharacterController character)
+	{
+		return CanAssignOnClick(character) && !character.Routines.AnyActive() && !character.IsMoving();
+	}
+	
 	private void SetCurrentCursorType(CursorType cursorType)
 	{
+		if(debugMode>1) Debug.Log(this + " SetCurrentCursorType " + cursorType);
 		currentCursor = cursorType;
 	}
 

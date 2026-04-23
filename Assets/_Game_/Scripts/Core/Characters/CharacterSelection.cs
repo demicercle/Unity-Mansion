@@ -64,23 +64,6 @@ public class CharacterSelection : MonoBehaviour
 		var newIndex = (startIndex + 1) % partyCount;
 		Debug.Log("SelectNextCharacter " + startIndex + " " + selected + " > " + newIndex);
 		SelectCharacter(party[newIndex]);
-			
-		/*Debug.Log(" SelectNextCharacter from " + startIndex + " (" + selected.name + ") partyCount=" + partyCount);
-		while (partyCount-- > 0)
-		{
-			startIndex++;
-			
-			var newIndex = startIndex % party.Length;
-			Debug.Log(" try select at " + newIndex);
-			var newChar = party[newIndex];
-			if (newChar != selected && !newChar.IsDead())
-			{
-				SelectCharacter(newChar);
-				return;
-			}
-		}
-		
-		Debug.LogWarning(" Has no character to select next!");*/
 	}
 	#endregion
 	
@@ -146,7 +129,7 @@ public class CharacterSelection : MonoBehaviour
 			return;
 		}
 		
-		gameObject.layer = LayerMask.NameToLayer(Consts.LAYER_CHARACTER);
+		gameObject.layer = Layers.LayerCharacter;
 	}
 
 	private void LateUpdate()//TODO optim

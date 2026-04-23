@@ -9,12 +9,12 @@ public class DebugDrawer : MonoBehaviour
 	//private static bool shouldDraw => (GameInput.debugMode + CharacterDetection.debugMode > 0);
 	private static bool shouldDraw => true;
 
-	static public DebugDrawer FloatingText(Vector3 position, string message, float duration = 1.0f, float speedY = 1.0f)
+	public static DebugDrawer FloatingText(Vector3 position, string message, float duration = 1.0f, float speedY = 1.0f)
 	{
 		return WorldLabel(position, message, duration, speedY);
 	}
 
-	static public DebugDrawer WorldLabel(Vector3 position, string message, float duration = 0f, float speedY = 0f)
+	public static DebugDrawer WorldLabel(Vector3 position, string message, float duration = 0f, float speedY = 0f)
 	{
 		if (!shouldDraw) return null;
 		var label = new GameObject().AddComponent<DebugDrawer>();
@@ -28,19 +28,19 @@ public class DebugDrawer : MonoBehaviour
 		return label;
 	}
 
-	static public void WireCapsule(Vector3 position, Quaternion rotation, float radius, float height, Color color, float duration = 0f)
+	public static void WireCapsule(Vector3 position, Quaternion rotation, float radius, float height, Color color, float duration = 0f)
 	{
 		if (!shouldDraw) return;
 		DbgDraw.WireCapsule(position,rotation,radius,height,color,duration);
 	}
 	
-	static public void WireArrow(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
+	public static void WireArrow(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
 	{
 		if (!shouldDraw) return;
 		DbgDraw.WireArrow(position, Quaternion.LookRotation(direction), scale, color, duration);
 	}
 	
-	static public void Path(Vector3[] path, bool closedLoop, Color color, float duration = 0f)
+	public static void Path(Vector3[] path, bool closedLoop, Color color, float duration = 0f)
 	{
 		if (!shouldDraw) return;
 		if (path.Length <= 0)
@@ -57,19 +57,27 @@ public class DebugDrawer : MonoBehaviour
 			Line(path.Last(), path.First(), color, duration);
 	}
 	
-	static public void WireDisc(Vector3 position, Vector3 direction, float scale, Color color, float duration = 0f)
+	public static void Sphere(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
+	{
+		if (!shouldDraw) return;
+		DbgDraw.Sphere(position, Quaternion.LookRotation(direction), scale, color, duration);
+	}
+
+	public static void WireDisc(Vector3 position, float scale, Color color, float duration = 0f)
+		=> WireDisc(position, Vector3.forward, scale, color, duration);
+	public static void WireDisc(Vector3 position, Vector3 direction, float scale, Color color, float duration = 0f)
 	{
 		if (!shouldDraw) return;
 		DbgDraw.WireDisc(position, Quaternion.LookRotation(direction), scale, color, duration);
 	}
 	
-	static public void WireDBox(Vector3 position, Quaternion rot, Vector3 size, Color color, float duration = 0f)
+	public static void WireDBox(Vector3 position, Quaternion rot, Vector3 size, Color color, float duration = 0f)
 	{
 		if (!shouldDraw) return;
 		DbgDraw.WireCube(position, rot, size, color, duration);
 	}
 	
-	static public void Line(Vector3 start, Vector3 end, Color color, float duration = 0f)
+	public static void Line(Vector3 start, Vector3 end, Color color, float duration = 0f)
 	{
 		if (!shouldDraw) return;
 		DbgDraw.Line(start, end, color, duration);
