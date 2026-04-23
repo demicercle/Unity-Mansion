@@ -264,7 +264,7 @@ public class CharacterController : MonoBehaviour
 	public float GetRadius() => GetAgent().GetRadius();
 	public float GetHeight() => GetAgent().GetHeight();
 	public bool IsMoving() => GetAgent().IsMoving();
-	public bool IsPathAssignable() => !agent.pathPending && agent.isPathValid;
+	public bool IsPathAssignable() =>  agent.isPathValid;
 	
 	public void StopAgent()
 	{
@@ -424,6 +424,8 @@ public class CharacterController : MonoBehaviour
 		if (!other.IsCharacterRevealed()) return false;
 		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
 	});
+
+	public bool HasDetectedOther(CharacterController other) => detection && detection.IsCharacterDetected(other);
 	
 	public bool TryGetAnimation(out CharacterAnimation outAnimation)
 	{
@@ -464,6 +466,7 @@ public class CharacterController : MonoBehaviour
 	private CharacterAnimation characterAnimation;
 	private CharacterFollows follows;
 	private WeaponData currentWeapon;
+	private CharacterDetection detection;
 	
 	private void Awake()
 	{
@@ -480,6 +483,9 @@ public class CharacterController : MonoBehaviour
 		
 		follows = GetComponent<CharacterFollows>();
 		if(!follows) follows = gameObject.AddComponent<CharacterFollows>();
+		
+		detection = GetComponent<CharacterDetection>();
+		if (!detection) Debug.LogWarning(this + " has no detection component");
 		
 		characterAnimation = GetComponent<CharacterAnimation>();
 		//if(!characterAnimation) characterAnimation = gameObject.AddComponent<CharacterAnimation>(); //TODO is it possible to have characters with no anims?

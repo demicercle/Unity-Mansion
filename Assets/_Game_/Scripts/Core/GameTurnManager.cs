@@ -70,6 +70,8 @@ public class GameTurnManager : MonoBehaviour
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
+	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
+	
 	private CharacterController[] levelCharacters;
 	private int currentTurn;
 	private bool playerTurn;
@@ -181,7 +183,6 @@ public class GameTurnManager : MonoBehaviour
 				yield return new WaitForSeconds(firstTurnSeconds); 
 			}
 			
-			
 			while (IsPlayerTurn())
 			{
 				yield return null;
@@ -274,8 +275,24 @@ public class GameTurnManager : MonoBehaviour
 		currentTurn += 1;
 		playerTurn = true;
 		onPlayerChanged?.Invoke(true);
+		
 		Debug.Log(this + " NewTurn " + currentTurn);
-		if(currentTurn > 0) onTurnStarted?.Invoke();
+		
+		if (currentTurn > 0)
+		{
+			if (currentTurn == 1)
+			{
+				foreach (var partyCharacter in partyCharacters) // stop agent and draw weapons
+				{
+					partyCharacter.StopAgent();
+					
+					if (partyCharacter.TryGetAnimation(out var anim))
+						anim.TrySwitchWeapons(true);
+				}
+			}
+				
+			onTurnStarted?.Invoke();
+		}
 	}
 
 	private void SelectBestPlayerCharacter()
@@ -296,15 +313,20 @@ public class GameTurnManager : MonoBehaviour
 			character.Rest(verbose);
 	}
 
-	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
-
 	private bool IsAnyEnemyAroundCheck()
 	{
-		foreach (var character in levelCharacters)
+		foreach (var enemyCharacter in levelCharacters)
 		{
-			if (character.IsEnemyToPlayer() && !character.IsDead() && character.IsCharacterRevealed())
+			if (!enemyCharacter.IsEnemyToPlayer()) continue;
+			if (!enemyCharacter.IsDead() && enemyCharacter.IsCharacterRevealed())
 			{
-				return true;
+				foreach (var partyCharacter in partyCharacters)
+				{
+					if (enemyCharacter.HasDetectedOther(partyCharacter))
+					{
+						return true;
+					}
+				}
 			}
 		}
 
