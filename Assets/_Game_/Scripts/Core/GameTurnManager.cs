@@ -85,14 +85,14 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Starts");
-		
-		FadeScreen.FadeIn(true);
 
 		foreach (var go in startupObjects)
 		{
 			Debug.Log(this + " Instantiate startupObjects " + go);
 			Instantiate(go);
 		}
+		
+		FadeScreen.FadeIn(true);
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
 		sceneLoader.SetSceneToLoad(nextLevelName, LoadSceneMode.Additive);

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7138105096927598453}
   - component: {fileID: 2856407218528173990}
   m_Layer: 0
-  m_Name: GameTurnManager
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49,14 +49,16 @@ MonoBehaviour:
   firstTurnIsPlayer: 1
   skipInvisibleCharacters: 1
   cameraStartZoom: 0.204
+  realTimeTicks: 0.5
   postLoadDuration: 1
   turnChangedSeconds: 2
   focusCharacterSeconds: 1
   noActionsSeconds: 3
   defaultActionsSeconds: 1
-  cameraStartsSeconds: 0.5
+  firstTurnSeconds: 1
   aiThinksSeconds: 0.5
   startupObjects:
+  - {fileID: 5336333531941352975, guid: f9935e526320d6841a75a1a6d3b88052, type: 3}
   - {fileID: 1235272970627628970, guid: ebc1fc7399cf6304d88ef4b6f671ba70, type: 3}
   - {fileID: 5406122567533382223, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
   - {fileID: 1961438188781018041, guid: 1abf13e0d98417f43b67e3c232d68eba, type: 3}
