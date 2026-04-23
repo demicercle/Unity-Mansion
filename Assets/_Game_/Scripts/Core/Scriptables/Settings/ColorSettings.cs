@@ -44,7 +44,7 @@ public class ColorSettings : ScriptableObject
 		if (!character.IsCurrentTurn())
 			return GetDisabledColor(character.GetCurrentFaction());
 		
-		if (!character.HasUsedAction(CharacterAction.RunAction) || !character.HasMovePoints())
+		if (!character.HasUsedAction(CharacterAction.Run) || !character.HasMovePoints())
 		{
 			if (disabledIfNoActions && !character.HasActions()) 
 				return GetDisabledColor(character.GetCurrentFaction());

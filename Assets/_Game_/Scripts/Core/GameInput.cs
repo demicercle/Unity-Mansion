@@ -474,7 +474,7 @@ public class GameInput : MonoBehaviour
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
-			if(selectedCharacter.CanUseAction(CharacterAction.RunAction))
+			if(selectedCharacter.CanUseAction(CharacterAction.Run))
 				selectedCharacter.Routines.AssignRunAction();
 		}
 	}
@@ -649,7 +649,7 @@ public class GameInput : MonoBehaviour
 				// assign attack
 				if (selectedCharacter.CanAttack(false))
 				{
-					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.AttackAction))
+					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
 						selectedCharacter.FloatingText_Cant();
 					else
 						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
@@ -679,7 +679,7 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.InteractAction))
+				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Interact))
 					selectedCharacter.FloatingText_Cant();
 				else
 					selectedCharacter.Routines.AssignInteract(clickedProp);

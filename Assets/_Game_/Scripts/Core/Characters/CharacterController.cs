@@ -15,9 +15,9 @@ public enum CharacterFaction
 public enum CharacterAction
 {
 	None,
-	RunAction,
-	AttackAction,
-	InteractAction
+	Run,
+	Attack,
+	Interact
 }
 
 public class CharacterController : MonoBehaviour
@@ -114,14 +114,14 @@ public class CharacterController : MonoBehaviour
 	
 	public void AttackAction(CharacterController target = null, bool stopAgent = true)
 	{
-		UseAction(CharacterAction.AttackAction, target);
+		UseAction(CharacterAction.Attack, target);
 	}
 	
 	public void UseAction(CharacterAction actionType, object param = null)
 	{
 		usedActions.Add(actionType);
 		Debug.Log(this + " usedAction=" + usedActions.Last() + " param=" + param);
-		if (actionType == CharacterAction.RunAction)
+		if (actionType == CharacterAction.Run)
 		{
 			usedMovePoints -= characterData.runActionExtraMovePoints;
 		}

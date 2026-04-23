@@ -127,6 +127,12 @@ public static class ConsoleWrapper
 	{
 		Debug.Log("debug_nav=" + (NavmeshRebuilder.debugMode = value));
 	}
+	
+	[ConsoleMethod("log", "")]
+	public static void _Log(string message)
+	{
+		GameCanvas.Instance.gameLog.AppendLine(message);
+	}
 
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()

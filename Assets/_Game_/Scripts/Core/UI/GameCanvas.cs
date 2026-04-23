@@ -20,6 +20,8 @@ public class GameCanvas : MonoBehaviour
 	
 	public event System.Action<bool> onViewportMouseOver;
 	
+	public GameLog gameLog => GetComponentInChildren<GameLog>();
+	
 	[Header("Viewport")]
 	[SerializeField] private RectTransform viewportRect;
 	[SerializeField] private RawImage viewportOverlay;
@@ -172,7 +174,7 @@ public class GameCanvas : MonoBehaviour
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out var selected))
 		{
-			if (selected.CanUseAction(CharacterAction.RunAction))
+			if (selected.CanUseAction(CharacterAction.Run))
 			{
 				selected.Routines.AssignRunAction();
 			}

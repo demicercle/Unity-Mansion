@@ -12,7 +12,7 @@ public class PropComponent : MonoBehaviour
 	
 	[Header("Interaction")]
 	[SerializeField] private CursorType cursorType = CursorType.OpenDoor;
-	[SerializeField] private CharacterAction consumeAction = CharacterAction.InteractAction;
+	[SerializeField] private CharacterAction consumeAction = CharacterAction.Interact;
 	
 	[Header("Trigger")]
 	[SerializeField] private bool onlyOnce;

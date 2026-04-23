@@ -46,7 +46,7 @@ public class GameTurnManager : MonoBehaviour
 	public bool SelectedCharacterCanUseRunAction() =>
 		!CharacterRoutines.AnyActiveRoutines() && IsPlayerTurn() 
 		                                       && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
-		                                       && selectedCharacter.CanUseAction(CharacterAction.RunAction);
+		                                       && selectedCharacter.CanUseAction(CharacterAction.Run);
 
 	public bool SelectedCharacterIsControllable() => IsPlayerTurn() 
 	                                                 && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
