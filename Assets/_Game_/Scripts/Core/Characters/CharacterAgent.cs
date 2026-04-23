@@ -127,12 +127,21 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if (force || !hasDestination)
 		{
-			AssignFollowTransform(null);
-			hasDestination = true;
+			if(debugMode > 0) Debug.Log(this + " AssignDestination " + force);
+			
+			if (IsFollowing()) 
+				AssignFollowTransform(null);
 
-			aiPath.endReachedDistance = endReachDistance;
-			aiPath.destination = hitPoint;
-			aiPath.SearchPath();
+			if (!hasDestination || Vector3.Distance(aiPath.destination, hitPoint) > 0.05f)
+			{
+				if(debugMode > 1) Debug.Log(this + " aiPath.SearchPath() ");
+				aiPath.endReachedDistance = endReachDistance;
+				aiPath.destination = hitPoint;
+				aiPath.canSearch = true;
+				aiPath.SearchPath();
+			}
+			
+			hasDestination = true;
 			
 			UpdatePathAndTarget(true);
 		}
@@ -192,6 +201,7 @@ public class CharacterAgent : MonoBehaviour
 		lastPath = GetCurrentPath();
 		if (debugMode > 1) Debug.Log(this + " OnSearchPath lastPath=" + lastPath.Length);
 		if (debugMode > 0) DebugDrawer.Path(lastPath, false, Color.cyan);
+		UpdatePathAndTarget(true);
 	}
 
 	public Coroutine SearchPathAsync(Vector3 dest, System.Action onComplete = null)

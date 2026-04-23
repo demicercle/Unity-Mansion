@@ -77,7 +77,7 @@ public class CharacterController : MonoBehaviour
 
 	public CharacterAgent GetAgent()
 	{
-		if(!agent) agent = GetComponent<CharacterAgent>();
+		if(!Application.isPlaying && !agent) agent = GetComponent<CharacterAgent>(); // for DrawGizmos stuff
 		return agent;
 	}
 	

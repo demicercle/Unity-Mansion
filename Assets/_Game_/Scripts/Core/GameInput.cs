@@ -53,7 +53,8 @@ public class GameInput : MonoBehaviour
 		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction);
 		if (hitInteractions)
 		{ 
-			foreach (var cursorHandler in interactionHit.collider.GetComponents<ICursorHandler>().Concat(interactionHit.collider.GetComponentsInChildren<ICursorHandler>()))
+			foreach (var cursorHandler in interactionHit.collider.GetComponents<ICursorHandler>()
+				         .Concat(interactionHit.collider.GetComponentsInChildren<ICursorHandler>()))
 			{
 				cursorHandler.CursorOver();
 			}
@@ -399,8 +400,7 @@ public class GameInput : MonoBehaviour
 							
 							if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
 							{
-								var agent = selectedCharacter.GetAgent();
-								agent.AssignDestination(bestWaypoint.GetPosition(), true); // mouse over prop
+								selectedCharacter.GetAgent().AssignDestination(bestWaypoint.GetPosition(), true); // mouse over prop
 							}
 						}
 						else Debug.LogWarning(this + " overProp " + overProp + " no waypoints!");
