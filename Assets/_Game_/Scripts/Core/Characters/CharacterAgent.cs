@@ -312,14 +312,19 @@ public class CharacterAgent : MonoBehaviour
 
 	public void SetAgentActive(bool value)
 	{
+		if(debugMode > 0) Debug.Log(this + " SetAgentActive=" + value);
+		
 		StopMovement();
 		
-		if(debugMode > 0) Debug.Log(this + " SetAgentActive=" + value);
 		aiPath.enabled = value;
 		
 		if (aiPath.enabled)
 		{
 			aiPath.Teleport(transform.position);
+		}
+		else
+		{
+			SetObstacle(false);
 		}
 	}
 

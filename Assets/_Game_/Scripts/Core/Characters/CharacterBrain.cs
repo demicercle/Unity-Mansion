@@ -201,6 +201,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		}
 
 		_selfCharacter.onPartyIndexChanged += OnPartyIndexChanged;
+		_selfCharacter.onDead += OnCharacterDead;
 		
 		_waypointList = new List<Waypoint>();
 	}
@@ -208,6 +209,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	private void OnDestroy()
 	{
 		_selfCharacter.onPartyIndexChanged -= OnPartyIndexChanged;
+		_selfCharacter.onDead -= OnCharacterDead;
 	}
 
 	private void OnEnable()
@@ -255,6 +257,11 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	private void OnPartyIndexChanged(int index)
 	{
 		enabled = index < 0; // not in party
+	}
+
+	private void OnCharacterDead()
+	{
+		StopThinking();
 	}
 
 	private void OnCharacterDetected(CharacterController otherCharacter)

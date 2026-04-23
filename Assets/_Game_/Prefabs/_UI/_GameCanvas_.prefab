@@ -1183,7 +1183,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1415,30 +1415,6 @@ MonoBehaviour:
   linePrefab: {fileID: 3225157359246342260}
   noLog: 0
   maxLines: 8
-  alphaCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0.0000013004613
-      outSlope: 0.0000013004613
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.18333384
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: -2.829956
-      outSlope: -2.829956
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.041058898
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   fadeDuration: 3
 --- !u!1 &7210999077158376568
 GameObject:

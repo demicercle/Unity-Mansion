@@ -322,6 +322,7 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + characterOwner);
 		
 		var agent = characterOwner.GetAgent();
+		if(agent.IsMoving()) agent.StopMovement(); // stop any other movement
 		
 		yield return agent.SearchPathAsync(dest);
 

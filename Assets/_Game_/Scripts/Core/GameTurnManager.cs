@@ -156,13 +156,6 @@ public class GameTurnManager : MonoBehaviour
 		
 		while (turnBasedMode)
 		{
-			if (!IsAnyEnemyAroundCheck())
-			{
-				turnBasedMode = false;
-				Debug.Log(this + " Switch To RealTime");
-				break;
-			}
-
 			if (currentTurn == 0)
 			{
 				if (!playerTurn && firstTurnIsPlayer) // probably useless unless GD ("initiative")
@@ -216,6 +209,13 @@ public class GameTurnManager : MonoBehaviour
 			
 			while (IsPlayerTurn())
 			{
+				if (!IsAnyEnemyAroundCheck())
+				{
+					turnBasedMode = false;
+					Debug.Log(this + " Switch To RealTime");
+					yield break;
+				}
+				
 				yield return null;
 			}
 
@@ -320,8 +320,17 @@ public class GameTurnManager : MonoBehaviour
 		onPlayerChanged?.Invoke(true);
 		
 		Debug.Log(this + " NewTurn " + currentTurn);
+
+		if (currentTurn == 0) // turn based
+		{
+			foreach (var partyChar in partyCharacters)
+			{
+				if (partyChar.TryGetAnimation(out var anim))
+					anim.TrySwitchWeapons(false); // relax after fight
+			}
+		}
 		
-		if (currentTurn > 0)
+		else if (currentTurn > 0)
 		{
 			onTurnStarted?.Invoke();
 		}

@@ -29,8 +29,9 @@ public class CharacterController : MonoBehaviour
 	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
 	
 	public static event System.Action onPartyChanged;
-	public static event System.Action<CharacterController> onCharacterMoved;
-	public static event System.Action<CharacterController, CharacterAction> onCharacterUsesAction;
+	public static event System.Action<CharacterController> onAnyCharacterMoved;
+	public static event System.Action<CharacterController> onAnyCharacterDead;
+	public static event System.Action<CharacterController, CharacterAction> onAnyCharacterUsesAction;
 	
 	public event System.Action onSpawned;
 	public event System.Action onStatsChanged;
@@ -39,7 +40,7 @@ public class CharacterController : MonoBehaviour
 	public event System.Action<float> onHealed;
 	public event System.Action<float> onDamaged;
 	public event System.Action<int> onPartyIndexChanged;
-	public event System.Action onKilled;
+	public event System.Action onDead;
 	public event System.Action onMoved;
 	public event System.Action onRotate;
 	public event System.Action<CharacterAction, object> onUseAction;
@@ -126,7 +127,7 @@ public class CharacterController : MonoBehaviour
 			usedMovePoints -= characterData.runActionExtraMovePoints;
 		}
 		onUseAction?.Invoke(actionType, param);
-		onCharacterUsesAction?.Invoke(this, actionType);
+		onAnyCharacterUsesAction?.Invoke(this, actionType);
 		onStatsChanged?.Invoke();
 	}
 	
@@ -288,7 +289,7 @@ public class CharacterController : MonoBehaviour
 	public void Teleport(Vector3 dest, int newRot, bool stopMovement)
 	{
 		GetAgent().Teleport(dest, newRot, stopMovement);
-		onCharacterMoved?.Invoke(this);
+		onAnyCharacterMoved?.Invoke(this);
 	}
 
 	public int GetRotation() => (int)transform.eulerAngles.y;
@@ -297,7 +298,7 @@ public class CharacterController : MonoBehaviour
 	{
 		usedMovePoints += amount;
 		onStatsChanged?.Invoke();
-		if(notifyMoves) onCharacterMoved?.Invoke(this);
+		if(notifyMoves) onAnyCharacterMoved?.Invoke(this);
 	}
 	
 	public float GetTotalDamages() => totalDamages;
@@ -356,7 +357,9 @@ public class CharacterController : MonoBehaviour
 			isDead = true;
 			agent.SetAgentActive(false);
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
-			onKilled?.Invoke();
+			Routines.StopAllRoutines();
+			onDead?.Invoke();
+			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();
 			return true;
 		}
@@ -424,6 +427,8 @@ public class CharacterController : MonoBehaviour
 		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
 	});
 
+	public bool HasDetectedAnyPartyCharacter() => _partyCharacters.Any(HasDetectedOther);
+	
 	public bool HasDetectedOther(CharacterController other) => detection && detection.IsCharacterDetected(other);
 	
 	public bool TryGetAnimation(out CharacterAnimation outAnimation)
@@ -447,7 +452,6 @@ public class CharacterController : MonoBehaviour
 	#region PRIVATE
 	private static List<CharacterController> _allCharacters = new List<CharacterController>();
 	private static List<CharacterController> _partyCharacters = new List<CharacterController>();
-	private static ScriptableObject defaultAIBrain;
 
 	private int partyIndex = -1;
 	

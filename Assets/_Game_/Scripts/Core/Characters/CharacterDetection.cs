@@ -36,8 +36,8 @@ public class CharacterDetection : MonoBehaviour
 
 	private void OnEnable()
 	{
-		CharacterController.onCharacterMoved += OnCharacterMoved;
-		CharacterController.onCharacterUsesAction += OnCharacterUsesAction;
+		CharacterController.onAnyCharacterMoved += OnAnyCharacterMoved;
+		CharacterController.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
 		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
 		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 	}
@@ -46,19 +46,19 @@ public class CharacterDetection : MonoBehaviour
 	{
 		if (!selfCharacter) return;
 		
-		CharacterController.onCharacterMoved -= OnCharacterMoved;
-		CharacterController.onCharacterUsesAction -= OnCharacterUsesAction;
+		CharacterController.onAnyCharacterMoved -= OnAnyCharacterMoved;
+		CharacterController.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
 		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
 		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
 	}
 
-	private void OnTurnStarted()  => OnCharacterMoved(selfCharacter);
-	private void OnTurnEnded()  => OnCharacterMoved(selfCharacter);
+	private void OnTurnStarted()  => OnAnyCharacterMoved(selfCharacter);
+	private void OnTurnEnded()  => OnAnyCharacterMoved(selfCharacter);
 
-	private void OnCharacterUsesAction(CharacterController anyCharacter, CharacterAction _) =>
-		OnCharacterMoved(anyCharacter);
+	private void OnAnyCharacterUsesAction(CharacterController anyCharacter, CharacterAction _) =>
+		OnAnyCharacterMoved(anyCharacter);
 	
-	private void OnCharacterMoved(CharacterController anyCharacter)
+	private void OnAnyCharacterMoved(CharacterController anyCharacter)
 	{
 		if (anyCharacter.IsDead()) return;
 		
@@ -67,7 +67,7 @@ public class CharacterDetection : MonoBehaviour
 			foreach (var otherCharacter in CharacterController.AllCharacters)
 			{
 				if (otherCharacter == selfCharacter) continue;
-				OnCharacterMoved(otherCharacter);
+				OnAnyCharacterMoved(otherCharacter);
 			}
 		}
 		else

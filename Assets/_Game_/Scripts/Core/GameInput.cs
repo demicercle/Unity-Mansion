@@ -16,6 +16,7 @@ public class GameInput : MonoBehaviour
 {
 	public static int debugMode { get; set; }
 
+	public const float MaxMouseDeltaToClick = 3.0f;
 	
 	public const int CursorRaycastResult_None = 0;
 	public const int CursorRaycastResult_Navigation = 1;
@@ -38,8 +39,10 @@ public class GameInput : MonoBehaviour
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
-	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null) 
+	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null)
 	{
+		outRaycast = default(RaycastHit);
+		
 		if (!cam) cam = Camera.main;
 		if (!cam)
 		{
@@ -83,7 +86,6 @@ public class GameInput : MonoBehaviour
 			}
 		}
 		
-		outRaycast = wallsHit;
 		return CursorRaycastResult_None;
 	}
 
@@ -105,6 +107,7 @@ public class GameInput : MonoBehaviour
 	private bool hasNoActionsCursor;
 	private bool hasFocus;
 	private Vector2 mousePosition;
+	private Vector2 lastClickPosition;
 	private Vector2 lastMousePosition;
 	private Vector2 middleClickMousePosition;
 	private bool holdMiddleClick, mouseHasMoved, mouseOverViewport;
@@ -525,6 +528,7 @@ public class GameInput : MonoBehaviour
 	{
 		mousePosition = ctx.ReadValue<Vector2>();
 		mouseHasMoved = true;
+		if(debugMode > 1) Debug.Log(this + " MouseClickDelta=" + MouseClickDelta.magnitude);
 	}
 
 	private void OnInputRightClick(CallbackContext ctx)
@@ -556,9 +560,12 @@ public class GameInput : MonoBehaviour
 		{
 			if (!hasFocus || !mouseOverViewport)
 				return;
+
+			lastClickPosition = mousePosition;
+			if(debugMode > 1) Debug.Log(this + " lastClickPosition=" + lastClickPosition);
 		}
 
-		if (hasFocus && ctxValue <= 0 && leftClickValue > 0) // left click RELEASED
+		if (hasFocus && ctxValue <= 0 && leftClickValue > 0 && MouseClickDelta.magnitude <= MaxMouseDeltaToClick) // left click RELEASED
 		{
 			if (!mouseOverViewport) return;
 			
@@ -603,6 +610,8 @@ public class GameInput : MonoBehaviour
 	}
 	
 	// others
+
+	private Vector2 MouseClickDelta => mousePosition - lastClickPosition;
 	
 	private void SetInputEnabled(bool value)
 	{
@@ -695,7 +704,7 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				if (!gameTurnManager.IsTurnBasedMode() || selectedCharacter.IsPathAssignable())
+				if (!gameTurnManager.IsTurnBasedMode())
 				{
 					if (!IsLeaderMode())
 						selectedCharacter.Routines.AssignMoveToDestination(navPosition);

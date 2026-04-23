@@ -42,14 +42,14 @@ public class GameLog : MonoBehaviour
 	{
 		gameTurnManager.onTurnEnded += TurnEnded;
 		gameTurnManager.onTurnStarted += TurnStarted;
-		CharacterController.onCharacterUsesAction += OnCharacterUsesAction;
+		CharacterController.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
 	}
 
 	private void OnDisable()
 	{
 		gameTurnManager.onTurnEnded -= TurnEnded;
 		gameTurnManager.onTurnStarted -= TurnStarted;
-		CharacterController.onCharacterUsesAction -= OnCharacterUsesAction;
+		CharacterController.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
 
 		Clear();
 	}
@@ -64,7 +64,7 @@ public class GameLog : MonoBehaviour
 		AppendLine("Turn Ended");
 	}
 
-	private void OnCharacterUsesAction(CharacterController character, CharacterAction action)
+	private void OnAnyCharacterUsesAction(CharacterController character, CharacterAction action)
 	{
 		AppendLine(character.GetDisplayName() + " uses action " + action);
 	}

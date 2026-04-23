@@ -217,7 +217,7 @@ public class CharacterAnimation : MonoBehaviour
 
 		controller.onHealed += OnHealed;
 		controller.onDamaged += OnDamaged;
-		controller.onKilled += OnKilled;
+		controller.onDead += OnDead;
 		controller.onUseAction += OnUseAction;
 		controller.turnStarted += OnTurnStarted;
 		controller.turnEnded += OnTurnEnded;
@@ -256,7 +256,7 @@ public class CharacterAnimation : MonoBehaviour
 		controller.onHealed -= OnHealed;
 		//controller.onPartyIndexChanged -= (newIndex) =>
 		controller.onDamaged -= OnDamaged;
-		controller.onKilled -= OnKilled;
+		controller.onDead -= OnDead;
 		//controller.onMoved -= () =>
 		//controller.onRotate -= () =>
 		controller.onUseAction -= OnUseAction;
@@ -311,7 +311,7 @@ public class CharacterAnimation : MonoBehaviour
 		if (rpgAnimationHandler) rpgAnimationHandler.GetHit();
 	}
 
-	private void OnKilled()
+	private void OnDead()
 	{
 		//TrySetTrigger(parameters.trigger);
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
