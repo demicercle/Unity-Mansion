@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using RPGCharacterAnims;
 using RPGCharacterAnims.Lookups;
 using RPGCharacterAnims.Extensions;
@@ -33,7 +34,11 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     public bool hasDualWeapons => hasLeftWeapon && hasRightWeapon;
     public bool isRelaxed => rightWeapon == Weapon.Relax;
 
+    public bool HasWeapon() => rightWeapon != Weapon.Relax && rightWeapon != Weapon.Unarmed;
+    public bool IsWeaponSwitchable(Weapon rpgWeapon) => rpgWeapon != Weapon.Relax && !rpgWeapon.ToString().StartsWith("TwoHand");
+
 	// Weapon Parameters.
+	//public List<Weapon> switchableWeapons = new List<Weapon>();
 
 	[Header("Debug Options")]
 	public bool debugWalkthrough = true;
@@ -124,12 +129,16 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 
     public void Relax()
     {
+	    if (!IsWeaponSwitchable(Weapon.Relax))
+		    return;
+	    
 	    animator.SetInteger(AnimationParameters.Weapon, -1);
 	    animator.SetTrigger(AnimationParameters.Trigger);
 	    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
     }
 
     public void InstantWeaponSwitch() => InstantWeaponSwitch(rightWeapon);
+
     
     /// <summary>
     /// Queue a command to unsheath a weapon.

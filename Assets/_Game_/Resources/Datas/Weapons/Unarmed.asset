@@ -17,3 +17,5 @@ MonoBehaviour:
   isRanged: 0
   attackRange: 0
   noAttack: 0
+  rpgWeaponR: 0
+  rpgWeaponL: -1

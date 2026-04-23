@@ -20,6 +20,10 @@ PrefabInstance:
       propertyPath: spawnData
       value: 
       objectReference: {fileID: 11400000, guid: 4b33ba831b49b484594e40ec1584662c, type: 2}
+    - target: {fileID: 1855308542611445004, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: weaponSwitched
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2825705707412753727, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Height
       value: 1.5
@@ -36,9 +40,13 @@ PrefabInstance:
       propertyPath: characterData
       value: 
       objectReference: {fileID: 11400000, guid: 4b33ba831b49b484594e40ec1584662c, type: 2}
+    - target: {fileID: 5745611760749173238, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: defaultWeapon
+      value: 
+      objectReference: {fileID: 11400000, guid: ae09845b446b806478324b0d8d7f8fcb, type: 2}
     - target: {fileID: 6356768765544130209, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Name
-      value: PC_Player_0
+      value: PC_Player_0 Variant
       objectReference: {fileID: 0}
     - target: {fileID: 7238060625527304640, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_LocalPosition.x

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using RPGCharacterAnims.Lookups;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -72,6 +73,7 @@ public class CharacterController : MonoBehaviour
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
+		SetCurrentWeapon(defaultWeapon);
 		onSpawned?.Invoke();
 		onStatsChanged?.Invoke();
 	}
@@ -378,6 +380,8 @@ public class CharacterController : MonoBehaviour
 		return CanAttack() && !other.IsDead() && IsEnemyTo(other);
 	}
 
+	public WeaponData GetCurrentWeapon() => currentWeapon;
+
 	public float GetDistanceTo(Vector3 world) => Vector3.Distance(GetPosition(), world);
 
 	public float GetDistanceTo(CharacterController other) => GetDistanceTo(other.GetPosition());
@@ -470,6 +474,7 @@ public class CharacterController : MonoBehaviour
 	private CharacterFollows follows;
 	private WeaponData currentWeapon;
 	private CharacterDetection detection;
+	private WeaponRenderer[] weaponRenderers;
 	
 	private void Awake()
 	{
@@ -506,14 +511,30 @@ public class CharacterController : MonoBehaviour
 			defaultWeapon = WeaponData.CreateInstance<WeaponData>();
 		}
 
-		currentWeapon = defaultWeapon;
-		
+		weaponRenderers = GetComponentsInChildren<WeaponRenderer>();
+
 		gameObject.SetActive(false); // wait for "Spawn"
 	}
 
 	private void OnDestroy()
 	{
 		_allCharacters.Remove(this);
+	}
+
+	private void SetCurrentWeapon(WeaponData newWeapon)
+	{
+		currentWeapon = newWeapon;
+		
+		foreach (var wpr in weaponRenderers)
+		{
+			wpr.gameObject.SetActive(currentWeapon && wpr.rpgWeapon == (wpr.isLeft ? currentWeapon.rpgWeaponL : currentWeapon.rpgWeaponR));
+		}
+
+		if (characterAnimation)
+		{
+			characterAnimation.SetWeapon(currentWeapon.rpgWeaponR, false);
+			characterAnimation.SetWeapon(currentWeapon.rpgWeaponL, true);
+		}
 	}
 	
 	private bool LOSCheck(CharacterController other)
