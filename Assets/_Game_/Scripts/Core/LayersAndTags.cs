@@ -10,9 +10,10 @@ public static class Layers
 	public static int LayerProp => LayerMask.NameToLayer("Prop");
 	public static int LayerHidden => LayerMask.NameToLayer("Hidden");
 	
+	public static int MaskWall => LayerMask.GetMask("Ground", "Wall", "Fog");
+	public static int MaskNavigation => LayerMask.GetMask("Ground");
 	public static int MaskInteraction => LayerMask.GetMask("Character", "Prop");
 	public static int MaskObstruction => LayerMask.GetMask("Ground", "Wall", "Fog");
-	public static int MaskNavigation => LayerMask.GetMask("Ground");
 }
 
 public static class Tags

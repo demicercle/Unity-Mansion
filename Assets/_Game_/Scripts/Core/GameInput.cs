@@ -37,39 +37,55 @@ public class GameInput : MonoBehaviour
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
-	public int CursorRaycast(out RaycastHit raycastHit, Camera cam = null) 
+	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null) 
 	{
-		raycastHit = default(RaycastHit);
-		
 		if (!cam) cam = Camera.main;
 		if (!cam)
 		{
 			Debug.LogWarning(this + "cannot do cursor raycast because no main camera");
+			outRaycast = default(RaycastHit);
 			return CursorRaycastResult_None;
 		}
 		
 		raycastRay = cam.ScreenPointToRay(mousePosition);
-		if (Physics.Raycast(raycastRay, out raycastHit, 100f, Layers.MaskInteraction))
+		
+		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction);
+		if (hitInteractions)
 		{ 
-			foreach (var cursorHandler in raycastHit.collider.GetComponents<ICursorHandler>().Concat(raycastHit.collider.GetComponentsInChildren<ICursorHandler>()))
+			foreach (var cursorHandler in interactionHit.collider.GetComponents<ICursorHandler>().Concat(interactionHit.collider.GetComponentsInChildren<ICursorHandler>()))
 			{
 				cursorHandler.CursorOver();
 			}
 
+			outRaycast = interactionHit;
 			return CursorRaycastResult_Interaction;
 		}
 		
-		if (Physics.Raycast(raycastRay, out raycastHit, 100f, Layers.MaskNavigation))
+		hitNavigation = Physics.Raycast(raycastRay, out navigationHit, 100f, Layers.MaskNavigation);
+		if (hitNavigation)
 		{
-			if (NavUtils.TryGetNearestNavPosition(raycastHit.point, maxNavDistance, out var navPosition))
+			if (NavUtils.TryGetNearestNavPosition(navigationHit.point, maxNavDistance, out var navPosition))
 			{
-				raycastHit.point = navPosition;
-				return CursorRaycastResult_Navigation;
+				hitWalls = Physics.Linecast(navPosition, raycastRay.origin, out wallsHit, Layers.MaskWall);
+				if (!hitWalls)
+				{
+					outRaycast = navigationHit;
+					outRaycast.point = navPosition;
+					return CursorRaycastResult_Navigation;
+				}
+				else if (debugMode > 0)
+				{
+					DebugDrawer.Line(navPosition, wallsHit.point, Color.red);
+					DebugDrawer.Sphere(wallsHit.point, wallsHit.normal, Vector3.one * 0.1f, Color.red);
+				}
 			}
 		}
 		
+		outRaycast = wallsHit;
 		return CursorRaycastResult_None;
 	}
+
+	public bool IsLeaderMode() => !ungroupMode && !gameTurnManager.IsTurnBasedMode();
 
 	#region PRIVATE
 	private static GameInput instance;
@@ -93,8 +109,11 @@ public class GameInput : MonoBehaviour
 	private bool inputEnabled;
 	private CursorType currentCursor;
 	private Ray raycastRay;
+	private RaycastHit navigationHit, wallsHit, interactionHit;
+	private bool hitNavigation, hitWalls, hitInteractions;
 	private int lastCursorResult;
 	private string debugString;
+	private bool ungroupMode;
 
 	private void Awake()
 	{
@@ -596,7 +615,7 @@ public class GameInput : MonoBehaviour
 				CharacterSelection.SelectCharacter(clickedCharacter); // ClickCharacter select party character
 				//return;
 			}
-			else if(isDebugMode) Debug.Log(clickedCharacter + " InParty not in player turn");
+			else if(isDebugMode) Debug.Log("> InParty not in player turn");
 		}
 		
 		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
@@ -615,7 +634,7 @@ public class GameInput : MonoBehaviour
 				
 				selectedCharacter.FloatingText_Cant();
 			}
-			else if(isDebugMode)  Debug.Log(clickedCharacter + " IsEnemyToPlayer no selected character");
+			else if(isDebugMode)  Debug.Log("> IsEnemyToPlayer no selected character");
 		}
 		
 		else
@@ -624,7 +643,7 @@ public class GameInput : MonoBehaviour
 			{
 				Debug.LogWarning("//TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
 			}
-			else if(isDebugMode)  Debug.Log(clickedCharacter + " !IsEnemyToPlayer no selected character");
+			else if(isDebugMode)  Debug.Log("> !IsEnemyToPlayer no selected character");
 		}
 	}
 
@@ -643,7 +662,7 @@ public class GameInput : MonoBehaviour
 			}
 			else if(isDebugMode)  Debug.Log(" selected character not controllable");
 		}
-		else if(isDebugMode)  Debug.Log(" no character selected");
+		else if(isDebugMode)  Debug.Log("> no character selected");
 	}
 
 	private void ClickNavigation(Vector3 navPosition)
@@ -654,16 +673,19 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				if (selectedCharacter.GetAgent().isPathValid)
+				if (selectedCharacter.IsPathAssignable())
 				{
-					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+					if (!IsLeaderMode())
+						selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+					else
+						selectedCharacter.Routines.AssignMoveLeaderToDestination(navPosition);
 				}
-				else if(isDebugMode)  Debug.Log(" !isPathValid");
+				else if(isDebugMode)  Debug.Log("> " + selectedCharacter + " !IsPathAssignable");
 			}
-			else if(isDebugMode)  Debug.Log(" selected character not controllable");
+			else if(isDebugMode)  Debug.Log("> selected character not controllable");
 		}
 		
-		else if(isDebugMode)  Debug.Log(" no character selected");
+		else if(isDebugMode)  Debug.Log("> no character selected");
 	}
 	
 	private bool CanAssignOnClickSelected() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
@@ -678,7 +700,7 @@ public class GameInput : MonoBehaviour
 
 	private bool CanAssignOnMouseOver(CharacterController character)
 	{
-		return CanAssignOnClick(character) && !character.Routines.AnyActive();
+		return CanAssignOnClick(character) && !character.Routines.AnyActive() && !character.IsMoving();
 	}
 	
 	private void SetCurrentCursorType(CursorType cursorType)

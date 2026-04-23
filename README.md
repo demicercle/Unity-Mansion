@@ -18,6 +18,7 @@
 - rename "Handlers" in "Listeners"
 - cmd "kill_all"
 - game turn manager "PartyRest" on NewTurn, and then Rest each otherCharacter one by one after
+- clean "CharacterController"
 
 NullReferenceException: Object reference not set to an instance of an object
 GameInput.OnDisable () (at Assets/_Game_/Scripts/Core/GameInput.cs:162)

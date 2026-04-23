@@ -57,6 +57,12 @@ public class DebugDrawer : MonoBehaviour
 			Line(path.Last(), path.First(), color, duration);
 	}
 	
+	static public void Sphere(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
+	{
+		if (!shouldDraw) return;
+		DbgDraw.Sphere(position, Quaternion.LookRotation(direction), scale, color, duration);
+	}
+	
 	static public void WireDisc(Vector3 position, Vector3 direction, float scale, Color color, float duration = 0f)
 	{
 		if (!shouldDraw) return;

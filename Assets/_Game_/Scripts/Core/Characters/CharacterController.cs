@@ -26,8 +26,7 @@ public class CharacterController : MonoBehaviour
 	
 	public static List<CharacterController> AllCharacters => _allCharacters;
 
-	public static IEnumerable<CharacterController> GetPartyCharacters() =>
-		_allCharacters.Where(c => c.InParty()).OrderBy(c => c.GetPartyIndex());
+	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
 	
 	public static event System.Action onPartyChanged;
 	public static event System.Action<CharacterController> onCharacterMoved;
@@ -95,19 +94,6 @@ public class CharacterController : MonoBehaviour
 		onSelectionChanged?.Invoke(value);
 	}
 
-	/*public void EndTurn()
-	{
-		StopAgent();
-		turnEnded?.Invoke();
-	}*/
-	
-	public void NewTurn(int turn)
-	{
-		GetAgent().ClearDestination();
-		if (turn >= 0) currentTurn = turn;
-		turnStarted?.Invoke();
-	}
-
 	public void Rest(bool verbose = true)
 	{
 		if(verbose) Debug.Log(this + " Rest");
@@ -124,19 +110,6 @@ public class CharacterController : MonoBehaviour
 	{
 		return HasActions();
 	}
-	
-	/*public bool TryUseAction(CharacterAction action, bool floatingText)
-	{
-		if (CanUseAction(action))
-		{
-			UseAction(action);
-			return true;
-		}
-
-		Debug.Log(this + " TryUseAction " + action + " failed");
-		if(floatingText) FloatingText_Cant();
-		return false;
-	}*/
 	
 	public void AttackAction(CharacterController target = null, bool stopAgent = true)
 	{
@@ -179,6 +152,9 @@ public class CharacterController : MonoBehaviour
 		else
 			return faction == CharacterFaction.Enemy;
 	}
+
+	public bool IsLeaderOf(CharacterController other) => GameInput.Instance.IsLeaderMode() &&
+														InParty() && other.InParty() && IsSelected();
 	
 	public bool InParty() => partyIndex >= 0;
 	
@@ -191,11 +167,18 @@ public class CharacterController : MonoBehaviour
 		if (index >= 0)
 		{
 			isControllable = true;
-			SetCurrentFaction(CharacterFaction.Player);
 		}
 		else
 		{
 			isControllable = false;
+		}
+		_partyCharacters = _allCharacters.Where(c => c.InParty()).OrderBy(c => c.partyIndex).ToList();
+		if (index >= 0)
+		{
+			SetCurrentFaction(CharacterFaction.Player);
+		}
+		else
+		{
 			SetCurrentFaction(previousFaction);
 		}
 		onPartyIndexChanged?.Invoke(index);
@@ -268,6 +251,8 @@ public class CharacterController : MonoBehaviour
 		// DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
 		return dot >= MinFacingDot;
 	}
+
+	public Vector3 GetDirection() => transform.forward;
 	
 	public Vector3 GetPosition() => transform.position;
 	
@@ -278,6 +263,7 @@ public class CharacterController : MonoBehaviour
 	public float GetRadius() => GetAgent().GetRadius();
 	public float GetHeight() => GetAgent().GetHeight();
 	public bool IsMoving() => GetAgent().IsMoving();
+	public bool IsPathAssignable() => !agent.pathPending && agent.isPathValid;
 	
 	public void StopAgent()
 	{
@@ -452,6 +438,7 @@ public class CharacterController : MonoBehaviour
 	
 	#region PRIVATE
 	private static List<CharacterController> _allCharacters = new List<CharacterController>();
+	private static List<CharacterController> _partyCharacters = new List<CharacterController>();
 	private static ScriptableObject defaultAIBrain;
 
 	private int partyIndex = -1;

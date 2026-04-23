@@ -341,6 +341,7 @@ GameObject:
   - component: {fileID: 8722277412283640718}
   - component: {fileID: 467592031822895063}
   - component: {fileID: 7123389619300229274}
+  - component: {fileID: 3491681411637616590}
   m_Layer: 8
   m_Name: CharacterBase
   m_TagString: Player
@@ -785,6 +786,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
   setHidden: 1
+--- !u!114 &3491681411637616590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837400758454604685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b516620e7a5f4087a2b020d253b0edb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
+  followDistance: 3.5
+  tickTime: 1
 --- !u!1 &3549809914347783905
 GameObject:
   m_ObjectHideFlags: 0
@@ -1093,11 +1108,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e65e21edf4364c909eb7047d4a9555b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HideInFog
-  defaultLayer: Character
-  hiddenLayer: HiddenInGame
-  nodeSize: 0.5
   character: {fileID: 1077634328985660634}
   renderers: []
+  colliders: []
+  debugLog: 0
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0

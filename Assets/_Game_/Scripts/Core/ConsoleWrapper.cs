@@ -81,9 +81,21 @@ public static class ConsoleWrapper
 	}
 	
 	[ConsoleMethod("debug_cursor", "")]
-	public static void _DebugCursor(int value)
+	public static void _DebugInput(int value)
 	{
 		Debug.Log("GameInput.debugMode=" + (GameInput.debugMode = value));
+	}
+	
+	[ConsoleMethod("debug_follows", "")]
+	public static void _DebugFollows(int value)
+	{
+		Debug.Log("CharacterFollows.debugMode=" + (CharacterFollows.debugMode = value));
+	}
+	
+	[ConsoleMethod("debug_agent", "")]
+	public static void _DebugAgent(int value)
+	{
+		Debug.Log("CharacterAgent.debugMode=" + (CharacterAgent.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_detection", "")]
