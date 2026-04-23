@@ -1,20 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public static class ConsoleWrapper
+public class ConsoleCommands : MonoBehaviour
 {
 	[ConsoleMethod("apply_dmg", "")]
-	public static void _ApplyDamage(int amount)
+	public static void ApplyDamage(int amount)
 	{
 		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.TakeDamage(amount, character);
 	}
 
 	[ConsoleMethod("kill_all", "")]
-	public static void _KillAll(float range)
+	public static void KillAll(float range)
 	{
 		var center = CameraPivot.Instance.GetFocusPosition();
 		foreach (var character in CharacterController.AllCharacters)
@@ -31,21 +32,21 @@ public static class ConsoleWrapper
 	}
 
 	[ConsoleMethod("heal", "")]
-	public static void _Heal(int amount)
+	public static void Heal(int amount)
 	{
 		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.Heal(amount);
 	}
 
 	[ConsoleMethod("rest", "")]
-	public static void _Rest()
+	public static void Rest()
 	{
 		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
 			character.Rest();
 	}
 
 	[ConsoleMethod("use_all_actions", "")]
-	public static void _UseAllActions(int value)
+	public static void UseAllActions(int value)
 	{
 		if (value == 0) return;
 		if (value == 1)
@@ -61,9 +62,9 @@ public static class ConsoleWrapper
 	}
 
 	[ConsoleMethod("tp", "")]
-	public static void _Teleport() => _Teleport(0);
+	public static void Teleport() => Teleport(0);
 	[ConsoleMethod("teleport", "")]
-	public static void _Teleport(int value)
+	public static void Teleport(int value)
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out CharacterController partyChar))
 		{
@@ -73,6 +74,57 @@ public static class ConsoleWrapper
 				partyChar.Teleport(hit.point, value > 0);
 			}
 		}
+	}
+
+	[ConsoleMethod("quit_game", "")]
+	public static void QuitGame()
+	{
+		Application.Quit();
+	}
+
+	[ConsoleMethod("hard_reset", "")]
+	public static void ResetGame()
+	{
+		SceneManager.LoadScene(0);
+	}
+
+	[ConsoleMethod("dtset", "")]
+	public static void DtSet(float value)
+	{
+		Time.timeScale = Mathf.Clamp(value, 0.1f, 10.0f);
+	}
+
+	[ConsoleMethod("explore", "")]
+	public static void Explore(float value)
+	{
+		RoomTrigger.activeRooms.ToList().ForEach((room) =>
+		{
+			room.Explore();
+		});
+	}
+	
+	[ConsoleMethod("log", "")]
+	public static void Log(string message)
+	{
+		GameCanvas.Instance.gameLog.AppendLine(message);
+	}
+	
+	#region DEBUG
+
+	[ConsoleMethod("debug_all", "")]
+	public static void Debug_All(int value)
+	{
+		_DebugAgent(value);
+		_DebugAnim(value);
+		_DebugBrains(value);
+		_DebugBrains(value);
+		_DebugCamera(value);
+		_DebugDetection(value);
+		_DebugFollows(value);
+		_DebugInput(value);
+		_DebugNav(value);
+		_DebugRoutines(value);
+		_DebugTriggers(value);
 	}
 
 	[ConsoleMethod("debug_anim", "")]
@@ -135,36 +187,13 @@ public static class ConsoleWrapper
 		Debug.Log("debug_nav=" + (NavmeshRebuilder.debugMode = value));
 	}
 	
-	[ConsoleMethod("log", "")]
-	public static void _Log(string message)
-	{
-		GameCanvas.Instance.gameLog.AppendLine(message);
-	}
+	#endregion
 
-	[ConsoleMethod("quit_game", "")]
-	public static void QuitGame()
+	public List<string> commandsOnStart = new List<string>();
+	
+	private void Start()
 	{
-		Application.Quit();
-	}
-
-	[ConsoleMethod("hard_reset", "")]
-	public static void ResetGame()
-	{
-		SceneManager.LoadScene(0);
-	}
-
-	[ConsoleMethod("dtset", "")]
-	public static void _DtSet(float value)
-	{
-		Time.timeScale = Mathf.Clamp(value, 0.1f, 10.0f);
-	}
-
-	[ConsoleMethod("explore", "")]
-	public static void _Explore(float value)
-	{
-		RoomTrigger.activeRooms.ToList().ForEach((room) =>
-		{
-			room.Explore();
-		});
+		foreach (var cmd in commandsOnStart)
+			IngameDebugConsole.DebugLogConsole.ExecuteCommand(cmd);
 	}
 }

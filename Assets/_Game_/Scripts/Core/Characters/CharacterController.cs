@@ -342,13 +342,18 @@ public class CharacterController : MonoBehaviour
 		
 		if (objectFrom is CharacterController)
 		{
-			if(TryGetAnimation(out var anim))
-				anim.InstantSwitchWeapons();
-
-			if (!IsEnemyTo((objectFrom as CharacterController)))
+			if (IsEnemyTo((objectFrom as CharacterController))) // enemy should get angry
 			{
-				detection.SetDetected(objectFrom as CharacterController, true);
-				anim.TrySwitchWeapons(false);
+				if (detection && !detection.IsCharacterDetected((CharacterController)objectFrom))
+				{
+					detection.SetDetected(objectFrom as CharacterController, true);
+					Routines.AssignLookPosition((objectFrom as CharacterController).GetCenterPosition());
+				
+					if (TryGetAnimation(out var anim))
+					{
+						anim.InstantSwitchWeapons();
+					}
+				}
 			}
 		}
 	}

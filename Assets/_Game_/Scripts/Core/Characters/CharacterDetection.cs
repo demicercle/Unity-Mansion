@@ -12,7 +12,7 @@ public class CharacterDetection : MonoBehaviour
 	public System.Action<CharacterController> onCharacterDetected;
 	public System.Action<CharacterController> onCharacterLost;
 	
-	public bool IsCharacterDetected(CharacterController other) => detectedCharacters.Contains(other);
+	public bool IsCharacterDetected(CharacterController other) => other && detectedCharacters.Contains(other);
 	
 	public CharacterController[] GetDetectedCharacters() => detectedCharacters.ToArray();
 	

@@ -378,6 +378,11 @@ public class CharacterAgent : MonoBehaviour
 	public void SetReachDistance(float value) => aiPath.endReachedDistance = value;
 
 	public void SetDefaultReachDistance() => aiPath.endReachedDistance = endReachDistance;
+
+	public void EnableAvoidance(bool b)
+	{
+		rvoController.enabled = b;
+	}
 	   
 	public bool pathPending => aiPath.pathPending;
 

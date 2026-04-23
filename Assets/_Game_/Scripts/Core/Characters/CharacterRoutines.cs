@@ -58,6 +58,13 @@ public class CharacterRoutines : MonoBehaviour
 		characterOwner.UseAction(CharacterAction.Run);
 		StartNewRoutine(WaitAction(CharacterAction.Run));
 	}
+
+	public void AssignLookPosition(Vector3 lookPosition)
+	{
+		if(debugMode > 0) Debug.Log(this + " AssignLookPosition ");
+		if (debugMode > 0) DebugDrawer.Line(characterOwner.GetEyesPosition(), lookPosition, Color.magenta, 1.0f);//TODO defaultDrawDuration
+		StartNewRoutine(WaitCharacterLookPosition(lookPosition));
+	}
 	
 	// leader assign
 	public void AssignMoveLeaderToDestination(Vector3 navPosition)

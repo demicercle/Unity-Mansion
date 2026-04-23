@@ -704,16 +704,12 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				if (!gameTurnManager.IsTurnBasedMode())
-				{
-					if (!IsLeaderMode())
-						selectedCharacter.Routines.AssignMoveToDestination(navPosition);
-					else
-						selectedCharacter.Routines.AssignMoveLeaderToDestination(navPosition);
-				}
-				else if(isDebugMode)  Debug.Log("> " + selectedCharacter + " !IsPathAssignable");
+				if (!IsLeaderMode())
+					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+				else
+					selectedCharacter.Routines.AssignMoveLeaderToDestination(navPosition);
 			}
-			else if(isDebugMode)  Debug.Log("> selected character not controllable");
+			else if(isDebugMode)  Debug.Log(" !CanAssignOnClick");
 		}
 		
 		else if(isDebugMode)  Debug.Log("> no character selected");

@@ -152,6 +152,7 @@ public class GameTurnManager : MonoBehaviour
 		while (true)
 		{
 			yield return StartCoroutine(RealTimeCoroutine());
+			yield return null;
 			yield return StartCoroutine(TurnBasedCoroutine());
 			yield return null; // safety for loop
 		}
@@ -160,6 +161,22 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator TurnBasedCoroutine()
 	{
 		Debug.Log(this + " Enters TurnBasedCoroutine");
+
+		foreach (var character in levelCharacters)
+		{
+			character.Rest();
+			character.StopAgent();
+			character.Routines.StopAllRoutines();
+			character.GetAgent().SetObstacle(!character.IsSelected());
+			character.GetAgent().EnableAvoidance(false);
+
+			if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
+				otherAnimation.TrySwitchWeapons(true);
+			
+			if (character.TryGetComponent(out CharacterBrain otherBrain))
+				otherBrain.StopThinking();
+		}
+		
 		currentTurn = 0;
 		
 		while (turnBasedMode)
@@ -177,32 +194,6 @@ public class GameTurnManager : MonoBehaviour
 			
 			if (currentTurn == 1) // it is the first turn
 			{
-				foreach (var otherCharacter in levelCharacters)
-				{
-					if (otherCharacter.InParty()) continue;
-					
-					if (otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
-						otherBrain.StopThinking();
-					
-					otherCharacter.Routines.StopAllRoutines();
-					otherCharacter.StopAgent();
-					otherCharacter.Rest();
-
-					if (otherCharacter.TryGetAnimation(out CharacterAnimation otherAnimation))
-						otherAnimation.TrySwitchWeapons(true);
-				}
-				
-				foreach (var partyCharacter in partyCharacters) // stop agent and draw weapons
-				{
-					partyCharacter.StopAgent();
-					partyCharacter.Routines.StopAllRoutines();
-					partyCharacter.Rest();
-
-					if (partyCharacter.TryGetAnimation(out var anim))
-						anim.TrySwitchWeapons(true);
-				}
-				
-				Debug.Log(this + " first turn setup, wait weapon switch");
 				do
 				{
 					yield return null;
@@ -272,6 +263,11 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator RealTimeCoroutine()
 	{
 		Debug.Log(this + " Enters RealTimeCoroutine");
+
+		foreach (var character in levelCharacters)
+		{
+			character.GetAgent().EnableAvoidance(true);
+		}
 		
 		currentTurn = -1;
 		NewTurn();
