@@ -366,6 +366,7 @@ public class CharacterController : MonoBehaviour
 			agent.SetAgentActive(false);
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
+			if(detection) detection.ClearAll();
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();
@@ -398,14 +399,18 @@ public class CharacterController : MonoBehaviour
 	{
 		return agent.ReachedDestination(wp.GetPosition());
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
-	} 
+	}
+
+	public float GetAttackRange(CharacterController target)
+	{
+		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.agent.GetRadius());
+	}
 
 	public bool IsAtAttackRange(CharacterController target, bool losCheck = true)
 	{
-		var weaponRange = currentWeapon.attackRange;
-		var atkRange = Mathf.Max(weaponRange, agent.GetRadius() + agent.GetMinReachDistance() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
+		var atkRange = GetAttackRange(target);
 		var dist = Vector3.Distance(GetPosition(), target.GetPosition());
-		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
+		Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
 		if (dist <= atkRange)
 		{
 			return !losCheck || LOSCheck(target);

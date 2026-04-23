@@ -128,6 +128,10 @@ public class CharacterAgent : MonoBehaviour
 		ClearDestination();
 	}
 
+	public bool HasWaypointTo(MonoBehaviour provider) => bestWaypoint && lastWaypointProvider &&
+	                                                     lastWaypointProvider.GetComponentsInChildren<Waypoint>()
+		                                                     .Contains(bestWaypoint); // TODO optim
+
 	public Waypoint GetBestWaypoint() => bestWaypoint;
 	
 	public Coroutine AssignWaypointDestinationAsync(MonoBehaviour provider)
@@ -155,7 +159,7 @@ public class CharacterAgent : MonoBehaviour
 		bestWaypoint = null;
 		waypoints = waypointProvider.GetComponentsInChildren<Waypoint>();
 		
-		if (debugMode > 0)
+		if (debugMode > 1)
 		{
 			Debug.Log(this + " SearchBestWaypoint from " + _character + " to " + waypointProvider + " waypoints=" + waypoints.Length);
 			DebugDrawer.Line(_character.GetCenterPosition(), waypointProvider.transform.position, Color.blueViolet, 1.0f);
@@ -231,6 +235,7 @@ public class CharacterAgent : MonoBehaviour
 		}
 		else
 		{
+			lastWaypointProvider = waypointProvider;
 			AssignDestination(bestWaypoint.GetPosition(), true);
 			
 			if (debugMode > 0)
@@ -311,6 +316,7 @@ public class CharacterAgent : MonoBehaviour
 		return /*aiPath.reachedDestination ||*/ Vector3.Distance(aiPath.position, dest) <= GetMinReachDistance();
 	}
 
+	public bool IsActive() => aiPath && aiPath.enabled;
 	public void SetAgentActive(bool value)
 	{
 		if(debugMode > 0) Debug.Log(this + " SetAgentActive=" + value);
@@ -329,8 +335,16 @@ public class CharacterAgent : MonoBehaviour
 		}
 
 		rvoController.enabled = value;
+		rvoController.layer = rvoController.enabled ? RVOLayer.DefaultAgent : RVOLayer.Layer2;
 	}
 
+	public void RecalculatePath()
+	{
+		if (hasDestination)
+		{
+			AssignDestination(aiPath.destination, true);
+		}
+	}
 	private void OnSearchPath()
 	{
 		lastPath = GetCurrentPath();
@@ -398,7 +412,7 @@ public class CharacterAgent : MonoBehaviour
 	private GameTurnManager _gameTurnManager; // TODO
 	private CharacterAnimation _characterAnimation;
 	[HideInInspector] private Vector3[] lastPath; //hide in unity because it crashes (too much things to display probably)
-	private MonoBehaviour waypointProvider;
+	private MonoBehaviour waypointProvider, lastWaypointProvider;
 	private Waypoint bestWaypoint;
 	private Waypoint[] waypoints;
 	private RVOController rvoController;
@@ -423,6 +437,11 @@ public class CharacterAgent : MonoBehaviour
 		
 		UpdateComponent();
 		aiPath.onSearchPath += OnSearchPath;
+
+		moveTarget.name += " (" + name + ")";
+		moveTarget.radius = GetRadius() * 0.5f;
+		moveTarget.transform.SetParent(null, true);
+		moveTarget.gameObject.SetActive(false);
 	}
 
 	private void UpdateComponent()
@@ -438,6 +457,7 @@ public class CharacterAgent : MonoBehaviour
 	
 	private void OnDestroy()
 	{
+		if(moveTarget) Destroy(moveTarget.gameObject);
 		aiPath.onSearchPath -= OnSearchPath;
 		_character.onUseAction -= OnUseAction;
 		_gameTurnManager.onTurnEnded -= UpdatePathAndTarget;
@@ -477,8 +497,8 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if (lastPath?.Length > 0 && debugMode > 0) DebugDrawer.Path(lastPath, false, isPathValid ? Color.cyan : Color.red);
 		
-		if (CharacterRoutines.AnyActiveRoutines()) // todo
-			UpdatePathAndTarget(true);
+		//if (CharacterRoutines.AnyActiveRoutines()) // todo
+		//	UpdatePathAndTarget(true);
 	}
 
 	private bool[] shouldDrawPath = new []{false,false};
@@ -544,7 +564,7 @@ public class CharacterAgent : MonoBehaviour
 		if (bestWaypoint)
 			return true;
 
-		return hasDestination || IsMoving(); // show the target hak
+		return hasDestination;
 	}
 
 	void UpdateMoveTarget(bool isBlinking)

@@ -438,7 +438,7 @@ GameObject:
   - component: {fileID: 5377573228973138723}
   - component: {fileID: 2566465295043087341}
   - component: {fileID: 4816092130728771588}
-  - component: {fileID: 2778815670404937585}
+  - component: {fileID: 3083728991372862651}
   m_Layer: 5
   m_Name: IngameDebugConsole_Game
   m_TagString: Untagged
@@ -643,7 +643,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   embeddedEventSystem: {fileID: 7642270632825834238}
---- !u!114 &2778815670404937585
+--- !u!114 &3083728991372862651
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

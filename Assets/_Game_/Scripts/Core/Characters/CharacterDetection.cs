@@ -40,6 +40,8 @@ public class CharacterDetection : MonoBehaviour
 		}
 		
 	}
+
+	public void ClearAll() => detectedCharacters.Clear();
 	
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
@@ -88,6 +90,7 @@ public class CharacterDetection : MonoBehaviour
 	private void OnAnyCharacterMoved(CharacterController anyCharacter)
 	{
 		if (anyCharacter.IsDead()) return;
+		if (!selfCharacter.InParty() && !selfCharacter.IsCharacterRevealed()) return; // prevent non player characters to detect
 		
 		if (anyCharacter == selfCharacter)
 		{

@@ -45,7 +45,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void AssignMoveToDestination(Vector3 navPosition)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToDestination " + navPosition);
-		StartNewRoutine(WaitCharacterMoved(navPosition));
+		StartNewRoutine(WaitCharacterMoved(navPosition, 0f));
 	}
 	public void AssignMoveToWaypoint(Waypoint waypoint, bool canUseRunAction)
 	{
@@ -103,8 +103,6 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 	
-	
-	public Coroutine MoveToDestination(Vector3 navPosition) => StartCoroutine(WaitCharacterMoved(navPosition));
 #region PRIVATE
 	private Coroutine coroutine;
 	private CharacterController characterOwner;
@@ -154,7 +152,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		
 		if(debugMode > 0) Debug.Log(characterOwner + " WaitCharacterInteract " + clickedProp);
-		yield return StartCoroutine(WaitCharacterMoved(bestWaypoint.GetPosition()));
+		yield return StartCoroutine(WaitCharacterMoved(bestWaypoint.GetPosition(), bestWaypoint.radius));
 		if (agent.ReachedDestination(bestWaypoint.GetPosition()))
 		{
 			// waypoint reach
@@ -216,12 +214,13 @@ public class CharacterRoutines : MonoBehaviour
 					characterOwner.FloatingText_Cant();
 					yield break;
 				}
-				
-				if(debugMode > 0) Debug.Log(characterOwner + " starts moving towards target");
-				yield return characterOwner.StartCoroutine(WaitCharacterMoved(target.GetPosition()));
+
+				var reachDistance = characterOwner.GetAttackRange(target);
+				if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
+				yield return characterOwner.StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance));
 			}
 			
-			//else Debug.Log(characterOwner + " moves towards " + target);
+			else Debug.LogWarning(characterOwner + " cannot moves towards " + target);
 		}
 		
 		yield return characterOwner.StartCoroutine(WaitCharacterPerformAttack(target, true));
@@ -297,7 +296,7 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		debugString = "WaitMoveCharacterToWaypoint";
 		if(debugMode > 0) Debug.Log(this + " WaitMoveCharacterToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
-		yield return characterOwner.StartCoroutine(WaitCharacterMoved(waypoint.GetPosition()));
+		yield return characterOwner.StartCoroutine(WaitCharacterMoved(waypoint.GetPosition(), waypoint.radius));
 		
 		if (characterOwner.WaypointReached(waypoint))
 		{
@@ -319,11 +318,11 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " did not reach waypoint");
 	}
 
-	private IEnumerator WaitCharacterMoved(Vector3 dest)
+	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance)
 	{
-		debugString = "WaitCharacterMoved";
-		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + characterOwner);
-		
+		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
+		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + characterOwner + " " + reachDistance);
+			
 		var agent = characterOwner.GetAgent();
 		if(agent.IsMoving()) agent.StopMovement(); // stop any other movement
 		
@@ -358,6 +357,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		
 		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
+		agent.SetReachDistance(Mathf.Max(agent.GetMinReachDistance(), reachDistance));
 		agent.StartMove();
 		
 		var timeout = 0.0f;

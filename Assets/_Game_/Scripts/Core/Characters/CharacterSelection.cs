@@ -68,7 +68,7 @@ public class CharacterSelection : MonoBehaviour
 	#endregion
 	
 	private static CharacterController selectedCharacter;
-	private CharacterController controller;
+	private CharacterController _selfCharacter;
 	
 	[Header("Collision")]
 	[SerializeField] private CapsuleCollider capsuleCollider;
@@ -94,9 +94,9 @@ public class CharacterSelection : MonoBehaviour
 	[ContextMenu("UpdateComponents")]
 	private void UpdateComponents()
 	{
-		if (!controller) controller = GetComponent<CharacterController>();
-		if (!controller) return;
-		var agent = controller.GetAgent();
+		if (!_selfCharacter) _selfCharacter = GetComponent<CharacterController>();
+		if (!_selfCharacter) return;
+		var agent = _selfCharacter.GetAgent();
 		var radius = agent.GetRadius();
 		var height = agent.GetHeight();
 
@@ -121,8 +121,8 @@ public class CharacterSelection : MonoBehaviour
 
 	private void Awake()
 	{
-		controller = GetComponent<CharacterController>();
-		if (!controller)
+		_selfCharacter = GetComponent<CharacterController>();
+		if (!_selfCharacter)
 		{
 			Debug.LogWarning(this + " has no CharacterController");
 			enabled = false;
@@ -134,18 +134,19 @@ public class CharacterSelection : MonoBehaviour
 
 	private void LateUpdate()//TODO optim
 	{
-		currentColor = ColorSettings.GetCharacterColor(controller, true, false);
-		alphaColor = alphaCurve.Evaluate(CharacterSelection.IsCharacterSelected(controller) ? 1f : mouseOver ? 0.5f : 0.0f);
+		currentColor = ColorSettings.GetCharacterColor(_selfCharacter, true, false);
+		alphaColor = alphaCurve.Evaluate(CharacterSelection.IsCharacterSelected(_selfCharacter) ? 1f : mouseOver ? 0.5f : 0.0f);
 		
 		if (selectionCircle)
 		{
+			selectionCircle.gameObject.SetActive(!_selfCharacter.IsDead() || _selfCharacter.InParty());
 			selectionCircle.SetColor(currentColor, alphaColor);
 		}
 
 		if (movePointsCircle)
 		{
 			movePointsCircle.SetColor(currentColor, alphaColor);
-			movePointsCircle.SetProgress(controller.GetMovePointsProgress());
+			movePointsCircle.SetProgress(_selfCharacter.GetMovePointsProgress());
 		}
 		
 		UpdateComponents();

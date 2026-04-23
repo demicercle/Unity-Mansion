@@ -33,6 +33,8 @@ public class PropComponent : MonoBehaviour
 	
 	public CursorType GetCursorType() => cursorType;
 
+	public Vector3 GetPosition() => transform.position;
+
 	public void InteractedBy(CharacterController characterInstigator)
 	{
 		Debug.Log(this + " InteractedBy " + characterInstigator + " " + interactionCount);
