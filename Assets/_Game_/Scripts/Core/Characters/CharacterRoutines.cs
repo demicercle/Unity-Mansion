@@ -13,6 +13,11 @@ public class CharacterRoutines : MonoBehaviour
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
 	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
+	
+	public static Coroutine DoLookPositionOn(CharacterController character, Vector3 lookPosition)
+	{
+		return character.StartCoroutine(character.Routines.WaitCharacterLookPosition(lookPosition));
+	}
 
 	public System.Action OnStarted;
 	
@@ -32,7 +37,7 @@ public class CharacterRoutines : MonoBehaviour
 		StartNewRoutine(WaitCharacterPerformAttack(target, useAction));
 		//OnAssignAction?.Invoke();
 	}
-	public void AssignInteract(PropComponent clickedProp) // TODO Prop Controller
+	public void AssignInteract(PropComponent clickedProp) 
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignInteract " + clickedProp);
 		StartNewRoutine(WaitCharacterInteract(clickedProp));
@@ -52,10 +57,6 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignRunAction ");
 		characterOwner.UseAction(CharacterAction.RunAction);
 		StartNewRoutine(WaitAction(CharacterAction.RunAction));
-	}
-	public Coroutine LookPosition(Vector3 lookPosition)
-	{
-		return StartCoroutine(WaitCharacterLookPosition(lookPosition));
 	}
 	
 	// leader assign
@@ -85,6 +86,15 @@ public class CharacterRoutines : MonoBehaviour
 		follow.SetLeader(leader);
 		follow.enabled = true;
 	}
+
+	public void StopAllRoutines()
+	{
+		if (activeInstances.Contains(this))
+		{
+			StopAllCoroutines();
+			activeInstances.Remove(this);
+		}
+	}
 	
 	
 	public Coroutine MoveToDestination(Vector3 navPosition) => StartCoroutine(WaitCharacterMoved(navPosition));
@@ -105,26 +115,21 @@ public class CharacterRoutines : MonoBehaviour
 		StartCoroutine(_WaitComplete());
 		OnStarted?.Invoke();
 	}
-
-	private void StopAllRoutines()
-	{
-		if (activeInstances.Contains(this))
-		{
-			StopAllCoroutines();
-			activeInstances.Remove(this);
-		}
-	}
 	
 	//public Coroutine WaitComplete() => StartCoroutine(_WaitComplete());
 	private IEnumerator _WaitComplete()
 	{
 		if(activeInstances.Contains(this)) Debug.LogError(this + " _WaitComplete activeInstances.Contains(this)");
 		activeInstances.Add(this);
-		while (activeInstances[0] != this) yield return null; // wait other routines
+		
+		while (activeInstances[0] != this) // wait other routines
+			yield return null; 
+		
 		if(debugMode > 0) Debug.Log(this + " routine started " + activeInstances.Count);
 		yield return coroutine;
 		activeInstances.Remove(this);
 		if(debugMode > 0) Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
+		debugString = "";
 	}
 	
 	private IEnumerator WaitCharacterInteract( PropComponent clickedProp)
@@ -133,6 +138,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			if(debugMode > 0) Debug.Log(characterOwner + " WaitCharacterInteract " + clickedProp);
 			yield return StartCoroutine(WaitCharacterMoved(bestWaypoint.GetPosition()));
+			debugString = "WaitCharacterInteract";
 			var agent = characterOwner.GetAgent();
 			if (agent.ReachedDestination(bestWaypoint.GetPosition()))
 			{
@@ -165,6 +171,7 @@ public class CharacterRoutines : MonoBehaviour
 			{
 				do
 				{
+					debugString = "TrySwitchWeapons";
 					yield return null;
 				} while (characterAnim.IsSwitchingWeapons);
 				if(debugMode > 0) Debug.Log("weapons switched for attacking");
@@ -213,6 +220,7 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterPerformAttack(CharacterController target, bool useAction)
 	{
+		debugString = "WaitCharacterPerformAttack";
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterPerformAttack " + target );
 		
 		yield return StartCoroutine(WaitCharacterLookPosition(target.GetCenterPosition()));
@@ -233,19 +241,22 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log("attack ends");
 	}
 
-	private IEnumerator WaitCharacterInteract(PropComponent prop, Waypoint waypoint = null)
+	private IEnumerator WaitCharacterInteract(PropComponent prop, Waypoint waypoint)
 	{
+		debugString = "WaitCharacterInteract";
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteract > " + prop + " @ " + waypoint);
 		
-		if (waypoint != null)
+		if (!waypoint)
 		{
-			var wpDir = waypoint.GetDirection();
-
-			while (!characterOwner.IsFacingDirection(wpDir))
-			{
-				characterOwner.LookDirection(wpDir, Time.deltaTime);
-				yield return null;
-			}
+			Debug.LogWarning(this + " WaitCharacterInteract - no waypoint");
+			yield break;
+		}
+		
+		var wpDir = waypoint.GetDirection();
+		while (!characterOwner.IsFacingDirection(wpDir))
+		{
+			characterOwner.LookDirection(wpDir, Time.deltaTime);
+			yield return null;
 		}
 		
 		characterOwner.UseAction(prop.GetInteractAction(), prop);
@@ -263,6 +274,7 @@ public class CharacterRoutines : MonoBehaviour
 	
 	private IEnumerator WaitCharacterLookDirection(Vector3 dir)
 	{
+		debugString = "WaitCharacterLookDirection";
 		characterOwner.StopAgent();
 		
 		while (!characterOwner.IsFacingDirection(dir))
@@ -274,7 +286,8 @@ public class CharacterRoutines : MonoBehaviour
 	
 	private IEnumerator WaitMoveCharacterToWaypoint(Waypoint waypoint, bool canUseRunAction)
 	{
-		if(debugMode > 0) Debug.Log(this + " WaitMovecharacterOwnerToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
+		debugString = "WaitMoveCharacterToWaypoint";
+		if(debugMode > 0) Debug.Log(this + " WaitMoveCharacterToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
 		yield return characterOwner.StartCoroutine(WaitCharacterMoved(waypoint.GetPosition()));
 		
 		if (characterOwner.WaypointReached(waypoint))
@@ -299,6 +312,7 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterMoved(Vector3 dest)
 	{
+		debugString = "WaitCharacterMoved";
 		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + characterOwner);
 		
 		var agent = characterOwner.GetAgent();
@@ -364,6 +378,7 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 0) DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
 			if(debugMode > 0) DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
 			if(debugMode > 0) DebugDrawer.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
+			
 			yield return null;
 
 			var newPosition = characterOwner.GetPosition();
@@ -389,8 +404,18 @@ public class CharacterRoutines : MonoBehaviour
 	
 	private IEnumerator WaitAction(CharacterAction action)
 	{
+		debugString = "WaitAction " + action;
 		if(debugMode > 0) Debug.Log(">> WaitAction: " + this + " " + action);
 		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 	#endregion
+	
+	private string debugString = "";
+	private void OnGUI()
+	{
+		if (debugMode > 0)
+		{
+			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString));
+		}
+	}
 }

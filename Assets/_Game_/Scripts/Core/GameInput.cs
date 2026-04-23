@@ -116,6 +116,7 @@ public class GameInput : MonoBehaviour
 	private int lastCursorResult;
 	private string debugString;
 	private bool ungroupMode;
+	private bool hasConsoleEvents;
 
 	private void Awake()
 	{
@@ -151,8 +152,12 @@ public class GameInput : MonoBehaviour
 		
 		CharacterSelection.selectionChanged += SelectionChanged;
 
-		DebugLogManager.Instance.OnLogWindowShown += OnLogWindowShown;
-		DebugLogManager.Instance.OnLogWindowHidden += OnLogWindowHidden;
+		if (DebugLogManager.Instance)
+		{
+			hasConsoleEvents = true;
+			DebugLogManager.Instance.OnLogWindowShown += OnLogWindowShown;
+			DebugLogManager.Instance.OnLogWindowHidden += OnLogWindowHidden;
+		}
 
 		canvas.onViewportClicked += OnClickedViewport;
 		canvas.onViewportMouseOver += OnMouseOverViewport;
@@ -160,7 +165,9 @@ public class GameInput : MonoBehaviour
 
 	private void OnDisable()
 	{
+		#if UNITY_EDITOR
 		if (!Application.isPlaying) return;
+		#endif
 		
 		inputSystem.UI.Click.performed -= OnInputLeftClick;
 		inputSystem.UI.RightClick.performed -= OnInputRightClick;
@@ -176,8 +183,12 @@ public class GameInput : MonoBehaviour
 		
 		CharacterSelection.selectionChanged -= SelectionChanged;
 
-		DebugLogManager.Instance.OnLogWindowShown -= OnLogWindowShown;
-		DebugLogManager.Instance.OnLogWindowHidden -= OnLogWindowHidden;
+		if (DebugLogManager.Instance && hasConsoleEvents)
+		{
+			hasConsoleEvents = false;
+			DebugLogManager.Instance.OnLogWindowShown -= OnLogWindowShown;
+			DebugLogManager.Instance.OnLogWindowHidden -= OnLogWindowHidden;
+		}
 		
 		canvas.onViewportClicked -= OnClickedViewport;
 		canvas.onViewportMouseOver -= OnMouseOverViewport;
@@ -686,7 +697,7 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				if (selectedCharacter.IsPathAssignable())
+				if (!gameTurnManager.IsTurnBasedMode() || selectedCharacter.IsPathAssignable())
 				{
 					if (!IsLeaderMode())
 						selectedCharacter.Routines.AssignMoveToDestination(navPosition);

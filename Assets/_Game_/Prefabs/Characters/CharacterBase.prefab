@@ -493,6 +493,7 @@ MonoBehaviour:
   canChase: 1
   canPatrol: 1
   canUseRunAction: 0
+  lookAtDetectedEnemies: 1
   defaultWait: 1.5
   looseTargetTime: 1.5
 --- !u!114 &7705601098757829042
@@ -819,7 +820,7 @@ MonoBehaviour:
   centerBackingField: 1
   locked: 0
   lockWhenNotMoving: 1
-  agentTimeHorizon: 2
+  agentTimeHorizon: 1
   obstacleTimeHorizon: 0.5
   maxNeighbours: 10
   layer: 1
@@ -827,7 +828,7 @@ MonoBehaviour:
   wallAvoidForce: 1
   wallAvoidFalloff: 1
   priority: 0.5
-  debug: 255
+  debug: 0
 --- !u!1 &3549809914347783905
 GameObject:
   m_ObjectHideFlags: 0
@@ -1137,6 +1138,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HideInFog
   character: {fileID: 1077634328985660634}
+  transparentFX:
+  - {fileID: 4939472226289180237}
+  - {fileID: 3858026444835299486}
+  - {fileID: 9033233991935084580}
+  - {fileID: 5255465170416904580}
+  - {fileID: 2283550923626056868}
   renderers: []
   colliders: []
   debugLog: 0

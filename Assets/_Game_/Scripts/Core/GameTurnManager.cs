@@ -18,7 +18,7 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private bool skipInvisibleCharacters = true;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
-	[SerializeField] [Range(0.1f,1f)] private float realTimeTicks = 0.5f;
+	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
 	[SerializeField] [Min(0.1f)] private float postLoadDuration = 1.0f;
 	[SerializeField] [Min(0.1f)] private float turnChangedSeconds = 3.0f;
 	[SerializeField] [Min(0.1f)]  private  float focusCharacterSeconds = 1.5f;
@@ -113,8 +113,8 @@ public class GameTurnManager : MonoBehaviour
 			yield return new WaitForSeconds(postLoadDuration);
 		} while (SceneLoader.AnyInstanceActive);
 
-		while(NavmeshRebuilder.IsRebuildingAsync()) 
-			yield return null;
+		Debug.Log(" wait NavmeshRebuilder(s)");
+		do yield return null;	while (NavmeshRebuilder.IsRebuildingAsync()); // wait rebuild
 		
 		Debug.Log(" loading scene complete");
 		
@@ -143,14 +143,15 @@ public class GameTurnManager : MonoBehaviour
 		
 		while (true)
 		{
-			yield return StartCoroutine(RealTimeModeCoroutine());
+			yield return StartCoroutine(RealTimeCoroutine());
 			yield return StartCoroutine(TurnBasedCoroutine());
+			yield return null; // safety for loop
 		}
 	}
 
 	private IEnumerator TurnBasedCoroutine()
 	{
-		Debug.Log(this + " Enters TurnModeCoroutine");
+		Debug.Log(this + " Enters TurnBasedCoroutine");
 		currentTurn = 0;
 		
 		while (turnBasedMode)
@@ -173,14 +174,44 @@ public class GameTurnManager : MonoBehaviour
 			
 			NewTurn();
 			
-			if (currentTurn > 1) // it is not the first turn
+			if (currentTurn == 1) // it is the first turn
+			{
+				foreach (var otherCharacter in levelCharacters)
+				{
+					if (otherCharacter.InParty()) continue;
+					otherCharacter.StopAgent();
+					otherCharacter.Routines.StopAllRoutines();
+					otherCharacter.Rest();
+					
+					if (otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
+						otherBrain.StopThinking();
+
+					if (otherCharacter.TryGetAnimation(out CharacterAnimation otherAnimation))
+						otherAnimation.TrySwitchWeapons(true);
+				}
+				
+				foreach (var partyCharacter in partyCharacters) // stop agent and draw weapons
+				{
+					partyCharacter.StopAgent();
+					partyCharacter.Routines.StopAllRoutines();
+					partyCharacter.Rest();
+
+					if (partyCharacter.TryGetAnimation(out var anim))
+						anim.TrySwitchWeapons(true);
+				}
+				
+				Debug.Log(this + " first turn setup, wait weapon switch");
+				do
+				{
+					yield return null;
+				} while (levelCharacters.Any(c => c.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons));
+				
+				yield return new WaitForSeconds(firstTurnSeconds); 
+			}
+			else // it is NOT the first turn
 			{
 				SelectBestPlayerCharacter();
 				yield return new WaitForSeconds(focusCharacterSeconds); 
-			}
-			else
-			{
-				yield return new WaitForSeconds(firstTurnSeconds); 
 			}
 			
 			while (IsPlayerTurn())
@@ -229,9 +260,9 @@ public class GameTurnManager : MonoBehaviour
 		}
 	}
 
-	private IEnumerator RealTimeModeCoroutine()
+	private IEnumerator RealTimeCoroutine()
 	{
-		Debug.Log(this + " Enters RealTimeModeCoroutine");
+		Debug.Log(this + " Enters RealTimeCoroutine");
 		
 		currentTurn = -1;
 		NewTurn();
@@ -242,6 +273,18 @@ public class GameTurnManager : MonoBehaviour
 		do
 		{
 			PartyRest(false);
+
+			foreach (var otherCharacter in levelCharacters)
+			{
+				if (otherCharacter.InParty()) continue;
+				if (otherCharacter.IsDead()) continue;
+				otherCharacter.Rest(false);
+				if (otherCharacter.Routines.AnyActive()) continue;
+				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain)) continue;
+				
+				if (!otherBrain.IsThinking)
+					otherBrain.StartThink();
+			}
 
 			yield return new WaitForSeconds(realTimeTicks);
 
@@ -280,17 +323,6 @@ public class GameTurnManager : MonoBehaviour
 		
 		if (currentTurn > 0)
 		{
-			if (currentTurn == 1)
-			{
-				foreach (var partyCharacter in partyCharacters) // stop agent and draw weapons
-				{
-					partyCharacter.StopAgent();
-					
-					if (partyCharacter.TryGetAnimation(out var anim))
-						anim.TrySwitchWeapons(true);
-				}
-			}
-				
 			onTurnStarted?.Invoke();
 		}
 	}

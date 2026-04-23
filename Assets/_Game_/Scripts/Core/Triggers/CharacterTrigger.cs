@@ -6,6 +6,8 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Collider))]
 public class CharacterTrigger : MonoBehaviour
 {
+	public static int debugMode { get; set; }
+	
 	public static List<CharacterTrigger> activeTriggers = new List<CharacterTrigger>();
 	
 	[Header("Settings")]
@@ -13,7 +15,6 @@ public class CharacterTrigger : MonoBehaviour
 	[SerializeField] private bool triggerOnEnter = true;
 	[SerializeField] private bool triggerOnExit = false;
 	[Min(-1)] [SerializeField] private int maxCount = 1;
-	[SerializeField] private bool debugMode = false;
 	
 	[SerializeField] private UnityEvent triggered;
 	
@@ -60,7 +61,7 @@ public class CharacterTrigger : MonoBehaviour
 		if (other.TryGetComponent(out CharacterController character) && IsCharacterValid(character))
 		{
 			characters.Add(character);
-			if(debugMode) Debug.Log(this + " OnTriggerEnter " + character);
+			if(debugMode>0) Debug.Log(this + " OnTriggerEnter " + character);
 			if(triggerOnEnter) TriggerNow();
 		}
 	}
@@ -70,7 +71,7 @@ public class CharacterTrigger : MonoBehaviour
 		if (other.TryGetComponent(out CharacterController character))
 		{
 			characters.Remove(character);
-			if(debugMode) Debug.Log(this + " OnTriggerExit " + character);
+			if(debugMode>0) Debug.Log(this + " OnTriggerExit " + character);
 			if (triggerOnExit) TriggerNow();
 		}
 	}

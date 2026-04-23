@@ -7,12 +7,12 @@ using UnityEngine;
 public class HideInFog : MonoBehaviour
 {
 	[SerializeField] private CharacterController character;
+	[SerializeField] private List<Renderer> transparentFX = new List<Renderer>();
 	[SerializeField] private List<Renderer> renderers = new List<Renderer>();
 	[SerializeField] private List<Collider> colliders = new List<Collider>();
 	[SerializeField] private bool debugLog;
 	
 	private bool isHidden;
-	private int currentLayer;
 
 	private void Awake()
 	{
@@ -44,9 +44,9 @@ public class HideInFog : MonoBehaviour
 	{
 		CancelInvoke("UpdateVisibility");
 		isHidden = !character.IsCharacterRevealed();
-		currentLayer = isHidden ? Layers.LayerHidden : Layers.LayerCharacter;
-		renderers.ForEach(r => r.gameObject.layer = currentLayer);
-		colliders.ForEach(c => c.gameObject.layer = currentLayer);
+		transparentFX.ForEach(r => r.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerTransparentFX);
+		renderers.ForEach(r => r.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerCharacter);
+		colliders.ForEach(c => c.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerCharacter);
 		if(debugLog) Debug.Log(this + " " + character + " UpdateVisibility " + isHidden);
 	}
 }

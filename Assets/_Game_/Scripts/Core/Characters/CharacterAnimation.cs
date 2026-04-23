@@ -173,6 +173,7 @@ public class CharacterAnimation : MonoBehaviour
 			if (Time.time - startedTime > Consts.CharacterAnimTimeout)
 			{
 				Debug.LogWarning(this + " DoWaitSwitchWeapons timedout!");
+				isSwitchingWeapons = false;
 				yield break;
 			}
 		} while (rpgAnimationHandler.IsSwitchingWeapons());

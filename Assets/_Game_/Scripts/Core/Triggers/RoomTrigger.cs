@@ -21,8 +21,8 @@ public class RoomTrigger : MonoBehaviour
 	[SerializeField] private List<PropComponent> doors = new List<PropComponent>();
 	[SerializeField] private List<CharacterTrigger> triggers =  new List<CharacterTrigger>();
 	[SerializeField] private float ceilingHeight = 0.1f;
-	[SerializeField] private bool createCeilings;
 	
+	private bool createCeilings;
 	private List<BoxCollider> ceilings = new List<BoxCollider>();
 
 	public bool IsRevealed() => !gameObject.activeSelf;

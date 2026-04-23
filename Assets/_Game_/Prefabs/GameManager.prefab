@@ -49,14 +49,14 @@ MonoBehaviour:
   firstTurnIsPlayer: 1
   skipInvisibleCharacters: 1
   cameraStartZoom: 0.204
-  realTimeTicks: 0.5
+  realTimeTicks: 1
   postLoadDuration: 1
   turnChangedSeconds: 2
   focusCharacterSeconds: 1
   noActionsSeconds: 3
   defaultActionsSeconds: 1
-  firstTurnSeconds: 1
-  aiThinksSeconds: 0.5
+  firstTurnSeconds: 2
+  aiThinksSeconds: 1
   startupObjects:
   - {fileID: 5336333531941352975, guid: f9935e526320d6841a75a1a6d3b88052, type: 3}
   - {fileID: 1235272970627628970, guid: ebc1fc7399cf6304d88ef4b6f671ba70, type: 3}

@@ -115,6 +115,12 @@ public static class ConsoleWrapper
 	{
 		Debug.Log("debug_brains=" + (CharacterBrain.debugMode = value));
 	}
+
+	[ConsoleMethod("debug_triggers", "")]
+	public static void _DebugTriggers(int value)
+	{
+		Debug.Log("debug_triggers=" + (CharacterTrigger.debugMode = value));
+	}
 	
 	[ConsoleMethod("debug_nav", "")]
 	public static void _DebugNav(int value)

@@ -132,11 +132,10 @@ public class CharacterController : MonoBehaviour
 	
 	public void UseAllActions(bool consumeMovePoints = true)
 	{
-		if(consumeMovePoints && HasMovePoints()) ConsumeMovePoints(GetRemainingMovePoints(), false);
-		while (HasActions())
-		{
-			usedActions.Add(CharacterAction.None);
-		}
+		if(consumeMovePoints && HasMovePoints()) 
+			ConsumeMovePoints(GetRemainingMovePoints(), false);
+		
+		usedActions.Add(CharacterAction.None); // TODO
 	}
 	
 	public CharacterFaction GetCurrentFaction() => currentFaction;
