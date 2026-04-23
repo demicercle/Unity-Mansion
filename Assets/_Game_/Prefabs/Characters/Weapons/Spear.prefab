@@ -105,3 +105,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: 19
+  inHand: 1
+  offHand: 1

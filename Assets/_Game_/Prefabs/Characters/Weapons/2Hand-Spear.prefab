@@ -104,7 +104,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a52513df46e79ea41b451d0270508999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isLeft: 0
   rpgWeapon: 2
+  inHand: 1
+  offHand: 0
 --- !u!1 &8881655472164128921
 GameObject:
   m_ObjectHideFlags: 0

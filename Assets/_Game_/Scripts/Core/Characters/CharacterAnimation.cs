@@ -4,6 +4,7 @@ using RPGCharacterAnims.Lookups;
 using UnityEngine;
 using UnityEngine.Events;
 using RPGCharacterAnims.Extensions;
+using Unity.VisualScripting;
 
 public class CharacterAnimation : MonoBehaviour
 {
@@ -104,6 +105,7 @@ public class CharacterAnimation : MonoBehaviour
 
 	public void InstantSwitchWeapons()
 	{
+		Debug.Log(this + " InstantSwitchWeapons");
 		if (WeaponsSwitched())
 		{
 			return;
@@ -112,7 +114,7 @@ public class CharacterAnimation : MonoBehaviour
 		if (rpgAnimationHandler) rpgAnimationHandler.InstantWeaponSwitch();
 		TrySetTrigger(parameters.instantSwitchTrigger);
 		weaponSwitched = true;
-		Debug.Log(this + " InstantSwitchWeapons");
+		UpdateWeaponRenderers();
 	}
 
 	public bool TrySwitchWeapons(bool weaponsReady) // TODO instant switch weapons
@@ -187,26 +189,20 @@ public class CharacterAnimation : MonoBehaviour
 		weaponSwitched = weaponsReady;
 //		Debug.Log(this + " weaponSwitched=" + weaponSwitched);
 		isSwitchingWeapons = false;
+		UpdateWeaponRenderers();
 	}
 
 	public bool WeaponsSwitched() => weaponSwitched;
 
-	public void SetWeapon(Weapon rpgWeapon, bool isLeft)
+	public void WeaponChanged()
 	{
-		if (rpgAnimationHandler)
-		{
-			if (isLeft)
-			{
-				rpgAnimationHandler.leftWeapon = rpgWeapon;
-			}
-			else
-			{
-				rpgAnimationHandler.rightWeapon = rpgWeapon;
-			}
-
-			//TODO on weapon changed TrySwitchWeapons(true);
-		}
+		UpdateWeaponRenderers();
 	}
+
+	/*public void SetWeapon(Weapon rpgWeapon, bool isLeft)
+	{
+		
+	}*/
 	
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
@@ -214,6 +210,7 @@ public class CharacterAnimation : MonoBehaviour
 	private EventType waitForEvent;
 	private bool weaponSwitched;
 	private bool hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
+	private WeaponRenderer[] weaponRenderers;
 	
 	private void Awake()
 	{
@@ -238,6 +235,8 @@ public class CharacterAnimation : MonoBehaviour
 		
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponent<RPGAnimationHandler>();
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponentInChildren<RPGAnimationHandler>();
+
+		weaponRenderers = GetComponentsInChildren<WeaponRenderer>();
 
 		_selfCharacter.onHealed += OnHealed;
 		_selfCharacter.onDamaged += OnDamaged;
@@ -265,16 +264,11 @@ public class CharacterAnimation : MonoBehaviour
 
 		if (rpgAnimationHandler)
 		{
-			if (rpgAnimationHandler.HasWeapon())
-			{
-				TrySwitchWeapons(true);
-			}
-			else
-			{
-				TrySwitchWeapons(false);
-				rpgAnimationHandler.Relax();
-			}
+			rpgAnimationHandler.RelaxOnStart();
 		}
+		
+		if(!TrySwitchWeapons(weaponSwitched))
+			UpdateWeaponRenderers(); // instant update
 		
 		if (waitForEvent != EventType.Undefined) 
 			Debug.LogError(this + " has waitForEvent on start " + waitForEvent);
@@ -378,6 +372,27 @@ public class CharacterAnimation : MonoBehaviour
 			}
 			
 			_selfCharacter.FloatingText("Take this!");
+		}
+	}
+
+	private void UpdateWeaponRenderers()
+	{
+		if (!rpgAnimationHandler) return;
+
+		rpgAnimationHandler.rightWeapon = _selfCharacter.GetCurrentWeapon().rpgWeaponR;
+		rpgAnimationHandler.leftWeapon = _selfCharacter.GetCurrentWeapon().rpgWeaponL;
+			
+		foreach (var wpr in weaponRenderers)
+		{
+			if ((wpr.isLeft && rpgAnimationHandler.leftWeapon == wpr.rpgWeapon)
+			    || (!wpr.isLeft && rpgAnimationHandler.rightWeapon == wpr.rpgWeapon))
+			{
+				wpr.gameObject.SetActive( (weaponSwitched && wpr.inHand) || (!weaponSwitched && wpr.offHand));
+			}
+			else
+			{
+				wpr.gameObject.SetActive(false);
+			}
 		}
 	}
 	

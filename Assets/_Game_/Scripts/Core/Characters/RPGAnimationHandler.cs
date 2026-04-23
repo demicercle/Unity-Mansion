@@ -33,9 +33,8 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     public bool hasRightWeapon => rightWeapon.ToString().StartsWith("Right");
     public bool hasDualWeapons => hasLeftWeapon && hasRightWeapon;
     public bool isRelaxed => rightWeapon == Weapon.Relax;
-
-    public bool HasWeapon() => rightWeapon != Weapon.Relax && rightWeapon != Weapon.Unarmed;
-    public bool IsWeaponSwitchable(Weapon rpgWeapon) => rpgWeapon != Weapon.Relax && !rpgWeapon.ToString().StartsWith("TwoHand");
+    
+    public bool IsWeaponSwitchable(Weapon rpgWeapon) => rpgWeapon != Weapon.Relax /*&& !rpgWeapon.ToString().StartsWith("TwoHand")*/;
 
 	// Weapon Parameters.
 	//public List<Weapon> switchableWeapons = new List<Weapon>();
@@ -127,11 +126,8 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     
     #region WEAPONS
 
-    public void Relax()
+    public void RelaxOnStart()
     {
-	    if (!IsWeaponSwitchable(Weapon.Relax))
-		    return;
-	    
 	    animator.SetInteger(AnimationParameters.Weapon, -1);
 	    animator.SetTrigger(AnimationParameters.Trigger);
 	    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
