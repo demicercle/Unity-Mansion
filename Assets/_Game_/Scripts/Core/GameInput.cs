@@ -27,7 +27,8 @@ public class GameInput : MonoBehaviour
 	public static GameInput Instance => instance;
 
 	//[SerializeField] private bool debugLog;
-	
+
+	[SerializeField] private CircleRenderer navigationTarget;
 	[Header("Camera Control")]
 	[SerializeField] [Range(0f, 6f)] private float inputOrbitScale = 3.14f;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
@@ -93,8 +94,9 @@ public class GameInput : MonoBehaviour
 	private bool isLoading => gameTurnManager.IsLoading();
 	private GameCanvas canvas => GameCanvas.Instance;
 	private CameraPivot cameraPivot => CameraPivot.Instance;
+	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
 	private bool isDebugMode => debugMode > 0;
-	private GameTurnManager gameTurnManager;
+	private CharacterController selectedCharacter;
 	private bool mouseDown, orbitWithInputs;
 	private Vector2 orbitAxis;
 	private Vector2 orbitDelta;
@@ -126,11 +128,9 @@ public class GameInput : MonoBehaviour
 		Debug.Log(this + " Awake");
 		instance = this;
 
-		gameTurnManager = GameTurnManager.Instance;
-		if (!gameTurnManager) gameTurnManager = Utils.FindFirstObject<GameTurnManager>();
-		if (!gameTurnManager) Debug.LogError(this + " cannot find GameTurnManager!");
-
 		hasNoActionsCursor = CursorData.HasCursor(CursorType.NoActions);
+		
+		navigationTarget.gameObject.SetActive(false);
 	}
 	
 	private void OnEnable()
@@ -318,7 +318,7 @@ public class GameInput : MonoBehaviour
 			Cursor.SetCursor(null,default,default);
 		}
 
-		CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter);
+		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
 		if (hasFocus && mouseOverViewport && !holdMiddleClick) // mouse over
@@ -446,6 +446,10 @@ public class GameInput : MonoBehaviour
 	
 	private void LateUpdate()
 	{
+		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation);
+		if(navigationTarget.gameObject.activeSelf) 
+			navigationTarget.transform.position = navigationHit.point;
+		
 		lastMousePosition = mousePosition;
 		mouseHasMoved = false;
 		mouseDown = false;
@@ -495,7 +499,6 @@ public class GameInput : MonoBehaviour
 		if (gameTurnManager.IsTurnBasedMode()) ungroupMode = true;
 		else if (ctx.ReadValueAsButton()) ungroupMode = !ungroupMode;
 		if(debugMode > 0) Debug.Log(this + " ungroupMode=" + ungroupMode);
-		canvas.NotifyChanged();
 	}
 	
 	private void OnInputSelectNext(CallbackContext ctx)

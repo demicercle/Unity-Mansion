@@ -137,7 +137,7 @@ public class CharacterAgent : MonoBehaviour
 		}
 	}
 
-	public bool IsFollowing() => aiDestinationSetter && aiDestinationSetter.enabled;
+	public bool IsFollowing() => aiDestinationSetter && aiDestinationSetter.target;
 
 	public void AssignFollowTransform(Transform followTarget, float distance = 0f)
 	{
@@ -381,7 +381,7 @@ public class CharacterAgent : MonoBehaviour
 
 	void UpdateMoveTarget(bool isBlinking)
 	{
-		if (!hasDestination || !aiPath.hasPath || IsFollowing()) //hide
+		if ( !hasDestination || IsFollowing() ) //hide
 		{
 			moveTarget.gameObject.SetActive(false);
 			return;
@@ -391,11 +391,7 @@ public class CharacterAgent : MonoBehaviour
 		moveTarget.gameObject.SetActive(true);
 		moveTarget.transform.position = aiPath.destination;
 		
-		if (isPathValid)
-			moveTarget.SetColor(ColorSettings.GetCharacterColor(_character, true, true));
-		else 
-			moveTarget.SetColor(ColorSettings.GetDisabledColor());
-		
+		moveTarget.SetColor(ColorSettings.GetCharacterColor(_character, true, true));
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
 }

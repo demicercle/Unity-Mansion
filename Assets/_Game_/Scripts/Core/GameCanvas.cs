@@ -76,11 +76,6 @@ public class GameCanvas : MonoBehaviour
 		viewportOverlay.texture = rt;
 		viewportOverlay.enabled = true;
 	}
-
-	public void NotifyChanged()
-	{
-		UpdateSelectables();
-	}
 	
 	#region PRIVATE
 	private static GameTurnManager gameTurnManager => GameTurnManager.Instance;
@@ -105,7 +100,7 @@ public class GameCanvas : MonoBehaviour
 		floatingText.SetActive(false);
 
 		CharacterController.onPartyChanged += UpdatePortraits;
-		CharacterSelection.selectionChanged += UpdateSelectables;
+		//CharacterSelection.selectionChanged += UpdateSelectables;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
 		gameTurnManager.onPlayerChanged += OnPlayerChanged;
@@ -120,7 +115,7 @@ public class GameCanvas : MonoBehaviour
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
 		
 		CharacterController.onPartyChanged -= UpdatePortraits;
-		CharacterSelection.selectionChanged -= UpdateSelectables;
+		//CharacterSelection.selectionChanged -= UpdateSelectables;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
 		gameTurnManager.onPlayerChanged -= OnPlayerChanged;
