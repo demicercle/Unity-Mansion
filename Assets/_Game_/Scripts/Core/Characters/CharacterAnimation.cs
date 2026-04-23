@@ -8,6 +8,7 @@ using Unity.VisualScripting;
 
 public class CharacterAnimation : MonoBehaviour
 {
+	public static int debugMode { get; set; }
 	
 	public enum EventType
 	{
@@ -140,6 +141,7 @@ public class CharacterAnimation : MonoBehaviour
 	private IEnumerator DoWaitSwitchWeapons(bool weaponsReady)
 	{
 		isSwitchingWeapons = true;
+		if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons " + weaponsReady);
 		
 		if (!weaponsReady && hasSwitchOffTrigger)
 		{
@@ -169,9 +171,15 @@ public class CharacterAnimation : MonoBehaviour
 		if (rightWp.HasValue)
 		{
 			if (weaponsReady)
+			{
+				if(debugMode > 0) Debug.Log("rpg UnsheathWeapon " + rightWp.Value);
 				rpgAnimationHandler.UnsheathWeapon(rightWp.Value, false);
+			}
 			else if (rpgAnimationHandler.IsWeaponSwitchable(rightWp.Value))
+			{
+				if(debugMode > 0) Debug.Log("rpg SheathWeapon " + rightWp.Value);
 				rpgAnimationHandler.SheathWeapon(rightWp.Value, Weapon.Relax, false);
+			}
 		}
 		
 		var startedTime = Time.time;
@@ -352,6 +360,8 @@ public class CharacterAnimation : MonoBehaviour
 
 	private void OnUseAction(CharacterAction actionType, object args = null)
 	{
+		if(debugMode > 0) Debug.Log(this + " OnUseAction " + actionType + " " + args);
+		
 		if (actionType == CharacterAction.Run)
 		{
 			//TrySetTrigger(parameters.trigger);
@@ -366,8 +376,10 @@ public class CharacterAnimation : MonoBehaviour
 			{
 				if (rpgAnimationHandler)
 				{
-					animator.SetActionTrigger(rpgAnimationHandler.hasDualWeapons ? AnimatorTrigger.AttackDualTrigger : AnimatorTrigger.AttackTrigger, 
-						rpgAnimationHandler.attackNumber); // TODO attack number
+					if (!weaponSwitched)
+						InstantSwitchWeapons();
+					
+					rpgAnimationHandler.Attack_Right(); // TODO
 				}
 			}
 			

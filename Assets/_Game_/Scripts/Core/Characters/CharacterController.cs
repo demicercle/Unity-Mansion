@@ -347,6 +347,7 @@ public class CharacterController : MonoBehaviour
 
 			if (!IsEnemyTo((objectFrom as CharacterController)))
 			{
+				detection.SetDetected(objectFrom as CharacterController, true);
 				anim.TrySwitchWeapons(false);
 			}
 		}
@@ -368,9 +369,6 @@ public class CharacterController : MonoBehaviour
 
 		return false;
 	}
-
-
-	public float GetAttackRange() => currentWeapon.attackRange;
 
 	public bool CanAttack(bool checkActions = true, bool checkMoves = true) =>
 		!isDead && (!checkActions || HasActions()) && (!checkMoves || HasMovePoints());
@@ -399,8 +397,8 @@ public class CharacterController : MonoBehaviour
 
 	public bool IsAtAttackRange(CharacterController target, bool losCheck = true)
 	{
-		var atkRange = GetAttackRange();
-		atkRange = Mathf.Max(atkRange, agent.GetRadius() + agent.GetMinReachDistance() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
+		var weaponRange = currentWeapon.attackRange;
+		var atkRange = Mathf.Max(weaponRange, agent.GetRadius() + agent.GetMinReachDistance() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
 		var dist = Vector3.Distance(GetPosition(), target.GetPosition());
 		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
 		if (dist <= atkRange)

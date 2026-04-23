@@ -5,6 +5,7 @@ using System.Linq;
 using Oddworm.Framework;
 using Pathfinding;
 using Pathfinding.Drawing;
+using Pathfinding.RVO;
 using UnityEngine;
 
 
@@ -326,6 +327,8 @@ public class CharacterAgent : MonoBehaviour
 		{
 			SetObstacle(false);
 		}
+
+		rvoController.enabled = value;
 	}
 
 	private void OnSearchPath()
@@ -393,6 +396,7 @@ public class CharacterAgent : MonoBehaviour
 	private MonoBehaviour waypointProvider;
 	private Waypoint bestWaypoint;
 	private Waypoint[] waypoints;
+	private RVOController rvoController;
 
 	private void OnDrawGizmosSelected()
 	{
@@ -423,6 +427,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
 		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
+		rvoController = GetComponent<RVOController>();
 		if(Application.isPlaying) SetAgentActive(false);
 	}
 	

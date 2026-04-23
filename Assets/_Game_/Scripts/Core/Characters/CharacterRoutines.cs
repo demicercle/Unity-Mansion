@@ -211,11 +211,7 @@ public class CharacterRoutines : MonoBehaviour
 				}
 				
 				if(debugMode > 0) Debug.Log(characterOwner + " starts moving towards target");
-				characterOwner.StartCoroutine(WaitCharacterMoved(target.GetPosition()));
-				do
-				{
-					yield return null;
-				} while (!characterOwner.IsMoving()); // searching path
+				yield return characterOwner.StartCoroutine(WaitCharacterMoved(target.GetPosition()));
 			}
 			
 			//else Debug.Log(characterOwner + " moves towards " + target);
@@ -239,7 +235,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		
 		characterOwner.AttackAction();
-		yield return characterOwner.WaitAnimationEvent(CharacterAnimation.EventType.Hit);
+		yield return characterOwner.WaitAnimationEvent(characterOwner.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
 		target.TakeDamage(characterOwner.GetLastAttackDamage(), characterOwner, true);

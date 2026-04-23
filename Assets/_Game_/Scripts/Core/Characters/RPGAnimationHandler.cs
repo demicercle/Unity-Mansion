@@ -12,6 +12,8 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     private Animator animator; 
     private CoroutineQueue coroQueue;
     private bool weaponsSwitched;
+    private bool _isAttacking;
+    private bool isHipShooting;
 
     public bool IsSwitchingWeapons() => isWeaponSwitching && (int)rightWeapon > 0; // unarmed
     
@@ -34,7 +36,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     public bool hasDualWeapons => hasLeftWeapon && hasRightWeapon;
     public bool isRelaxed => rightWeapon == Weapon.Relax;
     
-    public bool IsWeaponSwitchable(Weapon rpgWeapon) => rpgWeapon != Weapon.Relax /*&& !rpgWeapon.ToString().StartsWith("TwoHand")*/;
+    public bool IsWeaponSwitchable(Weapon rpgWeapon) => rpgWeapon != Weapon.Relax;
 
 	// Weapon Parameters.
 	//public List<Weapon> switchableWeapons = new List<Weapon>();
@@ -883,6 +885,34 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
             case Weapon.RightSpear: SafeSetVisibility(spear, true); break;
         }
     }*/
+
+    #endregion
+
+    #region ATTACKS
+
+    public void Attack_Right() => Attack(Side.Right);
+    public void Attack(Side attackSide) => Attack(AnimationData.RandomAttackNumber(attackSide, attackSide == Side.Right ? rightWeapon : leftWeapon), attackSide, 1.0f);
+    public void Attack(int attackNumber, Side attackSide, float duration)
+    {
+	   if(CharacterAnimation.debugMode > 0) Debug.Log(this + " " + attackNumber + " " + attackSide + " " + duration + " " + rightWeapon + " " + leftWeapon);
+	   animator.SetInteger(AnimationParameters.LeftWeapon, (int)leftWeapon);
+	   animator.SetInteger(AnimationParameters.RightWeapon, (int)rightWeapon); // force
+	    animator.SetSide(attackSide);
+	    _isAttacking = true;
+	    Lock(true, true, true, 0, duration);
+
+	    // If shooting, use regular or hipshooting attack.
+	    if (rightWeapon == Weapon.Rifle) {
+		    if (attackSide == Side.None) {
+			    if (isHipShooting) { attackNumber = 2; }
+			    else { attackNumber = 1; }
+		    }
+	    }
+
+	    // Trigger the animation.
+	    var attackTriggerType = attackSide == Side.Dual ? AnimatorTrigger.AttackDualTrigger : AnimatorTrigger.AttackTrigger;
+	    animator.SetActionTrigger(attackTriggerType, attackNumber);
+    }
     #endregion
     
     #region EMOTES

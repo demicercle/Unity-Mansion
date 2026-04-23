@@ -75,6 +75,12 @@ public static class ConsoleWrapper
 		}
 	}
 
+	[ConsoleMethod("debug_anim", "")]
+	public static void _DebugAnim(int value)
+	{
+		Debug.Log("debug_anim=" + (CharacterAnimation.debugMode = value));
+	}
+
 	[ConsoleMethod("debug_routines", "")]
 	public static void _DebugRoutines(int value)
 	{

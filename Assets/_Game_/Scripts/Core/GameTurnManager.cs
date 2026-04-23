@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -82,8 +83,15 @@ public class GameTurnManager : MonoBehaviour
 	{
 		_instance = this;
 		Debug.Log(this + " Awake");
-	} 
-	
+
+		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
+	}
+
+	private void OnDestroy()
+	{
+		CharacterDetection.onAnyCharacterDetectionChanged -= OnAnyDetectionChanged;
+	}
+
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Starts");
@@ -172,12 +180,13 @@ public class GameTurnManager : MonoBehaviour
 				foreach (var otherCharacter in levelCharacters)
 				{
 					if (otherCharacter.InParty()) continue;
-					otherCharacter.StopAgent();
-					otherCharacter.Routines.StopAllRoutines();
-					otherCharacter.Rest();
 					
 					if (otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
 						otherBrain.StopThinking();
+					
+					otherCharacter.Routines.StopAllRoutines();
+					otherCharacter.StopAgent();
+					otherCharacter.Rest();
 
 					if (otherCharacter.TryGetAnimation(out CharacterAnimation otherAnimation))
 						otherAnimation.TrySwitchWeapons(true);
@@ -373,6 +382,17 @@ public class GameTurnManager : MonoBehaviour
 
 		return false;
 	}
-	
+
+	private void OnAnyDetectionChanged(CharacterController char1, CharacterController char2, bool detected)
+	{
+		if (!turnBasedMode) // if real time
+		{
+			if (char1.IsEnemyToPlayer() && char2.IsPlayer())
+			{
+				turnBasedMode = true;
+				Debug.Log(this + " OnAnyDetectionChanged " + char1.name + " " + char2.name + " switch turn based");
+			}
+		}
+	}
 	#endregion
 }
