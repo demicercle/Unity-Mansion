@@ -38,7 +38,7 @@ public class WeaponRenderer : MonoBehaviour
     {
         if (Application.isPlaying) return;
         var prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
-        var isVisible = prefabStage; //&& prefabStage.prefabContentsRoot == gameObject;
+        var isVisible = prefabStage && prefabStage.prefabContentsRoot == gameObject;
         foreach (var rd in renderers)
         {
             rd.enabled = isVisible;
