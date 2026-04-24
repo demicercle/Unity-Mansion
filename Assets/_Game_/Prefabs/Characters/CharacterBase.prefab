@@ -463,6 +463,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
   rpgAnimationHandler: {fileID: 0}
+  switchWeaponExtraTime: 0
   parameters:
     moving: 
     velocityX: 
@@ -478,6 +479,7 @@ MonoBehaviour:
   velocityScale: 1
   minMovePointsToRun: 0.1
   roomsReveleadSeconds: 1
+  shouldSwitchWeaponWhenDamaged: 1
 --- !u!114 &3789455635990092813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -492,9 +494,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
   canChase: 1
   canPatrol: 1
-  lookAtDetectedEnemies: 1
   defaultWait: 1.5
   looseTargetDistance: 13
+  wanderingPoint: {fileID: 0}
+  wanderingDistance: 0.1
 --- !u!114 &7705601098757829042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -513,6 +516,9 @@ MonoBehaviour:
   obstructionLayers:
     serializedVersion: 2
     m_Bits: 192
+  setDetectedOnDamaged: 1
+  lookAtDamageInstigator: 1
+  warnOthersInRoom: 1
   drawGizmos: 0
 --- !u!54 &6072534866263412361
 Rigidbody:
@@ -801,7 +807,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
   followDistance: 1.9
   tickTime: 1
-  heading: -2.65
+  heading: -1.43
 --- !u!114 &-9001009375405151572
 MonoBehaviour:
   m_ObjectHideFlags: 0

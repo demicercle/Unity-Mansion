@@ -43,7 +43,7 @@ public class CharacterController : MonoBehaviour
 	public event System.Action<float> onHealed;
 	public event System.Action<float> onDamaged;
 	public event System.Action<CharacterController, float> onDamagedBy;
-	public event System.Action<int> onPartyIndexChanged;
+	public event System.Action<int,int> onPartyIndexChanged;
 	public event System.Action onDead;
 	public event System.Action onMoved;
 	public event System.Action onRotate;
@@ -187,7 +187,7 @@ public class CharacterController : MonoBehaviour
 		{
 			SetCurrentFaction(previousFaction);
 		}
-		onPartyIndexChanged?.Invoke(index);
+		onPartyIndexChanged?.Invoke(index, _partyCharacters.Count);
 		onPartyChanged?.Invoke();
 	}
 

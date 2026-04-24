@@ -432,6 +432,7 @@ public class CharacterAgent : MonoBehaviour
 		_characterAnimation = GetComponent<CharacterAnimation>();
 		_character = GetComponent<CharacterController>();
 		_character.onUseAction += OnUseAction;
+		_character.onPartyIndexChanged += OnPartyIndexChanged;
 		
 		_gameTurnManager = GameTurnManager.Instance;
 		_gameTurnManager.onTurnEnded += UpdatePathAndTarget;
@@ -463,6 +464,7 @@ public class CharacterAgent : MonoBehaviour
 		if(moveTarget) Destroy(moveTarget.gameObject);
 		aiPath.onSearchPath -= OnSearchPath;
 		_character.onUseAction -= OnUseAction;
+		_character.onPartyIndexChanged -= OnPartyIndexChanged;
 		_gameTurnManager.onTurnEnded -= UpdatePathAndTarget;
 		_gameTurnManager.onTurnStarted -= UpdatePathAndTarget;
 		CharacterSelection.selectionChanged -= SelectionChanged;
@@ -479,6 +481,11 @@ public class CharacterAgent : MonoBehaviour
 	{
 		StopMovement();
 		UpdatePathAndTarget(true);
+	}
+
+	private void OnPartyIndexChanged(int newIndex, int partyCount)
+	{
+		rvoController.priority = Mathf.Lerp(0.1f, 0.9f, (float)newIndex / (float)partyCount);
 	}
 
 	private void SelectionChanged()

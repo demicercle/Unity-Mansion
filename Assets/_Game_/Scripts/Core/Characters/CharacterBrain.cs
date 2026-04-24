@@ -305,7 +305,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		_chaseCharacter = null;
 	}
 
-	private void OnPartyIndexChanged(int index)
+	private void OnPartyIndexChanged(int index, int _)
 	{
 		enabled = index < 0; // not in party
 	}
