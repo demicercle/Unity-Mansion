@@ -24,6 +24,7 @@ public class CharacterAnimation : MonoBehaviour
 	
 	[SerializeField] private Animator animator;
 	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
+	[SerializeField] [Min(0)] private float switchWeaponExtraTime;
 	
 	[System.Serializable]
 	public struct Parameters
@@ -90,7 +91,7 @@ public class CharacterAnimation : MonoBehaviour
 	private IEnumerator DoWaitEvent(EventType eventType, float timeout)
 	{
 		var startTime = Time.time;
-		Debug.Log(this + " DoWaitEvent " + eventType);
+		if (debugMode > 0) Debug.Log(this + " DoWaitEvent " + eventType);
 		waitForEvent = eventType;
 		do
 		{
@@ -106,12 +107,12 @@ public class CharacterAnimation : MonoBehaviour
 
 	public void InstantSwitchWeapons()
 	{
-		Debug.Log(this + " InstantSwitchWeapons");
 		if (WeaponsSwitched())
 		{
 			return;
 		}
 		
+		if(debugMode >0 )Debug.Log(this + " InstantSwitchWeapons");
 		if (rpgAnimationHandler) rpgAnimationHandler.InstantWeaponSwitch();
 		TrySetTrigger(parameters.instantSwitchTrigger);
 		weaponSwitched = true;
@@ -122,7 +123,7 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		if (weaponSwitched == weaponsReady)
 		{
-//			Debug.Log(this +" weapons already switched" );
+			if(debugMode >0 )Debug.Log(this + " weapons already switched");
 			return false; 
 		}
 		
@@ -145,7 +146,7 @@ public class CharacterAnimation : MonoBehaviour
 		
 		if (!weaponsReady && hasSwitchOffTrigger)
 		{
-			Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOffTrigger " + parameters.switchOffTrigger);
+			if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOffTrigger " + parameters.switchOffTrigger);
 			animator.SetTrigger(parameters.switchOffTrigger);
 			yield return WaitEvent(EventType.WeaponSwitch);
 			isSwitchingWeapons = false;
@@ -155,7 +156,7 @@ public class CharacterAnimation : MonoBehaviour
 
 		if (weaponsReady && hasSwitchOnTrigger)
 		{
-			Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOnTrigger " + parameters.switchOnTrigger);
+			if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOnTrigger " + parameters.switchOnTrigger);
 			animator.SetTrigger(parameters.switchOnTrigger);
 			yield return WaitEvent(EventType.WeaponSwitch);
 			isSwitchingWeapons = false;
@@ -193,9 +194,11 @@ public class CharacterAnimation : MonoBehaviour
 				yield break;
 			}
 		} while (rpgAnimationHandler.IsSwitchingWeapons());
+
+		yield return new WaitForSeconds(switchWeaponExtraTime);
 		
 		weaponSwitched = weaponsReady;
-//		Debug.Log(this + " weaponSwitched=" + weaponSwitched);
+		if (debugMode > 0) Debug.Log(this + " weaponSwitched=" + weaponSwitched);
 		isSwitchingWeapons = false;
 		UpdateWeaponRenderers();
 	}
