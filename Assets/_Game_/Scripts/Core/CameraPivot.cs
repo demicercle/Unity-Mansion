@@ -128,6 +128,7 @@ public class CameraPivot : MonoBehaviour
 
     
     #region PUBLIC
+    public float GetDistanceTo(Vector3 world) => Vector3.Distance(focusPosition, world);
     public Vector3 GetFocusPosition()
     {
         return focusPosition;

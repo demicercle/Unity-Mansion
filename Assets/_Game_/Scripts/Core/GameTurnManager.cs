@@ -78,6 +78,7 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
 	
 	private CharacterController[] levelCharacters;
+	private CharacterController focusCharacter;
 	private List<CharacterController> turnBasedCharacters = new List<CharacterController>();
 	private int currentTurn;
 	private bool playerTurn;
@@ -192,6 +193,15 @@ public class GameTurnManager : MonoBehaviour
 				if (character.TryGetComponent(out CharacterBrain otherBrain))
 					otherBrain.StopThinking();
 			}
+
+			if (character.IsEnemyToPlayer())
+			{
+				if (focusCharacter == null || cameraPivot.GetDistanceTo(focusCharacter.GetPosition()) >
+				    cameraPivot.GetDistanceTo(character.GetPosition()))
+				{
+					focusCharacter = character;
+				}
+			}
 		}
 
 		Debug.Log(this + " turnBasedCharacter=" + turnBasedCharacters.Count);
@@ -213,6 +223,14 @@ public class GameTurnManager : MonoBehaviour
 			
 			if (currentTurn == 1) // it is the first turn
 			{
+				if (focusCharacter)
+				{
+					Debug.Log(this + " focusCharacter=" + focusCharacter);
+					cameraPivot.Focus(focusCharacter);
+					focusCharacter = null;
+					yield return new WaitForSeconds(focusCharacterSeconds);
+				}
+				
 				do
 				{
 					yield return null;

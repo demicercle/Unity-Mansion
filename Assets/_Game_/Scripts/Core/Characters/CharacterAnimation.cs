@@ -122,6 +122,9 @@ public class CharacterAnimation : MonoBehaviour
 
 	public bool TrySwitchWeapons(bool weaponsReady) // TODO instant switch weapons
 	{
+		if (_selfCharacter.IsDead())
+			return false;
+		
 		if (weaponSwitched == weaponsReady)
 		{
 			if(debugMode >0 )Debug.Log(this + " weapons already switched");
