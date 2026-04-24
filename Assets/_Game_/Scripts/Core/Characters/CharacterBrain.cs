@@ -21,7 +21,6 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
 	[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
-	[SerializeField] [Min(0f)] private float looseTargetDistance = 6.0f;
 	[SerializeField] private Waypoint wanderingPoint;
 	[SerializeField] [Range(0f, 12f)] private float wanderingDistance = 2.5f;
 	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
@@ -102,7 +101,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 					yield break;
 			}
 		
-			if (looseTargetDistance > 0 && Vector3.Distance(_chaseCharacter.GetPosition(), _selfCharacter.GetPosition()) > looseTargetDistance)
+			if (!_characterDetection.IsCharacterDetected(_chaseCharacter))
 			{
 				ForgetTarget();
 				if (!TryFindTarget())
@@ -431,12 +430,6 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			}
 			
 		}
-	}
-
-	private void OnDrawGizmosSelected()
-	{
-		Gizmos.color = Color.red;
-		Utils.DrawGizmosCircle(transform.position, Vector3.up, looseTargetDistance);
 	}
 
 	private void OnDrawGizmos()

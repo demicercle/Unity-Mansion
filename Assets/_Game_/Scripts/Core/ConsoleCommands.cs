@@ -15,7 +15,17 @@ public class ConsoleCommands : MonoBehaviour
 	}
 
 	[ConsoleMethod("kill_all", "")]
-	public static void KillAll(float range)
+	public static void KillAll()
+	{
+		foreach (var character in GameTurnManager.Instance.GetTurnBasedCharacters())
+		{
+			if (!character.IsDead() && !character.InParty() && character.IsEnemyToPlayer())
+				character.TryKill();
+		}
+	}
+
+	[ConsoleMethod("kill_range", "")]
+	public static void KillRange(float range)
 	{
 		var center = CameraPivot.Instance.GetFocusPosition();
 		foreach (var character in CharacterController.AllCharacters)

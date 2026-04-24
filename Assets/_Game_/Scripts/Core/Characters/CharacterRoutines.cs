@@ -433,9 +433,6 @@ public class CharacterRoutines : MonoBehaviour
 			
 			yield return new WaitForSeconds(0.5f);
 			
-			if(!characterOwner.InParty()) 
-				characterOwner.UseAllActions();
-			
 			yield break;
 		}
 		

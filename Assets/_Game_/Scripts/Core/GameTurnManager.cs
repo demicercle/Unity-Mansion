@@ -72,6 +72,8 @@ public class GameTurnManager : MonoBehaviour
 			Debug.Log(this + " TryEndPlayerTurn failed: not in player turn");
 		}
 	}
+
+	public CharacterController[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
@@ -265,6 +267,7 @@ public class GameTurnManager : MonoBehaviour
 			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
+				if (otherCharacter.IsDead()) continue;
 				
 				otherCharacter.Rest(); // rest not player character
 
@@ -416,15 +419,12 @@ public class GameTurnManager : MonoBehaviour
 		{
 			if (enemyCharacter.InParty()) 
 				continue;
+
+			if (enemyCharacter.IsDead())
+				continue;
 			
 			if (!enemyCharacter.IsEnemyToPlayer())
 				continue;
-			
-			if (!enemyCharacter.IsDead())
-			{
-				if(debugMode > 0) Debug.Log(this + " Should_not_ExitTurnBased: !IsDead enemy " + enemyCharacter);
-				return false;
-			}
 
 			if (enemyCharacter.HasDetectedAnyPartyCharacter())
 			{

@@ -99,6 +99,9 @@ public class CharacterAnimation : MonoBehaviour
 		waitForEvent = eventType;
 		do
 		{
+			if(_selfCharacter.IsDead())
+				yield break;
+			
 			if (timeout > 0f && Time.time - startTime > timeout)
 			{
 				Debug.LogWarning(this + " timeout! "  + eventType);

@@ -20,6 +20,7 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField] private bool lookAtDamageInstigator = true;
 	[SerializeField] private bool warnOthersInRoom = true;
 	[SerializeField] private bool drawGizmos;
+	[SerializeField] [Min(0f)] private float looseTargetDistance;
 	
 	public bool IsCharacterDetected(CharacterController other) => other && detectedCharacters.Contains(other);
 	
@@ -151,7 +152,7 @@ public class CharacterDetection : MonoBehaviour
 			}
 			else
 			{
-				if (!IsCharacterVisible(anyCharacter))
+				if (looseTargetDistance > 0 && Vector3.Distance(selfCharacter.GetPosition(), anyCharacter.GetPosition()) > looseTargetDistance)
 				{
 					SetDetected(anyCharacter, false);
 				}
@@ -305,6 +306,9 @@ public class CharacterDetection : MonoBehaviour
 			Gizmos.color = Utils.ColorScale(Color.magenta, Mathf.PI * 0.1f);
 			Utils.DrawGizmosCircle((left + right) / 2, Vector3.up, (left - right).magnitude/2f);
 			//Gizmos.DrawWireSphere(selfCharacter.GetPosition(), selfCharacter.GetRadius() + triggerRangeOffset);
+			
+			Gizmos.color = Color.darkOrchid;
+			Utils.DrawGizmosCircle(transform.position, Vector3.up, looseTargetDistance);
 		}
 	}
 	#endif
