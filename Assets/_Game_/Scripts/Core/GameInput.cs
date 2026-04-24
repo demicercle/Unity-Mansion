@@ -660,7 +660,14 @@ public class GameInput : MonoBehaviour
 					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
 						selectedCharacter.FloatingText_Cant();
 					else
-						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+					{
+						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
+						if (!IsLeaderMode())
+							selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+						else
+							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false, false);
+						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+					}
 					return;
 				}
 				
@@ -687,12 +694,6 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				/*if (hasNoActionsCursor)
-				{
-					if(debugMode > 0) Debug.Log(this + " " + selectedCharacter + " hasNoActionsCursor");
-					selectedCharacter.FloatingText_Cant();
-				}
-				else */
 				if (!selectedCharacter.CanUseAction(CharacterAction.Interact))
 				{
 					if(debugMode > 0) Debug.Log(this + " " + selectedCharacter + " !CanUseAction Interact");
@@ -701,7 +702,11 @@ public class GameInput : MonoBehaviour
 				else
 				{
 					if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Interact " + clickedProp);
-					selectedCharacter.Routines.AssignInteract(clickedProp);
+					if (!IsLeaderMode())
+						selectedCharacter.Routines.AssignInteract(clickedProp);
+					else
+						selectedCharacter.Routines.Leader_AssignInteract(clickedProp);
+					//selectedCharacter.Routines.AssignInteract(clickedProp);
 				}
 			}
 			else if(isDebugMode)  Debug.Log(" selected character not controllable");

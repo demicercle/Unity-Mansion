@@ -82,6 +82,38 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 
+	public void Leader_AssignInteract(PropComponent clickedProp)
+	{
+		if(debugMode > 0) Debug.Log(this + " Leader_AssignInteract ");
+		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		{
+			if (partyCharacter == characterOwner)
+			{
+				partyCharacter.Routines.AssignInteract(clickedProp);
+			}
+			else
+			{
+				partyCharacter.Routines.AssignFollows(characterOwner);
+			}
+		}
+	}
+
+	public void Leader_AssignAttack(CharacterController other, bool canUseRunAction, bool losCheck)
+	{
+		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
+		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		{
+			if (partyCharacter == characterOwner)
+			{
+				partyCharacter.Routines.AssignAttack(other, canUseRunAction, losCheck);
+			}
+			else
+			{
+				partyCharacter.Routines.AssignFollows(characterOwner);
+			}
+		}
+	}
+
 	public void AssignFollows(CharacterController leader)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignFollows " + leader);
