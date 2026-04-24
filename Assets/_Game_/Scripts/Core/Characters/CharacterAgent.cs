@@ -174,6 +174,9 @@ public class CharacterAgent : MonoBehaviour
 
 			if (Vector3.Distance(startPoint, endPoint) > WaypointMaxSearchDistance)
 				continue;
+
+			if (!RoomTrigger.IsPositionVisible(endPoint)) // ignore not revealed waypoint
+				continue;
 				
 			// Crée une requête de chemin
 			ABPath path = ABPath.Construct(startPoint, endPoint, null);
@@ -313,7 +316,7 @@ public class CharacterAgent : MonoBehaviour
 
 	public bool ReachedDestination(Vector3 dest)
 	{
-		return /*aiPath.reachedDestination ||*/ Vector3.Distance(aiPath.position, dest) <= GetMinReachDistance();
+		return Utils.HDistance(aiPath.position, dest) <= Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
 	}
 
 	public bool IsActive() => aiPath && aiPath.enabled;

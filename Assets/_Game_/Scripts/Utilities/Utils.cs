@@ -275,6 +275,12 @@ public static class Utils
 		if (t == null) t= gameObject.AddComponent<T>();
 		return t;
 	}
+
+	public static float HDistance(Vector3 aiPathPosition, Vector3 dest)
+	{
+		aiPathPosition.y = dest.y;
+		return Vector3.Distance(aiPathPosition, dest);
+	}
 }
 
 public static class NavUtils
