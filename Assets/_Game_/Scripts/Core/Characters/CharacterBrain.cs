@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
-using Pathfinding;
 using UnityEngine;
 
 public interface ICharacterBrain
@@ -13,6 +11,8 @@ public interface ICharacterBrain
 
 public class CharacterBrain : MonoBehaviour, ICharacterBrain
 {
+	public const float WanderingSearchTimeout = 6.0f;
+	
 	public static int debugMode { get; set; }
 	
 	[SerializeField] private bool canChase = true;
@@ -20,6 +20,8 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	[SerializeField] private bool lookAtDetectedEnemies = true;
 	[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
 	[SerializeField] [Min(0f)] private float looseTargetDistance = 6.0f;
+	[SerializeField] private Waypoint wanderingPoint;
+	[SerializeField] [Range(0.1f, 10f)] private float wanderingDistance;
 	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 	
 	public bool IsThinking { get; private set; }
@@ -54,6 +56,9 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		// try patrol
 		if (canPatrol)
 			yield return StartCoroutine(TryPatrol());
+
+		if (wanderingPoint)
+			yield return StartCoroutine(TryWander());
 		
 		// fallback
 		
@@ -163,6 +168,42 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		} while (CharacterRoutines.AnyActiveRoutines());
 	}
 
+	private IEnumerator TryWander()
+	{
+		if (!_selfCharacter.HasMovePoints() || !_selfCharacter.HasActions())
+			yield break;
+
+		float startTime = Time.time;
+		while (!NavUtils.TryGetRandomPointOnNavmesh(wanderingPoint.GetPosition(), wanderingDistance,
+			       _selfCharacter.GetRadius(), out _wanderingPos)
+		       || Vector3.Distance(_wanderingPos, _selfCharacter.GetPosition()) < wanderingDistance / 2f)
+		{
+			yield return null;
+			if (Time.time - startTime > WanderingSearchTimeout)
+			{
+				Debug.LogWarning(this + " wandering Timeout!");
+				yield break;
+			}
+		}
+		
+		_selfCharacter.Routines.AssignMoveToDestination(_wanderingPos);
+		do
+		{
+			if (_chaseCharacter && canChase)
+			{
+				if(debugMode > 0) Debug.Log(this + " stops wandering because _chaseCharacter=" + _chaseCharacter);
+				break;
+			}
+			
+			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetCenterPosition(), _wanderingPos, Color.blue);
+			if(debugMode > 0) DebugDrawer.WireDisc(_selfCharacter.GetCenterPosition(), _wanderingPos, _selfCharacter.GetRadius(), Color.blue);
+			
+			yield return null;
+		} while (_selfCharacter.Routines.AnyActive());
+
+		yield return new WaitForSeconds(defaultWait);
+	}
+
 	private IEnumerator YieldCantAttack()
 	{
 		if(debugMode > 0) Debug.Log(this + " Yield CantAttack");
@@ -177,6 +218,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	private Waypoint _currentWaypoint;
 	private Vector3 _lastTargetKnownPosition;
 	private bool _targetDetected;
+	private Vector3 _wanderingPos;
 	
 	private void Awake()
 	{
@@ -325,5 +367,15 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	{
 		Gizmos.color = Color.red;
 		Utils.DrawGizmosCircle(transform.position, Vector3.up, looseTargetDistance);
+	}
+
+	private void OnDrawGizmos()
+	{
+		if (wanderingPoint)
+		{
+			Gizmos.color = Color.blue;
+			Gizmos.DrawLine(transform.position, wanderingPoint.GetPosition());
+			Utils.DrawGizmosCircle(wanderingPoint.GetPosition(), Vector3.up, wanderingDistance);
+		}
 	}
 }

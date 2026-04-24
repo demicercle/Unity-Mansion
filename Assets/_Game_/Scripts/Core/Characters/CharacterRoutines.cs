@@ -66,9 +66,9 @@ public class CharacterRoutines : MonoBehaviour
 	}
 	
 	// leader assign
-	public void AssignMoveLeaderToDestination(Vector3 navPosition)
+	public void Leader_AssignMoveToDestination(Vector3 navPosition)
 	{
-		if(debugMode > 0) Debug.Log(this + " AssignMoveLeaderToDestination ");
+		if(debugMode > 0) Debug.Log(this + " Leader_AssignMoveToDestination ");
 		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
 		{
 			if (partyCharacter == characterOwner)

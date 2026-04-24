@@ -720,7 +720,7 @@ public class GameInput : MonoBehaviour
 				if (!IsLeaderMode())
 					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
 				else
-					selectedCharacter.Routines.AssignMoveLeaderToDestination(navPosition);
+					selectedCharacter.Routines.Leader_AssignMoveToDestination(navPosition);
 			}
 			else if(isDebugMode)  Debug.Log(" !CanAssignOnClick");
 		}

@@ -87,6 +87,7 @@ public class CharacterFollows : MonoBehaviour
 
 	private void OnDrawGizmosSelected()
 	{
+		if (!Utils.IsEditorPrefabStage()) return;
 		Gizmos.color = Color.softBlue;
 		Gizmos.DrawLine(transform.position, transform.position + transform.forward * heading);
 		Utils.DrawGizmosCircle(transform.position + transform.forward * heading, Vector3.up, followDistance);
