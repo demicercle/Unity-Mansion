@@ -259,7 +259,7 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if (force || !hasDestination)
 		{
-			if(!hasDestination && debugMode > 0) Debug.Log(this + " Assign_new_Destination " + force);
+			if(debugMode > 1) Debug.Log(this + " Assign_new_Destination " + force);
 			
 			if (IsFollowing()) 
 				AssignFollowTransform(null);
@@ -286,7 +286,7 @@ public class CharacterAgent : MonoBehaviour
 		if(!aiDestinationSetter) aiDestinationSetter = GetComponent<AIDestinationSetter>();
 		if(!aiDestinationSetter) aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
 		if (aiDestinationSetter.target == followTarget) return;
-		if (debugMode > 0)Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
+		if (debugMode > 0) Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
 		hasDestination = false;
 		if (IsMoving())
 		{
@@ -496,6 +496,7 @@ public class CharacterAgent : MonoBehaviour
 	private void LateUpdate()
 	{
 		if (lastPath?.Length > 0 && debugMode > 0) DebugDrawer.Path(lastPath, false, isPathValid ? Color.cyan : Color.red);
+		if (hasDestination && debugMode > 0) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, isPathValid ? Color.cyan : Color.red);
 		
 		//if (CharacterRoutines.AnyActiveRoutines()) // todo
 		//	UpdatePathAndTarget(true);

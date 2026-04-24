@@ -125,6 +125,13 @@ public class ConsoleCommands : MonoBehaviour
 		_DebugNav(value);
 		_DebugRoutines(value);
 		_DebugTriggers(value);
+		_DebugGtm(value);
+	}
+
+	[ConsoleMethod("debug_gtm", "")]
+	public static void _DebugGtm(int value)
+	{
+		Debug.Log("debug_gtm=" + (GameTurnManager.debugMode = value));
 	}
 
 	[ConsoleMethod("debug_anim", "")]

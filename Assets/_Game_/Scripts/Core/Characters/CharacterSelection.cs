@@ -134,6 +134,8 @@ public class CharacterSelection : MonoBehaviour
 
 	private void LateUpdate()//TODO optim
 	{
+		capsuleCollider.enabled = !_selfCharacter.IsDead() && _selfCharacter.IsCharacterRevealed();
+		
 		currentColor = ColorSettings.GetCharacterColor(_selfCharacter, true, false);
 		alphaColor = alphaCurve.Evaluate(CharacterSelection.IsCharacterSelected(_selfCharacter) ? 1f : mouseOver ? 0.5f : 0.0f);
 		

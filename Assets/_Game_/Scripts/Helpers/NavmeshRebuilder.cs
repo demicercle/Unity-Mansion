@@ -30,7 +30,21 @@ public class NavmeshRebuilder : MonoBehaviour
 
 	private void OnEnable()
 	{
+		foreach (var other in GetComponents<NavmeshRebuilder>())
+		{
+			if (other != this)
+				Destroy(other); // take priority
+		}
+		
 		StartCoroutine(DoRebuild());
+	}
+
+	private void OnDisable()
+	{
+		if (instances.Contains(this))
+			instances.Remove(this);
+		
+		StopAllCoroutines();
 	}
 
 	IEnumerator DoRebuild()

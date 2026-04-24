@@ -38,7 +38,6 @@ public class CharacterDetection : MonoBehaviour
 				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, false);
 			}
 		}
-		
 	}
 
 	public void ClearAll() => detectedCharacters.Clear();
@@ -89,8 +88,11 @@ public class CharacterDetection : MonoBehaviour
 	
 	private void OnAnyCharacterMoved(CharacterController anyCharacter)
 	{
-		if (anyCharacter.IsDead()) return;
-		if (!selfCharacter.InParty() && !selfCharacter.IsCharacterRevealed()) return; // prevent non player characters to detect
+		if (anyCharacter.IsDead()) 
+			return;
+		
+		if (!selfCharacter.IsCharacterRevealed() || !anyCharacter.IsCharacterRevealed())  // ignore not revealed characters
+			return; 
 		
 		if (anyCharacter == selfCharacter)
 		{
@@ -121,7 +123,11 @@ public class CharacterDetection : MonoBehaviour
 
 	private bool IsCharacterVisible(CharacterController otherCharacter)
 	{
-		if (selfCharacter.IsPlayer() && otherCharacter.IsPlayer()) return true;
+		if (selfCharacter.IsPlayer() && otherCharacter.IsPlayer())  // party characters will always detect each other
+			return true;
+		
+		if (!selfCharacter.IsCharacterRevealed() || !otherCharacter.IsCharacterRevealed()) // ignore not revealed characters
+			return false;
 		
 		var selfPosition = selfCharacter.GetPosition();
 		var otherPosition = otherCharacter.GetPosition();

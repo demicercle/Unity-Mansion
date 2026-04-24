@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 using Pathfinding;
 using UnityEngine;
 
@@ -18,13 +19,16 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	[SerializeField] private bool canPatrol = true;
 	[SerializeField] private bool lookAtDetectedEnemies = true;
 	[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
-	[SerializeField] [Min(0f)] private float looseTargetTime = 1.5f;
+	[SerializeField] [Min(0f)] private float looseTargetDistance = 6.0f;
 	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 	
 	public bool IsThinking { get; private set; }
 	
 	public void StopThinking()
 	{
+		if (!IsThinking) 
+			return;
+		
 		StopAllCoroutines();
 		IsThinking = false;
 		if(debugMode > 0) Debug.Log(this + " StopThinking");
@@ -67,13 +71,6 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			yield break;
 		}
 		
-		if (_chaseCharacter && _chaseCharacter.IsDead())
-		{
-			ForgetTarget();
-			if (!TryFindTarget())
-				yield break;
-		}
-		
 		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
 		{
 			if (!_selfCharacter.CanAttack())
@@ -81,34 +78,25 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 				yield return StartCoroutine(YieldCantAttack());
 				yield break;
 			}
-			
-			if (!_targetDetected)
+		
+			if (_chaseCharacter.IsDead())
 			{
-				if (_selfCharacter.PositionReached(_lastTargetKnownPosition))
-				{
-					ForgetTarget();
-					if (!TryFindTarget())
-						yield break;
-				}
-				
-				if(debugMode > 0) Debug.Log(this + " go last known position " + _chaseCharacter);
-				_selfCharacter.Routines.AssignMoveToDestination((Vector3)_lastTargetKnownPosition); //TODO "canUseRunAction"
-
-				do
-				{
-					yield return null;
-
-					if (_targetDetected)
-					{
-						if(debugMode > 0) Debug.Log(this + " chase AGAIN " + _chaseCharacter);
-						break;
-					}
-				} while (CharacterRoutines.AnyActiveRoutines());
+				ForgetTarget();
+				if (!TryFindTarget())
+					yield break;
+			}
+		
+			if (looseTargetDistance > 0 && Vector3.Distance(_chaseCharacter.GetPosition(), _selfCharacter.GetPosition()) > looseTargetDistance)
+			{
+				ForgetTarget();
+				if (!TryFindTarget())
+					yield break;
 			}
 			
 			if (_targetDetected)
 			{
 				if(debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
+				
 				_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, false);
 				
 				do
@@ -177,7 +165,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 
 	private IEnumerator YieldCantAttack()
 	{
-		if(debugMode > 0) Debug.Log(this + " YieldCantAttack");
+		if(debugMode > 0) Debug.Log(this + " Yield CantAttack");
 		yield return new WaitForSeconds(defaultWait);
 	}
 	
@@ -261,6 +249,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 
 	private void OnCharacterDead()
 	{
+		ForgetTarget();
 		StopThinking();
 	}
 
@@ -278,14 +267,17 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		}
 	}
 
-	private void OnCharacterLost(CharacterController otherCharacter)
+	private void OnCharacterLost(CharacterController otherCharacter) // TODO move to last known position?
 	{
-		if (_targetDetected && _chaseCharacter == otherCharacter)
+		/*if (looseTargetDistance > 0)
 		{
-			if(debugMode > 0) Debug.Log(this + " looses target " + _chaseCharacter);
-			SaveTargetPosition();
-			_targetDetected = false;
-		}
+			if (_targetDetected && _chaseCharacter == otherCharacter)
+			{
+				if(debugMode > 0) Debug.Log(this + " looses target " + _chaseCharacter);
+				SaveTargetPosition();
+				_targetDetected = false;
+			}
+		}*/
 	}
 
 	private bool TryFindTarget()
@@ -327,5 +319,11 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			if(_chaseCharacter)
 				Utils.DrawWorldGUI((Vector3)_lastTargetKnownPosition, _chaseCharacter.name + " chased by " + name);
 		}
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		Gizmos.color = Color.red;
+		Utils.DrawGizmosCircle(transform.position, Vector3.up, looseTargetDistance);
 	}
 }

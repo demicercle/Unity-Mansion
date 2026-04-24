@@ -410,7 +410,7 @@ public class CharacterController : MonoBehaviour
 	{
 		var atkRange = GetAttackRange(target);
 		var dist = Vector3.Distance(GetPosition(), target.GetPosition());
-		Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
+		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
 		if (dist <= atkRange)
 		{
 			return !losCheck || LOSCheck(target);

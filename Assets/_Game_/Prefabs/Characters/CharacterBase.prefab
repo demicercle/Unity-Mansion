@@ -492,10 +492,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
   canChase: 1
   canPatrol: 1
-  canUseRunAction: 0
   lookAtDetectedEnemies: 1
   defaultWait: 1.5
-  looseTargetTime: 1.5
+  looseTargetDistance: 13
 --- !u!114 &7705601098757829042
 MonoBehaviour:
   m_ObjectHideFlags: 0

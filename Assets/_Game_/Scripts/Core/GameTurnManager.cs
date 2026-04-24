@@ -8,8 +8,10 @@ using UnityEngine.SceneManagement;
 
 public class GameTurnManager : MonoBehaviour
 {
-	static private GameTurnManager _instance;
-	static public GameTurnManager Instance => _instance;
+	private static GameTurnManager _instance;
+	public static GameTurnManager Instance => _instance;
+	
+	public static int debugMode { get; set; }
 
 	public System.Action<bool> onLoadingGame, onPlayerChanged;
 	public System.Action onTurnStarted, onTurnEnded;
@@ -167,6 +169,9 @@ public class GameTurnManager : MonoBehaviour
 		turnBasedCharacters.Clear();
 		foreach (var character in levelCharacters)
 		{
+			if (!character.InParty() && !character.HasDetectedAnyPartyCharacter())
+				continue;
+			
 			turnBasedCharacters.Add(character);
 			character.Rest();
 			
@@ -179,9 +184,12 @@ public class GameTurnManager : MonoBehaviour
 
 			if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
 				otherAnimation.TrySwitchWeapons(true);
-			
-			if (character.TryGetComponent(out CharacterBrain otherBrain))
-				otherBrain.StopThinking();
+
+			if (!character.InParty())
+			{
+				if (character.TryGetComponent(out CharacterBrain otherBrain))
+					otherBrain.StopThinking();
+			}
 		}
 
 		Debug.Log(this + " turnBasedCharacter=" + turnBasedCharacters.Count);
@@ -225,7 +233,7 @@ public class GameTurnManager : MonoBehaviour
 					yield break;
 				}
 				
-				yield return null;
+				yield return new WaitForSeconds(realTimeTicks);
 			}
 
 			CharacterSelection.SelectCharacter(null);
@@ -375,11 +383,25 @@ public class GameTurnManager : MonoBehaviour
 
 	private bool ShouldExitTurnBased()
 	{
-		foreach (var enemyCharacter in levelCharacters)
+		foreach (var enemyCharacter in turnBasedCharacters)
 		{
-			if (enemyCharacter.InParty()) continue;
-			if (!enemyCharacter.IsEnemyToPlayer()) continue;
-			if (!enemyCharacter.IsDead() && turnBasedCharacters.Contains(enemyCharacter)) return false;
+			if (enemyCharacter.InParty()) 
+				continue;
+			
+			if (!enemyCharacter.IsEnemyToPlayer())
+				continue;
+			
+			if (!enemyCharacter.IsDead())
+			{
+				if(debugMode > 0) Debug.Log(this + " Should_not_ExitTurnBased: !IsDead enemy " + enemyCharacter);
+				return false;
+			}
+
+			if (enemyCharacter.HasDetectedAnyPartyCharacter())
+			{
+				if(debugMode > 0) Debug.Log(this + " Should_not_ExitTurnBased: HasDetectedAnyPartyCharacter enemy " + enemyCharacter);
+				return false;
+			}
 		}
 
 		return true;

@@ -7,7 +7,6 @@ using System.Linq;
 public class CharacterRoutines : MonoBehaviour
 {
 	public const float SearchPathTimeout = 6.0f;
-	public const float AttackTargetTimeout = 12.0f;
 	public const float DefaultWaitSeconds = 1.0f;
 	
 	public static int debugMode { get; set; }
@@ -56,7 +55,6 @@ public class CharacterRoutines : MonoBehaviour
 	public void AssignRunAction()
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignRunAction ");
-		characterOwner.UseAction(CharacterAction.Run);
 		StartNewRoutine(WaitAction(CharacterAction.Run));
 	}
 
@@ -190,7 +188,6 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 
-		var startTime = Time.time;
 		var atAttackRange = false;
 		while (!atAttackRange)
 		{
@@ -207,32 +204,27 @@ public class CharacterRoutines : MonoBehaviour
 			{
 				if (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.CanUseAction(CharacterAction.Run))
 				{
-					yield return characterOwner.StartCoroutine(WaitAction(CharacterAction.Run));
+					if (debugMode > 0) Debug.Log(this + " WaitCharacterAttackCharacter use Run Action");
+					yield return StartCoroutine(WaitAction(CharacterAction.Run));
 				}
 				
-				if (!characterOwner.HasMovePoints())
+				else if (!characterOwner.HasMovePoints())
 				{
 					if(debugMode > 0) Debug.Log(characterOwner + " has no move points to reach target");
 					characterOwner.FloatingText_Cant();
 					yield break;
 				}
 
-				var reachDistance = characterOwner.GetAttackRange(target);
-				if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
-				yield return characterOwner.StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance));
+				else
+				{
+					var reachDistance = characterOwner.GetAttackRange(target);
+					if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
+					yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance));
+				}
 			}
-			
-			else if (Time.time - startTime > AttackTargetTimeout)
-			{
-				characterOwner.FloatingText_Cant();
-				Debug.LogWarning(this + " timeout Attack target!");
-				yield break;
-			}
-			
-			else Debug.LogWarning(characterOwner + " cannot moves towards " + target);
 		}
 		
-		yield return characterOwner.StartCoroutine(WaitCharacterPerformAttack(target, true));
+		yield return StartCoroutine(WaitCharacterPerformAttack(target, true));
 	}
 
 	private IEnumerator WaitCharacterPerformAttack(CharacterController target, bool useAction)
@@ -305,7 +297,7 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		debugString = "WaitMoveCharacterToWaypoint";
 		if(debugMode > 0) Debug.Log(this + " WaitMoveCharacterToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
-		yield return characterOwner.StartCoroutine(WaitCharacterMoved(waypoint.GetPosition(), waypoint.radius));
+		yield return StartCoroutine(WaitCharacterMoved(waypoint.GetPosition(), waypoint.radius));
 		
 		if (characterOwner.WaypointReached(waypoint))
 		{
@@ -313,13 +305,13 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else
 		{
-			if (canUseRunAction)
+			if (!characterOwner.HasMovePoints())
 			{
-				if (!characterOwner.HasActions() && characterOwner.CanUseAction(CharacterAction.Run))
+				if (canUseRunAction && characterOwner.CanUseAction(CharacterAction.Run))
 				{
-					yield return characterOwner.StartCoroutine(WaitAction(CharacterAction.Run));
-					yield return WaitMoveCharacterToWaypoint(waypoint, false);//TODO: multiple run actions??
-					yield break;
+					if (debugMode > 0) Debug.Log(this + " WaitMoveCharacterToWaypoint use Run Action");
+					yield return StartCoroutine(WaitAction(CharacterAction.Run));
+					yield return StartCoroutine(WaitMoveCharacterToWaypoint(waypoint, false));//TODO: multiple run actions??
 				}
 			}
 		}
@@ -406,7 +398,7 @@ public class CharacterRoutines : MonoBehaviour
 
 			if(debugMode > 0) DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
 			if(debugMode > 0) DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
-			if(debugMode > 0) DebugDrawer.WireDisc(dest, Vector3.up, agent.GetRadius(), Color.cyan, 0f);
+			if(debugMode > 0) DebugDrawer.WireDisc(dest, agent.GetRadius(), Color.cyan, 0f);
 			
 			yield return null;
 
@@ -428,6 +420,8 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitAction " + action;
 		if(debugMode > 0) Debug.Log(">> WaitAction: " + this + " " + action);
 		yield return new WaitForSeconds(DefaultWaitSeconds);
+		characterOwner.UseAction(action);
+		characterOwner.FloatingText(action.ToString());
 	}
 	#endregion
 	
