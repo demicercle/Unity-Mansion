@@ -299,6 +299,7 @@ public class GameTurnManager : MonoBehaviour
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
 				
+				Debug.Log(this + " YieldRoutines");
 				yield return YieldRoutines();
 
 				/*var startTime = Time.time;

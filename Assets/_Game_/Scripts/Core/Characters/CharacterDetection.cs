@@ -41,6 +41,7 @@ public class CharacterDetection : MonoBehaviour
 						var others = selfRoom.GetCharacters();
 						foreach (var other in others)
 						{
+							if (other == selfCharacter) continue;
 							if (other.GetCurrentFaction() == selfCharacter.GetCurrentFaction() 
 							    && !other.IsDead()
 							    && !other.HasDetectedOther(selfCharacter))
