@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using RPGCharacterAnims.Lookups;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -72,6 +73,7 @@ public class CharacterController : MonoBehaviour
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
+		SetCurrentWeapon(defaultWeapon);
 		onSpawned?.Invoke();
 		onStatsChanged?.Invoke();
 	}
@@ -340,12 +342,18 @@ public class CharacterController : MonoBehaviour
 		
 		if (objectFrom is CharacterController)
 		{
-			if(TryGetAnimation(out var anim))
-				anim.InstantSwitchWeapons();
-
-			if (!IsEnemyTo((objectFrom as CharacterController)))
+			if (IsEnemyTo((objectFrom as CharacterController))) // enemy should get angry
 			{
-				anim.TrySwitchWeapons(false);
+				if (detection && !detection.IsCharacterDetected((CharacterController)objectFrom))
+				{
+					detection.SetDetected(objectFrom as CharacterController, true);
+					Routines.AssignLookPosition((objectFrom as CharacterController).GetCenterPosition());
+				
+					if (TryGetAnimation(out var anim))
+					{
+						anim.InstantSwitchWeapons();
+					}
+				}
 			}
 		}
 	}
@@ -358,6 +366,7 @@ public class CharacterController : MonoBehaviour
 			agent.SetAgentActive(false);
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
+			if(detection) detection.ClearAll();
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();
@@ -367,9 +376,6 @@ public class CharacterController : MonoBehaviour
 		return false;
 	}
 
-
-	public float GetAttackRange() => currentWeapon.attackRange;
-
 	public bool CanAttack(bool checkActions = true, bool checkMoves = true) =>
 		!isDead && (!checkActions || HasActions()) && (!checkMoves || HasMovePoints());
 	
@@ -377,6 +383,8 @@ public class CharacterController : MonoBehaviour
 	{
 		return CanAttack() && !other.IsDead() && IsEnemyTo(other);
 	}
+
+	public WeaponData GetCurrentWeapon() => currentWeapon;
 
 	public float GetDistanceTo(Vector3 world) => Vector3.Distance(GetPosition(), world);
 
@@ -391,12 +399,16 @@ public class CharacterController : MonoBehaviour
 	{
 		return agent.ReachedDestination(wp.GetPosition());
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
-	} 
+	}
+
+	public float GetAttackRange(CharacterController target)
+	{
+		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.agent.GetRadius());
+	}
 
 	public bool IsAtAttackRange(CharacterController target, bool losCheck = true)
 	{
-		var atkRange = GetAttackRange();
-		atkRange = Mathf.Max(atkRange, agent.GetRadius() + agent.GetMinReachDistance() + target.agent.GetRadius() + target.agent.GetMinReachDistance());
+		var atkRange = GetAttackRange(target);
 		var dist = Vector3.Distance(GetPosition(), target.GetPosition());
 		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
 		if (dist <= atkRange)
@@ -506,14 +518,22 @@ public class CharacterController : MonoBehaviour
 			defaultWeapon = WeaponData.CreateInstance<WeaponData>();
 		}
 
-		currentWeapon = defaultWeapon;
-		
 		gameObject.SetActive(false); // wait for "Spawn"
 	}
 
 	private void OnDestroy()
 	{
 		_allCharacters.Remove(this);
+	}
+
+	private void SetCurrentWeapon(WeaponData newWeapon)
+	{
+		currentWeapon = newWeapon;
+
+		if (characterAnimation)
+		{
+			characterAnimation.WeaponChanged();
+		}
 	}
 	
 	private bool LOSCheck(CharacterController other)

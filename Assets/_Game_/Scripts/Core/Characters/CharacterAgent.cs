@@ -5,6 +5,7 @@ using System.Linq;
 using Oddworm.Framework;
 using Pathfinding;
 using Pathfinding.Drawing;
+using Pathfinding.RVO;
 using UnityEngine;
 
 
@@ -127,6 +128,10 @@ public class CharacterAgent : MonoBehaviour
 		ClearDestination();
 	}
 
+	public bool HasWaypointTo(MonoBehaviour provider) => bestWaypoint && lastWaypointProvider &&
+	                                                     lastWaypointProvider.GetComponentsInChildren<Waypoint>()
+		                                                     .Contains(bestWaypoint); // TODO optim
+
 	public Waypoint GetBestWaypoint() => bestWaypoint;
 	
 	public Coroutine AssignWaypointDestinationAsync(MonoBehaviour provider)
@@ -154,7 +159,7 @@ public class CharacterAgent : MonoBehaviour
 		bestWaypoint = null;
 		waypoints = waypointProvider.GetComponentsInChildren<Waypoint>();
 		
-		if (debugMode > 0)
+		if (debugMode > 1)
 		{
 			Debug.Log(this + " SearchBestWaypoint from " + _character + " to " + waypointProvider + " waypoints=" + waypoints.Length);
 			DebugDrawer.Line(_character.GetCenterPosition(), waypointProvider.transform.position, Color.blueViolet, 1.0f);
@@ -168,6 +173,9 @@ public class CharacterAgent : MonoBehaviour
 			var endPoint = wp.GetPosition();
 
 			if (Vector3.Distance(startPoint, endPoint) > WaypointMaxSearchDistance)
+				continue;
+
+			if (!RoomTrigger.IsPositionVisible(endPoint)) // ignore not revealed waypoint
 				continue;
 				
 			// Crée une requête de chemin
@@ -230,6 +238,7 @@ public class CharacterAgent : MonoBehaviour
 		}
 		else
 		{
+			lastWaypointProvider = waypointProvider;
 			AssignDestination(bestWaypoint.GetPosition(), true);
 			
 			if (debugMode > 0)
@@ -253,7 +262,7 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if (force || !hasDestination)
 		{
-			if(!hasDestination && debugMode > 0) Debug.Log(this + " Assign_new_Destination " + force);
+			if(debugMode > 1) Debug.Log(this + " Assign_new_Destination " + force);
 			
 			if (IsFollowing()) 
 				AssignFollowTransform(null);
@@ -280,7 +289,7 @@ public class CharacterAgent : MonoBehaviour
 		if(!aiDestinationSetter) aiDestinationSetter = GetComponent<AIDestinationSetter>();
 		if(!aiDestinationSetter) aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
 		if (aiDestinationSetter.target == followTarget) return;
-		if (debugMode > 0)Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
+		if (debugMode > 0) Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
 		hasDestination = false;
 		if (IsMoving())
 		{
@@ -307,9 +316,10 @@ public class CharacterAgent : MonoBehaviour
 
 	public bool ReachedDestination(Vector3 dest)
 	{
-		return /*aiPath.reachedDestination ||*/ Vector3.Distance(aiPath.position, dest) <= GetMinReachDistance();
+		return Utils.HDistance(aiPath.position, dest) <= Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
 	}
 
+	public bool IsActive() => aiPath && aiPath.enabled;
 	public void SetAgentActive(bool value)
 	{
 		if(debugMode > 0) Debug.Log(this + " SetAgentActive=" + value);
@@ -326,8 +336,18 @@ public class CharacterAgent : MonoBehaviour
 		{
 			SetObstacle(false);
 		}
+
+		rvoController.enabled = value;
+		rvoController.layer = rvoController.enabled ? RVOLayer.DefaultAgent : RVOLayer.Layer2;
 	}
 
+	public void RecalculatePath()
+	{
+		if (hasDestination)
+		{
+			AssignDestination(aiPath.destination, true);
+		}
+	}
 	private void OnSearchPath()
 	{
 		lastPath = GetCurrentPath();
@@ -375,6 +395,11 @@ public class CharacterAgent : MonoBehaviour
 	public void SetReachDistance(float value) => aiPath.endReachedDistance = value;
 
 	public void SetDefaultReachDistance() => aiPath.endReachedDistance = endReachDistance;
+
+	public void EnableAvoidance(bool b)
+	{
+		rvoController.enabled = b;
+	}
 	   
 	public bool pathPending => aiPath.pathPending;
 
@@ -390,9 +415,10 @@ public class CharacterAgent : MonoBehaviour
 	private GameTurnManager _gameTurnManager; // TODO
 	private CharacterAnimation _characterAnimation;
 	[HideInInspector] private Vector3[] lastPath; //hide in unity because it crashes (too much things to display probably)
-	private MonoBehaviour waypointProvider;
+	private MonoBehaviour waypointProvider, lastWaypointProvider;
 	private Waypoint bestWaypoint;
 	private Waypoint[] waypoints;
+	private RVOController rvoController;
 
 	private void OnDrawGizmosSelected()
 	{
@@ -414,6 +440,11 @@ public class CharacterAgent : MonoBehaviour
 		
 		UpdateComponent();
 		aiPath.onSearchPath += OnSearchPath;
+
+		moveTarget.name += " (" + name + ")";
+		moveTarget.radius = GetRadius() * 0.5f;
+		moveTarget.transform.SetParent(null, true);
+		moveTarget.gameObject.SetActive(false);
 	}
 
 	private void UpdateComponent()
@@ -423,11 +454,13 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
 		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
+		rvoController = GetComponent<RVOController>();
 		if(Application.isPlaying) SetAgentActive(false);
 	}
 	
 	private void OnDestroy()
 	{
+		if(moveTarget) Destroy(moveTarget.gameObject);
 		aiPath.onSearchPath -= OnSearchPath;
 		_character.onUseAction -= OnUseAction;
 		_gameTurnManager.onTurnEnded -= UpdatePathAndTarget;
@@ -466,9 +499,10 @@ public class CharacterAgent : MonoBehaviour
 	private void LateUpdate()
 	{
 		if (lastPath?.Length > 0 && debugMode > 0) DebugDrawer.Path(lastPath, false, isPathValid ? Color.cyan : Color.red);
+		if (hasDestination && debugMode > 0) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, isPathValid ? Color.cyan : Color.red);
 		
-		if (CharacterRoutines.AnyActiveRoutines()) // todo
-			UpdatePathAndTarget(true);
+		//if (CharacterRoutines.AnyActiveRoutines()) // todo
+		//	UpdatePathAndTarget(true);
 	}
 
 	private bool[] shouldDrawPath = new []{false,false};
@@ -534,7 +568,7 @@ public class CharacterAgent : MonoBehaviour
 		if (bestWaypoint)
 			return true;
 
-		return hasDestination || IsMoving(); // show the target hak
+		return hasDestination;
 	}
 
 	void UpdateMoveTarget(bool isBlinking)

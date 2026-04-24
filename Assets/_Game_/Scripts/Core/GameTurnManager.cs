@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -7,8 +8,10 @@ using UnityEngine.SceneManagement;
 
 public class GameTurnManager : MonoBehaviour
 {
-	static private GameTurnManager _instance;
-	static public GameTurnManager Instance => _instance;
+	private static GameTurnManager _instance;
+	public static GameTurnManager Instance => _instance;
+	
+	public static int debugMode { get; set; }
 
 	public System.Action<bool> onLoadingGame, onPlayerChanged;
 	public System.Action onTurnStarted, onTurnEnded;
@@ -73,6 +76,7 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
 	
 	private CharacterController[] levelCharacters;
+	private List<CharacterController> turnBasedCharacters = new List<CharacterController>();
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
@@ -82,8 +86,15 @@ public class GameTurnManager : MonoBehaviour
 	{
 		_instance = this;
 		Debug.Log(this + " Awake");
-	} 
-	
+
+		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
+	}
+
+	private void OnDestroy()
+	{
+		CharacterDetection.onAnyCharacterDetectionChanged -= OnAnyDetectionChanged;
+	}
+
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Starts");
@@ -144,6 +155,7 @@ public class GameTurnManager : MonoBehaviour
 		while (true)
 		{
 			yield return StartCoroutine(RealTimeCoroutine());
+			yield return null;
 			yield return StartCoroutine(TurnBasedCoroutine());
 			yield return null; // safety for loop
 		}
@@ -152,6 +164,36 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator TurnBasedCoroutine()
 	{
 		Debug.Log(this + " Enters TurnBasedCoroutine");
+		turnBasedMode = true;
+
+		turnBasedCharacters.Clear();
+		foreach (var character in levelCharacters)
+		{
+			if (!character.InParty() && !character.HasDetectedAnyPartyCharacter())
+				continue;
+			
+			turnBasedCharacters.Add(character);
+			character.Rest();
+			
+			character.Routines.StopAllRoutines();
+			
+			if(character.IsMoving()) character.StopAgent();
+			
+			character.GetAgent().SetObstacle(!character.IsSelected());
+			character.GetAgent().EnableAvoidance(false);
+
+			if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
+				otherAnimation.TrySwitchWeapons(true);
+
+			if (!character.InParty())
+			{
+				if (character.TryGetComponent(out CharacterBrain otherBrain))
+					otherBrain.StopThinking();
+			}
+		}
+
+		Debug.Log(this + " turnBasedCharacter=" + turnBasedCharacters.Count);
+		
 		currentTurn = 0;
 		
 		while (turnBasedMode)
@@ -169,31 +211,6 @@ public class GameTurnManager : MonoBehaviour
 			
 			if (currentTurn == 1) // it is the first turn
 			{
-				foreach (var otherCharacter in levelCharacters)
-				{
-					if (otherCharacter.InParty()) continue;
-					otherCharacter.StopAgent();
-					otherCharacter.Routines.StopAllRoutines();
-					otherCharacter.Rest();
-					
-					if (otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
-						otherBrain.StopThinking();
-
-					if (otherCharacter.TryGetAnimation(out CharacterAnimation otherAnimation))
-						otherAnimation.TrySwitchWeapons(true);
-				}
-				
-				foreach (var partyCharacter in partyCharacters) // stop agent and draw weapons
-				{
-					partyCharacter.StopAgent();
-					partyCharacter.Routines.StopAllRoutines();
-					partyCharacter.Rest();
-
-					if (partyCharacter.TryGetAnimation(out var anim))
-						anim.TrySwitchWeapons(true);
-				}
-				
-				Debug.Log(this + " first turn setup, wait weapon switch");
 				do
 				{
 					yield return null;
@@ -209,14 +226,14 @@ public class GameTurnManager : MonoBehaviour
 			
 			while (IsPlayerTurn())
 			{
-				if (!IsAnyEnemyAroundCheck())
+				if (turnBasedMode && ShouldExitTurnBased())
 				{
 					turnBasedMode = false;
 					Debug.Log(this + " Switch To RealTime");
 					yield break;
 				}
 				
-				yield return null;
+				yield return new WaitForSeconds(realTimeTicks);
 			}
 
 			CharacterSelection.SelectCharacter(null);
@@ -250,6 +267,10 @@ public class GameTurnManager : MonoBehaviour
 					continue;
 				}
 
+				otherCharacter.GetAgent().SetObstacle(false);
+				do yield return null;
+				while (NavmeshRebuilder.IsRebuildingAsync());
+				
 				yield return StartCoroutine(otherBrain.Think());
 
 				var startTime = Time.time;
@@ -263,6 +284,12 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator RealTimeCoroutine()
 	{
 		Debug.Log(this + " Enters RealTimeCoroutine");
+		turnBasedMode = false;
+
+		foreach (var character in levelCharacters)
+		{
+			character.GetAgent().EnableAvoidance(true);
+		}
 		
 		currentTurn = -1;
 		NewTurn();
@@ -288,7 +315,7 @@ public class GameTurnManager : MonoBehaviour
 
 			yield return new WaitForSeconds(realTimeTicks);
 
-			if (IsAnyEnemyAroundCheck())
+			if (!turnBasedMode && IsAnyEnemyAroundCheck())
 			{
 				turnBasedMode = true;
 				Debug.Log(this + " Switch Turn Based Mode");
@@ -354,6 +381,32 @@ public class GameTurnManager : MonoBehaviour
 			character.Rest(verbose);
 	}
 
+	private bool ShouldExitTurnBased()
+	{
+		foreach (var enemyCharacter in turnBasedCharacters)
+		{
+			if (enemyCharacter.InParty()) 
+				continue;
+			
+			if (!enemyCharacter.IsEnemyToPlayer())
+				continue;
+			
+			if (!enemyCharacter.IsDead())
+			{
+				if(debugMode > 0) Debug.Log(this + " Should_not_ExitTurnBased: !IsDead enemy " + enemyCharacter);
+				return false;
+			}
+
+			if (enemyCharacter.HasDetectedAnyPartyCharacter())
+			{
+				if(debugMode > 0) Debug.Log(this + " Should_not_ExitTurnBased: HasDetectedAnyPartyCharacter enemy " + enemyCharacter);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private bool IsAnyEnemyAroundCheck()
 	{
 		foreach (var enemyCharacter in levelCharacters)
@@ -373,6 +426,20 @@ public class GameTurnManager : MonoBehaviour
 
 		return false;
 	}
-	
+
+	private void OnAnyDetectionChanged(CharacterController char1, CharacterController char2, bool detected)
+	{
+		if (detected)
+		{
+			if (!turnBasedMode) // only if real time
+			{
+				if (!char1.IsDead() && char1.IsEnemyToPlayer() && char2.IsPlayer())
+				{
+					turnBasedMode = true;
+					Debug.Log(this + " OnAnyDetectionChanged " + char1.name + " " + char2.name + " switch turn based");
+				}
+			}
+		}
+	}
 	#endregion
 }

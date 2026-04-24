@@ -17,6 +17,7 @@ public class GameInput : MonoBehaviour
 	public static int debugMode { get; set; }
 
 	public const float MaxMouseDeltaToClick = 3.0f;
+	public const float AutoAssignDestinationToCLickedPropDistance = 1.0f;
 	
 	public const int CursorRaycastResult_None = 0;
 	public const int CursorRaycastResult_Navigation = 1;
@@ -686,10 +687,22 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Interact))
+				/*if (hasNoActionsCursor)
+				{
+					if(debugMode > 0) Debug.Log(this + " " + selectedCharacter + " hasNoActionsCursor");
 					selectedCharacter.FloatingText_Cant();
+				}
+				else */
+				if (!selectedCharacter.CanUseAction(CharacterAction.Interact))
+				{
+					if(debugMode > 0) Debug.Log(this + " " + selectedCharacter + " !CanUseAction Interact");
+					selectedCharacter.FloatingText_Cant();
+				}
 				else
+				{
+					if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Interact " + clickedProp);
 					selectedCharacter.Routines.AssignInteract(clickedProp);
+				}
 			}
 			else if(isDebugMode)  Debug.Log(" selected character not controllable");
 		}
@@ -704,16 +717,12 @@ public class GameInput : MonoBehaviour
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				if (!gameTurnManager.IsTurnBasedMode())
-				{
-					if (!IsLeaderMode())
-						selectedCharacter.Routines.AssignMoveToDestination(navPosition);
-					else
-						selectedCharacter.Routines.AssignMoveLeaderToDestination(navPosition);
-				}
-				else if(isDebugMode)  Debug.Log("> " + selectedCharacter + " !IsPathAssignable");
+				if (!IsLeaderMode())
+					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+				else
+					selectedCharacter.Routines.AssignMoveLeaderToDestination(navPosition);
 			}
-			else if(isDebugMode)  Debug.Log("> selected character not controllable");
+			else if(isDebugMode)  Debug.Log(" !CanAssignOnClick");
 		}
 		
 		else if(isDebugMode)  Debug.Log("> no character selected");

@@ -438,8 +438,9 @@ GameObject:
   - component: {fileID: 5377573228973138723}
   - component: {fileID: 2566465295043087341}
   - component: {fileID: 4816092130728771588}
+  - component: {fileID: 3083728991372862651}
   m_Layer: 5
-  m_Name: IngameDebugConsole
+  m_Name: IngameDebugConsole_Game
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -642,6 +643,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   embeddedEventSystem: {fileID: 7642270632825834238}
+--- !u!114 &3083728991372862651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235272970627628970}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09cf56a0f4054f288362fbccb9156587, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConsoleCommands
+  commandsOnStart:
+  - debug_all 1
 --- !u!1 &1720306999441167422
 GameObject:
   m_ObjectHideFlags: 0
@@ -839,7 +854,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1015916431847479992}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.7807019
+  m_Size: 0.780702
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2580,7 +2595,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00002670288}
+  m_AnchoredPosition: {x: 0, y: 0.000049591064}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2794619544371971493

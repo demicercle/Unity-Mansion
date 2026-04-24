@@ -30,7 +30,21 @@ public class NavmeshRebuilder : MonoBehaviour
 
 	private void OnEnable()
 	{
+		foreach (var other in GetComponents<NavmeshRebuilder>())
+		{
+			if (other != this)
+				Destroy(other); // take priority
+		}
+		
 		StartCoroutine(DoRebuild());
+	}
+
+	private void OnDisable()
+	{
+		if (instances.Contains(this))
+			instances.Remove(this);
+		
+		StopAllCoroutines();
 	}
 
 	IEnumerator DoRebuild()
@@ -47,7 +61,7 @@ public class NavmeshRebuilder : MonoBehaviour
 		foreach (Progress pr in AstarPath.active.ScanAsync())
 		{
 			progress = pr.progress;
-			if(debugMode > 0) Debug.Log(this + " Scanning... " + pr.ToString());
+			if(debugMode > 1) Debug.Log(this + " Scanning... " + pr.ToString());
 			yield return null;
 		}
 
@@ -59,6 +73,15 @@ public class NavmeshRebuilder : MonoBehaviour
 			Destroy(this);
 		else
 			enabled = false;
+
+		foreach (var character in CharacterController.AllCharacters)
+		{
+			var agent = character.GetAgent();
+			if (agent.IsActive())
+			{
+				agent.RecalculatePath();
+			}
+		}
 	}
 
 	private void OnGUI()

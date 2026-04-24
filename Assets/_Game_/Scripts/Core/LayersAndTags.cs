@@ -10,6 +10,7 @@ public static class Layers
 	public static int LayerProp => LayerMask.NameToLayer("Prop");
 	public static int LayerHidden => LayerMask.NameToLayer("Hidden");
 	public static int LayerTransparentFX => LayerMask.NameToLayer("TransparentFX");
+	public static int LayerEquipment => LayerMask.NameToLayer("Equipment");
 	
 	public static int MaskWall => LayerMask.GetMask("Ground", "Wall", "Fog");
 	public static int MaskNavigation => LayerMask.GetMask("Ground");

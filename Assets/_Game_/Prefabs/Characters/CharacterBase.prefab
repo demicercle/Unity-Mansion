@@ -444,7 +444,7 @@ MonoBehaviour:
   moveSpeed: 4.5
   radius: 0.5
   height: 1.5
-  endReachDistance: 0.1
+  endReachDistance: 0.2
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
@@ -492,10 +492,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
   canChase: 1
   canPatrol: 1
-  canUseRunAction: 0
   lookAtDetectedEnemies: 1
   defaultWait: 1.5
-  looseTargetTime: 1.5
+  looseTargetDistance: 13
 --- !u!114 &7705601098757829042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -702,7 +701,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  endReachedDistance: 0.1
+  endReachedDistance: 0.2
   whenCloseToDestination: 0
   rvoDensityBehavior:
     enabled: 1
@@ -718,12 +717,12 @@ MonoBehaviour:
     mode: 2
     period: 0.5
     sensitivity: 10
-    maximumPeriod: 2
+    maximumPeriod: 1
     visualizeSensitivity: 0
   maxAcceleration: -2.5
   rotationSpeed: 360
   slowdownDistance: 0.6
-  pickNextWaypointDist: 1
+  pickNextWaypointDist: 0.6
   alwaysDrawGizmos: 0
   slowWhenNotFacingTarget: 1
   preventMovingBackwards: 1
@@ -825,7 +824,7 @@ MonoBehaviour:
   obstacleTimeHorizon: 0.25
   maxNeighbours: 10
   layer: 1
-  collidesWith: -1
+  collidesWith: 1
   wallAvoidForce: 1
   wallAvoidFalloff: 1
   priority: 0.5

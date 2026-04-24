@@ -4,9 +4,11 @@ using RPGCharacterAnims.Lookups;
 using UnityEngine;
 using UnityEngine.Events;
 using RPGCharacterAnims.Extensions;
+using Unity.VisualScripting;
 
 public class CharacterAnimation : MonoBehaviour
 {
+	public static int debugMode { get; set; }
 	
 	public enum EventType
 	{
@@ -22,6 +24,7 @@ public class CharacterAnimation : MonoBehaviour
 	
 	[SerializeField] private Animator animator;
 	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
+	[SerializeField] [Min(0)] private float switchWeaponExtraTime;
 	
 	[System.Serializable]
 	public struct Parameters
@@ -88,7 +91,7 @@ public class CharacterAnimation : MonoBehaviour
 	private IEnumerator DoWaitEvent(EventType eventType, float timeout)
 	{
 		var startTime = Time.time;
-		Debug.Log(this + " DoWaitEvent " + eventType);
+		if (debugMode > 0) Debug.Log(this + " DoWaitEvent " + eventType);
 		waitForEvent = eventType;
 		do
 		{
@@ -109,17 +112,18 @@ public class CharacterAnimation : MonoBehaviour
 			return;
 		}
 		
+		if(debugMode >0 )Debug.Log(this + " InstantSwitchWeapons");
 		if (rpgAnimationHandler) rpgAnimationHandler.InstantWeaponSwitch();
 		TrySetTrigger(parameters.instantSwitchTrigger);
 		weaponSwitched = true;
-		Debug.Log(this + " InstantSwitchWeapons");
+		UpdateWeaponRenderers();
 	}
 
 	public bool TrySwitchWeapons(bool weaponsReady) // TODO instant switch weapons
 	{
-		if (WeaponsSwitched() == weaponsReady)
+		if (weaponSwitched == weaponsReady)
 		{
-//			Debug.Log(this +" weapons already switched" );
+			if(debugMode >0 )Debug.Log(this + " weapons already switched");
 			return false; 
 		}
 		
@@ -138,10 +142,11 @@ public class CharacterAnimation : MonoBehaviour
 	private IEnumerator DoWaitSwitchWeapons(bool weaponsReady)
 	{
 		isSwitchingWeapons = true;
+		if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons " + weaponsReady);
 		
 		if (!weaponsReady && hasSwitchOffTrigger)
 		{
-			Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOffTrigger " + parameters.switchOffTrigger);
+			if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOffTrigger " + parameters.switchOffTrigger);
 			animator.SetTrigger(parameters.switchOffTrigger);
 			yield return WaitEvent(EventType.WeaponSwitch);
 			isSwitchingWeapons = false;
@@ -151,7 +156,7 @@ public class CharacterAnimation : MonoBehaviour
 
 		if (weaponsReady && hasSwitchOnTrigger)
 		{
-			Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOnTrigger " + parameters.switchOnTrigger);
+			if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOnTrigger " + parameters.switchOnTrigger);
 			animator.SetTrigger(parameters.switchOnTrigger);
 			yield return WaitEvent(EventType.WeaponSwitch);
 			isSwitchingWeapons = false;
@@ -160,11 +165,23 @@ public class CharacterAnimation : MonoBehaviour
 		}
 		
 		// RPG Character stuff
-		
-		if (weaponsReady)
-			rpgAnimationHandler.UnsheathWeapon(rpgAnimationHandler.rightWeapon, false);
-		else
-			rpgAnimationHandler.SheathWeapon(rpgAnimationHandler.rightWeapon, Weapon.Relax, false);
+
+		var rightWp = _selfCharacter.GetCurrentWeapon()?.rpgWeaponR;
+		//TODO var leftWp = Weapon.Relax;
+
+		if (rightWp.HasValue)
+		{
+			if (weaponsReady)
+			{
+				if(debugMode > 0) Debug.Log("rpg UnsheathWeapon " + rightWp.Value);
+				rpgAnimationHandler.UnsheathWeapon(rightWp.Value, false);
+			}
+			else if (rpgAnimationHandler.IsWeaponSwitchable(rightWp.Value))
+			{
+				if(debugMode > 0) Debug.Log("rpg SheathWeapon " + rightWp.Value);
+				rpgAnimationHandler.SheathWeapon(rightWp.Value, Weapon.Relax, false);
+			}
+		}
 		
 		var startedTime = Time.time;
 		do
@@ -177,24 +194,39 @@ public class CharacterAnimation : MonoBehaviour
 				yield break;
 			}
 		} while (rpgAnimationHandler.IsSwitchingWeapons());
+
+		yield return new WaitForSeconds(switchWeaponExtraTime);
 		
 		weaponSwitched = weaponsReady;
-//		Debug.Log(this + " weaponSwitched=" + weaponSwitched);
+		if (debugMode > 0) Debug.Log(this + " weaponSwitched=" + weaponSwitched);
 		isSwitchingWeapons = false;
+		UpdateWeaponRenderers();
 	}
 
 	public bool WeaponsSwitched() => weaponSwitched;
+
+	public void WeaponChanged()
+	{
+		UpdateWeaponRenderers();
+	}
+
+	/*public void SetWeapon(Weapon rpgWeapon, bool isLeft)
+	{
+		
+	}*/
 	
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
-	private CharacterController controller;
+	private CharacterController _selfCharacter;
 	private EventType waitForEvent;
-	private bool weaponSwitched, hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
+	private bool weaponSwitched;
+	private bool hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
+	private WeaponRenderer[] weaponRenderers;
 	
 	private void Awake()
 	{
-		controller = GetComponent<CharacterController>();
-		if (!controller)
+		_selfCharacter = GetComponent<CharacterController>();
+		if (!_selfCharacter)
 		{
 			Debug.LogWarning(this + " has no CharacterController");
 			enabled = false;
@@ -215,12 +247,14 @@ public class CharacterAnimation : MonoBehaviour
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponent<RPGAnimationHandler>();
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponentInChildren<RPGAnimationHandler>();
 
-		controller.onHealed += OnHealed;
-		controller.onDamaged += OnDamaged;
-		controller.onDead += OnDead;
-		controller.onUseAction += OnUseAction;
-		controller.turnStarted += OnTurnStarted;
-		controller.turnEnded += OnTurnEnded;
+		weaponRenderers = GetComponentsInChildren<WeaponRenderer>();
+
+		_selfCharacter.onHealed += OnHealed;
+		_selfCharacter.onDamaged += OnDamaged;
+		_selfCharacter.onDead += OnDead;
+		_selfCharacter.onUseAction += OnUseAction;
+		_selfCharacter.turnStarted += OnTurnStarted;
+		_selfCharacter.turnEnded += OnTurnEnded;
 
 		RoomTrigger.onChanged += OnRoomsChanged;
 	}
@@ -239,9 +273,16 @@ public class CharacterAnimation : MonoBehaviour
 		TrySetFloat(parameters.velocityZ, 0.0f);        
 		TrySetBool(parameters.moving, false);
 
-		if (rpgAnimationHandler) rpgAnimationHandler.Relax();
-		TrySwitchWeapons(weaponSwitched); // something can have ask to switch weapons
-		if (waitForEvent != EventType.Undefined) Debug.LogError(this + " has waitForEvent on start " + waitForEvent);
+		if (rpgAnimationHandler)
+		{
+			rpgAnimationHandler.RelaxOnStart();
+		}
+		
+		if(!TrySwitchWeapons(weaponSwitched))
+			UpdateWeaponRenderers(); // instant update
+		
+		if (waitForEvent != EventType.Undefined) 
+			Debug.LogError(this + " has waitForEvent on start " + waitForEvent);
 	}
 
 	private void OnDisable()
@@ -253,15 +294,15 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		RoomTrigger.onChanged -= OnRoomsChanged;
 		
-		controller.onHealed -= OnHealed;
+		_selfCharacter.onHealed -= OnHealed;
 		//controller.onPartyIndexChanged -= (newIndex) =>
-		controller.onDamaged -= OnDamaged;
-		controller.onDead -= OnDead;
+		_selfCharacter.onDamaged -= OnDamaged;
+		_selfCharacter.onDead -= OnDead;
 		//controller.onMoved -= () =>
 		//controller.onRotate -= () =>
-		controller.onUseAction -= OnUseAction;
-		controller.turnStarted -= OnTurnStarted;
-		controller.turnEnded -= OnTurnEnded;
+		_selfCharacter.onUseAction -= OnUseAction;
+		_selfCharacter.turnStarted -= OnTurnStarted;
+		_selfCharacter.turnEnded -= OnTurnEnded;
 		
 		_characterAnimationEvent.onCharacterAnimationEvent -= OnCharacterAnimationEvent;
 	}
@@ -296,17 +337,17 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		if (!weaponSwitched) yield break;
 		yield return new WaitForSeconds(roomsReveleadSeconds);
-		TrySwitchWeapons(controller.CanSeeAnyEnemyAround());
+		TrySwitchWeapons(_selfCharacter.CanSeeAnyEnemyAround());
 	}
 
 	private void OnHealed(float amount)
 	{
-		controller.FloatingText("Heal!");
+		_selfCharacter.FloatingText("Heal!");
 	}
 
 	private void OnDamaged(float amount)
 	{
-		controller.FloatingText(Mathf.CeilToInt(amount).ToString());
+		_selfCharacter.FloatingText(Mathf.CeilToInt(amount).ToString());
 		TrySetTrigger(parameters.getHitTrigger);
 		if (rpgAnimationHandler) rpgAnimationHandler.GetHit();
 	}
@@ -322,12 +363,14 @@ public class CharacterAnimation : MonoBehaviour
 
 	private void OnUseAction(CharacterAction actionType, object args = null)
 	{
+		if(debugMode > 0) Debug.Log(this + " OnUseAction " + actionType + " " + args);
+		
 		if (actionType == CharacterAction.Run)
 		{
 			//TrySetTrigger(parameters.trigger);
 			//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
 			TrySetTrigger(parameters.runTrigger);
-			controller.FloatingText("Run!");
+			_selfCharacter.FloatingText("Run!");
 		}
 		
 		else if (actionType == CharacterAction.Attack)
@@ -336,23 +379,46 @@ public class CharacterAnimation : MonoBehaviour
 			{
 				if (rpgAnimationHandler)
 				{
-					animator.SetActionTrigger(rpgAnimationHandler.hasDualWeapons ? AnimatorTrigger.AttackDualTrigger : AnimatorTrigger.AttackTrigger, 
-						rpgAnimationHandler.attackNumber); // TODO attack number
+					if (!weaponSwitched)
+						InstantSwitchWeapons();
+					
+					rpgAnimationHandler.Attack_Right(); // TODO
 				}
 			}
 			
-			controller.FloatingText("Take this!");
+			_selfCharacter.FloatingText("Take this!");
+		}
+	}
+
+	private void UpdateWeaponRenderers()
+	{
+		if (!rpgAnimationHandler) return;
+
+		rpgAnimationHandler.rightWeapon = _selfCharacter.GetCurrentWeapon().rpgWeaponR;
+		rpgAnimationHandler.leftWeapon = _selfCharacter.GetCurrentWeapon().rpgWeaponL;
+			
+		foreach (var wpr in weaponRenderers)
+		{
+			if ((wpr.isLeft && rpgAnimationHandler.leftWeapon == wpr.rpgWeapon)
+			    || (!wpr.isLeft && rpgAnimationHandler.rightWeapon == wpr.rpgWeapon))
+			{
+				wpr.gameObject.SetActive( (weaponSwitched && wpr.inHand) || (!weaponSwitched && wpr.offHand));
+			}
+			else
+			{
+				wpr.gameObject.SetActive(false);
+			}
 		}
 	}
 	
 	private void LateUpdate()
 	{
-		var localVelocity = controller.GetVelocity();
-		var isMoving = controller.IsMoving();
-		if (minMovePointsToRun >= 0f && controller.HasUsedAction(CharacterAction.Run) && controller.HasMovePoints(minMovePointsToRun) && controller.IsCurrentTurn())
+		var localVelocity = _selfCharacter.GetVelocity();
+		var isMoving = _selfCharacter.IsMoving();
+		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
 		{
 			isMoving = true;
-			localVelocity = Vector3.forward * controller.GetAgent().GetMaxSpeed();
+			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
 		}
 		TrySetFloat(parameters.velocityX, 0);      
 		TrySetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  

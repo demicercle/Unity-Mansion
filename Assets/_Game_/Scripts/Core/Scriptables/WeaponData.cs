@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using RPGCharacterAnims.Lookups;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "WeaponData", order = 0)]
 public class WeaponData : ScriptableObject
@@ -8,6 +9,8 @@ public class WeaponData : ScriptableObject
 	public bool isRanged = false;
 	[Range(0f, 10f)] public float attackRange = 0f;
 	public bool noAttack = false;
+	public Weapon rpgWeaponR = Weapon.Relax;
+	public Weapon rpgWeaponL = Weapon.Relax;
 	
 	public float RollDamage()
 	{

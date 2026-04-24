@@ -5,14 +5,42 @@ using UnityEngine.TextCore.Text;
 
 public class CharacterDetection : MonoBehaviour
 {
-	static public int debugMode { get; set; }
+	public static int debugMode { get; set; }
+
+	public static event System.Action<CharacterController, CharacterController, bool> onAnyCharacterDetectionChanged;
 	
 	public System.Action<CharacterController> onCharacterDetected;
 	public System.Action<CharacterController> onCharacterLost;
 	
-	public bool IsCharacterDetected(CharacterController other) => detectedCharacters.Contains(other);
+	public bool IsCharacterDetected(CharacterController other) => other && detectedCharacters.Contains(other);
 	
 	public CharacterController[] GetDetectedCharacters() => detectedCharacters.ToArray();
+	
+	public void SetDetected(CharacterController otherCharacter, bool value)
+	{
+		if (value)
+		{
+			if (!detectedCharacters.Contains(otherCharacter))
+			{
+				if(debugMode > 0) Debug.Log(this + " detects " + otherCharacter);
+				detectedCharacters.Add(otherCharacter);
+				onCharacterDetected?.Invoke(otherCharacter);
+				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, true);
+			}
+		}
+		else
+		{
+			if (detectedCharacters.Contains(otherCharacter))
+			{
+				if(debugMode > 0) Debug.Log(this + " looses " + otherCharacter);
+				detectedCharacters.Remove(otherCharacter);
+				onCharacterLost?.Invoke(otherCharacter);
+				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, false);
+			}
+		}
+	}
+
+	public void ClearAll() => detectedCharacters.Clear();
 	
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
@@ -60,7 +88,11 @@ public class CharacterDetection : MonoBehaviour
 	
 	private void OnAnyCharacterMoved(CharacterController anyCharacter)
 	{
-		if (anyCharacter.IsDead()) return;
+		if (anyCharacter.IsDead()) 
+			return;
+		
+		if (!selfCharacter.IsCharacterRevealed() || !anyCharacter.IsCharacterRevealed())  // ignore not revealed characters
+			return; 
 		
 		if (anyCharacter == selfCharacter)
 		{
@@ -76,18 +108,14 @@ public class CharacterDetection : MonoBehaviour
 			{
 				if (IsCharacterVisible(anyCharacter))
 				{
-					detectedCharacters.Add(anyCharacter);
-					if(debugMode > 0) Debug.Log(this + " detects " + anyCharacter);
-					onCharacterDetected?.Invoke(anyCharacter);
+					SetDetected(anyCharacter, true);
 				}
 			}
 			else
 			{
 				if (!IsCharacterVisible(anyCharacter))
 				{
-					detectedCharacters.Remove(anyCharacter);
-					if(debugMode > 0) Debug.Log(this + " looses " + anyCharacter);
-					onCharacterLost?.Invoke(anyCharacter);
+					SetDetected(anyCharacter, false);
 				}
 			}
 		}
@@ -95,7 +123,11 @@ public class CharacterDetection : MonoBehaviour
 
 	private bool IsCharacterVisible(CharacterController otherCharacter)
 	{
-		if (selfCharacter.IsPlayer() && otherCharacter.IsPlayer()) return true;
+		if (selfCharacter.IsPlayer() && otherCharacter.IsPlayer())  // party characters will always detect each other
+			return true;
+		
+		if (!selfCharacter.IsCharacterRevealed() || !otherCharacter.IsCharacterRevealed()) // ignore not revealed characters
+			return false;
 		
 		var selfPosition = selfCharacter.GetPosition();
 		var otherPosition = otherCharacter.GetPosition();
