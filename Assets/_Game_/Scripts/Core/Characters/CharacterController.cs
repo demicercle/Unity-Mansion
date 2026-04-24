@@ -302,6 +302,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public void Teleport(Vector3 dest, int newRot, bool stopMovement)
 	{
 		GetAgent().Teleport(dest, newRot, stopMovement);
+		onMoved?.Invoke();
 		onAnyCharacterMoved?.Invoke(this);
 	}
 
@@ -311,7 +312,11 @@ public class CharacterController : MonoBehaviour, IAttackable
 	{
 		usedMovePoints += amount;
 		onStatsChanged?.Invoke();
-		if(notifyMoves) onAnyCharacterMoved?.Invoke(this);
+		if (notifyMoves)
+		{
+			onMoved?.Invoke();
+			onAnyCharacterMoved?.Invoke(this);
+		}
 	}
 	
 	public float GetTotalDamages() => totalDamages;
