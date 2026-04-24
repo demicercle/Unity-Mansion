@@ -23,7 +23,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
 	[SerializeField] [Min(0f)] private float looseTargetDistance = 6.0f;
 	[SerializeField] private Waypoint wanderingPoint;
-	[SerializeField] [Range(0.1f, 10f)] private float wanderingDistance;
+	[SerializeField] [Range(0f, 12f)] private float wanderingDistance = 2.5f;
 	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 	
 	public bool IsThinking { get; private set; }
@@ -43,6 +43,13 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		StopAllCoroutines();
 		StartCoroutine(Think());
 	}
+
+	public void AssignWanderingPoint(Waypoint newWp)
+	{
+		wanderingPoint = newWp;
+	}
+
+	public bool HasWanderingPoint(Waypoint wp) => wanderingPoint == wp;
 
 	public IEnumerator Think()
 	{

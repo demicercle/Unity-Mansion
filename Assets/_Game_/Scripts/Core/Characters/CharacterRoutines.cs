@@ -333,7 +333,8 @@ public class CharacterRoutines : MonoBehaviour
 		
 		if (characterOwner.WaypointReached(waypoint))
 		{
-			yield return StartCoroutine(WaitCharacterLookDirection(waypoint.GetDirection()));
+			if(!waypoint.ignoreRotation)
+				yield return StartCoroutine(WaitCharacterLookDirection(waypoint.GetDirection()));
 		}
 		else
 		{
@@ -348,7 +349,7 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " did not reach waypoint");
+		//if(debugMode > 0) Debug.Log(this + " did not reach waypoint");
 	}
 
 	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance)
