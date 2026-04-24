@@ -46,6 +46,8 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
 	[SerializeField] private LayerMask obstructionLayers;
+	[SerializeField] private bool setDetectedOnDamaged = true;
+	[SerializeField] private bool lookAtDamageInstigator = true;
 	[SerializeField] private bool drawGizmos;
 
 	private List<CharacterController> detectedCharacters = new List<CharacterController>();
@@ -68,6 +70,7 @@ public class CharacterDetection : MonoBehaviour
 		CharacterController.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
 		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
 		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
+		selfCharacter.onDamagedBy += OnDamagedBy;
 	}
 
 	private void OnDisable()
@@ -78,10 +81,21 @@ public class CharacterDetection : MonoBehaviour
 		CharacterController.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
 		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
 		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
+		selfCharacter.onDamagedBy -= OnDamagedBy;
 	}
 
 	private void OnTurnStarted()  => OnAnyCharacterMoved(selfCharacter);
+	
 	private void OnTurnEnded()  => OnAnyCharacterMoved(selfCharacter);
+
+	private void OnDamagedBy(CharacterController other, float amount)
+	{
+		if (setDetectedOnDamaged)
+			SetDetected(other, true);
+		
+		if (lookAtDamageInstigator)
+			CharacterRoutines.DoLookPositionOn(selfCharacter, other.GetPosition());
+	}
 
 	private void OnAnyCharacterUsesAction(CharacterController anyCharacter, CharacterAction _) =>
 		OnAnyCharacterMoved(anyCharacter);

@@ -81,6 +81,7 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	[SerializeField] private float roomsReveleadSeconds = 1.0f;
+	[SerializeField] private bool shouldSwitchWeaponWhenDamaged = true;
 
 	public bool IsSwitchingWeapons => isSwitchingWeapons;
 
@@ -255,6 +256,7 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.onUseAction += OnUseAction;
 		_selfCharacter.turnStarted += OnTurnStarted;
 		_selfCharacter.turnEnded += OnTurnEnded;
+		_selfCharacter.onDamagedBy += OnDamagedBy;
 
 		RoomTrigger.onChanged += OnRoomsChanged;
 	}
@@ -303,6 +305,7 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.onUseAction -= OnUseAction;
 		_selfCharacter.turnStarted -= OnTurnStarted;
 		_selfCharacter.turnEnded -= OnTurnEnded;
+		_selfCharacter.onDamagedBy -= OnDamagedBy;
 		
 		_characterAnimationEvent.onCharacterAnimationEvent -= OnCharacterAnimationEvent;
 	}
@@ -388,6 +391,12 @@ public class CharacterAnimation : MonoBehaviour
 			
 			_selfCharacter.FloatingText("Take this!");
 		}
+	}
+
+	private void OnDamagedBy(CharacterController other, float amount)
+	{
+		if(shouldSwitchWeaponWhenDamaged)
+			InstantSwitchWeapons();
 	}
 
 	private void UpdateWeaponRenderers()

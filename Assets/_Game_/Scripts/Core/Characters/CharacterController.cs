@@ -40,6 +40,7 @@ public class CharacterController : MonoBehaviour
 	public event System.Action<bool> onSelectionChanged;
 	public event System.Action<float> onHealed;
 	public event System.Action<float> onDamaged;
+	public event System.Action<CharacterController, float> onDamagedBy;
 	public event System.Action<int> onPartyIndexChanged;
 	public event System.Action onDead;
 	public event System.Action onMoved;
@@ -342,19 +343,7 @@ public class CharacterController : MonoBehaviour
 		
 		if (objectFrom is CharacterController)
 		{
-			if (IsEnemyTo((objectFrom as CharacterController))) // enemy should get angry
-			{
-				if (detection && !detection.IsCharacterDetected((CharacterController)objectFrom))
-				{
-					detection.SetDetected(objectFrom as CharacterController, true);
-					Routines.AssignLookPosition((objectFrom as CharacterController).GetCenterPosition());
-				
-					if (TryGetAnimation(out var anim))
-					{
-						anim.InstantSwitchWeapons();
-					}
-				}
-			}
+			onDamagedBy?.Invoke(objectFrom as CharacterController, amount);
 		}
 	}
 	public bool TryKill()
