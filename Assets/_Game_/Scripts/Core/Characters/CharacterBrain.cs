@@ -18,6 +18,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
 	[SerializeField] private bool lookAtDetectedEnemies = true;
+	[SerializeField] private bool warnOthersInRoom = true;
 	[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
 	[SerializeField] [Min(0f)] private float looseTargetDistance = 6.0f;
 	[SerializeField] private Waypoint wanderingPoint;
@@ -306,6 +307,27 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			
 			if (lookAtDetectedEnemies) 
 				CharacterRoutines.DoLookPositionOn(_selfCharacter, _lastTargetKnownPosition);
+
+			if (warnOthersInRoom)
+			{
+				if (RoomTrigger.TryGetRoom(_selfCharacter, out var selfRoom))
+				{
+					var others = selfRoom.GetCharacters();
+					foreach (var other in others)
+					{
+						if (other.GetCurrentFaction() == _selfCharacter.GetCurrentFaction() 
+						    && !other.IsDead()
+						    && !other.HasDetectedOther(_chaseCharacter))
+						{
+							if (other.TryGetComponent(out CharacterDetection otherDetection))
+							{
+								if(debugMode > 0) Debug.Log(this + " warnOthersInRoom " + other + " SetDetected " + _chaseCharacter);
+								otherDetection.SetDetected(_chaseCharacter, true);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 

@@ -19,6 +19,7 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool firstTurnIsPlayer = true;
 	[SerializeField] private bool skipInvisibleCharacters = true;
+	[SerializeField] private bool restCharacterAtFirstTurn;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
@@ -30,6 +31,7 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] [Min(0.1f)] private  float firstTurnSeconds = 1.0f;
 	[SerializeField] [Min(0.1f)] private  float aiThinksSeconds = 0.5f;
 	[Space]
+	[Header("Init")] 
 	[SerializeField] private GameObject[] startupObjects = new GameObject[0];
 
 	public bool IsTurnBasedMode() => turnBasedMode;
@@ -173,7 +175,7 @@ public class GameTurnManager : MonoBehaviour
 				continue;
 			
 			turnBasedCharacters.Add(character);
-			character.Rest();
+			if(restCharacterAtFirstTurn) character.Rest();
 			
 			character.Routines.StopAllRoutines();
 			
@@ -268,15 +270,23 @@ public class GameTurnManager : MonoBehaviour
 				}
 
 				otherCharacter.GetAgent().SetObstacle(false);
+				
 				do yield return null;
 				while (NavmeshRebuilder.IsRebuildingAsync());
 				
-				yield return StartCoroutine(otherBrain.Think());
+				StartCoroutine(otherBrain.Think());
+				
+				do
+				{
+					yield return null;
+				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
+				
+				yield return YieldRoutines();
 
-				var startTime = Time.time;
+				/*var startTime = Time.time;
 				yield return YieldRoutines();
 				while (Time.time - startTime < aiThinksSeconds)
-					yield return null;
+					yield return null;*/
 			}
 		}
 	}

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 
 public class RoomTrigger : MonoBehaviour
 {
+	public static List<RoomTrigger> allRooms = new List<RoomTrigger>();
 	public static List<RoomTrigger> activeRooms = new List<RoomTrigger>();
 
 	public static bool IsPositionVisible(Vector3 world)
@@ -18,6 +20,31 @@ public class RoomTrigger : MonoBehaviour
 			return false;
 		
 		return true;
+	}
+
+	public static bool TryGetRoom(CharacterController character, out RoomTrigger inRoom)
+	{
+		foreach (var room in allRooms)
+		{
+			if (room.HasCharacter(character))
+			{
+				inRoom = room;
+				return true;
+			}
+		}
+
+		inRoom = null;
+		return false;
+	}
+	
+	public List<CharacterController> GetCharacters()
+	{
+		var outList = new  List<CharacterController>();
+		foreach (var trigger in triggers)
+		{
+			outList.AddRange(trigger.GetCharacters());
+		}
+		return outList;
 	}
 
 	public static System.Action onChanged;
@@ -105,6 +132,16 @@ public class RoomTrigger : MonoBehaviour
 		}
 	}
 	#endif
+
+	private void Awake()
+	{
+		allRooms.Add(this);
+	}
+
+	private void OnDestroy()
+	{
+		allRooms.Remove(this);
+	}
 
 	private void OnEnable()
 	{
