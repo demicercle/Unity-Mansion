@@ -22,14 +22,20 @@ public static class Utils
 		       });
 	}
 
-	public static void DrawWorldGUI(Vector3 position, string debugString)
+	public static void DrawWorldGUI(Vector3 position, string debugString) =>
+		DrawWorldGUI(position, debugString, Vector2.zero);
+	public static void DrawWorldGUI(Vector3 position, string debugString, Vector2 offset) =>
+		DrawWorldGUI(position, debugString, offset, new GUIStyle("textfield"));
+	public static void DrawWorldGUI(Vector3 position, string debugString, GUIStyle guiStyle) =>
+		DrawWorldGUI(position, debugString, Vector2.zero, guiStyle);
+	public static void DrawWorldGUI(Vector3 position, string debugString, Vector2 offset, GUIStyle guiStyle)
 	{
 		var guiContent = new GUIContent(debugString);
-		var guiStyle = new GUIStyle("textfield");
 		var guiRect = GUILayoutUtility.GetRect(guiContent, guiStyle);
 		var guiPosition = (Vector2)Camera.main.WorldToScreenPoint(position);
 		guiPosition.y = Screen.height - guiPosition.y;
-		GUI.Box(new Rect(guiPosition, guiRect.size), guiContent);
+		guiPosition += offset;
+		GUI.Box(new Rect(guiPosition, guiRect.size), guiContent, guiStyle);
 	}
 
 	public static bool IsEditorPrefabStage()

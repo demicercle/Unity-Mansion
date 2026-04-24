@@ -134,6 +134,12 @@ public class ConsoleCommands : MonoBehaviour
 		Debug.Log("debug_gtm=" + (GameTurnManager.debugMode = value));
 	}
 
+	[ConsoleMethod("debug_stats", "")]
+	public static void _DebugStats(int value)
+	{
+		Debug.Log("debug_stats=" + (CharacterController.debugStats= value));
+	}
+
 	[ConsoleMethod("debug_anim", "")]
 	public static void _DebugAnim(int value)
 	{

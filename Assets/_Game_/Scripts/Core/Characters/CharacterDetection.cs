@@ -12,6 +12,15 @@ public class CharacterDetection : MonoBehaviour
 	public System.Action<CharacterController> onCharacterDetected;
 	public System.Action<CharacterController> onCharacterLost;
 	
+	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
+	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
+	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
+	[SerializeField] private LayerMask obstructionLayers;
+	[SerializeField] private bool setDetectedOnDamaged = true;
+	[SerializeField] private bool lookAtDamageInstigator = true;
+	[SerializeField] private bool warnOthersInRoom = true;
+	[SerializeField] private bool drawGizmos;
+	
 	public bool IsCharacterDetected(CharacterController other) => other && detectedCharacters.Contains(other);
 	
 	public CharacterController[] GetDetectedCharacters() => detectedCharacters.ToArray();
@@ -24,6 +33,28 @@ public class CharacterDetection : MonoBehaviour
 			{
 				if(debugMode > 0) Debug.Log(this + " detects " + otherCharacter);
 				detectedCharacters.Add(otherCharacter);
+				
+				if (warnOthersInRoom)
+				{
+					if (RoomTrigger.TryGetRoom(selfCharacter, out var selfRoom))
+					{
+						var others = selfRoom.GetCharacters();
+						foreach (var other in others)
+						{
+							if (other.GetCurrentFaction() == selfCharacter.GetCurrentFaction() 
+							    && !other.IsDead()
+							    && !other.HasDetectedOther(selfCharacter))
+							{
+								if (other.TryGetComponent(out CharacterDetection otherDetection))
+								{
+									if(debugMode > 0) Debug.Log(this + " warnOthersInRoom " + otherDetection + " SetDetected " + otherCharacter);
+									otherDetection.SetDetected(otherCharacter, true);
+								}
+							}
+						}
+					}
+				}
+				
 				onCharacterDetected?.Invoke(otherCharacter);
 				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, true);
 			}
@@ -41,14 +72,6 @@ public class CharacterDetection : MonoBehaviour
 	}
 
 	public void ClearAll() => detectedCharacters.Clear();
-	
-	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
-	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
-	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
-	[SerializeField] private LayerMask obstructionLayers;
-	[SerializeField] private bool setDetectedOnDamaged = true;
-	[SerializeField] private bool lookAtDamageInstigator = true;
-	[SerializeField] private bool drawGizmos;
 
 	private List<CharacterController> detectedCharacters = new List<CharacterController>();
 	private CharacterController selfCharacter;

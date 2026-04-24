@@ -25,6 +25,8 @@ public class CharacterController : MonoBehaviour
 {
 	const float MinFacingDot = 0.9f;
 	
+	public static int debugStats { get; set; }
+	
 	public static List<CharacterController> AllCharacters => _allCharacters;
 
 	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
@@ -548,4 +550,13 @@ public class CharacterController : MonoBehaviour
 		Utils.DrawGizmosCircle(transform.position, Vector3.up, visionRange);
 	}
 	#endif
+
+	private void OnGUI()
+	{
+		if (debugStats > 0)
+		{
+			var healthStr = GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2");
+			Utils.DrawWorldGUI(GetEyesPosition(), name + "\n" + healthStr, "label");
+		}
+	}
 }

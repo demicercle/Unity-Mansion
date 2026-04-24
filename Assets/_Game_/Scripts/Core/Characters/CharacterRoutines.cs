@@ -328,32 +328,18 @@ public class CharacterRoutines : MonoBehaviour
 		if(agent.IsMoving()) agent.StopMovement(); // stop any other movement
 		
 		yield return agent.SearchPathAsync(dest);
-
-		var startTime = Time.time;
-		var path = default(Vector3[]);
-		do
-		{
-			path = agent.GetCurrentPath();
-			if(debugMode > 1) Debug.Log("WaitCharacterMoved path=" + path.Length + " time=" + (Time.time - startTime) );
-			if (path.Length > 1) break;
-			yield return null;
-			if (Time.time - startTime > SearchPathTimeout)
-				break;
-		} while (true);
-
-		if (Time.time - startTime > SearchPathTimeout)
-		{
-			Debug.LogWarning(characterOwner + " TimedOut!");
-			yield return new WaitForSeconds(0.5f);
-			characterOwner.UseAllActions();
-			yield break;
-		}
+		
+		var path = agent.GetCurrentPath();
 		
 		if (path.Length <= 1)
 		{
 			Debug.LogWarning(characterOwner + " path invalid");
+			
 			yield return new WaitForSeconds(0.5f);
-			characterOwner.UseAllActions();
+			
+			if(!characterOwner.InParty()) 
+				characterOwner.UseAllActions();
+			
 			yield break;
 		}
 		
@@ -369,7 +355,7 @@ public class CharacterRoutines : MonoBehaviour
 		agent.SetReachDistance(Mathf.Max(agent.GetMinReachDistance(), reachDistance));
 		agent.StartMove();
 
-		startTime = Time.time;
+		var startTime = Time.time;
 		do
 		{
 			if (Time.time - startTime > SearchPathTimeout)
