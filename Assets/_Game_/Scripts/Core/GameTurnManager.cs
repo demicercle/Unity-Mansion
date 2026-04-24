@@ -144,7 +144,7 @@ public class GameTurnManager : MonoBehaviour
 		foreach (var character in levelCharacters)
 		{
 			character.Spawn();
-			if(character.CompareTag(Tags.TagPlayer))
+			if(character.GetCurrentFaction() == CharacterFaction.Player)
 				character.SetPartyIndex(partyIndex++);
 		}
 		

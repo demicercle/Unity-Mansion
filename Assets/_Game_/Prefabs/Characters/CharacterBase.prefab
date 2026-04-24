@@ -464,6 +464,7 @@ MonoBehaviour:
   animator: {fileID: 0}
   rpgAnimationHandler: {fileID: 0}
   switchWeaponExtraTime: 0
+  waitToRelaxTime: 6
   parameters:
     moving: 
     velocityX: 
@@ -479,6 +480,7 @@ MonoBehaviour:
   velocityScale: 1
   minMovePointsToRun: 0.1
   roomsReveleadSeconds: 1
+  startsWeaponsReady: 0
   shouldSwitchWeaponWhenDamaged: 1
 --- !u!114 &3789455635990092813
 MonoBehaviour:

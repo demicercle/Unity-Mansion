@@ -83,6 +83,7 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	[SerializeField] private float roomsReveleadSeconds = 1.0f;
+	[SerializeField] private bool startsWeaponsReady = true;
 	[SerializeField] private bool shouldSwitchWeaponWhenDamaged = true;
 
 	public bool IsSwitchingWeapons => isSwitchingWeapons;
@@ -183,6 +184,8 @@ public class CharacterAnimation : MonoBehaviour
 			return;
 		}
 		
+		weaponSwitched = startsWeaponsReady;
+		
 		_characterAnimationEvent = animator.GetComponent<CharacterAnimationEvent>();
 		if(!_characterAnimationEvent) _characterAnimationEvent = animator.gameObject.AddComponent<CharacterAnimationEvent>();
 		_characterAnimationEvent.onCharacterAnimationEvent += OnCharacterAnimationEvent;
@@ -220,7 +223,8 @@ public class CharacterAnimation : MonoBehaviour
 
 		if (rpgAnimationHandler)
 		{
-			rpgAnimationHandler.RelaxOnStart();
+			if(!weaponSwitched)
+				rpgAnimationHandler.RelaxOnStart();
 		}
 		
 		if(!TrySwitchWeapons(weaponSwitched))
