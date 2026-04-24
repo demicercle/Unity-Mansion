@@ -337,7 +337,7 @@ public class GameInput : MonoBehaviour
 		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
-		if (hasFocus && mouseOverViewport && !holdMiddleClick) // mouse over
+		if (hasFocus && mouseOverViewport && !holdMiddleClick) ///////////////////////////////////////////////////////////////////////////// mouse over
 		{
 			lastCursorResult = CursorRaycast(out var hit);
 
@@ -392,8 +392,8 @@ public class GameInput : MonoBehaviour
 						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");
-				}
-				else if (hit.collider.TryGetComponent(out PropComponent overProp)) 
+				} // TODO ISelectable, ITalkable
+				else if (hit.collider.TryGetComponent(out PropComponent overProp))  // TODO IInteractable
 				{
 					if (debugMode > 1) Debug.Log(this + " overProp=" + overProp);
 					debugString += " (Prop)";
@@ -409,6 +409,22 @@ public class GameInput : MonoBehaviour
 						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");
+				}
+				else if (hit.collider.TryGetComponent(out IAttackable overAttackable))
+				{
+					if (debugMode > 1) Debug.Log(this + " overAttackable=" + overAttackable);
+					debugString += " (Attackable)";
+					if (selectedCharacter != null)
+					{
+						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
+							: CursorType.Attack);
+							
+						if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
+						{
+							selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition(), true);
+						}
+						debugString += "\n>" + currentCursor;
+					}
 				}
 			}
 			
@@ -578,9 +594,14 @@ public class GameInput : MonoBehaviour
 					ClickCharacter(clickedCharacter);
 				}
 
-				if (hit.collider.TryGetComponent(out PropComponent clickedProp)) // click prop
+				else if (hit.collider.TryGetComponent(out PropComponent clickedProp)) // click prop
 				{
 					ClickProp(clickedProp);
+				}
+				
+				else if (hit.collider.TryGetComponent(out IAttackable attackable))
+				{
+					ClickAttackable(attackable);
 				}
 			}
 			else if (raycastResult == CursorRaycastResult_Navigation) // click navigation
@@ -686,7 +707,7 @@ public class GameInput : MonoBehaviour
 		}
 	}
 
-	private void ClickProp(PropComponent clickedProp) // TODO Prop Controller
+	private void ClickProp(PropComponent clickedProp) 
 	{
 		Debug.Log(this + " ClickProp " + clickedProp);
 
@@ -712,6 +733,34 @@ public class GameInput : MonoBehaviour
 			else if(isDebugMode)  Debug.Log(" selected character not controllable");
 		}
 		else if(isDebugMode)  Debug.Log("> no character selected");
+	}
+
+	private void ClickAttackable(IAttackable attackable)
+	{
+		Debug.Log(this + " ClickAttackable " + attackable);
+		
+		if (selectedCharacter != null)
+		{
+			// assign attack
+			if (selectedCharacter.CanAttack(false))
+			{
+				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
+					selectedCharacter.FloatingText_Cant();
+				else
+				{
+					if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + attackable);
+					if (!IsLeaderMode())
+						selectedCharacter.Routines.AssignAttack(attackable, false, false);
+					else
+						selectedCharacter.Routines.Leader_AssignAttack(attackable, false, false);
+					//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+				}
+				return;
+			}
+				
+			selectedCharacter.FloatingText_Cant();
+		}
+		else if(isDebugMode)  Debug.Log("> IsEnemyToPlayer no selected character");
 	}
 
 	private void ClickNavigation(Vector3 navPosition)

@@ -5,6 +5,13 @@ using RPGCharacterAnims.Lookups;
 using Unity.VisualScripting;
 using UnityEngine;
 
+public interface IAttackable
+{
+	Vector3 GetPosition();
+	float GetRadius();
+	void TakeDamage(float amount, object instigator);
+}
+
 public enum CharacterFaction
 {
 	None = -1,
@@ -18,10 +25,11 @@ public enum CharacterAction
 	None,
 	Run,
 	Attack,
-	Interact
+	Interact,
+	Destroy
 }
 
-public class CharacterController : MonoBehaviour
+public class CharacterController : MonoBehaviour, IAttackable
 {
 	const float MinFacingDot = 0.9f;
 	
@@ -326,12 +334,12 @@ public class CharacterController : MonoBehaviour
 		onHealed?.Invoke(amount);
 		onStatsChanged?.Invoke();
 	}
-	public void TakeDamage(float amount, object objectFrom, bool stopAgent = true)
+	public void TakeDamage(float amount, object objectFrom)
 	{
 		Debug.Log(this + " TakeDamage " + amount);
 		totalDamages += amount;
 		
-		if(stopAgent) StopAgent();
+		StopAgent();
 
 		onDamaged?.Invoke(amount);
 		
@@ -392,12 +400,12 @@ public class CharacterController : MonoBehaviour
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	}
 
-	public float GetAttackRange(CharacterController target)
+	public float GetAttackRange(IAttackable target)
 	{
-		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.agent.GetRadius());
+		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius());
 	}
 
-	public bool IsAtAttackRange(CharacterController target, bool losCheck = true)
+	public bool IsAtAttackRange(IAttackable target, bool losCheck = true)
 	{
 		var atkRange = GetAttackRange(target);
 		var dist = Vector3.Distance(GetPosition(), target.GetPosition());
@@ -527,10 +535,10 @@ public class CharacterController : MonoBehaviour
 		}
 	}
 	
-	private bool LOSCheck(CharacterController other)
+	private bool LOSCheck(IAttackable other)
 	{
 		var start = GetEyesPosition();
-		var end = other.GetEyesPosition();
+		var end = other.GetPosition();
 		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
 		{
 			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);

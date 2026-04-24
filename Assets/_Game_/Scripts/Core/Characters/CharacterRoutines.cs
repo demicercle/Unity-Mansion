@@ -26,12 +26,12 @@ public class CharacterRoutines : MonoBehaviour
 		return activeInstances.Contains(this);
 	}
 	
-	public void AssignAttack(CharacterController target, bool canUseRunAction, bool losCheck)
+	public void AssignAttack(IAttackable target, bool canUseRunAction, bool losCheck)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck);
-		StartNewRoutine(WaitCharacterAttackCharacter(target, canUseRunAction, losCheck));
+		StartNewRoutine(WaitCharacterAttack(target, canUseRunAction, losCheck));
 	}
-	public void AssignAttackInstant(CharacterController target, bool useAction)
+	public void AssignAttackInstant(IAttackable target, bool useAction)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignAttackInstant " + target + " usesActions=" + useAction);
 		StartNewRoutine(WaitCharacterPerformAttack(target, useAction));
@@ -98,7 +98,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 
-	public void Leader_AssignAttack(CharacterController other, bool canUseRunAction, bool losCheck)
+	public void Leader_AssignAttack(IAttackable other, bool canUseRunAction, bool losCheck)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
 		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
@@ -203,7 +203,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 	
-	private IEnumerator WaitCharacterAttackCharacter(CharacterController target, bool canUseRunAction, bool losCheck)
+	private IEnumerator WaitCharacterAttack(IAttackable target, bool canUseRunAction, bool losCheck)
 	{
 		if(debugMode > 0) Debug.Log("WaitCharacterAttackCharacter " + characterOwner + " " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck);
 
@@ -259,12 +259,12 @@ public class CharacterRoutines : MonoBehaviour
 		yield return StartCoroutine(WaitCharacterPerformAttack(target, true));
 	}
 
-	private IEnumerator WaitCharacterPerformAttack(CharacterController target, bool useAction)
+	private IEnumerator WaitCharacterPerformAttack(IAttackable target, bool useAction)
 	{
 		debugString = "WaitCharacterPerformAttack";
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterPerformAttack " + target );
 		
-		yield return StartCoroutine(WaitCharacterLookPosition(target.GetCenterPosition()));
+		yield return StartCoroutine(WaitCharacterLookPosition(target.GetPosition()));
 
 		if (useAction && !characterOwner.HasActions())
 		{
@@ -277,7 +277,7 @@ public class CharacterRoutines : MonoBehaviour
 		yield return characterOwner.WaitAnimationEvent(characterOwner.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
-		target.TakeDamage(characterOwner.GetLastAttackDamage(), characterOwner, true);
+		target.TakeDamage(characterOwner.GetLastAttackDamage(), characterOwner);
 
 		if(debugMode > 0) Debug.Log("attack ends");
 	}
@@ -310,6 +310,69 @@ public class CharacterRoutines : MonoBehaviour
 			yield return null;
 		} while (!prop.AnimFinished());
 	}
+	/*private IEnumerator WaitCharacterDestroys(Destructible destructible)
+	{
+		debugString = "WaitCharacterDestroys";
+		if (debugMode > 0) Debug.Log(this + " WaitCharacterDestroys > " + destructible);
+		
+		if (characterOwner.TryGetAnimation(out var characterAnim))
+		{
+			if (characterAnim.TrySwitchWeapons(true))
+			{
+				do
+				{
+					debugString = "TrySwitchWeapons";
+					yield return null;
+				} while (characterAnim.IsSwitchingWeapons);
+				if(debugMode > 0) Debug.Log("weapons switched for attacking");
+			}
+		}
+
+		var atAttackRange = false;
+		while (!atAttackRange)
+		{
+			yield return null;
+
+			atAttackRange = characterOwner.IsAtAttackRange(target, losCheck);
+			if (atAttackRange)
+			{
+				if(debugMode > 0) Debug.Log(characterOwner + " atAttackRange of " + target + ", StopAgent");
+				characterOwner.StopAgent();
+			}
+			
+			else if (!characterOwner.IsMoving())
+			{
+				if (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.CanUseAction(CharacterAction.Run))
+				{
+					if (debugMode > 0) Debug.Log(this + " WaitCharacterAttackCharacter use Run Action");
+					yield return StartCoroutine(WaitAction(CharacterAction.Run));
+				}
+				
+				else if (!characterOwner.HasMovePoints())
+				{
+					if(debugMode > 0) Debug.Log(characterOwner + " has no move points to reach target");
+					characterOwner.FloatingText_Cant();
+					yield break;
+				}
+
+				else
+				{
+					var reachDistance = characterOwner.GetAttackRange(target);
+					if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
+					yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance));
+				}
+			}
+		}
+		
+		characterOwner.UseAction(CharacterAction.Destroy, destructible);
+		
+		prop.InteractedBy(characterOwner);
+
+		do
+		{
+			yield return null;
+		} while (!prop.AnimFinished());
+	}*/
 
 	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection((pos - characterOwner.GetPosition()).normalized);
 	
