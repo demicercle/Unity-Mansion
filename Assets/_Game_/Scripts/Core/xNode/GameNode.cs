@@ -1,9 +1,15 @@
-﻿using XNode;
+﻿using UnityEngine;
+using XNode;
 
-public class GameNode : Node
+public abstract class GameNode : Node
 {
-	public override string ToString()
+	protected override void Init()
 	{
-		return "x_" + base.ToString();
+		if(!Application.isPlaying)
+			name = name.Replace("Node", string.Empty).Trim(' ');
+		
+		base.Init();
 	}
+
+	protected void DebugLogThis(string msg) => Debug.Log("x_" + this + ": " + msg);
 }

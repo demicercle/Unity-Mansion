@@ -12,14 +12,13 @@ public class NodeDebugLog : GameNode
 	// Use this for initialization
 	protected override void Init()
 	{
-		_in.Connect(this, "_in", OnCallback);
-		
 		base.Init();
+		_in.Init(this, "_in", OnCallback);
 	}
 
 	private void OnCallback()
 	{
-		Debug.Log(this + " " + message);
+		DebugLogThis(message);
 	}
 
 	// Return the correct value of an output port when requested

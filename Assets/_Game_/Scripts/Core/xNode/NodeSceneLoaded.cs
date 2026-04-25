@@ -5,13 +5,12 @@ using RPGCharacterAnims;
 using UnityEngine;
 using XNode;
 
-public class NodeSceneLoaded : GameNode, ISceneLoaded
+public class NodeSceneLoaded : GameNode
 {
 	[Output] public NodeExec _out;
 
 	public void OnSceneLoaded()
 	{
-		Debug.Log(this + " OnSceneLoaded");
 		_out.callback?.Invoke();
 	}
 	

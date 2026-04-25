@@ -13,12 +13,12 @@ public class NodeExec
 {
 	public System.Action callback;
 	
-	public void Connect(Node node, string inputName, System.Action callback)
+	public void Init(Node node, string inputName, System.Action callback)
 	{
-		otherExec =node.GetInputPort(inputName).GetInputValue<NodeExec>();
+		otherExec = node.GetInputPort(inputName).GetInputValue<NodeExec>();
 		if (otherExec != null)
 		{
-			Debug.Log(this + " Connects " + node + " " + inputName);
+			//Debug.Log(this + " Connects " + node + " " + inputName);
 			otherExec.callback += callback;
 		}
 	}
