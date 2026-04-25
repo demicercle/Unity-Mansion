@@ -201,4 +201,15 @@ public static class EditorTools
 		}
 	}
 	#endregion
+	
+	#region AStar
+	[MenuItem("Tools/RebuildAStar")]
+	private static void RebuildAStar()
+	{
+		foreach (var graph in AstarPath.active.graphs)
+		{
+			graph.Scan();
+		}
+	}
+	#endregion
 }
