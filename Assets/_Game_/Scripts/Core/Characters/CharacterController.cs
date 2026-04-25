@@ -237,7 +237,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		getDirection.y = 0;
 		getDirection.Normalize();
 
-		if (getDirection.sqrMagnitude < 0.01f)
+		if (getDirection.sqrMagnitude < Consts.MinMagnitude)
 		{
 			Debug.LogWarning(this + " invalid direction");
 			return;
@@ -413,7 +413,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public bool IsAtAttackRange(IAttackable target, bool losCheck = true)
 	{
 		var atkRange = GetAttackRange(target);
-		var dist = Vector3.Distance(GetPosition(), target.GetPosition());
+		var dist = NavUtils.NavDistanceRoundY(GetPosition(), target.GetPosition());
 		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
 		if (dist <= atkRange)
 		{

@@ -171,50 +171,53 @@ public class GameTurnManager : MonoBehaviour
 	{
 		Debug.Log(this + " Enters TurnBasedCoroutine");
 		turnBasedMode = true;
-
-		turnBasedCharacters.Clear();
-		foreach (var character in levelCharacters)
-		{
-			if (!character.InParty() && !character.HasDetectedAnyPartyCharacter())
-				continue;
-			
-			turnBasedCharacters.Add(character);
-			if(restCharacterAtFirstTurn) character.Rest();
-			
-			character.Routines.StopAllRoutines();
-			
-			if(character.IsMoving()) character.StopAgent();
-			
-			character.GetAgent().SetObstacle(!character.IsSelected());
-			character.GetAgent().EnableAvoidance(false);
-
-			if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
-				otherAnimation.TrySwitchWeapons(true);
-
-			if (!character.InParty())
-			{
-				if (character.TryGetComponent(out CharacterBrain otherBrain))
-					otherBrain.StopThinking();
-			}
-
-			if (character.IsEnemyToPlayer())
-			{
-				if (focusCharacter == null || cameraPivot.GetDistanceTo(focusCharacter.GetPosition()) >
-				    cameraPivot.GetDistanceTo(character.GetPosition()))
-				{
-					focusCharacter = character;
-				}
-			}
-		}
-
-		Debug.Log(this + " turnBasedCharacter=" + turnBasedCharacters.Count);
 		
 		currentTurn = 0;
 		
 		while (turnBasedMode)
 		{
-			if (currentTurn == 0)
+			if (currentTurn == 0) 
 			{
+				Debug.Log(this + " init first turn");
+				
+				turnBasedCharacters.Clear();
+				foreach (var character in levelCharacters)
+				{
+					if (character.IsDead())
+						continue;
+			
+					if (!character.InParty() && !character.HasDetectedAnyPartyCharacter())
+						continue;
+			
+					turnBasedCharacters.Add(character);
+					if(restCharacterAtFirstTurn) character.Rest();
+			
+					character.Routines.StopAllRoutines();
+					character.StopAgent();
+					character.GetAgent().SetObstacle(!character.IsSelected());
+					character.GetAgent().EnableAvoidance(false);
+
+					if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
+						otherAnimation.TrySwitchWeapons(true);
+
+					if (!character.InParty())
+					{
+						if (character.TryGetComponent(out CharacterBrain otherBrain))
+							otherBrain.StopThink();
+					}
+
+					if (character.IsEnemyToPlayer())
+					{
+						if (focusCharacter == null || cameraPivot.GetDistanceTo(focusCharacter.GetPosition()) >
+						    cameraPivot.GetDistanceTo(character.GetPosition()))
+						{
+							focusCharacter = character;
+						}
+					}
+				}
+
+				Debug.Log(this + " found turnBasedCharacter=" + turnBasedCharacters.Count);
+				
 				if (!playerTurn && firstTurnIsPlayer) // probably useless unless GD ("initiative")
 				{
 					playerTurn = true;
@@ -296,11 +299,12 @@ public class GameTurnManager : MonoBehaviour
 				
 				do yield return null;
 				while (NavmeshRebuilder.IsRebuildingAsync());
-
-				StartCoroutine(otherBrain.Think());
 				
 				do
 				{
+					if(!otherBrain.IsThinking)
+						otherBrain.StartThink();
+					
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
 				
@@ -430,7 +434,7 @@ public class GameTurnManager : MonoBehaviour
 
 			if (enemyCharacter.HasDetectedAnyPartyCharacter())
 			{
-				if(debugMode > 0) Debug.Log(this + " Should_not_ExitTurnBased: HasDetectedAnyPartyCharacter enemy " + enemyCharacter);
+//				if(debugMode > 0) Debug.Log(this + " Should_not_ExitTurnBased: HasDetectedAnyPartyCharacter enemy " + enemyCharacter);
 				return false;
 			}
 		}
@@ -483,7 +487,7 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.BeginVertical("textfield");
 			
 			GUILayout.Label("GAME TURN MANAGER");
-			GUILayout.Label("levelCharacters: " + levelCharacters.Length);
+			GUILayout.Label("levelCharacters: " + levelCharacters?.Length);
 			
 			GUILayout.BeginVertical("textfield");
 			GUILayout.Label("turnBasedMode: " + turnBasedMode);
@@ -509,4 +513,6 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.EndArea();
 		}
 	}
+
+	public override string ToString() => "<b>GTM</b>";
 }

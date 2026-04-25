@@ -164,48 +164,4 @@ public class RoomTrigger : MonoBehaviour
 			door.onInteracted -= Explore;
 		}
 	}
-
-	private void Start()
-	{
-		CreateCeilings();
-	}
-
-	private void CreateCeilings()
-	{
-		if (!createCeilings)
-			return;
-		
-		var rebuildNav = ceilings.Count > 0;
-		while (ceilings.Count > 0)
-		{
-			Destroy(ceilings[0].gameObject);
-			ceilings.RemoveAt(0);
-		}
-		
-		foreach (var trigger in triggers)
-		{
-			var boxCollider = trigger.GetComponent<BoxCollider>();
-			if(!boxCollider) Debug.LogWarning(this + " invalid collider for " + trigger);
-			else
-			{
-				var newSize = boxCollider.size;
-				
-				var newCenter = boxCollider.center;
-				newCenter.y += newSize.y / 2;
-				newSize.y = ceilingHeight;
-				
-				var ceiling = new GameObject("ceiling_" + ceilings.Count).AddComponent<BoxCollider>();
-				ceiling.gameObject.layer = Layers.LayerWall;
-				ceiling.transform.SetParent(trigger.transform, false);
-				ceiling.isTrigger = false;
-				ceiling.size = newSize;
-				ceiling.center = newCenter;
-				
-				ceilings.Add(ceiling);
-			}
-		}
-
-		if(rebuildNav) 
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
-	}
 }

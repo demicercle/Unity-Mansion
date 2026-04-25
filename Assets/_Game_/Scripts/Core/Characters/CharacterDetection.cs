@@ -35,7 +35,7 @@ public class CharacterDetection : MonoBehaviour
 				if(debugMode > 0) Debug.Log(this + " detects " + otherCharacter);
 				detectedCharacters.Add(otherCharacter);
 				
-				if (warnOthersInRoom)
+				if (selfCharacter.IsEnemyTo(otherCharacter) && warnOthersInRoom)
 				{
 					if (RoomTrigger.TryGetRoom(selfCharacter, out var selfRoom))
 					{

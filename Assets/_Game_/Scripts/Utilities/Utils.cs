@@ -279,6 +279,13 @@ public static class Utils
 		foreach (var obj in objs) str += obj?.ToString() + separator;
 		return str;
 	}
+	
+	public static string ArrayStr(IEnumerable objs, char  separator = ',')
+	{
+		var str = "";
+		foreach (var obj in objs) str += obj?.ToString() + separator;
+		return str;
+	}
 
 	public static T GetOrAddComponent<T>(GameObject gameObject) where T:Component
 	{
@@ -286,7 +293,7 @@ public static class Utils
 		if (t == null) t= gameObject.AddComponent<T>();
 		return t;
 	}
-
+	
 	public static float HDistance(Vector3 aiPathPosition, Vector3 dest)
 	{
 		aiPathPosition.y = dest.y;
@@ -298,6 +305,12 @@ public static class Utils
 
 public static class NavUtils
 {
+	public static float NavDistanceRoundY(Vector3 from, Vector3 to)
+	{
+		from.y = to.y = Mathf.Round(from.y);
+		return Vector3.Distance(from, to);
+	}
+	
 	/// <summary>
 	/// Récupère un point aléatoire accessible sur le graphe, dans un rayon donné autour d'un centre.
 	/// </summary>

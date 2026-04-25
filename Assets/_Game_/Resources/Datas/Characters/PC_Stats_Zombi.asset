@@ -18,4 +18,4 @@ MonoBehaviour:
   maxActions: 1
   maxMovePoints: 8
   runActionExtraMovePoints: 8
-  maxHealth: 12
+  maxHealth: 7

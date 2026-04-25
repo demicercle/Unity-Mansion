@@ -198,7 +198,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else if(debugMode > 0) 
 		{
-			var dist = Vector3.Distance(characterOwner.GetPosition(), bestWaypoint.GetPosition());
+			var dist = NavUtils.NavDistanceRoundY(characterOwner.GetPosition(), bestWaypoint.GetPosition());
 			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
 		}
 	}
@@ -417,8 +417,15 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance)
 	{
+		var currentDistance = NavUtils.NavDistanceRoundY(dest,  characterOwner.GetPosition());
 		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
-		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + characterOwner + " " + reachDistance);
+		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + characterOwner + " " + reachDistance + " currentDistance=" + currentDistance);
+		
+		if (currentDistance <= reachDistance)
+		{
+			if(debugMode > 0) Debug.Log("character already at reachDistance=" + reachDistance+ ", abort");
+			yield break;
+		}
 			
 		var agent = characterOwner.GetAgent();
 		if(agent.IsMoving()) agent.StopMovement(); // stop any other movement
@@ -426,25 +433,23 @@ public class CharacterRoutines : MonoBehaviour
 		yield return agent.SearchPathAsync(dest);
 		
 		var path = agent.GetCurrentPath();
-		
 		if (path.Length <= 1)
 		{
-			Debug.LogWarning(characterOwner + " path invalid");
-			
-			yield return new WaitForSeconds(0.5f);
-			
+			Debug.LogWarning(characterOwner + " path invalid\nfrom " + characterOwner.GetPosition() + " points: " + Utils.ArrayStr(path));;
+			if(debugMode > 2) Debug.DebugBreak();
+			yield return null;
 			yield break;
 		}
 		
 		var firstPoint = path[1];
 		var dir = (firstPoint - characterOwner.GetPosition()).normalized;
-		while (!characterOwner.IsFacingDirection(dir))
+		while (dir.magnitude >= Consts.MinMagnitude && !characterOwner.IsFacingDirection(dir))
 		{
 			characterOwner.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
+//		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
 		agent.SetReachDistance(Mathf.Max(agent.GetMinReachDistance(), reachDistance));
 		agent.StartMove();
 
@@ -464,7 +469,7 @@ public class CharacterRoutines : MonoBehaviour
 				if(debugMode > 0) Debug.Log(characterOwner + " something stopped movement");
 				yield break;
 			}
-
+			
 			if (!characterOwner.HasMovePoints())
 			{
 				if(debugMode > 0) Debug.Log(characterOwner + " !HasMovePoints");
@@ -475,15 +480,19 @@ public class CharacterRoutines : MonoBehaviour
 
 			var oldPosition = characterOwner.GetPosition();
 
-			if(debugMode > 0) DebugDrawer.Line(oldPosition, dest, Color.cyan, 0f);
-			if(debugMode > 0) DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.blue, 0f);
+			if(debugMode > 0) DebugDrawer.Path(path, false, Color.cyan);
+			if(debugMode > 0) DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.cyan, 0f);
 			if(debugMode > 0) DebugDrawer.WireDisc(dest, agent.GetRadius(), Color.cyan, 0f);
 			
 			yield return null;
 
 			var newPosition = characterOwner.GetPosition();
-			var deltaPos =
-				(newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
+			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
+			if (deltaPos > Consts.MinMagnitude) // character has moved
+			{
+				//agent.DropOnGround(); // to avoid overlapping obstacles
+				startTime = Time.time; // reset timeout
+			}
 			
 			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			characterOwner.ConsumeMovePoints(deltaPos, true);

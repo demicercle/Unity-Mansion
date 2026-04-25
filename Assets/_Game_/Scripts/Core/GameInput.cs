@@ -197,6 +197,9 @@ public class GameInput : MonoBehaviour
 		
 		canvas.onViewportClicked -= OnClickedViewport;
 		canvas.onViewportMouseOver -= OnMouseOverViewport;
+		
+		Cursor.SetCursor(null, default, default);
+		Cursor.lockState = default;
 	}
 
 	private IEnumerator Start()

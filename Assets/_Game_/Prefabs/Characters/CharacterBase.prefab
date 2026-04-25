@@ -496,8 +496,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
   canChase: 1
   canPatrol: 1
-  defaultWait: 1.5
-  looseTargetDistance: 13
   wanderingPoint: {fileID: 0}
   wanderingDistance: 0.1
 --- !u!114 &7705601098757829042
@@ -522,6 +520,7 @@ MonoBehaviour:
   lookAtDamageInstigator: 1
   warnOthersInRoom: 1
   drawGizmos: 0
+  looseTargetDistance: 0
 --- !u!54 &6072534866263412361
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -705,10 +704,10 @@ MonoBehaviour:
   height: 1.5
   simulateMovement: 1
   maxSpeed: 4.5
-  gravity: {x: NaN, y: NaN, z: NaN}
+  gravity: {x: 0, y: -9.81, z: 0}
   groundMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 64
   endReachedDistance: 0.2
   whenCloseToDestination: 0
   rvoDensityBehavior:
