@@ -171,8 +171,11 @@ public class CharacterRoutines : MonoBehaviour
 	private IEnumerator WaitCharacterInteract( PropComponent clickedProp)
 	{
 		debugString = "WaitCharacterInteract";
+		if(debugMode > 0) Debug.Log(_selfCharacter + " WaitCharacterInteract " + clickedProp);
 		
 		var agent = _selfCharacter.GetAgent();
+		agent.StopMovement(); // force agent to stop while calculating destination path
+		
 		yield return agent.AssignWaypointDestinationAsync(clickedProp);
 
 		var bestWaypoint = agent.GetBestWaypoint();
@@ -182,8 +185,11 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 		
-		if(debugMode > 0) Debug.Log(_selfCharacter + " WaitCharacterInteract " + clickedProp);
-		yield return StartCoroutine(WaitCharacterMoved(bestWaypoint.GetPosition(), bestWaypoint.radius));
+		if(debugMode > 0) Debug.Log(_selfCharacter + " waypoint found: " + bestWaypoint + ", move to");
+		agent.SetReachDistance(bestWaypoint.radius);
+		//agent.AssignDestination(bestWaypoint.GetPosition(), true);
+		yield return StartCoroutine(WaitMoveLastPath());
+		
 		if (agent.ReachedDestination(bestWaypoint.GetPosition()))
 		{
 			// waypoint reach
@@ -428,11 +434,22 @@ public class CharacterRoutines : MonoBehaviour
 		}
 			
 		var agent = _selfCharacter.GetAgent();
-		if(agent.IsMoving()) agent.StopMovement(); // stop any other movement
+		agent.StopMovement(); // stop any movement
+		agent.SetReachDistance(Mathf.Max(agent.GetMinReachDistance(), reachDistance));
 		
 		yield return agent.SearchPathAsync(dest);
-		
+		do yield return null;
+		while (agent.pathPending);
+
+		yield return StartCoroutine(WaitMoveLastPath());
+	}
+
+	private IEnumerator WaitMoveLastPath()
+	{
+		var agent = _selfCharacter.GetAgent();
 		var path = agent.GetCurrentPath();
+		if(debugMode > 0) Debug.Log(this + " move to last path: " + path.Length);
+		if(debugMode > 0) DebugDrawer.Path(path, false, Color.blue, 1.0f);
 		if (path.Length <= 1)
 		{
 			Debug.LogWarning(_selfCharacter + " path invalid\nfrom " + _selfCharacter.GetPosition() + " points: " + Utils.ArrayStr(path));;
@@ -440,7 +457,8 @@ public class CharacterRoutines : MonoBehaviour
 			yield return null;
 			yield break;
 		}
-		
+
+		var lastPoint = path.Last();
 		var firstPoint = path[1];
 		var dir = (firstPoint - _selfCharacter.GetPosition()).normalized;
 		if (dir.sqrMagnitude < Consts.MinMagnitude)
@@ -457,7 +475,6 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		
 //		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
-		agent.SetReachDistance(Mathf.Max(agent.GetMinReachDistance(), reachDistance));
 		agent.StartMove();
 
 		var startTime = Time.time;
@@ -489,7 +506,7 @@ public class CharacterRoutines : MonoBehaviour
 
 			if(debugMode > 0) DebugDrawer.Path(path, false, Color.cyan);
 			if(debugMode > 0) DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.cyan, 0f);
-			if(debugMode > 0) DebugDrawer.WireDisc(dest, agent.GetRadius(), Color.cyan, 0f);
+			if(debugMode > 0) DebugDrawer.WireDisc(lastPoint, agent.GetRadius(), Color.cyan, 0f);
 			
 			yield return null;
 
@@ -504,7 +521,7 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			_selfCharacter.ConsumeMovePoints(deltaPos, true);
 		}
-		while (!agent.ReachedDestination(dest));
+		while (!agent.ReachedDestination(lastPoint));
 		
 		if(debugMode > 0) Debug.Log(this + " reached destination!");
 		agent.StopMovement();

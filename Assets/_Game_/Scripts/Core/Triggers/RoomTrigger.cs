@@ -146,7 +146,7 @@ public class RoomTrigger : MonoBehaviour
 	private void OnEnable()
 	{
 		activeRooms.Add(this);
-		Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
 		foreach (var door in doors)
 		{
@@ -157,7 +157,7 @@ public class RoomTrigger : MonoBehaviour
 	private void OnDisable()
 	{
 		activeRooms.Remove(this);
-		Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
 		foreach (var door in doors)
 		{

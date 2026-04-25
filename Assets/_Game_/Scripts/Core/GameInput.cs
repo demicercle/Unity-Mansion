@@ -101,6 +101,9 @@ public class GameInput : MonoBehaviour
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
 	private bool isDebugMode => debugMode > 0;
 	private CharacterController selectedCharacter;
+	private CharacterAgent selectedAgent;
+	private Collider lastMouseOverObject;
+	private bool mouseOverChanged;
 	private bool mouseDown, orbitWithInputs;
 	private Vector2 orbitAxis;
 	private Vector2 orbitDelta;
@@ -338,11 +341,13 @@ public class GameInput : MonoBehaviour
 		}
 
 		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
-
+		
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
 		if (hasFocus && mouseOverViewport && !holdMiddleClick) ///////////////////////////////////////////////////////////////////////////// mouse over
 		{
 			lastCursorResult = CursorRaycast(out var hit);
+			mouseOverChanged = lastMouseOverObject != hit.collider;
+			lastMouseOverObject = hit.collider;
 
 			debugString += "\nresult==" + lastCursorResult + " " + (hit.collider ? hit.collider.name : "no hit");
 			
@@ -353,7 +358,7 @@ public class GameInput : MonoBehaviour
 					SetCurrentCursorType(CursorType.Navigate);
 					debugString += "\n>Navigate";
 					
-					if (CanAssignOnMouseOver(selectedCharacter))
+					if (CanAssignOnMouseOver(selectedCharacter) && mouseHasMoved)
 					{
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
 					}
@@ -389,7 +394,7 @@ public class GameInput : MonoBehaviour
 						{
 							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
 							
-							if (CanAssignOnMouseOver(selectedCharacter))
+							if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
 								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
 						}
 						debugString += "\n>" + currentCursor;
@@ -407,7 +412,11 @@ public class GameInput : MonoBehaviour
 							
 						if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
 						{
-							selectedCharacter.GetAgent().AssignWaypointDestinationAsync(overProp); // mouse over prop
+							if (mouseOverChanged) // assign waypoint destination only if it changed
+							{
+								selectedAgent = selectedCharacter.GetAgent();
+								selectedAgent.AssignWaypointDestinationAsync(overProp);
+							}
 						}
 						debugString += "\n>" + currentCursor;
 					}
@@ -422,7 +431,7 @@ public class GameInput : MonoBehaviour
 						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
 							: CursorType.Attack);
 							
-						if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
+						if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) // mouse over prop
 						{
 							selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition(), true);
 						}
@@ -474,6 +483,16 @@ public class GameInput : MonoBehaviour
 		}
 		
 		if (debugMode > 1) Debug.Log(debugString);
+	}
+
+	private void OnMouseEnter(Collider overCollider)
+	{
+		
+	}
+
+	private void OnMouseExit(Collider overCollider)
+	{
+		
 	}
 	
 	private void LateUpdate()
@@ -661,8 +680,8 @@ public class GameInput : MonoBehaviour
 	private void ClickCharacter(CharacterController clickedCharacter)
 	{
 		Debug.Log(this + " ClickCharacter " + clickedCharacter);
-		
-		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
+
+		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 		
 		if (clickedCharacter.InParty())
 		{
@@ -714,7 +733,7 @@ public class GameInput : MonoBehaviour
 	{
 		Debug.Log(this + " ClickProp " + clickedProp);
 
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{

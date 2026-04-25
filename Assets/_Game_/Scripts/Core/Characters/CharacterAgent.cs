@@ -16,6 +16,7 @@ public class CharacterAgent : MonoBehaviour
 	private const float WaypointMaxEndPointDistance = 0.2f;
 	private const int WaypointRoundDecimals = 1000;
 	private const float WaypointMaxSearchDistance = 28.0f;
+	private const float WaypointSearchSeconds = 0.10f;
 	
 	public static int debugMode { get; set; }
 	
@@ -178,6 +179,7 @@ public class CharacterAgent : MonoBehaviour
 			DebugDrawer.Line(_selfCharacter.GetCenterPosition(), waypointProvider.transform.position, Color.blueViolet, 1.0f);
 		}
 
+		var waypointOut = default(Waypoint);
 		var startPoint = _selfCharacter.GetPosition();
 		var bestLength = 0f;
 		var index = 0;
@@ -190,6 +192,10 @@ public class CharacterAgent : MonoBehaviour
 
 			if (!RoomTrigger.IsPositionVisible(endPoint)) // ignore not revealed waypoint
 				continue;
+
+			do
+				yield return new WaitForSeconds(WaypointSearchSeconds);
+			while (NavmeshRebuilder.IsRebuildingAsync());
 				
 			// Crée une requête de chemin
 			ABPath path = ABPath.Construct(startPoint, endPoint, null);
@@ -225,18 +231,18 @@ public class CharacterAgent : MonoBehaviour
 				{
 					if(debugMode > 1) DebugDrawer.Path(pathPoints, false, Color.blueViolet, debugDrawDuration);
 					float pathLength = path.GetTotalLength();
-					if (bestWaypoint && (int)pathLength * WaypointRoundDecimals == (int)bestLength * WaypointRoundDecimals) // sometimes results are wrong, this is a hak
+					if (waypointOut && (int)pathLength * WaypointRoundDecimals == (int)bestLength * WaypointRoundDecimals) // sometimes results are wrong, this is a hak
 					{
-						var bestDist = NavUtils.NavDistanceRoundY(startPoint, bestWaypoint.GetPosition());
+						var bestDist = NavUtils.NavDistanceRoundY(startPoint, waypointOut.GetPosition());
 						var pathDist = NavUtils.NavDistanceRoundY(startPoint, endPoint);
 						if (bestDist < pathDist)
 							pathLength = -1f; // override path length because the path is actually not shorter
 					}
-					if(debugMode > 1) Debug.Log(index+ " bestWaypoint=" + bestWaypoint + " pathLength=" + pathLength + " from bestLength=" + bestLength + " path.Length=" + pathPoints.Length);
-					if (!bestWaypoint || (pathLength > 0 && pathLength < bestLength))
+					if(debugMode > 1) Debug.Log(index+ " waypointOut=" + waypointOut + " pathLength=" + pathLength + " from bestLength=" + bestLength + " path.Length=" + pathPoints.Length);
+					if (!waypointOut || (pathLength > 0 && pathLength < bestLength))
 					{
 						bestLength = pathLength;
-						bestWaypoint = wp;
+						waypointOut = wp;
 					}
 				}
 				
@@ -245,15 +251,18 @@ public class CharacterAgent : MonoBehaviour
 			}
 		}
 
-		if (!bestWaypoint)
+		if (!waypointOut)
 		{
 			if(debugMode > 0) Debug.Log(this + " no waypoint found! provider=" + waypointProvider + " count=" + waypoints.Length);
 		}
 		else
 		{
 			lastWaypointProvider = waypointProvider;
-			AssignDestination(bestWaypoint.GetPosition(), true);
+			AssignDestination(waypointOut.GetPosition(), true);
+			do yield return null;
+			while (aiPath.pathPending);
 			
+			bestWaypoint = waypointOut; // assign it so it can returns "GetBestWaypoint"
 			if (debugMode > 0)
 			{
 				if(debugMode > 1) Debug.Log("new destination set bestWaypoint=" + bestWaypoint);
@@ -362,8 +371,8 @@ public class CharacterAgent : MonoBehaviour
 	private void OnSearchPath()
 	{
 		lastPath = GetCurrentPath();
-		if (debugMode > 1) Debug.Log(this + " OnSearchPath lastPath=" + lastPath.Length);
-		if (debugMode > 0) DebugDrawer.Path(lastPath, false, Color.blue);
+		if (debugMode > 2) Debug.Log(this + " OnSearchPath lastPath=" + lastPath.Length);
+		if (debugMode > 2) DebugDrawer.Path(lastPath, false, Color.blue);
 		UpdatePathAndTarget(true);
 	}
 
@@ -376,12 +385,14 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync");
 		// WaitCharacterMoved
+		
+		while (NavmeshRebuilder.IsRebuildingAsync())
+			yield return null;
 
-		if (NavUtils.TryGetNearestNavPosition(dest, _selfCharacter.GetRadius(), out dest))
+		if (NavUtils.TryGetNearestNavPosition(dest, aiPath.endReachedDistance, out dest))
 		{
 			if(debugMode > 1) Debug.Log(this + " dest clamped to navmesh");
 		}
-		
 		
 		var timeout = 0.0f;
 		do
