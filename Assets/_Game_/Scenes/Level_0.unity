@@ -821,6 +821,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2113469372072591625, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 943585681}
+    - targetCorrespondingSourceObject: {fileID: 2113469372072591625, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 943585687}
   m_SourcePrefab: {fileID: 100100000, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
 --- !u!4 &251902896 stripped
 Transform:
@@ -2183,6 +2186,19 @@ MonoBehaviour:
   sceneToLoad: Level_0_Env
   loadSceneMode: 1
   autoLoad: 1
+--- !u!114 &943585687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 943585673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7617360bf95545ebbc1fe995be500a43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameScript
+  graph: {fileID: 11400000, guid: a9425239fa3b46545aa72a523738abb5, type: 2}
 --- !u!1001 &957038466
 PrefabInstance:
   m_ObjectHideFlags: 0

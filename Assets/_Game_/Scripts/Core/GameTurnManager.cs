@@ -14,7 +14,7 @@ public class GameTurnManager : MonoBehaviour
 	public static int debugMode { get; set; }
 
 	public System.Action<bool> onLoadingGame, onPlayerChanged;
-	public System.Action onTurnStarted, onTurnEnded;
+	public System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool firstTurnIsPlayer = true;
@@ -154,6 +154,7 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log("loading complete");
 		isLoading = false;
 		onLoadingGame?.Invoke(false);
+		onSceneLoaded?.Invoke();
 		
 		FadeScreen.FadeOut();
 		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);
