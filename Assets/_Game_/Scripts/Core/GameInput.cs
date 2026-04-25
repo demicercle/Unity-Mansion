@@ -723,7 +723,17 @@ public class GameInput : MonoBehaviour
 		{
 			if (selectedCharacter)
 			{
-				Debug.LogWarning("//TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
+				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Talk))
+					selectedCharacter.FloatingText_Cant();
+				else
+				{
+					if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Talk " + clickedCharacter);
+					if (!IsLeaderMode())
+						selectedCharacter.Routines.AssignTalk(clickedCharacter);
+					else
+						selectedCharacter.Routines.Leader_AssignTalk(clickedCharacter);
+				}
+				//Debug.LogWarning("//TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
 			}
 			else if(isDebugMode)  Debug.Log("> !IsEnemyToPlayer no selected character");
 		}

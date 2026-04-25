@@ -336,6 +336,7 @@ public class CharacterAgent : MonoBehaviour
 
 	public bool ReachedDestination(Vector3 dest)
 	{
+//		Debug.Log("FLOOD " + NavUtils.NavDistanceRoundY(aiPath.position, dest) + " <= " + Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance));
 		return NavUtils.NavDistanceRoundY(aiPath.position, dest) <= Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
 	}
 

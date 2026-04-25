@@ -8,21 +8,35 @@ public class GameScript : MonoBehaviour
 	
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
 	
-	[SerializeField] [ReadOnly] private PropComponent prop;
+	[SerializeField] private PropComponent selfProp;
+	[SerializeField] private CharacterController selfCharacter;
 
 	private void OnDrawGizmosSelected()
 	{
-		TryGetComponent(out prop);
+		if(!Application.isPlaying)
+			TryGetComponents();
+	}
+	
+	private void TryGetComponents()
+	{
+		if(!selfProp) TryGetComponent(out selfProp);
+		if(!selfCharacter) TryGetComponent(out selfCharacter);
 	}
 
 	private void OnEnable()
 	{
 		gameTurnManager.onSceneLoaded += OnSceneLoaded;
+
+		TryGetComponents();
 		
-		prop = GetComponent<PropComponent>();
-		if (prop)
+		if (selfProp)
 		{
-			prop.onInteracted += OnInteracted;
+			selfProp.onInteracted += OnInteracted;
+		}
+
+		if (selfCharacter)
+		{
+			selfCharacter.onTalkedBy += OnTalkedBy;
 		}
 	}
 
@@ -30,9 +44,14 @@ public class GameScript : MonoBehaviour
 	{
 		gameTurnManager.onSceneLoaded -= OnSceneLoaded;
 		
-		if (prop)
+		if (selfProp)
 		{
-			prop.onInteracted -= OnInteracted;
+			selfProp.onInteracted -= OnInteracted;
+		}
+
+		if (selfCharacter)
+		{
+			selfCharacter.onTalkedBy -= OnTalkedBy;
 		}
 	}
 
@@ -45,6 +64,14 @@ public class GameScript : MonoBehaviour
 	}
 
 	private void OnInteracted()
+	{
+		foreach (var node in graph.nodes)
+		{
+			(node as NodeInteracted)?.Interacted();
+		}
+	}
+
+	private void OnTalkedBy(CharacterController other)
 	{
 		foreach (var node in graph.nodes)
 		{

@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using RPGCharacterAnims.Lookups;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public interface IAttackable
@@ -26,7 +24,7 @@ public enum CharacterAction
 	Run,
 	Attack,
 	Interact,
-	Destroy
+	Talk
 }
 
 public class CharacterController : MonoBehaviour, IAttackable
@@ -56,6 +54,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public event System.Action onMoved;
 	public event System.Action onRotate;
 	public event System.Action<CharacterAction, object> onUseAction;
+	public event System.Action<CharacterController> onTalkedBy;
 	public event System.Action turnStarted;
 	public event System.Action turnEnded;
 	
@@ -138,6 +137,10 @@ public class CharacterController : MonoBehaviour, IAttackable
 		if (actionType == CharacterAction.Run)
 		{
 			usedMovePoints -= characterData.runActionExtraMovePoints;
+		}
+		else if (actionType == CharacterAction.Talk)
+		{
+			(param as CharacterController)?.onTalkedBy?.Invoke(this);
 		}
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);
@@ -255,6 +258,8 @@ public class CharacterController : MonoBehaviour, IAttackable
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 		}
 	}
+
+	public bool IsFacingPosition(Vector3 pos) => IsFacingDirection(pos - GetPosition());
     
 	public bool IsFacingDirection(Vector3 dir)
 	{

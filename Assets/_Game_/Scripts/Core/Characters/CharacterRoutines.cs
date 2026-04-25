@@ -8,6 +8,7 @@ public class CharacterRoutines : MonoBehaviour
 {
 	public const float SearchPathTimeout = 6.0f;
 	public const float DefaultWaitSeconds = 1.0f;
+	public const float MinTalkDistance = 0.5f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -57,12 +58,17 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignRunAction ");
 		StartNewRoutine(WaitAction(CharacterAction.Run));
 	}
-
 	public void AssignLookPosition(Vector3 lookPosition)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignLookPosition ");
 		if (debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), lookPosition, Color.magenta, 1.0f);//TODO defaultDrawDuration
 		StartNewRoutine(WaitCharacterLookPosition(lookPosition));
+	}
+
+	public void AssignTalk(CharacterController npc) // TODO all " Assign " methods should return the coroutine
+	{
+		if(debugMode > 0) Debug.Log(this + " AssignTalk " + npc);
+		StartCoroutine(WaitCharacterTalk(npc));
 	}
 	
 	// leader assign
@@ -106,6 +112,22 @@ public class CharacterRoutines : MonoBehaviour
 			if (partyCharacter == _selfCharacter)
 			{
 				partyCharacter.Routines.AssignAttack(other, canUseRunAction, losCheck);
+			}
+			else
+			{
+				partyCharacter.Routines.AssignFollows(_selfCharacter);
+			}
+		}
+	}
+
+	public void Leader_AssignTalk(CharacterController npc)
+	{
+		if(debugMode > 0) Debug.Log(this + " Leader_AssignTalk ");
+		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		{
+			if (partyCharacter == _selfCharacter)
+			{
+				partyCharacter.Routines.AssignTalk(npc);
 			}
 			else
 			{
@@ -453,16 +475,16 @@ public class CharacterRoutines : MonoBehaviour
 			
 		var agent = _selfCharacter.GetAgent();
 		agent.StopMovement(); // stop any movement
-		agent.SetReachDistance(Mathf.Max(agent.GetMinReachDistance(), reachDistance));
+		agent.SetReachDistance(reachDistance);
 		
 		yield return agent.SearchPathAsync(dest);
 		do yield return null;
 		while (agent.pathPending);
 
-		yield return StartCoroutine(WaitMoveLastPath());
+		yield return StartCoroutine(WaitMoveLastPath(reachDistance));
 	}
 
-	private IEnumerator WaitMoveLastPath()
+	private IEnumerator WaitMoveLastPath(float forcedReachDistance = 0f)
 	{
 		var agent = _selfCharacter.GetAgent();
 		var path = agent.GetCurrentPath();
@@ -495,9 +517,15 @@ public class CharacterRoutines : MonoBehaviour
 //		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
 		agent.StartMove();
 
+		if (forcedReachDistance > 0)
+			agent.SetReachDistance(forcedReachDistance);
+		
 		var startTime = Time.time;
-		do
+		while (!agent.ReachedDestination(lastPoint))
 		{
+			if (forcedReachDistance > 0)
+				agent.SetReachDistance(forcedReachDistance);
+			
 			if (Time.time - startTime > SearchPathTimeout)
 			{
 				Debug.LogWarning(_selfCharacter + " TIMED_OUT!");
@@ -539,7 +567,6 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			_selfCharacter.ConsumeMovePoints(deltaPos, true);
 		}
-		while (!agent.ReachedDestination(lastPoint));
 		
 		if(debugMode > 0) Debug.Log(this + " reached destination!");
 		agent.StopMovement();
@@ -552,6 +579,36 @@ public class CharacterRoutines : MonoBehaviour
 		yield return new WaitForSeconds(DefaultWaitSeconds);
 		_selfCharacter.UseAction(action);
 		_selfCharacter.FloatingText(action.ToString());
+	}
+
+	private IEnumerator WaitCharacterTalk(CharacterController npc)
+	{
+		debugString = "WaitCharacterTalk " + npc;
+		if(debugMode > 0) Debug.Log(">> WaitCharacterTalk: " + this + " " + npc);
+
+		var talkDistance = npc.GetRadius() + _selfCharacter.GetRadius() + MinTalkDistance;
+		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(),talkDistance));
+
+		if (NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), npc.GetPosition()) > talkDistance)
+		{
+			Debug.LogWarning(this + " talk distance not reached, abort");
+			yield break;
+		}
+
+		while (!_selfCharacter.IsFacingPosition(npc.GetPosition()))
+		{
+			_selfCharacter.LookWorldPosition(npc.GetPosition(), Time.deltaTime);
+			yield return null;
+		}
+
+		while (!npc.IsFacingPosition(_selfCharacter.GetPosition()))
+		{
+			npc.LookWorldPosition(_selfCharacter.GetPosition(), Time.deltaTime);
+			yield return null;
+		}
+
+		if(debugMode > 0) Debug.Log(this + " Use Talk action");
+		_selfCharacter.UseAction(CharacterAction.Talk, npc);
 	}
 	#endregion
 	

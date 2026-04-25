@@ -13,7 +13,7 @@ public class NodeDebugLog : GameNode
 	protected override void Init()
 	{
 		base.Init();
-		_in.Init(this, "_in", OnCallback);
+		_in.InitInput(this, "_in", OnCallback);
 	}
 
 	private void OnCallback()

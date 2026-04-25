@@ -11,9 +11,11 @@ public class GameScriptGraph : NodeGraph
 [System.Serializable]
 public class NodeExec
 {
-	public System.Action callback;
+	private System.Action callback;
 	
-	public void Init(Node node, string inputName, System.Action callback)
+	public void Invoke() => callback?.Invoke();
+	
+	public void InitInput(Node node, string inputName, System.Action callback)
 	{
 		otherExec = node.GetInputPort(inputName).GetInputValue<NodeExec>();
 		if (otherExec != null)

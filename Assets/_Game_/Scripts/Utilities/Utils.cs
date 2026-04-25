@@ -305,6 +305,8 @@ public static class Utils
 
 public static class NavUtils
 {
+	public const float MinNavDistance = 0.1f;
+	
 	public static float NavDistanceRoundY(Vector3 from, Vector3 to)
 	{
 		from.y = to.y = Mathf.Round(from.y);

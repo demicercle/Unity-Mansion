@@ -11,7 +11,7 @@ public class NodeSceneLoaded : GameNode
 
 	public void OnSceneLoaded()
 	{
-		_out.callback?.Invoke();
+		_out.Invoke();
 	}
 	
 	// Use this for initialization

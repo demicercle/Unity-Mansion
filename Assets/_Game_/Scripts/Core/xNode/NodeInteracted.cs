@@ -21,6 +21,6 @@ public class NodeInteracted : GameNode
 	
 	public void Interacted()
 	{
-		_out.callback?.Invoke();
+		_out.Invoke();
 	}
 }
