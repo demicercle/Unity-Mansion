@@ -9,7 +9,13 @@ public class NodeFloatingText : GameNode
 	[Output] public NodeExec _out;
 	[Input] public NodeExec _in;
 	[Input] public SceneReference _character;
-	[Input] public string message;
+	[Input] public LocalizedText message;
+
+	protected override void Init()
+	{
+		base.Init();
+		message.Init();
+	}
 
 	// Return the correct value of an output port when requested
 	public override object GetValue(NodePort port) {
@@ -31,7 +37,7 @@ public class NodeFloatingText : GameNode
 	{
 		if (_character.TryGetComponent(this, out CharacterController character))
 		{
-			character.FloatingText(GetInputValue("message", message));
+			character.FloatingText(GetInputValue("message", message).GetValue());
 		}
 	}
 }

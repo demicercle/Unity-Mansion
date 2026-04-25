@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Debug Log
   m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
   graph: {fileID: 11400000}
-  position: {x: -296, y: -216}
+  position: {x: -360, y: -232}
   ports:
     keys:
     - _in
@@ -54,7 +54,7 @@ MonoBehaviour:
   m_Name: Switch
   m_EditorClassIdentifier: Assembly-CSharp::NodeSwitch
   graph: {fileID: 11400000}
-  position: {x: -376, y: -40}
+  position: {x: -376, y: -88}
   ports:
     keys:
     - _in
@@ -107,7 +107,10 @@ MonoBehaviour:
       _node: {fileID: -1777878850390571389}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _in
+        node: {fileID: 4533588354387013093}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -116,7 +119,10 @@ MonoBehaviour:
       _node: {fileID: -1777878850390571389}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _in
+        node: {fileID: -1036241989258757978}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -157,6 +163,71 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+--- !u!114 &-1036241989258757978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d05139a4fc14bd381b60ecbe97ab488, type: 3}
+  m_Name: Floating Text
+  m_EditorClassIdentifier: Assembly-CSharp::NodeFloatingText
+  graph: {fileID: 11400000}
+  position: {x: 8, y: 248}
+  ports:
+    keys:
+    - _out
+    - _in
+    - _character
+    - message
+    values:
+    - _fieldName: _out
+      _node: {fileID: -1036241989258757978}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _in
+      _node: {fileID: -1036241989258757978}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out3
+        node: {fileID: -1777878850390571389}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: -1036241989258757978}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: message
+      _node: {fileID: -1036241989258757978}
+      _typeQualifiedName: LocalizedText, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _character:
+    findName: 
+  message:
+    line: 12
+    text: Stop that
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,6 +246,8 @@ MonoBehaviour:
   - {fileID: 1661894733017915128}
   - {fileID: -1777878850390571389}
   - {fileID: 6287711585738284144}
+  - {fileID: 4533588354387013093}
+  - {fileID: -1036241989258757978}
 --- !u!114 &1661894733017915128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,7 +261,7 @@ MonoBehaviour:
   m_Name: Floating Text
   m_EditorClassIdentifier: Assembly-CSharp::NodeFloatingText
   graph: {fileID: 11400000}
-  position: {x: 8, y: -216}
+  position: {x: 8, y: -232}
   ports:
     keys:
     - _out
@@ -228,8 +301,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: message
       _node: {fileID: 1661894733017915128}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
+      _typeQualifiedName: LocalizedText, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -237,7 +310,74 @@ MonoBehaviour:
       _dynamic: 0
   _character:
     findName: 
-  message: Hello you
+  message:
+    line: 9
+    text: "Hello\r"
+--- !u!114 &4533588354387013093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d05139a4fc14bd381b60ecbe97ab488, type: 3}
+  m_Name: Floating Text
+  m_EditorClassIdentifier: Assembly-CSharp::NodeFloatingText
+  graph: {fileID: 11400000}
+  position: {x: 8, y: 104}
+  ports:
+    keys:
+    - _out
+    - _in
+    - _character
+    - message
+    values:
+    - _fieldName: _out
+      _node: {fileID: 4533588354387013093}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _in
+      _node: {fileID: 4533588354387013093}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out2
+        node: {fileID: -1777878850390571389}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: 4533588354387013093}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: message
+      _node: {fileID: 4533588354387013093}
+      _typeQualifiedName: LocalizedText, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _character:
+    findName: 
+  message:
+    line: 11
+    text: "Let me alone\r"
 --- !u!114 &6287711585738284144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,7 +391,7 @@ MonoBehaviour:
   m_Name: Floating Text
   m_EditorClassIdentifier: Assembly-CSharp::NodeFloatingText
   graph: {fileID: 11400000}
-  position: {x: -24, y: -24}
+  position: {x: 8, y: -56}
   ports:
     keys:
     - _out
@@ -291,8 +431,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: message
       _node: {fileID: 6287711585738284144}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
+      _typeQualifiedName: LocalizedText, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -300,7 +440,9 @@ MonoBehaviour:
       _dynamic: 0
   _character:
     findName: 
-  message: I hope you are not bored
+  message:
+    line: 10
+    text: "I don't want to speak\r"
 --- !u!114 &8046466847253731282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -314,7 +456,7 @@ MonoBehaviour:
   m_Name: Interacted
   m_EditorClassIdentifier: Assembly-CSharp::NodeInteracted
   graph: {fileID: 11400000}
-  position: {x: -584, y: -136}
+  position: {x: -664, y: -136}
   ports:
     keys:
     - _out
