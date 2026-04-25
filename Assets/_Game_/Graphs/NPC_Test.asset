@@ -41,6 +41,136 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   message: ' talked'
+--- !u!114 &-6396237199070666795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bcb6511be6d466590e60deca2c643aa, type: 3}
+  m_Name: Node Move To
+  m_EditorClassIdentifier: Assembly-CSharp::NodeMoveTo
+  graph: {fileID: 11400000}
+  position: {x: 376, y: 104}
+  ports:
+    keys:
+    - _start
+    - _character
+    - _to
+    - _finished
+    values:
+    - _fieldName: _start
+      _node: {fileID: -6396237199070666795}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 4533588354387013093}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: -6396237199070666795}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _to
+      _node: {fileID: -6396237199070666795}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _finished
+      _node: {fileID: -6396237199070666795}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _character:
+    findName: 
+  _to:
+    findName: Waypoint_NPC_3
+  canUseRunAction: 0
+--- !u!114 &-4710916101070361956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bcb6511be6d466590e60deca2c643aa, type: 3}
+  m_Name: Node Move To
+  m_EditorClassIdentifier: Assembly-CSharp::NodeMoveTo
+  graph: {fileID: 11400000}
+  position: {x: 376, y: -328}
+  ports:
+    keys:
+    - _start
+    - _character
+    - _to
+    - _finished
+    values:
+    - _fieldName: _start
+      _node: {fileID: -4710916101070361956}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 1661894733017915128}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: -4710916101070361956}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _to
+      _node: {fileID: -4710916101070361956}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _finished
+      _node: {fileID: -4710916101070361956}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _character:
+    findName: 
+  _to:
+    findName: Waypoint_NPC_1
+  canUseRunAction: 0
 --- !u!114 &-1777878850390571389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,7 +318,10 @@ MonoBehaviour:
       _node: {fileID: -1036241989258757978}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _start
+        node: {fileID: 8272428726248898318}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -228,6 +361,71 @@ MonoBehaviour:
   message:
     line: 12
     text: Stop that
+--- !u!114 &-454481680373365717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bcb6511be6d466590e60deca2c643aa, type: 3}
+  m_Name: Node Move To
+  m_EditorClassIdentifier: Assembly-CSharp::NodeMoveTo
+  graph: {fileID: 11400000}
+  position: {x: 392.5, y: -102.5}
+  ports:
+    keys:
+    - _start
+    - _character
+    - _to
+    - _finished
+    values:
+    - _fieldName: _start
+      _node: {fileID: -454481680373365717}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 6287711585738284144}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: -454481680373365717}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _to
+      _node: {fileID: -454481680373365717}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _finished
+      _node: {fileID: -454481680373365717}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _character:
+    findName: 
+  _to:
+    findName: Waypoint_NPC_2
+  canUseRunAction: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,6 +446,10 @@ MonoBehaviour:
   - {fileID: 6287711585738284144}
   - {fileID: 4533588354387013093}
   - {fileID: -1036241989258757978}
+  - {fileID: -4710916101070361956}
+  - {fileID: -454481680373365717}
+  - {fileID: -6396237199070666795}
+  - {fileID: 8272428726248898318}
 --- !u!114 &1661894733017915128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -273,7 +475,10 @@ MonoBehaviour:
       _node: {fileID: 1661894733017915128}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _start
+        node: {fileID: -4710916101070361956}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -338,7 +543,10 @@ MonoBehaviour:
       _node: {fileID: 4533588354387013093}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _start
+        node: {fileID: -6396237199070666795}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -403,7 +611,10 @@ MonoBehaviour:
       _node: {fileID: 6287711585738284144}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _start
+        node: {fileID: -454481680373365717}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -476,3 +687,68 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+--- !u!114 &8272428726248898318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bcb6511be6d466590e60deca2c643aa, type: 3}
+  m_Name: Node Move To
+  m_EditorClassIdentifier: Assembly-CSharp::NodeMoveTo
+  graph: {fileID: 11400000}
+  position: {x: 403.5, y: 329.5}
+  ports:
+    keys:
+    - _start
+    - _character
+    - _to
+    - _finished
+    values:
+    - _fieldName: _start
+      _node: {fileID: 8272428726248898318}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: -1036241989258757978}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: 8272428726248898318}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _to
+      _node: {fileID: 8272428726248898318}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _finished
+      _node: {fileID: 8272428726248898318}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _character:
+    findName: 
+  _to:
+    findName: Waypoint_NPC_2
+  canUseRunAction: 0

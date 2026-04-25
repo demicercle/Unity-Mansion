@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameScript : MonoBehaviour
 {
-	public static int debugMode = 1;
+	public static int debugMode { get; set; }
 	
 	[SerializeField] private GameScriptGraph graph;
 	

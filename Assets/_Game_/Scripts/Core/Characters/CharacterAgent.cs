@@ -12,6 +12,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class CharacterAgent : MonoBehaviour
 {
+	private const float ReachDestinationScale = 100.0f;
 	private const float TimeOut = 3f;
 	private const float WaypointMaxEndPointDistance = 0.2f;
 	private const int WaypointRoundDecimals = 1000;
@@ -114,12 +115,12 @@ public class CharacterAgent : MonoBehaviour
 		UpdatePathAndTarget(true);
 	}
 
-	public void StopMovement()
+	public void StopMovement(bool clamp = false)
 	{
 		if(debugMode > 0) Debug.Log(this + " StopMovement()");
 		SetObstacle(!_selfCharacter.IsSelected());
 		DropOnGround();
-		ClampOnNavigation();
+		if(clamp) ClampOnNavigation();
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
@@ -334,10 +335,14 @@ public class CharacterAgent : MonoBehaviour
 		}
 	}
 
+	public bool ReachedDestination() => ReachedDestination(aiPath.destination);
 	public bool ReachedDestination(Vector3 dest)
 	{
-//		Debug.Log("FLOOD " + NavUtils.NavDistanceRoundY(aiPath.position, dest) + " <= " + Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance));
-		return NavUtils.NavDistanceRoundY(aiPath.position, dest) <= Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
+		var dist = NavUtils.NavDistanceRoundY(aiPath.position, dest);
+		dist = Mathf.Round(dist * ReachDestinationScale) / ReachDestinationScale;
+		var reach = Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
+//		Debug.Log("FLOOD ReachedDestination " + dist + " <= " + reach);
+		return dist <= reach;
 	}
 
 	public bool IsActive() => aiPath && aiPath.enabled;

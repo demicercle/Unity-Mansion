@@ -138,6 +138,12 @@ public class ConsoleCommands : MonoBehaviour
 		_DebugGtm(value);
 	}
 
+	[ConsoleMethod("debug_script", "")]
+	public static void _DebugScript(int value)
+	{
+		Debug.Log("debug_script=" + (GameScript.debugMode = value));
+	}
+
 	[ConsoleMethod("debug_gtm", "")]
 	public static void _DebugGtm(int value)
 	{

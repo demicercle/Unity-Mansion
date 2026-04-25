@@ -38,6 +38,7 @@ public class NodeFloatingText : GameNode
 		if (_character.TryGetComponent(this, out CharacterController character))
 		{
 			character.FloatingText(GetInputValue("message", message).GetValue());
+			_out.Invoke();
 		}
 	}
 }

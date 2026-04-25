@@ -393,13 +393,6 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public WeaponData GetCurrentWeapon() => currentWeapon;
 
 	public float GetDistanceTo(Vector3 world) => Vector3.Distance(GetPosition(), world);
-
-	public float GetDistanceTo(CharacterController other) => GetDistanceTo(other.GetPosition());
-
-	public bool PositionReached(Vector3 world)
-	{
-		return GetDistanceTo(world) <= GetRadius() + GetAgent().GetMinReachDistance();
-	}
 	
 	public bool WaypointReached(Waypoint wp)
 	{

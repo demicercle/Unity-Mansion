@@ -36,7 +36,10 @@ public abstract class GameNode : Node
 		DebugLogThis("Inits");
 	}
 
-	protected void DebugLogThis(string msg) => Debug.Log("x_" + this + ": " + msg);
+	protected void DebugLogThis(string msg)
+	{
+		if(GameScript.debugMode > 0) Debug.Log("x_" + this + ": " + msg);
+	}
 }
 
 
@@ -54,6 +57,8 @@ public class NodeExec
 			Debug.Log(this + " app not playing");
 			return;
 		}
+		
+		//Debug.Log(this + " AwakeInput " + node + " " + inputName + " " + callback);
 		
 		otherExec = node.GetInputPort(inputName).GetInputValue<NodeExec>();
 		if (otherExec != null)

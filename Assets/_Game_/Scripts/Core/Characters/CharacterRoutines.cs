@@ -8,7 +8,7 @@ public class CharacterRoutines : MonoBehaviour
 {
 	public const float SearchPathTimeout = 6.0f;
 	public const float DefaultWaitSeconds = 1.0f;
-	public const float MinTalkDistance = 0.5f;
+	public const float MinTalkDistance = 0.1f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -486,6 +486,7 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitMoveLastPath(float forcedReachDistance = 0f)
 	{
+		if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath " + forcedReachDistance); 
 		var agent = _selfCharacter.GetAgent();
 		var path = agent.GetCurrentPath();
 		if(debugMode > 0) Debug.Log(this + " move to last path: " + path.Length);
@@ -568,7 +569,7 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.ConsumeMovePoints(deltaPos, true);
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " reached destination!");
+		if(debugMode > 0) Debug.Log(this + " reached destination! " + NavUtils.NavDistanceRoundY(lastPoint, _selfCharacter.GetPosition()));
 		agent.StopMovement();
 	}
 	
@@ -587,9 +588,9 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(">> WaitCharacterTalk: " + this + " " + npc);
 
 		var talkDistance = npc.GetRadius() + _selfCharacter.GetRadius() + MinTalkDistance;
-		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(),talkDistance));
+		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(),talkDistance+ MinTalkDistance));
 
-		if (NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), npc.GetPosition()) > talkDistance)
+		if (!_selfCharacter.GetAgent().ReachedDestination())
 		{
 			Debug.LogWarning(this + " talk distance not reached, abort");
 			yield break;
