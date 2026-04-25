@@ -101,6 +101,9 @@ public class GameInput : MonoBehaviour
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
 	private bool isDebugMode => debugMode > 0;
 	private CharacterController selectedCharacter;
+	private CharacterAgent selectedAgent;
+	private Collider lastMouseOverObject;
+	private bool mouseOverChanged;
 	private bool mouseDown, orbitWithInputs;
 	private Vector2 orbitAxis;
 	private Vector2 orbitDelta;
@@ -197,6 +200,9 @@ public class GameInput : MonoBehaviour
 		
 		canvas.onViewportClicked -= OnClickedViewport;
 		canvas.onViewportMouseOver -= OnMouseOverViewport;
+		
+		Cursor.SetCursor(null, default, default);
+		Cursor.lockState = default;
 	}
 
 	private IEnumerator Start()
@@ -335,11 +341,13 @@ public class GameInput : MonoBehaviour
 		}
 
 		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
-
+		
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
-		if (hasFocus && mouseOverViewport && !holdMiddleClick) // mouse over
+		if (hasFocus && mouseOverViewport && !holdMiddleClick) ///////////////////////////////////////////////////////////////////////////// mouse over
 		{
 			lastCursorResult = CursorRaycast(out var hit);
+			mouseOverChanged = lastMouseOverObject != hit.collider;
+			lastMouseOverObject = hit.collider;
 
 			debugString += "\nresult==" + lastCursorResult + " " + (hit.collider ? hit.collider.name : "no hit");
 			
@@ -350,7 +358,7 @@ public class GameInput : MonoBehaviour
 					SetCurrentCursorType(CursorType.Navigate);
 					debugString += "\n>Navigate";
 					
-					if (CanAssignOnMouseOver(selectedCharacter))
+					if (CanAssignOnMouseOver(selectedCharacter) && mouseHasMoved)
 					{
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
 					}
@@ -386,14 +394,14 @@ public class GameInput : MonoBehaviour
 						{
 							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
 							
-							if (CanAssignOnMouseOver(selectedCharacter))
+							if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
 								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
 						}
 						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");
-				}
-				else if (hit.collider.TryGetComponent(out PropComponent overProp)) 
+				} // TODO ISelectable, ITalkable
+				else if (hit.collider.TryGetComponent(out PropComponent overProp))  // TODO IInteractable
 				{
 					if (debugMode > 1) Debug.Log(this + " overProp=" + overProp);
 					debugString += " (Prop)";
@@ -404,11 +412,31 @@ public class GameInput : MonoBehaviour
 							
 						if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
 						{
-							selectedCharacter.GetAgent().AssignWaypointDestinationAsync(overProp); // mouse over prop
+							if (mouseOverChanged) // assign waypoint destination only if it changed
+							{
+								selectedAgent = selectedCharacter.GetAgent();
+								selectedAgent.AssignWaypointDestinationAsync(overProp);
+							}
 						}
 						debugString += "\n>" + currentCursor;
 					}
 					//else if(isDebugMode) Debug.Log("no selected character");
+				}
+				else if (hit.collider.TryGetComponent(out IAttackable overAttackable))
+				{
+					if (debugMode > 1) Debug.Log(this + " overAttackable=" + overAttackable);
+					debugString += " (Attackable)";
+					if (selectedCharacter != null)
+					{
+						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
+							: CursorType.Attack);
+							
+						if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) // mouse over prop
+						{
+							selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition(), true);
+						}
+						debugString += "\n>" + currentCursor;
+					}
 				}
 			}
 			
@@ -455,6 +483,16 @@ public class GameInput : MonoBehaviour
 		}
 		
 		if (debugMode > 1) Debug.Log(debugString);
+	}
+
+	private void OnMouseEnter(Collider overCollider)
+	{
+		
+	}
+
+	private void OnMouseExit(Collider overCollider)
+	{
+		
 	}
 	
 	private void LateUpdate()
@@ -578,9 +616,14 @@ public class GameInput : MonoBehaviour
 					ClickCharacter(clickedCharacter);
 				}
 
-				if (hit.collider.TryGetComponent(out PropComponent clickedProp)) // click prop
+				else if (hit.collider.TryGetComponent(out PropComponent clickedProp)) // click prop
 				{
 					ClickProp(clickedProp);
+				}
+				
+				else if (hit.collider.TryGetComponent(out IAttackable attackable))
+				{
+					ClickAttackable(attackable);
 				}
 			}
 			else if (raycastResult == CursorRaycastResult_Navigation) // click navigation
@@ -637,8 +680,8 @@ public class GameInput : MonoBehaviour
 	private void ClickCharacter(CharacterController clickedCharacter)
 	{
 		Debug.Log(this + " ClickCharacter " + clickedCharacter);
-		
-		var selectedCharacter = CharacterSelection.GetSelectedCharacter();
+
+		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 		
 		if (clickedCharacter.InParty())
 		{
@@ -660,7 +703,14 @@ public class GameInput : MonoBehaviour
 					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
 						selectedCharacter.FloatingText_Cant();
 					else
-						selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+					{
+						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
+						if (!IsLeaderMode())
+							selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+						else
+							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false, false);
+						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+					}
 					return;
 				}
 				
@@ -679,20 +729,14 @@ public class GameInput : MonoBehaviour
 		}
 	}
 
-	private void ClickProp(PropComponent clickedProp) // TODO Prop Controller
+	private void ClickProp(PropComponent clickedProp) 
 	{
 		Debug.Log(this + " ClickProp " + clickedProp);
 
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
 			if (CanAssignOnClick(selectedCharacter))
 			{
-				/*if (hasNoActionsCursor)
-				{
-					if(debugMode > 0) Debug.Log(this + " " + selectedCharacter + " hasNoActionsCursor");
-					selectedCharacter.FloatingText_Cant();
-				}
-				else */
 				if (!selectedCharacter.CanUseAction(CharacterAction.Interact))
 				{
 					if(debugMode > 0) Debug.Log(this + " " + selectedCharacter + " !CanUseAction Interact");
@@ -701,12 +745,44 @@ public class GameInput : MonoBehaviour
 				else
 				{
 					if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Interact " + clickedProp);
-					selectedCharacter.Routines.AssignInteract(clickedProp);
+					if (!IsLeaderMode())
+						selectedCharacter.Routines.AssignInteract(clickedProp);
+					else
+						selectedCharacter.Routines.Leader_AssignInteract(clickedProp);
+					//selectedCharacter.Routines.AssignInteract(clickedProp);
 				}
 			}
 			else if(isDebugMode)  Debug.Log(" selected character not controllable");
 		}
 		else if(isDebugMode)  Debug.Log("> no character selected");
+	}
+
+	private void ClickAttackable(IAttackable attackable)
+	{
+		Debug.Log(this + " ClickAttackable " + attackable);
+		
+		if (selectedCharacter != null)
+		{
+			// assign attack
+			if (selectedCharacter.CanAttack(false))
+			{
+				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
+					selectedCharacter.FloatingText_Cant();
+				else
+				{
+					if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + attackable);
+					if (!IsLeaderMode())
+						selectedCharacter.Routines.AssignAttack(attackable, false, false);
+					else
+						selectedCharacter.Routines.Leader_AssignAttack(attackable, false, false);
+					//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+				}
+				return;
+			}
+				
+			selectedCharacter.FloatingText_Cant();
+		}
+		else if(isDebugMode)  Debug.Log("> IsEnemyToPlayer no selected character");
 	}
 
 	private void ClickNavigation(Vector3 navPosition)
@@ -720,7 +796,7 @@ public class GameInput : MonoBehaviour
 				if (!IsLeaderMode())
 					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
 				else
-					selectedCharacter.Routines.AssignMoveLeaderToDestination(navPosition);
+					selectedCharacter.Routines.Leader_AssignMoveToDestination(navPosition);
 			}
 			else if(isDebugMode)  Debug.Log(" !CanAssignOnClick");
 		}

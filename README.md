@@ -20,6 +20,9 @@
 - game turn manager "PartyRest" on NewTurn, and then Rest each otherCharacter one by one after
 - clean "CharacterController"
 
+dev-level
+- enemy take damage: should switch chase target to closest one
+
 NullReferenceException: Object reference not set to an instance of an object
 GameInput.OnDisable () (at Assets/_Game_/Scripts/Core/GameInput.cs:162)
 

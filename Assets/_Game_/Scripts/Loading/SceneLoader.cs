@@ -23,8 +23,11 @@ public class SceneLoader : MonoBehaviour
 		StartCoroutine("Start");
 	}
 
+	public void LoadNow() => autoLoad = true;
+
 	[SerializeField] private string sceneToLoad;
 	[SerializeField] private LoadSceneMode loadSceneMode = LoadSceneMode.Additive;
+	[SerializeField] private bool autoLoad = true;
 
 	private float currentProgress;
 
@@ -42,6 +45,9 @@ public class SceneLoader : MonoBehaviour
 
 	private IEnumerator Start()
 	{
+		while (!autoLoad)
+			yield return null;
+		
 		while (activeInstances.First() != this)
 		{
 			yield return null; // wait other scene loaders

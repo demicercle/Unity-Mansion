@@ -28,14 +28,19 @@ public class NavmeshRebuilder : MonoBehaviour
 	private float progress;
 	private IEnumerable<Progress> scanProgress;
 
-	private void OnEnable()
+	private void Awake()
 	{
+		if(debugMode > 0) Debug.Log(this + " Awake");
+		
 		foreach (var other in GetComponents<NavmeshRebuilder>())
 		{
 			if (other != this)
 				Destroy(other); // take priority
 		}
-		
+	}
+
+	private void OnEnable()
+	{
 		StartCoroutine(DoRebuild());
 	}
 

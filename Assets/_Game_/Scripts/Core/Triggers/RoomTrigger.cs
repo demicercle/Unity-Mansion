@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 
 public class RoomTrigger : MonoBehaviour
 {
+	public static List<RoomTrigger> allRooms = new List<RoomTrigger>();
 	public static List<RoomTrigger> activeRooms = new List<RoomTrigger>();
 
 	public static bool IsPositionVisible(Vector3 world)
@@ -18,6 +20,31 @@ public class RoomTrigger : MonoBehaviour
 			return false;
 		
 		return true;
+	}
+
+	public static bool TryGetRoom(CharacterController character, out RoomTrigger inRoom)
+	{
+		foreach (var room in allRooms)
+		{
+			if (room.HasCharacter(character))
+			{
+				inRoom = room;
+				return true;
+			}
+		}
+
+		inRoom = null;
+		return false;
+	}
+	
+	public List<CharacterController> GetCharacters()
+	{
+		var outList = new  List<CharacterController>();
+		foreach (var trigger in triggers)
+		{
+			outList.AddRange(trigger.GetCharacters());
+		}
+		return outList;
 	}
 
 	public static System.Action onChanged;
@@ -106,10 +133,20 @@ public class RoomTrigger : MonoBehaviour
 	}
 	#endif
 
+	private void Awake()
+	{
+		allRooms.Add(this);
+	}
+
+	private void OnDestroy()
+	{
+		allRooms.Remove(this);
+	}
+
 	private void OnEnable()
 	{
 		activeRooms.Add(this);
-		Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
 		foreach (var door in doors)
 		{
@@ -120,55 +157,11 @@ public class RoomTrigger : MonoBehaviour
 	private void OnDisable()
 	{
 		activeRooms.Remove(this);
-		Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
 		foreach (var door in doors)
 		{
 			door.onInteracted -= Explore;
 		}
-	}
-
-	private void Start()
-	{
-		CreateCeilings();
-	}
-
-	private void CreateCeilings()
-	{
-		if (!createCeilings)
-			return;
-		
-		var rebuildNav = ceilings.Count > 0;
-		while (ceilings.Count > 0)
-		{
-			Destroy(ceilings[0].gameObject);
-			ceilings.RemoveAt(0);
-		}
-		
-		foreach (var trigger in triggers)
-		{
-			var boxCollider = trigger.GetComponent<BoxCollider>();
-			if(!boxCollider) Debug.LogWarning(this + " invalid collider for " + trigger);
-			else
-			{
-				var newSize = boxCollider.size;
-				
-				var newCenter = boxCollider.center;
-				newCenter.y += newSize.y / 2;
-				newSize.y = ceilingHeight;
-				
-				var ceiling = new GameObject("ceiling_" + ceilings.Count).AddComponent<BoxCollider>();
-				ceiling.gameObject.layer = Layers.LayerWall;
-				ceiling.transform.SetParent(trigger.transform, false);
-				ceiling.isTrigger = false;
-				ceiling.size = newSize;
-				ceiling.center = newCenter;
-				
-				ceilings.Add(ceiling);
-			}
-		}
-
-		if(rebuildNav) 
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 	}
 }

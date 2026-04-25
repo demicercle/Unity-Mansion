@@ -1,10 +1,29 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Pathfinding;
+using Pathfinding.Util;
 using UnityEngine;
+
 
 public static class Utils
 {
+	public static void DrawWorldGUI(Vector3 position, string debugString) =>
+		DrawWorldGUI(position, debugString, Vector2.zero);
+	public static void DrawWorldGUI(Vector3 position, string debugString, Vector2 offset) =>
+		DrawWorldGUI(position, debugString, offset, new GUIStyle("textfield"));
+	public static void DrawWorldGUI(Vector3 position, string debugString, GUIStyle guiStyle) =>
+		DrawWorldGUI(position, debugString, Vector2.zero, guiStyle);
+	public static void DrawWorldGUI(Vector3 position, string debugString, Vector2 offset, GUIStyle guiStyle)
+	{
+		var guiContent = new GUIContent(debugString);
+		var guiRect = GUILayoutUtility.GetRect(guiContent, guiStyle);
+		var guiPosition = (Vector2)Camera.main.WorldToScreenPoint(position);
+		guiPosition.y = Screen.height - guiPosition.y;
+		guiPosition += offset;
+		GUI.Box(new Rect(guiPosition, guiRect.size), guiContent, guiStyle);
+	}
+	
 	public static bool TagCheck(string filters, object obj)
 	{
 		return obj == null || string.IsNullOrWhiteSpace(filters) ||
@@ -20,24 +39,16 @@ public static class Utils
 		       });
 	}
 
-	static public void DrawWorldGUI(Vector3 position, string debugString)
+	public static bool IsEditorPrefabStage()
 	{
-		var guiContent = new GUIContent(debugString);
-		var guiStyle = new GUIStyle("textfield");
-		var guiRect = GUILayoutUtility.GetRect(guiContent, guiStyle);
-		var guiPosition = (Vector2)Camera.main.WorldToScreenPoint(position);
-		guiPosition.y = Screen.height - guiPosition.y;
-		GUI.Box(new Rect(guiPosition, guiRect.size), guiContent);
+		#if UNITY_EDITOR
+		return UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+		#else
+		return false;
+		#endif
 	}
 	
-#if UNITY_EDITOR
-	[UnityEditor.MenuItem("Edit/Set Selection Dirty")]
-	static public void SetSelectionDirty()
-	{
-		SetDirty(UnityEditor.Selection.objects);
-	}
-#endif
-	static public void SetDirty(params Object[] objects)
+	public static void SetDirty(params Object[] objects)
 	{
 #if UNITY_EDITOR
 		if (!Application.isPlaying)
@@ -59,8 +70,8 @@ public static class Utils
 	{
 		return System.Text.RegularExpressions.Regex.Replace(input, "([A-Z])", " $1", System.Text.RegularExpressions.RegexOptions.Compiled).Trim();
 	}
-	static public Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
-	static public Color ColorScale(Color color, float alpha) => new Color(color.r * alpha, color.g * alpha, color.b * alpha, color.a * alpha);
+	public static Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
+	public static Color ColorScale(Color color, float alpha) => new Color(color.r * alpha, color.g * alpha, color.b * alpha, color.a * alpha);
 
 	public static Color HTML_To_Color(string html)
 	{
@@ -113,7 +124,7 @@ public static class Utils
 		return limitedPath.ToArray();
 	}
 	
-	static public void RebuildNavigation()
+	public static void RebuildNavigation()
 	{
 		foreach (var astar in Object.FindObjectsByType<AstarPath>(FindObjectsInactive.Exclude, FindObjectsSortMode.InstanceID))
 		{
@@ -121,9 +132,9 @@ public static class Utils
 		}
 	}
 
-	//static public Coroutine RebuildNavigationAsync() => AstarPath.active.StartCoroutine(DoRebuildNavigationAsync());
+	//public static Coroutine RebuildNavigationAsync() => AstarPath.active.StartCoroutine(DoRebuildNavigationAsync());
 	
-	static public IEnumerator RebuildNavigationAsync()
+	public static IEnumerator RebuildNavigationAsync()
 	{
 		foreach (var progress in AstarPath.active.ScanAsync()) {
 //			Debug.Log("Scanning... " + progress.ToString());
@@ -131,8 +142,8 @@ public static class Utils
 		}
 	}
 
-	static public T[] FindObjects<T>() where T : Object => Object.FindObjectsByType<T>(default);
-	static public T FindFirstObject<T>() where T : Object => FindObjects<T>().FirstOrDefault();
+	public static T[] FindObjects<T>() where T : Object => Object.FindObjectsByType<T>(default);
+	public static T FindFirstObject<T>() where T : Object => FindObjects<T>().FirstOrDefault();
 
 	public static void DrawGizmosPath(Vector3[] path, bool closedLoop)
 	{
@@ -268,6 +279,13 @@ public static class Utils
 		foreach (var obj in objs) str += obj?.ToString() + separator;
 		return str;
 	}
+	
+	public static string ArrayStr(IEnumerable objs, char  separator = ',')
+	{
+		var str = "";
+		foreach (var obj in objs) str += obj?.ToString() + separator;
+		return str;
+	}
 
 	public static T GetOrAddComponent<T>(GameObject gameObject) where T:Component
 	{
@@ -275,17 +293,36 @@ public static class Utils
 		if (t == null) t= gameObject.AddComponent<T>();
 		return t;
 	}
-
+	
 	public static float HDistance(Vector3 aiPathPosition, Vector3 dest)
 	{
 		aiPathPosition.y = dest.y;
 		return Vector3.Distance(aiPathPosition, dest);
 	}
+	
+	
 }
 
 public static class NavUtils
 {
+	public static float NavDistanceRoundY(Vector3 from, Vector3 to)
+	{
+		from.y = to.y = Mathf.Round(from.y);
+		return Vector3.Distance(from, to);
+	}
 	
+	/// <summary>
+	/// Récupère un point aléatoire accessible sur le graphe, dans un rayon donné autour d'un centre.
+	/// </summary>
+	/// <param name="center">Centre de la zone de recherche.</param>
+	/// <param name="radius">Rayon de la zone de recherche.</param>
+	/// <param name="graphIndex">Index du graphe à utiliser (par défaut : 0, le premier graphe).</param>
+	/// <returns>Un point aléatoire accessible, ou null si aucun n'est trouvé.</returns>
+	public static bool TryGetRandomPointOnNavmesh(Vector3 center, float radius, float maxDistance, out Vector3 randomPoint)
+	{
+		randomPoint = center + Quaternion.Euler(0, Random.Range(0, 360f), 0) * Vector3.forward * radius;
+		return TryGetNearestNavPosition(randomPoint, maxDistance,  out randomPoint);
+	}
 	
 	public static bool TryGetNearestNavPosition(Vector3 position, float maxDistance, out Vector3 navPosition)
 	{

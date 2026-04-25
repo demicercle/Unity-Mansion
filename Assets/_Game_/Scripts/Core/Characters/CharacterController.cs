@@ -5,6 +5,13 @@ using RPGCharacterAnims.Lookups;
 using Unity.VisualScripting;
 using UnityEngine;
 
+public interface IAttackable
+{
+	Vector3 GetPosition();
+	float GetRadius();
+	void TakeDamage(float amount, object instigator);
+}
+
 public enum CharacterFaction
 {
 	None = -1,
@@ -18,12 +25,15 @@ public enum CharacterAction
 	None,
 	Run,
 	Attack,
-	Interact
+	Interact,
+	Destroy
 }
 
-public class CharacterController : MonoBehaviour
+public class CharacterController : MonoBehaviour, IAttackable
 {
 	const float MinFacingDot = 0.9f;
+	
+	public static int debugStats { get; set; }
 	
 	public static List<CharacterController> AllCharacters => _allCharacters;
 
@@ -40,7 +50,8 @@ public class CharacterController : MonoBehaviour
 	public event System.Action<bool> onSelectionChanged;
 	public event System.Action<float> onHealed;
 	public event System.Action<float> onDamaged;
-	public event System.Action<int> onPartyIndexChanged;
+	public event System.Action<CharacterController, float> onDamagedBy;
+	public event System.Action<int,int> onPartyIndexChanged;
 	public event System.Action onDead;
 	public event System.Action onMoved;
 	public event System.Action onRotate;
@@ -184,7 +195,7 @@ public class CharacterController : MonoBehaviour
 		{
 			SetCurrentFaction(previousFaction);
 		}
-		onPartyIndexChanged?.Invoke(index);
+		onPartyIndexChanged?.Invoke(index, _partyCharacters.Count);
 		onPartyChanged?.Invoke();
 	}
 
@@ -226,7 +237,7 @@ public class CharacterController : MonoBehaviour
 		getDirection.y = 0;
 		getDirection.Normalize();
 
-		if (getDirection.sqrMagnitude < 0.01f)
+		if (getDirection.sqrMagnitude < Consts.MinMagnitude)
 		{
 			Debug.LogWarning(this + " invalid direction");
 			return;
@@ -249,10 +260,7 @@ public class CharacterController : MonoBehaviour
 	{
 		dir.y = 0;
 		dir.Normalize();
-		var dot = Vector3.Dot(dir, transform.forward);
-		//Debug.Log(dot);
-		// DebugGUI.FloatingText(transform.position, dot.ToString("N2"));
-		return dot >= MinFacingDot;
+		return dir.sqrMagnitude >= Consts.MinMagnitude && Vector3.Dot(dir, transform.forward) >= MinFacingDot;
 	}
 
 	public Vector3 GetDirection() => transform.forward;
@@ -291,6 +299,7 @@ public class CharacterController : MonoBehaviour
 	public void Teleport(Vector3 dest, int newRot, bool stopMovement)
 	{
 		GetAgent().Teleport(dest, newRot, stopMovement);
+		onMoved?.Invoke();
 		onAnyCharacterMoved?.Invoke(this);
 	}
 
@@ -300,7 +309,11 @@ public class CharacterController : MonoBehaviour
 	{
 		usedMovePoints += amount;
 		onStatsChanged?.Invoke();
-		if(notifyMoves) onAnyCharacterMoved?.Invoke(this);
+		if (notifyMoves)
+		{
+			onMoved?.Invoke();
+			onAnyCharacterMoved?.Invoke(this);
+		}
 	}
 	
 	public float GetTotalDamages() => totalDamages;
@@ -323,12 +336,12 @@ public class CharacterController : MonoBehaviour
 		onHealed?.Invoke(amount);
 		onStatsChanged?.Invoke();
 	}
-	public void TakeDamage(float amount, object objectFrom, bool stopAgent = true)
+	public void TakeDamage(float amount, object objectFrom)
 	{
 		Debug.Log(this + " TakeDamage " + amount);
 		totalDamages += amount;
 		
-		if(stopAgent) StopAgent();
+		StopAgent();
 
 		onDamaged?.Invoke(amount);
 		
@@ -342,19 +355,7 @@ public class CharacterController : MonoBehaviour
 		
 		if (objectFrom is CharacterController)
 		{
-			if (IsEnemyTo((objectFrom as CharacterController))) // enemy should get angry
-			{
-				if (detection && !detection.IsCharacterDetected((CharacterController)objectFrom))
-				{
-					detection.SetDetected(objectFrom as CharacterController, true);
-					Routines.AssignLookPosition((objectFrom as CharacterController).GetCenterPosition());
-				
-					if (TryGetAnimation(out var anim))
-					{
-						anim.InstantSwitchWeapons();
-					}
-				}
-			}
+			onDamagedBy?.Invoke(objectFrom as CharacterController, amount);
 		}
 	}
 	public bool TryKill()
@@ -401,15 +402,15 @@ public class CharacterController : MonoBehaviour
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	}
 
-	public float GetAttackRange(CharacterController target)
+	public float GetAttackRange(IAttackable target)
 	{
-		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.agent.GetRadius());
+		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius());
 	}
 
-	public bool IsAtAttackRange(CharacterController target, bool losCheck = true)
+	public bool IsAtAttackRange(IAttackable target, bool losCheck = true)
 	{
 		var atkRange = GetAttackRange(target);
-		var dist = Vector3.Distance(GetPosition(), target.GetPosition());
+		var dist = NavUtils.NavDistanceRoundY(GetPosition(), target.GetPosition());
 		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
 		if (dist <= atkRange)
 		{
@@ -536,10 +537,10 @@ public class CharacterController : MonoBehaviour
 		}
 	}
 	
-	private bool LOSCheck(CharacterController other)
+	private bool LOSCheck(IAttackable other)
 	{
 		var start = GetEyesPosition();
-		var end = other.GetEyesPosition();
+		var end = other.GetPosition();
 		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
 		{
 			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
@@ -559,4 +560,13 @@ public class CharacterController : MonoBehaviour
 		Utils.DrawGizmosCircle(transform.position, Vector3.up, visionRange);
 	}
 	#endif
+
+	private void OnGUI()
+	{
+		if (debugStats > 0)
+		{
+			var healthStr = isDead ? "DEAD" : GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2");
+			Utils.DrawWorldGUI(GetEyesPosition(), name + "\n" + healthStr, "label");
+		}
+	}
 }

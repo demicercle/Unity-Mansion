@@ -20,6 +20,8 @@ public class CharacterTrigger : MonoBehaviour
 	
 	public event System.Action<CharacterTrigger> onTriggered;
 
+	public CharacterController[] GetCharacters() => characters.ToArray();
+
 	public bool HasCharacter(CharacterController character)
 	{
 		return characters.Contains(character);
