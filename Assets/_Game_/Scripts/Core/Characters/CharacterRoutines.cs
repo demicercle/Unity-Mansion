@@ -187,7 +187,25 @@ public class CharacterRoutines : MonoBehaviour
 		
 		if(debugMode > 0) Debug.Log(_selfCharacter + " waypoint found: " + bestWaypoint + ", move to");
 		agent.SetReachDistance(bestWaypoint.radius);
-		//agent.AssignDestination(bestWaypoint.GetPosition(), true);
+
+		var startTime = Time.time;
+		var pathValid = false;
+		do
+		{
+			if (Time.time - startTime > SearchPathTimeout)
+			{
+				Debug.LogWarning(this + " search path to waypoint timeout");
+				yield break;
+			}
+			
+			yield return agent.SearchPathAsync(bestWaypoint.GetPosition());
+
+			var path = agent.GetCurrentPath();
+			pathValid = path.Length > 1 && NavUtils.NavDistanceRoundY(path.Last(), bestWaypoint.GetPosition()) <=
+				bestWaypoint.radius + agent.GetRadius();
+			
+		} while (!pathValid);
+
 		yield return StartCoroutine(WaitMoveLastPath());
 		
 		if (agent.ReachedDestination(bestWaypoint.GetPosition()))
