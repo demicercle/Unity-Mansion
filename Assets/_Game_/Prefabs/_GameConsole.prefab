@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 4816092130728771588}
   - component: {fileID: 3083728991372862651}
   m_Layer: 5
-  m_Name: GameConsole
+  m_Name: _GameConsole
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
