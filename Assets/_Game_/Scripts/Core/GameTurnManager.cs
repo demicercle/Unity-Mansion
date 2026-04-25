@@ -80,6 +80,7 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
 	
 	private CharacterController[] levelCharacters;
+	private CharacterController currentAICharacter;
 	private CharacterController focusCharacter;
 	private List<CharacterController> turnBasedCharacters = new List<CharacterController>();
 	private int currentTurn;
@@ -269,6 +270,7 @@ public class GameTurnManager : MonoBehaviour
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
 				
+				currentAICharacter = otherCharacter;
 				otherCharacter.Rest(); // rest not player character
 
 				if (skipInvisibleCharacters && !otherCharacter.IsCharacterRevealed())
@@ -294,7 +296,7 @@ public class GameTurnManager : MonoBehaviour
 				
 				do yield return null;
 				while (NavmeshRebuilder.IsRebuildingAsync());
-				
+
 				StartCoroutine(otherBrain.Think());
 				
 				do
@@ -471,4 +473,40 @@ public class GameTurnManager : MonoBehaviour
 		}
 	}
 	#endregion
+
+	private void OnGUI()
+	{
+		if (debugMode > 0)
+		{
+			GUILayout.BeginArea(new Rect(16,16,256f,Screen.height));
+			
+			GUILayout.BeginVertical("textfield");
+			
+			GUILayout.Label("GAME TURN MANAGER");
+			GUILayout.Label("levelCharacters: " + levelCharacters.Length);
+			
+			GUILayout.BeginVertical("textfield");
+			GUILayout.Label("turnBasedMode: " + turnBasedMode);
+			if (turnBasedMode)
+			{
+				GUILayout.Label("isPlayerTurn: " + playerTurn);
+				foreach (var character in turnBasedCharacters)
+				{
+					var isCurrent = (playerTurn && character.InParty()) ||
+					                (!playerTurn && currentAICharacter == character);
+
+					var label = character.name;
+					if (character.IsDead()) label += " (DEAD)";
+					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
+					
+					GUILayout.Toggle(isCurrent, label);
+				}
+			}
+			GUILayout.EndVertical();
+			
+			GUILayout.EndVertical();
+			
+			GUILayout.EndArea();
+		}
+	}
 }

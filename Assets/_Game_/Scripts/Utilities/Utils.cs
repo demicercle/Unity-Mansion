@@ -5,23 +5,9 @@ using Pathfinding;
 using Pathfinding.Util;
 using UnityEngine;
 
+
 public static class Utils
 {
-	public static bool TagCheck(string filters, object obj)
-	{
-		return obj == null || string.IsNullOrWhiteSpace(filters) ||
-		       filters.Split(',').ToList().Any(tag =>
-		       {
-			       if (obj is Component)
-				       return (obj as Component).CompareTag(tag);
-
-			       if (obj is GameObject)
-				       return (obj as GameObject).CompareTag(tag);
-
-			       return false;
-		       });
-	}
-
 	public static void DrawWorldGUI(Vector3 position, string debugString) =>
 		DrawWorldGUI(position, debugString, Vector2.zero);
 	public static void DrawWorldGUI(Vector3 position, string debugString, Vector2 offset) =>
@@ -36,6 +22,21 @@ public static class Utils
 		guiPosition.y = Screen.height - guiPosition.y;
 		guiPosition += offset;
 		GUI.Box(new Rect(guiPosition, guiRect.size), guiContent, guiStyle);
+	}
+	
+	public static bool TagCheck(string filters, object obj)
+	{
+		return obj == null || string.IsNullOrWhiteSpace(filters) ||
+		       filters.Split(',').ToList().Any(tag =>
+		       {
+			       if (obj is Component)
+				       return (obj as Component).CompareTag(tag);
+
+			       if (obj is GameObject)
+				       return (obj as GameObject).CompareTag(tag);
+
+			       return false;
+		       });
 	}
 
 	public static bool IsEditorPrefabStage()
