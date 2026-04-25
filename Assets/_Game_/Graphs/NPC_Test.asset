@@ -54,7 +54,7 @@ MonoBehaviour:
   m_Name: Node Move To
   m_EditorClassIdentifier: Assembly-CSharp::NodeMoveTo
   graph: {fileID: 11400000}
-  position: {x: 376, y: 104}
+  position: {x: 360, y: 904}
   ports:
     keys:
     - _start
@@ -67,8 +67,8 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out
-        node: {fileID: 4533588354387013093}
+      - fieldName: _out2
+        node: {fileID: 7751640997977408073}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_Name: Node Move To
   m_EditorClassIdentifier: Assembly-CSharp::NodeMoveTo
   graph: {fileID: 11400000}
-  position: {x: 376, y: -328}
+  position: {x: 360, y: 472}
   ports:
     keys:
     - _start
@@ -132,8 +132,8 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out
-        node: {fileID: 1661894733017915128}
+      - fieldName: _out0
+        node: {fileID: 7751640997977408073}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
@@ -318,10 +318,7 @@ MonoBehaviour:
       _node: {fileID: -1036241989258757978}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _start
-        node: {fileID: 8272428726248898318}
-        reroutePoints: []
+      connections: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -374,7 +371,7 @@ MonoBehaviour:
   m_Name: Node Move To
   m_EditorClassIdentifier: Assembly-CSharp::NodeMoveTo
   graph: {fileID: 11400000}
-  position: {x: 392.5, y: -102.5}
+  position: {x: 376, y: 696}
   ports:
     keys:
     - _start
@@ -387,8 +384,8 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out
-        node: {fileID: 6287711585738284144}
+      - fieldName: _out1
+        node: {fileID: 7751640997977408073}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
@@ -449,7 +446,7 @@ MonoBehaviour:
   - {fileID: -4710916101070361956}
   - {fileID: -454481680373365717}
   - {fileID: -6396237199070666795}
-  - {fileID: 8272428726248898318}
+  - {fileID: 7751640997977408073}
 --- !u!114 &1661894733017915128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -475,10 +472,7 @@ MonoBehaviour:
       _node: {fileID: 1661894733017915128}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _start
-        node: {fileID: -4710916101070361956}
-        reroutePoints: []
+      connections: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -543,10 +537,7 @@ MonoBehaviour:
       _node: {fileID: 4533588354387013093}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _start
-        node: {fileID: -6396237199070666795}
-        reroutePoints: []
+      connections: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -611,10 +602,7 @@ MonoBehaviour:
       _node: {fileID: 6287711585738284144}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _start
-        node: {fileID: -454481680373365717}
-        reroutePoints: []
+      connections: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -654,6 +642,125 @@ MonoBehaviour:
   message:
     line: 10
     text: "I don't want to speak\r"
+--- !u!114 &7751640997977408073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae79794563fd4776bffcab07c56e368a, type: 3}
+  m_Name: Switch
+  m_EditorClassIdentifier: Assembly-CSharp::NodeSwitch
+  graph: {fileID: 11400000}
+  position: {x: -88, y: 504}
+  ports:
+    keys:
+    - _in
+    - _out0
+    - _out1
+    - _out2
+    - _out3
+    - _out4
+    - _out5
+    - _out6
+    - _out7
+    values:
+    - _fieldName: _in
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 8046466847253731282}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out0
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _start
+        node: {fileID: -4710916101070361956}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out1
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _start
+        node: {fileID: -454481680373365717}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out2
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _start
+        node: {fileID: -6396237199070666795}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out3
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out4
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out5
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out6
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out7
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
 --- !u!114 &8046466847253731282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -667,7 +774,7 @@ MonoBehaviour:
   m_Name: Interacted
   m_EditorClassIdentifier: Assembly-CSharp::NodeInteracted
   graph: {fileID: 11400000}
-  position: {x: -664, y: -136}
+  position: {x: -920, y: 344}
   ports:
     keys:
     - _out
@@ -683,72 +790,10 @@ MonoBehaviour:
       - fieldName: _in
         node: {fileID: -7953189124686401581}
         reroutePoints: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
---- !u!114 &8272428726248898318
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bcb6511be6d466590e60deca2c643aa, type: 3}
-  m_Name: Node Move To
-  m_EditorClassIdentifier: Assembly-CSharp::NodeMoveTo
-  graph: {fileID: 11400000}
-  position: {x: 403.5, y: 329.5}
-  ports:
-    keys:
-    - _start
-    - _character
-    - _to
-    - _finished
-    values:
-    - _fieldName: _start
-      _node: {fileID: 8272428726248898318}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _out
-        node: {fileID: -1036241989258757978}
+      - fieldName: _in
+        node: {fileID: 7751640997977408073}
         reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _character
-      _node: {fileID: 8272428726248898318}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _to
-      _node: {fileID: 8272428726248898318}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _finished
-      _node: {fileID: 8272428726248898318}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _character:
-    findName: 
-  _to:
-    findName: Waypoint_NPC_2
-  canUseRunAction: 0
