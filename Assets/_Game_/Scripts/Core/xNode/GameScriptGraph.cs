@@ -7,23 +7,3 @@ using XNode;
 public class GameScriptGraph : NodeGraph
 { 
 }
-
-[System.Serializable]
-public class NodeExec
-{
-	private System.Action callback;
-	
-	public void Invoke() => callback?.Invoke();
-	
-	public void InitInput(Node node, string inputName, System.Action callback)
-	{
-		otherExec = node.GetInputPort(inputName).GetInputValue<NodeExec>();
-		if (otherExec != null)
-		{
-			//Debug.Log(this + " Connects " + node + " " + inputName);
-			otherExec.callback += callback;
-		}
-	}
-
-	private static NodeExec otherExec;
-}

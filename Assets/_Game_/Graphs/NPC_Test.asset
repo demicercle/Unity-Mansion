@@ -56,6 +56,70 @@ MonoBehaviour:
   nodes:
   - {fileID: -7953189124686401581}
   - {fileID: 8046466847253731282}
+  - {fileID: 1661894733017915128}
+--- !u!114 &1661894733017915128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d05139a4fc14bd381b60ecbe97ab488, type: 3}
+  m_Name: Floating Text
+  m_EditorClassIdentifier: Assembly-CSharp::NodeFloatingText
+  graph: {fileID: 11400000}
+  position: {x: -120, y: -8}
+  ports:
+    keys:
+    - _out
+    - _in
+    - _character
+    - message
+    values:
+    - _fieldName: _out
+      _node: {fileID: 1661894733017915128}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _in
+      _node: {fileID: 1661894733017915128}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 8046466847253731282}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: 1661894733017915128}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: message
+      _node: {fileID: 1661894733017915128}
+      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _character:
+    findName: 
+  message: Hello you
 --- !u!114 &8046466847253731282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81,6 +145,9 @@ MonoBehaviour:
       connections:
       - fieldName: _in
         node: {fileID: -7953189124686401581}
+        reroutePoints: []
+      - fieldName: _in
+        node: {fileID: 1661894733017915128}
         reroutePoints: []
       _direction: 1
       _connectionType: 0

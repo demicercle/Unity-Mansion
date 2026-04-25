@@ -18,7 +18,7 @@ public class NodeDebugLog : GameNode
 
 	private void OnCallback()
 	{
-		DebugLogThis(message);
+		DebugLogThis(GetInputValue("message", message));
 	}
 
 	// Return the correct value of an output port when requested

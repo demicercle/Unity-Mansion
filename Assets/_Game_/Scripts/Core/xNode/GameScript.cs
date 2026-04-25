@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 
@@ -21,6 +22,22 @@ public class GameScript : MonoBehaviour
 	{
 		if(!selfProp) TryGetComponent(out selfProp);
 		if(!selfCharacter) TryGetComponent(out selfCharacter);
+	}
+
+	private void Awake()
+	{
+		foreach (var node in graph.nodes.OfType<GameNode>())
+		{
+			node.script = this;
+		}
+	}
+
+	private void OnDestroy()
+	{
+		foreach (var node in graph.nodes.OfType<GameNode>())
+		{
+			node.script = null;
+		}
 	}
 
 	private void OnEnable()

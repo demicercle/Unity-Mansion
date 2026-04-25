@@ -6,8 +6,10 @@ using XNode;
 
 public class NodeFloatingText : GameNode
 {
-	[Input] public NodeExec _in;
 	[Output] public NodeExec _out;
+	[Input] public NodeExec _in;
+	[Input] public SceneReference _character;
+	[Input] public string message;
 
 	// Return the correct value of an output port when requested
 	public override object GetValue(NodePort port) {
@@ -18,8 +20,6 @@ public class NodeFloatingText : GameNode
 		return null; // Replace this
 	}
 	
-	[Input] public string message;
-	
 	// Use this for initialization
 	protected override void Init()
 	{
@@ -29,6 +29,9 @@ public class NodeFloatingText : GameNode
 
 	private void OnCallback()
 	{
-		
+		if (_character.TryGetComponent(this, out CharacterController character))
+		{
+			character.FloatingText(GetInputValue("message", message));
+		}
 	}
 }
