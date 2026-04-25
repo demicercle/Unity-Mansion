@@ -22,20 +22,18 @@ public abstract class GameNode : Node
 	
 	virtual protected void OnScriptAwake()
 	{
-		
+		DebugLogThis("OnScriptAwake");
 	}
 
 	virtual protected void OnScriptDestroy()
 	{
-		
+		DebugLogThis("OnScriptDestroy");
 	}
 	
 	protected override void Init()
 	{
-		if(!Application.isPlaying)
-			name = name.Replace("Node", string.Empty).Trim(' ');
-		
 		base.Init();
+		DebugLogThis("Inits");
 	}
 
 	protected void DebugLogThis(string msg) => Debug.Log("x_" + this + ": " + msg);
@@ -49,14 +47,27 @@ public class NodeExec
 	
 	public void Invoke() => callback?.Invoke();
 	
-	public void InitInput(Node node, string inputName, System.Action callback)
+	public void AwakeInput(Node node, string inputName, System.Action callback)
 	{
+		if (!Application.isPlaying)
+		{
+			Debug.Log(this + " app not playing");
+			return;
+		}
+		
 		otherExec = node.GetInputPort(inputName).GetInputValue<NodeExec>();
 		if (otherExec != null)
 		{
-			//Debug.Log(this + " Connects " + node + " " + inputName);
 			otherExec.callback += callback;
+			return;
 		}
+		
+		Debug.LogWarning(this + " can't connect from " + node + " " + inputName + " in " + node.graph);
+	}
+
+	public bool HasCallbacks()
+	{
+		return callback?.Target != null;
 	}
 
 	private static NodeExec otherExec;

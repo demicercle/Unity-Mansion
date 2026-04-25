@@ -10,10 +10,10 @@ public class NodeDebugLog : GameNode
 	[Input] public string message;
 	
 	// Use this for initialization
-	protected override void Init()
+	protected override void OnScriptAwake()
 	{
-		base.Init();
-		_in.InitInput(this, "_in", OnCallback);
+		base.OnScriptAwake();
+		_in.AwakeInput(this, "_in", OnCallback);
 	}
 
 	private void OnCallback()

@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class GameScript : MonoBehaviour
 {
+	public static int debugMode = 1;
+	
 	[SerializeField] private GameScriptGraph graph;
 	
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
@@ -26,6 +28,15 @@ public class GameScript : MonoBehaviour
 
 	private void Awake()
 	{
+		if (!graph)
+		{
+			Debug.LogWarning(this + " has no graph!");
+			enabled = false;
+			return;
+		}
+		
+		graph = Instantiate(graph);
+		
 		foreach (var node in graph.nodes.OfType<GameNode>())
 		{
 			node.script = this;
@@ -34,10 +45,14 @@ public class GameScript : MonoBehaviour
 
 	private void OnDestroy()
 	{
+		if (!graph) return;
+		
 		foreach (var node in graph.nodes.OfType<GameNode>())
 		{
 			node.script = null;
 		}
+			
+		Destroy(graph);
 	}
 
 	private void OnEnable()
@@ -59,6 +74,8 @@ public class GameScript : MonoBehaviour
 
 	private void OnDisable()
 	{
+		if (!graph) return;
+		
 		gameTurnManager.onSceneLoaded -= OnSceneLoaded;
 		
 		if (selfProp)
@@ -90,6 +107,7 @@ public class GameScript : MonoBehaviour
 
 	private void OnTalkedBy(CharacterController other)
 	{
+		if(debugMode > 0) Debug.Log(this + " OnTalkedBy " + other);
 		foreach (var node in graph.nodes)
 		{
 			(node as NodeInteracted)?.Interacted();
