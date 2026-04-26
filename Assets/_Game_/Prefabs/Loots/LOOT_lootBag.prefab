@@ -14,7 +14,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
       propertyPath: m_Layer
-      value: 11
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
       propertyPath: m_RootOrder
@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2300000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 3e7c99b03a26e964ba43e78721c07b20, type: 2}
     m_RemovedComponents:
     - {fileID: 9500000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
     m_RemovedGameObjects: []
@@ -74,6 +78,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3870844094002656079}
+    - targetCorrespondingSourceObject: {fileID: 100000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1974061724383152390}
+    - targetCorrespondingSourceObject: {fileID: 100000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8009311080362619247}
   m_SourcePrefab: {fileID: 100100000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
 --- !u!1 &3296481348593993862 stripped
 GameObject:
@@ -154,3 +164,34 @@ MonoBehaviour:
   lootBagPrefab: {fileID: 0}
   items:
   - {fileID: 0}
+--- !u!114 &1974061724383152390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3296481348593993862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuickOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &8009311080362619247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3296481348593993862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
+  ignorePresets: 0
