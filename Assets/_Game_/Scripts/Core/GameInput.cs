@@ -58,19 +58,32 @@ public class GameInput : MonoBehaviour
 		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction);
 		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point))
 		{ 
+			if (itemToUse)
+			{
+				if (!itemToUse.CanBeUsedOn(interactionHit.collider.gameObject))
+					return CursorRaycastResult_None;
+			}
+			
+			outRaycast = interactionHit;
+			
 			foreach (var cursorHandler in interactionHit.collider.GetComponents<ICursorHandler>()
 				         .Concat(interactionHit.collider.GetComponentsInChildren<ICursorHandler>()))
 			{
 				cursorHandler.CursorOver();
 			}
-
-			outRaycast = interactionHit;
+			
 			return CursorRaycastResult_Interaction;
 		}
 		
 		hitNavigation = Physics.Raycast(raycastRay, out navigationHit, 100f, Layers.MaskNavigation);
 		if (hitNavigation && RoomTrigger.IsPositionVisible(navigationHit.point))
 		{
+			if (itemToUse)
+			{
+				if (!itemToUse.CanBeUsedOn(navigationHit.collider.gameObject))
+					return CursorRaycastResult_None;
+			}
+			
 			if (NavUtils.TryGetNearestNavPosition(navigationHit.point, maxNavDistance, out var navPosition))
 			{
 				hitWalls = Physics.Linecast(navPosition, raycastRay.origin, out wallsHit, Layers.MaskWall);
@@ -78,6 +91,7 @@ public class GameInput : MonoBehaviour
 				{
 					outRaycast = navigationHit;
 					outRaycast.point = navPosition;
+					
 					return CursorRaycastResult_Navigation;
 				}
 				else if (debugMode > 0)
@@ -347,6 +361,7 @@ public class GameInput : MonoBehaviour
 		if (hasFocus && mouseOverViewport && !holdMiddleClick) ///////////////////////////////////////////////////////////////////////////// mouse over
 		{
 			lastCursorResult = CursorRaycast(out var hit);
+			
 			mouseOverChanged = lastMouseOverObject != hit.collider;
 			lastMouseOverObject = hit.collider;
 
@@ -468,9 +483,12 @@ public class GameInput : MonoBehaviour
 			SetCurrentCursorType(CursorType.Blocked);
 		}
 
-		if (itemToUse != null)
+		if (itemToUse)
 		{
-			SetCurrentCursorType(CursorType.UseItem);
+			if (itemToUse.CanBeUsedOn(lastMouseOverObject?.gameObject))
+				SetCurrentCursorType(CursorType.UseItem);
+			else
+				SetCurrentCursorType(CursorType.Blocked);
 		}
 
 		if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
@@ -588,12 +606,15 @@ public class GameInput : MonoBehaviour
 		
 		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
 		{
-			if (gameTurnManager.IsPlayerTurn())
+			if (itemToUse)
+			{
+				SetItemToUse(null);
+			}
+			
+			else if (gameTurnManager.IsPlayerTurn())
 			{
 				CharacterSelection.SelectCharacter(null); // deselect all
 			}
-			
-			SetItemToUse(null);
 		}
 		
 		rightClickValue = ctxValue;
@@ -872,6 +893,8 @@ public class GameInput : MonoBehaviour
 	}
 
 	public ItemData GetItemToUse() => itemToUse;
+
+	public bool IsBlocked() => currentCursor == CursorType.Blocked;
 
 	public Vector3 GetMousePosition()
 	{

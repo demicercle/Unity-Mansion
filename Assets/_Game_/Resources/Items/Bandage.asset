@@ -16,3 +16,4 @@ MonoBehaviour:
     lineIndex: 1
     text: "Bandage\r"
   icon: {fileID: 2800000, guid: 1b310b4f2926ae14280a4e0543f9607a, type: 3}
+  targetType: 1
