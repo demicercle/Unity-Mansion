@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
+	private const float CreateLootNavDistance = 1.0f;
+	
 	public static int debugMode { get; set; }
 	public static event System.Action<Inventory> onAnyInventoryChanged;
 	public static event System.Action<Inventory, ItemData> onAnyItemAdded, onAnyItemRemoved;
@@ -12,8 +14,34 @@ public class Inventory : MonoBehaviour
 	public static event System.Action<Inventory, ItemData, object> onAnyItemUsed;
 	
 	[SerializeField] [Range(1, 32)] private int maxSize = 6;
+	[SerializeField] private Inventory lootBagPrefab = null;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
+	
+	public bool TryCreateLootBag(ItemData itemData, out Inventory bag)
+	{
+		if (!lootBagPrefab)
+		{
+			Debug.LogWarning(this + " cannot CreateLootBag because no prefab set!");
+			bag = null;
+			return false;
+		}
 
+		if (!NavUtils.TryGetNearestNavPosition(transform.position, CreateLootNavDistance, out var navPosition))
+		{
+			Debug.LogWarning(this + " cannot CreateLootBag: no nav position found");
+			bag = null;
+			return false;
+		}
+
+		bag = Instantiate(lootBagPrefab.gameObject).GetComponent<Inventory>();
+		bag.maxSize = 1;
+		bag.items.Add(itemData);
+		bag.destroyIfEmpty = true;
+		bag.transform.position = navPosition;
+		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+		return true;
+	}
+	
 	public void NotifyUsed(ItemData item, object objectTo)
 	{
 		onAnyItemUsed?.Invoke(this, item, objectTo);
@@ -94,6 +122,9 @@ public class Inventory : MonoBehaviour
 		return false;
 	}
 	
+	#region PRIVATE
+	private bool destroyIfEmpty;
+	
 	[ContextMenu("Update Size")]
 	private void UpdateSize()
 	{
@@ -109,6 +140,24 @@ public class Inventory : MonoBehaviour
 		
 		Utils.SetDirty(this);
 	}
+
+	private void LateUpdate()
+	{
+		if (destroyIfEmpty)
+		{
+			for (int i = 0; i < items.Count; i++)
+			{
+				if (items[i])
+					return;
+			}
+
+			if(debugMode > 0) Debug.Log(this + " DestroysIfEmpty");
+			Destroy(gameObject);
+		}
+	}
+	#endregion
+	
+	
 
 #if UNITY_EDITOR
 	private void OnDrawGizmos()

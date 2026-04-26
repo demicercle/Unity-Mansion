@@ -195,7 +195,7 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "";
 	}
 	
-	private IEnumerator WaitCharacterInteract( PropComponent clickedProp)
+	private IEnumerator WaitCharacterInteract(PropComponent clickedProp)
 	{
 		debugString = "WaitCharacterInteract";
 		if(debugMode > 0) Debug.Log(_selfCharacter + " WaitCharacterInteract " + clickedProp);
@@ -205,15 +205,17 @@ public class CharacterRoutines : MonoBehaviour
 		
 		yield return agent.AssignWaypointDestinationAsync(clickedProp);
 
-		var bestWaypoint = agent.GetBestWaypoint();
-		if (!bestWaypoint)
+		var destination = clickedProp.GetPosition();
+		var reachRadius = clickedProp.GetRadius();
+		var direction = (_selfCharacter.GetPosition() - clickedProp.GetPosition()).normalized;
+		var foundWaypoint = agent.GetBestWaypoint();
+		if (foundWaypoint)
 		{
-			Debug.LogWarning(this + " no best waypoint, abort WaitCharacterInteract");
-			yield break;
+			if(debugMode > 0) Debug.Log(_selfCharacter + " waypoint found: " + foundWaypoint + ", move to");
+			agent.SetReachDistance(foundWaypoint.radius);
+			destination = foundWaypoint.GetPosition();
+			direction = foundWaypoint.GetDirection();
 		}
-		
-		if(debugMode > 0) Debug.Log(_selfCharacter + " waypoint found: " + bestWaypoint + ", move to");
-		agent.SetReachDistance(bestWaypoint.radius);
 
 		var startTime = Time.time;
 		var pathValid = false;
@@ -225,22 +227,35 @@ public class CharacterRoutines : MonoBehaviour
 				yield break;
 			}
 			
-			yield return agent.SearchPathAsync(bestWaypoint.GetPosition());
+			yield return agent.SearchPathAsync(destination);
 
 			var path = agent.GetCurrentPath();
-			pathValid = path.Length > 1 && NavUtils.NavDistanceRoundY(path.Last(), bestWaypoint.GetPosition()) <=
-				bestWaypoint.radius + agent.GetRadius();
+			pathValid = path.Length > 1 && NavUtils.NavDistanceRoundY(path.Last(), destination) <= reachRadius + agent.GetRadius();
 			
 		} while (!pathValid);
 
-		yield return StartCoroutine(WaitMoveLastPath(bestWaypoint.GetPosition()));
+		yield return StartCoroutine(WaitMoveLastPath(destination));
 		
-		if (agent.ReachedDestination(bestWaypoint.GetPosition()))
+		if (agent.ReachedDestination(destination))
 		{
 			// waypoint reach
 			if (_selfCharacter.CanInteract())
 			{
-				yield return StartCoroutine(WaitCharacterInteract(clickedProp, bestWaypoint));
+				while (!_selfCharacter.IsFacingDirection(direction))
+				{
+					_selfCharacter.LookDirection(direction, Time.deltaTime);
+					yield return null;
+				}
+		
+				_selfCharacter.UseAction(clickedProp.GetInteractAction(), clickedProp);
+				yield return clickedProp.WaitInteraction(_selfCharacter);
+		
+				clickedProp.InteractedBy(_selfCharacter);
+
+				do
+				{
+					yield return null;
+				} while (!clickedProp.AnimFinished());
 			}
 			else
 			{
@@ -249,8 +264,8 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else if(debugMode > 0) 
 		{
-			var dist = NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), bestWaypoint.GetPosition());
-			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + bestWaypoint);
+			var dist = NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), destination);
+			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + destination);
 		}
 	}
 	
@@ -332,98 +347,6 @@ public class CharacterRoutines : MonoBehaviour
 
 		if(debugMode > 0) Debug.Log("attack ends");
 	}
-
-	private IEnumerator WaitCharacterInteract(PropComponent prop, Waypoint waypoint)
-	{
-		debugString = "WaitCharacterInteract";
-		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteract > " + prop + " @ " + waypoint);
-		
-		if (!waypoint)
-		{
-			Debug.LogWarning(this + " WaitCharacterInteract - no waypoint");
-			yield break;
-		}
-		
-		var wpDir = waypoint.GetDirection();
-		while (!_selfCharacter.IsFacingDirection(wpDir))
-		{
-			_selfCharacter.LookDirection(wpDir, Time.deltaTime);
-			yield return null;
-		}
-		
-		_selfCharacter.UseAction(prop.GetInteractAction(), prop);
-		yield return prop.WaitInteraction(_selfCharacter);
-		
-		prop.InteractedBy(_selfCharacter);
-
-		do
-		{
-			yield return null;
-		} while (!prop.AnimFinished());
-	}
-	/*private IEnumerator WaitCharacterDestroys(Destructible destructible)
-	{
-		debugString = "WaitCharacterDestroys";
-		if (debugMode > 0) Debug.Log(this + " WaitCharacterDestroys > " + destructible);
-		
-		if (characterOwner.TryGetAnimation(out var characterAnim))
-		{
-			if (characterAnim.TrySwitchWeapons(true))
-			{
-				do
-				{
-					debugString = "TrySwitchWeapons";
-					yield return null;
-				} while (characterAnim.IsSwitchingWeapons);
-				if(debugMode > 0) Debug.Log("weapons switched for attacking");
-			}
-		}
-
-		var atAttackRange = false;
-		while (!atAttackRange)
-		{
-			yield return null;
-
-			atAttackRange = characterOwner.IsAtAttackRange(target, losCheck);
-			if (atAttackRange)
-			{
-				if(debugMode > 0) Debug.Log(characterOwner + " atAttackRange of " + target + ", StopAgent");
-				characterOwner.StopAgent();
-			}
-			
-			else if (!characterOwner.IsMoving())
-			{
-				if (!characterOwner.HasMovePoints() && canUseRunAction && characterOwner.CanUseAction(CharacterAction.Run))
-				{
-					if (debugMode > 0) Debug.Log(this + " WaitCharacterAttackCharacter use Run Action");
-					yield return StartCoroutine(WaitAction(CharacterAction.Run));
-				}
-				
-				else if (!characterOwner.HasMovePoints())
-				{
-					if(debugMode > 0) Debug.Log(characterOwner + " has no move points to reach target");
-					characterOwner.FloatingText_Cant();
-					yield break;
-				}
-
-				else
-				{
-					var reachDistance = characterOwner.GetAttackRange(target);
-					if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
-					yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance));
-				}
-			}
-		}
-		
-		characterOwner.UseAction(CharacterAction.Destroy, destructible);
-		
-		prop.InteractedBy(characterOwner);
-
-		do
-		{
-			yield return null;
-		} while (!prop.AnimFinished());
-	}*/
 
 	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection((pos - _selfCharacter.GetPosition()).normalized);
 	

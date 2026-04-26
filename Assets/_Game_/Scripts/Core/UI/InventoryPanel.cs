@@ -29,11 +29,11 @@ public class InventoryPanel : MonoBehaviour
 			{
 				if (selfInventory.TryGetItem(i, out var itemData))
 				{
-					buttons[i].SetItem(itemData);
+					buttons[i].SetItem(itemData, selfInventory);
 				}
 				else
 				{
-					buttons[i].SetItem(null);
+					buttons[i].SetItem(null, selfInventory);
 				}
 			}
 		}
