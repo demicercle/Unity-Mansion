@@ -57,6 +57,21 @@ public class Inventory : MonoBehaviour
 		return false;
 	}
 	
+	public bool TryRemoveItem(ItemData itemToUse)
+	{
+		for (int i = 0; i < items.Count; i++)
+		{
+			if (items[i] == itemToUse)
+			{
+				onAnyItemRemoved?.Invoke(this, items[i]);
+				items[i] = null;
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
 	[ContextMenu("Update Size")]
 	private void UpdateSize()
 	{

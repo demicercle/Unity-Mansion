@@ -8,20 +8,24 @@ public class GameScript : MonoBehaviour
 	public static int debugMode { get; set; }
 	
 	[SerializeField] private GameScriptGraph graph;
+
+	public void SetGraph(GameScriptGraph newGraph)
+	{
+		graph = newGraph;
+	}
 	
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
 
-	private void Awake()
+	private void Start()
 	{
 		if (!graph)
 		{
-			Debug.LogWarning(this + " has no graph!");
-			enabled = false;
+			Destroy(this);
 			return;
 		}
 		
 		graph = Instantiate(graph);
-		
+
 		foreach (var node in graph.nodes.OfType<GameNode>())
 		{
 			node.script = this;

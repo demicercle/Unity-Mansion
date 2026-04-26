@@ -640,7 +640,26 @@ public class GameInput : MonoBehaviour
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CursorRaycastResult_Interaction)
 			{
-				if (hit.collider.TryGetComponent(out CharacterController clickedCharacter)) // click character
+				if (itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject))
+				{
+					if (!selectedCharacter || !selectedCharacter.TryGetComponent(out Inventory selectedInventory))
+					{
+						Debug.LogWarning(this + " no selected character to use item from " + itemToUse);
+						return;
+					}
+					
+					if (!selectedInventory.TryRemoveItem(itemToUse))
+					{
+						Debug.LogWarning(this + " cannot remove item from inventory " + itemToUse + " " +
+						                 selectedInventory);
+						return;
+					}
+					
+					itemToUse.UseOn(hit.collider.gameObject);
+					SetItemToUse(null);
+				}
+				
+				else if (hit.collider.TryGetComponent(out CharacterController clickedCharacter)) // click character
 				{
 					ClickCharacter(clickedCharacter);
 				}
