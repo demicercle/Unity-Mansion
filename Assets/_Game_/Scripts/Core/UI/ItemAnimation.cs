@@ -11,7 +11,8 @@ public class ItemAnimation : MonoBehaviour
 	[SerializeField] private float upScale = 2.0f;
 	[SerializeField] private RawImage iconContainer;
 	[SerializeField] private AnimationCurve alphaCurve;
-	
+
+	private static ItemAnimation singleton;
 	private Vector3 positionFrom, positionTo;
 	private float time;
 	private RectTransform rectTransform;
@@ -19,32 +20,51 @@ public class ItemAnimation : MonoBehaviour
 	private void Awake()
 	{
 		rectTransform = GetComponent<RectTransform>();
-		Inventory.onAnyItemTransfered += OnAnyItemTransfered;
+		if (!singleton)
+		{
+			singleton = this;
+			
+			Inventory.onAnyItemTransfered += OnAnyItemTransfered;
+			Inventory.onAnyItemUsed += OnAnyItemUsed;
+			
+			gameObject.SetActive(false);
+		}
 	}
 
 	private void OnDestroy()
 	{
-		Inventory.onAnyItemTransfered -= OnAnyItemTransfered;
+		if (singleton == this)
+		{
+			Inventory.onAnyItemTransfered -= OnAnyItemTransfered;
+			Inventory.onAnyItemUsed -= OnAnyItemUsed;
+		}
 	}
 
 	private void OnAnyItemTransfered(Inventory fromInventory, Inventory toInventory, ItemData itemData)
 	{
 		var instance = Instantiate(this, transform.parent).GetComponent<ItemAnimation>();
 		instance.gameObject.SetActive(true);
-		instance.positionFrom = fromInventory.GetPosition();
-		instance.positionTo = toInventory.GetPosition();
 		instance.iconContainer.texture = itemData.GetIcon();
 		instance.time = duration;
+		instance.positionFrom = fromInventory.GetPosition();
+		instance.positionTo = toInventory.GetPosition();
+	}
+
+	private void OnAnyItemUsed(Inventory fromInventory, ItemData itemData, object objectTo)
+	{
+		var instance = Instantiate(this, transform.parent).GetComponent<ItemAnimation>();
+		instance.gameObject.SetActive(true);
+		instance.iconContainer.texture = itemData.GetIcon();
+		instance.time = duration;
+		instance.positionFrom  = instance.positionTo = fromInventory.GetPosition();
+		if(objectTo is CharacterController) 
+			instance.positionTo = (objectTo as CharacterController).GetCenterPosition();
+		else 
+			Debug.LogWarning(this + " objectTo=" + objectTo + " cannot find position");
 	}
 
 	IEnumerator Start()
 	{
-		if (time <= 0)
-		{
-			gameObject.SetActive(false);
-			yield break;
-		}
-		
 		while (time > 0f)
 		{
 			var worldPosition = Vector3.Lerp(positionTo, positionFrom, time / duration);

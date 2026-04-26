@@ -660,6 +660,7 @@ public class CharacterRoutines : MonoBehaviour
 				}
 				
 				itemToUse.UseOn(otherCharacter.gameObject);
+				inventory.NotifyUsed(itemToUse, otherCharacter);
 			}
 		}
 	}

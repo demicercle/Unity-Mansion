@@ -9,9 +9,15 @@ public class Inventory : MonoBehaviour
 	public static event System.Action<Inventory> onAnyInventoryChanged;
 	public static event System.Action<Inventory, ItemData> onAnyItemAdded, onAnyItemRemoved;
 	public static event System.Action<Inventory, Inventory, ItemData> onAnyItemTransfered;
+	public static event System.Action<Inventory, ItemData, object> onAnyItemUsed;
 	
 	[SerializeField] [Range(1, 32)] private int maxSize = 6;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
+
+	public void NotifyUsed(ItemData item, object objectTo)
+	{
+		onAnyItemUsed?.Invoke(this, item, objectTo);
+	}
 
 	public Vector3 GetPosition()
 	{
