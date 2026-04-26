@@ -5,10 +5,10 @@ public class NodeHeal : GameNode
 	[Input] public SceneReference _character;
 	[Input] public float _amount;
 
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
-		_in.AwakeInput(this, "_in", () =>
+		base.OnScriptStart();
+		_in.StartInput(this, "_in", () =>
 		{
 			_amount = GetInputValue<float>("_amount", _amount);
 			

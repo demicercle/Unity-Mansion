@@ -17,13 +17,13 @@ public abstract class GameNode : Node
 			_script = value;
 			
 			if(_script != null) 
-				OnScriptAwake();
+				OnScriptStart();
 		}
 	}
 	
-	virtual protected void OnScriptAwake()
+	virtual protected void OnScriptStart()
 	{
-		DebugLogThis("OnScriptAwake");
+		DebugLogThis("OnScriptStart");
 	}
 
 	virtual protected void OnScriptDestroy()
@@ -64,7 +64,7 @@ public class NodeExec
 	
 	public void Invoke() => callback?.Invoke();
 	
-	public void AwakeInput(Node node, string inputName, System.Action callback)
+	public void StartInput(Node node, string inputName, System.Action callback)
 	{
 		if (!Application.isPlaying)
 		{

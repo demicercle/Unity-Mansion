@@ -16,10 +16,10 @@ public class NodeDelay : GameNode
 		return null;
 	}
 
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
-		_in.AwakeInput(this, "_in", () =>
+		base.OnScriptStart();
+		_in.StartInput(this, "_in", () =>
 		{
 			if (_scheduler) _scheduler.StopAndDestroy();
 			_scheduler = CoroutineScheduler.Start(script.gameObject, WaitAction());

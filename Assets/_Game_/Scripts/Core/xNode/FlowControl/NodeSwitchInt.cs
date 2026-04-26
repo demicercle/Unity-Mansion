@@ -38,13 +38,13 @@ public class NodeSwitchInt : GameNode
 	private NodeExec[] _outs;
 	private int _index;
 	
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
+		base.OnScriptStart();
 
 		_outs = DynamicOutputs.ToList().ConvertAll(x => (NodeExec)x.GetOutputValue()).ToArray();
 		_index = 0;
-		_in.AwakeInput(this, "_in", () =>
+		_in.StartInput(this, "_in", () =>
 		{
 			_outs[_index].Invoke();
 

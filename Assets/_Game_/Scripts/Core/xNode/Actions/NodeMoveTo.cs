@@ -19,10 +19,10 @@ public class NodeMoveTo : GameNode
 		return base.GetValue(port);
 	}
 
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
-		_start.AwakeInput(this, "_start", OnStart);
+		base.OnScriptStart();
+		_start.StartInput(this, "_start", OnStart);
 	}
 
 	private void OnStart()

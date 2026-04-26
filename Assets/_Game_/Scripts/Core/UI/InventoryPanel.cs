@@ -14,9 +14,10 @@ public class InventoryPanel : MonoBehaviour
 		Utils.SetDirty(this);
 	}
 	
-	public void AssignInventory(Inventory inventory)
+	public void AssignInventory(Inventory newInventory)
 	{
-		selfInventory = inventory;
+		Debug.Log(this + " AssignInventory " + newInventory);
+		selfInventory = newInventory;
 		if (!selfInventory)
 		{
 			gameObject.SetActive(false);

@@ -30,4 +30,5 @@ MonoBehaviour:
   - "<CHARACTER> receives item <ITEM>\r"
   - "<CHARACTER> looses item <ITEM>\r"
   - "<CHARACTER> receives <DAMAGE> damage(s)\r"
-  - <CHARACTER> uses action <ACTION>
+  - "<CHARACTER> uses action <ACTION>\r"
+  - '<CHARACTER> healed: <AMOUNT>'

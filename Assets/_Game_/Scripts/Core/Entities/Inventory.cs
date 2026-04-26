@@ -48,8 +48,9 @@ public class Inventory : MonoBehaviour
 			if (!items[i])
 			{
 				items[i] = itemData;
+				Debug.Log(this + " onAnyItemAdded " + items[i]);
 				onAnyItemAdded?.Invoke(this, items[i]);
-				NotifyChanged();
+				onAnyInventoryChanged?.Invoke(this);
 				return true;
 			}
 		}
@@ -63,8 +64,10 @@ public class Inventory : MonoBehaviour
 		{
 			if (items[i] == itemToUse)
 			{
+				Debug.Log(this + " onAnyItemRemoved " + items[i]);
 				onAnyItemRemoved?.Invoke(this, items[i]);
 				items[i] = null;
+				onAnyInventoryChanged?.Invoke(this);
 				return true;
 			}
 		}
@@ -86,11 +89,6 @@ public class Inventory : MonoBehaviour
 		}
 		
 		Utils.SetDirty(this);
-	}
-
-	private void NotifyChanged()
-	{
-		onAnyInventoryChanged?.Invoke(this);
 	}
 
 #if UNITY_EDITOR

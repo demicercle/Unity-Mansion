@@ -46,6 +46,7 @@ public class GameLog : MonoBehaviour
 		CharacterController.onAddedToParty += CharacterAddedToParty;
 		CharacterController.onRemovedFromParty += CharacterRemovedFromParty;
 		CharacterController.onAnyCharacterDamaged += OnAnyCharacterDamaged;
+		CharacterController.onAnyCharacterHealed += OnAnyCharacterHealed;
 		Inventory.onAnyItemAdded += OnItemAdded;
 		Inventory.onAnyItemRemoved += OnItemRemoved;
 	}
@@ -58,6 +59,7 @@ public class GameLog : MonoBehaviour
 		CharacterController.onAddedToParty -= CharacterAddedToParty;
 		CharacterController.onRemovedFromParty -= CharacterRemovedFromParty;
 		CharacterController.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+		CharacterController.onAnyCharacterHealed -= OnAnyCharacterHealed;
 		Inventory.onAnyItemAdded -= OnItemAdded;
 		Inventory.onAnyItemRemoved -= OnItemRemoved;
 
@@ -110,6 +112,13 @@ public class GameLog : MonoBehaviour
 		AppendLine(GetLocalizedLine(15, "<CHARACTER> receives <DAMAGE> damage(s)")
 			.Replace("<CHARACTER>", character.GetDisplayName())
 			.Replace("<DAMAGE>", Mathf.CeilToInt(amount).ToString()));
+	}
+
+	private void OnAnyCharacterHealed(CharacterController character, float amount)
+	{
+		AppendLine(GetLocalizedLine(16, "<CHARACTER> healed: <AMOUNT>")
+			.Replace("<CHARACTER>", character.GetDisplayName()
+			.Replace("<AMOUNT>", Mathf.CeilToInt(amount).ToString())));
 	}
 
 	private string GetLocalizedLine(int index, string fallback) =>

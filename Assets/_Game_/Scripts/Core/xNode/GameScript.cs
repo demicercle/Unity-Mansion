@@ -6,6 +6,8 @@ using UnityEngine;
 public class GameScript : MonoBehaviour
 {
 	public static int debugMode { get; set; }
+
+	public void Destroy() => Destroy(this);
 	
 	[SerializeField] private GameScriptGraph graph;
 
@@ -20,11 +22,17 @@ public class GameScript : MonoBehaviour
 	{
 		if (!graph)
 		{
-			Destroy(this);
+			Debug.LogWarning(this + " has no graph, destroys");
+			Destroy();
 			return;
 		}
 		
 		graph = Instantiate(graph);
+		
+		if(debugMode > 0) Debug.Log(this + " Start " + graph);
+		#if UNITY_EDITOR
+		if (debugMode > 0) UnityEditor.Selection.activeObject = graph;
+		#endif
 
 		foreach (var node in graph.nodes.OfType<GameNode>())
 		{
@@ -35,13 +43,16 @@ public class GameScript : MonoBehaviour
 	private void OnDestroy()
 	{
 		if (!graph) return;
+		if (!Application.isPlaying) return;
+		
+		if(debugMode > 0) Debug.Log(this + " OnDestroy");
 		
 		foreach (var node in graph.nodes.OfType<GameNode>())
 		{
 			node.script = null;
 		}
 			
-		Destroy(graph);
+		//Destroy(graph);
 	}
 
 	private void OnEnable()

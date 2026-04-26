@@ -19,10 +19,10 @@ public class NodeGiveItem : GameNode
 		return base.GetValue(port);
 	}
 
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
-		_in.AwakeInput(this, "_in", () =>
+		base.OnScriptStart();
+		_in.StartInput(this, "_in", () =>
 		{
 			if (_character.TryGetComponent(this, out Inventory inv))
 			{

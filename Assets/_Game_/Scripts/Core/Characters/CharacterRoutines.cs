@@ -635,6 +635,12 @@ public class CharacterRoutines : MonoBehaviour
 			if (useRange <= 0 ||
 			    NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
 			{
+				while (!_selfCharacter.IsFacingPosition(otherCharacter.GetPosition()))
+				{
+					_selfCharacter.LookWorldPosition(otherCharacter.GetPosition(), Time.deltaTime);
+					yield return null;
+				}
+				
 				if (!_selfCharacter.TryGetComponent(out Inventory inventory))
 				{
 					Debug.LogWarning(_selfCharacter + " has no inventory");

@@ -40,6 +40,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	
 	public static event System.Action onPartyChanged;
 	public static event System.Action<CharacterController, float, object> onAnyCharacterDamaged;
+	public static event System.Action<CharacterController, float> onAnyCharacterHealed;
 	public static event System.Action<CharacterController> onAddedToParty, onRemovedFromParty;
 	public static event System.Action<CharacterController> onAnyCharacterMoved;
 	public static event System.Action<CharacterController> onAnyCharacterDead;
@@ -346,6 +347,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 			totalDamages = Mathf.Max(0, totalDamages - amount);
 		
 		onHealed?.Invoke(amount);
+		onAnyCharacterHealed?.Invoke(this, amount);
 		onStatsChanged?.Invoke();
 	}
 	public void TakeDamage(float amount, object objectFrom)

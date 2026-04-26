@@ -25,10 +25,10 @@ public class NodeFloatingText : GameNode
 	}
 	
 	// Use this for initialization
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
-		_in.AwakeInput(this, "_in", OnCallback);
+		base.OnScriptStart();
+		_in.StartInput(this, "_in", OnCallback);
 	}
 
 	private void OnCallback()

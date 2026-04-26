@@ -1,4 +1,5 @@
-﻿using XNode;
+﻿using System.Collections;
+using XNode;
 
 [CreateNodeMenu("Events/Started")]
 public class NodeStarted : GameNode
@@ -11,10 +12,16 @@ public class NodeStarted : GameNode
 		return base.GetValue(port);
 	}
 
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
-		
+		base.OnScriptStart();
+
+		script.StartCoroutine(WaitAndInvoke());
+	}
+
+	private IEnumerator WaitAndInvoke()
+	{
+		yield return null;
 		_out.Invoke();
 	}
 }
