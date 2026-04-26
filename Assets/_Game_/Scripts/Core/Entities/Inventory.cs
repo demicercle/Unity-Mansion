@@ -11,6 +11,29 @@ public class Inventory : MonoBehaviour
 	[SerializeField] [Range(1, 32)] private int maxSize = 6;
 
 	public int GetMaxSize() => maxSize;
+
+	public void TransfertToSelectedCharacter()
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		{
+			if (selectedCharacter.TryGetComponent(out Inventory otherInventory))
+			{
+				for (int i = 0; i < items.Count; i++)
+				{
+					if (items[i])
+					{
+						if (!otherInventory.TryAddItem(items[i]))
+						{
+							Debug.LogWarning(this + " inventory full " + otherInventory);
+							return;
+						}
+
+						items[i] = null; // remove from this inventory
+					}
+				}
+			}
+		}
+	}
 	
 	public bool TryGetItem(int index, out ItemData item)
 	{
@@ -52,4 +75,31 @@ public class Inventory : MonoBehaviour
 	{
 		onAnyInventoryChanged?.Invoke(this);
 	}
+
+#if UNITY_EDITOR
+	private void OnDrawGizmos()
+	{
+		var label = "";
+		
+		foreach (var item in items)
+		{
+			if (item)
+				label += item.displayName.GetValue() + "\n";
+		}
+
+		label = label.Trim('\n');
+		
+		if (!string.IsNullOrEmpty(label))
+		{
+			var bounds = new Bounds(Vector3.zero, transform.position);
+			
+			if (TryGetComponent(out Collider coll))
+			{
+				bounds = coll.bounds;
+			}
+			
+			UnityEditor.Handles.Label(bounds.center, label);
+		}
+	}
+#endif
 }
