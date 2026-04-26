@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 42322bc7f6054969a8e19d46e46bbde4, type: 3}
-  m_Name: LanguageSettings
+  m_Name: LanguageSettings (1)
   m_EditorClassIdentifier: Assembly-CSharp::LanguageSettings
-  dialogText: {fileID: 4900000, guid: 6dd0485b4f8d476bb2411e78dc23c9ba, type: 3}
+  dialogText: {fileID: 4900000, guid: 5ba3278974654674b5e0dc16313e6548, type: 3}
   lines:
   - 
   - "\r"
@@ -24,14 +24,8 @@ MonoBehaviour:
   - "\r"
   - "\r"
   - "\r"
-  - "Hello\r"
-  - "I don't want to speak\r"
-  - "Let me alone\r"
-  - "Stop that\r"
-  - "\r"
-  - "\r"
-  - "\r"
-  - "\r"
-  - "\r"
-  - "\r"
-  - Bandage
+  - "Turn Started\r"
+  - "Turn Ended\r"
+  - "<CHARACTER> uses action <ACTION>\r"
+  - "<CHARACTER> receives item <ITEM>\r"
+  - <CHARACTER> looses item <ITEM>

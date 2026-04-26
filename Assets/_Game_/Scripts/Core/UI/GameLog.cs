@@ -43,6 +43,10 @@ public class GameLog : MonoBehaviour
 		gameTurnManager.onTurnEnded += TurnEnded;
 		gameTurnManager.onTurnStarted += TurnStarted;
 		CharacterController.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
+		CharacterController.onAddedToParty += CharacterAddedToParty;
+		CharacterController.onRemovedFromParty += CharacterRemovedFromParty;
+		Inventory.onAnyItemAdded += OnItemAdded;
+		Inventory.onAnyItemRemoved += OnItemRemoved;
 	}
 
 	private void OnDisable()
@@ -50,24 +54,55 @@ public class GameLog : MonoBehaviour
 		gameTurnManager.onTurnEnded -= TurnEnded;
 		gameTurnManager.onTurnStarted -= TurnStarted;
 		CharacterController.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
+		CharacterController.onAddedToParty -= CharacterAddedToParty;
+		CharacterController.onRemovedFromParty -= CharacterRemovedFromParty;
+		Inventory.onAnyItemAdded -= OnItemAdded;
+		Inventory.onAnyItemRemoved -= OnItemRemoved;
 
 		Clear();
 	}
 
+	private void CharacterAddedToParty(CharacterController character)
+	{
+		//TODO
+	}
+
+	private void CharacterRemovedFromParty(CharacterController character)
+	{
+		//TODO
+	}
+
+	private void OnItemAdded(Inventory inventory, ItemData item)
+	{
+		AppendLine(GetLocalizedLine(13, "<CHARACTER> receives item <ITEM>")
+			.Replace("<CHARACTER>", inventory.TryGetComponent(out CharacterController character) ? character.GetDisplayName() : "???")
+			.Replace("<ITEM>", item.GetDisplayName()));
+	}
+
+	private void OnItemRemoved(Inventory inventory, ItemData item)
+	{
+		AppendLine(GetLocalizedLine(14, "<CHARACTER> looses item <ITEM>")
+			.Replace("<CHARACTER>", inventory.TryGetComponent(out CharacterController character) ? character.GetDisplayName() : "???")
+			.Replace("<ITEM>", item.GetDisplayName()));
+	}
+
 	private void TurnStarted()
 	{
-		AppendLine("Turn Started");
+		AppendLine(GetLocalizedLine(10, "Turn Started"));
 	}
 
 	private void TurnEnded()
 	{
-		AppendLine("Turn Ended");
+		AppendLine(GetLocalizedLine(11, "Turn Ended"));
 	}
 
 	private void OnAnyCharacterUsesAction(CharacterController character, CharacterAction action)
 	{
 		AppendLine(character.GetDisplayName() + " uses action " + action);
 	}
+
+	private string GetLocalizedLine(int index, string fallback) =>
+		LanguageSettings.GetSettings(DialogFiles.gamelog).GetLine(index, fallback);
 
 	private void Clear()
 	{

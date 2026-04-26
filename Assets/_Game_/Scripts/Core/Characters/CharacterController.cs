@@ -38,6 +38,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
 	
 	public static event System.Action onPartyChanged;
+	public static event System.Action<CharacterController> onAddedToParty, onRemovedFromParty;
 	public static event System.Action<CharacterController> onAnyCharacterMoved;
 	public static event System.Action<CharacterController> onAnyCharacterDead;
 	public static event System.Action<CharacterController, CharacterAction> onAnyCharacterUsesAction;
@@ -200,6 +201,10 @@ public class CharacterController : MonoBehaviour, IAttackable
 		}
 		onPartyIndexChanged?.Invoke(index, _partyCharacters.Count);
 		onPartyChanged?.Invoke();
+		if(index >= 0)
+			onAddedToParty?.Invoke(_partyCharacters[index]);
+		else
+			onRemovedFromParty?.Invoke(_partyCharacters[index]);
 	}
 
 	private void SetCurrentFaction(CharacterFaction faction)

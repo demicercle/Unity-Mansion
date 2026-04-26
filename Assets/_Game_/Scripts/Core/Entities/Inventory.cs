@@ -6,10 +6,11 @@ using UnityEngine;
 public class Inventory : MonoBehaviour
 {
 	public static event System.Action<Inventory> onAnyInventoryChanged;
+	public static event System.Action<Inventory, ItemData> onAnyItemAdded, onAnyItemRemoved;
 	
-	[SerializeField] private List<ItemData> items = new List<ItemData>();
 	[SerializeField] [Range(1, 32)] private int maxSize = 6;
-
+	[SerializeField] private List<ItemData> items = new List<ItemData>();
+	
 	public int GetMaxSize() => maxSize;
 
 	public void TransfertToSelectedCharacter()
@@ -27,7 +28,7 @@ public class Inventory : MonoBehaviour
 							Debug.LogWarning(this + " inventory full " + otherInventory);
 							return;
 						}
-
+						
 						items[i] = null; // remove from this inventory
 					}
 				}
@@ -47,6 +48,7 @@ public class Inventory : MonoBehaviour
 			if (!items[i])
 			{
 				items[i] = itemData;
+				onAnyItemAdded?.Invoke(this, items[i]);
 				NotifyChanged();
 				return true;
 			}
@@ -84,7 +86,7 @@ public class Inventory : MonoBehaviour
 		foreach (var item in items)
 		{
 			if (item)
-				label += item.displayName.GetValue() + "\n";
+				label += item.name + "\n";
 		}
 
 		label = label.Trim('\n');

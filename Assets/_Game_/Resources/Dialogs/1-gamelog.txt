@@ -1,0 +1,14 @@
+﻿
+
+
+
+
+
+
+
+
+Turn Started
+Turn Ended
+<CHARACTER> uses action <ACTION>
+<CHARACTER> receives item <ITEM>
+<CHARACTER> looses item <ITEM>

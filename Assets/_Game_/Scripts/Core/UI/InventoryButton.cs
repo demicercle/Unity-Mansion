@@ -21,8 +21,8 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		
 		if (itemData)
 		{
-			if(iconImage) iconImage.texture = itemData.icon;
-			if (itemLabel) itemLabel.text = itemData.displayName.GetValue();
+			if(iconImage) iconImage.texture = itemData.GetIcon();
+			if (itemLabel) itemLabel.text = itemData.GetDisplayName();
 		}
 		else
 		{
