@@ -28,4 +28,6 @@ MonoBehaviour:
   - "Turn Ended\r"
   - "<CHARACTER> uses action <ACTION>\r"
   - "<CHARACTER> receives item <ITEM>\r"
-  - <CHARACTER> looses item <ITEM>
+  - "<CHARACTER> looses item <ITEM>\r"
+  - "<CHARACTER> receives <DAMAGE> damage(s)\r"
+  - <CHARACTER> uses action <ACTION>

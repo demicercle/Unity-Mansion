@@ -5,6 +5,7 @@ using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
 using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
+using Object = UnityEngine.Object;
 
 public interface ICursorHandler
 {
@@ -467,6 +468,11 @@ public class GameInput : MonoBehaviour
 			SetCurrentCursorType(CursorType.Blocked);
 		}
 
+		if (itemToUse != null)
+		{
+			SetCurrentCursorType(CursorType.UseItem);
+		}
+
 		if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
 		{
 			SetCurrentCursorType(CursorType.Waiting);
@@ -586,6 +592,8 @@ public class GameInput : MonoBehaviour
 			{
 				CharacterSelection.SelectCharacter(null); // deselect all
 			}
+			
+			SetItemToUse(null);
 		}
 		
 		rightClickValue = ctxValue;
@@ -647,6 +655,8 @@ public class GameInput : MonoBehaviour
 
 	private void SelectionChanged()
 	{
+		SetItemToUse(null);
+		
 		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 		{
 			cameraPivot.Focus(selectedCharacter);
@@ -853,4 +863,18 @@ public class GameInput : MonoBehaviour
 		#endif
 	}
 	#endregion
+
+	private ItemData itemToUse;
+	
+	public void SetItemToUse(ItemData itemData)
+	{
+		itemToUse = itemData;
+	}
+
+	public ItemData GetItemToUse() => itemToUse;
+
+	public Vector3 GetMousePosition()
+	{
+		return mousePosition;
+	}
 }

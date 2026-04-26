@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -53,8 +54,18 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	private void OnToggleChanged(bool isOn)
 	{
-		Debug.LogWarning(this + " " + itemData + " ToggleChanged " + isOn + " TODO");
-		toggle.isOn = false;
+		//Debug.LogWarning(this + " " + itemData + " ToggleChanged " + isOn + " TODO");
+		//toggle.isOn = false;
+		if (isOn && itemData)
+		{
+			GameInput.Instance.SetItemToUse(itemData);
+		}
+	}
+
+	private void LateUpdate()
+	{
+		toggle.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn();
+		toggle.isOn = itemData && toggle.interactable && GameInput.Instance.GetItemToUse() == itemData;
 	}
 
 	public void OnPointerEnter(PointerEventData eventData)
@@ -65,5 +76,11 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	public void OnPointerExit(PointerEventData eventData)
 	{
 		if(tooltip) tooltip.gameObject.SetActive(false);
+	}
+
+	public void SetToggleGroup(ToggleGroup toggleGroup)
+	{
+		toggle.group = toggleGroup;
+		toggle.isOn = false;
 	}
 }

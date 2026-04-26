@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class InventoryPanel : MonoBehaviour
@@ -38,9 +39,18 @@ public class InventoryPanel : MonoBehaviour
 	}
 
 	private Inventory selfInventory;
+	private ToggleGroup toggleGroup;
 
 	private void Awake()
 	{
+		toggleGroup = Utils.GetOrAddComponent<ToggleGroup>(gameObject);
+		toggleGroup.allowSwitchOff = true;
+		if(buttons == null || buttons.Length == 0)
+			CollectButtons();
+		for (int i = 0; i < buttons.Length; i++)
+		{
+			buttons[i].SetToggleGroup(toggleGroup);
+		}
 		AssignInventory(null);
 	}
 
