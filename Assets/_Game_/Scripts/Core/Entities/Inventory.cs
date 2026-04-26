@@ -5,11 +5,22 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
+	public static int debugMode { get; set; }
 	public static event System.Action<Inventory> onAnyInventoryChanged;
 	public static event System.Action<Inventory, ItemData> onAnyItemAdded, onAnyItemRemoved;
+	public static event System.Action<Inventory, Inventory, ItemData> onAnyItemTransfered;
 	
 	[SerializeField] [Range(1, 32)] private int maxSize = 6;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
+
+	public Vector3 GetPosition()
+	{
+		if (TryGetComponent(out CharacterController character))
+			return character.GetPosition();
+		if (TryGetComponent(out Collider coll))
+			return coll.bounds.center;
+		return transform.position;
+	}
 	
 	public int GetMaxSize() => maxSize;
 
@@ -29,6 +40,8 @@ public class Inventory : MonoBehaviour
 							return;
 						}
 						
+						if(debugMode > 0) Debug.Log(this + " onAnyItemTransfered " + this + " " + otherInventory + " " + items[i]);
+						onAnyItemTransfered?.Invoke(this, otherInventory, items[i]);
 						items[i] = null; // remove from this inventory
 					}
 				}
@@ -48,7 +61,7 @@ public class Inventory : MonoBehaviour
 			if (!items[i])
 			{
 				items[i] = itemData;
-				Debug.Log(this + " onAnyItemAdded " + items[i]);
+				if(debugMode > 0) Debug.Log(this + " onAnyItemAdded " + items[i]);
 				onAnyItemAdded?.Invoke(this, items[i]);
 				onAnyInventoryChanged?.Invoke(this);
 				return true;
@@ -64,7 +77,7 @@ public class Inventory : MonoBehaviour
 		{
 			if (items[i] == itemToUse)
 			{
-				Debug.Log(this + " onAnyItemRemoved " + items[i]);
+				if(debugMode > 0) Debug.Log(this + " onAnyItemRemoved " + items[i]);
 				onAnyItemRemoved?.Invoke(this, items[i]);
 				items[i] = null;
 				onAnyInventoryChanged?.Invoke(this);

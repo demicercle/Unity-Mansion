@@ -156,7 +156,7 @@ public class GameCanvas : MonoBehaviour
 		if (itemCursorImage.gameObject.activeSelf)
 		{
 			itemCursorImage.texture = currentItemToUse.GetIcon();
-			itemCursorImage.color = Utils.ColorScale(Color.white, gameInput.IsBlocked() ? 0.30f : 0.90f);
+			itemCursorImage.color = Utils.ColorAlpha(Color.white, gameInput.IsBlocked() ? 0.30f : 0.90f);
 			itemCursorImage.transform.position = gameInput.GetMousePosition();
 			itemCursorImage.transform.SetAsLastSibling();
 		}

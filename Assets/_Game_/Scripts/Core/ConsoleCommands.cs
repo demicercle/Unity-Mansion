@@ -144,6 +144,12 @@ public class ConsoleCommands : MonoBehaviour
 		Debug.Log("debug_script=" + (GameScript.debugMode = value));
 	}
 
+	[ConsoleMethod("debug_inventory", "")]
+	public static void _DebugInventory(int value)
+	{
+		Debug.Log("debug_inventory=" + (Inventory.debugMode = value));
+	}
+
 	[ConsoleMethod("debug_gtm", "")]
 	public static void _DebugGtm(int value)
 	{
