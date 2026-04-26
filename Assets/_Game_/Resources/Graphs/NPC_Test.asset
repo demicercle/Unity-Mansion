@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Debug Log
   m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
   graph: {fileID: 11400000}
-  position: {x: -360, y: -232}
+  position: {x: -344, y: -264}
   ports:
     keys:
     - _in
@@ -23,10 +23,7 @@ MonoBehaviour:
       _node: {fileID: -7953189124686401581}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _out
-        node: {fileID: 6982387692696900501}
-        reroutePoints: []
+      connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
@@ -680,9 +677,6 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _in
-        node: {fileID: -7953189124686401581}
-        reroutePoints: []
       - fieldName: _in
         node: {fileID: -1777878850390571389}
         reroutePoints: []

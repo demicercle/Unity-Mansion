@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Random Range
   m_EditorClassIdentifier: Assembly-CSharp::NodeRandomRange
   graph: {fileID: 11400000}
-  position: {x: -616, y: -8}
+  position: {x: -664, y: -8}
   ports:
     keys:
     - _min
@@ -63,7 +63,7 @@ MonoBehaviour:
   m_Name: Floating Text
   m_EditorClassIdentifier: Assembly-CSharp::NodeFloatingText
   graph: {fileID: 11400000}
-  position: {x: -248, y: -360}
+  position: {x: -264, y: -360}
   ports:
     keys:
     - _in
@@ -118,7 +118,7 @@ MonoBehaviour:
   m_Name: Debug Log
   m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
   graph: {fileID: 11400000}
-  position: {x: -264, y: 8}
+  position: {x: 24, y: -248}
   ports:
     keys:
     - _in
@@ -128,10 +128,7 @@ MonoBehaviour:
       _node: {fileID: -2629015613768665479}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _out
-        node: {fileID: 7167503854543085475}
-        reroutePoints: []
+      connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
@@ -217,7 +214,7 @@ MonoBehaviour:
       _dynamic: 0
   _character:
     findName: 
-  _amount: 3
+  _amount: 5
 --- !u!114 &3365870759824373871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -231,7 +228,7 @@ MonoBehaviour:
   m_Name: Destroy Script
   m_EditorClassIdentifier: Assembly-CSharp::NodeDestroyScript
   graph: {fileID: 11400000}
-  position: {x: -248, y: 120}
+  position: {x: -264, y: -40}
   ports:
     keys:
     - _in
@@ -284,9 +281,6 @@ MonoBehaviour:
       connections:
       - fieldName: _in
         node: {fileID: 624561134456437675}
-        reroutePoints: []
-      - fieldName: _in
-        node: {fileID: -2629015613768665479}
         reroutePoints: []
       - fieldName: _in
         node: {fileID: -3648206744526794219}
