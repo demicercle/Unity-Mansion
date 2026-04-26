@@ -12,3 +12,5 @@ Turn Ended
 <CHARACTER> uses action <ACTION>
 <CHARACTER> receives item <ITEM>
 <CHARACTER> looses item <ITEM>
+<CHARACTER> receives <DAMAGE> damage(s)
+<CHARACTER> uses action <ACTION>

@@ -45,6 +45,7 @@ public class GameLog : MonoBehaviour
 		CharacterController.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
 		CharacterController.onAddedToParty += CharacterAddedToParty;
 		CharacterController.onRemovedFromParty += CharacterRemovedFromParty;
+		CharacterController.onAnyCharacterDamaged += OnAnyCharacterDamaged;
 		Inventory.onAnyItemAdded += OnItemAdded;
 		Inventory.onAnyItemRemoved += OnItemRemoved;
 	}
@@ -56,6 +57,7 @@ public class GameLog : MonoBehaviour
 		CharacterController.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
 		CharacterController.onAddedToParty -= CharacterAddedToParty;
 		CharacterController.onRemovedFromParty -= CharacterRemovedFromParty;
+		CharacterController.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
 		Inventory.onAnyItemAdded -= OnItemAdded;
 		Inventory.onAnyItemRemoved -= OnItemRemoved;
 
@@ -98,7 +100,16 @@ public class GameLog : MonoBehaviour
 
 	private void OnAnyCharacterUsesAction(CharacterController character, CharacterAction action)
 	{
-		AppendLine(character.GetDisplayName() + " uses action " + action);
+		AppendLine(GetLocalizedLine(16, "<CHARACTER> uses action <ACTION>")
+			.Replace("<CHARACTER>", character.GetDisplayName())
+			.Replace("<ACTION>", action.ToString())); // TODO Localization "CharacterAction"
+	}
+
+	private void OnAnyCharacterDamaged(CharacterController character, float amount, object objectFrom)
+	{
+		AppendLine(GetLocalizedLine(15, "<CHARACTER> receives <DAMAGE> damage(s)")
+			.Replace("<CHARACTER>", character.GetDisplayName())
+			.Replace("<DAMAGE>", Mathf.CeilToInt(amount).ToString()));
 	}
 
 	private string GetLocalizedLine(int index, string fallback) =>

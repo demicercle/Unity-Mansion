@@ -38,6 +38,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
 	
 	public static event System.Action onPartyChanged;
+	public static event System.Action<CharacterController, float, object> onAnyCharacterDamaged;
 	public static event System.Action<CharacterController> onAddedToParty, onRemovedFromParty;
 	public static event System.Action<CharacterController> onAnyCharacterMoved;
 	public static event System.Action<CharacterController> onAnyCharacterDead;
@@ -354,6 +355,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		StopAgent();
 
 		onDamaged?.Invoke(amount);
+		onAnyCharacterDamaged?.Invoke(this, amount, objectFrom);
 		
 		if (GetCurrentHealth() <= 0f)
 		{
@@ -367,6 +369,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		{
 			onDamagedBy?.Invoke(objectFrom as CharacterController, amount);
 		}
+
 	}
 	public bool TryKill()
 	{
