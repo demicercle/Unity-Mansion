@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using XNode;
 
 public abstract class GameNode : Node
@@ -29,7 +30,15 @@ public abstract class GameNode : Node
 	{
 		DebugLogThis("OnScriptDestroy");
 	}
-	
+
+	private void Reset()
+	{
+		#if UNITY_EDITOR
+		this.name = UnityEditor.ObjectNames.NicifyVariableName(GetType().ToString().Replace("Node", string.Empty)
+			.Trim(' '));
+#endif
+	}
+
 	protected override void Init()
 	{
 		base.Init();

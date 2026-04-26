@@ -1,5 +1,6 @@
 ﻿using XNode;
 
+[CreateNodeMenu("Actions/Move To")]
 public class NodeMoveTo : GameNode
 {
 	[Input] public NodeExec _start;

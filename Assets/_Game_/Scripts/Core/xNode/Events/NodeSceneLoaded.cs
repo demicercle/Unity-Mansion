@@ -5,6 +5,7 @@ using RPGCharacterAnims;
 using UnityEngine;
 using XNode;
 
+[CreateNodeMenu("Events/SceneLoaded")]
 public class NodeSceneLoaded : GameNode
 {
 	[Output] public NodeExec _out;

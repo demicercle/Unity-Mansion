@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using XNode;
 
+[CreateNodeMenu("Actions/Floating Text")]
 public class NodeFloatingText : GameNode
 {
 	//[Output] public NodeExec _out;

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using XNode;
 
+[CreateNodeMenu("Misc/DebugLog")]
 public class NodeDebugLog : GameNode
 {
 	[Input] public NodeExec _in;

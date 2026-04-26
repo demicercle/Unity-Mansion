@@ -615,7 +615,7 @@ MonoBehaviour:
   m_Name: Node Talked
   m_EditorClassIdentifier: Assembly-CSharp::NodeTalked
   graph: {fileID: 11400000}
-  position: {x: -904, y: 152}
+  position: {x: -920, y: 120}
   ports:
     keys:
     - _character

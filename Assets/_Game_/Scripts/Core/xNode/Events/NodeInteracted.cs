@@ -1,31 +1,32 @@
 ﻿using UnityEngine;
 using XNode;
 
-public class NodeTalked : GameNode
+[CreateNodeMenu("Events/Interacted")]
+public class NodeInteracted : GameNode
 {
-	[Input] public SceneReference _character;
+	[Input] public SceneReference _prop;
 	[Output] public NodeExec _out;
 	
 	protected override void OnScriptAwake()
 	{
 		base.OnScriptAwake();
 		
-		if (_character.TryGetComponent(this, out CharacterController character))
+		if (_prop.TryGetComponent(this, out PropComponent prop))
 		{
-			character.onTalkedBy += OnTalkedBy;
+			prop.onInteracted += Interacted;
 		}
 		else
 		{
-			DebugLogWarningThis("no character found");
+			DebugLogWarningThis("no prop found");
 		}
 	}
 
 	protected override void OnScriptDestroy()
 	{
 		base.OnScriptDestroy();
-		if (_character.TryGetComponent(this, out CharacterController character))
+		if (_prop.TryGetComponent(this, out PropComponent prop))
 		{
-			character.onTalkedBy -= OnTalkedBy;
+			prop.onInteracted -= Interacted;
 		}
 	}
 
@@ -38,7 +39,7 @@ public class NodeTalked : GameNode
 		return null; // Replace this
 	}
 	
-	private void OnTalkedBy(CharacterController other)
+	private void Interacted()
 	{
 		_out.Invoke();
 	}

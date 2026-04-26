@@ -2,6 +2,7 @@
 using UnityEngine;
 using XNode;
 
+[CreateNodeMenu("FlowControl/Switch")]
 public class NodeSwitchInt : GameNode
 {
 	[Input] public NodeExec _in;
