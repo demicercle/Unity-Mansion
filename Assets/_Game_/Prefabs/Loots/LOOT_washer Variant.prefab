@@ -133,7 +133,28 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8892573405944337149, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9138211787098676585}
+    - targetCorrespondingSourceObject: {fileID: 3782644307103013129, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3900908531413640132}
   m_SourcePrefab: {fileID: 100100000, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
+--- !u!1 &2531190770774256441 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3782644307103013129, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
+  m_PrefabInstance: {fileID: 1683851948055884336}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3900908531413640132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2531190770774256441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
+  ignorePresets: 0
 --- !u!4 &7457163448853330551 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8080325011075074119, guid: 7ee975695c7177b42934d08694d715a3, type: 3}

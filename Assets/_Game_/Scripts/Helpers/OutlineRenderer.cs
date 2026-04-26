@@ -5,8 +5,8 @@ public class OutlineRenderer : MonoBehaviour, ICursorHandler
 {
 	public void CursorOver()
 	{
-		foreach (var quickOutline in GetComponents<QuickOutline>())
-			quickOutline.enabled = true;
+		quickOutline.enabled = true;
+		
 		StopAllCoroutines();
 		StartCoroutine(WaitAndHide());
 	}
@@ -17,26 +17,26 @@ public class OutlineRenderer : MonoBehaviour, ICursorHandler
 	{
 		var color = Color.yellow;
 		var size = 5f;
+
+		quickOutline = GetComponent<QuickOutline>();
 		
-		foreach (var quickOutline in GetComponents<QuickOutline>())
+		if (!quickOutline)
+			quickOutline =gameObject.AddComponent<QuickOutline>();
+		
+		if (!ignorePresets)
 		{
-			if (!ignorePresets)
-			{
-				quickOutline.OutlineWidth = size;
-				quickOutline.OutlineColor = color;
-			}
-			
-			quickOutline.enabled = false;
+			quickOutline.OutlineWidth = size;
+			quickOutline.OutlineColor = color;
 		}
+			
+		quickOutline.enabled = false;
 	}
+	
+	private QuickOutline quickOutline;
 
 	IEnumerator WaitAndHide()
 	{
 		yield return null;
-		
-		foreach (var quickOutline in GetComponents<QuickOutline>())
-			quickOutline.enabled = false;
-		
-//		Debug.Log("Hide: " + this);
+		quickOutline.enabled = false;
 	}
 }
