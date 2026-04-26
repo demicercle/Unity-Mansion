@@ -1,8 +1,8 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using EventType = CharacterAnimation.EventType;
 
 public class CharacterRoutines : MonoBehaviour
 {
@@ -64,13 +64,18 @@ public class CharacterRoutines : MonoBehaviour
 		if (debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), lookPosition, Color.magenta, 1.0f);//TODO defaultDrawDuration
 		StartNewRoutine(WaitCharacterLookPosition(lookPosition));
 	}
-
 	public void AssignTalk(CharacterController npc) // TODO all " Assign " methods should return the coroutine
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignTalk " + npc);
 		StartCoroutine(WaitCharacterTalk(npc));
 	}
-	
+
+	public void AssignUseItem(ItemData itemToUse, object objectTo)
+	{
+		if(debugMode > 0) Debug.Log(this + " AssignUseItem " + itemToUse + " on " + objectTo);
+		StartCoroutine(WaitCharacterUseItem(itemToUse, objectTo));
+	}
+
 	// leader assign
 	public void Leader_AssignMoveToDestination(Vector3 navPosition)
 	{
@@ -426,8 +431,8 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		debugString = "WaitCharacterLookDirection";
 		_selfCharacter.StopAgent();
-		
-		while (!_selfCharacter.IsFacingDirection(dir))
+	
+		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
 		{
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
@@ -613,6 +618,45 @@ public class CharacterRoutines : MonoBehaviour
 
 		if(debugMode > 0) Debug.Log(this + " Use Talk action");
 		_selfCharacter.UseAction(CharacterAction.Talk, npc);
+	}
+
+	private IEnumerator WaitCharacterUseItem( ItemData itemToUse,object objectTo)
+	{
+		var useRange = itemToUse.GetUseRange();
+		if (objectTo is CharacterController)
+		{
+			var otherCharacter = objectTo as CharacterController;
+			if (useRange > 0 && NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) >
+			    useRange)
+			{
+				yield return StartCoroutine(WaitCharacterMoved(otherCharacter.GetPosition(), useRange));
+			}
+
+			if (useRange <= 0 ||
+			    NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
+			{
+				if (!_selfCharacter.TryGetComponent(out Inventory inventory))
+				{
+					Debug.LogWarning(_selfCharacter + " has no inventory");
+					yield break;
+				}
+				
+				_selfCharacter.UseAction(CharacterAction.UseItem, otherCharacter);
+				
+				if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
+				{
+					yield return anim.WaitEvent(EventType.Hit);
+				}
+
+				if (!inventory.TryRemoveItem(itemToUse))
+				{
+					Debug.LogWarning("item cannot be removed from inventory");
+					yield break;
+				}
+				
+				itemToUse.UseOn(otherCharacter.gameObject);
+			}
+		}
 	}
 	#endregion
 	

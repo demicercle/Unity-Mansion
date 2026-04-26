@@ -60,7 +60,7 @@ public class GameInput : MonoBehaviour
 		{ 
 			if (itemToUse)
 			{
-				if (!itemToUse.CanBeUsedOn(interactionHit.collider.gameObject))
+				if (!itemToUse.CanBeUsedOn(interactionHit.collider.gameObject, out var _))
 					return CursorRaycastResult_None;
 			}
 			
@@ -80,7 +80,7 @@ public class GameInput : MonoBehaviour
 		{
 			if (itemToUse)
 			{
-				if (!itemToUse.CanBeUsedOn(navigationHit.collider.gameObject))
+				if (!itemToUse.CanBeUsedOn(navigationHit.collider.gameObject, out var _))
 					return CursorRaycastResult_None;
 			}
 			
@@ -485,7 +485,7 @@ public class GameInput : MonoBehaviour
 
 		if (itemToUse)
 		{
-			if (itemToUse.CanBeUsedOn(lastMouseOverObject?.gameObject))
+			if (itemToUse.CanBeUsedOn(lastMouseOverObject?.gameObject, out var _))
 				SetCurrentCursorType(CursorType.UseItem);
 			else
 				SetCurrentCursorType(CursorType.Blocked);
@@ -640,22 +640,9 @@ public class GameInput : MonoBehaviour
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CursorRaycastResult_Interaction)
 			{
-				if (itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject))
+				if (selectedCharacter && itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject, out var objectTo))
 				{
-					if (!selectedCharacter || !selectedCharacter.TryGetComponent(out Inventory selectedInventory))
-					{
-						Debug.LogWarning(this + " no selected character to use item from " + itemToUse);
-						return;
-					}
-					
-					if (!selectedInventory.TryRemoveItem(itemToUse))
-					{
-						Debug.LogWarning(this + " cannot remove item from inventory " + itemToUse + " " +
-						                 selectedInventory);
-						return;
-					}
-					
-					itemToUse.UseOn(hit.collider.gameObject);
+					selectedCharacter.Routines.AssignUseItem(itemToUse, objectTo);
 					SetItemToUse(null);
 				}
 				

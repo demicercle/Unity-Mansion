@@ -794,7 +794,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 467592031822895063, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: uniqueID
-      value: 2590231734847712038
+      value: 8470843335387785193
       objectReference: {fileID: 0}
     - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: moveSpeed
@@ -970,7 +970,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8722277412283640718, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: uniqueID
-      value: 5873673441634421803
+      value: 2214208589409354500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4438104301555917016, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
@@ -1347,6 +1347,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7960912902921319732}
+    - targetCorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1592714092413870353}
   m_SourcePrefab: {fileID: 100100000, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
 --- !u!1 &5757940252883871167 stripped
 GameObject:
@@ -1447,6 +1450,36 @@ MonoBehaviour:
         m_CallState: 2
   actionType: 3
   filters: Door
+--- !u!114 &1592714092413870353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5757940252883871167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd8bf315116540e8aace59c6f3be0352, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterEventHandler
+  character: {fileID: 0}
+  onActionUsed:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6536868086427863390}
+        m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
+        m_MethodName: Activate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  actionType: 5
+  filters: 
 --- !u!4 &5757940252884301857 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400204, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
