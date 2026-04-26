@@ -46,10 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   navigationTarget: {fileID: 7986720061970377997}
-  inputOrbitScale: 3.14
+  inputOrbitScale: 180
   orbitCameraFromCenterScreen: 0
   orbitCameraY: 0
-  cameraCanRotateClamped: 0
   maxNavDistance: 0.5
 --- !u!1 &3627050124609751619
 GameObject:

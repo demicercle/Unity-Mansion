@@ -33,10 +33,9 @@ public class GameInput : MonoBehaviour
 
 	[SerializeField] private CircleRenderer navigationTarget;
 	[Header("Camera Control")]
-	[SerializeField] [Range(0f, 6f)] private float inputOrbitScale = 3.14f;
+	[SerializeField] [Range(0f, 360f)] private float inputOrbitScale = 180f;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
 	[SerializeField] private bool orbitCameraY = false;
-	[SerializeField] private bool cameraCanRotateClamped = false;
 	[Header("Character Control")]
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
 	
@@ -165,9 +164,6 @@ public class GameInput : MonoBehaviour
 		inputSystem.UI.RightClick.performed += OnInputRightClick;
 		inputSystem.UI.Point.performed += OnInputMouseMove;
 		inputSystem.UI.ScrollWheel.performed += OnInputCameraZoom;
-		inputSystem.Player.RotateLeft.performed += OnInputCameraRotateLeft;
-		inputSystem.Player.RotateRight.performed += OnInputCameraRotateRight;
-		inputSystem.Player.EndTurn.performed += OnInputEndTurn;
 		inputSystem.Player.SelectNext.performed += OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed += OnInputFocusSelected;
 		inputSystem.Player.ToggleGroup.performed += OnInputToggleGroup;
@@ -196,8 +192,6 @@ public class GameInput : MonoBehaviour
 		inputSystem.UI.RightClick.performed -= OnInputRightClick;
 		inputSystem.UI.Point.performed -= OnInputMouseMove;
 		inputSystem.UI.ScrollWheel.performed -= OnInputCameraZoom;
-		inputSystem.Player.RotateLeft.performed -= OnInputCameraRotateLeft;
-		inputSystem.Player.RotateRight.performed -= OnInputCameraRotateRight;
 		inputSystem.Player.EndTurn.performed -= OnInputEndTurn;
 		inputSystem.Player.SelectNext.performed -= OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed -= OnInputFocusSelected;
@@ -294,6 +288,7 @@ public class GameInput : MonoBehaviour
 			{
 				holdMiddleClick = true;
 				middleClickMousePosition = mousePosition;
+				if(debugMode > 0) Debug.Log(this + " middleClickMousePosition=" + middleClickMousePosition);
 			}
 
 			orbitAxis = inputSystem.Player.Orbit.ReadValue<Vector2>();
@@ -310,13 +305,13 @@ public class GameInput : MonoBehaviour
 				if (orbitCameraFromCenterScreen)
 				{
 					orbitDelta.x = Screen.width / 2f - mousePosition.x;
-					orbitDelta.y = Screen.height / 2f - mousePosition.y;
 				}
 				else
 				{
 					orbitDelta.x = (middleClickMousePosition - mousePosition).x;
-					orbitDelta.y = (middleClickMousePosition - mousePosition).y;
 				}
+				
+				orbitDelta.y = 0;
 				
 				if (orbitCameraY)
 				{
@@ -324,24 +319,24 @@ public class GameInput : MonoBehaviour
 					if (Mathf.Abs(orbitDelta.x) > Mathf.Abs(orbitDelta.y))
 					{
 						orbitDelta.x = 0;
-						orbitDelta.y = (lastMousePosition - mousePosition).y;
+
+						if (orbitCameraFromCenterScreen)
+						{
+							orbitDelta.y = Screen.height / 2f - mousePosition.y;
+						}
+						else
+						{
+							orbitDelta.y = (middleClickMousePosition - mousePosition).y;
+						}
 					}
-					else
-					{
-						orbitDelta.y = 0;
-					}
-				}
-				else
-				{
-					orbitDelta.y = (lastMousePosition - mousePosition).y;
 				}
 				
 				orbitDelta.x /= Screen.width;
 				orbitDelta.y /= Screen.height;
-				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, 1f);
+				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y);
 				
 				mouseHasMoved = true;
-				cameraPivot.OrbitDrag((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime);
+				//cameraPivot.OrbitDrag((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime);
 			}
 			else
 			{
@@ -541,16 +536,6 @@ public class GameInput : MonoBehaviour
 			if(selectedCharacter.CanUseAction(CharacterAction.Run))
 				selectedCharacter.Routines.AssignRunAction();
 		}
-	}
-
-	private void OnInputCameraRotateLeft(CallbackContext ctx)
-	{
-		if(hasFocus && cameraCanRotateClamped)cameraPivot.ClampedRotation(-1);
-	}
-
-	private void OnInputCameraRotateRight(CallbackContext ctx)
-	{
-		if(hasFocus && cameraCanRotateClamped)cameraPivot.ClampedRotation(1);
 	}
 	
 	private void OnInputCameraZoom(CallbackContext ctx)

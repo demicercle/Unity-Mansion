@@ -83,7 +83,6 @@ public class CameraPivot : MonoBehaviour
         rotationSpeed = _cameraSettings.rotationSpeed;
         orbitSpeed = _cameraSettings.orbitSpeed;
         orbitMaxSpeed = _cameraSettings.orbitMaxSpeed;
-        orbitDrag = _cameraSettings.orbitDrag;
     }
     
     public static CameraPivot Instance => instance;
@@ -108,7 +107,6 @@ public class CameraPivot : MonoBehaviour
     [Space]
     [Header("Scene Settings")]
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
-    [SerializeField] private float clampedRotationAngle = 0.0f;
     [Space]
     [Header("References")] 
     [SerializeField] private Animator animator;
@@ -152,12 +150,6 @@ public class CameraPivot : MonoBehaviour
         focusPosition = world;
         lastTimeFocused = Time.realtimeSinceStartup;
     }
-    
-    public void OrbitDrag(Vector2 readValue)
-    {
-        focusPosition.x += readValue.x / Screen.width * orbitDrag;
-        focusPosition.z += readValue.y / Screen.height * orbitDrag;
-    }
 
     public void MoveFromInput(Vector2 readValue)
     {
@@ -179,19 +171,34 @@ public class CameraPivot : MonoBehaviour
         desiredZoom = Mathf.Clamp01(value);
         UpdateAnimator();
     }
-
-    public void ClampedRotation(float delta)
-    {
-        desiredYaw = (desiredYaw - clampedRotationAngle * delta);
-    }
     
-    public void Orbit(float deltaX, float deltaY, float inputScale = 1f)
+    public void Orbit(float deltaX, float deltaY, float inputScale = 0f)
     {
-        orbitScale = new Vector2(deltaX, deltaX) * inputScale;
-        if (orbitMaxSpeed.x > 0) orbitScale.x = Mathf.Min(orbitScale.x, -orbitMaxSpeed.x, orbitMaxSpeed.x);
-        if (orbitMaxSpeed.y > 0) orbitScale.y = Mathf.Min(orbitScale.y, -orbitMaxSpeed.y, orbitMaxSpeed.y);
-        desiredYaw += deltaX * orbitSpeed.x * orbitScale.x;
-        Zoom(deltaY * orbitSpeed.y);
+        orbitScale = new Vector2(deltaX, deltaX);
+        if (debugMode > 0) Debug.Log(this + " Orbit " + deltaX + " " + deltaY + " " + inputScale);
+        if (inputScale != 0f)
+        {
+            orbitScale *= inputScale;
+        }
+        else
+        {
+            orbitScale *= orbitSpeed;
+            if (orbitMaxSpeed.x > 0) orbitScale.x = Mathf.Clamp(orbitScale.x, -orbitMaxSpeed.x, orbitMaxSpeed.x);
+            if (orbitMaxSpeed.y > 0) orbitScale.y = Mathf.Clamp(orbitScale.y, -orbitMaxSpeed.y, orbitMaxSpeed.y);
+        }
+
+        if (orbitScale.x != 0f)
+        {
+            desiredYaw += orbitScale.x;
+            desiredYaw %= 360.0f;
+            if (debugMode > 0) Debug.Log(this + " OrbitX " + orbitScale.x + " " + desiredYaw);
+        }
+        
+        if (orbitScale.y != 0f)
+        {
+            Zoom( orbitSpeed.y);
+            if (debugMode > 0) Debug.Log(this + " OrbitY " + orbitScale.y + " " + currentZoom);
+        }
     }
     
     public bool TryPanWithMouse(Vector2 mousePosition, float scale)
