@@ -6,20 +6,33 @@ using XNode;
 public class NodeSwitchInt : GameNode
 {
 	[Input] public NodeExec _in;
-	[Output] public NodeExec _out0;
-	[Output] public NodeExec _out1;
-	[Output] public NodeExec _out2;
-	[Output] public NodeExec _out3;
-	[Output] public NodeExec _out4;
-	[Output] public NodeExec _out5;
-	[Output] public NodeExec _out6;
-	[Output] public NodeExec _out7;
 
+	[ContextMenu("Add Port")]
+	public void AddPort()
+	{
+		AddDynamicOutput(typeof(NodeExec), fieldName: "Out" + DynamicOutputs.ToArray().Length);   
+	}
+
+	[ContextMenu("Remove Port")]
+	public void RemovePort()
+	{
+		RemoveDynamicPort("Out" + DynamicOutputs.ToArray().Length);   
+	}
+	
 	public override object GetValue(NodePort port)
 	{
-		if (int.TryParse(port.fieldName.Last().ToString(), out var index) && index < Outs.Length)
-			return Outs[index];
+		if (int.TryParse(port.fieldName.Last().ToString(), out var index) && index < _outs.Length)
+			return _outs[index];
 		return null; // Replace this
+	}
+
+	protected override void Init()
+	{
+		base.Init();
+		if (!DynamicOutputs.Any())
+		{
+			AddPort();
+		}
 	}
 
 	private NodeExec[] _outs;
@@ -29,28 +42,16 @@ public class NodeSwitchInt : GameNode
 	{
 		base.OnScriptAwake();
 
+		_outs = DynamicOutputs.ToList().ConvertAll(x => (NodeExec)x.GetOutputValue()).ToArray();
 		_index = 0;
 		_in.AwakeInput(this, "_in", () =>
 		{
-			Outs[_index].Invoke();
+			_outs[_index].Invoke();
 
 			do
 			{
-				_index = (_index + 1) % Outs.Length;
-			} while (Outs[_index] == null || !Outs[_index].HasCallbacks());
+				_index = (_index + 1) % _outs.Length;
+			} while (_outs[_index] == null || !_outs[_index].HasCallbacks());
 		});
-	}
-
-	private NodeExec[] Outs
-	{
-		get
-		{
-			if(_outs == null) _outs = new NodeExec[8]
-			{
-				_out0, _out1, _out2, _out3, _out4, _out5, _out6, _out7
-			};
-
-			return _outs;
-		}
 	}
 }

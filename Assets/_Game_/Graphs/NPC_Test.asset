@@ -68,7 +68,7 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out2
+      - fieldName: Out2
         node: {fileID: 7751640997977408073}
         reroutePoints: []
       _direction: 0
@@ -143,7 +143,7 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out0
+      - fieldName: Out0
         node: {fileID: 7751640997977408073}
         reroutePoints: []
       _direction: 0
@@ -204,18 +204,14 @@ MonoBehaviour:
   m_Name: Switch
   m_EditorClassIdentifier: Assembly-CSharp::NodeSwitch
   graph: {fileID: 11400000}
-  position: {x: -376, y: -88}
+  position: {x: -392, y: -88}
   ports:
     keys:
     - _in
-    - _out0
-    - _out1
-    - _out2
-    - _out3
-    - _out4
-    - _out5
-    - _out6
-    - _out7
+    - Out0
+    - Out1
+    - Out2
+    - Out3
     values:
     - _fieldName: _in
       _node: {fileID: -1777878850390571389}
@@ -229,7 +225,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _out0
+    - _fieldName: Out0
       _node: {fileID: -1777878850390571389}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
@@ -240,8 +236,8 @@ MonoBehaviour:
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out1
+      _dynamic: 1
+    - _fieldName: Out1
       _node: {fileID: -1777878850390571389}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
@@ -252,8 +248,8 @@ MonoBehaviour:
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out2
+      _dynamic: 1
+    - _fieldName: Out2
       _node: {fileID: -1777878850390571389}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
@@ -264,8 +260,8 @@ MonoBehaviour:
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out3
+      _dynamic: 1
+    - _fieldName: Out3
       _node: {fileID: -1777878850390571389}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
@@ -276,43 +272,7 @@ MonoBehaviour:
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out4
-      _node: {fileID: -1777878850390571389}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out5
-      _node: {fileID: -1777878850390571389}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out6
-      _node: {fileID: -1777878850390571389}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out7
-      _node: {fileID: -1777878850390571389}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
+      _dynamic: 1
 --- !u!114 &-1036241989258757978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,7 +298,7 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out3
+      - fieldName: Out3
         node: {fileID: -1777878850390571389}
         reroutePoints: []
       _direction: 0
@@ -395,7 +355,7 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out1
+      - fieldName: Out1
         node: {fileID: 7751640997977408073}
         reroutePoints: []
       _direction: 0
@@ -492,7 +452,7 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out0
+      - fieldName: Out0
         node: {fileID: -1777878850390571389}
         reroutePoints: []
       _direction: 0
@@ -547,7 +507,7 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out2
+      - fieldName: Out2
         node: {fileID: -1777878850390571389}
         reroutePoints: []
       _direction: 0
@@ -602,7 +562,7 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _out1
+      - fieldName: Out1
         node: {fileID: -1777878850390571389}
         reroutePoints: []
       _direction: 0
@@ -697,14 +657,9 @@ MonoBehaviour:
   ports:
     keys:
     - _in
-    - _out0
-    - _out1
-    - _out2
-    - _out3
-    - _out4
-    - _out5
-    - _out6
-    - _out7
+    - Out0
+    - Out1
+    - Out2
     values:
     - _fieldName: _in
       _node: {fileID: 7751640997977408073}
@@ -718,7 +673,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _out0
+    - _fieldName: Out0
       _node: {fileID: 7751640997977408073}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
@@ -729,8 +684,8 @@ MonoBehaviour:
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out1
+      _dynamic: 1
+    - _fieldName: Out1
       _node: {fileID: 7751640997977408073}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
@@ -741,8 +696,8 @@ MonoBehaviour:
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out2
+      _dynamic: 1
+    - _fieldName: Out2
       _node: {fileID: 7751640997977408073}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
@@ -753,49 +708,4 @@ MonoBehaviour:
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out3
-      _node: {fileID: 7751640997977408073}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out4
-      _node: {fileID: 7751640997977408073}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out5
-      _node: {fileID: 7751640997977408073}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out6
-      _node: {fileID: 7751640997977408073}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _out7
-      _node: {fileID: 7751640997977408073}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
+      _dynamic: 1
