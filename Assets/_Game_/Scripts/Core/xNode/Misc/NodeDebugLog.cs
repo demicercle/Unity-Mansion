@@ -19,7 +19,7 @@ public class NodeDebugLog : GameNode
 
 	private void OnCallback()
 	{
-		DebugLogThis(GetInputValue("message", message));
+		Debug.Log("<b>LOG: </b>" + GetInputValue("message", message) + "\nin graph=" + graph);
 	}
 
 	// Return the correct value of an output port when requested

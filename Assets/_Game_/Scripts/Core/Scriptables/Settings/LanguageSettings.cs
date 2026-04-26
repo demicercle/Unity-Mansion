@@ -24,7 +24,7 @@ public class LanguageSettings : ScriptableObject
 	[SerializeField] [ReadOnly] private string[] lines;
 
 	[ContextMenu("Parse")]
-	private void Parse()
+	public void Parse()
 	{
 		lines = dialogText.text.Split('\n');
 		lines = new string[]{string.Empty}.Concat(lines).ToArray();
@@ -64,6 +64,7 @@ public class LocalizedText
 
 	public void Parse()
 	{
+		LanguageSettings.CurrentSettings.Parse();
 		text = LanguageSettings.CurrentSettings.GetLine(lineIndex, text);
 	}
 
