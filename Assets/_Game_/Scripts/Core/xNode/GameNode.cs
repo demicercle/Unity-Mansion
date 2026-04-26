@@ -50,7 +50,7 @@ public abstract class GameNode : Node
 		if(GameScript.debugMode > 0) Debug.Log("x_" + this + ": " + msg);
 	}
 	
-	protected void DebugLogWarningThis(string msg)
+	protected void DebugWarningThis(string msg)
 	{
 		Debug.LogWarning("x_" + this + ": " + msg);
 	}

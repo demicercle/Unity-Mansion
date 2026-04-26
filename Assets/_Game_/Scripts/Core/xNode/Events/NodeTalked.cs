@@ -17,7 +17,7 @@ public class NodeTalked : GameNode
 		}
 		else
 		{
-			DebugLogWarningThis("no character found");
+			DebugWarningThis("no character found");
 		}
 	}
 

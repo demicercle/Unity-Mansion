@@ -17,7 +17,7 @@ public class NodeInteracted : GameNode
 		}
 		else
 		{
-			DebugLogWarningThis("no prop found");
+			DebugWarningThis("no prop found");
 		}
 	}
 
