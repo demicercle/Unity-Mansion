@@ -227,7 +227,7 @@ public class CharacterRoutines : MonoBehaviour
 				yield break;
 			}
 			
-			yield return agent.SearchPathAsync(destination);
+			yield return agent.SearchPathAsync(destination, false);
 
 			var path = agent.GetCurrentPath();
 			pathValid = path.Length > 1 && NavUtils.NavDistanceRoundY(path.Last(), destination) <= reachRadius + agent.GetRadius();
@@ -408,10 +408,7 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // stop any movement
 		agent.SetReachDistance(reachDistance);
 		
-		yield return agent.SearchPathAsync(dest);
-		do yield return null;
-		while (agent.pathPending);
-
+		yield return agent.SearchPathAsync(dest, false);
 		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
 	}
 
@@ -551,12 +548,14 @@ public class CharacterRoutines : MonoBehaviour
 			if (useRange > 0 && NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) >
 			    useRange)
 			{
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItem WaitCharacterMoved");
 				yield return StartCoroutine(WaitCharacterMoved(otherCharacter.GetPosition(), useRange));
 			}
 
 			if (useRange <= 0 ||
 			    NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
 			{
+				if (debugMode > 0) Debug.Log(this + " WaitCharacterUseItem at useRange");
 				while (otherCharacter != _selfCharacter && !_selfCharacter.IsFacingPosition(otherCharacter.GetPosition()))
 				{
 					_selfCharacter.LookWorldPosition(otherCharacter.GetPosition(), Time.deltaTime);
