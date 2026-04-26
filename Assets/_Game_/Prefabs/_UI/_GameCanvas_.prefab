@@ -274,7 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2b1cda68b744f828b0ec9abf7441707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AnimatorHandler
-  startValue: 0
+  startValue: 1
   parameterName: IsOn
 --- !u!114 &475927492592204959
 MonoBehaviour:
