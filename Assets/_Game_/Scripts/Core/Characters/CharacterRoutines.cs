@@ -8,7 +8,7 @@ public class CharacterRoutines : MonoBehaviour
 {
 	public const float SearchPathTimeout = 6.0f;
 	public const float DefaultWaitSeconds = 1.0f;
-	public const float MinTalkDistance = 0.1f;
+	public const float MinReachDistance = 0.1f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -233,7 +233,7 @@ public class CharacterRoutines : MonoBehaviour
 			
 		} while (!pathValid);
 
-		yield return StartCoroutine(WaitMoveLastPath());
+		yield return StartCoroutine(WaitMoveLastPath(bestWaypoint.GetPosition()));
 		
 		if (agent.ReachedDestination(bestWaypoint.GetPosition()))
 		{
@@ -300,7 +300,7 @@ public class CharacterRoutines : MonoBehaviour
 
 				else
 				{
-					var reachDistance = _selfCharacter.GetAttackRange(target);
+					var reachDistance = _selfCharacter.GetAttackRange(target) - MinReachDistance;
 					if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
 					yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance));
 				}
@@ -489,10 +489,10 @@ public class CharacterRoutines : MonoBehaviour
 		do yield return null;
 		while (agent.pathPending);
 
-		yield return StartCoroutine(WaitMoveLastPath(reachDistance));
+		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
 	}
 
-	private IEnumerator WaitMoveLastPath(float forcedReachDistance = 0f)
+	private IEnumerator WaitMoveLastPath(Vector3 dest, float forcedReachDistance = 0f)
 	{
 		if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath " + forcedReachDistance); 
 		var agent = _selfCharacter.GetAgent();
@@ -507,7 +507,6 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 
-		var lastPoint = path.Last();
 		var firstPoint = path[1];
 		var dir = (firstPoint - _selfCharacter.GetPosition()).normalized;
 		if (dir.sqrMagnitude < Consts.MinMagnitude)
@@ -530,7 +529,7 @@ public class CharacterRoutines : MonoBehaviour
 			agent.SetReachDistance(forcedReachDistance);
 		
 		var startTime = Time.time;
-		while (!agent.ReachedDestination(lastPoint))
+		while (!agent.ReachedDestination(dest))
 		{
 			if (forcedReachDistance > 0)
 				agent.SetReachDistance(forcedReachDistance);
@@ -561,7 +560,7 @@ public class CharacterRoutines : MonoBehaviour
 
 			if(debugMode > 0) DebugDrawer.Path(path, false, Color.cyan);
 			if(debugMode > 0) DebugDrawer.WireArrow(oldPosition, oldPosition + agent.velocity, Vector3.one, Color.cyan, 0f);
-			if(debugMode > 0) DebugDrawer.WireDisc(lastPoint, agent.GetRadius(), Color.cyan, 0f);
+			if(debugMode > 0) DebugDrawer.WireDisc(dest, agent.GetRadius(), Color.cyan, 0f);
 			
 			yield return null;
 
@@ -577,7 +576,7 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.ConsumeMovePoints(deltaPos, true);
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " reached destination! " + NavUtils.NavDistanceRoundY(lastPoint, _selfCharacter.GetPosition()));
+		if(debugMode > 0) Debug.Log(this + " reached destination! " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));
 		agent.StopMovement();
 	}
 	
@@ -595,8 +594,8 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitCharacterTalk " + npc;
 		if(debugMode > 0) Debug.Log(">> WaitCharacterTalk: " + this + " " + npc);
 
-		var talkDistance = npc.GetRadius() + _selfCharacter.GetRadius() + MinTalkDistance;
-		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(),talkDistance+ MinTalkDistance));
+		var talkDistance = npc.GetRadius() + _selfCharacter.GetRadius() + MinReachDistance;
+		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(),talkDistance+ MinReachDistance));
 
 		if (!_selfCharacter.GetAgent().ReachedDestination())
 		{

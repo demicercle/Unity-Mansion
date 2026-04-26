@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
+[RequireComponent (typeof (QuickOutline))]
 public class OutlineRenderer : MonoBehaviour, ICursorHandler
 {
 	public void CursorOver()
