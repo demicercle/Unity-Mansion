@@ -40,6 +40,11 @@ public abstract class GameNode : Node
 	{
 		if(GameScript.debugMode > 0) Debug.Log("x_" + this + ": " + msg);
 	}
+	
+	protected void DebugLogWarningThis(string msg)
+	{
+		Debug.LogWarning("x_" + this + ": " + msg);
+	}
 }
 
 

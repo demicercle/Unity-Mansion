@@ -3,13 +3,32 @@ using XNode;
 
 public class NodeInteracted : GameNode
 {
+	[Input] public SceneReference _prop;
 	[Output] public NodeExec _out;
 	
-	protected override void Init()
+	protected override void OnScriptAwake()
 	{
-		base.Init();
+		base.OnScriptAwake();
+		
+		if (_prop.TryGetComponent(this, out PropComponent prop))
+		{
+			prop.onInteracted += Interacted;
+		}
+		else
+		{
+			DebugLogWarningThis("no prop found");
+		}
 	}
-	
+
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		if (_prop.TryGetComponent(this, out PropComponent prop))
+		{
+			prop.onInteracted -= Interacted;
+		}
+	}
+
 	// Return the correct value of an output port when requested
 	public override object GetValue(NodePort port) {
 		if (port.fieldName == "_out")
@@ -19,7 +38,7 @@ public class NodeInteracted : GameNode
 		return null; // Replace this
 	}
 	
-	public void Interacted()
+	private void Interacted()
 	{
 		_out.Invoke();
 	}
