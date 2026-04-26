@@ -1,12 +1,26 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class CoroutineScheduler : MonoBehaviour
 {
-	private static CoroutineScheduler instance;
-	public static Coroutine Start(IEnumerator coroutine)
+	public static CoroutineScheduler Start(GameObject holder, IEnumerator coroutine)
 	{
-		if(!instance) instance = new GameObject("CoroutineScheduler").AddComponent<CoroutineScheduler>();
-		return instance.StartCoroutine(coroutine);
+		var instance = holder.AddComponent<CoroutineScheduler>();
+		instance._coroutine = coroutine;
+		return instance;
+	}
+
+	public void StopAndDestroy()
+	{
+		Destroy(this);
+	}
+
+	private IEnumerator _coroutine;
+
+	private IEnumerator Start()
+	{
+		yield return StartCoroutine(_coroutine);
+		Destroy(this);
 	}
 }
