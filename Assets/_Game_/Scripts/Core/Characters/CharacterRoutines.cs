@@ -48,10 +48,10 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToDestination " + navPosition);
 		StartNewRoutine(WaitCharacterMoved(navPosition, 0f));
 	}
-	public void AssignMoveToWaypoint(Waypoint waypoint, bool canUseRunAction)
+	public void AssignMoveToWaypoint(Waypoint waypoint, bool canUseRunAction, System.Action onComplete = null)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
-		StartNewRoutine(WaitMoveCharacterToWaypoint(waypoint, canUseRunAction));
+		StartNewRoutine(WaitMoveCharacterToWaypoint(waypoint, canUseRunAction, onComplete));
 	}
 	public void AssignRunAction()
 	{
@@ -434,7 +434,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 	
-	private IEnumerator WaitMoveCharacterToWaypoint(Waypoint waypoint, bool canUseRunAction)
+	private IEnumerator WaitMoveCharacterToWaypoint(Waypoint waypoint, bool canUseRunAction, System.Action onComplete = null)
 	{
 		debugString = "WaitMoveCharacterToWaypoint";
 		if(debugMode > 0) Debug.Log(this + " WaitMoveCharacterToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
@@ -454,9 +454,12 @@ public class CharacterRoutines : MonoBehaviour
 					if (debugMode > 0) Debug.Log(this + " WaitMoveCharacterToWaypoint use Run Action");
 					yield return StartCoroutine(WaitAction(CharacterAction.Run));
 					yield return StartCoroutine(WaitMoveCharacterToWaypoint(waypoint, false));//TODO: multiple run actions??
+					yield break;
 				}
 			}
 		}
+		
+		onComplete?.Invoke();
 		
 		//if(debugMode > 0) Debug.Log(this + " did not reach waypoint");
 	}
