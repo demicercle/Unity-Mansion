@@ -15,7 +15,7 @@ public class NodeFloatingText : GameNode
 	[ContextMenu("Parse")]
 	public void Parse()
 	{
-		message.Parse();
+		message.Parse(DialogFiles.script);
 	}
 
 	protected override void Init()
@@ -25,17 +25,17 @@ public class NodeFloatingText : GameNode
 	}
 	
 	// Use this for initialization
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
-		_in.AwakeInput(this, "_in", OnCallback);
+		base.OnScriptStart();
+		_in.StartInput(this, "_in", OnCallback);
 	}
 
 	private void OnCallback()
 	{
 		if (_character.TryGetComponent(this, out CharacterController character))
 		{
-			character.FloatingText(GetInputValue("message", message).GetValue());
+			character.FloatingText(GetInputValue("message", message).GetValue(DialogFiles.script));
 			//_out.Invoke();
 		}
 	}

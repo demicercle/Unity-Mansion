@@ -33,6 +33,9 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private Button button_endTurn;
 	[Header("Portraits")]
 	[SerializeField] private CharacterPortrait[] portraits;
+	[Header("Inventory")]
+	[SerializeField] private InventoryPanel inventoryPanel;
+	[SerializeField] private RawImage itemCursorImage;
 
 	[Space] [Header("Animation")]
 	[SerializeField] [Tooltip("Blend Weight Layer1")] private List<Animator> endTurnAnimators;
@@ -85,6 +88,7 @@ public class GameCanvas : MonoBehaviour
 
 	private CharacterController[] partyCharacters;
 	private MouseOverHandler viewportMouseHandler;
+	private ItemData currentItemToUse;
 	
 	private void Awake()
 	{
@@ -102,7 +106,7 @@ public class GameCanvas : MonoBehaviour
 		floatingText.SetActive(false);
 
 		CharacterController.onPartyChanged += UpdatePortraits;
-		//CharacterSelection.selectionChanged += UpdateSelectables;
+		CharacterSelection.selectionChanged += OnSelectionChanged;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
 		gameTurnManager.onPlayerChanged += OnPlayerChanged;
@@ -117,7 +121,7 @@ public class GameCanvas : MonoBehaviour
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
 		
 		CharacterController.onPartyChanged -= UpdatePortraits;
-		//CharacterSelection.selectionChanged -= UpdateSelectables;
+		CharacterSelection.selectionChanged -= OnSelectionChanged;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
 		gameTurnManager.onPlayerChanged -= OnPlayerChanged;
@@ -146,6 +150,16 @@ public class GameCanvas : MonoBehaviour
 	private void LateUpdate()
 	{
 		UpdateSelectables(); // TODO with events
+
+		currentItemToUse = gameInput.GetItemToUse();
+		itemCursorImage.gameObject.SetActive(currentItemToUse);
+		if (itemCursorImage.gameObject.activeSelf)
+		{
+			itemCursorImage.texture = currentItemToUse.GetIcon();
+			itemCursorImage.color = Utils.ColorAlpha(Color.white, gameInput.IsBlocked() ? 0.30f : 0.90f);
+			itemCursorImage.transform.position = gameInput.GetMousePosition();
+			itemCursorImage.transform.SetAsLastSibling();
+		}
 	}
 
 	private void OnPlayerChanged(bool isPlayerTurn)
@@ -223,6 +237,20 @@ public class GameCanvas : MonoBehaviour
 		{
 			endTurnAnimators.ForEach(anim => anim.SetLayerWeight(endTurnLayer, Mathf.Lerp(anim.GetLayerWeight(endTurnLayer), gameTurnManager.PlayerShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed)));
 		}
+	}
+
+	private void OnSelectionChanged()
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out var selected))
+		{
+			if (selected.TryGetComponent(out Inventory inventory))
+			{
+				inventoryPanel.AssignInventory(inventory);
+				return;
+			}
+		}
+		
+		inventoryPanel.AssignInventory(null);
 	}
 	#endregion
 }

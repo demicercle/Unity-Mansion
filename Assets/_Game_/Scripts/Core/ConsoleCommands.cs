@@ -104,13 +104,37 @@ public class ConsoleCommands : MonoBehaviour
 		Time.timeScale = Mathf.Clamp(value, 0.1f, 10.0f);
 	}
 
-	[ConsoleMethod("explore", "")]
-	public static void Explore(float value)
+	[ConsoleMethod("give_item", "")]
+	public static void GiveItem(string itemName)
 	{
-		RoomTrigger.activeRooms.ToList().ForEach((room) =>
+		var itemData = Resources.LoadAll<ItemData>(Consts.ResPath_Items)
+			.FirstOrDefault(i => i.name == itemName);
+
+		if (itemData == null)
 		{
-			room.Explore();
-		});
+			Debug.LogWarning("Item not found: " + itemName);
+			return;
+		}
+
+		if (!CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		{
+			Debug.LogWarning("No selected character");
+			return;
+		}
+
+		if (!selectedCharacter.TryGetComponent(out Inventory inventory))
+		{
+			Debug.LogWarning("Selected character " + selectedCharacter + " has no inventory");
+			return;
+		}
+
+		if (!inventory.TryAddItem(itemData))
+		{
+			Debug.LogWarning("Selected character " + selectedCharacter + " inventory full");
+			return;
+		}
+		
+		Debug.Log("Item added to inventory: " + itemData + " > " + inventory);
 	}
 	
 	[ConsoleMethod("log", "")]
@@ -142,6 +166,12 @@ public class ConsoleCommands : MonoBehaviour
 	public static void _DebugScript(int value)
 	{
 		Debug.Log("debug_script=" + (GameScript.debugMode = value));
+	}
+
+	[ConsoleMethod("debug_inventory", "")]
+	public static void _DebugInventory(int value)
+	{
+		Debug.Log("debug_inventory=" + (Inventory.debugMode = value));
 	}
 
 	[ConsoleMethod("debug_gtm", "")]

@@ -28,6 +28,12 @@ public class PropComponent : MonoBehaviour
 	
 	[Header("ReadOnly")]
 	[SerializeField] [ReadOnly] private int interactionCount;
+	
+	public float GetRadius()
+	{
+		worldBounds = selfCollider.bounds;
+		return Mathf.Max(worldBounds.size.x, worldBounds.size.y, worldBounds.size.z) / 2f;
+	}
 
 	public bool AnimFinished() => animFinished;
 	
@@ -76,6 +82,8 @@ public class PropComponent : MonoBehaviour
 	#region PRIVATE
 	private bool animFinished;
 	private int defaultLayer;
+	private Collider selfCollider;
+	private Bounds worldBounds;
 
 	private void OnAnimFinished()
 	{
@@ -102,6 +110,7 @@ public class PropComponent : MonoBehaviour
 	private void Awake()
 	{
 		defaultLayer = gameObject.layer;
+		selfCollider = GetComponent<Collider>();
 	}
 	
 	private IEnumerator Start()

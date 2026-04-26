@@ -7,9 +7,9 @@ public class NodeInteracted : GameNode
 	[Input] public SceneReference _prop;
 	[Output] public NodeExec _out;
 	
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
+		base.OnScriptStart();
 		
 		if (_prop.TryGetComponent(this, out PropComponent prop))
 		{
@@ -17,7 +17,7 @@ public class NodeInteracted : GameNode
 		}
 		else
 		{
-			DebugLogWarningThis("no prop found");
+			DebugWarningThis("no prop found");
 		}
 	}
 

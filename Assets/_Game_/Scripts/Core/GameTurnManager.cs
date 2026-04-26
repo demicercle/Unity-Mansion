@@ -36,7 +36,7 @@ public class GameTurnManager : MonoBehaviour
 
 	public bool IsTurnBasedMode() => turnBasedMode;
 	
-	public bool IsPlayerTurn() => playerTurn;
+	public bool IsPlayerTurn() => playerTurn || !turnBasedMode;
 
 	public bool AnyActiveRoutinesPlaying() => CharacterRoutines.AnyActiveRoutines();
 	

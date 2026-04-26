@@ -24,7 +24,8 @@ public enum CharacterAction
 	Run,
 	Attack,
 	Interact,
-	Talk
+	Talk,
+	UseItem
 }
 
 public class CharacterController : MonoBehaviour, IAttackable
@@ -38,6 +39,9 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
 	
 	public static event System.Action onPartyChanged;
+	public static event System.Action<CharacterController, float, object> onAnyCharacterDamaged;
+	public static event System.Action<CharacterController, float> onAnyCharacterHealed;
+	public static event System.Action<CharacterController> onAddedToParty, onRemovedFromParty;
 	public static event System.Action<CharacterController> onAnyCharacterMoved;
 	public static event System.Action<CharacterController> onAnyCharacterDead;
 	public static event System.Action<CharacterController, CharacterAction> onAnyCharacterUsesAction;
@@ -200,6 +204,10 @@ public class CharacterController : MonoBehaviour, IAttackable
 		}
 		onPartyIndexChanged?.Invoke(index, _partyCharacters.Count);
 		onPartyChanged?.Invoke();
+		if(index >= 0)
+			onAddedToParty?.Invoke(_partyCharacters[index]);
+		else
+			onRemovedFromParty?.Invoke(_partyCharacters[index]);
 	}
 
 	private void SetCurrentFaction(CharacterFaction faction)
@@ -265,7 +273,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	{
 		dir.y = 0;
 		dir.Normalize();
-		return dir.sqrMagnitude >= Consts.MinMagnitude && Vector3.Dot(dir, transform.forward) >= MinFacingDot;
+		return dir.sqrMagnitude > Consts.MinMagnitude && Vector3.Dot(dir, transform.forward) >= MinFacingDot;
 	}
 
 	public Vector3 GetDirection() => transform.forward;
@@ -339,6 +347,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 			totalDamages = Mathf.Max(0, totalDamages - amount);
 		
 		onHealed?.Invoke(amount);
+		onAnyCharacterHealed?.Invoke(this, amount);
 		onStatsChanged?.Invoke();
 	}
 	public void TakeDamage(float amount, object objectFrom)
@@ -349,6 +358,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		StopAgent();
 
 		onDamaged?.Invoke(amount);
+		onAnyCharacterDamaged?.Invoke(this, amount, objectFrom);
 		
 		if (GetCurrentHealth() <= 0f)
 		{
@@ -362,6 +372,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		{
 			onDamagedBy?.Invoke(objectFrom as CharacterController, amount);
 		}
+
 	}
 	public bool TryKill()
 	{

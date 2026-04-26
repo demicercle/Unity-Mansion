@@ -343,6 +343,7 @@ GameObject:
   - component: {fileID: 7123389619300229274}
   - component: {fileID: 3491681411637616590}
   - component: {fileID: -9001009375405151572}
+  - component: {fileID: 4619242293538590057}
   m_Layer: 8
   m_Name: CharacterBase
   m_TagString: Player
@@ -836,6 +837,28 @@ MonoBehaviour:
   wallAvoidFalloff: 1
   priority: 0.5
   debug: 0
+--- !u!114 &4619242293538590057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837400758454604685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a609e5ba6eb248d9a921da0a8cfb9add, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  maxSize: 6
+  destroyIfEmpty: 0
+  lootBagPrefab: {fileID: 3870844094002656079, guid: e06b8a3ef8b241e4290237da71253253, type: 3}
+  items:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &3549809914347783905
 GameObject:
   m_ObjectHideFlags: 0

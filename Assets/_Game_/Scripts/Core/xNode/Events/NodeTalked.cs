@@ -7,9 +7,9 @@ public class NodeTalked : GameNode
 	[Input] public SceneReference _character;
 	[Output] public NodeExec _out;
 	
-	protected override void OnScriptAwake()
+	protected override void OnScriptStart()
 	{
-		base.OnScriptAwake();
+		base.OnScriptStart();
 		
 		if (_character.TryGetComponent(this, out CharacterController character))
 		{
@@ -17,7 +17,7 @@ public class NodeTalked : GameNode
 		}
 		else
 		{
-			DebugLogWarningThis("no character found");
+			DebugWarningThis("no character found");
 		}
 	}
 

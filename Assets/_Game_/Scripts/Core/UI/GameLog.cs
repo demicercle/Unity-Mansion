@@ -43,6 +43,12 @@ public class GameLog : MonoBehaviour
 		gameTurnManager.onTurnEnded += TurnEnded;
 		gameTurnManager.onTurnStarted += TurnStarted;
 		CharacterController.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
+		CharacterController.onAddedToParty += CharacterAddedToParty;
+		CharacterController.onRemovedFromParty += CharacterRemovedFromParty;
+		CharacterController.onAnyCharacterDamaged += OnAnyCharacterDamaged;
+		CharacterController.onAnyCharacterHealed += OnAnyCharacterHealed;
+		Inventory.onAnyItemAdded += OnItemAdded;
+		Inventory.onAnyItemRemoved += OnItemRemoved;
 	}
 
 	private void OnDisable()
@@ -50,24 +56,73 @@ public class GameLog : MonoBehaviour
 		gameTurnManager.onTurnEnded -= TurnEnded;
 		gameTurnManager.onTurnStarted -= TurnStarted;
 		CharacterController.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
+		CharacterController.onAddedToParty -= CharacterAddedToParty;
+		CharacterController.onRemovedFromParty -= CharacterRemovedFromParty;
+		CharacterController.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+		CharacterController.onAnyCharacterHealed -= OnAnyCharacterHealed;
+		Inventory.onAnyItemAdded -= OnItemAdded;
+		Inventory.onAnyItemRemoved -= OnItemRemoved;
 
 		Clear();
 	}
 
+	private void CharacterAddedToParty(CharacterController character)
+	{
+		//TODO
+	}
+
+	private void CharacterRemovedFromParty(CharacterController character)
+	{
+		//TODO
+	}
+
+	private void OnItemAdded(Inventory inventory, ItemData item)
+	{
+		AppendLine(GetLocalizedLine(13, "<CHARACTER> receives item <ITEM>")
+			.Replace("<CHARACTER>", inventory.TryGetComponent(out CharacterController character) ? character.GetDisplayName() : "???")
+			.Replace("<ITEM>", item.GetDisplayName()));
+	}
+
+	private void OnItemRemoved(Inventory inventory, ItemData item)
+	{
+		AppendLine(GetLocalizedLine(14, "<CHARACTER> looses item <ITEM>")
+			.Replace("<CHARACTER>", inventory.TryGetComponent(out CharacterController character) ? character.GetDisplayName() : "???")
+			.Replace("<ITEM>", item.GetDisplayName()));
+	}
+
 	private void TurnStarted()
 	{
-		AppendLine("Turn Started");
+		AppendLine(GetLocalizedLine(10, "Turn Started"));
 	}
 
 	private void TurnEnded()
 	{
-		AppendLine("Turn Ended");
+		AppendLine(GetLocalizedLine(11, "Turn Ended"));
 	}
 
 	private void OnAnyCharacterUsesAction(CharacterController character, CharacterAction action)
 	{
-		AppendLine(character.GetDisplayName() + " uses action " + action);
+		AppendLine(GetLocalizedLine(16, "<CHARACTER> uses action <ACTION>")
+			.Replace("<CHARACTER>", character.GetDisplayName())
+			.Replace("<ACTION>", action.ToString())); // TODO Localization "CharacterAction"
 	}
+
+	private void OnAnyCharacterDamaged(CharacterController character, float amount, object objectFrom)
+	{
+		AppendLine(GetLocalizedLine(15, "<CHARACTER> receives <DAMAGE> damage(s)")
+			.Replace("<CHARACTER>", character.GetDisplayName())
+			.Replace("<DAMAGE>", Mathf.CeilToInt(amount).ToString()));
+	}
+
+	private void OnAnyCharacterHealed(CharacterController character, float amount)
+	{
+		AppendLine(GetLocalizedLine(16, "<CHARACTER> healed: <AMOUNT>")
+			.Replace("<CHARACTER>", character.GetDisplayName()
+			.Replace("<AMOUNT>", Mathf.CeilToInt(amount).ToString())));
+	}
+
+	private string GetLocalizedLine(int index, string fallback) =>
+		LanguageSettings.GetSettings(DialogFiles.gamelog).GetLine(index, fallback);
 
 	private void Clear()
 	{

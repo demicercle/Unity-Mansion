@@ -382,12 +382,12 @@ public class CharacterAgent : MonoBehaviour
 		UpdatePathAndTarget(true);
 	}
 
-	public Coroutine SearchPathAsync(Vector3 dest, System.Action onComplete = null)
+	public Coroutine SearchPathAsync(Vector3 dest, bool clamp, System.Action onComplete = null)
 	{
-		return StartCoroutine(DoSearchPathAsync(dest, onComplete));
+		return StartCoroutine(DoSearchPathAsync(dest, clamp, onComplete));
 	}
 	
-	private IEnumerator DoSearchPathAsync(Vector3 dest, System.Action onComplete = null)
+	private IEnumerator DoSearchPathAsync(Vector3 dest, bool clamp, System.Action onComplete = null)
 	{
 		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync");
 		// WaitCharacterMoved
@@ -395,7 +395,7 @@ public class CharacterAgent : MonoBehaviour
 		while (NavmeshRebuilder.IsRebuildingAsync())
 			yield return null;
 
-		if (NavUtils.TryGetNearestNavPosition(dest, aiPath.endReachedDistance, out dest))
+		if (clamp && NavUtils.TryGetNearestNavPosition(dest, aiPath.endReachedDistance, out dest))
 		{
 			if(debugMode > 1) Debug.Log(this + " dest clamped to navmesh");
 		}
@@ -410,9 +410,11 @@ public class CharacterAgent : MonoBehaviour
 			if (timeout >= TimeOut) break;
 			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetPosition(), dest, Color.blue, 0f);
 			yield return null;
+			lastPath = GetCurrentPath();
+			if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync lastPath=" + lastPath.Length);
 			timeout += Time.deltaTime;
 		}
-		while (aiPath.pathPending && GetCurrentPath().Length <= 1);
+		while (aiPath.pathPending || lastPath.Length <= 1);
 
 		UpdatePathAndTarget(true);
 		
@@ -422,7 +424,7 @@ public class CharacterAgent : MonoBehaviour
 			yield break;
 		}
 		
-		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync onComplete");
+		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync onComplete lastPath=" + lastPath.Length);
 		onComplete?.Invoke();
 		//var path = GetCurrentPath();
 	}
@@ -442,7 +444,7 @@ public class CharacterAgent : MonoBehaviour
 		rvoController.enabled = b;
 	}
 	   
-	public bool pathPending => aiPath.pathPending;
+	public bool pathPending => aiPath.pathPending || lastPath == null || lastPath.Length <= 1;
 
 	public float rotationSpeed => aiPath.rotationSpeed;
 

@@ -1,34 +1,77 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
+
+public enum DialogFiles
+{
+	main,
+	gamelog,
+	items,
+	script
+}
 
 [CreateAssetMenu(fileName = "LanguageSettings", menuName = "LanguageSettings", order = 0)]
 public class LanguageSettings : ScriptableObject
 {
-	private static LanguageSettings currentSettings;
-	public static LanguageSettings CurrentSettings
+	private static LanguageSettings[] allSettings;
+	private static LanguageSettings fallbackSettings;
+
+	public static LanguageSettings GetSettings(DialogFiles fileType)
 	{
-		get
+		if (allSettings == null)
 		{
-			if(!currentSettings) currentSettings = Resources.LoadAll<LanguageSettings>(Consts.ResPath_Settings).FirstOrDefault();
-			if (!currentSettings)
+			allSettings = Resources.LoadAll<LanguageSettings>(Consts.ResPath_Settings)
+				.OrderBy(s => s.name)
+				.ToArray();
+
+			foreach (var s in allSettings)
 			{
-				Debug.LogWarning("no LanguageSettings found, create new one");
-				currentSettings = CreateInstance<LanguageSettings>();
+				s.Parse();
 			}
-			return currentSettings;
 		}
+
+		if ((int)fileType >= allSettings.Length)
+		{
+			Debug.LogWarning("invalid language dialog file: " + fileType);
+			
+			if (!fallbackSettings)
+				fallbackSettings = ScriptableObject.CreateInstance<LanguageSettings>();
+			
+			return fallbackSettings;
+		}
+		
+		return allSettings[(int)fileType];
 	}
+	
 	
 	public TextAsset dialogText;
 
 	[SerializeField] [ReadOnly] private string[] lines;
 
 	[ContextMenu("Parse")]
-	private void Parse()
+	public void Parse()
 	{
+		if (!dialogText)
+		{
+			Debug.LogWarning(this + " has no dialogText");
+			return;
+		}
+		
 		lines = dialogText.text.Split('\n');
 		lines = new string[]{string.Empty}.Concat(lines).ToArray();
-		Utils.SetDirty(this);
+#if UNITY_EDITOR
+		if (Application.isPlaying) return;
+		/*var names = System.Enum.GetNames(typeof(DialogFiles));
+		for (int i = 0; i < names.Length; i++)
+		{
+			var sett = GetSettings((DialogFiles)i);
+			sett.name = typeof(LanguageSettings) + " (" + i + ")";
+			Debug.Log("rename " + sett + " " + i + " " + names[i]);
+			UnityEditor.AssetDatabase.RenameAsset(UnityEditor.AssetDatabase.GetAssetPath(sett), name);
+		}*/
+		UnityEditor.EditorUtility.SetDirty(this);
+		//UnityEditor.AssetDatabase.SaveAssets();
+#endif
 	}
 
 	private void TryParse()
@@ -49,10 +92,17 @@ public class LanguageSettings : ScriptableObject
 		
 		if (index < 0 || index >= lines.Length)
 		{
+			//Debug.Log(this + " GetLine " + index + " fallbacks " + fallback);
 			return fallback;
 		}
 		
-		return lines[index];
+		//Debug.Log(this + " GetLine " + index + " => " + lines[index]);
+		return lines[index].Trim('\n');
+	}
+
+	private void OnEnable()
+	{
+		Parse();
 	}
 }
 
@@ -61,15 +111,15 @@ public class LocalizedText
 {
 	[SerializeField] private int lineIndex;
 	[SerializeField] private string text;
-
-	public void Parse()
+	
+	public void Parse(DialogFiles fileType)
 	{
-		text = LanguageSettings.CurrentSettings.GetLine(lineIndex, text);
+		text = LanguageSettings.GetSettings(fileType).GetLine(lineIndex, text);
 	}
 
-	public string GetValue()
+	public string GetValue(DialogFiles fileType)
 	{
-		return lineIndex <= 0 ? text : LanguageSettings.CurrentSettings.GetLine(lineIndex, text);
+		return lineIndex <= 0 ? text : LanguageSettings.GetSettings(fileType).GetLine(lineIndex, text);
 	}
 }
 

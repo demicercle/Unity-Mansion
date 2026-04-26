@@ -18,7 +18,10 @@ public enum CursorType
 	Attack,
 	Talk,
 	
-	Blocked
+	Blocked,
+	
+	Loot,
+	UseItem
 }
 
 [CreateAssetMenu(fileName = "CursorData", menuName = "CursorData", order = 0)]

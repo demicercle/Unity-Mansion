@@ -19,6 +19,7 @@
 - cmd "kill_all"
 - game turn manager "PartyRest" on NewTurn, and then Rest each otherCharacter one by one after
 - clean "CharacterController"
+- heal / damage VFX
 
 dev-level
 - enemy take damage: should switch chase target to closest one
