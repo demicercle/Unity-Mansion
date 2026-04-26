@@ -12,20 +12,17 @@ public class NodeFloatingText : GameNode
 	[Input] public SceneReference _character;
 	[Input] public LocalizedText message;
 
+	[ContextMenu("Parse")]
+	public void Parse()
+	{
+		message.Parse();
+	}
+
 	protected override void Init()
 	{
 		base.Init();
-		message.Init();
+		Parse();
 	}
-
-	// Return the correct value of an output port when requested
-	/*public override object GetValue(NodePort port) {
-		if (port.fieldName == "_out")
-		{
-			return _out;
-		}
-		return null; // Replace this
-	}*/
 	
 	// Use this for initialization
 	protected override void OnScriptAwake()

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LanguageSettings
   dialogText: {fileID: 4900000, guid: 6dd0485b4f8d476bb2411e78dc23c9ba, type: 3}
   lines:
+  - 
   - "\r"
   - "\r"
   - "\r"

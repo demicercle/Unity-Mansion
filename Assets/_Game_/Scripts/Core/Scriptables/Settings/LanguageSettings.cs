@@ -27,6 +27,8 @@ public class LanguageSettings : ScriptableObject
 	private void Parse()
 	{
 		lines = dialogText.text.Split('\n');
+		lines = new string[]{string.Empty}.Concat(lines).ToArray();
+		Utils.SetDirty(this);
 	}
 
 	private void TryParse()
@@ -57,22 +59,17 @@ public class LanguageSettings : ScriptableObject
 [System.Serializable]
 public class LocalizedText
 {
-	[SerializeField] private string line;
-	[SerializeField] [ReadOnly] private string text;
+	[SerializeField] private int lineIndex;
+	[SerializeField] private string text;
 
-	public void Init()
+	public void Parse()
 	{
-		text = int.TryParse(line, out var lineIndex)
-			? LanguageSettings.CurrentSettings.GetLine(lineIndex, line)
-			: string.Empty;
+		text = LanguageSettings.CurrentSettings.GetLine(lineIndex, text);
 	}
 
 	public string GetValue()
 	{
-		if (int.TryParse(line.ToString(), out var lineIndex))
-			return LanguageSettings.CurrentSettings.GetLine(lineIndex, "GetLine(" + lineIndex + ")");
-		else
-			return line;
+		return lineIndex <= 0 ? text : LanguageSettings.CurrentSettings.GetLine(lineIndex, text);
 	}
 }
 
@@ -80,13 +77,21 @@ public class LocalizedText
 [UnityEditor.CustomPropertyDrawer(typeof(LocalizedText))]
 public class LocalizedTextDrawer : UnityEditor.PropertyDrawer
 {
+	private const float Width = 28f;
+	
 	public override void OnGUI(Rect rect, UnityEditor.SerializedProperty property, GUIContent label)
 	{
-		var lineProperty = property.FindPropertyRelative("line");
-		var textProperty = property.FindPropertyRelative("text");
-		textProperty.stringValue = int.TryParse(lineProperty.stringValue, out var lineIndex)
-			? LanguageSettings.CurrentSettings.GetLine(lineIndex, lineProperty.stringValue)
-			: lineProperty.stringValue;
+		var lineProp = property.FindPropertyRelative("lineIndex");
+		var lineRect = new Rect(rect.position, new Vector2(Width, rect.height));
+		lineProp.intValue = UnityEditor.EditorGUI.IntField(lineRect, lineProp.intValue);
+		var textProp = property.FindPropertyRelative("text");
+		var textRect = new Rect(rect.position + new Vector2(Width, 0), new Vector2(rect.width - Width, rect.height));
+		textProp.stringValue = UnityEditor.EditorGUI.TextField(textRect, textProp.stringValue);
+		if (GUI.changed)
+		{
+			textProp.stringValue = lineProp.intValue <= 0 ? textProp.stringValue : LanguageSettings.CurrentSettings.GetLine(lineProp.intValue, textProp.stringValue);
+			property.serializedObject.ApplyModifiedProperties();
+		}
 	}
 }
 #endif*/
