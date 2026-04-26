@@ -152,7 +152,7 @@ public class Inventory : MonoBehaviour
 			}
 
 			if(debugMode > 0) Debug.Log(this + " DestroysIfEmpty");
-			Destroy(gameObject);
+			gameObject.SetActive(false);
 		}
 	}
 	#endregion

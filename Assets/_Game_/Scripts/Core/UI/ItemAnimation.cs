@@ -3,40 +3,54 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-
+[RequireComponent(typeof(Animation))]
 public class ItemAnimation : MonoBehaviour
 {
-	[SerializeField] private float duration = 2.0f;
-	[SerializeField] private AnimationCurve upCurve;
-	[SerializeField] private float upScale = 2.0f;
+	public enum TriggerType
+	{
+		None = -1,
+		Loot = 0,
+		Use = 1
+	}
+	
 	[SerializeField] private RawImage iconContainer;
-	[SerializeField] private AnimationCurve alphaCurve;
+	[SerializeField] private TriggerType triggerType;
+	
+	
+	private bool displayOnLoot => triggerType == TriggerType.Loot;
+	private bool displayOnUse => triggerType == TriggerType.Use;
 
-	private static ItemAnimation singleton;
-	private Vector3 positionFrom, positionTo;
-	private float time;
+	private Inventory inventoryFrom, inventoryTo;
 	private RectTransform rectTransform;
+	private bool isClone;
+	private new Animation animation;
+
+	#if UNITY_EDITOR
+	private void OnDrawGizmosSelected()
+	{
+		if (Application.isPlaying) return;
+		var newName = typeof(ItemAnimation) + "_" + triggerType;
+		if (newName != name)
+		{
+			name = newName;
+			Utils.SetDirty(this);
+		}
+	}
+	#endif
 
 	private void Awake()
 	{
 		rectTransform = GetComponent<RectTransform>();
-		if (!singleton)
-		{
-			singleton = this;
-			
-			Inventory.onAnyItemTransfered += OnAnyItemTransfered;
-			Inventory.onAnyItemUsed += OnAnyItemUsed;
-			
-			gameObject.SetActive(false);
-		}
+		animation = GetComponent<Animation>();
+		animation.playAutomatically = false;
 	}
 
 	private void OnDestroy()
 	{
-		if (singleton == this)
+		if (!isClone)
 		{
-			Inventory.onAnyItemTransfered -= OnAnyItemTransfered;
-			Inventory.onAnyItemUsed -= OnAnyItemUsed;
+			if(displayOnLoot) Inventory.onAnyItemTransfered -= OnAnyItemTransfered;
+			if(displayOnUse) Inventory.onAnyItemUsed -= OnAnyItemUsed;
 		}
 	}
 
@@ -44,39 +58,63 @@ public class ItemAnimation : MonoBehaviour
 	{
 		var instance = Instantiate(this, transform.parent).GetComponent<ItemAnimation>();
 		instance.gameObject.SetActive(true);
+		instance.isClone = true;
 		instance.iconContainer.texture = itemData.GetIcon();
-		instance.time = duration;
-		instance.positionFrom = fromInventory.GetPosition();
-		instance.positionTo = toInventory.GetPosition();
+		instance.inventoryFrom = fromInventory;
+		instance.inventoryTo = toInventory;
 	}
 
 	private void OnAnyItemUsed(Inventory fromInventory, ItemData itemData, object objectTo)
 	{
 		var instance = Instantiate(this, transform.parent).GetComponent<ItemAnimation>();
 		instance.gameObject.SetActive(true);
+		instance.isClone = true;
 		instance.iconContainer.texture = itemData.GetIcon();
-		instance.time = duration;
-		instance.positionFrom  = instance.positionTo = fromInventory.GetPosition();
+		instance.inventoryFrom  = fromInventory;
 		if(objectTo is CharacterController) 
-			instance.positionTo = (objectTo as CharacterController).GetCenterPosition();
+			instance.inventoryTo = (objectTo as CharacterController).GetComponent<Inventory>();
 		else 
 			Debug.LogWarning(this + " objectTo=" + objectTo + " cannot find position");
 	}
 
-	IEnumerator Start()
+	private IEnumerator Start()
 	{
-		while (time > 0f)
+		if (!isClone)
 		{
-			var worldPosition = Vector3.Lerp(positionTo, positionFrom, time / duration);
-			worldPosition.y += upScale * upCurve.Evaluate(1f - time / duration);
-			var screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
-			rectTransform.anchoredPosition = screenPosition;
-			rectTransform.SetAsLastSibling();
-			iconContainer.color = Utils.ColorAlpha(Color.white, alphaCurve.Evaluate(1f - time / duration));
-			yield return null;
-			time -= Time.deltaTime;
+			if(displayOnLoot) Inventory.onAnyItemTransfered += OnAnyItemTransfered;
+			if(displayOnUse) Inventory.onAnyItemUsed += OnAnyItemUsed;
+			
+			gameObject.SetActive(false);
+			yield break;
 		}
-
+		
+		animation.clip = animation.GetClip(typeof(ItemAnimation) + "_" + triggerType.ToString());
+		animation.Play(animation.clip.name);
+		
+		do
+		{
+			yield return null;
+		} while (animation.isPlaying);
+		
 		Destroy(gameObject);
 	}
+
+	private void LateUpdate()
+	{
+		if (inventoryFrom)
+		{
+			if (!inventoryTo)
+			{
+				rectTransform.anchoredPosition = GetScreenPosition(inventoryFrom.GetPosition());
+			}
+			else
+			{
+				rectTransform.anchoredPosition = GetScreenPosition(
+					Vector3.Lerp( inventoryFrom.GetPosition(), inventoryTo.GetPosition(), animation[animation.clip.name].normalizedTime)
+				);
+			}
+		}
+	}
+
+	private Vector3 GetScreenPosition(Vector3 world) => Camera.main.WorldToScreenPoint(world);
 }
