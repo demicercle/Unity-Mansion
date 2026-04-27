@@ -15,7 +15,7 @@ public class CharacterRoutines : MonoBehaviour
 	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
 	
-	public static Coroutine DoLookPositionOn(CharacterController character, Vector3 lookPosition)
+	public static Coroutine DoLookPositionOn(CharacterEntity character, Vector3 lookPosition)
 	{
 		return character.StartCoroutine(character.Routines.WaitCharacterLookPosition(lookPosition));
 	}
@@ -64,7 +64,7 @@ public class CharacterRoutines : MonoBehaviour
 		if (debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), lookPosition, Color.magenta, 1.0f);//TODO defaultDrawDuration
 		StartNewRoutine(WaitCharacterLookPosition(lookPosition));
 	}
-	public void AssignTalk(CharacterController npc) // TODO all " Assign " methods should return the coroutine
+	public void AssignTalk(CharacterEntity npc) // TODO all " Assign " methods should return the coroutine
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignTalk " + npc);
 		StartCoroutine(WaitCharacterTalk(npc));
@@ -79,7 +79,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignMoveToDestination(Vector3 navPosition)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignMoveToDestination ");
-		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
@@ -94,7 +94,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignInteract(PropComponent clickedProp)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignInteract ");
-		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
@@ -109,7 +109,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignAttack(IAttackable other, bool canUseRunAction)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
-		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
@@ -121,10 +121,10 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-	public void Leader_AssignTalk(CharacterController npc)
+	public void Leader_AssignTalk(CharacterEntity npc)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignTalk ");
-		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
@@ -136,7 +136,7 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-	public void AssignFollows(CharacterController leader)
+	public void AssignFollows(CharacterEntity leader)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignFollows " + leader);
 		StopAllRoutines();
@@ -158,11 +158,11 @@ public class CharacterRoutines : MonoBehaviour
 	
 #region PRIVATE
 	private Coroutine coroutine;
-	private CharacterController _selfCharacter;
+	private CharacterEntity _selfCharacter;
 
 	private void Awake()
 	{
-		_selfCharacter = GetComponent<CharacterController>();
+		_selfCharacter = GetComponent<CharacterEntity>();
 		if(!_selfCharacter) Debug.LogError(this + " absolutely needs a character!");
 	}
 
@@ -520,7 +520,7 @@ public class CharacterRoutines : MonoBehaviour
 		_selfCharacter.FloatingText(action.ToString());
 	}
 
-	private IEnumerator WaitCharacterTalk(CharacterController npc)
+	private IEnumerator WaitCharacterTalk(CharacterEntity npc)
 	{
 		debugString = "WaitCharacterTalk " + npc;
 		if(debugMode > 0) Debug.Log(">> WaitCharacterTalk: " + this + " " + npc);
@@ -553,9 +553,9 @@ public class CharacterRoutines : MonoBehaviour
 	private IEnumerator WaitCharacterUseItem( ItemData itemToUse,object objectTo)
 	{
 		var useRange = itemToUse.GetUseRange();
-		if (objectTo is CharacterController)
+		if (objectTo is CharacterEntity)
 		{
-			var otherCharacter = objectTo as CharacterController;
+			var otherCharacter = objectTo as CharacterEntity;
 			if (useRange > 0 && NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) >
 			    useRange)
 			{

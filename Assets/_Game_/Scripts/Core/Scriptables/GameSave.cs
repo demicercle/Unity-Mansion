@@ -49,7 +49,7 @@ public class GameSave : ScriptableObject
 		public float damages;
 		public string[] slots = Array.Empty<string>();
 
-		public void Save(CharacterController character)
+		public void Save(CharacterEntity character)
 		{
 			name = character.name;
 			position = character.GetSavedPosition();
@@ -62,7 +62,7 @@ public class GameSave : ScriptableObject
 				slots = inv.GetItemNames();
 		}
 
-		public void Load(CharacterController character)
+		public void Load(CharacterEntity character)
 		{
 			character.Teleport(position, rotation);
 			
@@ -75,7 +75,7 @@ public class GameSave : ScriptableObject
 				inv.SetItemNames(slots);
 		}
 
-		public SavedPC(CharacterController character = null)
+		public SavedPC(CharacterEntity character = null)
 		{
 			if(character)
 				Save(character);
@@ -90,7 +90,7 @@ public class GameSave : ScriptableObject
 		public int rotation;
 		public bool isDead;
 
-		public void Save(CharacterController character)
+		public void Save(CharacterEntity character)
 		{
 			name = character.name;
 			position = character.GetSavedPosition();
@@ -98,7 +98,7 @@ public class GameSave : ScriptableObject
 			isDead = character.IsDead();
 		}
 
-		public void Load(CharacterController character)
+		public void Load(CharacterEntity character)
 		{
 			character.Teleport(position, rotation);
 			
@@ -106,7 +106,7 @@ public class GameSave : ScriptableObject
 				character.TryKill();
 		}
 
-		public SavedCharacter(CharacterController character = null)
+		public SavedCharacter(CharacterEntity character = null)
 		{
 			if(character)
 				Save(character);
@@ -221,7 +221,7 @@ public class GameSave : ScriptableObject
 		if (fromFile)
 			LoadFromFile();
 		
-		var partyCharacters = CharacterController.GetPartyCharacters();
+		var partyCharacters = CharacterEntity.GetPartyCharacters();
 		foreach (var savedPC in savedPCs)
 		{
 			var partyChar = partyCharacters.FirstOrDefault(pc => pc.IsName(savedPC.name));
@@ -312,7 +312,7 @@ public class GameSave : ScriptableObject
 
 		selectedCharacter = CharacterSelection.GetSelectedPartyCharacterIndex();
 		
-		foreach (var partyChar in CharacterController.GetPartyCharacters())
+		foreach (var partyChar in CharacterEntity.GetPartyCharacters())
 		{
 			savedPCs.Add(new SavedPC(partyChar));
 		}

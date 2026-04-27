@@ -52,10 +52,10 @@ public class GameCanvas : MonoBehaviour
 
 	public TextReference FloatingText(Object obj, string label)
 	{
-		if (obj is CharacterController)
+		if (obj is CharacterEntity)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetFollows((obj as CharacterController).transform, (obj as CharacterController).GetCenterPosition(true));
+				.SetFollows((obj as CharacterEntity).transform, (obj as CharacterEntity).GetCenterPosition(true));
 		}
 		
 		if (obj is Component)
@@ -84,7 +84,7 @@ public class GameCanvas : MonoBehaviour
 	private static GameTurnManager gameTurnManager => GameTurnManager.Instance;
 	private static GameInput gameInput => GameInput.Instance;
 
-	private CharacterController[] partyCharacters;
+	private CharacterEntity[] partyCharacters;
 	private MouseOverHandler viewportMouseHandler;
 	private ItemData currentItemToUse;
 	
@@ -103,7 +103,7 @@ public class GameCanvas : MonoBehaviour
 		
 		floatingText.SetActive(false);
 
-		CharacterController.onPartyChanged += UpdatePortraits;
+		CharacterEntity.onPartyChanged += UpdatePortraits;
 		CharacterSelection.selectionChanged += OnSelectionChanged;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
@@ -118,7 +118,7 @@ public class GameCanvas : MonoBehaviour
 		viewportMouseHandler.onMouseOverChanged -= OnViewportRectMouseOver;
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
 		
-		CharacterController.onPartyChanged -= UpdatePortraits;
+		CharacterEntity.onPartyChanged -= UpdatePortraits;
 		CharacterSelection.selectionChanged -= OnSelectionChanged;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
@@ -206,7 +206,7 @@ public class GameCanvas : MonoBehaviour
 			return;
 		}
 		
-		partyCharacters = CharacterController.GetPartyCharacters().ToArray();
+		partyCharacters = CharacterEntity.GetPartyCharacters().ToArray();
 		//Debug.Log(this + " UpdatePortraits partyCharacters=" + partyCharacters.Length);
 		for (int i = 0; i < portraits.Length; i++)
 		{

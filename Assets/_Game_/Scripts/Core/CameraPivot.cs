@@ -51,7 +51,7 @@ public class CameraPivot : MonoBehaviour
     [ContextMenu("FocusFirstCharacter")]
     public void FocusFirstCharacter()
     {
-        var firstCharacter = Utils.FindObjects<CharacterController>()
+        var firstCharacter = Utils.FindObjects<CharacterEntity>()
             .OrderBy(c => (c.CompareTag(Tags.TagPlayer) ? 0 : 1) + c.transform.GetSiblingIndex())
             .FirstOrDefault();
         

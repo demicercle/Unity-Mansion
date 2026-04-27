@@ -20,7 +20,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		CharacterSelection.SelectPartyCharacter( transform.GetSiblingIndex());
 	}
 	
-	public void AssignCharacter(CharacterController character)
+	public void AssignCharacter(CharacterEntity character)
 	{
 		if (_assignedCharacter != null)
 		{
@@ -48,7 +48,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		UpdateStats();
 	}
 	
-	private CharacterController _assignedCharacter;
+	private CharacterEntity _assignedCharacter;
 
 	private void OnSelectionChanged(bool selected)
 	{

@@ -79,7 +79,7 @@ public class NavmeshRebuilder : MonoBehaviour
 		else
 			enabled = false;
 
-		foreach (var character in CharacterController.AllCharacters)
+		foreach (var character in CharacterEntity.AllCharacters)
 		{
 			var agent = character.GetAgent();
 			if (agent.IsActive())

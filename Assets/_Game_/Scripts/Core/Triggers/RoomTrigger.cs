@@ -14,7 +14,7 @@ public class RoomTrigger : MonoBehaviour
 		return !activeRooms.Any(room => room.HasPosition(world));
 	}
 	
-	public static bool IsCharacterVisible(CharacterController character)
+	public static bool IsCharacterVisible(CharacterEntity character)
 	{
 		if (activeRooms.Any(room => room.HasCharacter(character)))
 			return false;
@@ -25,7 +25,7 @@ public class RoomTrigger : MonoBehaviour
 	public bool IsName(string n) => name == n;
 	public string GetName() => name;
 
-	public static bool TryGetRoom(CharacterController character, out RoomTrigger inRoom)
+	public static bool TryGetRoom(CharacterEntity character, out RoomTrigger inRoom)
 	{
 		foreach (var room in allRooms)
 		{
@@ -40,9 +40,9 @@ public class RoomTrigger : MonoBehaviour
 		return false;
 	}
 	
-	public List<CharacterController> GetCharacters()
+	public List<CharacterEntity> GetCharacters()
 	{
-		var outList = new  List<CharacterController>();
+		var outList = new  List<CharacterEntity>();
 		foreach (var trigger in triggers)
 		{
 			outList.AddRange(trigger.GetCharacters());
@@ -74,7 +74,7 @@ public class RoomTrigger : MonoBehaviour
 		onChanged?.Invoke();
 	}
 	
-	public bool HasCharacter(CharacterController character)
+	public bool HasCharacter(CharacterEntity character)
 	{
 		return triggers.Any(t => t.HasCharacter(character));
 	}

@@ -12,7 +12,7 @@ public class PropComponent : MonoBehaviour
 	public static PropComponent[] GetSavedInstances() => allInstances.Where(p => p.saveProp).ToArray();
 	
 	public System.Action onInteracted;
-	public System.Action<CharacterController> onInteractedBy;
+	public System.Action<CharacterEntity> onInteractedBy;
 
 	public string GetName() => name;
 	public bool IsName(string n) => name == n;
@@ -82,7 +82,7 @@ public class PropComponent : MonoBehaviour
 		}
 	}
 
-	public void InteractedBy(CharacterController characterInstigator)
+	public void InteractedBy(CharacterEntity characterInstigator)
 	{
 		Debug.Log(this + " InteractedBy " + characterInstigator + " " + interactionCount);
 		interactionCount++;
@@ -116,7 +116,7 @@ public class PropComponent : MonoBehaviour
 	
 	public float GetAnimDuration() => animDuration; // todo: read the animation itself using events etc
 
-	public Coroutine WaitInteraction(CharacterController characterInstigator) => StartCoroutine(DoWaitInteractionEvent(characterInstigator));
+	public Coroutine WaitInteraction(CharacterEntity characterInstigator) => StartCoroutine(DoWaitInteractionEvent(characterInstigator));
 	
 	#region PRIVATE
 	private bool animFinished;
@@ -170,7 +170,7 @@ public class PropComponent : MonoBehaviour
 		}
 	}
 
-	private IEnumerator DoWaitInteractionEvent(CharacterController characterInstigator)
+	private IEnumerator DoWaitInteractionEvent(CharacterEntity characterInstigator)
 	{
 		Debug.Log(this + " DoWaitInteractionEvent " + animationEvent + " instigator=" + characterInstigator);
 		

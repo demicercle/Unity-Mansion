@@ -9,7 +9,7 @@ using Pathfinding.RVO;
 using UnityEngine;
 
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(CharacterEntity))]
 public class CharacterAgent : MonoBehaviour
 {
 	private const float ReachDestinationScale = 100.0f;
@@ -467,7 +467,7 @@ public class CharacterAgent : MonoBehaviour
 	//private Transform followTarget;
 	private AIDestinationSetter aiDestinationSetter;
 	private AIPath aiPath;
-	private CharacterController _selfCharacter;
+	private CharacterEntity _selfCharacter;
 	private GameTurnManager _gameTurnManager; // TODO
 	private CharacterAnimation _characterAnimation;
 	[HideInInspector] private Vector3[] lastPath; //hide in unity because it crashes (too much things to display probably)
@@ -485,7 +485,7 @@ public class CharacterAgent : MonoBehaviour
 	private void Awake()
 	{
 		_characterAnimation = GetComponent<CharacterAnimation>();
-		_selfCharacter = GetComponent<CharacterController>();
+		_selfCharacter = GetComponent<CharacterEntity>();
 		_selfCharacter.onUseAction += OnUseAction;
 		_selfCharacter.onPartyIndexChanged += OnPartyIndexChanged;
 		

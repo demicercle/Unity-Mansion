@@ -106,7 +106,7 @@ public class Inventory : MonoBehaviour
 
 	public Vector3 GetPosition()
 	{
-		if (TryGetComponent(out CharacterController character))
+		if (TryGetComponent(out CharacterEntity character))
 			return character.GetPosition();
 		if (TryGetComponent(out Collider coll))
 			return coll.bounds.center;
@@ -177,13 +177,13 @@ public class Inventory : MonoBehaviour
 	
 	#region PRIVATE
 	private bool destroyIfEmpty;
-	private CharacterController selfCharacter;
+	private CharacterEntity selfCharacter;
 	
 	private void Awake()
 	{ 
 		allInventories.Add(this);
 		
-		selfCharacter = GetComponent<CharacterController>();
+		selfCharacter = GetComponent<CharacterEntity>();
 	}
 
 	private void OnDestroy()

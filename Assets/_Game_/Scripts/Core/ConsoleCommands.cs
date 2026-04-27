@@ -10,7 +10,7 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("apply_dmg", "")]
 	public static void ApplyDamage(int amount)
 	{
-		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
+		if(CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
 			character.TakeDamage(amount, character);
 	}
 
@@ -28,7 +28,7 @@ public class ConsoleCommands : MonoBehaviour
 	public static void KillRange(float range)
 	{
 		var center = CameraPivot.Instance.GetFocusPosition();
-		foreach (var character in CharacterController.AllCharacters)
+		foreach (var character in CharacterEntity.AllCharacters)
 		{
 			if (!character.IsDead() && character.IsEnemyToPlayer())
 			{
@@ -44,14 +44,14 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("heal", "")]
 	public static void Heal(int amount)
 	{
-		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
+		if(CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
 			character.Heal(amount);
 	}
 
 	[ConsoleMethod("rest", "")]
 	public static void Rest()
 	{
-		if(CharacterSelection.TryGetSelectedCharacter(out CharacterController character))
+		if(CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
 			character.Rest();
 	}
 
@@ -61,12 +61,12 @@ public class ConsoleCommands : MonoBehaviour
 		if (value == 0) return;
 		if (value == 1)
 		{
-			if (CharacterSelection.TryGetSelectedCharacter(out CharacterController partyChar))
+			if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity partyChar))
 				partyChar.UseAllActions();
 		}
 		else
 		{
-			foreach(var partyChar in CharacterController.GetPartyCharacters())
+			foreach(var partyChar in CharacterEntity.GetPartyCharacters())
 				partyChar.UseAllActions();
 		}
 	}
@@ -76,7 +76,7 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("teleport", "")]
 	public static void Teleport(int value)
 	{
-		if (CharacterSelection.TryGetSelectedCharacter(out CharacterController partyChar))
+		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity partyChar))
 		{
 			var result = GameInput.Instance.CursorRaycast(out var hit);
 			if (result == GameInput.CursorRaycastResult_Navigation)
@@ -191,7 +191,7 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("debug_stats", "")]
 	public static void _DebugStats(int value)
 	{
-		Debug.Log("debug_stats=" + (CharacterController.debugStats= value));
+		Debug.Log("debug_stats=" + (CharacterEntity.debugStats= value));
 	}
 
 	[ConsoleMethod("debug_anim", "")]

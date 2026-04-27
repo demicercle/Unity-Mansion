@@ -33,7 +33,7 @@ public class NodeFloatingText : GameNode
 
 	private void OnCallback()
 	{
-		if (_character.TryGetComponent(this, out CharacterController character))
+		if (_character.TryGetComponent(this, out CharacterEntity character))
 		{
 			character.FloatingText(GetInputValue("message", message).GetValue(DialogFiles.script));
 			//_out.Invoke();

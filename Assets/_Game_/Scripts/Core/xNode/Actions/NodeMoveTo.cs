@@ -28,7 +28,7 @@ public class NodeMoveTo : GameNode
 	private void OnStart()
 	{
 		DebugLogThis("OnStart");
-		if (_character.TryGetComponent(this, out CharacterController character))
+		if (_character.TryGetComponent(this, out CharacterEntity character))
 		{
 			if (_to.TryGetComponent(this, out Waypoint waypoint))
 			{

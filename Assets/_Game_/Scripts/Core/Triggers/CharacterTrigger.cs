@@ -20,9 +20,9 @@ public class CharacterTrigger : MonoBehaviour
 	
 	public event System.Action<CharacterTrigger> onTriggered;
 
-	public CharacterController[] GetCharacters() => characters.ToArray();
+	public CharacterEntity[] GetCharacters() => characters.ToArray();
 
-	public bool HasCharacter(CharacterController character)
+	public bool HasCharacter(CharacterEntity character)
 	{
 		return characters.Contains(character);
 	}
@@ -52,9 +52,9 @@ public class CharacterTrigger : MonoBehaviour
 	private Bounds worldBounds;
 	
 	[Header("Debug")]
-	[ReadOnly][SerializeField] private List<CharacterController> characters = new List<CharacterController>();
+	[ReadOnly][SerializeField] private List<CharacterEntity> characters = new List<CharacterEntity>();
 
-	bool IsCharacterValid(CharacterController character) => !character.IsDead() && (!partyOnly || character.InParty());
+	bool IsCharacterValid(CharacterEntity character) => !character.IsDead() && (!partyOnly || character.InParty());
 
 	private void OnDrawGizmosSelected()
 	{
@@ -75,7 +75,7 @@ public class CharacterTrigger : MonoBehaviour
 	
 	private void OnTriggerEnter(Collider other)
 	{
-		if (other.TryGetComponent(out CharacterController character) && IsCharacterValid(character))
+		if (other.TryGetComponent(out CharacterEntity character) && IsCharacterValid(character))
 		{
 			characters.Add(character);
 			if(debugMode>0) Debug.Log(this + " OnTriggerEnter " + character);
@@ -85,7 +85,7 @@ public class CharacterTrigger : MonoBehaviour
 
 	private void OnTriggerExit(Collider other)
 	{
-		if (other.TryGetComponent(out CharacterController character))
+		if (other.TryGetComponent(out CharacterEntity character))
 		{
 			characters.Remove(character);
 			if(debugMode>0) Debug.Log(this + " OnTriggerExit " + character);

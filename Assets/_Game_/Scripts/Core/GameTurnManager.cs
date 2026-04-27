@@ -76,18 +76,18 @@ public class GameTurnManager : MonoBehaviour
 		}
 	}
 
-	public CharacterController[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
-	public CharacterController[] GetLevelCharacters() => levelCharacters.ToArray();
+	public CharacterEntity[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
+	public CharacterEntity[] GetLevelCharacters() => levelCharacters.ToArray();
 	public bool IsLevelIndex(int index) => index == 0; // TODO
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
-	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
+	private IEnumerable<CharacterEntity> partyCharacters => CharacterEntity.GetPartyCharacters();
 	
-	private CharacterController[] levelCharacters;
-	private CharacterController currentAICharacter;
-	private CharacterController focusCharacter;
-	private List<CharacterController> turnBasedCharacters = new List<CharacterController>();
+	private CharacterEntity[] levelCharacters;
+	private CharacterEntity currentAICharacter;
+	private CharacterEntity focusCharacter;
+	private List<CharacterEntity> turnBasedCharacters = new List<CharacterEntity>();
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
@@ -142,7 +142,7 @@ public class GameTurnManager : MonoBehaviour
 		
 		yield return new WaitForSeconds(0.1f); // for triggers
 
-		levelCharacters = CharacterController.AllCharacters
+		levelCharacters = CharacterEntity.AllCharacters
 			.OrderBy(c => c.transform.GetSiblingIndex())
 			.ToArray();
 		
@@ -484,7 +484,7 @@ public class GameTurnManager : MonoBehaviour
 		return false;
 	}
 
-	private void OnAnyDetectionChanged(CharacterController char1, CharacterController char2, bool detected)
+	private void OnAnyDetectionChanged(CharacterEntity char1, CharacterEntity char2, bool detected)
 	{
 		if (detected)
 		{

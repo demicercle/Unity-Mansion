@@ -11,7 +11,7 @@ public class NodeTalked : GameNode
 	{
 		base.OnScriptStart();
 		
-		if (_character.TryGetComponent(this, out CharacterController character))
+		if (_character.TryGetComponent(this, out CharacterEntity character))
 		{
 			character.onTalkedBy += OnTalkedBy;
 		}
@@ -24,7 +24,7 @@ public class NodeTalked : GameNode
 	protected override void OnScriptDestroy()
 	{
 		base.OnScriptDestroy();
-		if (_character.TryGetComponent(this, out CharacterController character))
+		if (_character.TryGetComponent(this, out CharacterEntity character))
 		{
 			character.onTalkedBy -= OnTalkedBy;
 		}
@@ -39,7 +39,7 @@ public class NodeTalked : GameNode
 		return null; // Replace this
 	}
 	
-	private void OnTalkedBy(CharacterController other)
+	private void OnTalkedBy(CharacterEntity other)
 	{
 		_out.Invoke();
 	}

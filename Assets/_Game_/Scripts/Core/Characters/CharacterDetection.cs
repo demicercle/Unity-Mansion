@@ -7,10 +7,10 @@ public class CharacterDetection : MonoBehaviour
 {
 	public static int debugMode { get; set; }
 
-	public static event System.Action<CharacterController, CharacterController, bool> onAnyCharacterDetectionChanged;
+	public static event System.Action<CharacterEntity, CharacterEntity, bool> onAnyCharacterDetectionChanged;
 	
-	public System.Action<CharacterController> onCharacterDetected;
-	public System.Action<CharacterController> onCharacterLost;
+	public System.Action<CharacterEntity> onCharacterDetected;
+	public System.Action<CharacterEntity> onCharacterLost;
 	
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
@@ -22,11 +22,11 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField] private bool drawGizmos;
 	[SerializeField] [Min(0f)] private float looseTargetDistance;
 	
-	public bool IsCharacterDetected(CharacterController other) => other && detectedCharacters.Contains(other);
+	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
 	
-	public CharacterController[] GetDetectedCharacters() => detectedCharacters.ToArray();
+	public CharacterEntity[] GetDetectedCharacters() => detectedCharacters.ToArray();
 	
-	public void SetDetected(CharacterController otherCharacter, bool value)
+	public void SetDetected(CharacterEntity otherCharacter, bool value)
 	{
 		if (value)
 		{
@@ -78,13 +78,13 @@ public class CharacterDetection : MonoBehaviour
 
 	public void ClearAll() => detectedCharacters.Clear();
 
-	private List<CharacterController> detectedCharacters = new List<CharacterController>();
-	private CharacterController selfCharacter;
+	private List<CharacterEntity> detectedCharacters = new List<CharacterEntity>();
+	private CharacterEntity selfCharacter;
 	private string debugString;
 	
 	private void Awake()
 	{
-		selfCharacter = GetComponent<CharacterController>();
+		selfCharacter = GetComponent<CharacterEntity>();
 		if (!selfCharacter)
 		{
 			Debug.LogWarning(this + " has no character controller!");
@@ -94,8 +94,8 @@ public class CharacterDetection : MonoBehaviour
 
 	private void OnEnable()
 	{
-		CharacterController.onAnyCharacterMoved += OnAnyCharacterMoved;
-		CharacterController.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
+		CharacterEntity.onAnyCharacterMoved += OnAnyCharacterMoved;
+		CharacterEntity.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
 		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
 		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 		selfCharacter.onDamagedBy += OnDamagedBy;
@@ -105,8 +105,8 @@ public class CharacterDetection : MonoBehaviour
 	{
 		if (!selfCharacter) return;
 		
-		CharacterController.onAnyCharacterMoved -= OnAnyCharacterMoved;
-		CharacterController.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
+		CharacterEntity.onAnyCharacterMoved -= OnAnyCharacterMoved;
+		CharacterEntity.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
 		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
 		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
 		selfCharacter.onDamagedBy -= OnDamagedBy;
@@ -116,7 +116,7 @@ public class CharacterDetection : MonoBehaviour
 	
 	private void OnTurnEnded()  => OnAnyCharacterMoved(selfCharacter);
 
-	private void OnDamagedBy(CharacterController other, float amount)
+	private void OnDamagedBy(CharacterEntity other, float amount)
 	{
 		if(debugMode > 1) Debug.Log(this + " OnDamagedBy " + other);
 		
@@ -124,10 +124,10 @@ public class CharacterDetection : MonoBehaviour
 			SetDetected(other, true);
 	}
 
-	private void OnAnyCharacterUsesAction(CharacterController anyCharacter, CharacterAction _) =>
+	private void OnAnyCharacterUsesAction(CharacterEntity anyCharacter, CharacterAction _) =>
 		OnAnyCharacterMoved(anyCharacter);
 	
-	private void OnAnyCharacterMoved(CharacterController anyCharacter)
+	private void OnAnyCharacterMoved(CharacterEntity anyCharacter)
 	{
 		if (anyCharacter.IsDead()) 
 			return;
@@ -140,7 +140,7 @@ public class CharacterDetection : MonoBehaviour
 		
 		if (anyCharacter == selfCharacter)
 		{
-			foreach (var otherCharacter in CharacterController.AllCharacters)
+			foreach (var otherCharacter in CharacterEntity.AllCharacters)
 			{
 				if (otherCharacter == selfCharacter) continue;
 				OnAnyCharacterMoved(otherCharacter);
@@ -165,7 +165,7 @@ public class CharacterDetection : MonoBehaviour
 		}
 	}
 
-	private bool IsCharacterVisible(CharacterController otherCharacter)
+	private bool IsCharacterVisible(CharacterEntity otherCharacter)
 	{
 		if (selfCharacter.IsPlayer() && otherCharacter.IsPlayer())  // party characters will always detect each other
 			return true;
@@ -201,7 +201,7 @@ public class CharacterDetection : MonoBehaviour
 		return false;
 	}
 
-	private bool AngleCheck(CharacterController other)
+	private bool AngleCheck(CharacterEntity other)
 	{
 		if (maxAngle <= 0f) return false;
 		if (maxAngle >= 360f) return true;
@@ -219,7 +219,7 @@ public class CharacterDetection : MonoBehaviour
 		return angle <= maxAngle;
 	}
 	
-	private bool ObstructionCheck(CharacterController otherCharacter)
+	private bool ObstructionCheck(CharacterEntity otherCharacter)
 	{
 		Vector3 eyesPos = selfCharacter.GetEyesPosition();
 		Vector3 otherPos =  otherCharacter.GetCenterPosition();
@@ -283,7 +283,7 @@ public class CharacterDetection : MonoBehaviour
 	private void OnDrawGizmosSelected()
 	{
 		if (!drawGizmos) return;
-		selfCharacter = GetComponent<CharacterController>();
+		selfCharacter = GetComponent<CharacterEntity>();
 		if (selfCharacter)
 		{
 			if (maxAngle <= 0f) return;

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class HideInFog : MonoBehaviour
 {
-	[SerializeField] private CharacterController character;
+	[SerializeField] private CharacterEntity character;
 	[SerializeField] private List<Renderer> transparentFX = new List<Renderer>();
 	[SerializeField] private List<Renderer> renderers = new List<Renderer>();
 	[SerializeField] private List<Collider> colliders = new List<Collider>();

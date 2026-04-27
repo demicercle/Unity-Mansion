@@ -11,19 +11,19 @@ public class CharacterSelection : MonoBehaviour
 	#region Static Selection Methods
 	public static event System.Action selectionChanged;
 	
-	public static CharacterController GetSelectedCharacter() => selectedCharacter;
+	public static CharacterEntity GetSelectedCharacter() => selectedCharacter;
 
-	public static bool TryGetSelectedCharacter(out CharacterController character)
+	public static bool TryGetSelectedCharacter(out CharacterEntity character)
 	{
 		character = GetSelectedCharacter();
 		return character != null;
 	}
 
-	public static bool IsCharacterSelected(CharacterController character) => selectedCharacter == character;
+	public static bool IsCharacterSelected(CharacterEntity character) => selectedCharacter == character;
 
 	public static void SelectCharacterAt(int index)
 	{
-		var partyChars = CharacterController.GetPartyCharacters();
+		var partyChars = CharacterEntity.GetPartyCharacters();
 		if (index < 0 || index >= partyChars.Length)
 		{
 			Debug.LogWarning("SelectCharacterAt invalid index " + index + " / " + partyChars.Length);
@@ -33,7 +33,7 @@ public class CharacterSelection : MonoBehaviour
 		SelectCharacter(partyChars[index]);
 	}
 
-	public static void SelectCharacter(CharacterController newCharacter)
+	public static void SelectCharacter(CharacterEntity newCharacter)
 	{
 		Debug.Log("SelectCharacter: " + newCharacter);
 
@@ -54,17 +54,17 @@ public class CharacterSelection : MonoBehaviour
 
 	public static void SelectPartyCharacter(int index)
 	{
-		var party = CharacterController.GetPartyCharacters().ToArray();
+		var party = CharacterEntity.GetPartyCharacters().ToArray();
 		if(index >= 0 && index < party.Length) SelectCharacter(party[index]);
 	}
 	
 	public static int GetSelectedPartyCharacterIndex()
 	{
-		return selectedCharacter == null ? -1 : CharacterController.GetPartyCharacters().ToList().IndexOf(selectedCharacter);
+		return selectedCharacter == null ? -1 : CharacterEntity.GetPartyCharacters().ToList().IndexOf(selectedCharacter);
 	}
 
 	public static void SelectFirstCharacter() =>
-		SelectCharacter(CharacterController.GetPartyCharacters().FirstOrDefault());
+		SelectCharacter(CharacterEntity.GetPartyCharacters().FirstOrDefault());
 	
 	public static void SelectNextCharacter()
 	{
@@ -75,12 +75,12 @@ public class CharacterSelection : MonoBehaviour
 			return;
 		}
 
-		var party = CharacterController.GetPartyCharacters().ToArray();
+		var party = CharacterEntity.GetPartyCharacters().ToArray();
 		var partyCount = party.Length;
 		var newIndex = (startIndex + 1) % partyCount;
 		if(debugMode >0) Debug.Log("SelectNextCharacter " + startIndex + " " + selected + " > " + newIndex);
 		SelectCharacter(party[newIndex]);
-		if (party[newIndex].IsDead() && CharacterController.CountLivingPartyCharacters() > 1)
+		if (party[newIndex].IsDead() && CharacterEntity.CountLivingPartyCharacters() > 1)
 		{
 			if(debugMode >0) Debug.Log(party[newIndex] + " is dead, select next");
 			SelectNextCharacter();
@@ -88,8 +88,8 @@ public class CharacterSelection : MonoBehaviour
 	}
 	#endregion
 	
-	private static CharacterController selectedCharacter;
-	private CharacterController _selfCharacter;
+	private static CharacterEntity selectedCharacter;
+	private CharacterEntity _selfCharacter;
 	
 	[Header("Collision")]
 	[SerializeField] private CapsuleCollider capsuleCollider;
@@ -115,7 +115,7 @@ public class CharacterSelection : MonoBehaviour
 	[ContextMenu("UpdateComponents")]
 	private void UpdateComponents()
 	{
-		if (!_selfCharacter) _selfCharacter = GetComponent<CharacterController>();
+		if (!_selfCharacter) _selfCharacter = GetComponent<CharacterEntity>();
 		if (!_selfCharacter) return;
 		var agent = _selfCharacter.GetAgent();
 		var radius = agent.GetRadius();
@@ -142,7 +142,7 @@ public class CharacterSelection : MonoBehaviour
 
 	private void Awake()
 	{
-		_selfCharacter = GetComponent<CharacterController>();
+		_selfCharacter = GetComponent<CharacterEntity>();
 		if (!_selfCharacter)
 		{
 			Debug.LogWarning(this + " has no CharacterController");

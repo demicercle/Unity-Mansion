@@ -27,7 +27,7 @@ public class ItemData : ScriptableObject
 	{
 		if (target)
 		{
-			if (targetType == TargetType.AnyCharacter && target.TryGetComponent<CharacterController>(out var character))
+			if (targetType == TargetType.AnyCharacter && target.TryGetComponent<CharacterEntity>(out var character))
 			{
 				objectTo = character;
 				return true;
