@@ -57,6 +57,11 @@ public class PropComponent : MonoBehaviour
 		
 		animFinished = false;
 		Invoke("OnAnimFinished", Mathf.Max(animDuration, 0.1f));
+
+		if (TryGetComponent(out Inventory selfInventory) && characterInstigator.TryGetComponent(out Inventory otherInventory))
+		{
+			selfInventory.TransfertTo(otherInventory);
+		}
 		
 		onInteracted?.Invoke();
 		onInteractedBy?.Invoke(characterInstigator);
