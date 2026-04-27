@@ -66,8 +66,11 @@ public class GameTurnManager : MonoBehaviour
 
 	public void TryEndPlayerTurn()
 	{
+		if (!IsTurnBasedMode()) return;
+		
 		if (IsPlayerTurn())
 		{
+			Debug.Log(this + " TryEndTurn");
 			EndTurn();
 		}
 		else

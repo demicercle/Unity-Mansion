@@ -1,12 +1,9 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.Events;
 using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
-using Object = UnityEngine.Object;
 
 public interface ICursorHandler
 {
@@ -198,7 +195,6 @@ public class GameInput : MonoBehaviour
 		inputSystem.UI.RightClick.performed -= OnInputRightClick;
 		inputSystem.UI.Point.performed -= OnInputMouseMove;
 		inputSystem.UI.ScrollWheel.performed -= OnInputCameraZoom;
-		inputSystem.Player.EndTurn.performed -= OnInputEndTurn;
 		inputSystem.Player.SelectNext.performed -= OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed -= OnInputFocusSelected;
 		inputSystem.Player.ToggleGroup.performed -= OnInputToggleGroup;
@@ -286,6 +282,11 @@ public class GameInput : MonoBehaviour
 			if (inputSystem.Player.Escape.WasPressedThisFrame())
 			{
 				PauseCanvas.Instance.TogglePaused();
+			}
+
+			if (inputSystem.Player.EndTurn.WasPressedThisFrame())
+			{
+				gameTurnManager.TryEndPlayerTurn();
 			}
 			
 			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(0);
@@ -560,8 +561,6 @@ public class GameInput : MonoBehaviour
 	}
 
 	// KEY INPUT
-	
-	private void OnInputEndTurn(CallbackContext ctx) => gameTurnManager.TryEndPlayerTurn();
 
 	private void OnInputAction_Run(CallbackContext ctx)
 	{
