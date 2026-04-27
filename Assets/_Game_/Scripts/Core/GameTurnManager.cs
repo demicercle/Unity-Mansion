@@ -20,6 +20,7 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private bool firstTurnIsPlayer = true;
 	[SerializeField] private bool skipInvisibleCharacters = true;
 	[SerializeField] private bool restCharacterAtFirstTurn;
+	[SerializeField] [Range(0f, 6f)] private float restInterval = 3.0f;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
@@ -195,7 +196,7 @@ public class GameTurnManager : MonoBehaviour
 			
 					character.Routines.StopAllRoutines();
 					character.StopAgent();
-					character.GetAgent().SetObstacle(!character.IsSelected());
+					character.GetAgent().UpdateObstacle();
 					character.GetAgent().EnableAvoidance(false);
 
 					if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
@@ -274,7 +275,6 @@ public class GameTurnManager : MonoBehaviour
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
 				
-				currentAICharacter = otherCharacter;
 				otherCharacter.Rest(); // rest not player character
 
 				if (skipInvisibleCharacters && !otherCharacter.IsCharacterRevealed())
@@ -283,6 +283,8 @@ public class GameTurnManager : MonoBehaviour
 					yield return new WaitForSeconds(defaultActionsSeconds);
 					continue;
 				}
+				
+				currentAICharacter = otherCharacter;
 				
 				cameraPivot.Focus(otherCharacter);
 				//TODO "cameraPivot.Lock(true)"
@@ -338,13 +340,13 @@ public class GameTurnManager : MonoBehaviour
 
 		do
 		{
-			PartyRest(false);
+			PartyRest(true);
 
 			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
-				otherCharacter.Rest(false);
+				if (Time.time - otherCharacter.lastTimeRested >= restInterval) otherCharacter.Rest(debugMode > 1);
 				if (otherCharacter.Routines.AnyActive()) continue;
 				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain)) continue;
 				
@@ -374,13 +376,15 @@ public class GameTurnManager : MonoBehaviour
 	{
 		playerTurn = false;
 		onPlayerChanged?.Invoke(false);
-		PartyRest(true);
 		Debug.Log(this + " EndTurn " + currentTurn);
 		onTurnEnded?.Invoke();
 	}
 	
 	private void NewTurn()
 	{
+		if(currentTurn >= 1 || restCharacterAtFirstTurn) 
+			PartyRest(false);
+		
 		currentTurn += 1;
 		playerTurn = true;
 		onPlayerChanged?.Invoke(true);
@@ -414,10 +418,13 @@ public class GameTurnManager : MonoBehaviour
 		CharacterSelection.SelectCharacter(bestCharacter);
 	}
 
-	private void PartyRest(bool verbose)
+	private void PartyRest(bool checkInterval)
 	{
 		foreach (var character in partyCharacters)
-			character.Rest(verbose);
+		{
+			if(!checkInterval || Time.time - character.lastTimeRested > restInterval)
+				character.Rest(debugMode > 1);
+		}
 	}
 
 	private bool ShouldExitTurnBased()
@@ -479,11 +486,16 @@ public class GameTurnManager : MonoBehaviour
 	}
 	#endregion
 
+	[Header("Debug")]
+	[SerializeField] private Rect debugGUIRect;
 	private void OnGUI()
 	{
 		if (debugMode > 0)
 		{
-			GUILayout.BeginArea(new Rect(16,16,256f,Screen.height));
+			if (GameInput.IsConsoleVisible()) return;
+			if (isLoading) return;
+			
+			GUILayout.BeginArea(debugGUIRect);
 			
 			GUILayout.BeginVertical("textfield");
 			

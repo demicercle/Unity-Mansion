@@ -113,9 +113,10 @@ MonoBehaviour:
   worldY: 0
   worldHeight: 3
   awakeZoom: 1
-  canRotateY: 1
-  clampedRotationAngle: 0
-  orbitFromScreenCenter: 1
+  rotationInputScale: 90
+  animator: {fileID: 8422079425768255504}
+  zoomParameter: Blend
+  rotationPivot: {fileID: 1017557397532967885}
   lerpSpeed: 6
   inputSpeed: 14
   panSpeed: 20
@@ -123,10 +124,8 @@ MonoBehaviour:
   zoomSpeed: 1
   rotationSpeed: {x: 1, y: 16}
   orbitSpeed: {x: 0.18, y: 0}
+  orbitMaxSpeed: {x: -1, y: -1}
   orbitDrag: 0
-  animator: {fileID: 8422079425768255504}
-  zoomParameter: Blend
-  rotationPivot: {fileID: 1017557397532967885}
 --- !u!1 &8751710906931499399
 GameObject:
   m_ObjectHideFlags: 0

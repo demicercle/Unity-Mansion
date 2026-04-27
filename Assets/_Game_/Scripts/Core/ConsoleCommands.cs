@@ -198,10 +198,10 @@ public class ConsoleCommands : MonoBehaviour
 		Debug.Log("debug_routines=" + (CharacterRoutines.debugMode = value));
 	}
 	
-	[ConsoleMethod("debug_cursor", "")]
+	[ConsoleMethod("debug_input", "")]
 	public static void _DebugInput(int value)
 	{
-		Debug.Log("debug_cursor=" + (GameInput.debugMode = value));
+		Debug.Log("debug_input=" + (GameInput.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_follows", "")]
@@ -248,11 +248,15 @@ public class ConsoleCommands : MonoBehaviour
 	
 	#endregion
 
+	public int skipCommands;
 	public List<string> commandsOnStart = new List<string>();
 	
 	private void Start()
 	{
-		foreach (var cmd in commandsOnStart)
-			IngameDebugConsole.DebugLogConsole.ExecuteCommand(cmd);
+		if (skipCommands < 0) return;
+		for (int i = skipCommands; i < commandsOnStart.Count; i++)
+		{
+			DebugLogConsole.ExecuteCommand(commandsOnStart[i]);
+		}
 	}
 }

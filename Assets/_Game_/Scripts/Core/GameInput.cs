@@ -33,10 +33,10 @@ public class GameInput : MonoBehaviour
 
 	[SerializeField] private CircleRenderer navigationTarget;
 	[Header("Camera Control")]
-	[SerializeField] [Range(0f, 6f)] private float inputOrbitScale = 3.14f;
+	[SerializeField] [Range(0f, 360f)] private float inputOrbitScale = 180f;
+	[SerializeField] [Min(0f)] private float inputOrbitSpeed = 3.0f;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
 	[SerializeField] private bool orbitCameraY = false;
-	[SerializeField] private bool cameraCanRotateClamped = false;
 	[Header("Character Control")]
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
 	
@@ -165,9 +165,6 @@ public class GameInput : MonoBehaviour
 		inputSystem.UI.RightClick.performed += OnInputRightClick;
 		inputSystem.UI.Point.performed += OnInputMouseMove;
 		inputSystem.UI.ScrollWheel.performed += OnInputCameraZoom;
-		inputSystem.Player.RotateLeft.performed += OnInputCameraRotateLeft;
-		inputSystem.Player.RotateRight.performed += OnInputCameraRotateRight;
-		inputSystem.Player.EndTurn.performed += OnInputEndTurn;
 		inputSystem.Player.SelectNext.performed += OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed += OnInputFocusSelected;
 		inputSystem.Player.ToggleGroup.performed += OnInputToggleGroup;
@@ -196,8 +193,6 @@ public class GameInput : MonoBehaviour
 		inputSystem.UI.RightClick.performed -= OnInputRightClick;
 		inputSystem.UI.Point.performed -= OnInputMouseMove;
 		inputSystem.UI.ScrollWheel.performed -= OnInputCameraZoom;
-		inputSystem.Player.RotateLeft.performed -= OnInputCameraRotateLeft;
-		inputSystem.Player.RotateRight.performed -= OnInputCameraRotateRight;
 		inputSystem.Player.EndTurn.performed -= OnInputEndTurn;
 		inputSystem.Player.SelectNext.performed -= OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed -= OnInputFocusSelected;
@@ -294,6 +289,12 @@ public class GameInput : MonoBehaviour
 			{
 				holdMiddleClick = true;
 				middleClickMousePosition = mousePosition;
+				if(debugMode > 0) Debug.Log(this + " middleClickMousePosition=" + middleClickMousePosition);
+			}
+
+			if (inputSystem.Player.HighlightObjects.IsPressed())
+			{
+				OutlineRenderer.ForceHightlight();
 			}
 
 			orbitAxis = inputSystem.Player.Orbit.ReadValue<Vector2>();
@@ -301,8 +302,8 @@ public class GameInput : MonoBehaviour
 			
 			if (orbitWithInputs)
 			{
-				orbitDelta = orbitAxis;
-				orbitDelta *= Time.unscaledDeltaTime;
+				orbitDelta.x = inputOrbitScale <= 0 ? orbitAxis.x : Mathf.Lerp(orbitDelta.x, orbitAxis.x, Time.unscaledDeltaTime * inputOrbitScale);
+				orbitDelta.y = inputOrbitScale <= 0 ? orbitAxis.y :Mathf.Lerp(orbitDelta.y, orbitAxis.y, Time.unscaledDeltaTime * inputOrbitScale);
 				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, inputOrbitScale);
 			}
 			else if (holdMiddleClick)
@@ -310,13 +311,13 @@ public class GameInput : MonoBehaviour
 				if (orbitCameraFromCenterScreen)
 				{
 					orbitDelta.x = Screen.width / 2f - mousePosition.x;
-					orbitDelta.y = Screen.height / 2f - mousePosition.y;
 				}
 				else
 				{
 					orbitDelta.x = (middleClickMousePosition - mousePosition).x;
-					orbitDelta.y = (middleClickMousePosition - mousePosition).y;
 				}
+				
+				orbitDelta.y = 0;
 				
 				if (orbitCameraY)
 				{
@@ -324,24 +325,24 @@ public class GameInput : MonoBehaviour
 					if (Mathf.Abs(orbitDelta.x) > Mathf.Abs(orbitDelta.y))
 					{
 						orbitDelta.x = 0;
-						orbitDelta.y = (lastMousePosition - mousePosition).y;
+
+						if (orbitCameraFromCenterScreen)
+						{
+							orbitDelta.y = Screen.height / 2f - mousePosition.y;
+						}
+						else
+						{
+							orbitDelta.y = (middleClickMousePosition - mousePosition).y;
+						}
 					}
-					else
-					{
-						orbitDelta.y = 0;
-					}
-				}
-				else
-				{
-					orbitDelta.y = (lastMousePosition - mousePosition).y;
 				}
 				
 				orbitDelta.x /= Screen.width;
 				orbitDelta.y /= Screen.height;
-				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, 1f);
+				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y);
 				
 				mouseHasMoved = true;
-				cameraPivot.OrbitDrag((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime);
+				//cameraPivot.OrbitDrag((middleClickMousePosition - mousePosition) * Time.unscaledDeltaTime);
 			}
 			else
 			{
@@ -477,23 +478,26 @@ public class GameInput : MonoBehaviour
 			}
 		}
 
-		if (lastCursorResult == CursorRaycastResult_Navigation && selectedCharacter &&
-		    !selectedCharacter.GetAgent().isPathValid)
+		if (mouseOverViewport)
 		{
-			SetCurrentCursorType(CursorType.Blocked);
-		}
-
-		if (itemToUse)
-		{
-			if (itemToUse.CanBeUsedOn(lastMouseOverObject?.gameObject, out var _))
-				SetCurrentCursorType(CursorType.UseItem);
-			else
+			if (lastCursorResult == CursorRaycastResult_Navigation && selectedCharacter &&
+			    !selectedCharacter.GetAgent().isPathValid)
+			{
 				SetCurrentCursorType(CursorType.Blocked);
-		}
+			}
 
-		if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
-		{
-			SetCurrentCursorType(CursorType.Waiting);
+			if (itemToUse)
+			{
+				if (itemToUse.CanBeUsedOn(lastMouseOverObject?.gameObject, out var _))
+					SetCurrentCursorType(CursorType.UseItem);
+				else
+					SetCurrentCursorType(CursorType.Blocked);
+			}
+
+			if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
+			{
+				SetCurrentCursorType(CursorType.Waiting);
+			}
 		}
 
 		if (isLoading)
@@ -521,7 +525,7 @@ public class GameInput : MonoBehaviour
 	
 	private void LateUpdate()
 	{
-		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation);
+		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading);
 		if(navigationTarget.gameObject.activeSelf) 
 			navigationTarget.transform.position = navigationHit.point;
 		
@@ -541,16 +545,6 @@ public class GameInput : MonoBehaviour
 			if(selectedCharacter.CanUseAction(CharacterAction.Run))
 				selectedCharacter.Routines.AssignRunAction();
 		}
-	}
-
-	private void OnInputCameraRotateLeft(CallbackContext ctx)
-	{
-		if(hasFocus && cameraCanRotateClamped)cameraPivot.ClampedRotation(-1);
-	}
-
-	private void OnInputCameraRotateRight(CallbackContext ctx)
-	{
-		if(hasFocus && cameraCanRotateClamped)cameraPivot.ClampedRotation(1);
 	}
 	
 	private void OnInputCameraZoom(CallbackContext ctx)
@@ -745,7 +739,7 @@ public class GameInput : MonoBehaviour
 						if (!IsLeaderMode())
 							selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 						else
-							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false, false);
+							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false);
 						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 					}
 					return;
@@ -821,7 +815,7 @@ public class GameInput : MonoBehaviour
 					if (!IsLeaderMode())
 						selectedCharacter.Routines.AssignAttack(attackable, false, false);
 					else
-						selectedCharacter.Routines.Leader_AssignAttack(attackable, false, false);
+						selectedCharacter.Routines.Leader_AssignAttack(attackable, false);
 					//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 				}
 				return;

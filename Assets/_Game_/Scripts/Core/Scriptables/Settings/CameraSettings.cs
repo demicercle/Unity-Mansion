@@ -37,7 +37,6 @@ public class CameraSettings : ScriptableObject/*, IDebugGUI*/
 	public Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
 	public Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
 	public Vector2 orbitMaxSpeed = new Vector2(-1.0f, -1.0f);
-	public float orbitDrag = 0.1f;
 
 	//private bool setDirtyEditor;
 	/*public void OnDebugGUI()

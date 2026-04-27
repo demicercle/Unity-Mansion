@@ -34,6 +34,12 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] private CircleRenderer moveTarget;
 	
 	//public bool PositionChanged(Vector3 p1, Vector3 p2) => p1.ToString() != p2.ToString();
+
+	public bool updateRotation
+	{
+		get => aiPath.updateRotation;
+		set => aiPath.updateRotation = value;
+	}
 	
 	public float GetMaxSpeed() => moveSpeed;
 
@@ -118,14 +124,22 @@ public class CharacterAgent : MonoBehaviour
 	public void StopMovement(bool clamp = false)
 	{
 		if(debugMode > 0) Debug.Log(this + " StopMovement()");
-		SetObstacle(!_selfCharacter.IsSelected());
 		DropOnGround();
+		UpdateObstacle();
 		if(clamp) ClampOnNavigation();
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
 		aiPath.canSearch = false;
 		ClearDestination();
+	}
+
+	public void UpdateObstacle()
+	{
+		SetObstacle(!_selfCharacter.IsSelected() 
+		            && !_selfCharacter.IsMoving()
+		            && _selfCharacter.IsCharacterRevealed() 
+		            && GameTurnManager.Instance.IsTurnBasedMode());
 	}
 
 	public void DropOnGround()
@@ -314,7 +328,6 @@ public class CharacterAgent : MonoBehaviour
 		if (IsMoving())
 		{
 			StopMovement();
-			SetObstacle(true);
 		}
 		aiDestinationSetter.enabled = followTarget;
 		aiDestinationSetter.target = followTarget;
@@ -534,17 +547,10 @@ public class CharacterAgent : MonoBehaviour
 
 	private void SelectionChanged()
 	{
-		if (_selfCharacter.IsSelected())
-		{
-			SetObstacle(!_selfCharacter.IsControllableByPlayer());
-		}
-		else
-		{
-			SetObstacle(true);
-			if(!IsMoving()) ClearDestination();
-		}
-		
+		UpdateObstacle();
+		if(!IsMoving()) ClearDestination();
 		UpdatePathAndTarget(true);
+		rvoController.lockWhenNotMoving = _selfCharacter.IsSelected();
 	}
 
 	private void LateUpdate()

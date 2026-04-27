@@ -58,27 +58,21 @@ public class Inventory : MonoBehaviour
 	
 	public int GetMaxSize() => maxSize;
 
-	public void TransfertToSelectedCharacter()
+	public void TransfertTo(Inventory otherInventory)
 	{
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		for (int i = 0; i < items.Count; i++)
 		{
-			if (selectedCharacter.TryGetComponent(out Inventory otherInventory))
+			if (items[i])
 			{
-				for (int i = 0; i < items.Count; i++)
+				if (!otherInventory.TryAddItem(items[i]))
 				{
-					if (items[i])
-					{
-						if (!otherInventory.TryAddItem(items[i]))
-						{
-							Debug.LogWarning(this + " inventory full " + otherInventory);
-							return;
-						}
-						
-						if(debugMode > 0) Debug.Log(this + " onAnyItemTransfered " + this + " " + otherInventory + " " + items[i]);
-						onAnyItemTransfered?.Invoke(this, otherInventory, items[i]);
-						items[i] = null; // remove from this inventory
-					}
+					Debug.LogWarning(this + " inventory full " + otherInventory);
+					return;
 				}
+						
+				if(debugMode > 0) Debug.Log(this + " onAnyItemTransfered " + this + " " + otherInventory + " " + items[i]);
+				onAnyItemTransfered?.Invoke(this, otherInventory, items[i]);
+				items[i] = null; // remove from this inventory
 			}
 		}
 	}

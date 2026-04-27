@@ -10,7 +10,7 @@ public class Waypoint : MonoBehaviour
 	public int GetRotation() => (int)transform.eulerAngles.y;
 	public Vector3 GetDirection() => transform.forward;
 		
-	[Range(0.1f, 1.0f)] public float radius = 0.4f;
+	[Range(0.1f, 10.0f)] public float radius = 0.4f;
 	public bool ignoreRotation;
 	public Color color = Color.cyan;
 

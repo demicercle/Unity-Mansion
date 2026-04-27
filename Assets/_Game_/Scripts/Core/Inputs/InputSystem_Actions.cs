@@ -192,24 +192,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""RotateLeft"",
-                    ""type"": ""Button"",
-                    ""id"": ""aefde290-4e4a-4c5f-929b-8b64a30558f0"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""RotateRight"",
-                    ""type"": ""Button"",
-                    ""id"": ""886c9298-dbe2-4526-b7dc-cf78a931934c"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""EndTurn"",
                     ""type"": ""Button"",
                     ""id"": ""203be30f-4149-422d-888e-772ff951fd32"",
@@ -251,13 +233,22 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""id"": ""7f83f43d-8eee-4944-89e4-2001254e7e59"",
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": ""ScaleVector2(x=-1,y=0)"",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold"",
                     ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""ToggleGroup"",
                     ""type"": ""Button"",
                     ""id"": ""5e9b5283-27e5-4431-9888-b15704a742b1"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""HighlightObjects"",
+                    ""type"": ""Button"",
+                    ""id"": ""0d3ed21d-b571-4d99-b344-69e2d1d49259"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -674,28 +665,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""fb72cc1f-9ae8-40f6-a8f8-5c02d9139ad2"",
-                    ""path"": ""<Keyboard>/q"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""RotateLeft"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""2e7403d8-4fbd-421e-90a0-bab94dda9725"",
-                    ""path"": ""<Keyboard>/e"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""RotateRight"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""ae6cedde-5fd3-4378-ad4f-84123dc86bdd"",
                     ""path"": ""<Keyboard>/enter"",
                     ""interactions"": """",
@@ -801,6 +770,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""ToggleGroup"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c03add12-6b81-4d5e-af23-01171f11a554"",
+                    ""path"": ""<Keyboard>/alt"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HighlightObjects"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7d6ba488-03f4-4c6a-b9ef-f847d48bd644"",
+                    ""path"": ""<Keyboard>/rightAlt"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HighlightObjects"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1399,14 +1390,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Previous = m_Player.FindAction("Previous", throwIfNotFound: true);
         m_Player_Next = m_Player.FindAction("Next", throwIfNotFound: true);
         m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
-        m_Player_RotateLeft = m_Player.FindAction("RotateLeft", throwIfNotFound: true);
-        m_Player_RotateRight = m_Player.FindAction("RotateRight", throwIfNotFound: true);
         m_Player_EndTurn = m_Player.FindAction("EndTurn", throwIfNotFound: true);
         m_Player_Action_Run = m_Player.FindAction("Action_Run", throwIfNotFound: true);
         m_Player_SelectNext = m_Player.FindAction("SelectNext", throwIfNotFound: true);
         m_Player_FocusSelected = m_Player.FindAction("FocusSelected", throwIfNotFound: true);
         m_Player_Orbit = m_Player.FindAction("Orbit", throwIfNotFound: true);
         m_Player_ToggleGroup = m_Player.FindAction("ToggleGroup", throwIfNotFound: true);
+        m_Player_HighlightObjects = m_Player.FindAction("HighlightObjects", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1511,14 +1501,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Previous;
     private readonly InputAction m_Player_Next;
     private readonly InputAction m_Player_Sprint;
-    private readonly InputAction m_Player_RotateLeft;
-    private readonly InputAction m_Player_RotateRight;
     private readonly InputAction m_Player_EndTurn;
     private readonly InputAction m_Player_Action_Run;
     private readonly InputAction m_Player_SelectNext;
     private readonly InputAction m_Player_FocusSelected;
     private readonly InputAction m_Player_Orbit;
     private readonly InputAction m_Player_ToggleGroup;
+    private readonly InputAction m_Player_HighlightObjects;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1575,14 +1564,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
         /// <summary>
-        /// Provides access to the underlying input action "Player/RotateLeft".
-        /// </summary>
-        public InputAction @RotateLeft => m_Wrapper.m_Player_RotateLeft;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/RotateRight".
-        /// </summary>
-        public InputAction @RotateRight => m_Wrapper.m_Player_RotateRight;
-        /// <summary>
         /// Provides access to the underlying input action "Player/EndTurn".
         /// </summary>
         public InputAction @EndTurn => m_Wrapper.m_Player_EndTurn;
@@ -1606,6 +1587,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/ToggleGroup".
         /// </summary>
         public InputAction @ToggleGroup => m_Wrapper.m_Player_ToggleGroup;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/HighlightObjects".
+        /// </summary>
+        public InputAction @HighlightObjects => m_Wrapper.m_Player_HighlightObjects;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1665,12 +1650,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
-            @RotateLeft.started += instance.OnRotateLeft;
-            @RotateLeft.performed += instance.OnRotateLeft;
-            @RotateLeft.canceled += instance.OnRotateLeft;
-            @RotateRight.started += instance.OnRotateRight;
-            @RotateRight.performed += instance.OnRotateRight;
-            @RotateRight.canceled += instance.OnRotateRight;
             @EndTurn.started += instance.OnEndTurn;
             @EndTurn.performed += instance.OnEndTurn;
             @EndTurn.canceled += instance.OnEndTurn;
@@ -1689,6 +1668,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ToggleGroup.started += instance.OnToggleGroup;
             @ToggleGroup.performed += instance.OnToggleGroup;
             @ToggleGroup.canceled += instance.OnToggleGroup;
+            @HighlightObjects.started += instance.OnHighlightObjects;
+            @HighlightObjects.performed += instance.OnHighlightObjects;
+            @HighlightObjects.canceled += instance.OnHighlightObjects;
         }
 
         /// <summary>
@@ -1733,12 +1715,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
-            @RotateLeft.started -= instance.OnRotateLeft;
-            @RotateLeft.performed -= instance.OnRotateLeft;
-            @RotateLeft.canceled -= instance.OnRotateLeft;
-            @RotateRight.started -= instance.OnRotateRight;
-            @RotateRight.performed -= instance.OnRotateRight;
-            @RotateRight.canceled -= instance.OnRotateRight;
             @EndTurn.started -= instance.OnEndTurn;
             @EndTurn.performed -= instance.OnEndTurn;
             @EndTurn.canceled -= instance.OnEndTurn;
@@ -1757,6 +1733,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ToggleGroup.started -= instance.OnToggleGroup;
             @ToggleGroup.performed -= instance.OnToggleGroup;
             @ToggleGroup.canceled -= instance.OnToggleGroup;
+            @HighlightObjects.started -= instance.OnHighlightObjects;
+            @HighlightObjects.performed -= instance.OnHighlightObjects;
+            @HighlightObjects.canceled -= instance.OnHighlightObjects;
         }
 
         /// <summary>
@@ -2135,20 +2114,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSprint(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "RotateLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnRotateLeft(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "RotateRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnRotateRight(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "EndTurn" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
@@ -2190,6 +2155,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnToggleGroup(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "HighlightObjects" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnHighlightObjects(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

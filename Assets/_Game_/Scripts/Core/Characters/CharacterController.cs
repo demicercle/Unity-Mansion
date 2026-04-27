@@ -30,13 +30,18 @@ public enum CharacterAction
 
 public class CharacterController : MonoBehaviour, IAttackable
 {
-	const float MinFacingDot = 0.9f;
+	private const float MinFacingDot = 0.9f;
+	private const float MinAttackRange = 0.15f;
 	
 	public static int debugStats { get; set; }
 	
 	public static List<CharacterController> AllCharacters => _allCharacters;
 
 	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
+	
+	public static int CountLivingPartyCharacters() => _partyCharacters.Count(p => !p.IsDead());
+
+	public static int PartyCount => _partyCharacters.Count;
 	
 	public static event System.Action onPartyChanged;
 	public static event System.Action<CharacterController, float, object> onAnyCharacterDamaged;
@@ -69,6 +74,8 @@ public class CharacterController : MonoBehaviour, IAttackable
 	[SerializeField] private WeaponData defaultWeapon;
 	
 	public CharacterRoutines Routines => routines;
+	
+	public float lastTimeRested { get; private set; }
 	
 	public void FloatingText_Cant() // TODO: in character animation
 	{
@@ -117,6 +124,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		if(verbose) Debug.Log(this + " Rest");
 		usedActions.Clear();
 		usedMovePoints = 0;
+		lastTimeRested = Time.time;
 		onStatsChanged?.Invoke();
 	}
 	
@@ -236,7 +244,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 
 	public void LookWorldPosition(Vector3 worldPosition, float f = -1f)
 	{
-		DebugDrawer.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
+		//DebugDrawer.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
 		LookDirection(worldPosition - GetPosition(), f);
 	} // TODO not in use
 
@@ -331,8 +339,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	
 	public float GetTotalDamages() => totalDamages;
 	public int GetMaxHealth() => characterData.maxHealth;
-	public int GetCurrentHealthInt() => Mathf.CeilToInt(GetCurrentHealth());
-	public float GetCurrentHealth() => GetMaxHealth() - GetTotalDamages();
+	public int GetCurrentHealth() => GetMaxHealth() - Mathf.CeilToInt(GetTotalDamages());
 	public float GetDamageProgress() => Mathf.Clamp01(GetCurrentHealth() / (float)GetMaxHealth());
 	public bool IsDead() => isDead;
 
@@ -384,6 +391,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
 			if(detection) detection.ClearAll();
+			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();
@@ -413,22 +421,29 @@ public class CharacterController : MonoBehaviour, IAttackable
 
 	public float GetAttackRange(IAttackable target)
 	{
-		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius());
+		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + MinAttackRange);
 	}
 
-	public bool IsAtAttackRange(IAttackable target, bool losCheck = true)
+	public bool IsAtAttackRange(IAttackable target)
 	{
 		var atkRange = GetAttackRange(target);
 		var dist = NavUtils.NavDistanceRoundY(GetPosition(), target.GetPosition());
-		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
-		if (dist <= atkRange)
+		return dist <= atkRange;
+	}
+	
+	public bool LOSCheck(IAttackable other)
+	{
+		var start = GetEyesPosition();
+		var end = other.GetPosition();
+		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
 		{
-			return !losCheck || LOSCheck(target);
-		}
-		else
-		{
+			if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
+			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
 			return false;
 		}
+
+		if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, end, Color.green, 1.0f);
+		return true;
 	}
 	
 	public float GetLastAttackDamage()
@@ -546,20 +561,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		}
 	}
 	
-	private bool LOSCheck(IAttackable other)
-	{
-		var start = GetEyesPosition();
-		var end = other.GetPosition();
-		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
-		{
-			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
-			//DebugGUI.Line(start, end, Color.red, drawDuration);
-			return false;
-		}
-
-		//DebugGUI.Line(start, end, Color.green, drawDuration);
-		return true;
-	}
+	
 	#endregion
 
 	#if UNITY_EDITOR
@@ -574,8 +576,11 @@ public class CharacterController : MonoBehaviour, IAttackable
 	{
 		if (debugStats > 0)
 		{
-			var healthStr = isDead ? "DEAD" : GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2");
-			Utils.DrawWorldGUI(GetEyesPosition(), name + "\n" + healthStr, "label");
+			Utils.DrawWorldGUI(GetEyesPosition(), name 
+			                                      + "\n" + (isDead ? "DEAD" : GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2"))
+			                                      + "\n" + usedActions.Count + "/" + characterData.maxActions
+			                                      + "\n" + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
+				, "label");
 		}
 	}
 }

@@ -48,6 +48,7 @@ MonoBehaviour:
   nextLevelName: Level_0
   firstTurnIsPlayer: 1
   skipInvisibleCharacters: 1
+  restCharacterAtFirstTurn: 0
   cameraStartZoom: 0.204
   realTimeTicks: 1
   postLoadDuration: 1
@@ -62,6 +63,12 @@ MonoBehaviour:
   - {fileID: 1235272970627628970, guid: ebc1fc7399cf6304d88ef4b6f671ba70, type: 3}
   - {fileID: 5406122567533382223, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
   - {fileID: 1961438188781018041, guid: 1abf13e0d98417f43b67e3c232d68eba, type: 3}
+  debugGUIRect:
+    serializedVersion: 2
+    x: 8
+    y: 128
+    width: 256
+    height: 512
 --- !u!1001 &4690182601283876028
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -133,49 +133,13 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8892573405944337149, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9138211787098676585}
-    - targetCorrespondingSourceObject: {fileID: 3782644307103013129, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8892573405944337149, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3900908531413640132}
-    - targetCorrespondingSourceObject: {fileID: 3782644307103013129, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
+      addedObject: {fileID: 4115083939495294090}
+    - targetCorrespondingSourceObject: {fileID: 8892573405944337149, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 792135586237977319}
+      addedObject: {fileID: 4649973613994403766}
   m_SourcePrefab: {fileID: 100100000, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
---- !u!1 &2531190770774256441 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3782644307103013129, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
-  m_PrefabInstance: {fileID: 1683851948055884336}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &3900908531413640132
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2531190770774256441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  ignorePresets: 0
---- !u!114 &792135586237977319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2531190770774256441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::QuickOutline
-  outlineMode: 0
-  outlineColor: {r: 1, g: 1, b: 1, a: 1}
-  outlineWidth: 2
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
 --- !u!4 &7457163448853330551 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8080325011075074119, guid: 7ee975695c7177b42934d08694d715a3, type: 3}
@@ -246,18 +210,6 @@ MonoBehaviour:
   _interacted:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9138211787098676585}
-        m_TargetAssemblyTypeName: Inventory, Assembly-CSharp
-        m_MethodName: TransfertToSelectedCharacter
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 4063956333514656132}
         m_TargetAssemblyTypeName: AnimatorHandler, Assembly-CSharp
         m_MethodName: ToggleBool
@@ -284,6 +236,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   maxSize: 6
+  lootBagPrefab: {fileID: 0}
   items:
   - {fileID: 0}
   - {fileID: 0}
@@ -291,3 +244,35 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+--- !u!114 &4115083939495294090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7797694722379456717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuickOutline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &4649973613994403766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7797694722379456717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
+  boxSize: 0.2
+  ignorePresets: 0

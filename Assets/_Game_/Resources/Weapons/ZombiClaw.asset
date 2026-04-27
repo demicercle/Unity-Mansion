@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26b91483504440d7b3e2d5878f8dde34, type: 3}
   m_Name: ZombiClaw
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  minDamage: 1
-  maxDamage: 2
+  minDamage: 2
+  maxDamage: 3
   isRanged: 0
   attackRange: 0
   noAttack: 0
+  rpgWeaponR: -1
+  rpgWeaponL: -1

@@ -13,12 +13,13 @@ public interface ICharacterBrain
 
 public class CharacterBrain : MonoBehaviour, ICharacterBrain
 {
-	public const float WanderingSearchTimeout = 6.0f;
-	public const float ThinkingTimeout = 10.0f;
-	public const float AggroDistanceScale = 0.9f;
-	public const float MaxAggro = 10.0f;
-	public const float DefaultWaitSeconds = 0.25f;
-	public const float MinDistanceToDetectMovement = 0.20f;
+	private const float WanderingSearchTimeout = 6.0f;
+	private const float SearchWaypointSeconds = 0.5f;
+	private const float ThinkingTimeout = 10.0f;
+	private const float AggroDistanceScale = 0.9f;
+	private const float MaxAggro = 10.0f;
+	private const float DefaultWaitSeconds = 0.25f;
+	private const float MinDistanceToDetectMovement = 0.20f;
 	
 	public static int debugMode { get; set; }
 	
@@ -26,7 +27,6 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	[SerializeField] private bool canPatrol = true;
 	//[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
 	[SerializeField] private Waypoint wanderingPoint;
-	[SerializeField] [Range(0f, 12f)] private float wanderingDistance = 2.5f;
 	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 	
 	public bool IsThinking { get; private set; }
@@ -145,7 +145,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			
 			if(debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
 				
-			_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, false);
+			_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, _selfCharacter.IsUsingRangeWeapon());
 				
 			do
 			{
@@ -227,18 +227,22 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			yield break;
 
 		float startTime = Time.time;
+		float wanderingDistance = wanderingPoint.radius;
+		_lastWanderingPos = _wanderingPos;
 		while (!NavUtils.TryGetRandomPointOnNavmesh(wanderingPoint.GetPosition(), wanderingDistance,
 			       _selfCharacter.GetRadius(), out _wanderingPos)
-		       || Vector3.Distance(_wanderingPos, _selfCharacter.GetPosition()) < wanderingDistance / 2f)
+		       || Vector3.Distance(_wanderingPos, _selfCharacter.GetPosition()) < wanderingDistance / 2f
+		       || Vector3.Distance(_wanderingPos, _lastWanderingPos) < wanderingDistance / 2f)
 		{
-			yield return null;
+			yield return new WaitForSeconds(SearchWaypointSeconds);
 			if (Time.time - startTime > WanderingSearchTimeout)
 			{
 				Debug.LogWarning(this + " wandering Timeout!");
 				yield break;
 			}
 		}
-		
+
+		_lastWanderingPos = _wanderingPos;
 		_selfCharacter.Routines.AssignMoveToDestination(_wanderingPos);
 		do
 		{
@@ -280,7 +284,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	private List<Waypoint> _waypointList;
 	private Waypoint _currentWaypoint;
 	private Vector3 _lastTargetKnownPosition;
-	private Vector3 _wanderingPos;
+	private Vector3 _wanderingPos, _lastWanderingPos;
 	private Dictionary<CharacterController, float> _aggroMap = new Dictionary<CharacterController, float>();
 	private float _startedThinkingTime;
 	private Vector3 _lastPosition;
@@ -479,7 +483,9 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	{
 		if (wanderingPoint)
 		{
+			float wanderingDistance = wanderingPoint.radius;
 			Gizmos.color = Color.blue;
+			wanderingPoint.color = Gizmos.color;
 			Gizmos.DrawLine(transform.position, wanderingPoint.GetPosition());
 			Utils.DrawGizmosCircle(wanderingPoint.GetPosition(), Vector3.up, wanderingDistance);
 		}
