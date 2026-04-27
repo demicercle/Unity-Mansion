@@ -297,7 +297,8 @@ public class GameSave : ScriptableObject
 	}
 	
 	[ContextMenu("Save Game")]
-	public void SaveGame()
+	public void SaveGame()=>SaveGame(false);
+	public void SaveGame(bool toFile)
 	{
 		if (!Application.isPlaying)
 		{
@@ -340,6 +341,9 @@ public class GameSave : ScriptableObject
 		}
 		
 		Debug.Log(this + " Game saved");
+		
+		if(toFile)
+			SaveToFile();
 	}
 
 	[ContextMenu("Save To File")]

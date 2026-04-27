@@ -36,6 +36,8 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private GameObject[] startupObjects = new GameObject[0];
 
 	public bool IsTurnBasedMode() => turnBasedMode;
+
+	public bool PlayerCanSave() => !IsTurnBasedMode();
 	
 	public bool IsPlayerTurn() => playerTurn || !turnBasedMode;
 

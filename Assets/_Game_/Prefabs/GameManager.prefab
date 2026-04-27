@@ -49,6 +49,7 @@ MonoBehaviour:
   firstTurnIsPlayer: 1
   skipInvisibleCharacters: 1
   restCharacterAtFirstTurn: 0
+  restInterval: 3
   cameraStartZoom: 0.204
   realTimeTicks: 1
   postLoadDuration: 1
@@ -62,6 +63,7 @@ MonoBehaviour:
   - {fileID: 5336333531941352975, guid: f9935e526320d6841a75a1a6d3b88052, type: 3}
   - {fileID: 1235272970627628970, guid: ebc1fc7399cf6304d88ef4b6f671ba70, type: 3}
   - {fileID: 5406122567533382223, guid: 084f9d0314802b94bb10c4c82fcf87fa, type: 3}
+  - {fileID: 2271876487196425357, guid: 402bbca7ad3d9b54f8d69398341376ca, type: 3}
   - {fileID: 1961438188781018041, guid: 1abf13e0d98417f43b67e3c232d68eba, type: 3}
   debugGUIRect:
     serializedVersion: 2

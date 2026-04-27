@@ -87,7 +87,7 @@ public class PropComponent : MonoBehaviour
 		Debug.Log(this + " InteractedBy " + characterInstigator + " " + interactionCount);
 		interactionCount++;
 		
-		TriggerAnimators(false);
+		TriggerAnimators(true);
 		
 		animFinished = false;
 		Invoke("OnAnimFinished", Mathf.Max(animDuration, 0.1f));
