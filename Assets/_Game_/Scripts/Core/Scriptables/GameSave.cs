@@ -91,6 +91,7 @@ public class GameSave : ScriptableObject
 
 	[Min(0)] public int version;
 	public List<SavedLevel> savedLevels = new List<SavedLevel>();
+	public int selectedCharacter;
 	public List<SavedPC> savedPCs = new List<SavedPC>();
 
 	public bool IsEmpty() => version == 0;
@@ -103,6 +104,8 @@ public class GameSave : ScriptableObject
 #endif
 		savedLevels.Clear();
 		savedPCs.Clear();
+		selectedCharacter = 0;
+		version = 0;
 		if(!Application.isPlaying) Utils.SetDirty(this);
 	}
 
@@ -149,6 +152,8 @@ public class GameSave : ScriptableObject
 			}
 		}
 		
+		CharacterSelection.SelectCharacterAt(selectedCharacter);
+		
 		Debug.Log(this + " Game loaded");
 	}
 	
@@ -163,7 +168,9 @@ public class GameSave : ScriptableObject
 		
 		Clear();
 
-		version = GAME_VERSION; 
+		version = GAME_VERSION;
+
+		selectedCharacter = CharacterSelection.GetSelectedPartyCharacterIndex();
 		
 		foreach (var partyChar in CharacterController.GetPartyCharacters())
 		{
