@@ -292,6 +292,10 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public Vector3 GetDirection() => transform.forward;
 	
 	public Vector3 GetPosition() => transform.position;
+
+	private const float VectorDecimals = 100f;
+	public Vector3 GetSavedPosition() => new Vector3(Mathf.Round(transform.position.x * VectorDecimals) / VectorDecimals,
+		Mathf.Round(transform.position.y * VectorDecimals) / VectorDecimals, Mathf.Round(transform.position.z * VectorDecimals) / VectorDecimals);
 	
 	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * GetAgent().GetHeight() * 0.9f; // TODO "GetAgent()"
 	

@@ -52,7 +52,7 @@ public class GameSave : ScriptableObject
 		public void Save(CharacterController character)
 		{
 			name = character.name;
-			position = Snapping.Snap(character.GetPosition(),Vector3.one * 0.1f);
+			position = character.GetSavedPosition();
 			rotation = character.GetRotation();
 			isDead = character.IsDead();
 			
@@ -93,7 +93,7 @@ public class GameSave : ScriptableObject
 		public void Save(CharacterController character)
 		{
 			name = character.name;
-			position = Snapping.Snap(character.GetPosition(),Vector3.one * 0.1f);
+			position = character.GetSavedPosition();
 			rotation = character.GetRotation();
 			isDead = character.IsDead();
 		}
