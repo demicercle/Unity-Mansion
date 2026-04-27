@@ -383,6 +383,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
 			if(detection) detection.ClearAll();
+			NavmeshRebuilder.RebuildNavigationOn(gameObject);
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();

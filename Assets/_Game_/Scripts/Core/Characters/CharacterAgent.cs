@@ -118,14 +118,22 @@ public class CharacterAgent : MonoBehaviour
 	public void StopMovement(bool clamp = false)
 	{
 		if(debugMode > 0) Debug.Log(this + " StopMovement()");
-		SetObstacle(!_selfCharacter.IsSelected() && _selfCharacter.IsCharacterRevealed());
 		DropOnGround();
+		UpdateObstacle();
 		if(clamp) ClampOnNavigation();
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
 		aiPath.canSearch = false;
 		ClearDestination();
+	}
+
+	public void UpdateObstacle()
+	{
+		SetObstacle(!_selfCharacter.IsSelected() 
+		            && !_selfCharacter.IsMoving()
+		            && _selfCharacter.IsCharacterRevealed() 
+		            && GameTurnManager.Instance.IsTurnBasedMode());
 	}
 
 	public void DropOnGround()
@@ -533,16 +541,8 @@ public class CharacterAgent : MonoBehaviour
 
 	private void SelectionChanged()
 	{
-		if (_selfCharacter.IsSelected())
-		{
-			SetObstacle(!_selfCharacter.IsControllableByPlayer());
-		}
-		else
-		{
-			SetObstacle(true);
-			if(!IsMoving()) ClearDestination();
-		}
-		
+		UpdateObstacle();
+		if(!IsMoving()) ClearDestination();
 		UpdatePathAndTarget(true);
 	}
 

@@ -195,7 +195,7 @@ public class GameTurnManager : MonoBehaviour
 			
 					character.Routines.StopAllRoutines();
 					character.StopAgent();
-					character.GetAgent().SetObstacle(!character.IsSelected());
+					character.GetAgent().UpdateObstacle();
 					character.GetAgent().EnableAvoidance(false);
 
 					if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
