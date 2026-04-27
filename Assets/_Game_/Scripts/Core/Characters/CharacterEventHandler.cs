@@ -29,6 +29,7 @@ public class CharacterEventHandler : MonoBehaviour
 	public UnityEvent onHealed;
 	public UnityEvent onTurnStart;
 	public UnityEvent onAttack;
+	public UnityEvent<bool> onUseRangeWeapon;
 	public UnityEvent onLastKill;
 
 	[ContextMenu("Find Character")]
@@ -85,6 +86,12 @@ public class CharacterEventHandler : MonoBehaviour
 				Debug.Log(this + " OnCharacterUseAction onActionUsed.Invoke " + action);
 				actionEvt.Invoke();
 			};
+		}
+
+		if (action == CharacterAction.Attack)
+		{
+			onUseRangeWeapon?.Invoke(character.IsUsingRangeWeapon());
+			onAttack?.Invoke();
 		}
 	}
 

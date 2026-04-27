@@ -7,6 +7,9 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(AudioSource))]
 public class AudioTrigger : MonoBehaviour
 {
+	public void SetActive(bool value) => gameObject.SetActive(value);
+	public void SetDisabled(bool value) => gameObject.SetActive(!value);
+	
 	
 	public void PlayNext()
 	{
