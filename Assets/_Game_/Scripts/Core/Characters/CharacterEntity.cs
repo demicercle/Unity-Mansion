@@ -7,7 +7,7 @@ public interface IAttackable
 {
 	Vector3 GetPosition();
 	float GetRadius();
-	void TakeDamage(float amount, object instigator);
+	void TakeDamage(DamageInfo damageInfo, object instigator);
 }
 
 public enum CharacterFaction
@@ -26,6 +26,12 @@ public enum CharacterAction
 	Interact,
 	Talk,
 	UseItem
+}
+
+public struct DamageInfo
+{
+	public float amount;
+	public bool isRanged;
 }
 
 public class CharacterEntity : MonoBehaviour, IAttackable
@@ -385,8 +391,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onStatsChanged?.Invoke();
 	}
 	
-	public void TakeDamage(float amount, object objectFrom)
+	public void TakeDamage(DamageInfo damageInfo, object objectFrom)
 	{
+		var amount = damageInfo.amount;
 		Debug.Log(this + " TakeDamage " + amount);
 		totalDamages += amount;
 		

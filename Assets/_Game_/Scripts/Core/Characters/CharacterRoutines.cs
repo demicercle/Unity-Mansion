@@ -350,7 +350,11 @@ public class CharacterRoutines : MonoBehaviour
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
-		target.TakeDamage(_selfCharacter.GetLastAttackDamage(), _selfCharacter);
+		target.TakeDamage(new DamageInfo()
+		{
+			amount = _selfCharacter.GetLastAttackDamage(),
+			isRanged =  _selfCharacter.IsUsingRangeWeapon()
+		}, _selfCharacter);
 
 		if(debugMode > 0) Debug.Log("attack ends");
 	}

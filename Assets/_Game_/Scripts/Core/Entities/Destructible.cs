@@ -4,6 +4,8 @@ using UnityEngine.Events;
 
 public class Destructible : MonoBehaviour, IAttackable
 {
+	public static int debugMode => CharacterEntity.debugStats;
+	
 	[SerializeField] [Range(0.1f, 5.0f)] private float radius = 1.0f;
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
 	[SerializeField] private Rigidbody[] rigidbodies;
@@ -11,15 +13,23 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	public Vector3 GetPosition() => transform.position;
 	public float GetRadius() => radius;
-	
+
+	public bool damagedWithRangeWeapons;
 	public UnityEvent takeDamage;
 	public UnityEvent breaks;
 
-	public void TakeDamage(float amount, object instigator)
+	public void TakeDamage(DamageInfo dmgInfo, object instigator)
 	{
+		if (!damagedWithRangeWeapons && dmgInfo.isRanged)
+		{
+			GameCanvas.Instance.FloatingText(this, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
+			return;
+		}
+		
+		var amount = dmgInfo.amount;
 		damageAmount += amount;
 		GameCanvas.Instance.FloatingText(this, Mathf.CeilToInt(amount).ToString());
-		Debug.Log(this + " take damage " + amount + " total=" + damageAmount + "/" + maxHealth);
+		if(debugMode > 0)Debug.Log(this + " take damage " + amount + " total=" + damageAmount + "/" + maxHealth);
 		
 		takeDamage?.Invoke();
 		
@@ -57,7 +67,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	{
 		if (isBroken) return;
 		isBroken = true;
-		Debug.Log(this + " Breaks");
+		if(debugMode > 0)Debug.Log(this + " Breaks");
 		
 		foreach (var rb in rigidbodies)
 		{

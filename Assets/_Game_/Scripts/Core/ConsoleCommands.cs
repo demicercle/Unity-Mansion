@@ -11,7 +11,11 @@ public class ConsoleCommands : MonoBehaviour
 	public static void ApplyDamage(int amount)
 	{
 		if(CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
-			character.TakeDamage(amount, character);
+			character.TakeDamage(new DamageInfo()
+			{
+				amount = amount,
+				isRanged = false
+			}, character);
 	}
 
 	[ConsoleMethod("kill_all", "")]
