@@ -262,6 +262,33 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SelectParty1"",
+                    ""type"": ""Button"",
+                    ""id"": ""a90aafa0-58ff-4a36-ade9-551a55f436bb"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SelectParty2"",
+                    ""type"": ""Button"",
+                    ""id"": ""b12f08dc-f626-40d9-9b4d-3a08239d5bb4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SelectParty3"",
+                    ""type"": ""Button"",
+                    ""id"": ""d7143e86-141c-4962-8f2b-3efa84825219"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -823,6 +850,39 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""HighlightObjects"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e9834a6d-00c5-4d51-849d-4b278b308409"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SelectParty1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d0ded1fd-52a1-427a-a9f5-9c350d4996f7"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SelectParty2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b4a60f4b-46cd-4a2d-82ad-05cf86dacfa6"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SelectParty3"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1429,6 +1489,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Orbit = m_Player.FindAction("Orbit", throwIfNotFound: true);
         m_Player_ToggleGroup = m_Player.FindAction("ToggleGroup", throwIfNotFound: true);
         m_Player_HighlightObjects = m_Player.FindAction("HighlightObjects", throwIfNotFound: true);
+        m_Player_SelectParty1 = m_Player.FindAction("SelectParty1", throwIfNotFound: true);
+        m_Player_SelectParty2 = m_Player.FindAction("SelectParty2", throwIfNotFound: true);
+        m_Player_SelectParty3 = m_Player.FindAction("SelectParty3", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1541,6 +1604,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Orbit;
     private readonly InputAction m_Player_ToggleGroup;
     private readonly InputAction m_Player_HighlightObjects;
+    private readonly InputAction m_Player_SelectParty1;
+    private readonly InputAction m_Player_SelectParty2;
+    private readonly InputAction m_Player_SelectParty3;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1629,6 +1695,18 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @HighlightObjects => m_Wrapper.m_Player_HighlightObjects;
         /// <summary>
+        /// Provides access to the underlying input action "Player/SelectParty1".
+        /// </summary>
+        public InputAction @SelectParty1 => m_Wrapper.m_Player_SelectParty1;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/SelectParty2".
+        /// </summary>
+        public InputAction @SelectParty2 => m_Wrapper.m_Player_SelectParty2;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/SelectParty3".
+        /// </summary>
+        public InputAction @SelectParty3 => m_Wrapper.m_Player_SelectParty3;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1711,6 +1789,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @HighlightObjects.started += instance.OnHighlightObjects;
             @HighlightObjects.performed += instance.OnHighlightObjects;
             @HighlightObjects.canceled += instance.OnHighlightObjects;
+            @SelectParty1.started += instance.OnSelectParty1;
+            @SelectParty1.performed += instance.OnSelectParty1;
+            @SelectParty1.canceled += instance.OnSelectParty1;
+            @SelectParty2.started += instance.OnSelectParty2;
+            @SelectParty2.performed += instance.OnSelectParty2;
+            @SelectParty2.canceled += instance.OnSelectParty2;
+            @SelectParty3.started += instance.OnSelectParty3;
+            @SelectParty3.performed += instance.OnSelectParty3;
+            @SelectParty3.canceled += instance.OnSelectParty3;
         }
 
         /// <summary>
@@ -1779,6 +1866,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @HighlightObjects.started -= instance.OnHighlightObjects;
             @HighlightObjects.performed -= instance.OnHighlightObjects;
             @HighlightObjects.canceled -= instance.OnHighlightObjects;
+            @SelectParty1.started -= instance.OnSelectParty1;
+            @SelectParty1.performed -= instance.OnSelectParty1;
+            @SelectParty1.canceled -= instance.OnSelectParty1;
+            @SelectParty2.started -= instance.OnSelectParty2;
+            @SelectParty2.performed -= instance.OnSelectParty2;
+            @SelectParty2.canceled -= instance.OnSelectParty2;
+            @SelectParty3.started -= instance.OnSelectParty3;
+            @SelectParty3.performed -= instance.OnSelectParty3;
+            @SelectParty3.canceled -= instance.OnSelectParty3;
         }
 
         /// <summary>
@@ -2212,6 +2308,27 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnHighlightObjects(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SelectParty1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSelectParty1(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SelectParty2" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSelectParty2(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SelectParty3" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSelectParty3(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

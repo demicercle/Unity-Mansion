@@ -287,6 +287,10 @@ public class GameInput : MonoBehaviour
 			{
 				PauseCanvas.Instance.TogglePaused();
 			}
+			
+			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(0);
+			if (inputSystem.Player.SelectParty2.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(1);
+			if (inputSystem.Player.SelectParty3.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(2);
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
