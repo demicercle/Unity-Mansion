@@ -63,7 +63,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		rawImage.texture = _assignedCharacter.GetPortraitTexture();
 		nameLabel.text = _assignedCharacter.GetDisplayName();
 		healthSprite.fillAmount = 1f - _assignedCharacter.GetDamageProgress();
-		healthLabel.text = _assignedCharacter.GetCurrentHealthInt() + "/" +
+		healthLabel.text = _assignedCharacter.GetCurrentHealth() + "/" +
 		                   _assignedCharacter.GetMaxHealth();
 	}
 

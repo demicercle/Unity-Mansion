@@ -331,8 +331,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	
 	public float GetTotalDamages() => totalDamages;
 	public int GetMaxHealth() => characterData.maxHealth;
-	public int GetCurrentHealthInt() => Mathf.CeilToInt(GetCurrentHealth());
-	public float GetCurrentHealth() => GetMaxHealth() - GetTotalDamages();
+	public int GetCurrentHealth() => GetMaxHealth() - Mathf.CeilToInt(GetTotalDamages());
 	public float GetDamageProgress() => Mathf.Clamp01(GetCurrentHealth() / (float)GetMaxHealth());
 	public bool IsDead() => isDead;
 
