@@ -337,8 +337,12 @@ public class CharacterController : MonoBehaviour, IAttackable
 	
 	public void ConsumeMovePoints(float amount, bool notifyMoves)
 	{
-		usedMovePoints += amount;
-		onStatsChanged?.Invoke();
+		if (amount != 0f)
+		{
+			usedMovePoints += amount;
+			onStatsChanged?.Invoke();
+		}
+		
 		if (notifyMoves)
 		{
 			onMoved?.Invoke();

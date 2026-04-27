@@ -256,14 +256,16 @@ public class ConsoleCommands : MonoBehaviour
 	
 	#endregion
 
-	public int skipCommands;
+	[Min(0)] public int skipCommands;
 	public List<string> commandsOnStart = new List<string>();
 	
 	private void Start()
 	{
-		if (skipCommands < 0) return;
 		for (int i = skipCommands; i < commandsOnStart.Count; i++)
 		{
+			if (commandsOnStart[i].StartsWith("#") || commandsOnStart[i].StartsWith("//"))
+				continue;
+			
 			DebugLogConsole.ExecuteCommand(commandsOnStart[i]);
 		}
 	}

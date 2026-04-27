@@ -501,8 +501,7 @@ public class CharacterRoutines : MonoBehaviour
 			
 			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			
-			if(GameTurnManager.Instance.IsTurnBasedMode())
-				_selfCharacter.ConsumeMovePoints(deltaPos, true);
+			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
 		}
 		
 		if(debugMode > 0) Debug.Log(this + " reached destination! " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));

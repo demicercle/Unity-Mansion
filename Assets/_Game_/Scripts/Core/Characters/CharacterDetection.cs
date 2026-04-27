@@ -115,6 +115,8 @@ public class CharacterDetection : MonoBehaviour
 
 	private void OnDamagedBy(CharacterController other, float amount)
 	{
+		if(debugMode > 1) Debug.Log(this + " OnDamagedBy " + other);
+		
 		if (setDetectedOnDamaged)
 			SetDetected(other, true);
 		
@@ -129,6 +131,9 @@ public class CharacterDetection : MonoBehaviour
 	{
 		if (anyCharacter.IsDead()) 
 			return;
+
+		if (debugMode > 1)
+			Debug.Log(this + " revealed:" + selfCharacter.IsCharacterRevealed() + " OnAnyCharacterMoved "+ anyCharacter + " revealed:" + anyCharacter.IsCharacterRevealed());
 		
 		if (!selfCharacter.IsCharacterRevealed() || !anyCharacter.IsCharacterRevealed())  // ignore not revealed characters
 			return; 
@@ -167,6 +172,8 @@ public class CharacterDetection : MonoBehaviour
 		
 		if (!selfCharacter.IsCharacterRevealed() || !otherCharacter.IsCharacterRevealed()) // ignore not revealed characters
 			return false;
+		
+		if(debugMode > 1) Debug.Log(this + " IsCharacterVisible " + otherCharacter);
 		
 		var selfPosition = selfCharacter.GetPosition();
 		var otherPosition = otherCharacter.GetPosition();
