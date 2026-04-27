@@ -37,6 +37,8 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public static List<CharacterController> AllCharacters => _allCharacters;
 
 	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
+
+	public static int PartyCount => _partyCharacters.Count;
 	
 	public static event System.Action onPartyChanged;
 	public static event System.Action<CharacterController, float, object> onAnyCharacterDamaged;

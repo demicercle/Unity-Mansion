@@ -808,7 +808,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
   followDistance: 1.9
   tickTime: 1
-  heading: -1.88
+  minHeading: -2.79
+  maxHeading: -0.55
+  headingSpeed: 3
+  headingScale: 0.6
 --- !u!114 &-9001009375405151572
 MonoBehaviour:
   m_ObjectHideFlags: 0
