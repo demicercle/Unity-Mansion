@@ -2,6 +2,7 @@
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -10,7 +11,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 {
 	public RawImage rawImage;
 	public TMP_Text nameLabel;
-	public Toggle toggle;
+	public Toggle toggleSelected, toggleHasActions;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
 	
@@ -51,14 +52,18 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 
 	private void OnSelectionChanged(bool selected)
 	{
-		toggle.isOn = selected;
-		//UpdateStats();
+		UpdateStats();
 	}
 
 	private void UpdateStats()
 	{
-		toggle.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
-		toggle.interactable = _assignedCharacter.IsControllableByPlayer();
+		toggleSelected.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
+		toggleSelected.interactable = _assignedCharacter.IsControllableByPlayer();
+
+		toggleHasActions.isOn = GameTurnManager.Instance.IsTurnBasedMode() 
+		                        && GameTurnManager.Instance.IsPlayerTurn()
+		                        && !_assignedCharacter.IsDead()
+		                        && _assignedCharacter.HasActions();
 			
 		rawImage.texture = _assignedCharacter.GetPortraitTexture();
 		nameLabel.text = _assignedCharacter.GetDisplayName();
@@ -67,8 +72,17 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		                   _assignedCharacter.GetMaxHealth();
 	}
 
+	private void Awake()
+	{
+		GameTurnManager.Instance.onTurnStarted += UpdateStats;
+		GameTurnManager.Instance.onTurnEnded += UpdateStats;
+	}
+
 	private void OnDestroy()
 	{
+		GameTurnManager.Instance.onTurnStarted -= UpdateStats;
+		GameTurnManager.Instance.onTurnEnded -= UpdateStats;
+		
 		if (_assignedCharacter != null) 
 			AssignCharacter(null); // dispose events
 	} 
