@@ -18,7 +18,7 @@ public class Sound2D : ScriptableObject
 		source.clip = clip;
 		source.outputAudioMixerGroup = mixerGroup;
 		source.Play();
-		source.gameObject.AddComponent<AutoDestroy>().delay = source.clip.length + 0.5f;
+		source.gameObject.AddComponent<AutoDestroy>().delay = source.clip.length + 1.5f;
 		DontDestroyOnLoad(source.gameObject);
 	}
 
