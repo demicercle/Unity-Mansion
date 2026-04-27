@@ -70,6 +70,8 @@ public class CharacterController : MonoBehaviour, IAttackable
 	
 	public CharacterRoutines Routines => routines;
 	
+	public float lastTimeRested { get; private set; }
+	
 	public void FloatingText_Cant() // TODO: in character animation
 	{
 		if(IsCurrentTurn()) FloatingText(!HasActions() ? "No actions!" : "Can't");
@@ -117,6 +119,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		if(verbose) Debug.Log(this + " Rest");
 		usedActions.Clear();
 		usedMovePoints = 0;
+		lastTimeRested = Time.time;
 		onStatsChanged?.Invoke();
 	}
 	

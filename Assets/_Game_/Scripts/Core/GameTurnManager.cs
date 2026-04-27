@@ -20,6 +20,7 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private bool firstTurnIsPlayer = true;
 	[SerializeField] private bool skipInvisibleCharacters = true;
 	[SerializeField] private bool restCharacterAtFirstTurn;
+	[SerializeField] [Range(0f, 6f)] private float restInterval = 3.0f;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
@@ -344,7 +345,7 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
-				otherCharacter.Rest(false);
+				if (Time.time - otherCharacter.lastTimeRested >= restInterval) otherCharacter.Rest(debugMode > 1);
 				if (otherCharacter.Routines.AnyActive()) continue;
 				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain)) continue;
 				
@@ -485,6 +486,7 @@ public class GameTurnManager : MonoBehaviour
 	{
 		if (debugMode > 0)
 		{
+			if (GameInput.IsConsoleVisible()) return;
 			GUILayout.BeginArea(debugGUIRect);
 			
 			GUILayout.BeginVertical("textfield");
