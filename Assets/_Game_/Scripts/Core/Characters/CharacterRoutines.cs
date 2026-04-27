@@ -345,7 +345,7 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 		
-		_selfCharacter.AttackAction();
+		_selfCharacter.AttackAction(target);
 		if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetPosition(), Color.red, 2.0f);
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration

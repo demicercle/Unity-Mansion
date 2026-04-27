@@ -147,9 +147,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		return HasActions();
 	}
+
+	private IAttackable lastAttackTarget;
+	public IAttackable GetLastAttackTarget() => lastAttackTarget;
 	
-	public void AttackAction(CharacterEntity target = null, bool stopAgent = true)
+	public void AttackAction(IAttackable target, bool stopAgent = true)
 	{
+		lastAttackTarget = target;
 		UseAction(CharacterAction.Attack, target);
 	}
 	
@@ -284,6 +288,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			//DebugDrawer.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 		}
+
+		agent.SetRotationY(transform.rotation.eulerAngles.y);
 	}
 
 	public bool IsFacingPosition(Vector3 pos) => IsFacingDirection(pos - GetPosition());

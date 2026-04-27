@@ -642,4 +642,10 @@ public class CharacterAgent : MonoBehaviour
 		
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
+
+	public void SetRotationY(float eulerAnglesY)
+	{
+		//aiPath.updateRotation = false;
+		aiPath.rotation = Quaternion.Euler(0, eulerAnglesY, 0);
+	}
 }
