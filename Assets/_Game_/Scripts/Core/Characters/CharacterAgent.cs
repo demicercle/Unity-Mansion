@@ -630,6 +630,8 @@ public class CharacterAgent : MonoBehaviour
 
 	void UpdateMoveTarget(bool isBlinking)
 	{
+		if (!moveTarget) return; // editor error
+		
 		moveTarget.gameObject.SetActive(ShowMoveTarget());
 		if (!moveTarget.gameObject.activeSelf)
 			return;

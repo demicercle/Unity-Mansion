@@ -75,6 +75,8 @@ public class GameTurnManager : MonoBehaviour
 	}
 
 	public CharacterController[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
+	public CharacterController[] GetLevelCharacters() => levelCharacters.ToArray();
+	public bool IsLevelIndex(int index) => index == 0; // TODO
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
