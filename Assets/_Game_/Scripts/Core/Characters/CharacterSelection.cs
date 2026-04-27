@@ -4,6 +4,8 @@ using System.Linq;
 
 public class CharacterSelection : MonoBehaviour
 {
+	private const float CapsuleRadiusOffset = -0.1f;
+	
 	#region Static Selection Methods
 	public static event System.Action selectionChanged;
 	
@@ -108,7 +110,7 @@ public class CharacterSelection : MonoBehaviour
 		if (capsuleCollider)
 		{
 			capsuleCollider.height = height;
-			capsuleCollider.radius = radius;
+			capsuleCollider.radius = radius + CapsuleRadiusOffset;
 			capsuleCollider.center = Vector3.up * height / 2f;
 		}
 

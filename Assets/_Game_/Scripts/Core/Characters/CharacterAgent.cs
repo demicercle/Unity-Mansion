@@ -544,6 +544,7 @@ public class CharacterAgent : MonoBehaviour
 		UpdateObstacle();
 		if(!IsMoving()) ClearDestination();
 		UpdatePathAndTarget(true);
+		rvoController.lockWhenNotMoving = _selfCharacter.IsSelected();
 	}
 
 	private void LateUpdate()

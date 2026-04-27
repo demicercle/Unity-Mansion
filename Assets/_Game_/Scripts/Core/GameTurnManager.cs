@@ -275,7 +275,6 @@ public class GameTurnManager : MonoBehaviour
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
 				
-				currentAICharacter = otherCharacter;
 				otherCharacter.Rest(); // rest not player character
 
 				if (skipInvisibleCharacters && !otherCharacter.IsCharacterRevealed())
@@ -284,6 +283,8 @@ public class GameTurnManager : MonoBehaviour
 					yield return new WaitForSeconds(defaultActionsSeconds);
 					continue;
 				}
+				
+				currentAICharacter = otherCharacter;
 				
 				cameraPivot.Focus(otherCharacter);
 				//TODO "cameraPivot.Lock(true)"
