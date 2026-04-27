@@ -200,6 +200,24 @@ public static class EditorTools
 			EditorUtility.SetDirty(parent);
 		}
 	}
+
+	[MenuItem("Tools/Transform/DropOnGroup")]
+	private static void DropOnGroup()
+	{
+		Undo.RecordObjects(Selection.transforms, "DropOnGroup");
+		foreach (var transform in Selection.transforms)
+		{
+			var origin = transform.position + Vector3.up;
+			var end = transform.position - Vector3.up * 100;
+			if (Physics.Linecast(origin, end, out RaycastHit hit, Layers.LayerGround))
+			{
+				Debug.DrawLine(origin, hit.point, Color.green, 1.0f);
+				transform.position = hit.point;
+				Utils.SetDirty(transform);
+			}
+			else Debug.DrawLine(origin, end, Color.red, 1.0f);
+		}
+	}
 	#endregion
 	
 	#region AStar
