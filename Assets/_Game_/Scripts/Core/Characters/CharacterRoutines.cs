@@ -448,6 +448,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			Debug.LogWarning(this + " invalid direction to firstPoint, abort move");
 			_selfCharacter.StopAgent();
+			StopAllRoutines();
 			yield break;
 		}
 		
