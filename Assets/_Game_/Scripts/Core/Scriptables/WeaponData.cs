@@ -7,7 +7,7 @@ public class WeaponData : ScriptableObject
 	[Range(1, 12)] public int minDamage = 1;
 	[Range(1, 12)] public int maxDamage = 1;
 	public bool isRanged = false;
-	[Range(0f, 10f)] public float attackRange = 0f;
+	[Range(0f, 32f)] public float attackRange = 0f;
 	public bool noAttack = false;
 	public Weapon rpgWeaponR = Weapon.Relax;
 	public Weapon rpgWeaponL = Weapon.Relax;

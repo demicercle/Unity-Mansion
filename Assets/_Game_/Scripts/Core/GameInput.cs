@@ -477,23 +477,26 @@ public class GameInput : MonoBehaviour
 			}
 		}
 
-		if (lastCursorResult == CursorRaycastResult_Navigation && selectedCharacter &&
-		    !selectedCharacter.GetAgent().isPathValid)
+		if (mouseOverViewport)
 		{
-			SetCurrentCursorType(CursorType.Blocked);
-		}
-
-		if (itemToUse)
-		{
-			if (itemToUse.CanBeUsedOn(lastMouseOverObject?.gameObject, out var _))
-				SetCurrentCursorType(CursorType.UseItem);
-			else
+			if (lastCursorResult == CursorRaycastResult_Navigation && selectedCharacter &&
+			    !selectedCharacter.GetAgent().isPathValid)
+			{
 				SetCurrentCursorType(CursorType.Blocked);
-		}
+			}
 
-		if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
-		{
-			SetCurrentCursorType(CursorType.Waiting);
+			if (itemToUse)
+			{
+				if (itemToUse.CanBeUsedOn(lastMouseOverObject?.gameObject, out var _))
+					SetCurrentCursorType(CursorType.UseItem);
+				else
+					SetCurrentCursorType(CursorType.Blocked);
+			}
+
+			if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
+			{
+				SetCurrentCursorType(CursorType.Waiting);
+			}
 		}
 
 		if (isLoading)
@@ -521,7 +524,7 @@ public class GameInput : MonoBehaviour
 	
 	private void LateUpdate()
 	{
-		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation);
+		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading);
 		if(navigationTarget.gameObject.activeSelf) 
 			navigationTarget.transform.position = navigationHit.point;
 		
