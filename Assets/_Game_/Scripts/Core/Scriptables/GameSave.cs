@@ -67,7 +67,8 @@ public class GameSave : ScriptableObject
 		public int levelIndex;
 		public List<SavedCharacter> levelCharacters = new List<SavedCharacter>();
 	}
-	
+
+	[Min(0)] public int version;
 	public List<SavedLevel> savedLevels = new List<SavedLevel>();
 	public List<SavedPC> savedPCs = new List<SavedPC>();
 
@@ -155,12 +156,21 @@ public class GameSave : ScriptableObject
 	[ContextMenu("Load From File")]
 	public void LoadFromFile()
 	{
-		#if UNITY_EDITOR
-		UnityEditor.Undo.RecordObject(this, "Load From File");
-		#endif
+#if UNITY_EDITOR
+		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Load From File");
+#endif
+		var backup = JsonUtility.ToJson(this, true);
+		var lastVersion = version;
 		var json = System.IO.File.ReadAllText(filePath);
 		JsonUtility.FromJsonOverwrite(json, this);
-		Utils.SetDirty(this);
+		if (lastVersion != version)
+		{
+			Debug.LogWarning(this + " incompatible version: " + lastVersion + " > " + version);
+			JsonUtility.FromJsonOverwrite(backup, this);
+		}
+#if UNITY_EDITOR
+		if(!Application.isPlaying) UnityEditor.EditorUtility.SetDirty(this);
+#endif
 	}
 
 	[ContextMenu("Open file")]
