@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cedb504928fe4356a008ddc7ec65c37c, type: 3}
   m_Name: FightStarts
   m_EditorClassIdentifier: Assembly-CSharp::Sound2D
-  mixerGroup: {fileID: -7870757165288459144, guid: 2cb187995ddc99f4abf03b986f17dac1, type: 2}
+  mixerGroup: {fileID: 9054349462224724870, guid: 2cb187995ddc99f4abf03b986f17dac1, type: 2}
   clips:
   - {fileID: 8300000, guid: d095667ece6abc44898afa2920e1a7c3, type: 3}
