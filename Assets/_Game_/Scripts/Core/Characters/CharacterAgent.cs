@@ -118,7 +118,7 @@ public class CharacterAgent : MonoBehaviour
 	public void StopMovement(bool clamp = false)
 	{
 		if(debugMode > 0) Debug.Log(this + " StopMovement()");
-		SetObstacle(!_selfCharacter.IsSelected());
+		SetObstacle(!_selfCharacter.IsSelected() && _selfCharacter.IsCharacterRevealed());
 		DropOnGround();
 		if(clamp) ClampOnNavigation();
 		aiPath.isStopped = true;
@@ -314,7 +314,6 @@ public class CharacterAgent : MonoBehaviour
 		if (IsMoving())
 		{
 			StopMovement();
-			SetObstacle(true);
 		}
 		aiDestinationSetter.enabled = followTarget;
 		aiDestinationSetter.target = followTarget;
