@@ -291,7 +291,7 @@ public class GameTurnManager : MonoBehaviour
 				if (skipInvisibleCharacters && !otherCharacter.IsCharacterRevealed())
 				{
 					Debug.Log("skipInvisibleCharacters: " + otherCharacter);
-					yield return new WaitForSeconds(defaultActionsSeconds);
+					yield return null;
 					continue;
 				}
 				
@@ -314,6 +314,7 @@ public class GameTurnManager : MonoBehaviour
 				do yield return null;
 				while (NavmeshRebuilder.IsRebuildingAsync());
 				
+				if(debugMode > 0) Debug.Log(this + " start think " + otherBrain);
 				do
 				{
 					if(!otherBrain.IsThinking)
@@ -321,15 +322,13 @@ public class GameTurnManager : MonoBehaviour
 					
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
-				
-				Debug.Log(this + " YieldRoutines");
-				yield return YieldRoutines();
 
-				/*var startTime = Time.time;
+				if(debugMode > 0) Debug.Log(this + " yield");
 				yield return YieldRoutines();
-				while (Time.time - startTime < aiThinksSeconds)
-					yield return null;*/
+				if(debugMode > 0) Debug.Log(this + " end yield");
 			}
+			
+			yield return new WaitForSeconds(turnChangedSeconds);
 		}
 	}
 
@@ -379,8 +378,12 @@ public class GameTurnManager : MonoBehaviour
 	private Coroutine YieldRoutines() => StartCoroutine(WaitRoutines());
 	private IEnumerator WaitRoutines()
 	{
-		while(CharacterRoutines.AnyActiveRoutines())
+		do
+		{
 			yield return null;
+			if(debugMode > 0) Debug.Log(this + " WaitRoutines " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
+		}
+		while (CharacterRoutines.AnyActiveRoutines()) ;
 	}
 	
 	private void EndTurn()
