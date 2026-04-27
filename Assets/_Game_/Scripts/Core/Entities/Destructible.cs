@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Destructible : MonoBehaviour, IAttackable
 {
+	public static List<Destructible> allInstances = new List<Destructible>();
+	public bool IsName(string s) => name == s;
+	public string GetName() => name;
 	public static int debugMode => CharacterEntity.debugStats;
 	
 	[SerializeField] [Range(0.1f, 5.0f)] private float radius = 1.0f;
@@ -17,6 +21,8 @@ public class Destructible : MonoBehaviour, IAttackable
 	public bool damagedWithRangeWeapons;
 	public UnityEvent takeDamage;
 	public UnityEvent breaks;
+
+	public bool IsBroken() => isBroken;
 
 	public void TakeDamage(DamageInfo dmgInfo, object instigator)
 	{
@@ -38,6 +44,33 @@ public class Destructible : MonoBehaviour, IAttackable
 			Break();
 		}
 	}
+
+	public void Break()
+	{
+		if (isBroken) return;
+		isBroken = true;
+		if(debugMode > 0)Debug.Log(this + " Breaks");
+
+
+		foreach (var obj in deactivateObjects)
+		{
+			if (obj) obj.SetActive(false);
+		}
+
+		gameObject.layer = Layers.LayerIgnore;
+		
+		NavmeshRebuilder.RebuildNavigationOn(gameObject);
+		
+		foreach (var rb in rigidbodies)
+		{
+			if (!rb) continue;
+			rb.isKinematic = false;
+			rb.useGravity = true;
+		}
+			
+		breaks?.Invoke();
+		
+	}
 	
 	private bool isBroken;
 	private float damageAmount;
@@ -51,6 +84,8 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	private void Awake()
 	{
+		allInstances.Add(this);
+			
 		foreach (var obj in deactivateObjects)
 		{
 			if (obj) obj.SetActive(true);
@@ -63,29 +98,9 @@ public class Destructible : MonoBehaviour, IAttackable
 		}
 	}
 
-	private void Break()
+	private void OnDestroy()
 	{
-		if (isBroken) return;
-		isBroken = true;
-		if(debugMode > 0)Debug.Log(this + " Breaks");
-		
-		foreach (var rb in rigidbodies)
-		{
-			if (!rb) continue;
-			rb.isKinematic = false;
-			rb.useGravity = true;
-		}
-
-		foreach (var obj in deactivateObjects)
-		{
-			if (obj) obj.SetActive(false);
-		}
-
-		gameObject.layer = Layers.LayerIgnore;
-		
-		NavmeshRebuilder.RebuildNavigationOn(gameObject);
-		
-		breaks?.Invoke();
+		allInstances.Remove(this);
 	}
 
 	private void OnDrawGizmosSelected()

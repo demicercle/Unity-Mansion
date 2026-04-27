@@ -37,6 +37,7 @@ public class GameSave : ScriptableObject
 		public List<string> revealedRooms = new List<string>();
 		public List<SavedProp> savedProps = new List<SavedProp>();
 		public List<SavedInventory> savedInventories = new List<SavedInventory>();
+		public List<string> destroyedProps = new List<string>();
 	}
 
 	[System.Serializable]
@@ -289,6 +290,15 @@ public class GameSave : ScriptableObject
 					}
 				}
 			}
+
+			foreach (var savedDestructibleName in savedLevel.destroyedProps)
+			{
+				var destructible = Destructible.allInstances.FirstOrDefault(d => d.IsName(savedDestructibleName));
+				if (destructible)
+				{
+					destructible.Break();
+				}
+			}
 		}
 		
 		CharacterSelection.SelectCharacterAt(selectedCharacter);
@@ -338,6 +348,12 @@ public class GameSave : ScriptableObject
 		foreach (var inv in Inventory.GetSavedInventories())
 		{
 			savedLevels[0].savedInventories.Add(new SavedInventory(inv));
+		}
+
+		foreach (var destructible in Destructible.allInstances)
+		{
+			if(destructible.IsBroken())
+				savedLevels[0].destroyedProps.Add(destructible.GetName());
 		}
 		
 		Debug.Log(this + " Game saved");
