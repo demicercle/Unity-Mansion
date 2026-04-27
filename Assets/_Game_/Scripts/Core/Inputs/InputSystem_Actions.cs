@@ -244,6 +244,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""HighlightObjects"",
+                    ""type"": ""Button"",
+                    ""id"": ""0d3ed21d-b571-4d99-b344-69e2d1d49259"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -761,6 +770,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""ToggleGroup"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c03add12-6b81-4d5e-af23-01171f11a554"",
+                    ""path"": ""<Keyboard>/alt"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HighlightObjects"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7d6ba488-03f4-4c6a-b9ef-f847d48bd644"",
+                    ""path"": ""<Keyboard>/rightAlt"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HighlightObjects"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1365,6 +1396,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_FocusSelected = m_Player.FindAction("FocusSelected", throwIfNotFound: true);
         m_Player_Orbit = m_Player.FindAction("Orbit", throwIfNotFound: true);
         m_Player_ToggleGroup = m_Player.FindAction("ToggleGroup", throwIfNotFound: true);
+        m_Player_HighlightObjects = m_Player.FindAction("HighlightObjects", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1475,6 +1507,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_FocusSelected;
     private readonly InputAction m_Player_Orbit;
     private readonly InputAction m_Player_ToggleGroup;
+    private readonly InputAction m_Player_HighlightObjects;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1555,6 +1588,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @ToggleGroup => m_Wrapper.m_Player_ToggleGroup;
         /// <summary>
+        /// Provides access to the underlying input action "Player/HighlightObjects".
+        /// </summary>
+        public InputAction @HighlightObjects => m_Wrapper.m_Player_HighlightObjects;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1631,6 +1668,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ToggleGroup.started += instance.OnToggleGroup;
             @ToggleGroup.performed += instance.OnToggleGroup;
             @ToggleGroup.canceled += instance.OnToggleGroup;
+            @HighlightObjects.started += instance.OnHighlightObjects;
+            @HighlightObjects.performed += instance.OnHighlightObjects;
+            @HighlightObjects.canceled += instance.OnHighlightObjects;
         }
 
         /// <summary>
@@ -1693,6 +1733,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ToggleGroup.started -= instance.OnToggleGroup;
             @ToggleGroup.performed -= instance.OnToggleGroup;
             @ToggleGroup.canceled -= instance.OnToggleGroup;
+            @HighlightObjects.started -= instance.OnHighlightObjects;
+            @HighlightObjects.performed -= instance.OnHighlightObjects;
+            @HighlightObjects.canceled -= instance.OnHighlightObjects;
         }
 
         /// <summary>
@@ -2112,6 +2155,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnToggleGroup(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "HighlightObjects" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnHighlightObjects(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

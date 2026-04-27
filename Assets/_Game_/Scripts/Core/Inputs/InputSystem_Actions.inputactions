@@ -158,6 +158,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "HighlightObjects",
+                    "type": "Button",
+                    "id": "0d3ed21d-b571-4d99-b344-69e2d1d49259",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -675,6 +684,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "ToggleGroup",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c03add12-6b81-4d5e-af23-01171f11a554",
+                    "path": "<Keyboard>/alt",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "HighlightObjects",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7d6ba488-03f4-4c6a-b9ef-f847d48bd644",
+                    "path": "<Keyboard>/rightAlt",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "HighlightObjects",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

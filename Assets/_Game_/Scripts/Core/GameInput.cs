@@ -291,6 +291,11 @@ public class GameInput : MonoBehaviour
 				if(debugMode > 0) Debug.Log(this + " middleClickMousePosition=" + middleClickMousePosition);
 			}
 
+			if (inputSystem.Player.HighlightObjects.IsPressed())
+			{
+				OutlineRenderer.ForceHightlight();
+			}
+
 			orbitAxis = inputSystem.Player.Orbit.ReadValue<Vector2>();
 			orbitWithInputs = orbitAxis.magnitude >= Consts.MinMagnitude;
 			
