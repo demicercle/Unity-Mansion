@@ -145,7 +145,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			
 			if(debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
 				
-			_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, false);
+			_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, _selfCharacter.IsUsingRangeWeapon());
 				
 			do
 			{

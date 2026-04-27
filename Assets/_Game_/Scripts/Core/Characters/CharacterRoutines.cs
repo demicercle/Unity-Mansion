@@ -106,14 +106,14 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-	public void Leader_AssignAttack(IAttackable other, bool canUseRunAction, bool losCheck)
+	public void Leader_AssignAttack(IAttackable other, bool canUseRunAction)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
 		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
-				partyCharacter.Routines.AssignAttack(other, canUseRunAction, losCheck);
+				partyCharacter.Routines.AssignAttack(other, canUseRunAction, partyCharacter.IsUsingRangeWeapon());
 			}
 			else
 			{
@@ -286,7 +286,18 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			yield return null;
 
-			atAttackRange = _selfCharacter.IsAtAttackRange(target, losCheck);
+			atAttackRange = _selfCharacter.IsAtAttackRange(target);
+			
+			if (atAttackRange && losCheck)
+			{
+				if (!_selfCharacter.LOSCheck(target))
+				{
+					if (debugMode > 0) Debug.Log(_selfCharacter + " los obstructed, try to find better position");
+					_selfCharacter.FloatingText_Cant();
+					yield break;
+				}
+			}
+			
 			if (atAttackRange)
 			{
 				if(debugMode > 0) Debug.Log(_selfCharacter + " atAttackRange of " + target + ", StopAgent");

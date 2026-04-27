@@ -248,11 +248,15 @@ public class ConsoleCommands : MonoBehaviour
 	
 	#endregion
 
+	public int skipCommands;
 	public List<string> commandsOnStart = new List<string>();
 	
 	private void Start()
 	{
-		foreach (var cmd in commandsOnStart)
-			IngameDebugConsole.DebugLogConsole.ExecuteCommand(cmd);
+		if (skipCommands < 0) return;
+		for (int i = skipCommands; i < commandsOnStart.Count; i++)
+		{
+			DebugLogConsole.ExecuteCommand(commandsOnStart[i]);
+		}
 	}
 }

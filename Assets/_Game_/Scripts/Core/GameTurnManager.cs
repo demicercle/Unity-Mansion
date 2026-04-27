@@ -487,6 +487,8 @@ public class GameTurnManager : MonoBehaviour
 		if (debugMode > 0)
 		{
 			if (GameInput.IsConsoleVisible()) return;
+			if (isLoading) return;
+			
 			GUILayout.BeginArea(debugGUIRect);
 			
 			GUILayout.BeginVertical("textfield");

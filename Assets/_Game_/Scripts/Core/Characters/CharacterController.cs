@@ -419,19 +419,26 @@ public class CharacterController : MonoBehaviour, IAttackable
 		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius());
 	}
 
-	public bool IsAtAttackRange(IAttackable target, bool losCheck = true)
+	public bool IsAtAttackRange(IAttackable target)
 	{
 		var atkRange = GetAttackRange(target);
 		var dist = NavUtils.NavDistanceRoundY(GetPosition(), target.GetPosition());
-		//Debug.Log(this + " IsAtAttackRange " + target + " " + dist + " / " + atkRange + " los " + losCheck);
-		if (dist <= atkRange)
+		return dist <= atkRange;
+	}
+	
+	public bool LOSCheck(IAttackable other)
+	{
+		var start = GetEyesPosition();
+		var end = other.GetPosition();
+		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
 		{
-			return !losCheck || LOSCheck(target);
-		}
-		else
-		{
+			if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
+			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
 			return false;
 		}
+
+		if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, end, Color.green, 1.0f);
+		return true;
 	}
 	
 	public float GetLastAttackDamage()
@@ -549,20 +556,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		}
 	}
 	
-	private bool LOSCheck(IAttackable other)
-	{
-		var start = GetEyesPosition();
-		var end = other.GetPosition();
-		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
-		{
-			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
-			//DebugGUI.Line(start, end, Color.red, drawDuration);
-			return false;
-		}
-
-		//DebugGUI.Line(start, end, Color.green, drawDuration);
-		return true;
-	}
+	
 	#endregion
 
 	#if UNITY_EDITOR

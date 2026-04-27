@@ -738,7 +738,7 @@ public class GameInput : MonoBehaviour
 						if (!IsLeaderMode())
 							selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 						else
-							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false, false);
+							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false);
 						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 					}
 					return;
@@ -814,7 +814,7 @@ public class GameInput : MonoBehaviour
 					if (!IsLeaderMode())
 						selectedCharacter.Routines.AssignAttack(attackable, false, false);
 					else
-						selectedCharacter.Routines.Leader_AssignAttack(attackable, false, false);
+						selectedCharacter.Routines.Leader_AssignAttack(attackable, false);
 					//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 				}
 				return;
