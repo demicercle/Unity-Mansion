@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -27,6 +28,41 @@ public class GameSave : ScriptableObject
 	private static string filePath => Application.persistentDataPath + "/GameSave.json";
 	public static bool SaveExists() => System.IO.File.Exists(filePath);
 	public static void DeleteSave() => System.IO.File.Delete(filePath);
+
+	[System.Serializable]
+	public class SavedLevel
+	{
+		public int levelIndex;
+		public List<SavedCharacter> levelCharacters = new List<SavedCharacter>();
+		public List<string> revealedRooms = new List<string>();
+		public List<SavedProp> savedProps = new List<SavedProp>();
+		public List<SavedInventory> savedInventories = new List<SavedInventory>();
+		public List<SavedAnimator> savedAnimators = new List<SavedAnimator>();
+	}
+
+	[System.Serializable]
+	public class SavedPC : SavedCharacter
+	{
+		public float damages;
+
+		override public void Save(CharacterController character)
+		{
+			base.Save(character);
+			damages = character.GetTotalDamages();
+		}
+
+		override public void Load(CharacterController character)
+		{
+			base.Load(character);
+			character.SetDamages(damages);
+		}
+
+		public SavedPC(CharacterController character = null)
+		{
+			if(character)
+				Save(character);
+		}
+	}
 	
 	[System.Serializable]
 	public class SavedCharacter
@@ -59,35 +95,107 @@ public class GameSave : ScriptableObject
 	}
 
 	[System.Serializable]
-	public class SavedPC : SavedCharacter
+	public class SavedProp
 	{
-		public float damages;
+		public string name;
+		public int interactionCount;
 
-		override public void Save(CharacterController character)
+		public void Save(PropComponent prop)
 		{
-			base.Save(character);
-			damages = character.GetTotalDamages();
+			name = prop.name;
+			interactionCount = prop.GetInteractionCount();
 		}
 
-		override public void Load(CharacterController character)
+		public void Load(PropComponent prop)
 		{
-			base.Load(character);
-			character.SetDamages(damages);
+			if (prop.IsName(name))
+			{
+				prop.SetInteractionCount(interactionCount);
+			}
 		}
 
-		public SavedPC(CharacterController character = null)
+		public SavedProp(PropComponent prop = null)
 		{
-			if(character)
-				Save(character);
+			if (prop)
+				Load(prop);
 		}
 	}
 
 	[System.Serializable]
-	public class SavedLevel
+	public class SavedInventory
 	{
-		public int levelIndex;
-		public List<SavedCharacter> levelCharacters = new List<SavedCharacter>();
-		public List<string> revealedRooms = new List<string>();
+		public string name;
+		public string[] slots = Array.Empty<string>();
+
+		public void Save(Inventory inventory)
+		{
+			name = inventory.GetName();
+			slots = inventory.GetItemNames();
+		}
+
+		public void Load(Inventory inventory)
+		{
+			if (inventory.IsName(name))
+			{
+				for (int i = 0; i < slots.Length; i++)
+				{
+					inventory.SetItemName(i, slots[i]);
+				}
+			}
+		}
+
+		public SavedInventory(Inventory inv = null)
+		{
+			if (inv)
+			{
+				Load(inv);
+			}
+		}
+	}
+
+	[System.Serializable]
+	public class SavedAnimator
+	{
+		public string name;
+		public SavedValue[] savedValues = Array.Empty<SavedValue>();
+		
+		public void Save(SaveAnimator prop)
+		{
+			name = prop.GetName();
+			savedValues = prop.SaveValues();
+		}
+
+		public void Load(SaveAnimator prop)
+		{
+			if (prop.IsName(name))
+			{
+				prop.LoadValues(savedValues);
+			}
+		}
+
+		public SavedAnimator(SaveAnimator anim = null)
+		{
+			if (anim)
+			{
+				Load(anim);
+			}
+		}
+	}
+
+	[System.Serializable]
+	public class SavedValue
+	{
+		public string name;
+		public ValueType valueType;
+		[ReadOnly] public bool currentValue;
+	}
+	
+	public enum ValueType
+	{
+		Bool,
+		Int,
+		Float,
+		String
 	}
 
 	[Min(0)] public int version;
@@ -163,6 +271,42 @@ public class GameSave : ScriptableObject
 					}
 				}
 			}
+
+			foreach (var savedProp in savedLevel.savedProps)
+			{
+				foreach (var prop in PropComponent.GetSavedInstances())
+				{
+					if (prop.IsName(savedProp.name))
+					{
+						savedProp.Load(prop);
+						break;
+					}
+				}
+			}
+
+			foreach (var savedInv in savedLevel.savedInventories)
+			{
+				foreach (var inv in Inventory.GetSavedInventories())
+				{
+					if (inv.IsName(savedInv.name))
+					{
+						savedInv.Load(inv);
+						break;
+					}
+				}
+			}
+
+			foreach (var savedAnim in savedLevel.savedAnimators)
+			{
+				foreach (var sa in SaveAnimator.GetInstances())
+				{
+					if (sa.IsName(savedAnim.name))
+					{
+						savedAnim.Load(sa);
+						break;
+					}
+				}
+			}
 		}
 		
 		CharacterSelection.SelectCharacterAt(selectedCharacter);
@@ -201,6 +345,21 @@ public class GameSave : ScriptableObject
 		{
 			if(room.IsRevealed())
 				savedLevels[0].revealedRooms.Add(room.GetName());
+		}
+
+		foreach (var prop in PropComponent.GetSavedInstances())
+		{
+			savedLevels[0].savedProps.Add(new SavedProp(prop));
+		}
+		
+		foreach (var inv in Inventory.GetSavedInventories())
+		{
+			savedLevels[0].savedInventories.Add(new SavedInventory(inv));
+		}
+
+		foreach (var sa in SaveAnimator.GetInstances())
+		{
+			savedLevels[0].savedAnimators.Add(new SavedAnimator(sa));
 		}
 		
 		Debug.Log(this + " Game saved");

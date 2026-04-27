@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
 public class Inventory : MonoBehaviour
 {
+	private static List<Inventory> allInventories = new List<Inventory>();
+
+	public static Inventory[] GetSavedInventories() => allInventories.Where(i => i.saveInventory).ToArray();
+	
 	private const float CreateLootNavDistance = 1.0f;
+	
+	public string GetName() => name;
+	public bool IsName(string s) => s == name;
+	public bool ShouldSave() => saveInventory;
 	
 	public static int debugMode { get; set; }
 	public static event System.Action<Inventory> onAnyInventoryChanged;
@@ -15,7 +24,34 @@ public class Inventory : MonoBehaviour
 	
 	[SerializeField] [Range(1, 32)] private int maxSize = 6;
 	[SerializeField] private Inventory lootBagPrefab = null;
+	[SerializeField] private bool saveInventory;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
+	
+	public string[] GetItemNames()
+	{
+		return items.ConvertAll(i => !i ? "null" : i.name).ToArray();
+	}
+
+	public void SetItemName(int index, string itemName)
+	{
+		if (index < 0 || index >= items.Count)
+		{
+			Debug.LogWarning(this + " invalid SetItemName index: " + index + " items=" + items.Count);
+			return;
+		}
+		
+		var item = ItemData.GetItemFromName(itemName);
+		if (item == null)
+		{
+			Debug.LogWarning(this + " invalid item name: " + itemName);
+			return;
+		}
+		
+		if(items[index] != null)
+			Debug.LogWarning(this + " SetItemName already has an item at index " + index + ", overwrite !");
+		
+		items[index] = item;
+	}
 	
 	public bool TryCreateLootBag(ItemData itemData, out Inventory bag)
 	{
@@ -118,6 +154,9 @@ public class Inventory : MonoBehaviour
 	
 	#region PRIVATE
 	private bool destroyIfEmpty;
+
+	private void Awake() => allInventories.Add(this);
+	private void OnDestroy() => allInventories.Remove(this);
 	
 	[ContextMenu("Update Size")]
 	private void UpdateSize()

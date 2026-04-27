@@ -450,6 +450,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cursorType: 6
   consumeAction: 3
+  saveProp: 0
   onlyOnce: 1
   rebuildNavigation: 1
   autoTriggerDelay: 0
@@ -718,6 +719,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boxSize: 0.5
   ignorePresets: 0
 --- !u!1001 &4733966527374943401
 PrefabInstance:
@@ -949,6 +951,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boxSize: 0.5
   ignorePresets: 0
 --- !u!4 &9033570961674743079 stripped
 Transform:

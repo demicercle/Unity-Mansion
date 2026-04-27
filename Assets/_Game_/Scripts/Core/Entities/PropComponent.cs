@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Pathfinding;//TODO
@@ -7,12 +8,19 @@ using UnityEngine.Events;
 
 public class PropComponent : MonoBehaviour
 {
+	private static List<PropComponent> allInstances = new List<PropComponent>();
+	public static PropComponent[] GetSavedInstances() => allInstances.Where(p => p.saveProp).ToArray();
+	
 	public System.Action onInteracted;
 	public System.Action<CharacterController> onInteractedBy;
+
+	public string GetName() => name;
+	public bool IsName(string n) => name == n;
 	
 	[Header("Interaction")]
 	[SerializeField] private CursorType cursorType = CursorType.OpenDoor;
 	[SerializeField] private CharacterAction consumeAction = CharacterAction.Interact;
+	[SerializeField] private bool saveProp = false;
 	
 	[Header("Trigger")]
 	[SerializeField] private bool onlyOnce;
@@ -40,6 +48,18 @@ public class PropComponent : MonoBehaviour
 	public CursorType GetCursorType() => cursorType;
 
 	public Vector3 GetPosition() => transform.position;
+
+	public int GetInteractionCount() => interactionCount;
+	
+	public void SetInteractionCount(int newCount)
+	{
+		interactionCount = newCount;
+		
+		if (onlyOnce && interactionCount > 0)
+		{
+			SetDisabled(true);
+		}
+	}
 
 	public void InteractedBy(CharacterController characterInstigator)
 	{
@@ -116,8 +136,14 @@ public class PropComponent : MonoBehaviour
 	{
 		defaultLayer = gameObject.layer;
 		selfCollider = GetComponent<Collider>();
+		allInstances.Add(this);
 	}
-	
+
+	private void OnDestroy()
+	{
+		allInstances.Remove(this);
+	}
+
 	private IEnumerator Start()
 	{
 		if(rebuildNavigation) 
