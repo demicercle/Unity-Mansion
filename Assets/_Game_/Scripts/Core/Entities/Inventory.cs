@@ -32,6 +32,14 @@ public class Inventory : MonoBehaviour
 		return items.ConvertAll(i => !i ? "null" : i.name).ToArray();
 	}
 
+	public void SetItemNames(string[] slots)
+	{
+		for (int i = 0; i < slots.Length; i++)
+		{
+			SetItemName(i, slots[i]);
+		}
+	}
+	
 	public void SetItemName(int index, string itemName)
 	{
 		if (index < 0 || index >= items.Count)
@@ -49,8 +57,21 @@ public class Inventory : MonoBehaviour
 		
 		if(items[index] != null)
 			Debug.LogWarning(this + " SetItemName already has an item at index " + index + ", overwrite !");
+
+		var lastItem = items[index];
+		if (lastItem)
+		{
+			onAnyItemRemoved?.Invoke(this, lastItem);
+		}
 		
 		items[index] = item;
+
+		if (!lastItem)
+		{
+			onAnyItemAdded?.Invoke(this, items[index]);
+		}
+		
+		onAnyInventoryChanged?.Invoke(this);
 	}
 	
 	public bool TryCreateLootBag(ItemData itemData, out Inventory bag)

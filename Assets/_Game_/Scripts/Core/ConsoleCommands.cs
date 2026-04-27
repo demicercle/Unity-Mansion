@@ -99,10 +99,10 @@ public class ConsoleCommands : MonoBehaviour
 	}
 
 	[ConsoleMethod("save_and_quit", "")]
-	public static void SaveAndQuit()
+	public static void SaveAndQuit(bool toFile)
 	{
 		GameSave.Current.SaveGame();
-		GameSave.Current.SaveToFile();
+		if(toFile) GameSave.Current.SaveToFile();
 		ResetGame();
 	}
 

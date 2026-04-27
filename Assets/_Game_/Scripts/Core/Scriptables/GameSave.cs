@@ -48,7 +48,7 @@ public class GameSave : ScriptableObject
 		public int rotation;
 		public bool isDead;
 		public float damages;
-		public SavedInventory inventory = new SavedInventory();
+		public string[] slots = Array.Empty<string>();
 
 		public void Save(CharacterController character)
 		{
@@ -58,9 +58,9 @@ public class GameSave : ScriptableObject
 			isDead = character.IsDead();
 			
 			damages = character.GetTotalDamages();
-			
-			if(character.TryGetComponent(out Inventory inv))
-				inventory.Save(inv);
+
+			if (character.TryGetComponent(out Inventory inv))
+				slots = inv.GetItemNames();
 		}
 
 		public void Load(CharacterController character)
@@ -73,7 +73,7 @@ public class GameSave : ScriptableObject
 			character.SetDamages(damages);
 
 			if (character.TryGetComponent(out Inventory inv))
-				inventory.Load(inv);
+				inv.SetItemNames(slots);
 		}
 
 		public SavedPC(CharacterController character = null)
@@ -137,7 +137,7 @@ public class GameSave : ScriptableObject
 		public SavedProp(PropComponent prop = null)
 		{
 			if (prop)
-				Load(prop);
+				Save(prop);
 		}
 	}
 
@@ -168,7 +168,7 @@ public class GameSave : ScriptableObject
 		{
 			if (inv)
 			{
-				Load(inv);
+				Save(inv);
 			}
 		}
 	}
@@ -197,7 +197,7 @@ public class GameSave : ScriptableObject
 		{
 			if (anim)
 			{
-				Load(anim);
+				Save(anim);
 			}
 		}
 	}
@@ -239,13 +239,17 @@ public class GameSave : ScriptableObject
 	}
 
 	[ContextMenu("Load Game")]
-	public void LoadGame()
+	public void LoadGame() => LoadGame(false);
+	public void LoadGame(bool fromFile)
 	{
 		if (!Application.isPlaying)
 		{
 			Debug.LogWarning(this + " LoadGame works only in play mode!");
 			return;
 		}
+		
+		if (fromFile)
+			LoadFromFile();
 		
 		var partyCharacters = CharacterController.GetPartyCharacters();
 		foreach (var savedPC in savedPCs)
