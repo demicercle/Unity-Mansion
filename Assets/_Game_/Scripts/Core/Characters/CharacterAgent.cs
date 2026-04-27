@@ -34,6 +34,12 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] private CircleRenderer moveTarget;
 	
 	//public bool PositionChanged(Vector3 p1, Vector3 p2) => p1.ToString() != p2.ToString();
+
+	public bool updateRotation
+	{
+		get => aiPath.updateRotation;
+		set => aiPath.updateRotation = value;
+	}
 	
 	public float GetMaxSpeed() => moveSpeed;
 

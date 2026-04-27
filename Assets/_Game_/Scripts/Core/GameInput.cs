@@ -34,6 +34,7 @@ public class GameInput : MonoBehaviour
 	[SerializeField] private CircleRenderer navigationTarget;
 	[Header("Camera Control")]
 	[SerializeField] [Range(0f, 360f)] private float inputOrbitScale = 180f;
+	[SerializeField] [Min(0f)] private float inputOrbitSpeed = 3.0f;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
 	[SerializeField] private bool orbitCameraY = false;
 	[Header("Character Control")]
@@ -301,8 +302,8 @@ public class GameInput : MonoBehaviour
 			
 			if (orbitWithInputs)
 			{
-				orbitDelta = orbitAxis;
-				orbitDelta *= Time.unscaledDeltaTime;
+				orbitDelta.x = inputOrbitScale <= 0 ? orbitAxis.x : Mathf.Lerp(orbitDelta.x, orbitAxis.x, Time.unscaledDeltaTime * inputOrbitScale);
+				orbitDelta.y = inputOrbitScale <= 0 ? orbitAxis.y :Mathf.Lerp(orbitDelta.y, orbitAxis.y, Time.unscaledDeltaTime * inputOrbitScale);
 				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, inputOrbitScale);
 			}
 			else if (holdMiddleClick)

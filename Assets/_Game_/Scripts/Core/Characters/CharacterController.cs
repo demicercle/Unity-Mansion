@@ -30,13 +30,16 @@ public enum CharacterAction
 
 public class CharacterController : MonoBehaviour, IAttackable
 {
-	const float MinFacingDot = 0.9f;
+	private const float MinFacingDot = 0.9f;
+	private const float MinAttackRange = 0.15f;
 	
 	public static int debugStats { get; set; }
 	
 	public static List<CharacterController> AllCharacters => _allCharacters;
 
 	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
+	
+	public static int CountLivingPartyCharacters() => _partyCharacters.Count(p => !p.IsDead());
 
 	public static int PartyCount => _partyCharacters.Count;
 	
@@ -418,7 +421,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 
 	public float GetAttackRange(IAttackable target)
 	{
-		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius());
+		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + MinAttackRange);
 	}
 
 	public bool IsAtAttackRange(IAttackable target)

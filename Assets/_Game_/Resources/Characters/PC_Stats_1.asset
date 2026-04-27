@@ -16,9 +16,6 @@ MonoBehaviour:
   portraitTexture: {fileID: 2800000, guid: 08e943a402f07f34aacd1f93940543fc, type: 3}
   faction: 1
   maxActions: 1
-  maxMovePoints: 8
-  runActionExtraMovePoints: 8
-  noAttack: 0
-  attackRange: 0
-  maxHealth: 5
-  lastAttackDamage: 1
+  maxMovePoints: 9
+  runActionExtraMovePoints: 9
+  maxHealth: 6

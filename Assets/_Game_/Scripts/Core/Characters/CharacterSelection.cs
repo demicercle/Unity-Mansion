@@ -5,6 +5,8 @@ using System.Linq;
 public class CharacterSelection : MonoBehaviour
 {
 	private const float CapsuleRadiusOffset = -0.1f;
+
+	public static int debugMode => GameInput.debugMode;
 	
 	#region Static Selection Methods
 	public static event System.Action selectionChanged;
@@ -64,8 +66,13 @@ public class CharacterSelection : MonoBehaviour
 		var party = CharacterController.GetPartyCharacters().ToArray();
 		var partyCount = party.Length;
 		var newIndex = (startIndex + 1) % partyCount;
-		Debug.Log("SelectNextCharacter " + startIndex + " " + selected + " > " + newIndex);
+		if(debugMode >0) Debug.Log("SelectNextCharacter " + startIndex + " " + selected + " > " + newIndex);
 		SelectCharacter(party[newIndex]);
+		if (party[newIndex].IsDead() && CharacterController.CountLivingPartyCharacters() > 1)
+		{
+			if(debugMode >0) Debug.Log(party[newIndex] + " is dead, select next");
+			SelectNextCharacter();
+		}
 	}
 	#endregion
 	

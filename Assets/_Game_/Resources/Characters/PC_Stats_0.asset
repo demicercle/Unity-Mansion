@@ -18,7 +18,4 @@ MonoBehaviour:
   maxActions: 1
   maxMovePoints: 8
   runActionExtraMovePoints: 8
-  noAttack: 0
-  attackRange: 0
-  maxHealth: 5
-  lastAttackDamage: 1
+  maxHealth: 7

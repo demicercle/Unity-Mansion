@@ -340,7 +340,7 @@ public class GameTurnManager : MonoBehaviour
 
 		do
 		{
-			PartyRest(false);
+			PartyRest(true);
 
 			foreach (var otherCharacter in levelCharacters)
 			{
@@ -376,13 +376,15 @@ public class GameTurnManager : MonoBehaviour
 	{
 		playerTurn = false;
 		onPlayerChanged?.Invoke(false);
-		PartyRest(true);
 		Debug.Log(this + " EndTurn " + currentTurn);
 		onTurnEnded?.Invoke();
 	}
 	
 	private void NewTurn()
 	{
+		if(currentTurn >= 1 || restCharacterAtFirstTurn) 
+			PartyRest(false);
+		
 		currentTurn += 1;
 		playerTurn = true;
 		onPlayerChanged?.Invoke(true);
@@ -416,10 +418,13 @@ public class GameTurnManager : MonoBehaviour
 		CharacterSelection.SelectCharacter(bestCharacter);
 	}
 
-	private void PartyRest(bool verbose)
+	private void PartyRest(bool checkInterval)
 	{
 		foreach (var character in partyCharacters)
-			character.Rest(verbose);
+		{
+			if(!checkInterval || Time.time - character.lastTimeRested > restInterval)
+				character.Rest(debugMode > 1);
+		}
 	}
 
 	private bool ShouldExitTurnBased()

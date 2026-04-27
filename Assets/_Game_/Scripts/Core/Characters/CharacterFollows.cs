@@ -4,6 +4,8 @@ using System.Collections;
 
 public class CharacterFollows : MonoBehaviour
 {
+	private const float MinVelocityToLook = 0.5f;
+	
 	public static int debugMode { get; set; }
 	
 	[SerializeField] [Range(0.5f, 12.0f)] private float followDistance = 3.0f;
@@ -57,6 +59,7 @@ public class CharacterFollows : MonoBehaviour
 			selfCharacter.Routines.OnStarted -= OnNewRoutineStarted;
 			StopAllCoroutines();
 			agent.AssignFollowTransform(null);
+			agent.updateRotation = true;
 		}
 	}
 
@@ -104,6 +107,22 @@ public class CharacterFollows : MonoBehaviour
 			
 			dummy.position = headingSpeed <= 0 ? headingPos :
 				Vector3.Lerp(dummy.position, headingPos, Time.deltaTime * headingSpeed);
+
+			if (leaderCharacter && agent.velocity.magnitude <= MinVelocityToLook)
+			{
+				agent.updateRotation = false;
+				selfCharacter.LookWorldPosition(leaderCharacter.GetCenterPosition(), Time.deltaTime);
+			}
+			else
+			{
+				agent.updateRotation = true;
+			}
+		
+			if (debugMode > 0)
+			{
+				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, tickTime);
+				DebugDrawer.WireDisc(dummy.position, followDistance, Color.aquamarine, tickTime);
+			}
 		}
 	}
 
@@ -121,11 +140,5 @@ public class CharacterFollows : MonoBehaviour
 		Gizmos.color = Color.deepSkyBlue;
 		Gizmos.DrawLine(transform.position, transform.position + transform.forward * headingScale * maxHeading);
 		Utils.DrawGizmosCircle(transform.position + transform.forward * headingScale * maxHeading, Vector3.up, followDistance);
-		
-		if (Application.isPlaying && dummy)
-		{
-			DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, tickTime);
-			DebugDrawer.WireDisc(dummy.position, followDistance, Color.aquamarine, tickTime);
-		}
 	}
 }

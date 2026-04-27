@@ -198,10 +198,10 @@ public class ConsoleCommands : MonoBehaviour
 		Debug.Log("debug_routines=" + (CharacterRoutines.debugMode = value));
 	}
 	
-	[ConsoleMethod("debug_cursor", "")]
+	[ConsoleMethod("debug_input", "")]
 	public static void _DebugInput(int value)
 	{
-		Debug.Log("debug_cursor=" + (GameInput.debugMode = value));
+		Debug.Log("debug_input=" + (GameInput.debugMode = value));
 	}
 	
 	[ConsoleMethod("debug_follows", "")]
