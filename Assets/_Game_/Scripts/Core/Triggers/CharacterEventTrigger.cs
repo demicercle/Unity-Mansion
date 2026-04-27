@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-public class CharacterEventHandler : MonoBehaviour
+public class CharacterEventTrigger : MonoBehaviour
 {
 	[System.Serializable]
 	public class ActionEvent

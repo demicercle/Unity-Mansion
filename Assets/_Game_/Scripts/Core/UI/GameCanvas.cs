@@ -42,8 +42,6 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private int endTurnLayer;
 	[SerializeField] private float lerpSpeed;
 	[Space]
-	[SerializeField] private List<Animator> playerChangedAnimators;
-	[Space]
 	[Header("References")]
 	[SerializeField] private TextReference floatingText;
 	[Space]
@@ -166,7 +164,6 @@ public class GameCanvas : MonoBehaviour
 	{
 		Debug.Log(this + " OnPlayerChanged " + isPlayerTurn);
 		onPlayerTurnChanged?.Invoke(isPlayerTurn);
-		playerChangedAnimators.ForEach(anim => anim.SetBool("PlayerChanged", isPlayerTurn));
 	}
 
 	private void OnLoadingGame(bool isLoading)

@@ -566,6 +566,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3562262033673451285}
   - component: {fileID: 5121136328145511449}
+  - component: {fileID: 735717516542907120}
   m_Layer: 5
   m_Name: PlayerChanged
   m_TagString: Untagged
@@ -616,6 +617,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &735717516542907120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518658748795755281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2b1cda68b744f828b0ec9abf7441707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimatorHandler
+  startValue: 1
+  parameterName: PlayerChanged
 --- !u!1 &3616657709612850440
 GameObject:
   m_ObjectHideFlags: 0
@@ -1229,13 +1244,23 @@ MonoBehaviour:
   - {fileID: 7341861476820033120}
   endTurnLayer: 1
   lerpSpeed: 3
-  playerChangedAnimators:
-  - {fileID: 5121136328145511449}
   floatingText:
     tmpText: {fileID: 3801711341008438118}
   onPlayerTurnChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 735717516542907120}
+        m_TargetAssemblyTypeName: AnimatorHandler, Assembly-CSharp
+        m_MethodName: SetBool
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &6660572087860162430
 MonoBehaviour:
   m_ObjectHideFlags: 0
