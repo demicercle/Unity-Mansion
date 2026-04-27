@@ -142,14 +142,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
-  debugMode: 1
+  debugMode: 0
   clips:
   - {fileID: 0}
-  randomAtStart: 0
   nextIsRandom: 0
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}
 --- !u!1 &345372015078450982
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,14 +291,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
-  debugMode: 1
+  debugMode: 0
   clips:
   - {fileID: 0}
-  randomAtStart: 0
   nextIsRandom: 0
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}
 --- !u!1 &1584591143098027833
 GameObject:
   m_ObjectHideFlags: 0
@@ -668,14 +666,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
-  debugMode: 1
+  debugMode: 0
   clips:
   - {fileID: 8300000, guid: d48fb7163a861c54f9c0c249c58a2fce, type: 3}
-  randomAtStart: 0
   nextIsRandom: 0
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}
 --- !u!1 &2620076123978134491
 GameObject:
   m_ObjectHideFlags: 0
@@ -818,14 +815,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
-  debugMode: 1
+  debugMode: 0
   clips:
   - {fileID: 0}
-  randomAtStart: 0
   nextIsRandom: 0
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}
 --- !u!1 &5102070097373879665
 GameObject:
   m_ObjectHideFlags: 0
@@ -968,14 +964,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
-  debugMode: 1
+  debugMode: 0
   clips:
   - {fileID: 8300000, guid: 64037390003de164cba76e8385212379, type: 3}
-  randomAtStart: 0
   nextIsRandom: 0
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}
 --- !u!1 &6759954976913001228
 GameObject:
   m_ObjectHideFlags: 0
@@ -1118,14 +1113,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
-  debugMode: 1
+  debugMode: 0
   clips:
   - {fileID: 0}
-  randomAtStart: 0
   nextIsRandom: 0
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}
 --- !u!1 &7543130193276833981
 GameObject:
   m_ObjectHideFlags: 0
@@ -1268,14 +1262,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
-  debugMode: 1
+  debugMode: 0
   clips:
   - {fileID: 0}
-  randomAtStart: 0
   nextIsRandom: 0
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}
 --- !u!1 &8778297856149750417
 GameObject:
   m_ObjectHideFlags: 0
@@ -1418,14 +1411,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
-  debugMode: 1
+  debugMode: 0
   clips:
   - {fileID: 0}
-  randomAtStart: 0
   nextIsRandom: 0
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}
 --- !u!1 &9126495154990809384
 GameObject:
   m_ObjectHideFlags: 0
@@ -1573,8 +1565,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  randomAtStart: 0
   nextIsRandom: 1
-  onStart:
-    m_PersistentCalls:
-      m_Calls: []
+  playAtStart: 0
+  playRepeat: 0
+  repeatInterval: {x: 0, y: 0}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using Random = UnityEngine.Random;
@@ -47,10 +48,11 @@ public class AudioTrigger : MonoBehaviour
 	[SerializeField] private bool debugMode;
 	[Space]
 	[SerializeField] private AudioClip[] clips;
-	[SerializeField] private bool randomAtStart;
 	[SerializeField] private bool nextIsRandom;
-	
-	public UnityEvent onStart;
+	[Space]
+	[SerializeField] private bool playAtStart;
+	[SerializeField] private bool playRepeat;
+	[SerializeField] private Vector2 repeatInterval;
 
 	private int clipIndex;
 	private AudioSource audioSource;
@@ -60,11 +62,21 @@ public class AudioTrigger : MonoBehaviour
 		audioSource =  GetComponent<AudioSource>();
 	}
 
-	private void Start()
+	private IEnumerator Start()
 	{
-		if(randomAtStart)
-			clipIndex = Random.Range(0, clips.Length);
+		if(playAtStart)
+			PlayNext();
 		
-		onStart?.Invoke();
+		while (playRepeat)
+		{
+			do
+			{
+				yield return new WaitForSeconds(1f);
+			} while (audioSource.isPlaying);
+			
+			yield return new WaitForSeconds(Random.Range(repeatInterval.x, repeatInterval.y));
+			
+			PlayNext();
+		}
 	}
 }
