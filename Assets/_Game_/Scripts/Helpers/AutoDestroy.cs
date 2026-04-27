@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class AutoDestroy : MonoBehaviour
 {
-	[SerializeField] private float delay = 2.0f;
+	public float delay = 2.0f;
 
 	IEnumerator Start()
 	{

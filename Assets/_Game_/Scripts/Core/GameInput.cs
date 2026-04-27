@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
+using UnityEngine.Events;
 using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
 using Object = UnityEngine.Object;
 
@@ -33,12 +34,14 @@ public class GameInput : MonoBehaviour
 
 	[SerializeField] private CircleRenderer navigationTarget;
 	[Header("Camera Control")]
-	[SerializeField] [Range(0f, 360f)] private float inputOrbitScale = 180f;
-	[SerializeField] [Min(0f)] private float inputOrbitSpeed = 3.0f;
+	[SerializeField] [Range(0f, 360f)] private float orbitSpeedAngle = 180f;
+	[SerializeField] [Min(0f)] private float orbitSpeedInput = 3.0f;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
 	[SerializeField] private bool orbitCameraY = false;
 	[Header("Character Control")]
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
+
+	public UnityEvent onClick, onSelect;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
 	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null)
@@ -304,15 +307,23 @@ public class GameInput : MonoBehaviour
 			}
 
 			orbitAxis = inputSystem.Player.Orbit.ReadValue<Vector2>();
-			orbitWithInputs = orbitAxis.magnitude >= Consts.MinMagnitude;
+			orbitWithInputs = (orbitAxis.magnitude+orbitDelta.magnitude) >= Consts.MinMagnitude;
 			
 			if (orbitWithInputs)
 			{
-				orbitDelta.x = inputOrbitScale <= 0 ? orbitAxis.x : Mathf.Lerp(orbitDelta.x, orbitAxis.x, Time.unscaledDeltaTime * inputOrbitScale);
-				orbitDelta.y = inputOrbitScale <= 0 ? orbitAxis.y :Mathf.Lerp(orbitDelta.y, orbitAxis.y, Time.unscaledDeltaTime * inputOrbitScale);
-				cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, inputOrbitScale);
+				orbitDelta.x = orbitSpeedInput <= 0 ? orbitAxis.x : Mathf.Lerp(orbitDelta.x, orbitAxis.x, Time.unscaledDeltaTime * orbitSpeedInput);
+				orbitDelta.y = orbitSpeedInput <= 0 ? orbitAxis.y :Mathf.Lerp(orbitDelta.y, orbitAxis.y, Time.unscaledDeltaTime * orbitSpeedInput);
+				
+				if(debugMode > 1)
+					Debug.Log(this + " orbitDelta=" + orbitDelta + " orbitAxis=" + orbitAxis);
+				
+				if (!holdMiddleClick)
+				{
+					cameraPivot.Orbit(orbitDelta.x, orbitDelta.y, Time.unscaledDeltaTime * orbitSpeedAngle);
+				}
 			}
-			else if (holdMiddleClick)
+			
+			if (holdMiddleClick)
 			{
 				if (orbitCameraFromCenterScreen)
 				{
@@ -602,6 +613,8 @@ public class GameInput : MonoBehaviour
 		{
 			if (!hasFocus || !mouseOverViewport)
 				return;
+			
+			//onClick?.Invoke();
 		}
 		
 		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
@@ -631,6 +644,8 @@ public class GameInput : MonoBehaviour
 
 			lastClickPosition = mousePosition;
 			if(debugMode > 1) Debug.Log(this + " lastClickPosition=" + lastClickPosition);
+			
+			//onClick?.Invoke();
 		}
 
 		if (hasFocus && ctxValue <= 0 && leftClickValue > 0 && MouseClickDelta.magnitude <= MaxMouseDeltaToClick) // left click RELEASED
@@ -684,9 +699,10 @@ public class GameInput : MonoBehaviour
 	{
 		SetItemToUse(null);
 		
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		if (CharacterSelection.TryGetSelectedCharacter(out var newSelected) && newSelected != selectedCharacter)
 		{
-			cameraPivot.Focus(selectedCharacter);
+			onSelect?.Invoke();
+			cameraPivot.Focus(newSelected);
 		}
 	}
 	
@@ -732,8 +748,10 @@ public class GameInput : MonoBehaviour
 		
 		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
 		{
-			if (selectedCharacter != null)
+			if (selectedCharacter)
 			{
+				onClick?.Invoke();
+				
 				// assign attack
 				if (selectedCharacter.CanAttack(false))
 				{
@@ -750,7 +768,7 @@ public class GameInput : MonoBehaviour
 					}
 					return;
 				}
-				
+					
 				selectedCharacter.FloatingText_Cant();
 			}
 			else if(isDebugMode)  Debug.Log("> IsEnemyToPlayer no selected character");
@@ -760,6 +778,8 @@ public class GameInput : MonoBehaviour
 		{
 			if (selectedCharacter)
 			{
+				onClick?.Invoke();
+				
 				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Talk))
 					selectedCharacter.FloatingText_Cant();
 				else
@@ -770,6 +790,7 @@ public class GameInput : MonoBehaviour
 					else
 						selectedCharacter.Routines.Leader_AssignTalk(clickedCharacter);
 				}
+					
 				//Debug.LogWarning("//TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
 			}
 			else if(isDebugMode)  Debug.Log("> !IsEnemyToPlayer no selected character");
@@ -782,6 +803,8 @@ public class GameInput : MonoBehaviour
 
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
+			onClick?.Invoke();
+			
 			if (CanAssignOnClick(selectedCharacter))
 			{
 				if (!selectedCharacter.CanUseAction(CharacterAction.Interact))
@@ -808,8 +831,10 @@ public class GameInput : MonoBehaviour
 	{
 		Debug.Log(this + " ClickAttackable " + attackable);
 		
-		if (selectedCharacter != null)
+		if (selectedCharacter)
 		{
+			onClick?.Invoke();
+			
 			// assign attack
 			if (selectedCharacter.CanAttack(false))
 			{
@@ -836,8 +861,10 @@ public class GameInput : MonoBehaviour
 	{
 		Debug.Log(this + " ClickNavigation " + navPosition);
 
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
+			onClick?.Invoke();
+			
 			if (CanAssignOnClick(selectedCharacter))
 			{
 				if (!IsLeaderMode())

@@ -149,6 +149,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemAnimation
   iconContainer: {fileID: 1229797421477897085}
   triggerType: -1
+  onPlayed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!111 &6312593723491474097
 Animation:
   m_ObjectHideFlags: 0

@@ -77,6 +77,20 @@ public static class Utils
 	{
 		return ColorUtility.TryParseHtmlString(html, out var c) ? c : default;
 	}
+
+	public static string GetTransformPath(Transform transform, string path = "")
+	{
+		path = transform.name + "/" + path;
+		
+		if (transform.parent)
+		{
+			return GetTransformPath(transform.parent, path);
+		}
+		else
+		{
+			return path;
+		}
+	}
 	
 	public static float PathLength(params Vector3[] path)
 	{

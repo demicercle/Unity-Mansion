@@ -17,6 +17,7 @@ public class CharacterAnimation : MonoBehaviour
 		Hit,
 		Shoot,
 		WeaponSwitch,
+		Scream
 	}
 	
 	//public const string EventHit = "Hit";
@@ -287,25 +288,31 @@ public class CharacterAnimation : MonoBehaviour
 		StartCoroutine(CheckForEnemies());
 	}
 
+	//public UnityEvent onHealed;
 	private void OnHealed(float amount)
 	{
 		_selfCharacter.FloatingText("Heal!");
+		//onHealed?.Invoke();
 	}
 
+	//public UnityEvent onDamaged;
 	private void OnDamaged(float amount)
 	{
 		wasDamaged = true;
 		_selfCharacter.FloatingText(Mathf.CeilToInt(amount).ToString());
 		TrySetTrigger(parameters.getHitTrigger);
+		//onDamaged?.Invoke();
 		if (rpgAnimationHandler) rpgAnimationHandler.GetHit();
 	}
 
+	//public UnityEvent onDead;
 	private void OnDead()
 	{
 		//TrySetTrigger(parameters.trigger);
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
 		if (rpgAnimationHandler) rpgAnimationHandler.Death();
+		//onDead?.Invoke();
 		gameObject.layer = Layers.LayerIgnore;
 	}
 

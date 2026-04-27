@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Animation))]
@@ -15,7 +16,8 @@ public class ItemAnimation : MonoBehaviour
 	
 	[SerializeField] private RawImage iconContainer;
 	[SerializeField] private TriggerType triggerType;
-	
+
+	public UnityEvent onPlayed;
 	
 	private bool displayOnLoot => triggerType == TriggerType.Loot;
 	private bool displayOnUse => triggerType == TriggerType.Use;
@@ -90,6 +92,7 @@ public class ItemAnimation : MonoBehaviour
 		
 		animation.clip = animation.GetClip(typeof(ItemAnimation) + "_" + triggerType.ToString());
 		animation.Play(animation.clip.name);
+		onPlayed?.Invoke();
 		
 		do
 		{

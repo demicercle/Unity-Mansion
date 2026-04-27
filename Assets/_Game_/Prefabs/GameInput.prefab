@@ -46,10 +46,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   navigationTarget: {fileID: 7986720061970377997}
-  inputOrbitScale: 180
+  orbitSpeedAngle: 270
+  orbitSpeedInput: 3.14
   orbitCameraFromCenterScreen: 0
   orbitCameraY: 0
   maxNavDistance: 0.5
+  onClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 11400000, guid: 42439909ad231af498dbeca282b23330, type: 2}
+        m_TargetAssemblyTypeName: Sound2D, Assembly-CSharp
+        m_MethodName: PlayNext
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onSelect:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 11400000, guid: 71dbde66ec679824f8b7c01c61f9480e, type: 2}
+        m_TargetAssemblyTypeName: Sound2D, Assembly-CSharp
+        m_MethodName: PlayNext
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &3627050124609751619
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,7 +13,7 @@ public class GameTurnManager : MonoBehaviour
 	
 	public static int debugMode { get; set; }
 
-	public System.Action<bool> onLoadingGame, onPlayerChanged;
+	public System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
 	public System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
@@ -183,7 +183,7 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator TurnBasedCoroutine()
 	{
 		Debug.Log(this + " Enters TurnBasedCoroutine");
-		turnBasedMode = true;
+		onTurnBasedChanged?.Invoke(true);
 		
 		currentTurn = 0;
 		
@@ -336,7 +336,7 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator RealTimeCoroutine()
 	{
 		Debug.Log(this + " Enters RealTimeCoroutine");
-		turnBasedMode = false;
+		onTurnBasedChanged?.Invoke(false);
 
 		foreach (var character in levelCharacters)
 		{

@@ -214,6 +214,7 @@ Transform:
   - {fileID: 5703262471981040408}
   - {fileID: 6467573212584386305}
   - {fileID: 4899443128964224672}
+  - {fileID: 2907436885240189091}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &8495298704536974578
@@ -240,7 +241,19 @@ MonoBehaviour:
   animationEvent: 1
   _interacted:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 9172523181829411214}
+        m_TargetAssemblyTypeName: AudioTrigger, Assembly-CSharp
+        m_MethodName: PlayNext
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   interactionCount: 0
 --- !u!65 &2209946154352752973
 BoxCollider:
@@ -465,6 +478,79 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a6a21a97bc4744643887b70c00345f6e, type: 3}
   m_PrefabInstance: {fileID: 707329966676163594}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &4058351716538179981
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 701814047783249712}
+    m_Modifications:
+    - target: {fileID: 1053429163486451861, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_Name
+      value: SFX_Door
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.8102401
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.17525
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.16948974
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+--- !u!4 &2907436885240189091 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1156126662778614062, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+  m_PrefabInstance: {fileID: 4058351716538179981}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9172523181829411214 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5123249600393687043, guid: dfdb4ced8e963bd4e87968a987b851ec, type: 3}
+  m_PrefabInstance: {fileID: 4058351716538179981}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
 --- !u!1001 &7329137799349095516
 PrefabInstance:
   m_ObjectHideFlags: 0

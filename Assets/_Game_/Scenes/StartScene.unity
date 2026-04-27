@@ -202,6 +202,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 11400000, guid: 42439909ad231af498dbeca282b23330, type: 2}
+        m_TargetAssemblyTypeName: Sound2D, Assembly-CSharp
+        m_MethodName: PlayNext
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 11400000, guid: d2c2d3e84e574d64ca127294b3ca4cfd, type: 2}
         m_TargetAssemblyTypeName: GameSave, Assembly-CSharp
         m_MethodName: Clear
@@ -351,7 +363,7 @@ GameObject:
   - component: {fileID: 620185839}
   m_Layer: 0
   m_Name: Camera
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -799,6 +811,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 11400000, guid: 42439909ad231af498dbeca282b23330, type: 2}
+        m_TargetAssemblyTypeName: Sound2D, Assembly-CSharp
+        m_MethodName: PlayNext
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 11400000, guid: d2c2d3e84e574d64ca127294b3ca4cfd, type: 2}
         m_TargetAssemblyTypeName: GameSave, Assembly-CSharp
         m_MethodName: LoadFromFile

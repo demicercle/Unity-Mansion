@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 public interface ICharacterBrain
 {
@@ -28,6 +29,8 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	//[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
 	[SerializeField] private Waypoint wanderingPoint;
 	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
+
+	public UnityEvent onStartThink;
 	
 	public bool IsThinking { get; private set; }
 	
@@ -64,6 +67,8 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		
 		if (debugMode > 0) Debug.Log(this + " Thinking...");
 		yield return new WaitForSeconds(DefaultWaitSeconds);
+		
+		onStartThink?.Invoke();
 		
 		// try chase
 		if (canChase)
