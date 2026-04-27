@@ -304,7 +304,7 @@ GameObject:
   - component: {fileID: 7108226757086379274}
   - component: {fileID: 2913409419077217874}
   m_Layer: 5
-  m_Name: PauseCanvas
+  m_Name: _PauseCanvas_
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -875,6 +875,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 11400000, guid: 42439909ad231af498dbeca282b23330, type: 2}
+        m_TargetAssemblyTypeName: Sound2D, Assembly-CSharp
+        m_MethodName: PlayNext
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4945390322812767268
 GameObject:
   m_ObjectHideFlags: 0
@@ -1000,6 +1012,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: PauseCanvas, Assembly-CSharp
         m_MethodName: QuitGame
         m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 11400000, guid: 42439909ad231af498dbeca282b23330, type: 2}
+        m_TargetAssemblyTypeName: Sound2D, Assembly-CSharp
+        m_MethodName: PlayNext
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -1285,6 +1309,18 @@ MonoBehaviour:
       - m_Target: {fileID: 7108226757086379274}
         m_TargetAssemblyTypeName: PauseCanvas, Assembly-CSharp
         m_MethodName: ResumeGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 11400000, guid: 42439909ad231af498dbeca282b23330, type: 2}
+        m_TargetAssemblyTypeName: Sound2D, Assembly-CSharp
+        m_MethodName: PlayNext
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -606,7 +606,7 @@ public class GameInput : MonoBehaviour
 			if (!hasFocus || !mouseOverViewport)
 				return;
 			
-			onClick?.Invoke();
+			//onClick?.Invoke();
 		}
 		
 		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
@@ -637,7 +637,7 @@ public class GameInput : MonoBehaviour
 			lastClickPosition = mousePosition;
 			if(debugMode > 1) Debug.Log(this + " lastClickPosition=" + lastClickPosition);
 			
-			onClick?.Invoke();
+			//onClick?.Invoke();
 		}
 
 		if (hasFocus && ctxValue <= 0 && leftClickValue > 0 && MouseClickDelta.magnitude <= MaxMouseDeltaToClick) // left click RELEASED
@@ -740,8 +740,10 @@ public class GameInput : MonoBehaviour
 		
 		else if (clickedCharacter.IsEnemyToPlayer(clickedCharacter))
 		{
-			if (selectedCharacter != null)
+			if (selectedCharacter)
 			{
+				onClick?.Invoke();
+				
 				// assign attack
 				if (selectedCharacter.CanAttack(false))
 				{
@@ -758,7 +760,7 @@ public class GameInput : MonoBehaviour
 					}
 					return;
 				}
-				
+					
 				selectedCharacter.FloatingText_Cant();
 			}
 			else if(isDebugMode)  Debug.Log("> IsEnemyToPlayer no selected character");
@@ -768,6 +770,8 @@ public class GameInput : MonoBehaviour
 		{
 			if (selectedCharacter)
 			{
+				onClick?.Invoke();
+				
 				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Talk))
 					selectedCharacter.FloatingText_Cant();
 				else
@@ -778,6 +782,7 @@ public class GameInput : MonoBehaviour
 					else
 						selectedCharacter.Routines.Leader_AssignTalk(clickedCharacter);
 				}
+					
 				//Debug.LogWarning("//TODO " + selectedCharacter + " interact with " + clickedCharacter); //TODO
 			}
 			else if(isDebugMode)  Debug.Log("> !IsEnemyToPlayer no selected character");
@@ -790,6 +795,8 @@ public class GameInput : MonoBehaviour
 
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
+			onClick?.Invoke();
+			
 			if (CanAssignOnClick(selectedCharacter))
 			{
 				if (!selectedCharacter.CanUseAction(CharacterAction.Interact))
@@ -816,8 +823,10 @@ public class GameInput : MonoBehaviour
 	{
 		Debug.Log(this + " ClickAttackable " + attackable);
 		
-		if (selectedCharacter != null)
+		if (selectedCharacter)
 		{
+			onClick?.Invoke();
+			
 			// assign attack
 			if (selectedCharacter.CanAttack(false))
 			{
@@ -844,8 +853,10 @@ public class GameInput : MonoBehaviour
 	{
 		Debug.Log(this + " ClickNavigation " + navPosition);
 
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
+			onClick?.Invoke();
+			
 			if (CanAssignOnClick(selectedCharacter))
 			{
 				if (!IsLeaderMode())
