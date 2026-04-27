@@ -574,8 +574,11 @@ public class CharacterController : MonoBehaviour, IAttackable
 	{
 		if (debugStats > 0)
 		{
-			var healthStr = isDead ? "DEAD" : GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2");
-			Utils.DrawWorldGUI(GetEyesPosition(), name + "\n" + healthStr, "label");
+			Utils.DrawWorldGUI(GetEyesPosition(), name 
+			                                      + "\n" + (isDead ? "DEAD" : GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2"))
+			                                      + "\n" + usedActions.Count + "/" + characterData.maxActions
+			                                      + "\n" + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
+				, "label");
 		}
 	}
 }

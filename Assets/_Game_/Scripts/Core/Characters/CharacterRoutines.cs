@@ -69,7 +69,6 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignTalk " + npc);
 		StartCoroutine(WaitCharacterTalk(npc));
 	}
-
 	public void AssignUseItem(ItemData itemToUse, object objectTo)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignUseItem " + itemToUse + " on " + objectTo);
@@ -92,7 +91,6 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-
 	public void Leader_AssignInteract(PropComponent clickedProp)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignInteract ");
@@ -108,7 +106,6 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-
 	public void Leader_AssignAttack(IAttackable other, bool canUseRunAction, bool losCheck)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
@@ -124,7 +121,6 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-
 	public void Leader_AssignTalk(CharacterController npc)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignTalk ");
@@ -140,7 +136,6 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-
 	public void AssignFollows(CharacterController leader)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignFollows " + leader);
@@ -336,7 +331,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			if(debugMode > 0) Debug.Log(this + " cannot attack (no actions)");
 			_selfCharacter.FloatingText_Cant();
-			yield return null;
+			yield break;
 		}
 		
 		_selfCharacter.AttackAction();
