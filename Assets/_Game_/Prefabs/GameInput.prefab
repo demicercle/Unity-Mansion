@@ -46,8 +46,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   navigationTarget: {fileID: 7986720061970377997}
-  inputOrbitScale: 180
-  inputOrbitSpeed: 3
+  orbitSpeedAngle: 270
+  orbitSpeedInput: 3.14
   orbitCameraFromCenterScreen: 0
   orbitCameraY: 0
   maxNavDistance: 0.5
