@@ -87,6 +87,7 @@ public class GameSave : ScriptableObject
 	{
 		public int levelIndex;
 		public List<SavedCharacter> levelCharacters = new List<SavedCharacter>();
+		public List<string> revealedRooms = new List<string>();
 	}
 
 	[Min(0)] public int version;
@@ -150,6 +151,18 @@ public class GameSave : ScriptableObject
 					savedChar.Load(levelChar);
 				}
 			}
+
+			foreach (var roomName in savedLevel.revealedRooms)
+			{
+				foreach (var room in RoomTrigger.allRooms)
+				{
+					if (!room.IsRevealed() && room.IsName(roomName))
+					{
+						room.Explore();
+						break;
+					}
+				}
+			}
 		}
 		
 		CharacterSelection.SelectCharacterAt(selectedCharacter);
@@ -182,6 +195,12 @@ public class GameSave : ScriptableObject
 		{
 			if (levelChar.InParty()) continue;
 			savedLevels[0].levelCharacters.Add(new SavedCharacter(levelChar));	
+		}
+
+		foreach (var room in RoomTrigger.allRooms)
+		{
+			if(room.IsRevealed())
+				savedLevels[0].revealedRooms.Add(room.GetName());
 		}
 		
 		Debug.Log(this + " Game saved");

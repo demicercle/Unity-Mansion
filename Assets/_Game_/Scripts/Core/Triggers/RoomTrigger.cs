@@ -22,6 +22,9 @@ public class RoomTrigger : MonoBehaviour
 		return true;
 	}
 
+	public bool IsName(string n) => name == n;
+	public string GetName() => name;
+
 	public static bool TryGetRoom(CharacterController character, out RoomTrigger inRoom)
 	{
 		foreach (var room in allRooms)
