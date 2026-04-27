@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
+using UnityEngine.Events;
 using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
 using Object = UnityEngine.Object;
 
@@ -39,6 +40,8 @@ public class GameInput : MonoBehaviour
 	[SerializeField] private bool orbitCameraY = false;
 	[Header("Character Control")]
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
+
+	public UnityEvent onClick, onSelect;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
 	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null)
@@ -602,6 +605,8 @@ public class GameInput : MonoBehaviour
 		{
 			if (!hasFocus || !mouseOverViewport)
 				return;
+			
+			onClick?.Invoke();
 		}
 		
 		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
@@ -631,6 +636,8 @@ public class GameInput : MonoBehaviour
 
 			lastClickPosition = mousePosition;
 			if(debugMode > 1) Debug.Log(this + " lastClickPosition=" + lastClickPosition);
+			
+			onClick?.Invoke();
 		}
 
 		if (hasFocus && ctxValue <= 0 && leftClickValue > 0 && MouseClickDelta.magnitude <= MaxMouseDeltaToClick) // left click RELEASED
@@ -684,9 +691,10 @@ public class GameInput : MonoBehaviour
 	{
 		SetItemToUse(null);
 		
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		if (CharacterSelection.TryGetSelectedCharacter(out var newSelected) && newSelected != selectedCharacter)
 		{
-			cameraPivot.Focus(selectedCharacter);
+			onSelect?.Invoke();
+			cameraPivot.Focus(newSelected);
 		}
 	}
 	

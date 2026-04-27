@@ -52,7 +52,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 
 	private void OnSelectionChanged(bool selected)
 	{
-		UpdateStats();
+		Invoke("UpdateStats", 0.1f);
 	}
 
 	private void UpdateStats()

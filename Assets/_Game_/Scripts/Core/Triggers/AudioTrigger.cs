@@ -13,6 +13,8 @@ public class AudioTrigger : MonoBehaviour
 	
 	public void PlayNext()
 	{
+		if (!audioSource) return;
+		
 		if (nextIsRandom)
 		{
 			if (clips.Length > 1)
