@@ -244,7 +244,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 
 	public void LookWorldPosition(Vector3 worldPosition, float f = -1f)
 	{
-		DebugDrawer.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
+		//DebugDrawer.Line(GetEyesPosition(), worldPosition, Color.cyan, f);
 		LookDirection(worldPosition - GetPosition(), f);
 	} // TODO not in use
 
