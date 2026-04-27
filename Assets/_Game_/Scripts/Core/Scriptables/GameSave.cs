@@ -37,7 +37,6 @@ public class GameSave : ScriptableObject
 		public List<string> revealedRooms = new List<string>();
 		public List<SavedProp> savedProps = new List<SavedProp>();
 		public List<SavedInventory> savedInventories = new List<SavedInventory>();
-		public List<SavedAnimator> savedAnimators = new List<SavedAnimator>();
 	}
 
 	[System.Serializable]
@@ -174,35 +173,6 @@ public class GameSave : ScriptableObject
 	}
 
 	[System.Serializable]
-	public class SavedAnimator
-	{
-		public string name;
-		public SavedValue[] values = Array.Empty<SavedValue>();
-		
-		public void Save(SaveAnimator prop)
-		{
-			name = prop.GetName();
-			values = prop.SaveValues();
-		}
-
-		public void Load(SaveAnimator prop)
-		{
-			if (prop.IsName(name))
-			{
-				prop.LoadValues(values);
-			}
-		}
-
-		public SavedAnimator(SaveAnimator anim = null)
-		{
-			if (anim)
-			{
-				Save(anim);
-			}
-		}
-	}
-
-	[System.Serializable]
 	public class SavedValue
 	{
 		public string name;
@@ -319,18 +289,6 @@ public class GameSave : ScriptableObject
 					}
 				}
 			}
-
-			foreach (var savedAnim in savedLevel.savedAnimators)
-			{
-				foreach (var sa in SaveAnimator.GetInstances())
-				{
-					if (sa.IsName(savedAnim.name))
-					{
-						savedAnim.Load(sa);
-						break;
-					}
-				}
-			}
 		}
 		
 		CharacterSelection.SelectCharacterAt(selectedCharacter);
@@ -379,11 +337,6 @@ public class GameSave : ScriptableObject
 		foreach (var inv in Inventory.GetSavedInventories())
 		{
 			savedLevels[0].savedInventories.Add(new SavedInventory(inv));
-		}
-
-		foreach (var sa in SaveAnimator.GetInstances())
-		{
-			savedLevels[0].savedAnimators.Add(new SavedAnimator(sa));
 		}
 		
 		Debug.Log(this + " Game saved");
