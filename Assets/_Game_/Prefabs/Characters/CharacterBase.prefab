@@ -533,7 +533,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 192
   setDetectedOnDamaged: 1
-  lookAtDamageInstigator: 1
+  lookAtDetected: 1
   warnOthersInRoom: 1
   drawGizmos: 0
   looseTargetDistance: 0
@@ -826,8 +826,10 @@ MonoBehaviour:
   tickTime: 1
   minHeading: -2.79
   maxHeading: -0.55
-  headingSpeed: 3
   headingScale: 0.6
+  headingSpeed: 3
+  avoidDistance: 1
+  avoidHeadingScale: 2
 --- !u!114 &-9001009375405151572
 MonoBehaviour:
   m_ObjectHideFlags: 0

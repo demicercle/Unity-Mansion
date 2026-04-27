@@ -542,7 +542,8 @@ public class CharacterAgent : MonoBehaviour
 
 	private void OnPartyIndexChanged(int newIndex, int partyCount)
 	{
-		rvoController.priority = Mathf.Lerp(0.1f, 0.9f, (float)newIndex / (float)partyCount);
+		rvoController.priority = CharacterSelection.IsCharacterSelected(_selfCharacter) ? 1.0f :
+			Mathf.Lerp(0.25f, 0.75f, (float)newIndex / (float)partyCount);
 	}
 
 	private void SelectionChanged()
