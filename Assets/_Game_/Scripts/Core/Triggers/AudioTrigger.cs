@@ -38,7 +38,7 @@ public class AudioTrigger : MonoBehaviour
 
 		if (debugMode)
 		{
-			Debug.Log(this + " Plays " + clipIndex + " = " + audioSource.clip);
+			Debug.Log(Utils.GetTransformPath(transform) + " AudioTrigger Plays " + clipIndex + " = " + audioSource.clip);
 #if UNITY_EDITOR
 			UnityEditor.EditorGUIUtility.PingObject(gameObject);
 #endif
