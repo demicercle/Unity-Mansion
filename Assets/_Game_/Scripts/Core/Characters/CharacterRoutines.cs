@@ -364,9 +364,12 @@ public class CharacterRoutines : MonoBehaviour
 	
 		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
 		{
+			_selfCharacter.GetAgent().updateRotation = false;
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
+		
+		_selfCharacter.GetAgent().updateRotation = true;
 	}
 	
 	private IEnumerator WaitMoveCharacterToWaypoint(Waypoint waypoint, bool canUseRunAction, System.Action onComplete = null)

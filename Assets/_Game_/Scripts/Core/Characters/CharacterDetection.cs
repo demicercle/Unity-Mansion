@@ -17,7 +17,7 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
 	[SerializeField] private LayerMask obstructionLayers;
 	[SerializeField] private bool setDetectedOnDamaged = true;
-	[SerializeField] private bool lookAtDamageInstigator = true;
+	[SerializeField] private bool lookAtDetected = true;
 	[SerializeField] private bool warnOthersInRoom = true;
 	[SerializeField] private bool drawGizmos;
 	[SerializeField] [Min(0f)] private float looseTargetDistance;
@@ -59,6 +59,9 @@ public class CharacterDetection : MonoBehaviour
 				
 				onCharacterDetected?.Invoke(otherCharacter);
 				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, true);
+		
+				if (lookAtDetected && !selfCharacter.InParty())
+					CharacterRoutines.DoLookPositionOn(selfCharacter, otherCharacter.GetPosition());
 			}
 		}
 		else
@@ -119,9 +122,6 @@ public class CharacterDetection : MonoBehaviour
 		
 		if (setDetectedOnDamaged)
 			SetDetected(other, true);
-		
-		if (lookAtDamageInstigator)
-			CharacterRoutines.DoLookPositionOn(selfCharacter, other.GetPosition());
 	}
 
 	private void OnAnyCharacterUsesAction(CharacterController anyCharacter, CharacterAction _) =>
