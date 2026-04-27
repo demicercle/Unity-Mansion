@@ -55,7 +55,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 8
+  MaxDistance: 12
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -142,9 +142,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0681e523a87459abc2e49c5a0ad5d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioTrigger
+  debugMode: 0
   clips:
   - {fileID: 8300000, guid: e01d1001b73b414498f8bb62d73e2864, type: 3}
   - {fileID: 8300000, guid: 939e1430560cb674aa537063766a085c, type: 3}
+  randomAtStart: 0
+  nextIsRandom: 0
   onStart:
     m_PersistentCalls:
       m_Calls: []
