@@ -90,6 +90,16 @@ public class ConsoleCommands : MonoBehaviour
 		}
 	}
 
+	[ConsoleMethod("explore", "")]
+	public static void Explore()
+	{
+		foreach (var room in RoomTrigger.activeRooms.ToArray())
+		{
+			Debug.Log("Explore: " + room.name);
+			room.Explore();
+		}
+	}
+
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()
 	{

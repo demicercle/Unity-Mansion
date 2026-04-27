@@ -208,9 +208,10 @@ public class CharacterAgent : MonoBehaviour
 			if (!RoomTrigger.IsPositionVisible(endPoint)) // ignore not revealed waypoint
 				continue;
 
-			do
-				yield return new WaitForSeconds(WaypointSearchSeconds);
-			while (NavmeshRebuilder.IsRebuildingAsync());
+			
+			yield return StartCoroutine(WaitNavmesh());
+			
+			aiPath.canSearch = true;
 				
 			// Crée une requête de chemin
 			ABPath path = ABPath.Construct(startPoint, endPoint, null);
@@ -399,14 +400,23 @@ public class CharacterAgent : MonoBehaviour
 	{
 		return StartCoroutine(DoSearchPathAsync(dest, clamp, onComplete));
 	}
+
+	private IEnumerator WaitNavmesh()
+	{
+		do
+		{
+			aiPath.canSearch = false;
+			yield return null;
+		} while (NavmeshRebuilder.IsRebuildingAsync());
+		aiPath.canSearch = true;
+	}
 	
 	private IEnumerator DoSearchPathAsync(Vector3 dest, bool clamp, System.Action onComplete = null)
 	{
 		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync");
 		// WaitCharacterMoved
-		
-		while (NavmeshRebuilder.IsRebuildingAsync())
-			yield return null;
+
+		yield return StartCoroutine(WaitNavmesh());
 
 		if (clamp && NavUtils.TryGetNearestNavPosition(dest, aiPath.endReachedDistance, out dest))
 		{
@@ -418,6 +428,9 @@ public class CharacterAgent : MonoBehaviour
 		{
 			if(!aiPath.pathPending || !aiPath.hasPath)
 				AssignDestination(dest, true); 
+			
+			while (NavmeshRebuilder.IsRebuildingAsync())
+				yield return null;
 			
 			UpdatePathAndTarget(true);
 			if (timeout >= TimeOut) break;
