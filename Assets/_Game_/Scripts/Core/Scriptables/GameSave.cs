@@ -5,7 +5,28 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameSave", menuName = "GameSave", order = 0)]
 public class GameSave : ScriptableObject
 {
-	private string filePath => Application.persistentDataPath + "/GameSave.json";
+	public const int GAME_VERSION = 1;
+	
+	private static GameSave currentInstance;
+
+	public static GameSave Current
+	{
+		get
+		{
+			if (!currentInstance) currentInstance = Resources.LoadAll<GameSave>("").FirstOrDefault();
+			if (!currentInstance)
+			{
+				Debug.LogWarning(" cannot find game save in ressources, create one");
+				currentInstance = CreateInstance<GameSave>();
+			}
+
+			return currentInstance;
+		}
+	}
+	
+	private static string filePath => Application.persistentDataPath + "/GameSave.json";
+	public static bool SaveExists() => System.IO.File.Exists(filePath);
+	public static void DeleteSave() => System.IO.File.Delete(filePath);
 	
 	[System.Serializable]
 	public class SavedCharacter
@@ -72,6 +93,19 @@ public class GameSave : ScriptableObject
 	public List<SavedLevel> savedLevels = new List<SavedLevel>();
 	public List<SavedPC> savedPCs = new List<SavedPC>();
 
+	public bool IsEmpty() => version == 0;
+
+	[ContextMenu("Clear")]
+	public void Clear()
+	{
+#if UNITY_EDITOR
+		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Clear");
+#endif
+		savedLevels.Clear();
+		savedPCs.Clear();
+		if(!Application.isPlaying) Utils.SetDirty(this);
+	}
+
 	[ContextMenu("Load Game")]
 	public void LoadGame()
 	{
@@ -80,7 +114,7 @@ public class GameSave : ScriptableObject
 			Debug.LogWarning(this + " LoadGame works only in play mode!");
 			return;
 		}
-
+		
 		var partyCharacters = CharacterController.GetPartyCharacters();
 		foreach (var savedPC in savedPCs)
 		{
@@ -127,14 +161,14 @@ public class GameSave : ScriptableObject
 			return;
 		}
 		
-		savedPCs.Clear();
+		Clear();
+
+		version = GAME_VERSION; 
 		
 		foreach (var partyChar in CharacterController.GetPartyCharacters())
 		{
 			savedPCs.Add(new SavedPC(partyChar));
 		}
-
-		savedLevels.Clear();
 		
 		savedLevels.Insert(0, new SavedLevel());
 		foreach (var levelChar in GameTurnManager.Instance.GetLevelCharacters())
@@ -151,6 +185,7 @@ public class GameSave : ScriptableObject
 	{
 		var json = JsonUtility.ToJson(this, true);
 		System.IO.File.WriteAllText(filePath, json);
+		Debug.Log(this + " Saved To File " + filePath);
 	}
 
 	[ContextMenu("Load From File")]
@@ -167,7 +202,9 @@ public class GameSave : ScriptableObject
 		{
 			Debug.LogWarning(this + " incompatible version: " + lastVersion + " > " + version);
 			JsonUtility.FromJsonOverwrite(backup, this);
+			return;
 		}
+		Debug.Log(this + " Loaded From File " + filePath);
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.EditorUtility.SetDirty(this);
 #endif

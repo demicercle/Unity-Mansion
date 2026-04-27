@@ -153,6 +153,13 @@ public class GameTurnManager : MonoBehaviour
 			if(character.GetCurrentFaction() == CharacterFaction.Player)
 				character.SetPartyIndex(partyIndex++);
 		}
+
+		if (!GameSave.Current.IsEmpty())
+		{
+			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
+			GameSave.Current.LoadGame();
+			yield return new WaitForSeconds(0.3f);
+		}
 		
 		Debug.Log("loading complete");
 		isLoading = false;

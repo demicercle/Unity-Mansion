@@ -12,5 +12,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5dd240e700d42499999efd830201ea6, type: 3}
   m_Name: GameSave
   m_EditorClassIdentifier: Assembly-CSharp::GameSave
-  savedLevels: []
-  savedPCs: []
+  version: 0
+  savedLevels:
+  - levelIndex: 0
+    levelCharacters:
+    - name: PC_Zombi_0
+      position: {x: 7.9, y: 3.8, z: -3.1000001}
+      rotation: 279
+      isDead: 0
+    - name: PC_Zombi_1
+      position: {x: 5.8, y: 0.2, z: 3.9}
+      rotation: 247
+      isDead: 0
+    - name: PC_Zombi_2
+      position: {x: 6.2000003, y: 0.2, z: 6.9}
+      rotation: 28
+      isDead: 0
+    - name: PC_Zombi_3
+      position: {x: -12.5, y: 0.2, z: 1.7}
+      rotation: 64
+      isDead: 0
+    - name: PC_Zombi_4
+      position: {x: -8.3, y: 3.8, z: 7.3}
+      rotation: 295
+      isDead: 0
+    - name: PC_Zombi_6
+      position: {x: -6.6, y: 0.2, z: 0.8}
+      rotation: 240
+      isDead: 0
+    - name: PC_Zombi_5
+      position: {x: -4.2000003, y: 0.2, z: -3.1000001}
+      rotation: 64
+      isDead: 0
+    - name: PC_Neutral
+      position: {x: -6.4, y: 0.2, z: -15.1}
+      rotation: 44
+      isDead: 0
+  savedPCs:
+  - name: PC_Player_0
+    position: {x: 9.6, y: 3.8, z: -8.400001}
+    rotation: 332
+    isDead: 0
+    damages: 0
+  - name: PC_Player_1
+    position: {x: 10, y: 3.8, z: -11.6}
+    rotation: 353
+    isDead: 0
+    damages: 0
+  - name: PC_Player_2
+    position: {x: 11.1, y: 3.8, z: -11.3}
+    rotation: 333
+    isDead: 0
+    damages: 0

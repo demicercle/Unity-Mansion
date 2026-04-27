@@ -98,6 +98,14 @@ public class ConsoleCommands : MonoBehaviour
 		SceneManager.LoadScene(0);
 	}
 
+	[ConsoleMethod("save_and_quit", "")]
+	public static void SaveAndQuit()
+	{
+		GameSave.Current.SaveGame();
+		GameSave.Current.SaveToFile();
+		ResetGame();
+	}
+
 	[ConsoleMethod("dtset", "")]
 	public static void DtSet(float value)
 	{
