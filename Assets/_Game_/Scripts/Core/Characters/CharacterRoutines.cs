@@ -9,6 +9,7 @@ public class CharacterRoutines : MonoBehaviour
 	public const float SearchPathTimeout = 6.0f;
 	public const float DefaultWaitSeconds = 1.0f;
 	public const float MinReachDistance = 0.1f;
+	public const float MinDeltaToMove = 0.1f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -465,6 +466,8 @@ public class CharacterRoutines : MonoBehaviour
 		var startTime = Time.time;
 		while (!agent.ReachedDestination(dest))
 		{
+			debugTimeout = (Time.time - startTime);
+			
 			if (forcedReachDistance > 0)
 				agent.SetReachDistance(forcedReachDistance);
 			
@@ -500,7 +503,7 @@ public class CharacterRoutines : MonoBehaviour
 
 			var newPosition = _selfCharacter.GetPosition();
 			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
-			if (deltaPos > Consts.MinMagnitude) // character has moved
+			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
 				//agent.DropOnGround(); // to avoid overlapping obstacles
 				startTime = Time.time; // reset timeout
@@ -602,13 +605,14 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 	#endregion
-	
+
+	private float debugTimeout = 0;
 	private string debugString = "";
 	private void OnGUI()
 	{
 		if (debugMode > 0)
 		{
-			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString));
+			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString) + "\n" + debugTimeout.ToString("N2"));
 		}
 	}
 }
