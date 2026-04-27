@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.TextCore.Text;
 
 public class WeaponRenderer : MonoBehaviour
 {
@@ -11,6 +13,31 @@ public class WeaponRenderer : MonoBehaviour
     public bool offHand = true;
 
     [SerializeField] private Renderer[] renderers = Array.Empty<Renderer>();
+    [SerializeField] private LineRenderer shootLine;
+    
+    public UnityEvent onShoot;
+
+    public void OnShoot()
+    {
+        if (shootLine)
+        {
+            var selfCharacter = GetComponentInParent<CharacterEntity>();
+            if (selfCharacter)
+            {
+                shootLine.gameObject.SetActive(true);
+                shootLine.useWorldSpace = true;
+                shootLine.positionCount = 2;
+                shootLine.SetPosition(0, shootLine.transform.position);
+                shootLine.SetPosition(1, shootLine.transform.position
+                                         + Vector3.Scale(new Vector3(1,0,1), shootLine.transform.forward) 
+                                         * (selfCharacter.GetLastAttackTarget().GetPosition() - selfCharacter.GetPosition()).magnitude);
+                shootLine.GetComponent<Animation>()?.Play();
+            }
+        }
+    }
+    
+    public UnityEvent onHit;
+    public void OnHit() => onHit?.Invoke();
 
     private void OnEnable()
     {
@@ -19,6 +46,12 @@ public class WeaponRenderer : MonoBehaviour
             rd.gameObject.layer = Layers.LayerEquipment;
             rd.enabled = true;
         }
+    }
+
+    private void Awake()
+    {
+        if (shootLine)
+            shootLine.gameObject.SetActive(false);
     }
 
 #if UNITY_EDITOR

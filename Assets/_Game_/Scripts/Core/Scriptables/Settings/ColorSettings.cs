@@ -31,12 +31,12 @@ public class ColorSettings : ScriptableObject
 	[SerializeField]private Color deadColor = Color.black;
 		
 	public static Color GetDeadColor() => DefaultSettings.deadColor;
-	public static Color GetCharacterColor(CharacterController character, bool disabledIfNoActions = false, bool disabledIfNoMovePoints = false) => DefaultSettings.GetCurrentColor(character, disabledIfNoActions, disabledIfNoMovePoints);
+	public static Color GetCharacterColor(CharacterEntity character, bool disabledIfNoActions = false, bool disabledIfNoMovePoints = false) => DefaultSettings.GetCurrentColor(character, disabledIfNoActions, disabledIfNoMovePoints);
 	public static Color GetDisabledColor(CharacterFaction faction) => Color.Lerp(DefaultSettings.disabledColor, DefaultSettings.GetFactionColor(faction), DefaultSettings.disabledToFaction);
 	public static Color GetDisabledColor() => DefaultSettings.disabledColor;
 	
 	//#region PRIVATE
-	private Color GetCurrentColor(CharacterController character, bool disabledIfNoActions, bool disabledIfNoMovePoints)
+	private Color GetCurrentColor(CharacterEntity character, bool disabledIfNoActions, bool disabledIfNoMovePoints)
 	{
 		if (character.IsDead()) 
 			return GetDeadColor();

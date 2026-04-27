@@ -12,16 +12,18 @@ public class CharacterFollows : MonoBehaviour
 	[SerializeField] [Range(0.1f, 10f)] private float tickTime = 1.0f;
 	[SerializeField] [Range(-10f, 0f)] private float minHeading = 1.5f;
 	[SerializeField] [Range(-10f, 0f)] private float maxHeading = 1.5f;
-	[SerializeField] [Min(0)] private float headingSpeed = 1.5f;
 	[SerializeField] [Range(0f, 1f)] private float headingScale = 0.5f;
+	[SerializeField] [Min(0)] private float headingSpeed = 1.5f;
+	[SerializeField] [Min(0)] private float avoidDistance = 1.0f;
+	[SerializeField] [Min(1f)] private float avoidHeadingScale = 1.0f;
 
-	public void SetLeader(CharacterController newLeader)
+	public void SetLeader(CharacterEntity newLeader)
 	{
 		leaderCharacter = newLeader;
 	}
 
-	private CharacterController selfCharacter;
-	private CharacterController leaderCharacter;
+	private CharacterEntity selfCharacter;
+	private CharacterEntity leaderCharacter;
 	private CharacterAgent agent;
 	private Transform dummy;
 	private float heading;
@@ -43,7 +45,7 @@ public class CharacterFollows : MonoBehaviour
 		if (debugMode>0) Debug.Log(this + " OnEnable");
 		if (!selfCharacter)
 		{
-			selfCharacter = GetComponent<CharacterController>();
+			selfCharacter = GetComponent<CharacterEntity>();
 			if (!selfCharacter) Debug.LogError(this + " no character");
 			agent = selfCharacter.GetAgent();
 		}
@@ -77,9 +79,14 @@ public class CharacterFollows : MonoBehaviour
 		
 		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead() && GameInput.Instance.IsLeaderMode())
 		{
-			heading = Mathf.Lerp(minHeading, maxHeading, CharacterController.PartyCount <= 0 ? 0f :
-				selfCharacter.GetPartyIndex() / CharacterController.PartyCount);
-
+			heading = Mathf.Lerp(minHeading, maxHeading, CharacterEntity.PartyCount <= 0 ? 0f :
+				selfCharacter.GetPartyIndex() / CharacterEntity.PartyCount);
+			
+			if (NavUtils.NavDistanceRoundY(selfCharacter.GetPosition(), leaderCharacter.GetPosition()) <= avoidDistance)
+			{
+				heading *= avoidHeadingScale;
+			}
+			
 			headingPos = leaderCharacter.transform.position
 			             + leaderCharacter.transform.forward * headingScale * heading;
 			

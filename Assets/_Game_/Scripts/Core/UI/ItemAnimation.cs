@@ -73,8 +73,8 @@ public class ItemAnimation : MonoBehaviour
 		instance.isClone = true;
 		instance.iconContainer.texture = itemData.GetIcon();
 		instance.inventoryFrom  = fromInventory;
-		if(objectTo is CharacterController) 
-			instance.inventoryTo = (objectTo as CharacterController).GetComponent<Inventory>();
+		if(objectTo is CharacterEntity) 
+			instance.inventoryTo = (objectTo as CharacterEntity).GetComponent<Inventory>();
 		else 
 			Debug.LogWarning(this + " objectTo=" + objectTo + " cannot find position");
 	}

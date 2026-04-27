@@ -655,13 +655,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09cf56a0f4054f288362fbccb9156587, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConsoleCommands
-  skipCommands: -1
+  skipCommands: 0
   commandsOnStart:
-  - debug_agent 2
-  - debug_detection 1
-  - debug_brains 1
-  - debug_routines 1
-  - debug_gtm 1
+  - '#debug_agent 2'
+  - '#debug_detection 1'
+  - '#debug_brains 1'
+  - '#debug_routines 1'
+  - '#debug_gtm 1'
 --- !u!1 &1720306999441167422
 GameObject:
   m_ObjectHideFlags: 0

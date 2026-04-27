@@ -17,7 +17,7 @@ public class CharacterEventTrigger : MonoBehaviour
 	}
 	
 	[Header("Reference")]
-	[SerializeField] private CharacterController character;
+	[SerializeField] private CharacterEntity character;
 	[SerializeField] private bool revealedOnly;
 	[Space]
 	[Header("Action Events")]
@@ -35,9 +35,9 @@ public class CharacterEventTrigger : MonoBehaviour
 	[ContextMenu("Find Character")]
 	private void FindCharacter()
 	{
-		if (!character) character = GetComponent<CharacterController>();
-		if (!character) character = GetComponentInParent<CharacterController>();
-		if (!character) character = GetComponentInChildren<CharacterController>();
+		if (!character) character = GetComponent<CharacterEntity>();
+		if (!character) character = GetComponentInParent<CharacterEntity>();
+		if (!character) character = GetComponentInChildren<CharacterEntity>();
 		Utils.SetDirty(this);
 	}
 
@@ -62,7 +62,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		character.onHealed += OnCharacterHealed;
 		GameTurnManager.Instance.onTurnStarted += OnTurnChanged;
 		GameTurnManager.Instance.onTurnEnded += OnTurnChanged;
-		CharacterController.onAnyCharacterDamaged += OnAnyCharacterDamaged;
+		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
 	}
 
 	private void OnDisable()
@@ -74,7 +74,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		character.onHealed -= OnCharacterHealed;
 		GameTurnManager.Instance.onTurnStarted -= OnTurnChanged;
 		GameTurnManager.Instance.onTurnEnded -= OnTurnChanged;
-		CharacterController.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
 	}
 
 	private void OnCharacterUseAction(CharacterAction action, object target)
@@ -116,15 +116,15 @@ public class CharacterEventTrigger : MonoBehaviour
 			onTurnStart?.Invoke();
 	}
 
-	private void OnAnyCharacterDamaged(CharacterController arg1, float arg2, object arg3)
+	private void OnAnyCharacterDamaged(CharacterEntity arg1, float arg2, object arg3)
 	{
-		if (arg3 as CharacterController == character && CheckState())
+		if (arg3 as CharacterEntity == character && CheckState())
 		{
 			StartCoroutine(CheckDead(arg1));
 		}
 	}
 
-	private IEnumerator CheckDead(CharacterController other)
+	private IEnumerator CheckDead(CharacterEntity other)
 	{
 		yield return new WaitForSeconds(0.5f);
 		if (other && other.IsDead())

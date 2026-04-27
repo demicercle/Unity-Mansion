@@ -1,12 +1,9 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.Events;
 using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
-using Object = UnityEngine.Object;
 
 public interface ICursorHandler
 {
@@ -118,7 +115,7 @@ public class GameInput : MonoBehaviour
 	private CameraPivot cameraPivot => CameraPivot.Instance;
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
 	private bool isDebugMode => debugMode > 0;
-	private CharacterController selectedCharacter;
+	private CharacterEntity selectedCharacter;
 	private CharacterAgent selectedAgent;
 	private Collider lastMouseOverObject;
 	private bool mouseOverChanged;
@@ -184,6 +181,8 @@ public class GameInput : MonoBehaviour
 
 		canvas.onViewportClicked += OnClickedViewport;
 		canvas.onViewportMouseOver += OnMouseOverViewport;
+		
+		onClick.AddListener(TryRestSelected);
 	}
 
 	private void OnDisable()
@@ -196,7 +195,6 @@ public class GameInput : MonoBehaviour
 		inputSystem.UI.RightClick.performed -= OnInputRightClick;
 		inputSystem.UI.Point.performed -= OnInputMouseMove;
 		inputSystem.UI.ScrollWheel.performed -= OnInputCameraZoom;
-		inputSystem.Player.EndTurn.performed -= OnInputEndTurn;
 		inputSystem.Player.SelectNext.performed -= OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed -= OnInputFocusSelected;
 		inputSystem.Player.ToggleGroup.performed -= OnInputToggleGroup;
@@ -213,6 +211,8 @@ public class GameInput : MonoBehaviour
 		
 		canvas.onViewportClicked -= OnClickedViewport;
 		canvas.onViewportMouseOver -= OnMouseOverViewport;
+		
+		onClick.RemoveListener(TryRestSelected);
 		
 		Cursor.SetCursor(null, default, default);
 		Cursor.lockState = default;
@@ -283,6 +283,15 @@ public class GameInput : MonoBehaviour
 			{
 				PauseCanvas.Instance.TogglePaused();
 			}
+
+			if (inputSystem.Player.EndTurn.WasPressedThisFrame())
+			{
+				gameTurnManager.TryEndPlayerTurn();
+			}
+			
+			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(0);
+			if (inputSystem.Player.SelectParty2.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(1);
+			if (inputSystem.Player.SelectParty3.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(2);
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
@@ -402,7 +411,7 @@ public class GameInput : MonoBehaviour
 			
 			else if (lastCursorResult == CursorRaycastResult_Interaction) 
 			{
-				if (hit.collider.TryGetComponent(out CharacterController overCharacter))
+				if (hit.collider.TryGetComponent(out CharacterEntity overCharacter))
 				{
 					if (debugMode > 1) Debug.Log(this + " overCharacter=" + overCharacter);
 					debugString += " (Character)";
@@ -552,8 +561,6 @@ public class GameInput : MonoBehaviour
 	}
 
 	// KEY INPUT
-	
-	private void OnInputEndTurn(CallbackContext ctx) => gameTurnManager.TryEndPlayerTurn();
 
 	private void OnInputAction_Run(CallbackContext ctx)
 	{
@@ -661,7 +668,7 @@ public class GameInput : MonoBehaviour
 					SetItemToUse(null);
 				}
 				
-				else if (hit.collider.TryGetComponent(out CharacterController clickedCharacter)) // click character
+				else if (hit.collider.TryGetComponent(out CharacterEntity clickedCharacter)) // click character
 				{
 					ClickCharacter(clickedCharacter);
 				}
@@ -730,7 +737,13 @@ public class GameInput : MonoBehaviour
 		}
 	}
 
-	private void ClickCharacter(CharacterController clickedCharacter)
+	private void TryRestSelected()
+	{
+		if(selectedCharacter && !gameTurnManager.IsTurnBasedMode() && !selectedCharacter.HasActions()) 
+			selectedCharacter.Rest();
+	}
+
+	private void ClickCharacter(CharacterEntity clickedCharacter)
 	{
 		Debug.Log(this + " ClickCharacter " + clickedCharacter);
 
@@ -881,14 +894,14 @@ public class GameInput : MonoBehaviour
 	private bool CanAssignOnClickSelected() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
 	                                              && CanAssignOnClick(selectedCharacter);
 	
-	private bool CanAssignOnClick(CharacterController character)
+	private bool CanAssignOnClick(CharacterEntity character)
 	{
 		return hasFocus 
 		       && (!gameTurnManager.IsTurnBasedMode() || (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines()))
 		       && character.IsControllableByPlayer();
 	}
 
-	private bool CanAssignOnMouseOver(CharacterController character)
+	private bool CanAssignOnMouseOver(CharacterEntity character)
 	{
 		return CanAssignOnClick(character) && !character.Routines.AnyActive() && !character.IsMoving();
 	}

@@ -176,6 +176,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "SelectParty1",
+                    "type": "Button",
+                    "id": "a90aafa0-58ff-4a36-ade9-551a55f436bb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectParty2",
+                    "type": "Button",
+                    "id": "b12f08dc-f626-40d9-9b4d-3a08239d5bb4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectParty3",
+                    "type": "Button",
+                    "id": "d7143e86-141c-4962-8f2b-3efa84825219",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -737,6 +764,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "HighlightObjects",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e9834a6d-00c5-4d51-849d-4b278b308409",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectParty1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d0ded1fd-52a1-427a-a9f5-9c350d4996f7",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectParty2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4a60f4b-46cd-4a2d-82ad-05cf86dacfa6",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectParty3",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

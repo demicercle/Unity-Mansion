@@ -9,13 +9,14 @@ public class CharacterRoutines : MonoBehaviour
 	public const float SearchPathTimeout = 6.0f;
 	public const float DefaultWaitSeconds = 1.0f;
 	public const float MinReachDistance = 0.1f;
+	public const float MinDeltaToMove = 0.1f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
 	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
 	
-	public static Coroutine DoLookPositionOn(CharacterController character, Vector3 lookPosition)
+	public static Coroutine DoLookPositionOn(CharacterEntity character, Vector3 lookPosition)
 	{
 		return character.StartCoroutine(character.Routines.WaitCharacterLookPosition(lookPosition));
 	}
@@ -64,7 +65,7 @@ public class CharacterRoutines : MonoBehaviour
 		if (debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), lookPosition, Color.magenta, 1.0f);//TODO defaultDrawDuration
 		StartNewRoutine(WaitCharacterLookPosition(lookPosition));
 	}
-	public void AssignTalk(CharacterController npc) // TODO all " Assign " methods should return the coroutine
+	public void AssignTalk(CharacterEntity npc) // TODO all " Assign " methods should return the coroutine
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignTalk " + npc);
 		StartCoroutine(WaitCharacterTalk(npc));
@@ -79,7 +80,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignMoveToDestination(Vector3 navPosition)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignMoveToDestination ");
-		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
@@ -94,7 +95,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignInteract(PropComponent clickedProp)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignInteract ");
-		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
@@ -109,7 +110,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignAttack(IAttackable other, bool canUseRunAction)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
-		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
@@ -121,10 +122,10 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-	public void Leader_AssignTalk(CharacterController npc)
+	public void Leader_AssignTalk(CharacterEntity npc)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignTalk ");
-		foreach (var partyCharacter in CharacterController.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
 		{
 			if (partyCharacter == _selfCharacter)
 			{
@@ -136,7 +137,7 @@ public class CharacterRoutines : MonoBehaviour
 			}
 		}
 	}
-	public void AssignFollows(CharacterController leader)
+	public void AssignFollows(CharacterEntity leader)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignFollows " + leader);
 		StopAllRoutines();
@@ -158,11 +159,11 @@ public class CharacterRoutines : MonoBehaviour
 	
 #region PRIVATE
 	private Coroutine coroutine;
-	private CharacterController _selfCharacter;
+	private CharacterEntity _selfCharacter;
 
 	private void Awake()
 	{
-		_selfCharacter = GetComponent<CharacterController>();
+		_selfCharacter = GetComponent<CharacterEntity>();
 		if(!_selfCharacter) Debug.LogError(this + " absolutely needs a character!");
 	}
 
@@ -345,12 +346,16 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 		
-		_selfCharacter.AttackAction();
+		_selfCharacter.AttackAction(target);
 		if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetPosition(), Color.red, 2.0f);
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
-		target.TakeDamage(_selfCharacter.GetLastAttackDamage(), _selfCharacter);
+		target.TakeDamage(new DamageInfo()
+		{
+			amount = _selfCharacter.GetLastAttackDamage(),
+			isRanged =  _selfCharacter.IsUsingRangeWeapon()
+		}, _selfCharacter);
 
 		if(debugMode > 0) Debug.Log("attack ends");
 	}
@@ -364,9 +369,12 @@ public class CharacterRoutines : MonoBehaviour
 	
 		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
 		{
+			_selfCharacter.GetAgent().updateRotation = false;
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
+		
+		_selfCharacter.GetAgent().updateRotation = true;
 	}
 	
 	private IEnumerator WaitMoveCharacterToWaypoint(Waypoint waypoint, bool canUseRunAction, System.Action onComplete = null)
@@ -440,6 +448,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			Debug.LogWarning(this + " invalid direction to firstPoint, abort move");
 			_selfCharacter.StopAgent();
+			StopAllRoutines();
 			yield break;
 		}
 		
@@ -458,6 +467,8 @@ public class CharacterRoutines : MonoBehaviour
 		var startTime = Time.time;
 		while (!agent.ReachedDestination(dest))
 		{
+			debugTimeout = (Time.time - startTime);
+			
 			if (forcedReachDistance > 0)
 				agent.SetReachDistance(forcedReachDistance);
 			
@@ -493,7 +504,7 @@ public class CharacterRoutines : MonoBehaviour
 
 			var newPosition = _selfCharacter.GetPosition();
 			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
-			if (deltaPos > Consts.MinMagnitude) // character has moved
+			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
 				//agent.DropOnGround(); // to avoid overlapping obstacles
 				startTime = Time.time; // reset timeout
@@ -501,8 +512,7 @@ public class CharacterRoutines : MonoBehaviour
 			
 			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			
-			if(GameTurnManager.Instance.IsTurnBasedMode())
-				_selfCharacter.ConsumeMovePoints(deltaPos, true);
+			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
 		}
 		
 		if(debugMode > 0) Debug.Log(this + " reached destination! " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));
@@ -518,7 +528,7 @@ public class CharacterRoutines : MonoBehaviour
 		_selfCharacter.FloatingText(action.ToString());
 	}
 
-	private IEnumerator WaitCharacterTalk(CharacterController npc)
+	private IEnumerator WaitCharacterTalk(CharacterEntity npc)
 	{
 		debugString = "WaitCharacterTalk " + npc;
 		if(debugMode > 0) Debug.Log(">> WaitCharacterTalk: " + this + " " + npc);
@@ -551,9 +561,9 @@ public class CharacterRoutines : MonoBehaviour
 	private IEnumerator WaitCharacterUseItem( ItemData itemToUse,object objectTo)
 	{
 		var useRange = itemToUse.GetUseRange();
-		if (objectTo is CharacterController)
+		if (objectTo is CharacterEntity)
 		{
-			var otherCharacter = objectTo as CharacterController;
+			var otherCharacter = objectTo as CharacterEntity;
 			if (useRange > 0 && NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) >
 			    useRange)
 			{
@@ -596,13 +606,14 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 	#endregion
-	
+
+	private float debugTimeout = 0;
 	private string debugString = "";
 	private void OnGUI()
 	{
 		if (debugMode > 0)
 		{
-			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString));
+			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString) + "\n" + debugTimeout.ToString("N2"));
 		}
 	}
 }

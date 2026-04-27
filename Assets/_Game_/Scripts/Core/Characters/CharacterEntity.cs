@@ -7,7 +7,7 @@ public interface IAttackable
 {
 	Vector3 GetPosition();
 	float GetRadius();
-	void TakeDamage(float amount, object instigator);
+	void TakeDamage(DamageInfo damageInfo, object instigator);
 }
 
 public enum CharacterFaction
@@ -28,28 +28,34 @@ public enum CharacterAction
 	UseItem
 }
 
-public class CharacterController : MonoBehaviour, IAttackable
+public struct DamageInfo
+{
+	public float amount;
+	public bool isRanged;
+}
+
+public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
 	private const float MinAttackRange = 0.15f;
 	
 	public static int debugStats { get; set; }
 	
-	public static List<CharacterController> AllCharacters => _allCharacters;
+	public static List<CharacterEntity> AllCharacters => _allCharacters;
 
-	public static CharacterController[] GetPartyCharacters() => _partyCharacters.ToArray();
+	public static CharacterEntity[] GetPartyCharacters() => _partyCharacters.ToArray();
 	
 	public static int CountLivingPartyCharacters() => _partyCharacters.Count(p => !p.IsDead());
 
 	public static int PartyCount => _partyCharacters.Count;
 	
 	public static event System.Action onPartyChanged;
-	public static event System.Action<CharacterController, float, object> onAnyCharacterDamaged;
-	public static event System.Action<CharacterController, float> onAnyCharacterHealed;
-	public static event System.Action<CharacterController> onAddedToParty, onRemovedFromParty;
-	public static event System.Action<CharacterController> onAnyCharacterMoved;
-	public static event System.Action<CharacterController> onAnyCharacterDead;
-	public static event System.Action<CharacterController, CharacterAction> onAnyCharacterUsesAction;
+	public static event System.Action<CharacterEntity, float, object> onAnyCharacterDamaged;
+	public static event System.Action<CharacterEntity, float> onAnyCharacterHealed;
+	public static event System.Action<CharacterEntity> onAddedToParty, onRemovedFromParty;
+	public static event System.Action<CharacterEntity> onAnyCharacterMoved;
+	public static event System.Action<CharacterEntity> onAnyCharacterDead;
+	public static event System.Action<CharacterEntity, CharacterAction> onAnyCharacterUsesAction;
 	
 	public event System.Action onSpawned;
 	public event System.Action onStatsChanged;
@@ -57,13 +63,13 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public event System.Action<bool> onSelectionChanged;
 	public event System.Action<float> onHealed;
 	public event System.Action<float> onDamaged;
-	public event System.Action<CharacterController, float> onDamagedBy;
+	public event System.Action<CharacterEntity, float> onDamagedBy;
 	public event System.Action<int,int> onPartyIndexChanged;
 	public event System.Action onDead;
 	public event System.Action onMoved;
 	public event System.Action onRotate;
 	public event System.Action<CharacterAction, object> onUseAction;
-	public event System.Action<CharacterController> onTalkedBy;
+	public event System.Action<CharacterEntity> onTalkedBy;
 	public event System.Action turnStarted;
 	public event System.Action turnEnded;
 	
@@ -141,9 +147,13 @@ public class CharacterController : MonoBehaviour, IAttackable
 	{
 		return HasActions();
 	}
+
+	private IAttackable lastAttackTarget;
+	public IAttackable GetLastAttackTarget() => lastAttackTarget;
 	
-	public void AttackAction(CharacterController target = null, bool stopAgent = true)
+	public void AttackAction(IAttackable target, bool stopAgent = true)
 	{
+		lastAttackTarget = target;
 		UseAction(CharacterAction.Attack, target);
 	}
 	
@@ -157,7 +167,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 		}
 		else if (actionType == CharacterAction.Talk)
 		{
-			(param as CharacterController)?.onTalkedBy?.Invoke(this);
+			(param as CharacterEntity)?.onTalkedBy?.Invoke(this);
 		}
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);
@@ -176,9 +186,9 @@ public class CharacterController : MonoBehaviour, IAttackable
 	
 	public bool IsPlayer() => GetCurrentFaction() == CharacterFaction.Player;
 	
-	public bool IsEnemyToPlayer(CharacterController other = null) => currentFaction == CharacterFaction.Enemy;
+	public bool IsEnemyToPlayer(CharacterEntity other = null) => currentFaction == CharacterFaction.Enemy;
 
-	public bool IsEnemyTo(CharacterController other) => IsEnemyTo(other.GetCurrentFaction());
+	public bool IsEnemyTo(CharacterEntity other) => IsEnemyTo(other.GetCurrentFaction());
 	public bool IsEnemyTo(CharacterFaction faction)
 	{
 		if (currentFaction == CharacterFaction.Enemy)
@@ -187,7 +197,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 			return faction == CharacterFaction.Enemy;
 	}
 
-	public bool IsLeaderOf(CharacterController other) => GameInput.Instance.IsLeaderMode() &&
+	public bool IsLeaderOf(CharacterEntity other) => GameInput.Instance.IsLeaderMode() &&
 														InParty() && other.InParty() && IsSelected();
 	
 	public bool InParty() => partyIndex >= 0;
@@ -278,6 +288,8 @@ public class CharacterController : MonoBehaviour, IAttackable
 			//DebugDrawer.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 		}
+
+		agent.SetRotationY(transform.rotation.eulerAngles.y);
 	}
 
 	public bool IsFacingPosition(Vector3 pos) => IsFacingDirection(pos - GetPosition());
@@ -337,8 +349,12 @@ public class CharacterController : MonoBehaviour, IAttackable
 	
 	public void ConsumeMovePoints(float amount, bool notifyMoves)
 	{
-		usedMovePoints += amount;
-		onStatsChanged?.Invoke();
+		if (amount != 0f)
+		{
+			usedMovePoints += amount;
+			onStatsChanged?.Invoke();
+		}
+		
 		if (notifyMoves)
 		{
 			onMoved?.Invoke();
@@ -381,8 +397,9 @@ public class CharacterController : MonoBehaviour, IAttackable
 		onStatsChanged?.Invoke();
 	}
 	
-	public void TakeDamage(float amount, object objectFrom)
+	public void TakeDamage(DamageInfo damageInfo, object objectFrom)
 	{
+		var amount = damageInfo.amount;
 		Debug.Log(this + " TakeDamage " + amount);
 		totalDamages += amount;
 		
@@ -399,9 +416,9 @@ public class CharacterController : MonoBehaviour, IAttackable
 
 		onStatsChanged?.Invoke();
 		
-		if (objectFrom is CharacterController)
+		if (objectFrom is CharacterEntity)
 		{
-			onDamagedBy?.Invoke(objectFrom as CharacterController, amount);
+			onDamagedBy?.Invoke(objectFrom as CharacterEntity, amount);
 		}
 
 	}
@@ -428,7 +445,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public bool CanAttack(bool checkActions = true, bool checkMoves = true) =>
 		!isDead && (!checkActions || HasActions()) && (!checkMoves || HasMovePoints());
 	
-	public bool CanAttackOther(CharacterController other)
+	public bool CanAttackOther(CharacterEntity other)
 	{
 		return CanAttack() && !other.IsDead() && IsEnemyTo(other);
 	}
@@ -490,7 +507,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 
 	public bool HasDetectedAnyPartyCharacter() => _partyCharacters.Any(HasDetectedOther);
 	
-	public bool HasDetectedOther(CharacterController other) => detection && detection.IsCharacterDetected(other);
+	public bool HasDetectedOther(CharacterEntity other) => detection && detection.IsCharacterDetected(other);
 	
 	public bool TryGetAnimation(out CharacterAnimation outAnimation)
 	{
@@ -511,8 +528,8 @@ public class CharacterController : MonoBehaviour, IAttackable
 	}
 	
 	#region PRIVATE
-	private static List<CharacterController> _allCharacters = new List<CharacterController>();
-	private static List<CharacterController> _partyCharacters = new List<CharacterController>();
+	private static List<CharacterEntity> _allCharacters = new List<CharacterEntity>();
+	private static List<CharacterEntity> _partyCharacters = new List<CharacterEntity>();
 
 	private int partyIndex = -1;
 	

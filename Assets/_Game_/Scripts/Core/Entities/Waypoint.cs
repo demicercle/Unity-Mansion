@@ -20,7 +20,7 @@ public class Waypoint : MonoBehaviour
 	private void AssignWandering_False() => AssignWandering(false);
 	private void AssignWandering(bool value)
 	{
-		var characters = Utils.FindObjects<CharacterController>();
+		var characters = Utils.FindObjects<CharacterEntity>();
 		foreach (var character in characters)
 		{
 			if (!character.TryGetComponent(out CharacterBrain brain)) 

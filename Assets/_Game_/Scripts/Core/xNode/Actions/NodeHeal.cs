@@ -12,7 +12,7 @@ public class NodeHeal : GameNode
 		{
 			_amount = GetInputValue<float>("_amount", _amount);
 			
-			if (_character.TryGetComponent(this, out CharacterController character))
+			if (_character.TryGetComponent(this, out CharacterEntity character))
 			{
 				character.Heal(_amount);
 			}

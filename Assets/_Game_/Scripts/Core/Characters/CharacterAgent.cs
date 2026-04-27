@@ -9,7 +9,7 @@ using Pathfinding.RVO;
 using UnityEngine;
 
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(CharacterEntity))]
 public class CharacterAgent : MonoBehaviour
 {
 	private const float ReachDestinationScale = 100.0f;
@@ -208,9 +208,10 @@ public class CharacterAgent : MonoBehaviour
 			if (!RoomTrigger.IsPositionVisible(endPoint)) // ignore not revealed waypoint
 				continue;
 
-			do
-				yield return new WaitForSeconds(WaypointSearchSeconds);
-			while (NavmeshRebuilder.IsRebuildingAsync());
+			
+			yield return StartCoroutine(WaitNavmesh());
+			
+			aiPath.canSearch = true;
 				
 			// Crée une requête de chemin
 			ABPath path = ABPath.Construct(startPoint, endPoint, null);
@@ -399,14 +400,23 @@ public class CharacterAgent : MonoBehaviour
 	{
 		return StartCoroutine(DoSearchPathAsync(dest, clamp, onComplete));
 	}
+
+	private IEnumerator WaitNavmesh()
+	{
+		do
+		{
+			aiPath.canSearch = false;
+			yield return null;
+		} while (NavmeshRebuilder.IsRebuildingAsync());
+		aiPath.canSearch = true;
+	}
 	
 	private IEnumerator DoSearchPathAsync(Vector3 dest, bool clamp, System.Action onComplete = null)
 	{
 		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync");
 		// WaitCharacterMoved
-		
-		while (NavmeshRebuilder.IsRebuildingAsync())
-			yield return null;
+
+		yield return StartCoroutine(WaitNavmesh());
 
 		if (clamp && NavUtils.TryGetNearestNavPosition(dest, aiPath.endReachedDistance, out dest))
 		{
@@ -418,6 +428,9 @@ public class CharacterAgent : MonoBehaviour
 		{
 			if(!aiPath.pathPending || !aiPath.hasPath)
 				AssignDestination(dest, true); 
+			
+			while (NavmeshRebuilder.IsRebuildingAsync())
+				yield return null;
 			
 			UpdatePathAndTarget(true);
 			if (timeout >= TimeOut) break;
@@ -467,7 +480,7 @@ public class CharacterAgent : MonoBehaviour
 	//private Transform followTarget;
 	private AIDestinationSetter aiDestinationSetter;
 	private AIPath aiPath;
-	private CharacterController _selfCharacter;
+	private CharacterEntity _selfCharacter;
 	private GameTurnManager _gameTurnManager; // TODO
 	private CharacterAnimation _characterAnimation;
 	[HideInInspector] private Vector3[] lastPath; //hide in unity because it crashes (too much things to display probably)
@@ -485,7 +498,7 @@ public class CharacterAgent : MonoBehaviour
 	private void Awake()
 	{
 		_characterAnimation = GetComponent<CharacterAnimation>();
-		_selfCharacter = GetComponent<CharacterController>();
+		_selfCharacter = GetComponent<CharacterEntity>();
 		_selfCharacter.onUseAction += OnUseAction;
 		_selfCharacter.onPartyIndexChanged += OnPartyIndexChanged;
 		
@@ -542,7 +555,8 @@ public class CharacterAgent : MonoBehaviour
 
 	private void OnPartyIndexChanged(int newIndex, int partyCount)
 	{
-		rvoController.priority = Mathf.Lerp(0.1f, 0.9f, (float)newIndex / (float)partyCount);
+		rvoController.priority = CharacterSelection.IsCharacterSelected(_selfCharacter) ? 1.0f :
+			Mathf.Lerp(0.25f, 0.75f, (float)newIndex / (float)partyCount);
 	}
 
 	private void SelectionChanged()
@@ -641,5 +655,11 @@ public class CharacterAgent : MonoBehaviour
 			: ColorSettings.GetDisabledColor(_selfCharacter.GetCurrentFaction()));
 		
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
+	}
+
+	public void SetRotationY(float eulerAnglesY)
+	{
+		//aiPath.updateRotation = false;
+		aiPath.rotation = Quaternion.Euler(0, eulerAnglesY, 0);
 	}
 }

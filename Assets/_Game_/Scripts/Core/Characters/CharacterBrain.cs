@@ -282,21 +282,21 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		}
 	}
 	
-	private CharacterController _selfCharacter;
+	private CharacterEntity _selfCharacter;
 	private CharacterDetection _characterDetection;
-	private CharacterController _chaseCharacter;
+	private CharacterEntity _chaseCharacter;
 	private PatrolRoute _patrolRoute;
 	private List<Waypoint> _waypointList;
 	private Waypoint _currentWaypoint;
 	private Vector3 _lastTargetKnownPosition;
 	private Vector3 _wanderingPos, _lastWanderingPos;
-	private Dictionary<CharacterController, float> _aggroMap = new Dictionary<CharacterController, float>();
+	private Dictionary<CharacterEntity, float> _aggroMap = new Dictionary<CharacterEntity, float>();
 	private float _startedThinkingTime;
 	private Vector3 _lastPosition;
 	
 	private void Awake()
 	{
-		_selfCharacter = GetComponent<CharacterController>();
+		_selfCharacter = GetComponent<CharacterEntity>();
 		if (!_selfCharacter)
 		{
 			Debug.LogWarning(this + " has no character controller!");
@@ -375,12 +375,12 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		_aggroMap.Clear();
 	}
 
-	private void OnDamagedBy(CharacterController other, float amount)
+	private void OnDamagedBy(CharacterEntity other, float amount)
 	{
 		AddAggro(other, amount);
 	}
 
-	private void AddAggro(CharacterController other, float amount)
+	private void AddAggro(CharacterEntity other, float amount)
 	{
 		if (!_aggroMap.ContainsKey(other))
 			_aggroMap.Add(other, amount);
@@ -390,7 +390,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		_aggroMap[other] = Mathf.Min(_aggroMap[other], MaxAggro);
 	}
 
-	private bool TryFindNewTarget(out CharacterController newTarget)
+	private bool TryFindNewTarget(out CharacterEntity newTarget)
 	{
 		newTarget = _aggroMap.Keys.OrderBy(other =>
 		{
@@ -402,7 +402,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		return newTarget && newTarget != _chaseCharacter;
 	}
 
-	private void OnCharacterDetected(CharacterController otherCharacter)
+	private void OnCharacterDetected(CharacterEntity otherCharacter)
 	{
 		if(_selfCharacter.IsEnemyTo(otherCharacter))
 			AddAggro(otherCharacter, 0f);
@@ -415,7 +415,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		}
 	}
 
-	private void OnCharacterLost(CharacterController otherCharacter) // TODO move to last known position?
+	private void OnCharacterLost(CharacterEntity otherCharacter) // TODO move to last known position?
 	{
 		/*if (looseTargetDistance > 0)
 		{

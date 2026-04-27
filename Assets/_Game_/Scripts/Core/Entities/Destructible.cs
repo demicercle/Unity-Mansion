@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Destructible : MonoBehaviour, IAttackable
 {
+	public static List<Destructible> allInstances = new List<Destructible>();
+	public bool IsName(string s) => name == s;
+	public string GetName() => name;
+	public static int debugMode => CharacterEntity.debugStats;
+	
 	[SerializeField] [Range(0.1f, 5.0f)] private float radius = 1.0f;
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
 	[SerializeField] private Rigidbody[] rigidbodies;
@@ -12,14 +18,24 @@ public class Destructible : MonoBehaviour, IAttackable
 	public Vector3 GetPosition() => transform.position;
 	public float GetRadius() => radius;
 
+	public bool damagedWithRangeWeapons;
 	public UnityEvent takeDamage;
 	public UnityEvent breaks;
 
-	public void TakeDamage(float amount, object instigator)
+	public bool IsBroken() => isBroken;
+
+	public void TakeDamage(DamageInfo dmgInfo, object instigator)
 	{
+		if (!damagedWithRangeWeapons && dmgInfo.isRanged)
+		{
+			GameCanvas.Instance.FloatingText(this, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
+			return;
+		}
+		
+		var amount = dmgInfo.amount;
 		damageAmount += amount;
 		GameCanvas.Instance.FloatingText(this, Mathf.CeilToInt(amount).ToString());
-		Debug.Log(this + " take damage " + amount + " total=" + damageAmount + "/" + maxHealth);
+		if(debugMode > 0)Debug.Log(this + " take damage " + amount + " total=" + damageAmount + "/" + maxHealth);
 		
 		takeDamage?.Invoke();
 		
@@ -27,6 +43,33 @@ public class Destructible : MonoBehaviour, IAttackable
 		{
 			Break();
 		}
+	}
+
+	public void Break()
+	{
+		if (isBroken) return;
+		isBroken = true;
+		if(debugMode > 0)Debug.Log(this + " Breaks");
+
+
+		foreach (var obj in deactivateObjects)
+		{
+			if (obj) obj.SetActive(false);
+		}
+
+		gameObject.layer = Layers.LayerIgnore;
+		
+		NavmeshRebuilder.RebuildNavigationOn(gameObject);
+		
+		foreach (var rb in rigidbodies)
+		{
+			if (!rb) continue;
+			rb.isKinematic = false;
+			rb.useGravity = true;
+		}
+			
+		breaks?.Invoke();
+		
 	}
 	
 	private bool isBroken;
@@ -41,6 +84,8 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	private void Awake()
 	{
+		allInstances.Add(this);
+			
 		foreach (var obj in deactivateObjects)
 		{
 			if (obj) obj.SetActive(true);
@@ -53,29 +98,9 @@ public class Destructible : MonoBehaviour, IAttackable
 		}
 	}
 
-	private void Break()
+	private void OnDestroy()
 	{
-		if (isBroken) return;
-		isBroken = true;
-		Debug.Log(this + " Breaks");
-		
-		foreach (var rb in rigidbodies)
-		{
-			if (!rb) continue;
-			rb.isKinematic = false;
-			rb.useGravity = true;
-		}
-
-		foreach (var obj in deactivateObjects)
-		{
-			if (obj) obj.SetActive(false);
-		}
-
-		gameObject.layer = Layers.LayerIgnore;
-		
-		NavmeshRebuilder.RebuildNavigationOn(gameObject);
-		
-		breaks?.Invoke();
+		allInstances.Remove(this);
 	}
 
 	private void OnDrawGizmosSelected()

@@ -164,7 +164,7 @@ public class CharacterAnimation : MonoBehaviour
 	
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
-	private CharacterController _selfCharacter;
+	private CharacterEntity _selfCharacter;
 	private EventType waitForEvent;
 	private bool weaponSwitched;
 	private bool wasDamaged, wasAttacking, wasMoving;
@@ -173,7 +173,7 @@ public class CharacterAnimation : MonoBehaviour
 	
 	private void Awake()
 	{
-		_selfCharacter = GetComponent<CharacterController>();
+		_selfCharacter = GetComponent<CharacterEntity>();
 		if (!_selfCharacter)
 		{
 			Debug.LogWarning(this + " has no CharacterController");
@@ -347,7 +347,7 @@ public class CharacterAnimation : MonoBehaviour
 		}
 	}
 
-	private void OnDamagedBy(CharacterController other, float amount)
+	private void OnDamagedBy(CharacterEntity other, float amount)
 	{
 		if(shouldSwitchWeaponWhenDamaged)
 			InstantSwitchWeapons();

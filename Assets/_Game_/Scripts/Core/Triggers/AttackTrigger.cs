@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class AttackTrigger : MonoBehaviour
 {
-	[SerializeField] private CharacterController selfCharacter;
+	[SerializeField] private CharacterEntity selfCharacter;
 	[SerializeField] [Range(0.1f, 1.0f)] private float triggerRangeOffset = 0.3f;
 	[SerializeField] private bool triggerOnExit = true;
 	[SerializeField] private bool triggerOnEnter = false;
@@ -25,7 +25,7 @@ public class AttackTrigger : MonoBehaviour
 		sphereCollider = GetComponent<SphereCollider>();
 		if (!sphereCollider) sphereCollider = gameObject.AddComponent<SphereCollider>();
 		
-		if (!selfCharacter) selfCharacter = GetComponentInParent<CharacterController>();
+		if (!selfCharacter) selfCharacter = GetComponentInParent<CharacterEntity>();
 		if (!selfCharacter)
 		{
 			Debug.LogWarning(this + " has no character set, disabling");
@@ -67,7 +67,7 @@ public class AttackTrigger : MonoBehaviour
 		if (maxTriggerCount >= 0 && triggerCount >= maxTriggerCount) return;
 		if (meleeWeaponOnly && selfCharacter.IsUsingRangeWeapon()) return;
 		
-		if (other.TryGetComponent(out CharacterController otherCharacter))
+		if (other.TryGetComponent(out CharacterEntity otherCharacter))
 		{
 			if (!otherCharacter.IsDead() && Utils.TagCheck(filters, otherCharacter))
 			{

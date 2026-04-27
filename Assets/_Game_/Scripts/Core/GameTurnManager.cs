@@ -66,8 +66,11 @@ public class GameTurnManager : MonoBehaviour
 
 	public void TryEndPlayerTurn()
 	{
+		if (!IsTurnBasedMode()) return;
+		
 		if (IsPlayerTurn())
 		{
+			Debug.Log(this + " TryEndTurn");
 			EndTurn();
 		}
 		else
@@ -76,18 +79,18 @@ public class GameTurnManager : MonoBehaviour
 		}
 	}
 
-	public CharacterController[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
-	public CharacterController[] GetLevelCharacters() => levelCharacters.ToArray();
+	public CharacterEntity[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
+	public CharacterEntity[] GetLevelCharacters() => levelCharacters.ToArray();
 	public bool IsLevelIndex(int index) => index == 0; // TODO
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
-	private IEnumerable<CharacterController> partyCharacters => CharacterController.GetPartyCharacters();
+	private IEnumerable<CharacterEntity> partyCharacters => CharacterEntity.GetPartyCharacters();
 	
-	private CharacterController[] levelCharacters;
-	private CharacterController currentAICharacter;
-	private CharacterController focusCharacter;
-	private List<CharacterController> turnBasedCharacters = new List<CharacterController>();
+	private CharacterEntity[] levelCharacters;
+	private CharacterEntity currentAICharacter;
+	private CharacterEntity focusCharacter;
+	private List<CharacterEntity> turnBasedCharacters = new List<CharacterEntity>();
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
@@ -142,7 +145,7 @@ public class GameTurnManager : MonoBehaviour
 		
 		yield return new WaitForSeconds(0.1f); // for triggers
 
-		levelCharacters = CharacterController.AllCharacters
+		levelCharacters = CharacterEntity.AllCharacters
 			.OrderBy(c => c.transform.GetSiblingIndex())
 			.ToArray();
 		
@@ -161,6 +164,16 @@ public class GameTurnManager : MonoBehaviour
 			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
 			GameSave.Current.LoadGame();
 			yield return new WaitForSeconds(0.3f);
+			
+			if (CharacterSelection.TryGetSelectedCharacter(out var previouslySelected)) // TODO hak selection on load
+			{
+				foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
+				{
+					CharacterSelection.SelectCharacter(partyCharacter, true);
+				}
+				
+				CharacterSelection.SelectCharacter(previouslySelected);
+			}
 		}
 		
 		Debug.Log("loading complete");
@@ -291,7 +304,7 @@ public class GameTurnManager : MonoBehaviour
 				if (skipInvisibleCharacters && !otherCharacter.IsCharacterRevealed())
 				{
 					Debug.Log("skipInvisibleCharacters: " + otherCharacter);
-					yield return new WaitForSeconds(defaultActionsSeconds);
+					yield return null;
 					continue;
 				}
 				
@@ -314,6 +327,7 @@ public class GameTurnManager : MonoBehaviour
 				do yield return null;
 				while (NavmeshRebuilder.IsRebuildingAsync());
 				
+				if(debugMode > 0) Debug.Log(this + " start think " + otherBrain);
 				do
 				{
 					if(!otherBrain.IsThinking)
@@ -321,15 +335,13 @@ public class GameTurnManager : MonoBehaviour
 					
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
-				
-				Debug.Log(this + " YieldRoutines");
-				yield return YieldRoutines();
 
-				/*var startTime = Time.time;
+				if(debugMode > 0) Debug.Log(this + " yield");
 				yield return YieldRoutines();
-				while (Time.time - startTime < aiThinksSeconds)
-					yield return null;*/
+				if(debugMode > 0) Debug.Log(this + " end yield");
 			}
+			
+			yield return new WaitForSeconds(turnChangedSeconds);
 		}
 	}
 
@@ -379,8 +391,12 @@ public class GameTurnManager : MonoBehaviour
 	private Coroutine YieldRoutines() => StartCoroutine(WaitRoutines());
 	private IEnumerator WaitRoutines()
 	{
-		while(CharacterRoutines.AnyActiveRoutines())
+		do
+		{
 			yield return null;
+			if(debugMode > 0) Debug.Log(this + " WaitRoutines " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
+		}
+		while (CharacterRoutines.AnyActiveRoutines()) ;
 	}
 	
 	private void EndTurn()
@@ -481,7 +497,7 @@ public class GameTurnManager : MonoBehaviour
 		return false;
 	}
 
-	private void OnAnyDetectionChanged(CharacterController char1, CharacterController char2, bool detected)
+	private void OnAnyDetectionChanged(CharacterEntity char1, CharacterEntity char2, bool detected)
 	{
 		if (detected)
 		{
