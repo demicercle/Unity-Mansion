@@ -1390,9 +1390,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7960912902921319732}
-    - targetCorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1592714092413870353}
   m_SourcePrefab: {fileID: 100100000, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
 --- !u!1 &5757940252883871167 stripped
 GameObject:
@@ -1468,6 +1465,9 @@ MonoBehaviour:
   onShoot:
     m_PersistentCalls:
       m_Calls: []
+  onScream:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &6536868086427863390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1500,53 +1500,60 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEventHandler
   character: {fileID: 5745611760749173238}
-  onActionUsed:
+  revealedOnly: 0
+  actionEvents:
+  - actionType: 3
+    filters: 
+    onActionUsed:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6536868086427863390}
+          m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
+          m_MethodName: Activate
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - actionType: 5
+    filters: 
+    onActionUsed:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6536868086427863390}
+          m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
+          m_MethodName: Activate
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  onDamaged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6536868086427863390}
-        m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
-        m_MethodName: Activate
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  actionType: 3
-  filters: Door
---- !u!114 &1592714092413870353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5757940252883871167}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd8bf315116540e8aace59c6f3be0352, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterEventHandler
-  character: {fileID: 0}
-  onActionUsed:
+      m_Calls: []
+  onDeath:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6536868086427863390}
-        m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
-        m_MethodName: Activate
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  actionType: 5
-  filters: 
+      m_Calls: []
+  onHealed:
+    m_PersistentCalls:
+      m_Calls: []
+  onTurnStart:
+    m_PersistentCalls:
+      m_Calls: []
+  onAttack:
+    m_PersistentCalls:
+      m_Calls: []
+  onLastKill:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &5757940252884301857 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400204, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}

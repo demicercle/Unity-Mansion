@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -6,14 +7,21 @@ using UnityEngine.Events;
 
 public class CharacterEventHandler : MonoBehaviour
 {
+	[System.Serializable]
+	public class ActionEvent
+	{
+		public CharacterAction actionType;
+		public string filters;
+		public UnityEvent onActionUsed;
+		public void Invoke() => onActionUsed?.Invoke();
+	}
+	
 	[Header("Reference")]
 	[SerializeField] private CharacterController character;
 	[SerializeField] private bool revealedOnly;
 	[Space]
 	[Header("Action Events")]
-	[SerializeField] private CharacterAction actionType;
-	[SerializeField] private string filters;
-	[SerializeField] private UnityEvent onActionUsed;
+	[SerializeField] private List<ActionEvent> actionEvents;
 	[Space]
 	[Header("Other Events")]
 	public UnityEvent onDamaged;
@@ -51,7 +59,8 @@ public class CharacterEventHandler : MonoBehaviour
 		character.onDamaged += OnCharacterDamaged;
 		character.onDead += OnCharacterDeath;
 		character.onHealed += OnCharacterHealed;
-		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
+		GameTurnManager.Instance.onTurnStarted += OnTurnChanged;
+		GameTurnManager.Instance.onTurnEnded += OnTurnChanged;
 		CharacterController.onAnyCharacterDamaged += OnAnyCharacterDamaged;
 	}
 
@@ -62,17 +71,21 @@ public class CharacterEventHandler : MonoBehaviour
 		character.onDamaged -= OnCharacterDamaged;
 		character.onDead -= OnCharacterDeath;
 		character.onHealed -= OnCharacterHealed;
-		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
+		GameTurnManager.Instance.onTurnStarted -= OnTurnChanged;
+		GameTurnManager.Instance.onTurnEnded -= OnTurnChanged;
 		CharacterController.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
 	}
 
 	private void OnCharacterUseAction(CharacterAction action, object target)
 	{
-		if (action == actionType && Utils.TagCheck(filters, target))
+		foreach (var actionEvt in actionEvents)
 		{
-			Debug.Log(this + " OnCharacterUseAction onActionUsed.Invoke " + action);
-			onActionUsed.Invoke();
-		};
+			if (action == actionEvt.actionType && Utils.TagCheck(actionEvt.filters, target))
+			{
+				Debug.Log(this + " OnCharacterUseAction onActionUsed.Invoke " + action);
+				actionEvt.Invoke();
+			};
+		}
 	}
 
 	private void OnCharacterDamaged(float amount)
@@ -90,7 +103,7 @@ public class CharacterEventHandler : MonoBehaviour
 		onHealed?.Invoke();
 	}
 
-	private void OnTurnStarted()
+	private void OnTurnChanged()
 	{
 		if(character.IsCurrentTurn())
 			onTurnStart?.Invoke();

@@ -202,11 +202,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEventHandler
   character: {fileID: 0}
   revealedOnly: 0
-  actionType: 0
-  filters: 
-  onActionUsed:
-    m_PersistentCalls:
-      m_Calls: []
+  actionEvents:
+  - actionType: 2
+    filters: 
+    onActionUsed:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 7916089246513355597}
+          m_TargetAssemblyTypeName: AudioTrigger, Assembly-CSharp
+          m_MethodName: PlayNext
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
   onDamaged:
     m_PersistentCalls:
       m_Calls:
@@ -267,6 +280,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onAttack:
+    m_PersistentCalls:
+      m_Calls: []
   onLastKill:
     m_PersistentCalls:
       m_Calls:
