@@ -21,6 +21,18 @@ public class CharacterSelection : MonoBehaviour
 
 	public static bool IsCharacterSelected(CharacterController character) => selectedCharacter == character;
 
+	public static void SelectCharacterAt(int index)
+	{
+		var partyChars = CharacterController.GetPartyCharacters();
+		if (index < 0 || index >= partyChars.Length)
+		{
+			Debug.LogWarning("SelectCharacterAt invalid index " + index + " / " + partyChars.Length);
+			return;
+		}
+		
+		SelectCharacter(partyChars[index]);
+	}
+
 	public static void SelectCharacter(CharacterController newCharacter)
 	{
 		Debug.Log("SelectCharacter: " + newCharacter);

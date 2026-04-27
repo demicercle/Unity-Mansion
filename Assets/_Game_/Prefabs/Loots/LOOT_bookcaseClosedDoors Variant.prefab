@@ -236,6 +236,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PropComponent
   cursorType: 10
   consumeAction: 3
+  saveProp: 0
   onlyOnce: 0
   rebuildNavigation: 0
   autoTriggerDelay: 0
@@ -273,6 +274,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   maxSize: 6
   lootBagPrefab: {fileID: 0}
+  saveInventory: 1
   items:
   - {fileID: 0}
   - {fileID: 0}

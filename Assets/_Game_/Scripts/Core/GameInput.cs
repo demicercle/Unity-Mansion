@@ -255,9 +255,10 @@ public class GameInput : MonoBehaviour
 		
 		if (Application.isEditor)
 		{
-			if (hasFocus && inputSystem.Player.Escape.WasPressedThisFrame())
+			if (hasFocus && inputSystem.Player.EscapeEditor.WasPressedThisFrame())
 			{
 				OnApplicationFocus(false);
+				
 			}
 			
 			if (!hasFocus && inputSystem.UI.Click.WasPressedThisFrame())
@@ -274,6 +275,11 @@ public class GameInput : MonoBehaviour
 			Cursor.visible = !holdMiddleClick;
 			
 			SetCurrentCursorType(CursorType.DefaultArrow);
+
+			if (inputSystem.Player.Escape.WasPressedThisFrame())
+			{
+				PauseCanvas.Instance.TogglePaused();
+			}
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{

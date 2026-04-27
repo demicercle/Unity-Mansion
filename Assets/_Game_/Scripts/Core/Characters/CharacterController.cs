@@ -76,6 +76,11 @@ public class CharacterController : MonoBehaviour, IAttackable
 	public CharacterRoutines Routines => routines;
 	
 	public float lastTimeRested { get; private set; }
+
+	public bool IsName(string savedPCName)
+	{
+		return name == savedPCName;
+	}
 	
 	public void FloatingText_Cant() // TODO: in character animation
 	{
@@ -315,9 +320,9 @@ public class CharacterController : MonoBehaviour, IAttackable
 
 	public void Teleport(Vector3 dest) => Teleport(dest, GetRotation(), true);
 	
-	public void Teleport(Vector3 dest, bool stopMovement) => Teleport(dest, GetRotation(), stopMovement);
+	public void Teleport(Vector3 dest, bool stopMovement = true) => Teleport(dest, GetRotation(), stopMovement);
 	
-	public void Teleport(Vector3 dest, int newRot, bool stopMovement)
+	public void Teleport(Vector3 dest, int newRot, bool stopMovement = true)
 	{
 		GetAgent().Teleport(dest, newRot, stopMovement);
 		onMoved?.Invoke();
@@ -338,6 +343,7 @@ public class CharacterController : MonoBehaviour, IAttackable
 	}
 	
 	public float GetTotalDamages() => totalDamages;
+	
 	public int GetMaxHealth() => characterData.maxHealth;
 	public int GetCurrentHealth() => GetMaxHealth() - Mathf.CeilToInt(GetTotalDamages());
 	public float GetDamageProgress() => Mathf.Clamp01(GetCurrentHealth() / (float)GetMaxHealth());
@@ -357,6 +363,20 @@ public class CharacterController : MonoBehaviour, IAttackable
 		onAnyCharacterHealed?.Invoke(this, amount);
 		onStatsChanged?.Invoke();
 	}
+
+	public void SetDamages(float newDamage)
+	{
+		totalDamages = newDamage;
+		
+		if (GetCurrentHealth() <= 0f)
+		{
+			if(TryKill())
+				return;
+		}
+		
+		onStatsChanged?.Invoke();
+	}
+	
 	public void TakeDamage(float amount, object objectFrom)
 	{
 		Debug.Log(this + " TakeDamage " + amount);

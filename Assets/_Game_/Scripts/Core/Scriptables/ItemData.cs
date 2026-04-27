@@ -9,6 +9,12 @@ public enum TargetType
 [CreateAssetMenu(fileName = "ItemData", menuName = "ItemData", order = 0)]
 public class ItemData : ScriptableObject
 {
+
+	public static ItemData GetItemFromName(string itemName)
+	{
+		return Resources.Load<ItemData>(Consts.ResPath_Items + itemName);
+	}
+	
 	[SerializeField] private LocalizedText displayName;
 	[SerializeField] private Texture2D icon;
 	[SerializeField] private TargetType targetType;

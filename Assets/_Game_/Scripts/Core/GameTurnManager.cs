@@ -36,6 +36,8 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private GameObject[] startupObjects = new GameObject[0];
 
 	public bool IsTurnBasedMode() => turnBasedMode;
+
+	public bool PlayerCanSave() => !IsTurnBasedMode();
 	
 	public bool IsPlayerTurn() => playerTurn || !turnBasedMode;
 
@@ -75,6 +77,8 @@ public class GameTurnManager : MonoBehaviour
 	}
 
 	public CharacterController[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
+	public CharacterController[] GetLevelCharacters() => levelCharacters.ToArray();
+	public bool IsLevelIndex(int index) => index == 0; // TODO
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
@@ -150,6 +154,13 @@ public class GameTurnManager : MonoBehaviour
 			character.Spawn();
 			if(character.GetCurrentFaction() == CharacterFaction.Player)
 				character.SetPartyIndex(partyIndex++);
+		}
+
+		if (!GameSave.Current.IsEmpty())
+		{
+			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
+			GameSave.Current.LoadGame();
+			yield return new WaitForSeconds(0.3f);
 		}
 		
 		Debug.Log("loading complete");

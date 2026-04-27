@@ -34,6 +34,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "EscapeEditor",
+                    "type": "Button",
+                    "id": "2351f5ef-2615-4d31-8bb9-33d2fae907d1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Look",
                     "type": "Value",
                     "id": "6b444451-8a00-4d00-a97e-f47457f736a8",
@@ -321,6 +330,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Escape",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "445235f4-ab54-4915-b937-29fc1aa25aad",
+                    "path": "<Keyboard>/f1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Escape",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "66d460d3-5714-461c-9425-20ffb4537067",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EscapeEditor",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
