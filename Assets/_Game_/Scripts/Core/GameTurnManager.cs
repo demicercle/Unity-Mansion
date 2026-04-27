@@ -479,11 +479,13 @@ public class GameTurnManager : MonoBehaviour
 	}
 	#endregion
 
+	[Header("Debug")]
+	[SerializeField] private Rect debugGUIRect;
 	private void OnGUI()
 	{
 		if (debugMode > 0)
 		{
-			GUILayout.BeginArea(new Rect(16,16,256f,Screen.height));
+			GUILayout.BeginArea(debugGUIRect);
 			
 			GUILayout.BeginVertical("textfield");
 			
