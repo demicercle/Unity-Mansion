@@ -8,7 +8,7 @@ public class Inventory : MonoBehaviour
 {
 	private static List<Inventory> allInventories = new List<Inventory>();
 
-	public static Inventory[] GetSavedInventories() => allInventories.Where(i => i.saveInventory).ToArray();
+	public static Inventory[] GetSavedInventories() => allInventories.Where(i => i.saveInventory && !i.IsPartyInventory()).ToArray();
 	
 	private const float CreateLootNavDistance = 1.0f;
 	
@@ -151,12 +151,24 @@ public class Inventory : MonoBehaviour
 
 		return false;
 	}
+
+	public bool IsPartyInventory() => selfCharacter && selfCharacter.InParty();
 	
 	#region PRIVATE
 	private bool destroyIfEmpty;
+	private CharacterController selfCharacter;
+	
+	private void Awake()
+	{ 
+		allInventories.Add(this);
+		
+		selfCharacter = GetComponent<CharacterController>();
+	}
 
-	private void Awake() => allInventories.Add(this);
-	private void OnDestroy() => allInventories.Remove(this);
+	private void OnDestroy()
+	{
+		allInventories.Remove(this);
+	} 
 	
 	[ContextMenu("Update Size")]
 	private void UpdateSize()

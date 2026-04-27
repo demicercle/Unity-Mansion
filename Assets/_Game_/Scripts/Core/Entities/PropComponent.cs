@@ -54,10 +54,31 @@ public class PropComponent : MonoBehaviour
 	public void SetInteractionCount(int newCount)
 	{
 		interactionCount = newCount;
+		TriggerAnimators(interactionCount % 2 != 0);
 		
 		if (onlyOnce && interactionCount > 0)
 		{
 			SetDisabled(true);
+		}
+	}
+
+	private void TriggerAnimators(bool setTrigger)
+	{
+		if (!string.IsNullOrEmpty(animatorTrigger))
+		{
+			foreach (var animator in GetComponents<Animator>().Concat(GetComponentsInChildren<Animator>())) //todo private
+			{
+				if (setTrigger)
+				{
+					Debug.Log(this + " SetTrigger " + animatorTrigger + " on " + animator);
+					animator.SetTrigger(animatorTrigger);
+				}
+				else
+				{
+					Debug.Log(this + " ResetTrigger " + animatorTrigger + " on " + animator);
+					animator.ResetTrigger(animatorTrigger);
+				}
+			}
 		}
 	}
 
@@ -66,14 +87,7 @@ public class PropComponent : MonoBehaviour
 		Debug.Log(this + " InteractedBy " + characterInstigator + " " + interactionCount);
 		interactionCount++;
 		
-		if (!string.IsNullOrEmpty(animatorTrigger))
-		{
-			foreach (var animator in GetComponents<Animator>().Concat(GetComponentsInChildren<Animator>())) //todo private
-			{
-				Debug.Log(this + " SetTrigger " + animatorTrigger + " on " + animator);
-				animator.SetTrigger(animatorTrigger);
-			}
-		}
+		TriggerAnimators(false);
 		
 		animFinished = false;
 		Invoke("OnAnimFinished", Mathf.Max(animDuration, 0.1f));

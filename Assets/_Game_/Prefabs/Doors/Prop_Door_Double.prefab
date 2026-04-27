@@ -450,7 +450,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cursorType: 6
   consumeAction: 3
-  saveProp: 0
+  saveProp: 1
   onlyOnce: 1
   rebuildNavigation: 1
   autoTriggerDelay: 0

@@ -17,8 +17,8 @@ public class SaveAnimator : MonoBehaviour
 	{
 		for (int i = 0; i < savedValues.Count; i++)
 		{
-			if(savedValues[i].valueType == GameSave.ValueType.Bool)
-				savedValues[i].currentValue = animator.GetBool(savedValues[i].name);
+			if(savedValues[i].type == GameSave.ValueType.Bool)
+				savedValues[i].value = animator.GetBool(savedValues[i].name);
 		}
 
 		return savedValues.ToArray();
@@ -31,8 +31,8 @@ public class SaveAnimator : MonoBehaviour
 		
 		for (int i = 0; i < savedValues.Count; i++)
 		{
-			if(savedValues[i].valueType == GameSave.ValueType.Bool)
-				animator.SetBool(savedValues[i].name, savedValues[i].currentValue);
+			if(savedValues[i].type == GameSave.ValueType.Bool)
+				animator.SetBool(savedValues[i].name, savedValues[i].value);
 		}
 	}
 	

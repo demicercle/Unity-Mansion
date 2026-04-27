@@ -41,20 +41,39 @@ public class GameSave : ScriptableObject
 	}
 
 	[System.Serializable]
-	public class SavedPC : SavedCharacter
+	public class SavedPC
 	{
+		public string name;
+		public Vector3 position;
+		public int rotation;
+		public bool isDead;
 		public float damages;
+		public SavedInventory inventory = new SavedInventory();
 
-		override public void Save(CharacterController character)
+		public void Save(CharacterController character)
 		{
-			base.Save(character);
+			name = character.name;
+			position = Snapping.Snap(character.GetPosition(),Vector3.one * 0.1f);
+			rotation = character.GetRotation();
+			isDead = character.IsDead();
+			
 			damages = character.GetTotalDamages();
+			
+			if(character.TryGetComponent(out Inventory inv))
+				inventory.Save(inv);
 		}
 
-		override public void Load(CharacterController character)
+		public void Load(CharacterController character)
 		{
-			base.Load(character);
+			character.Teleport(position, rotation);
+			
+			if (isDead)
+				character.TryKill();
+			
 			character.SetDamages(damages);
+
+			if (character.TryGetComponent(out Inventory inv))
+				inventory.Load(inv);
 		}
 
 		public SavedPC(CharacterController character = null)
@@ -72,7 +91,7 @@ public class GameSave : ScriptableObject
 		public int rotation;
 		public bool isDead;
 
-		virtual public void Save(CharacterController character)
+		public void Save(CharacterController character)
 		{
 			name = character.name;
 			position = Snapping.Snap(character.GetPosition(),Vector3.one * 0.1f);
@@ -80,9 +99,10 @@ public class GameSave : ScriptableObject
 			isDead = character.IsDead();
 		}
 
-		virtual public void Load(CharacterController character)
+		public void Load(CharacterController character)
 		{
 			character.Teleport(position, rotation);
+			
 			if (isDead)
 				character.TryKill();
 		}
@@ -98,19 +118,19 @@ public class GameSave : ScriptableObject
 	public class SavedProp
 	{
 		public string name;
-		public int interactionCount;
+		public int count;
 
 		public void Save(PropComponent prop)
 		{
 			name = prop.name;
-			interactionCount = prop.GetInteractionCount();
+			count = prop.GetInteractionCount();
 		}
 
 		public void Load(PropComponent prop)
 		{
 			if (prop.IsName(name))
 			{
-				prop.SetInteractionCount(interactionCount);
+				prop.SetInteractionCount(count);
 			}
 		}
 
@@ -157,19 +177,19 @@ public class GameSave : ScriptableObject
 	public class SavedAnimator
 	{
 		public string name;
-		public SavedValue[] savedValues = Array.Empty<SavedValue>();
+		public SavedValue[] values = Array.Empty<SavedValue>();
 		
 		public void Save(SaveAnimator prop)
 		{
 			name = prop.GetName();
-			savedValues = prop.SaveValues();
+			values = prop.SaveValues();
 		}
 
 		public void Load(SaveAnimator prop)
 		{
 			if (prop.IsName(name))
 			{
-				prop.LoadValues(savedValues);
+				prop.LoadValues(values);
 			}
 		}
 
@@ -186,8 +206,8 @@ public class GameSave : ScriptableObject
 	public class SavedValue
 	{
 		public string name;
-		public ValueType valueType;
-		[ReadOnly] public bool currentValue;
+		public ValueType type;
+		[ReadOnly] public bool value;
 	}
 	
 	public enum ValueType
