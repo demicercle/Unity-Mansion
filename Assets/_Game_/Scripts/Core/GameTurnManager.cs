@@ -161,6 +161,16 @@ public class GameTurnManager : MonoBehaviour
 			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
 			GameSave.Current.LoadGame();
 			yield return new WaitForSeconds(0.3f);
+			
+			if (CharacterSelection.TryGetSelectedCharacter(out var previouslySelected)) // TODO hak selection on load
+			{
+				foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
+				{
+					CharacterSelection.SelectCharacter(partyCharacter, true);
+				}
+				
+				CharacterSelection.SelectCharacter(previouslySelected);
+			}
 		}
 		
 		Debug.Log("loading complete");

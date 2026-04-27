@@ -33,7 +33,7 @@ public class CharacterSelection : MonoBehaviour
 		SelectCharacter(partyChars[index]);
 	}
 
-	public static void SelectCharacter(CharacterEntity newCharacter)
+	public static void SelectCharacter(CharacterEntity newCharacter, bool silent = false)
 	{
 		Debug.Log("SelectCharacter: " + newCharacter);
 
@@ -49,7 +49,8 @@ public class CharacterSelection : MonoBehaviour
 			selectedCharacter.NotifySelected(true);
 		}
 		
-		selectionChanged?.Invoke();
+		if(!silent)
+			selectionChanged?.Invoke();
 	}
 
 	public static void SelectPartyCharacter(int index)
