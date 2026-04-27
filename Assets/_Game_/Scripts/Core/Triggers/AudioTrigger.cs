@@ -7,21 +7,43 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(AudioSource))]
 public class AudioTrigger : MonoBehaviour
 {
+	
 	public void PlayNext()
 	{
-		clipIndex = (clipIndex + 1) % clips.Length;
+		if (nextIsRandom)
+		{
+			if (clips.Length > 1)
+			{
+				var oldIndex = clipIndex;
+				do
+				{
+					clipIndex = Random.Range(0, clips.Length);
+				} while (clipIndex == oldIndex);
+			}
+		}
+		else
+		{
+			clipIndex = (clipIndex + 1) % clips.Length;
+		}
+		
 		audioSource.clip = clips[clipIndex];
-		audioSource.Play();
-	}
-	
-	public void PlayRandomClip()
-	{
-		audioSource.clip = clips[clipIndex = Random.Range(0, clips.Length)];
-		audioSource.Play();
+		if(audioSource.clip)
+			audioSource.Play();
+
+		if (debugMode)
+		{
+			Debug.Log(this + " Plays " + clipIndex + " = " + audioSource.clip);
+#if UNITY_EDITOR
+			UnityEditor.EditorGUIUtility.PingObject(gameObject);
+#endif
+		}
 	}
 
+	[SerializeField] private bool debugMode;
+	[Space]
 	[SerializeField] private AudioClip[] clips;
 	[SerializeField] private bool randomAtStart;
+	[SerializeField] private bool nextIsRandom;
 	
 	public UnityEvent onStart;
 

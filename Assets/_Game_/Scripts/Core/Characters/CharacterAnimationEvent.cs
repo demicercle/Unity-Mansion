@@ -35,4 +35,11 @@ public class CharacterAnimationEvent : MonoBehaviour
 		onCharacterAnimationEvent?.Invoke(EventType.Shoot);
 		onShoot.Invoke();
 	}
+	
+	public UnityEvent onScream = new();
+	public void Scream()
+	{
+		onCharacterAnimationEvent?.Invoke(EventType.Scream);
+		onScream.Invoke();
+	}
 }
