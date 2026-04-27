@@ -5,21 +5,23 @@ TagManager:
   serializedVersion: 3
   tags:
   - Collide
+  - Enemy
+  - Door
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Hidden
   - Water
   - UI
   - Ground
   - Wall
   - Character
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Trigger
+  - NavBlocker
+  - Prop
+  - Fog
+  - Equipment
   - 
   - 
   - 
@@ -41,6 +43,9 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Paths
+    uniqueID: 4194582103
     locked: 0
   m_RenderingLayers:
   - Default

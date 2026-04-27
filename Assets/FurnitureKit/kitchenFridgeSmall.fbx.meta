@@ -1,9 +1,29 @@
 fileFormatVersion: 2
 guid: 2d677b07f1503b14d97ac743d50ef3c5
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: glass
+    second: {fileID: 2100000, guid: dbfcef1243376e5419036922b5fa5691, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metal
+    second: {fileID: 2100000, guid: f3116ab97c936d94caeee5517c9d2df6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metalDark
+    second: {fileID: 2100000, guid: 4a98f3566af4db64ab0b6366c23163f0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metalLight
+    second: {fileID: 2100000, guid: 6069e0f02b2be6442809e039eae287e0, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -56,6 +76,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8

@@ -1,9 +1,24 @@
 fileFormatVersion: 2
 guid: ecc7e5de112953c47a51cb8ddec5d18a
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: carpetWhite
+    second: {fileID: 2100000, guid: 4006829d09305d44992fdb8e7e47abfc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metal
+    second: {fileID: 2100000, guid: f3116ab97c936d94caeee5517c9d2df6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metalMedium
+    second: {fileID: 2100000, guid: df3e0c834f191114f9695d3a707e34e7, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -56,6 +71,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
