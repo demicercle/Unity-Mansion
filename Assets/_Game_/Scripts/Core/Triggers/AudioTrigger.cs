@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.Events;
 using Random = UnityEngine.Random;
 
 
@@ -12,11 +14,18 @@ public class AudioTrigger : MonoBehaviour
 	}
 
 	[SerializeField] private AudioClip[] clips;
+
+	public UnityEvent onStart;
 	
 	private AudioSource audioSource;
 
 	private void Awake()
 	{
 		audioSource =  GetComponent<AudioSource>();
+	}
+
+	private void Start()
+	{
+		onStart?.Invoke();
 	}
 }

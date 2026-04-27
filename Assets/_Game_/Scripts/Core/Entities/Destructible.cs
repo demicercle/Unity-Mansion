@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Destructible : MonoBehaviour, IAttackable
 {
@@ -11,11 +12,16 @@ public class Destructible : MonoBehaviour, IAttackable
 	public Vector3 GetPosition() => transform.position;
 	public float GetRadius() => radius;
 
+	public UnityEvent takeDamage;
+	public UnityEvent breaks;
+
 	public void TakeDamage(float amount, object instigator)
 	{
 		damageAmount += amount;
 		GameCanvas.Instance.FloatingText(this, Mathf.CeilToInt(amount).ToString());
 		Debug.Log(this + " take damage " + amount + " total=" + damageAmount + "/" + maxHealth);
+		
+		takeDamage?.Invoke();
 		
 		if (damageAmount >= maxHealth)
 		{
@@ -68,6 +74,8 @@ public class Destructible : MonoBehaviour, IAttackable
 		gameObject.layer = Layers.LayerIgnore;
 		
 		NavmeshRebuilder.RebuildNavigationOn(gameObject);
+		
+		breaks?.Invoke();
 	}
 
 	private void OnDrawGizmosSelected()
