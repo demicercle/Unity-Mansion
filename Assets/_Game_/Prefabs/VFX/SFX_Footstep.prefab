@@ -55,7 +55,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 8
+  MaxDistance: 4
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -148,3 +148,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 9bbb48c42bd0521468a7832c13881a7f, type: 3}
   - {fileID: 8300000, guid: 8ef455ffa50ab5144bb1c6d570f1377a, type: 3}
   - {fileID: 8300000, guid: 6a5eb030a511672468c5e58451c201e2, type: 3}
+  randomAtStart: 0
+  onStart:
+    m_PersistentCalls:
+      m_Calls: []

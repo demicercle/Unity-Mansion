@@ -21,7 +21,8 @@ public class AudioTrigger : MonoBehaviour
 	}
 
 	[SerializeField] private AudioClip[] clips;
-
+	[SerializeField] private bool randomAtStart;
+	
 	public UnityEvent onStart;
 
 	private int clipIndex;
@@ -34,6 +35,9 @@ public class AudioTrigger : MonoBehaviour
 
 	private void Start()
 	{
+		if(randomAtStart)
+			clipIndex = Random.Range(0, clips.Length);
+		
 		onStart?.Invoke();
 	}
 }
