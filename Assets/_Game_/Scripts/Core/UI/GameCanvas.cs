@@ -111,11 +111,14 @@ public class GameCanvas : MonoBehaviour
 
 		CharacterEntity.onPartyChanged += UpdatePortraits;
 		CharacterEntity.onAttackResult += OnAttackResult;
+		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
+		
 		CharacterSelection.selectionChanged += OnSelectionChanged;
+		
+		Destructible.onAnyDestructibleHit += OnAnyDestructibleHit;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
 		gameTurnManager.onPlayerChanged += OnPlayerChanged;
-		gameTurnManager.onAnyDamageDealed += OnAnyDamagedDealed;
 	}
 
 	private void OnDestroy()
@@ -128,14 +131,22 @@ public class GameCanvas : MonoBehaviour
 		
 		CharacterEntity.onPartyChanged -= UpdatePortraits;
 		CharacterEntity.onAttackResult -= OnAttackResult;
+		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+
+		Destructible.onAnyDestructibleHit -= OnAnyDestructibleHit;
+		
 		CharacterSelection.selectionChanged -= OnSelectionChanged;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
 		gameTurnManager.onPlayerChanged -= OnPlayerChanged;
-		gameTurnManager.onAnyDamageDealed -= OnAnyDamagedDealed;
 	}
 
-	private void OnAnyDamagedDealed(IAttackable target, DamageInfo damageInfo, object objectFrom)
+	private void OnAnyDestructibleHit(Destructible arg1, DamageInfo arg2, object arg3)
+	{
+		FloatingText(arg1, Mathf.CeilToInt(arg2.amount).ToString());
+	}
+
+	private void OnAnyCharacterDamaged(CharacterEntity target, DamageInfo damageInfo, object objectFrom)
 	{
 		FloatingText(target, Mathf.CeilToInt(damageInfo.amount).ToString());
 	}

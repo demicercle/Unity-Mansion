@@ -372,7 +372,6 @@ public class CharacterRoutines : MonoBehaviour
 					isRanged = _selfCharacter.IsUsingRangeWeapon()
 				};
 				target.TakeDamage(damageInfo, _selfCharacter);
-				GameTurnManager.Instance.NotifyDamageDealed(target, damageInfo, _selfCharacter);
 				break;
 		}
 

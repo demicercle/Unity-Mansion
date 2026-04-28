@@ -10,6 +10,8 @@ public class Destructible : MonoBehaviour, IAttackable
 	public bool IsName(string s) => name == s;
 	public string GetName() => name;
 	public static int debugMode => CharacterEntity.debugStats;
+
+	public static event System.Action<Destructible, DamageInfo, object> onAnyDestructibleHit;
 	
 	[SerializeField] [Range(0.1f, 5.0f)] private float radius = 1.0f;
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
@@ -29,13 +31,13 @@ public class Destructible : MonoBehaviour, IAttackable
 	{
 		if (!damagedWithRangeWeapons && dmgInfo.isRanged)
 		{
-			return;
+			dmgInfo.amount = 0;
 		}
 		
-		var amount = dmgInfo.amount;
-		damageAmount += amount;
-		if(debugMode > 0)Debug.Log(this + " take damage " + amount + " total=" + damageAmount + "/" + maxHealth);
-		
+		damageAmount += dmgInfo.amount;
+		if(debugMode > 0) Debug.Log(this + " take damage " + dmgInfo + " total=" + damageAmount + "/" + maxHealth);
+
+		onAnyDestructibleHit?.Invoke(this, dmgInfo, instigator);
 		takeDamage?.Invoke();
 		
 		if (damageAmount >= maxHealth)

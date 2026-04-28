@@ -116,7 +116,7 @@ public class CharacterEventTrigger : MonoBehaviour
 			onTurnStart?.Invoke();
 	}
 
-	private void OnAnyCharacterDamaged(CharacterEntity arg1, float arg2, object arg3)
+	private void OnAnyCharacterDamaged(CharacterEntity arg1, DamageInfo arg2, object arg3)
 	{
 		if (arg3 as CharacterEntity == character && CheckState())
 		{

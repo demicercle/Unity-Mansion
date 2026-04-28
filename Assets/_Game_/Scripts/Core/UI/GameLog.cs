@@ -120,11 +120,11 @@ public class GameLog : MonoBehaviour
 			.Replace("<ACTION>", action.ToString())); // TODO Localization "CharacterAction"
 	}
 
-	private void OnAnyCharacterDamaged(CharacterEntity character, float amount, object objectFrom)
+	private void OnAnyCharacterDamaged(CharacterEntity character, DamageInfo damageInfo, object objectFrom)
 	{
 		AppendLine(GetLocalizedLine(15, "<CHARACTER> receives <DAMAGE> damage(s)")
 			.Replace("<CHARACTER>", character.GetDisplayName())
-			.Replace("<DAMAGE>", Mathf.CeilToInt(amount).ToString()));
+			.Replace("<DAMAGE>", Mathf.CeilToInt(damageInfo.amount).ToString()));
 	}
 
 	private void OnAnyCharacterHealed(CharacterEntity character, float amount)

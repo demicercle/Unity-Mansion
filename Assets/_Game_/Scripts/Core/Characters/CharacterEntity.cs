@@ -32,6 +32,11 @@ public struct DamageInfo
 {
 	public float amount;
 	public bool isRanged;
+
+	public override string ToString()
+	{
+		return $"DamageInfo (amount={amount}, isRange={isRanged}";
+	}
 }
 
 public class CharacterEntity : MonoBehaviour, IAttackable
@@ -50,7 +55,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public static int PartyCount => _partyCharacters.Count;
 	
 	public static event System.Action onPartyChanged;
-	public static event System.Action<CharacterEntity, float, object> onAnyCharacterDamaged;
+	public static event System.Action<CharacterEntity, DamageInfo, object> onAnyCharacterDamaged;
 	public static event System.Action<CharacterEntity, float> onAnyCharacterHealed;
 	public static event System.Action<CharacterEntity> onAddedToParty, onRemovedFromParty;
 	public static event System.Action<CharacterEntity> onAnyCharacterMoved;
@@ -175,7 +180,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		if (target is CharacterEntity)
 		{
-			if (RollDice() < GetHitChance())
+			if (RollDice() > GetHitChance())
 			{
 				onAttackResult?.Invoke(this, target as CharacterEntity, AttackResult.Miss);
 				return AttackResult.Miss;
@@ -448,14 +453,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public void TakeDamage(DamageInfo damageInfo, object objectFrom)
 	{
-		var amount = damageInfo.amount;
-		Debug.Log(this + " TakeDamage " + amount);
-		totalDamages += amount;
+		Debug.Log(this + " TakeDamage " + damageInfo);
+		totalDamages += damageInfo.amount;
 		
 		StopAgent();
 
-		onDamaged?.Invoke(amount);
-		onAnyCharacterDamaged?.Invoke(this, amount, objectFrom);
+		onDamaged?.Invoke(damageInfo.amount);
+		onAnyCharacterDamaged?.Invoke(this, damageInfo, objectFrom);
 		
 		if (GetCurrentHealth() <= 0f)
 		{
@@ -467,7 +471,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		
 		if (objectFrom is CharacterEntity)
 		{
-			onDamagedBy?.Invoke(objectFrom as CharacterEntity, amount);
+			onDamagedBy?.Invoke(objectFrom as CharacterEntity, damageInfo.amount);
 		}
 
 	}
