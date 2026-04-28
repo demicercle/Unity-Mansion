@@ -110,10 +110,12 @@ public class GameCanvas : MonoBehaviour
 		floatingText.SetActive(false);
 
 		CharacterEntity.onPartyChanged += UpdatePortraits;
+		CharacterEntity.onAttackResult += OnAttackResult;
 		CharacterSelection.selectionChanged += OnSelectionChanged;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
 		gameTurnManager.onPlayerChanged += OnPlayerChanged;
+		gameTurnManager.onAnyDamageDealed += OnAnyDamagedDealed;
 	}
 
 	private void OnDestroy()
@@ -125,10 +127,27 @@ public class GameCanvas : MonoBehaviour
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
 		
 		CharacterEntity.onPartyChanged -= UpdatePortraits;
+		CharacterEntity.onAttackResult -= OnAttackResult;
 		CharacterSelection.selectionChanged -= OnSelectionChanged;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
 		gameTurnManager.onPlayerChanged -= OnPlayerChanged;
+		gameTurnManager.onAnyDamageDealed -= OnAnyDamagedDealed;
+	}
+
+	private void OnAnyDamagedDealed(IAttackable target, DamageInfo damageInfo, object objectFrom)
+	{
+		FloatingText(target, Mathf.CeilToInt(damageInfo.amount).ToString());
+	}
+
+	private void OnAttackResult(CharacterEntity arg1, IAttackable arg2, CharacterEntity.AttackResult arg3)
+	{
+		if (arg3 == CharacterEntity.AttackResult.Undefined)
+			FloatingText(arg2, LanguageSettings.Main.Cant);
+		else if (arg3 == CharacterEntity.AttackResult.Dodge)
+			FloatingText(arg2, LanguageSettings.Main.Dodge);
+		else if (arg3 == CharacterEntity.AttackResult.Miss)
+			FloatingText(arg1, LanguageSettings.Main.Miss);
 	}
 
 	private void Start()

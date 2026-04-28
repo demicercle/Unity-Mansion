@@ -9,3 +9,5 @@
 
 miss!
 dodge!
+hit!
+can't!

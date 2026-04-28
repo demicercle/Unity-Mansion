@@ -13,8 +13,15 @@ public class GameTurnManager : MonoBehaviour
 	
 	public static int debugMode { get; set; }
 
-	public System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
-	public System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
+	public event System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
+	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
+	
+	public event System.Action<IAttackable, DamageInfo, object> onAnyDamageDealed;
+
+	public void NotifyDamageDealed(IAttackable target, DamageInfo damageInfo, object selfCharacter)
+	{
+		onAnyDamageDealed?.Invoke(target, damageInfo, selfCharacter);
+	}
 	
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool firstTurnIsPlayer = true;

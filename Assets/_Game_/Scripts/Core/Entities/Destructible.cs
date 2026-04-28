@@ -6,6 +6,7 @@ using UnityEngine.Events;
 public class Destructible : MonoBehaviour, IAttackable
 {
 	public static List<Destructible> allInstances = new List<Destructible>();
+	
 	public bool IsName(string s) => name == s;
 	public string GetName() => name;
 	public static int debugMode => CharacterEntity.debugStats;
@@ -28,13 +29,11 @@ public class Destructible : MonoBehaviour, IAttackable
 	{
 		if (!damagedWithRangeWeapons && dmgInfo.isRanged)
 		{
-			GameCanvas.Instance.FloatingText(this, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
 			return;
 		}
 		
 		var amount = dmgInfo.amount;
 		damageAmount += amount;
-		GameCanvas.Instance.FloatingText(this, Mathf.CeilToInt(amount).ToString());
 		if(debugMode > 0)Debug.Log(this + " take damage " + amount + " total=" + damageAmount + "/" + maxHealth);
 		
 		takeDamage?.Invoke();

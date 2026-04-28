@@ -355,19 +355,24 @@ public class CharacterRoutines : MonoBehaviour
 		switch (_selfCharacter.TryHit(target))
 		{
 			case CharacterEntity.AttackResult.Miss:
-				GameCanvas.Instance.FloatingText(_selfCharacter, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
+				Debug.Log(this + " AttackResult.Miss " + target);
+				//GameCanvas.Instance.FloatingText(_selfCharacter, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
 				break;
 			
 			case CharacterEntity.AttackResult.Dodge:
-				GameCanvas.Instance.FloatingText(target, LanguageSettings.GetSettings(DialogFiles.main).GetLine(11, "dodge!"));
+				Debug.Log(this + " AttackResult.Dodge by " + target);
+				//GameCanvas.Instance.FloatingText(target, LanguageSettings.GetSettings(DialogFiles.main).GetLine(11, "dodge!"));
 				break;
 			
 			case CharacterEntity.AttackResult.Hit:
-				target.TakeDamage(new DamageInfo()
+				Debug.Log(this + " AttackResult.Hit " + target);
+				var damageInfo = new DamageInfo()
 				{
 					amount = _selfCharacter.GetLastAttackDamage(),
-					isRanged =  _selfCharacter.IsUsingRangeWeapon()
-				}, _selfCharacter);
+					isRanged = _selfCharacter.IsUsingRangeWeapon()
+				};
+				target.TakeDamage(damageInfo, _selfCharacter);
+				GameTurnManager.Instance.NotifyDamageDealed(target, damageInfo, _selfCharacter);
 				break;
 		}
 

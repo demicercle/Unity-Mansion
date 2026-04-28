@@ -56,6 +56,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public static event System.Action<CharacterEntity> onAnyCharacterMoved;
 	public static event System.Action<CharacterEntity> onAnyCharacterDead;
 	public static event System.Action<CharacterEntity, CharacterAction> onAnyCharacterUsesAction;
+	public static event System.Action<CharacterEntity, IAttackable, AttackResult> onAttackResult;
 	
 	public event System.Action onSpawned;
 	public event System.Action onStatsChanged;
@@ -153,7 +154,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public float RollDice()
 	{
-		return Random.Range(0f, 1f);
+		var rolled = Random.Range(0f, 1f);
+		Debug.Log(this + " RollDice! " + rolled);
+		return rolled;
 	}
 
 	public float GetDodgeChance() => characterData.dodgeChance;
@@ -162,6 +165,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public enum AttackResult
 	{
+		Undefined,
 		Hit,
 		Miss,
 		Dodge,
@@ -172,13 +176,28 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (target is CharacterEntity)
 		{
 			if (RollDice() < GetHitChance())
+			{
+				onAttackResult?.Invoke(this, target as CharacterEntity, AttackResult.Miss);
 				return AttackResult.Miss;
-				
-			if (RollDice() < (target as CharacterEntity).GetDodgeChance())
+			}
+
+			if ((target as CharacterEntity).RollDice() < (target as CharacterEntity).GetDodgeChance())
+			{
+				onAttackResult?.Invoke(this, target as CharacterEntity, AttackResult.Dodge);
 				return AttackResult.Dodge;
+			}
+			
+			onAttackResult?.Invoke(this, target as CharacterEntity, AttackResult.Hit);
+			return AttackResult.Hit;
 		}
 
-		return AttackResult.Hit;
+		if (target is Destructible)
+		{
+			return AttackResult.Hit; // destructible always hit
+		}
+		
+		Debug.LogWarning(this + " TryAttack " + target + " AttackResult.Undefined!");
+		return AttackResult.Undefined;
 	}
 	
 	public void AttackAction(IAttackable target, bool stopAgent = true)
