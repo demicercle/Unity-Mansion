@@ -20,6 +20,7 @@ public class ItemData : ScriptableObject
 	[SerializeField] private TargetType targetType;
 	[SerializeField] [Range(0f, 12f)] private float useRange;
 	[SerializeField] private GameScriptGraph onUseScript;
+	[SerializeField] private Projectile projectilePrefab;
 
 	public float GetUseRange() => useRange;
 	
@@ -36,6 +37,13 @@ public class ItemData : ScriptableObject
 
 		objectTo = null;
 		return false;
+	}
+
+	public void Launch(Vector3 origin, Vector3 destination)
+	{
+		var instance = Instantiate(projectilePrefab);
+		instance.itemData = this;
+		instance.Launch(origin, destination);
 	}
 
 	public void UseOn(GameObject target)
