@@ -291,7 +291,8 @@ public class GameInput : MonoBehaviour
 				gameTurnManager.TryEndPlayerTurn();
 			}
 			
-			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(0);
+			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.
+				SelectCharacterAt(0);
 			if (inputSystem.Player.SelectParty2.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(1);
 			if (inputSystem.Player.SelectParty3.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(2);
 		
@@ -947,6 +948,19 @@ public class GameInput : MonoBehaviour
 
 	public bool IsBlocked() => currentCursor == CursorType.Blocked;
 
+	public bool WantsToAttack(out CharacterEntity target)
+	{
+		if (currentCursor == CursorType.Attack)
+		{
+			return lastMouseOverObject.TryGetComponent(out target);
+		}
+
+		target = null;
+		return false;
+	}
+
+	public CharacterEntity GetSelectedCharacter() => selectedCharacter;
+	
 	public Vector3 GetMousePosition()
 	{
 		return mousePosition;

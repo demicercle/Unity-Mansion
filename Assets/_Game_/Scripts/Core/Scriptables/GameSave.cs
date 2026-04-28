@@ -48,6 +48,7 @@ public class GameSave : ScriptableObject
 		public int rotation;
 		public bool isDead;
 		public float damages;
+		public float karma;
 		public string[] slots = Array.Empty<string>();
 
 		public void Save(CharacterEntity character)
@@ -57,6 +58,7 @@ public class GameSave : ScriptableObject
 			rotation = character.GetRotation();
 			isDead = character.IsDead();
 			
+			karma = character.GetCurrentKarma();
 			damages = character.GetTotalDamages();
 
 			if (character.TryGetComponent(out Inventory inv))
@@ -69,7 +71,8 @@ public class GameSave : ScriptableObject
 			
 			if (isDead)
 				character.TryKill();
-			
+
+			character.SetCurrentKarma(karma);
 			character.SetDamages(damages);
 
 			if (character.TryGetComponent(out Inventory inv))

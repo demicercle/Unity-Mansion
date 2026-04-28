@@ -16,7 +16,7 @@ MonoBehaviour:
   maxDamage: 1
   isRanged: 0
   attackRange: 0
-  hitChance: 0.8
+  hitChance: 0.75
   noAttack: 0
   rpgWeaponR: 0
   rpgWeaponL: -1

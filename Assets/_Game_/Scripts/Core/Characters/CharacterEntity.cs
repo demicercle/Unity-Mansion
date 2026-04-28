@@ -91,7 +91,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private WeaponData defaultWeapon;
 	[SerializeField] private bool noKarma;
 	[SerializeField] [Range(-1f, 1f)] private float baseKarma = 0.0f;
-	[SerializeField] [Min(0)] private int baseDodgeCount = 1;
 	
 	public void SetLuck(float newValue) => currentLuck = Mathf.Clamp(newValue, -1f, 1f);
 	public void SetKarma(float newValue) => currentKarma = Mathf.Clamp(newValue, -1f, 1f);
@@ -153,7 +152,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		usedActions.Clear();
 		usedMovePoints = 0;
 		lastTimeRested = Time.time;
-		dodgeCount = baseDodgeCount;
+		dodgeCount = characterData.dodgeCount;
 		onStatsChanged?.Invoke();
 	}
 	
@@ -170,6 +169,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public IAttackable GetLastAttackTarget() => lastAttackTarget;
 
 	public float GetCurrentKarma() => currentKarma;
+	public void SetCurrentKarma(float v) => currentKarma = Mathf.Clamp(v, -1f, 1f);
 	
 	public float RollDice()
 	{
@@ -219,6 +219,20 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return AttackResult.Undefined;
 	}
 
+	private float hitChanceResult;
+	public float CalculateHitChance(CharacterEntity target, bool canDodge)
+	{
+		hitChanceResult = GetHitChance();
+		
+		if (canDodge)
+		{
+			for(int i = 0; i < target.dodgeCount; i++)
+				hitChanceResult *= 1f - target.GetDodgeChance();
+		}
+
+		return hitChanceResult;
+	}
+	
 	public AttackResult TryHit(CharacterEntity target)
 	{
 		if (RollDice() > GetHitChance())

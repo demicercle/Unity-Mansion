@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -34,6 +35,8 @@ public class GameCanvas : MonoBehaviour
 	[Header("Inventory")]
 	[SerializeField] private InventoryPanel inventoryPanel;
 	[SerializeField] private RawImage itemCursorImage;
+	[Header("Cursor")] 
+	[SerializeField] private TMP_Text cursorText;
 
 	[Space] [Header("Animation")]
 	[SerializeField] [Tooltip("Blend Weight Layer1")] private List<Animator> endTurnAnimators;
@@ -193,6 +196,17 @@ public class GameCanvas : MonoBehaviour
 			itemCursorImage.color = Utils.ColorAlpha(Color.white, gameInput.IsBlocked() ? 0.30f : 0.90f);
 			itemCursorImage.transform.position = gameInput.GetMousePosition();
 			itemCursorImage.transform.SetAsLastSibling();
+		}
+
+		cursorText.gameObject.SetActive(gameInput.WantsToAttack(out var targetCharacter));
+		if (targetCharacter && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		{
+			cursorText.transform.position = gameInput.GetMousePosition();
+			cursorText.raycastTarget = false;
+			cursorText.text =
+				Mathf.RoundToInt(
+					selectedCharacter.CalculateHitChance(targetCharacter, !selectedCharacter.IsUsingRangeWeapon()) *
+					100) + "%";
 		}
 	}
 
