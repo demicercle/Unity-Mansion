@@ -100,6 +100,37 @@ public class ConsoleCommands : MonoBehaviour
 		}
 	}
 
+	[ConsoleMethod("set_luck", "")]
+	public static void SetLuck(float value)
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
+		{
+			character.SetLuck(value);
+		}
+	}
+
+	[ConsoleMethod("set_karma", "")]
+	public static void SetKarma(float value)
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
+		{
+			character.SetKarma(value);
+		}
+	}
+
+	[ConsoleMethod("roll_dices", "")]
+	public static void RollDices(int count)
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
+		{
+			_DebugStats(1);
+			while (count-- > 0)
+			{
+				Debug.Log("RollDices: " + character.RollDice());
+			}
+		}
+	}
+
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()
 	{

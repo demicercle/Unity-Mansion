@@ -43,6 +43,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
 	private const float MinAttackRange = 0.15f;
+	private const float DiceToKarma = Mathf.PI / Consts.RAD_TO_DEG;
 	
 	public static int debugStats { get; set; }
 	
@@ -84,6 +85,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
 	[SerializeField] private WeaponData defaultWeapon;
+	[SerializeField] private bool noKarma;
+	[SerializeField] [Range(-1f, 1f)] private float baseKarma = 0.0f;
+	[SerializeField] [Range(-1f, 1f)] private float luck = 0.0f;
+	public void SetLuck(float newValue) => luck = Mathf.Clamp(newValue, -1f, 1f);
+	public void SetKarma(float newValue) => currentKarma = Mathf.Clamp(newValue, -1f, 1f);
 	
 	public CharacterRoutines Routines => routines;
 	
@@ -156,12 +162,25 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	private IAttackable lastAttackTarget;
 	public IAttackable GetLastAttackTarget() => lastAttackTarget;
-
+	
 	public float RollDice()
 	{
 		var rolled = Random.Range(0f, 1f);
-		Debug.Log(this + " RollDice! " + rolled);
-		return rolled;
+		if (noKarma) return rolled;
+		
+		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
+		luck = Mathf.Clamp(luck, -1f, 1f);
+		
+		var result = rolled + currentKarma * 0.5f;
+		
+		if (rolled < 0.5f) currentKarma += rolled * DiceToKarma;
+		if (rolled > 0.5f) currentKarma -= (rolled - (0.5f + 0.5f * luck)) * DiceToKarma;
+		
+		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
+		
+		if (debugStats > 0) Debug.Log(this + " RollDice! rolled=" + rolled + " newKarma=" + currentKarma + " luck=" + luck);
+		
+		return result;
 	}
 
 	public float GetDodgeChance() => characterData.dodgeChance;
@@ -606,6 +625,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private CharacterFollows follows;
 	private WeaponData currentWeapon;
 	private CharacterDetection detection;
+	private float currentKarma;
 	
 	private void Awake()
 	{
@@ -641,6 +661,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			Debug.LogWarning(this + " has no weapon, CreateInstance default");
 			defaultWeapon = WeaponData.CreateInstance<WeaponData>();
 		}
+
+		currentKarma = baseKarma;
 
 		gameObject.SetActive(false); // wait for "Spawn"
 	}
@@ -679,6 +701,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			                                      + "\n" + (isDead ? "DEAD" : GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2"))
 			                                      + "\n" + usedActions.Count + "/" + characterData.maxActions
 			                                      + "\n" + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
+			                                      + "\n" + "KARMA: " + Mathf.RoundToInt(currentKarma*100)
+			                                      + "\n" + "LUCK: " + luck.ToString("N2")
 				, "label");
 		}
 	}
