@@ -162,7 +162,6 @@ MonoBehaviour:
   clips:
   - {fileID: 8300000, guid: 576b917f962a2414092b29c896162c3b, type: 3}
   - {fileID: 8300000, guid: 4d88dbb09330468499082dda5d48e220, type: 3}
-  - {fileID: 8300000, guid: 8496fa9d7894423469dae0cd1d853af8, type: 3}
   nextIsRandom: 1
   playAtStart: 1
   playRepeat: 1
