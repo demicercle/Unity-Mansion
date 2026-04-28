@@ -17,6 +17,7 @@ public class AudioMixerControl : MonoBehaviour
 	{
 		slider = GetComponent<Slider>();
 		slider.onValueChanged.AddListener(OnValueChanged);
+		slider.value = PlayerPrefs.GetFloat(audioMixer.name + "." + parameterName, 0);
 	}
 
 	private void OnDestroy()
@@ -26,6 +27,7 @@ public class AudioMixerControl : MonoBehaviour
 
 	private void OnValueChanged(float value)
 	{
+		PlayerPrefs.SetFloat(audioMixer.name + "." + parameterName, value);
 		audioMixer.SetFloat(parameterName, valueCurve.Evaluate(value));
 	}
 }

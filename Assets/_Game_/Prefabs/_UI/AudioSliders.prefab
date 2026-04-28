@@ -329,6 +329,10 @@ PrefabInstance:
       value: AudioSlider (SFX)
       objectReference: {fileID: 0}
     - target: {fileID: 8822082498961332867, guid: 0150cbf0c029c964faaccce6578c3ca4, type: 3}
+      propertyPath: m_MinValue
+      value: -20
+      objectReference: {fileID: 0}
+    - target: {fileID: 8822082498961332867, guid: 0150cbf0c029c964faaccce6578c3ca4, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.size
       value: 0
       objectReference: {fileID: 0}

@@ -29694,6 +29694,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Prop_Industrial_Tool_Box_01
       objectReference: {fileID: 0}
+    - target: {fileID: 6097362150592445918, guid: dc27e05de10e7df45a28bbe09d82ff49, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6097362150592799230, guid: dc27e05de10e7df45a28bbe09d82ff49, type: 3}
       propertyPath: m_LocalPosition.x
       value: -17.112743
