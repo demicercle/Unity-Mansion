@@ -50,12 +50,18 @@ public class GameCanvas : MonoBehaviour
 	
 	//public bool mouseOverViewport { get; private set; }
 
-	public TextReference FloatingText(Object obj, string label)
+	public TextReference FloatingText(object obj, string label)
 	{
 		if (obj is CharacterEntity)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
 				.SetFollows((obj as CharacterEntity).transform, (obj as CharacterEntity).GetCenterPosition(true));
+		}
+
+		if (obj is IAttackable)
+		{
+			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
+				.SetWorldPosition((obj as IAttackable).GetPosition());
 		}
 		
 		if (obj is Component)

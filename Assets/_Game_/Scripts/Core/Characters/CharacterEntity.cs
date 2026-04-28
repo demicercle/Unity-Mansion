@@ -150,6 +150,36 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	private IAttackable lastAttackTarget;
 	public IAttackable GetLastAttackTarget() => lastAttackTarget;
+
+	public float RollDice()
+	{
+		return Random.Range(0f, 1f);
+	}
+
+	public float GetDodgeChance() => characterData.dodgeChance;
+
+	public float GetHitChance() => currentWeapon.hitChance;
+
+	public enum AttackResult
+	{
+		Hit,
+		Miss,
+		Dodge,
+	}
+	
+	public AttackResult TryHit(IAttackable target)
+	{
+		if (target is CharacterEntity)
+		{
+			if (RollDice() < GetHitChance())
+				return AttackResult.Miss;
+				
+			if (RollDice() < (target as CharacterEntity).GetDodgeChance())
+				return AttackResult.Dodge;
+		}
+
+		return AttackResult.Hit;
+	}
 	
 	public void AttackAction(IAttackable target, bool stopAgent = true)
 	{
