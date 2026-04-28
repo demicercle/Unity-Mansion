@@ -24,4 +24,7 @@ MonoBehaviour:
   - "\r"
   - "\r"
   - "\r"
-  - miss!
+  - "miss!\r"
+  - "dodge!\r"
+  - "hit!\r"
+  - can't!

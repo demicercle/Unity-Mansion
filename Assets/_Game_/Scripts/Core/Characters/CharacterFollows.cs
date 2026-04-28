@@ -10,12 +10,8 @@ public class CharacterFollows : MonoBehaviour
 	
 	[SerializeField] [Range(0.5f, 12.0f)] private float followDistance = 3.0f;
 	[SerializeField] [Range(0.1f, 10f)] private float tickTime = 1.0f;
-	[SerializeField] [Range(-10f, 0f)] private float minHeading = 1.5f;
-	[SerializeField] [Range(-10f, 0f)] private float maxHeading = 1.5f;
-	[SerializeField] [Range(0f, 1f)] private float headingScale = 0.5f;
+	[SerializeField] private float headingDistance = 0.5f;
 	[SerializeField] [Min(0)] private float headingSpeed = 1.5f;
-	[SerializeField] [Min(0)] private float avoidDistance = 1.0f;
-	[SerializeField] [Min(1f)] private float avoidHeadingScale = 1.0f;
 
 	public void SetLeader(CharacterEntity newLeader)
 	{
@@ -79,28 +75,28 @@ public class CharacterFollows : MonoBehaviour
 		
 		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead() && GameInput.Instance.IsLeaderMode())
 		{
-			heading = Mathf.Lerp(minHeading, maxHeading, CharacterEntity.PartyCount <= 0 ? 0f :
-				selfCharacter.GetPartyIndex() / CharacterEntity.PartyCount);
+			heading = headingDistance;
+
+			//heading *= Utils.FlatDot(leaderCharacter.GetDirection(),
+			//	leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()));
 			
-			if (NavUtils.NavDistanceRoundY(selfCharacter.GetPosition(), leaderCharacter.GetPosition()) <= avoidDistance)
-			{
-				heading *= avoidHeadingScale;
-			}
-			
-			headingPos = leaderCharacter.transform.position
-			             + leaderCharacter.transform.forward * headingScale * heading;
+			headingPos = leaderCharacter.GetPosition()
+				+ leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()) * heading;
 			
 			agent.AssignFollowTransform(dummy, followDistance);
 			agent.SetObstacle(!agent.IsMoving());
 			
 			if (debugMode > 0)
 			{
-				DebugDrawer.Line(selfCharacter.GetCenterPosition(), leaderCharacter.GetCenterPosition(), Color.softBlue, tickTime);
+				DebugDrawer.Line(selfCharacter.GetCenterPosition(), leaderCharacter.GetCenterPosition(), Utils.ColorAlpha(Color.black, 0.3f), tickTime);
 				DebugDrawer.Line(selfCharacter.GetCenterPosition(), headingPos, Color.softBlue, tickTime);
 				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, tickTime);
 			}
-			
-			yield return new WaitForSeconds(tickTime);
+
+			if (tickTime > 0) 
+				yield return new WaitForSeconds(tickTime);
+			else 
+				yield return null;
 		}
 
 		enabled = false;
@@ -127,8 +123,8 @@ public class CharacterFollows : MonoBehaviour
 		
 			if (debugMode > 0)
 			{
-				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, tickTime);
-				DebugDrawer.WireDisc(dummy.position, followDistance, Color.aquamarine, tickTime);
+				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, 0);
+				DebugDrawer.WireDisc(dummy.position, followDistance, Color.aquamarine, 0);
 			}
 		}
 	}
@@ -138,14 +134,8 @@ public class CharacterFollows : MonoBehaviour
 		if (!Utils.IsEditorPrefabStage()) 
 			return;
 		
-		minHeading = Mathf.Min(minHeading, maxHeading);
-		maxHeading = Mathf.Max(maxHeading, minHeading);
-		
 		Gizmos.color = Color.softBlue;
-		Gizmos.DrawLine(transform.position, transform.position + transform.forward * headingScale * minHeading);
-		Utils.DrawGizmosCircle(transform.position + transform.forward * headingScale * minHeading, Vector3.up, followDistance);
-		Gizmos.color = Color.deepSkyBlue;
-		Gizmos.DrawLine(transform.position, transform.position + transform.forward * headingScale * maxHeading);
-		Utils.DrawGizmosCircle(transform.position + transform.forward * headingScale * maxHeading, Vector3.up, followDistance);
+		Gizmos.DrawLine(transform.position, transform.position + transform.forward * headingDistance);
+		Utils.DrawGizmosCircle(transform.position + transform.forward * headingDistance, Vector3.up, followDistance);
 	}
 }

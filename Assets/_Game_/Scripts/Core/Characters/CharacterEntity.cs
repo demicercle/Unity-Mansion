@@ -356,6 +356,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	}
 
 	public Vector3 GetDirection() => transform.forward;
+
+	public Vector3 GetDirectionTo(Vector3 world, bool flat = true)
+	{
+		return Vector3.Scale(new Vector3(1,flat ? 0 : 1,1), world - GetPosition()).normalized;
+	}
 	
 	public Vector3 GetPosition() => transform.position;
 

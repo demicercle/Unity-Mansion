@@ -313,8 +313,12 @@ public static class Utils
 		aiPathPosition.y = dest.y;
 		return Vector3.Distance(aiPathPosition, dest);
 	}
-	
-	
+
+	public static float FlatDot(Vector3 dir1, Vector3 dir2)
+	{
+		dir1.y = dir2.y;
+		return  Vector3.Dot(dir1, dir2);
+	}
 }
 
 public static class NavUtils

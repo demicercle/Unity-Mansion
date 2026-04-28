@@ -658,6 +658,7 @@ MonoBehaviour:
   skipCommands: 0
   commandsOnStart:
   - '#debug_agent 2'
+  - debug_follows 1
   - '#debug_detection 1'
   - '#debug_brains 1'
   - '#debug_routines 1'
