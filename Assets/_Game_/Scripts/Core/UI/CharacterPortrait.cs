@@ -16,6 +16,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	public TMP_Text healthLabel;
 	public Slider karmaSlider;
 	public TMP_Text[] karmaLabels;
+	public float karmaLerpSpeed = 1f;
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
@@ -51,6 +52,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	}
 	
 	private CharacterEntity _assignedCharacter;
+	private int karmaInt;
 
 	private void OnSelectionChanged(bool selected)
 	{
@@ -93,9 +95,18 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	{
 		if (_assignedCharacter)
 		{
-			karmaSlider.value = Mathf.Lerp(karmaSlider.value, _assignedCharacter.GetCurrentKarma(), Time.unscaledDeltaTime);
+			karmaSlider.minValue = -999;
+			karmaSlider.maxValue = 999;
+			karmaSlider.value = Mathf.MoveTowards(karmaSlider.value, _assignedCharacter.GetCurrentKarma() * 999, Time.unscaledDeltaTime * 999 * karmaLerpSpeed);
+			
 			foreach (var kt in karmaLabels)
-				kt.text = (karmaSlider.value > 0 ? "+" : "") + karmaSlider.value.ToString("N2").Replace(".", "").Replace(",","");
+			{
+				karmaInt = Mathf.Abs(Mathf.RoundToInt(karmaSlider.value));
+				kt.text = (karmaSlider.value > 0 ? "+" : karmaSlider.value < 0 ? "-" : "")
+				          + (karmaInt < 100 ? "0" : "")
+				          + (karmaInt < 10 ? "0" : "")
+				          + (karmaInt);
+			}
 		}
 	}
 }

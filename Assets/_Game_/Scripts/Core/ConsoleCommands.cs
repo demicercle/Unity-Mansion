@@ -123,7 +123,6 @@ public class ConsoleCommands : MonoBehaviour
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
 		{
-			_DebugStats(1);
 			while (count-- > 0)
 			{
 				Debug.Log("RollDices: " + character.RollDice());

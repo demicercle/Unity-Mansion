@@ -43,7 +43,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
 	private const float MinAttackRange = 0.15f;
-	private const float DiceToKarma = Mathf.PI / Consts.RAD_TO_DEG;
+	private const float DiceToKarma = Mathf.PI * 0.02f;
 	
 	public static int debugStats { get; set; }
 	
