@@ -100,6 +100,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			{
 				Debug.LogWarning(this + " Think Timeout!");
 				_selfCharacter.FloatingText_Cant();
+				_selfCharacter.Routines.StopAllRoutines();
 				StopThink();
 				yield break;
 			}

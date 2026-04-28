@@ -95,13 +95,21 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	{
 		if (_assignedCharacter)
 		{
-			karmaSlider.minValue = -999;
-			karmaSlider.maxValue = 999;
-			karmaSlider.value = Mathf.MoveTowards(karmaSlider.value, _assignedCharacter.GetCurrentKarma() * 999, Time.unscaledDeltaTime * 999 * karmaLerpSpeed);
+			karmaSlider.gameObject.SetActive(_assignedCharacter.HasKarma());
+			
+			if (karmaSlider.gameObject.activeSelf)
+			{
+				karmaSlider.minValue = -999;
+				karmaSlider.maxValue = 999;
+				karmaSlider.value = Mathf.MoveTowards(karmaSlider.value, _assignedCharacter.GetCurrentKarma() * 999, Time.unscaledDeltaTime * 999 * karmaLerpSpeed);
+			
+				karmaInt = Mathf.Abs(Mathf.RoundToInt(karmaSlider.value));
+			}
 			
 			foreach (var kt in karmaLabels)
 			{
-				karmaInt = Mathf.Abs(Mathf.RoundToInt(karmaSlider.value));
+				kt.gameObject.SetActive(karmaSlider.gameObject.activeSelf);
+				if (!kt.gameObject.activeSelf) continue;
 				kt.text = (karmaSlider.value > 0 ? "+" : karmaSlider.value < 0 ? "-" : "")
 				          + (karmaInt < 100 ? "0" : "")
 				          + (karmaInt < 10 ? "0" : "")

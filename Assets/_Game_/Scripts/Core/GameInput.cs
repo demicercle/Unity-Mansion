@@ -168,7 +168,8 @@ public class GameInput : MonoBehaviour
 		inputSystem.Player.SelectNext.performed += OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed += OnInputFocusSelected;
 		inputSystem.Player.ToggleGroup.performed += OnInputToggleGroup;
-		inputSystem.Player.Action_Run.performed += OnInputAction_Run; // TODO other actions inputs?
+		inputSystem.Player.Action_Run.performed += OnInputAction_Run;
+		inputSystem.Player.Action_Defend.performed += OnInputAction_Defend;
 		
 		CharacterSelection.selectionChanged += SelectionChanged;
 
@@ -199,6 +200,7 @@ public class GameInput : MonoBehaviour
 		inputSystem.Player.FocusSelected.performed -= OnInputFocusSelected;
 		inputSystem.Player.ToggleGroup.performed -= OnInputToggleGroup;
 		inputSystem.Player.Action_Run.performed -= OnInputAction_Run;
+		inputSystem.Player.Action_Defend.performed -= OnInputAction_Defend;
 		
 		CharacterSelection.selectionChanged -= SelectionChanged;
 
@@ -564,11 +566,14 @@ public class GameInput : MonoBehaviour
 
 	private void OnInputAction_Run(CallbackContext ctx)
 	{
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
-		{
-			if(selectedCharacter.CanUseAction(CharacterAction.Run))
-				selectedCharacter.Routines.AssignRunAction();
-		}
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Run))
+				selectedCharacter.Routines.AssignWaitAction(CharacterAction.Run);
+	}
+	
+	private void OnInputAction_Defend(CallbackContext ctx)
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Defend))
+			selectedCharacter.Routines.AssignWaitAction(CharacterAction.Defend);
 	}
 	
 	private void OnInputCameraZoom(CallbackContext ctx)

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using IngameDebugConsole;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 
 public class GameCanvas : MonoBehaviour
@@ -25,12 +21,14 @@ public class GameCanvas : MonoBehaviour
 	[Header("Viewport")]
 	[SerializeField] private RectTransform viewportRect;
 	[SerializeField] private RawImage viewportOverlay;
-	[Header("Buttons")]
+	[Header("Toggles")]
 	[SerializeField] private Toggle toggleGroupMode;
 	[SerializeField] private Toggle toggleTurnBased;
 	[SerializeField] private Toggle toggleActions;
-	[SerializeField] private Button button_actionRun;
-	[SerializeField] private Button button_endTurn;
+	[Header("Buttons")]
+	[SerializeField] private Button buttonEndTurn;
+	[SerializeField] private Button buttonActionRun;
+	[SerializeField] private Button buttonActionDefend;
 	[Header("Portraits")]
 	[SerializeField] private CharacterPortrait[] portraits;
 	[Header("Inventory")]
@@ -99,8 +97,9 @@ public class GameCanvas : MonoBehaviour
 		if (instance) Debug.LogError(this + " duplicated!");
 		instance = this;
 		
-		button_endTurn.onClick.AddListener(ClickEndTurn);
-		button_actionRun.onClick.AddListener(ClickRunAction);
+		buttonEndTurn.onClick.AddListener(ClickEndTurn);
+		buttonActionRun.onClick.AddListener(ClickRunAction);
+		buttonActionDefend.onClick.AddListener(ClickDefendAction);
 
 		viewportMouseHandler = viewportRect.GetComponent<MouseOverHandler>();
 		if(!viewportMouseHandler) viewportMouseHandler = viewportRect.gameObject.AddComponent<MouseOverHandler>();
@@ -123,8 +122,9 @@ public class GameCanvas : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		button_endTurn.onClick.RemoveListener( ClickEndTurn);
-		button_actionRun.onClick.RemoveListener(ClickRunAction);
+		buttonEndTurn.onClick.RemoveListener( ClickEndTurn);
+		buttonActionRun.onClick.RemoveListener(ClickRunAction);
+		buttonActionDefend.onClick.RemoveListener(ClickDefendAction);
 		
 		viewportMouseHandler.onMouseOverChanged -= OnViewportRectMouseOver;
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
@@ -223,7 +223,22 @@ public class GameCanvas : MonoBehaviour
 		{
 			if (selected.CanUseAction(CharacterAction.Run))
 			{
-				selected.Routines.AssignRunAction();
+				selected.Routines.AssignWaitAction(CharacterAction.Run);
+			}
+			else
+			{
+				selected.FloatingText_Cant();
+			}
+		}
+	}
+
+	private void ClickDefendAction()
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out var selected))
+		{
+			if (selected.CanUseAction(CharacterAction.Defend))
+			{
+				selected.Routines.AssignWaitAction(CharacterAction.Defend);
 			}
 			else
 			{
@@ -255,15 +270,16 @@ public class GameCanvas : MonoBehaviour
 		toggleGroupMode.isOn = gameInput.IsLeaderMode();
 		toggleTurnBased.isOn = gameTurnManager.IsTurnBasedMode();
 		toggleActions.isOn = gameTurnManager.SelectedCharacterIsControllable();
-		button_actionRun.interactable = gameTurnManager.SelectedCharacterCanUseRunAction();
+		buttonActionRun.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Run);
+		buttonActionDefend.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Defend);
 		
 		if (gameTurnManager.PlayerCanEndTurn())
 		{
-			button_endTurn.interactable = true;
+			buttonEndTurn.interactable = true;
 		}
 		else
 		{
-			button_endTurn.interactable = false;
+			buttonEndTurn.interactable = false;
 		}
 
 		if (lerpSpeed > 0)

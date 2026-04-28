@@ -54,10 +54,10 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
 		StartNewRoutine(WaitMoveCharacterToWaypoint(waypoint, canUseRunAction, onComplete));
 	}
-	public void AssignRunAction()
+	public void AssignWaitAction(CharacterAction waitAction)
 	{
-		if(debugMode > 0) Debug.Log(this + " AssignRunAction ");
-		StartNewRoutine(WaitAction(CharacterAction.Run));
+		if(debugMode > 0) Debug.Log(this + " AssignWaitAction " + waitAction);
+		StartNewRoutine(WaitAction(waitAction));
 	}
 	public void AssignLookPosition(Vector3 lookPosition)
 	{

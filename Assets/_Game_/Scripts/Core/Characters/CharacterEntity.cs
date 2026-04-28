@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using RPGCharacterAnims.Actions;
 using UnityEngine;
 
 public interface IAttackable
@@ -25,7 +26,8 @@ public enum CharacterAction
 	Attack,
 	Interact,
 	Talk,
-	UseItem
+	UseItem,
+	Defend
 }
 
 public struct DamageInfo
@@ -44,6 +46,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private const float MinFacingDot = 0.9f;
 	private const float MinAttackRange = 0.15f;
 	private const float DiceToKarma = Mathf.PI * 0.02f;
+	private const float MovePointsToDodge = 0.02f;
+	private const float MovePointsToHit = 0.01f;
 	
 	public static int debugStats { get; set; }
 	
@@ -87,10 +91,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private WeaponData defaultWeapon;
 	[SerializeField] private bool noKarma;
 	[SerializeField] [Range(-1f, 1f)] private float baseKarma = 0.0f;
-	private float currentLuck = 0.0f;
+	[SerializeField] [Min(0)] private int baseDodgeCount = 1;
+	
 	public void SetLuck(float newValue) => currentLuck = Mathf.Clamp(newValue, -1f, 1f);
 	public void SetKarma(float newValue) => currentKarma = Mathf.Clamp(newValue, -1f, 1f);
-	
+	public bool HasKarma() => !noKarma;
 	public CharacterRoutines Routines => routines;
 	
 	public float lastTimeRested { get; private set; }
@@ -148,6 +153,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		usedActions.Clear();
 		usedMovePoints = 0;
 		lastTimeRested = Time.time;
+		dodgeCount = baseDodgeCount;
 		onStatsChanged?.Invoke();
 	}
 	
@@ -185,9 +191,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return result;
 	}
 
-	public float GetDodgeChance() => characterData.dodgeChance;
+	public float GetDodgeChance() => Mathf.Clamp01(characterData.dodgeChance + GetRemainingMovePoints() * MovePointsToDodge);
 
-	public float GetHitChance() => currentWeapon.hitChance;
+	public float GetHitChance() => Mathf.Clamp01(currentWeapon.hitChance + GetRemainingMovePoints() * MovePointsToHit);
 
 	public enum AttackResult
 	{
@@ -201,20 +207,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		if (target is CharacterEntity)
 		{
-			if (RollDice() > GetHitChance())
-			{
-				onAttackResult?.Invoke(this, target as CharacterEntity, AttackResult.Miss);
-				return AttackResult.Miss;
-			}
-
-			if ((target as CharacterEntity).RollDice() < (target as CharacterEntity).GetDodgeChance())
-			{
-				onAttackResult?.Invoke(this, target as CharacterEntity, AttackResult.Dodge);
-				return AttackResult.Dodge;
-			}
-			
-			onAttackResult?.Invoke(this, target as CharacterEntity, AttackResult.Hit);
-			return AttackResult.Hit;
+			return TryHit(target as CharacterEntity);
 		}
 
 		if (target is Destructible)
@@ -224,6 +217,29 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		
 		Debug.LogWarning(this + " TryAttack " + target + " AttackResult.Undefined!");
 		return AttackResult.Undefined;
+	}
+
+	public AttackResult TryHit(CharacterEntity target)
+	{
+		if (RollDice() > GetHitChance())
+		{
+			onAttackResult?.Invoke(this, target, AttackResult.Miss);
+			return AttackResult.Miss;
+		}
+
+		while (target.dodgeCount > 0)
+		{
+			if(debugStats > 0) Debug.Log(target + " try dodge " + this + " dodgeCount=" + target.dodgeCount);
+			target.dodgeCount -= 1;
+			if (target.RollDice() < target.GetDodgeChance())
+			{
+				onAttackResult?.Invoke(this, target, AttackResult.Dodge);
+				return AttackResult.Dodge;
+			}
+		}
+			
+		onAttackResult?.Invoke(this, target, AttackResult.Hit);
+		return AttackResult.Hit;
 	}
 	
 	public void AttackAction(IAttackable target, bool stopAgent = true)
@@ -243,6 +259,10 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		else if (actionType == CharacterAction.Talk)
 		{
 			(param as CharacterEntity)?.onTalkedBy?.Invoke(this);
+		}
+		else if (actionType == CharacterAction.Defend)
+		{
+			dodgeCount++;
 		}
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);
@@ -628,6 +648,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private WeaponData currentWeapon;
 	private CharacterDetection detection;
 	private float currentKarma;
+	private float currentLuck = 0.0f;
+	private int dodgeCount;
 	
 	private void Awake()
 	{
@@ -700,13 +722,15 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		if (debugStats > 0)
 		{
-			Utils.DrawWorldGUI(GetEyesPosition(), name 
-			                                      + "\n" + (isDead ? "DEAD" : GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2"))
-			                                      + "\n" + usedActions.Count + "/" + characterData.maxActions
-			                                      + "\n" + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
-			                                      + "\n" + "KARMA: " + Mathf.RoundToInt(currentKarma*100)
-			                                      + "\n" + "LUCK: " + currentLuck.ToString("N2")
-				, "label");
+			Utils.DrawWorldGUI(GetEyesPosition(), name  + (IsDead() ? "\nDEAD" : ""
+			                                      + "\n" + GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2")
+			                                      + "\n" + "Actions: " + usedActions.Count + "/" + characterData.maxActions
+			                                      + "\n" + "MovePoints: " + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
+			                                      + "\n" + "KARMA: " + currentKarma.ToString("N3")
+			                                      + "\n" + "Luck: " + currentLuck.ToString("N2")
+			                                      + "\n" + "HitChance: " + GetHitChance().ToString("N2")
+			                                      + "\n" + "Dodge: " + GetDodgeChance().ToString("N2") + " (x" + dodgeCount + ")"
+				), "label");
 		}
 	}
 }

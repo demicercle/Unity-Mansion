@@ -51,13 +51,14 @@ public class GameTurnManager : MonoBehaviour
 										return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
 									});
 	
-	public bool SelectedCharacterCanUseRunAction() =>
+	public bool SelectedCharacterCanUseAction(CharacterAction action) =>
 		!CharacterRoutines.AnyActiveRoutines() && IsPlayerTurn() 
 		                                       && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
-		                                       && selectedCharacter.CanUseAction(CharacterAction.Run);
+		                                       && selectedCharacter.CanUseAction(action);
 
 	public bool SelectedCharacterIsControllable() => IsPlayerTurn() 
 	                                                 && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
+	                                                 && selectedCharacter.IsCurrentTurn()
 	                                                 && selectedCharacter.IsControllableByPlayer();
 	
 	public int GetCurrentTurn() => currentTurn;
