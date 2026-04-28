@@ -374,6 +374,7 @@ public class CharacterAgent : MonoBehaviour
 		}
 		else
 		{
+			aiPath.updatePosition = aiPath.updateRotation = false;
 			SetObstacle(false);
 		}
 
@@ -555,8 +556,8 @@ public class CharacterAgent : MonoBehaviour
 
 	private void OnPartyIndexChanged(int newIndex, int partyCount)
 	{
-		rvoController.priority = CharacterSelection.IsCharacterSelected(_selfCharacter) ? 1.0f :
-			Mathf.Lerp(0.25f, 0.75f, (float)newIndex / (float)partyCount);
+		rvoController.priority = CharacterSelection.IsCharacterSelected(_selfCharacter) ? 0.90f :
+			_selfCharacter.InParty() ? 0.66f : 0.33f;
 	}
 
 	private void SelectionChanged()

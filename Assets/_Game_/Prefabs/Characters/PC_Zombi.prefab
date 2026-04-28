@@ -109,6 +109,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &758686263111164508
 GameObject:
   m_ObjectHideFlags: 0
@@ -218,6 +225,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &985226490498603762
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,6 +340,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1062045132717546542
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,6 +487,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2595941189588296342
 GameObject:
   m_ObjectHideFlags: 0
@@ -574,6 +602,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2812536430256621170
 GameObject:
   m_ObjectHideFlags: 0
@@ -714,6 +749,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2941475378733544326
 GameObject:
   m_ObjectHideFlags: 0
@@ -822,6 +864,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3433586505867587646
 GameObject:
   m_ObjectHideFlags: 0
@@ -930,6 +979,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3525238577715641375
 GameObject:
   m_ObjectHideFlags: 0
@@ -1038,6 +1094,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3698572209905069831
 GameObject:
   m_ObjectHideFlags: 0
@@ -1147,6 +1210,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3923584781349262898
 GameObject:
   m_ObjectHideFlags: 0
@@ -1255,6 +1325,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &4033927125268310396
 GameObject:
   m_ObjectHideFlags: 0
@@ -1363,6 +1440,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &4529505671052520224
 GameObject:
   m_ObjectHideFlags: 0
@@ -1471,6 +1555,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5396490528178748884
 GameObject:
   m_ObjectHideFlags: 0
@@ -1579,6 +1670,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5641371306466564077
 GameObject:
   m_ObjectHideFlags: 0
@@ -1687,6 +1785,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5758516747736596918
 GameObject:
   m_ObjectHideFlags: 0
@@ -1795,6 +1900,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5830496135983802681
 GameObject:
   m_ObjectHideFlags: 0
@@ -1903,6 +2015,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6728294294006317938
 GameObject:
   m_ObjectHideFlags: 0
@@ -2104,6 +2223,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &7636350804564253807
 GameObject:
   m_ObjectHideFlags: 0
@@ -2212,6 +2338,13 @@ MonoBehaviour:
   inHand: 1
   offHand: 1
   renderers: []
+  shootLine: {fileID: 0}
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &4704016141573829932
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2222,7 +2355,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 467592031822895063, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: uniqueID
-      value: 2940721403518768482
+      value: 6575320937452672698
       objectReference: {fileID: 0}
     - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: characterData
@@ -2943,6 +3076,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5757940252884302303}
     m_Modifications:
+    - target: {fileID: 4557175951612426739, guid: 5cbad1a95219f304cba6efb80ce55386, type: 3}
+      propertyPath: 'clips.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 429d0ec86b8aba941aef6cb3d11772cd, type: 3}
     - target: {fileID: 4884688390025520555, guid: 5cbad1a95219f304cba6efb80ce55386, type: 3}
       propertyPath: m_Name
       value: SFX_Scream

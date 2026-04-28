@@ -646,11 +646,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3993351974707439097, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       propertyPath: showGraphs
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3993351974707439097, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       propertyPath: showNavGraphs
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3993351974707439097, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+      propertyPath: data.dataString
+      value: UEsDBBQAAAgIAAAIIewPA9LzxwIAAB8GAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGFVNtu4jAQ/RXk522V0nDbt12g7UrbFpWu+rD0wY0nxMLYkS8FWvHvO+MEEujDSghHZ86Mz9z8yRTfgR2boD373ul+67Cs4JZnHuwdyGVB6BWiUrsSMm/srZXi3ghAnNE3axvvYMuXRs/lBxw4L1L4gkg8cp64l+YQ05k1eCuzH3qpiJwgGLTMjV1PxRLGxnmHcM6VAzRZ48lbI/TZYdvaYVefH3R29pQBaJT/P1bQmeLrEgSpbcjpgX1d0TTmUTOSy26PwhulpKt1ML8rY55jXrqAWSBBSI55RQWUZnGoY7ft/JjnDnytyvLdRFosTxWV/TRVzdbcrSpp71wFuqfXTYdRVxX1/guhn0Zzbs26aWBCl/hCZqsnvsu4862qtuHJqfKgN1yt+JuClwL0g7m1OCcCjd4Gcg0OupNWqGNy4wKyVcOrtJ6BofzaoaumQ/uY/nbuoTzmkVymDfrHgZsrE6tfhyRLjfQpJFhs3i/MJ46Nqy9AlDSi/zNftuerNtxI6zyaTunEnWGLQIDOoK77BRE0yXszwVIsNo1aqRjBj43VEOFaYAmaK7+bYUR/PgNntpauM8sNp1Wr1dW2wwaduUS44SfJmWlmNsdmW5xeF0f68PX3lZrgCrO5B1c8Bq+kblWbDA9Y4LHRuhrddjEPbvNgc5613DxsfbAw4Z7H21AODphou2Ito4cOStEsxwSiIkyAfq/VO4X3qgizB6Pj6p2cUf4ySHG6ISyFbgL961GewnDY44OLYT4a9K/T3mAw6qejbsbiCkmN5eZqVtWr7hJOl25y0bguFPE3PaIgOvQg4h8v4/YKyze38mNtWhMgdW7mmQXQj1WkY9Jg8TJ8aMRUSEx3Dt5LHeeTfS6YMtkKxOIYaBELPN16yxdNlAUr5bvxhCzYOD6DC0bwcTNxhN8lbOjyk2CgsIUgnqWCNS/JlOzZ/h9QSwMEFAAACAgAAAgh7PHEHfNxAAAAfAAAAAkAJABtZXRhLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGrVipLLSrOzM9TslIw1TPRM9NRUEovSizIKAYKGII4pZkpIHa0kkmqkUGqmbFlmkmqhYVpormuRZqluZmxiam5uaWZiaVRslIsUH1JZUGqX2JuKkRPQGJJRlpmXkpmXrqeT2JlapF7UWaKO8h8pdhaAFBLAQItABQAAAgIAAAIIewPA9LzxwIAAB8GAAALACQAAAAAAAAAAAAAAAAAAABncmFwaDAuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLAQItABQAAAgIAAAIIezxxB3zcQAAAHwAAAAJACQAAAAAAAAAAAAAABQDAABtZXRhLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwUGAAAAAAIAAgC4AAAA0AMAAAAA
+      objectReference: {fileID: 0}
+    - target: {fileID: 4093696222227633728, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4833798763918923341, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       propertyPath: extends.x

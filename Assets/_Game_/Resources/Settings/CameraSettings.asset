@@ -21,4 +21,4 @@ MonoBehaviour:
   zoomSpeed: 1
   rotationSpeed: {x: 1, y: 16}
   orbitSpeed: {x: 3, y: 0}
-  orbitMaxSpeed: {x: 1.5, y: -1}
+  orbitMaxSpeed: {x: 3, y: -1}
