@@ -9,6 +9,7 @@ public class WeaponRenderer : MonoBehaviour
 {
     public bool isLeft;
     public Weapon rpgWeapon = Weapon.Relax;
+    public string itemTags = "";
     public bool inHand = true;
     public bool offHand = true;
 
@@ -40,6 +41,11 @@ public class WeaponRenderer : MonoBehaviour
                 shootLine.GetComponent<Animation>()?.Play();
             }
         }
+    }
+
+    public bool DisplaysItem(ItemData itemData)
+    {
+        return (rpgWeapon == Weapon.RightItem || rpgWeapon == Weapon.LeftItem) && itemData.CompareTags(itemTags);
     }
     
     public UnityEvent onHit;

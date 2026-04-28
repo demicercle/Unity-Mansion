@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using RPGCharacterAnims.Lookups;
+using UnityEngine;
 
 public enum TargetType
 {
 	None,
 	AnyCharacter,
+	GroundPosition
 }
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "ItemData", order = 0)]
@@ -20,9 +22,30 @@ public class ItemData : ScriptableObject
 	[SerializeField] private TargetType targetType;
 	[SerializeField] [Range(0f, 12f)] private float useRange;
 	[SerializeField] private GameScriptGraph onUseScript;
-	[SerializeField] private Projectile projectilePrefab;
+	[SerializeField] private string itemTags;
+	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
+	
+	public bool CompareTags(string tags)
+	{
+		foreach (var other in tags.Split(','))
+		{
+			foreach (var self in itemTags.Split(','))
+			{
+				if (other == self)
+					return true;
+			}
+		}
 
+		return string.IsNullOrEmpty(tags+itemTags);
+	}
+	
 	public float GetUseRange() => useRange;
+
+	public bool CanBeUsedAt(Vector3 position)
+	{
+		return targetType == TargetType.GroundPosition
+			&& NavUtils.TryGetNearestNavPosition(position, useGroundRadius, out var _);
+	}
 	
 	public bool CanBeUsedOn(GameObject target, out object objectTo)
 	{
@@ -41,9 +64,7 @@ public class ItemData : ScriptableObject
 
 	public void Launch(Vector3 origin, Vector3 destination)
 	{
-		var instance = Instantiate(projectilePrefab);
-		instance.itemData = this;
-		instance.Launch(origin, destination);
+		
 	}
 
 	public void UseOn(GameObject target)

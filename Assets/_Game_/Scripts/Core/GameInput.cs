@@ -80,7 +80,7 @@ public class GameInput : MonoBehaviour
 		{
 			if (itemToUse)
 			{
-				if (!itemToUse.CanBeUsedOn(navigationHit.collider.gameObject, out var _))
+				if (!itemToUse.CanBeUsedAt(navigationHit.point))
 					return CursorRaycastResult_None;
 			}
 			
@@ -408,6 +408,11 @@ public class GameInput : MonoBehaviour
 					{
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
 					}
+
+					if (itemToUse)
+					{
+						selectedCharacter.LookWorldPosition(hit.point, Time.deltaTime);
+					}
 				}
 				//else if(isDebugMode) Debug.Log("no selected character");
 			}
@@ -670,7 +675,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter && itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject, out var objectTo))
 				{
-					selectedCharacter.Routines.AssignUseItem(itemToUse, objectTo);
+					selectedCharacter.Routines.AssignUseItemOn(itemToUse, objectTo);
 					SetItemToUse(null);
 				}
 				
@@ -691,7 +696,19 @@ public class GameInput : MonoBehaviour
 			}
 			else if (raycastResult == CursorRaycastResult_Navigation) // click navigation
 			{
-				ClickNavigation(hit.point);
+				if (selectedCharacter && itemToUse)
+				{
+					if (itemToUse.CanBeUsedAt(hit.point))
+					{
+						selectedCharacter.Routines.AssignUseItemAt(itemToUse, hit.point);
+						SetItemToUse(null);
+					}
+				}
+
+				else
+				{
+					ClickNavigation(hit.point);
+				}
 			}
 		}
 
@@ -942,6 +959,9 @@ public class GameInput : MonoBehaviour
 	public void SetItemToUse(ItemData itemData)
 	{
 		itemToUse = itemData;
+		
+		if (selectedCharacter)
+			selectedCharacter.SetItemToUse(itemToUse);
 	}
 
 	public ItemData GetItemToUse() => itemToUse;

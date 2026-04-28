@@ -22,6 +22,10 @@ public class CharacterRoutines : MonoBehaviour
 	}
 
 	public System.Action OnStarted;
+
+	private object assignedTarget;
+
+	public bool HasAssignedTarget() => assignedTarget != null;
 	
 	public bool AnyActive()
 	{
@@ -30,50 +34,66 @@ public class CharacterRoutines : MonoBehaviour
 	
 	public void AssignAttack(IAttackable target, bool canUseRunAction, bool losCheck)
 	{
+		assignedTarget = target;
 		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck);
 		StartNewRoutine(WaitCharacterAttack(target, canUseRunAction, losCheck));
 	}
 	public void AssignAttackInstant(IAttackable target, bool useAction)
 	{
+		assignedTarget = target;
 		if(debugMode > 0) Debug.Log(this + " AssignAttackInstant " + target + " usesActions=" + useAction);
 		StartNewRoutine(WaitCharacterPerformAttack(target, useAction));
 		//OnAssignAction?.Invoke();
 	}
 	public void AssignInteract(PropComponent clickedProp) 
 	{
+		assignedTarget = clickedProp;
 		if(debugMode > 0) Debug.Log(this + " AssignInteract " + clickedProp);
 		StartNewRoutine(WaitCharacterInteract(clickedProp));
 	}
 	public void AssignMoveToDestination(Vector3 navPosition)
 	{
+		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToDestination " + navPosition);
 		StartNewRoutine(WaitCharacterMoved(navPosition, 0f));
 	}
 	public void AssignMoveToWaypoint(Waypoint waypoint, bool canUseRunAction, System.Action onComplete = null)
 	{
+		assignedTarget = waypoint;
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
 		StartNewRoutine(WaitMoveCharacterToWaypoint(waypoint, canUseRunAction, onComplete));
 	}
 	public void AssignWaitAction(CharacterAction waitAction)
 	{
+		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignWaitAction " + waitAction);
 		StartNewRoutine(WaitAction(waitAction));
 	}
 	public void AssignLookPosition(Vector3 lookPosition)
 	{
+		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignLookPosition ");
 		if (debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), lookPosition, Color.magenta, 1.0f);//TODO defaultDrawDuration
 		StartNewRoutine(WaitCharacterLookPosition(lookPosition));
 	}
 	public void AssignTalk(CharacterEntity npc) // TODO all " Assign " methods should return the coroutine
 	{
+		assignedTarget = npc;
 		if(debugMode > 0) Debug.Log(this + " AssignTalk " + npc);
 		StartCoroutine(WaitCharacterTalk(npc));
 	}
-	public void AssignUseItem(ItemData itemToUse, object objectTo)
+	public void AssignUseItemOn(ItemData itemToUse, object objectTo)
 	{
+		assignedTarget = objectTo;
 		if(debugMode > 0) Debug.Log(this + " AssignUseItem " + itemToUse + " on " + objectTo);
-		StartCoroutine(WaitCharacterUseItem(itemToUse, objectTo));
+		StartCoroutine(WaitCharacterUseItemOn(itemToUse, objectTo));
+	}
+
+	public void AssignUseItemAt(ItemData itemToUse, Vector3 position)
+	{
+		assignedTarget = null;
+		if(debugMode > 0) Debug.Log(this + " AssignUseItem " + itemToUse + " at " + position);
+		StartCoroutine(WaitCharacterUseItemAt(itemToUse, position));
 	}
 
 	// leader assign
@@ -577,7 +597,7 @@ public class CharacterRoutines : MonoBehaviour
 		_selfCharacter.UseAction(CharacterAction.Talk, npc);
 	}
 
-	private IEnumerator WaitCharacterUseItem( ItemData itemToUse,object objectTo)
+	private IEnumerator WaitCharacterUseItemOn( ItemData itemToUse,object objectTo)
 	{
 		var useRange = itemToUse.GetUseRange();
 		if (objectTo is CharacterEntity)
@@ -623,6 +643,14 @@ public class CharacterRoutines : MonoBehaviour
 				inventory.NotifyUsed(itemToUse, otherCharacter);
 			}
 		}
+	}
+
+	private IEnumerator WaitCharacterUseItemAt(ItemData itemToUse, Vector3 position)
+	{
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItemAt " + itemToUse);
+		debugString = "WaitCharacterUseItemAt " + itemToUse;
+		DebugDrawer.Line(_selfCharacter.GetCenterPosition(), position, Color.red, DefaultWaitSeconds);
+		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 	#endregion
 
