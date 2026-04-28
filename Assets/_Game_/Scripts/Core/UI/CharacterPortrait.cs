@@ -14,6 +14,8 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	public Toggle toggleSelected, toggleHasActions;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
+	public Slider karmaSlider;
+	public TMP_Text[] karmaLabels;
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
@@ -85,5 +87,15 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		
 		if (_assignedCharacter != null) 
 			AssignCharacter(null); // dispose events
-	} 
+	}
+
+	private void LateUpdate()
+	{
+		if (_assignedCharacter)
+		{
+			karmaSlider.value = Mathf.Lerp(karmaSlider.value, _assignedCharacter.GetCurrentKarma(), Time.unscaledDeltaTime);
+			foreach (var kt in karmaLabels)
+				kt.text = (karmaSlider.value > 0 ? "+" : "") + karmaSlider.value.ToString("N2").Replace(".", "").Replace(",","");
+		}
+	}
 }

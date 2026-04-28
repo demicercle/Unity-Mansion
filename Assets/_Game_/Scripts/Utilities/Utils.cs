@@ -319,6 +319,19 @@ public static class Utils
 		dir1.y = dir2.y;
 		return  Vector3.Dot(dir1, dir2);
 	}
+
+	public static string IntToStringWithZero(int value)
+	{
+		return RepeatChar('0', Mathf.FloorToInt((float)value / 10f)) + value.ToString();
+	}
+
+	private static string tempStr;
+	public static string RepeatChar(char c, int count)
+	{
+		tempStr = "";
+		while(count-- > 0) tempStr += c;
+		return tempStr;
+	}
 }
 
 public static class NavUtils
