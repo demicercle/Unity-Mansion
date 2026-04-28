@@ -22,8 +22,8 @@ public class CharacterFollows : MonoBehaviour
 	private CharacterEntity leaderCharacter;
 	private CharacterAgent agent;
 	private Transform dummy;
-	private float heading;
 	private Vector3 headingPos;
+	private Vector3 leaderWorldVelocity;
 
 	private void Awake()
 	{
@@ -75,13 +75,8 @@ public class CharacterFollows : MonoBehaviour
 		
 		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead() && GameInput.Instance.IsLeaderMode())
 		{
-			heading = headingDistance;
-
-			//heading *= Utils.FlatDot(leaderCharacter.GetDirection(),
-			//	leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()));
-			
-			headingPos = leaderCharacter.GetPosition()
-				+ leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()) * heading;
+			headingPos = leaderCharacter.GetPosition();
+			headingPos += leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()) * headingDistance;
 			
 			agent.AssignFollowTransform(dummy, followDistance);
 			agent.SetObstacle(!agent.IsMoving());

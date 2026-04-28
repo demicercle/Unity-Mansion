@@ -354,7 +354,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		dir.Normalize();
 		return dir.sqrMagnitude > Consts.MinMagnitude && Vector3.Dot(dir, transform.forward) >= MinFacingDot;
 	}
-
+	
 	public Vector3 GetDirection() => transform.forward;
 
 	public Vector3 GetDirectionTo(Vector3 world, bool flat = true)

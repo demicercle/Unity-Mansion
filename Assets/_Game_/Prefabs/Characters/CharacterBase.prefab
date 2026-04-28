@@ -822,9 +822,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b516620e7a5f4087a2b020d253b0edb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
-  followDistance: 1.2
-  tickTime: 1
-  headingDistance: 1.5
+  followDistance: 2
+  tickTime: 0.5
+  headingDistance: 2
   headingSpeed: 3
 --- !u!114 &-9001009375405151572
 MonoBehaviour:
@@ -844,7 +844,7 @@ MonoBehaviour:
   centerBackingField: 1
   locked: 0
   lockWhenNotMoving: 1
-  agentTimeHorizon: 1.5
+  agentTimeHorizon: 0.5
   obstacleTimeHorizon: 1
   maxNeighbours: 10
   layer: 1
