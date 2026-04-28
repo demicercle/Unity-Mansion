@@ -87,8 +87,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private WeaponData defaultWeapon;
 	[SerializeField] private bool noKarma;
 	[SerializeField] [Range(-1f, 1f)] private float baseKarma = 0.0f;
-	[SerializeField] [Range(-1f, 1f)] private float luck = 0.0f;
-	public void SetLuck(float newValue) => luck = Mathf.Clamp(newValue, -1f, 1f);
+	private float currentLuck = 0.0f;
+	public void SetLuck(float newValue) => currentLuck = Mathf.Clamp(newValue, -1f, 1f);
 	public void SetKarma(float newValue) => currentKarma = Mathf.Clamp(newValue, -1f, 1f);
 	
 	public CharacterRoutines Routines => routines;
@@ -171,16 +171,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (noKarma) return rolled;
 		
 		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
-		luck = Mathf.Clamp(luck, -1f, 1f);
+		currentLuck = Mathf.Clamp(currentLuck, -1f, 1f);
 		
 		var result = rolled + currentKarma * 0.5f;
 		
 		if (rolled < 0.5f) currentKarma += rolled * DiceToKarma;
-		if (rolled > 0.5f) currentKarma -= (rolled - (0.5f + 0.5f * luck)) * DiceToKarma;
+		if (rolled > 0.5f) currentKarma -= (rolled - (0.5f + 0.5f * currentLuck)) * DiceToKarma;
 		
 		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
 		
-		if (debugStats > 0) Debug.Log(this + " RollDice! rolled=" + rolled + " newKarma=" + currentKarma + " luck=" + luck);
+		if (debugStats > 0) Debug.Log(this + " RollDice! rolled=" + rolled + " newKarma=" + currentKarma + " luck=" + currentLuck);
 		
 		return result;
 	}
@@ -665,6 +665,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 
 		currentKarma = baseKarma;
+		currentLuck = characterData.luck;
 
 		gameObject.SetActive(false); // wait for "Spawn"
 	}
@@ -704,7 +705,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			                                      + "\n" + usedActions.Count + "/" + characterData.maxActions
 			                                      + "\n" + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
 			                                      + "\n" + "KARMA: " + Mathf.RoundToInt(currentKarma*100)
-			                                      + "\n" + "LUCK: " + luck.ToString("N2")
+			                                      + "\n" + "LUCK: " + currentLuck.ToString("N2")
 				, "label");
 		}
 	}
