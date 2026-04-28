@@ -6,7 +6,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-
+[RequireComponent(typeof(CanvasScaler))]
 public class GameCanvas : MonoBehaviour
 {
 	private static GameCanvas instance;
@@ -51,24 +51,39 @@ public class GameCanvas : MonoBehaviour
 	
 	//public bool mouseOverViewport { get; private set; }
 
+	public Vector2 referenceResolution
+	{
+		get
+		{
+			if (canvasScaler.screenMatchMode == CanvasScaler.ScreenMatchMode.MatchWidthOrHeight)
+			{
+				return canvasScaler.referenceResolution;
+			}
+			else
+			{
+				return new Vector2(Screen.width, Screen.height);
+			}
+		}
+	}
+
 	public TextReference FloatingText(object obj, string label)
 	{
 		if (obj is CharacterEntity)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetFollows((obj as CharacterEntity).transform, (obj as CharacterEntity).GetCenterPosition(true));
+				.SetFollows((obj as CharacterEntity).transform, (obj as CharacterEntity).GetCenterPosition(true), referenceResolution);
 		}
 
 		if (obj is IAttackable)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetWorldPosition((obj as IAttackable).GetPosition());
+				.SetWorldPosition((obj as IAttackable).GetPosition(), referenceResolution);
 		}
 		
 		if (obj is Component)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetFollows((obj as Component).transform, default);
+				.SetFollows((obj as Component).transform, default, referenceResolution);
 		}
 		
 		Debug.LogWarning(this + " invalid floating text object: " + obj + " label=" + label);
@@ -77,7 +92,7 @@ public class GameCanvas : MonoBehaviour
 	
 	public TextReference FloatingText(Vector3 worldPosition, string label)
 	{
-		return floatingText.Duplicate().SetParent(transform).SetWorldPosition(worldPosition).SetText(label).SetActive();
+		return floatingText.Duplicate().SetParent(transform).SetWorldPosition(worldPosition, referenceResolution).SetText(label).SetActive();
 	}
 
 	public void SetOverlayRenderTexture(RenderTexture rt)
@@ -94,11 +109,14 @@ public class GameCanvas : MonoBehaviour
 	private CharacterEntity[] partyCharacters;
 	private MouseOverHandler viewportMouseHandler;
 	private ItemData currentItemToUse;
+	private CanvasScaler canvasScaler;
 	
 	private void Awake()
 	{
 		if (instance) Debug.LogError(this + " duplicated!");
 		instance = this;
+		
+		canvasScaler = GetComponent<CanvasScaler>();
 		
 		buttonEndTurn.onClick.AddListener(ClickEndTurn);
 		buttonActionRun.onClick.AddListener(ClickRunAction);
@@ -205,7 +223,7 @@ public class GameCanvas : MonoBehaviour
 			cursorText.raycastTarget = false;
 			cursorText.text =
 				Mathf.RoundToInt(
-					selectedCharacter.CalculateHitChance(targetCharacter, !selectedCharacter.IsUsingRangeWeapon()) *
+					selectedCharacter.CalculateHitChance(targetCharacter) *
 					100) + "%";
 		}
 	}

@@ -17,6 +17,39 @@ MonoBehaviour:
   isRanged: 1
   attackRange: 12
   hitChance: 0.75
+  rangeHitCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.16264139
+      value: 1
+      inSlope: 0.00000173573
+      outSlope: 0.00000173573
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.16403873
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -2.5714674
+      outSlope: -2.5714674
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.029855402
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   noAttack: 0
   rpgWeaponR: 17
   rpgWeaponL: -1

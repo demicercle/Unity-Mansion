@@ -11,12 +11,13 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 {
 	public RawImage rawImage;
 	public TMP_Text nameLabel;
-	public Toggle toggleSelected, toggleHasActions;
+	public Toggle toggleSelected, toggleHasActions, toggleTurnBased;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
 	public Slider karmaSlider;
-	public TMP_Text[] karmaLabels;
+	public TMP_Text karmaLabel;
 	public float karmaLerpSpeed = 1f;
+	public TMP_Text dodgeLabel;
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
@@ -95,6 +96,8 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	{
 		if (_assignedCharacter)
 		{
+			toggleTurnBased.isOn = GameTurnManager.Instance.IsTurnBasedMode();
+			
 			karmaSlider.gameObject.SetActive(_assignedCharacter.HasKarma());
 			
 			if (karmaSlider.gameObject.activeSelf)
@@ -106,15 +109,16 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 				karmaInt = Mathf.Abs(Mathf.RoundToInt(karmaSlider.value));
 			}
 			
-			foreach (var kt in karmaLabels)
+			karmaLabel.gameObject.SetActive(karmaSlider.gameObject.activeSelf);
+			if (karmaLabel.gameObject.activeSelf)
 			{
-				kt.gameObject.SetActive(karmaSlider.gameObject.activeSelf);
-				if (!kt.gameObject.activeSelf) continue;
-				kt.text = (karmaSlider.value > 0 ? "+" : karmaSlider.value < 0 ? "-" : "")
-				          + (karmaInt < 100 ? "0" : "")
-				          + (karmaInt < 10 ? "0" : "")
-				          + (karmaInt);
+				karmaLabel.text = (karmaSlider.value > 0 ? "+" : karmaSlider.value < 0 ? "-" : "")
+				                  + (karmaInt < 100 ? "0" : "")
+				                  + (karmaInt < 10 ? "0" : "")
+				                  + (karmaInt);
 			}
+
+			dodgeLabel.text = Mathf.RoundToInt(_assignedCharacter.CalculateDodgeChance() * 100) + "%";
 		}
 	}
 }

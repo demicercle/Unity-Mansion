@@ -22,6 +22,7 @@ public class ItemAnimation : MonoBehaviour
 	private bool displayOnLoot => triggerType == TriggerType.Loot;
 	private bool displayOnUse => triggerType == TriggerType.Use;
 
+	private ScreenFollowsWorld screenFollowsWorld;
 	private Inventory inventoryFrom, inventoryTo;
 	private RectTransform rectTransform;
 	private bool isClone;
@@ -45,6 +46,7 @@ public class ItemAnimation : MonoBehaviour
 		rectTransform = GetComponent<RectTransform>();
 		animation = GetComponent<Animation>();
 		animation.playAutomatically = false;
+		screenFollowsWorld = Utils.GetOrAddComponent<ScreenFollowsWorld>(gameObject);
 	}
 
 	private void OnDestroy()
@@ -108,6 +110,16 @@ public class ItemAnimation : MonoBehaviour
 		{
 			if (!inventoryTo)
 			{
+				screenFollowsWorld.SetWorldOffset(inventoryFrom.GetPosition());
+			}
+			else
+			{
+				screenFollowsWorld.SetWorldOffset(Vector3.Lerp(inventoryFrom.GetPosition(), inventoryTo.GetPosition(),
+					animation[animation.clip.name].normalizedTime));
+			}
+			
+			/*if (!inventoryTo)
+			{
 				rectTransform.anchoredPosition = GetScreenPosition(inventoryFrom.GetPosition());
 			}
 			else
@@ -115,7 +127,7 @@ public class ItemAnimation : MonoBehaviour
 				rectTransform.anchoredPosition = GetScreenPosition(
 					Vector3.Lerp( inventoryFrom.GetPosition(), inventoryTo.GetPosition(), animation[animation.clip.name].normalizedTime)
 				);
-			}
+			}*/
 		}
 	}
 

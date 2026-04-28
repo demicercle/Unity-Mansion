@@ -541,9 +541,10 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		debugString = "WaitAction " + action;
 		if(debugMode > 0) Debug.Log(">> WaitAction: " + this + " " + action);
-		yield return new WaitForSeconds(DefaultWaitSeconds);
+		yield return new WaitForSeconds(DefaultWaitSeconds*0.25f);
 		_selfCharacter.UseAction(action);
 		_selfCharacter.FloatingText(action.ToString());
+		yield return new WaitForSeconds(DefaultWaitSeconds*0.75f);
 	}
 
 	private IEnumerator WaitCharacterTalk(CharacterEntity npc)

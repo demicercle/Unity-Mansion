@@ -1189,10 +1189,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1024, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -1555,7 +1555,6 @@ GameObject:
   - component: {fileID: 4433584172233539935}
   - component: {fileID: 326150138956198090}
   - component: {fileID: 4676958143716694364}
-  - component: {fileID: 4617201834116914098}
   m_Layer: 5
   m_Name: CursorText
   m_TagString: Untagged
@@ -1682,34 +1681,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &4617201834116914098
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8020067975716767671}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 036eefbba252246489f9579d41dc84e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 4559085250805307426}
-  onButtonDisabled:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4676958143716694364}
-        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
-        m_MethodName: set_enableVertexGradient
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1 &8189241169061993423
 GameObject:
   m_ObjectHideFlags: 0

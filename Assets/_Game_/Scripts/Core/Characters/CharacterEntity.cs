@@ -193,6 +193,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public float GetDodgeChance() => Mathf.Clamp01(characterData.dodgeChance + GetRemainingMovePoints() * MovePointsToDodge);
 
+	
+	public int GetDodgeCount() => dodgeCount;
+
 	public float GetHitChance() => Mathf.Clamp01(currentWeapon.hitChance + GetRemainingMovePoints() * MovePointsToHit);
 
 	public enum AttackResult
@@ -219,36 +222,61 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return AttackResult.Undefined;
 	}
 
-	private float hitChanceResult;
-	public float CalculateHitChance(CharacterEntity target, bool canDodge)
+	private float calculatedHitChance;
+	private float targetRange;
+
+	public float CalculateHitChance(Vector3 targetPosition)
 	{
-		hitChanceResult = GetHitChance();
-		
-		if (canDodge)
+		if (IsUsingRangeWeapon())
+		{
+			targetRange = Vector3.Distance(GetCenterPosition(), targetPosition);
+			return GetHitChance() * currentWeapon.rangeHitCurve.Evaluate(Mathf.Clamp01(targetRange / currentWeapon.attackRange));
+		}
+		else
+		{
+			return GetHitChance();
+		}
+	}
+	
+	public float CalculateHitChance(CharacterEntity target)
+	{
+		calculatedHitChance = CalculateHitChance(target.GetCenterPosition());
+		if (!IsUsingRangeWeapon())
 		{
 			for(int i = 0; i < target.dodgeCount; i++)
-				hitChanceResult *= 1f - target.GetDodgeChance();
+				calculatedHitChance *= 1f - target.GetDodgeChance();
 		}
-
-		return hitChanceResult;
+		return calculatedHitChance;
+	}
+	
+	private float calculatedDodge;
+	public float CalculateDodgeChance()
+	{
+		calculatedDodge = 1f;
+		for( int i = 1; i <= dodgeCount; i++ )
+			calculatedDodge *= 1f - GetDodgeChance();
+		return 1f - calculatedDodge;
 	}
 	
 	public AttackResult TryHit(CharacterEntity target)
 	{
-		if (RollDice() > GetHitChance())
+		if (RollDice() > CalculateHitChance(target.GetCenterPosition()))
 		{
 			onAttackResult?.Invoke(this, target, AttackResult.Miss);
 			return AttackResult.Miss;
 		}
 
-		while (target.dodgeCount > 0)
+		if (!IsUsingRangeWeapon())
 		{
-			if(debugStats > 0) Debug.Log(target + " try dodge " + this + " dodgeCount=" + target.dodgeCount);
-			target.dodgeCount -= 1;
-			if (target.RollDice() < target.GetDodgeChance())
+			while (target.dodgeCount > 0)
 			{
-				onAttackResult?.Invoke(this, target, AttackResult.Dodge);
-				return AttackResult.Dodge;
+				if(debugStats > 0) Debug.Log(target + " try dodge " + this + " dodgeCount=" + target.dodgeCount);
+				target.dodgeCount -= 1;
+				if (target.RollDice() < target.GetDodgeChance())
+				{
+					onAttackResult?.Invoke(this, target, AttackResult.Dodge);
+					return AttackResult.Dodge;
+				}
 			}
 		}
 			
