@@ -2,12 +2,11 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-
+[RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
 {
 	[ReadOnly] public ItemData itemData;
 	[Min(1f)]public float speed = 1f;
-	public AnimationCurve lobCurve = AnimationCurve.Linear(0,0,1,0);
 
 	public UnityEvent onHit;
 	
@@ -15,9 +14,49 @@ public class Projectile : MonoBehaviour
 	private float time;
 	private float calculatedSpeed;
 	private Vector3 newPosition;
+	private Rigidbody rb;
+	private Projectile clone;
+	private bool destroysOnHit;
 
 	public void DestroyNow() => Destroy(gameObject);
-	
+
+	public void StopSimulate()
+	{
+		origin = destination = default;
+		
+		if(clone)
+			Destroy(clone.gameObject);
+	}
+
+	public void Simulate(Vector3 from, Vector3 to, float height)
+	{
+		if (!clone || Vector3.Distance(from, to) > 0.5f)
+		{
+			origin = from;
+			destination = to;
+			StopSimulate();
+		
+			clone = Instantiate(gameObject).GetComponent<Projectile>();
+			clone.transform.SetParent(null, true);
+			clone.rb.includeLayers = Layers.MaskProjectile;
+			clone.rb.excludeLayers = ~Layers.MaskProjectile;
+			rb.detectCollisions = true;
+			clone.destroysOnHit = true;
+			clone.rb.isKinematic = false;
+			clone.rb.linearVelocity = (to - from).normalized * clone.speed + Vector3.up * height;
+			Debug.Log(this + " Simulates " + rb.linearVelocity + "\n" + height + " " + from + " " + to );
+		}
+	}
+
+	private void OnCollisionEnter(Collision other)
+	{
+		if (destroysOnHit)
+		{
+			Debug.Log(this + " destroysOnHit " + other.collider);
+			DestroyNow();
+		}
+	}
+
 	public void Launch(Vector3 from, Vector3 to)
 	{
 		origin = from;
@@ -26,21 +65,10 @@ public class Projectile : MonoBehaviour
 		calculatedSpeed = speed / Utils.HDistance(from, to);
 	}
 
-	private void LateUpdate()
+	private void Awake()
 	{
-		newPosition = Vector3.Lerp(origin, destination, time)
-		              + Vector3.up * lobCurve.Evaluate(time);
-		transform.rotation = Quaternion.LookRotation((newPosition - transform.position).normalized);
-		transform.position = newPosition;
-		time += Time.deltaTime * calculatedSpeed;
-		if (time >= 1.0f)
-		{
-			enabled = false;
-			if (itemData)
-			{
-				itemData.UseOn(gameObject);
-			}
-			onHit?.Invoke();
-		}
+		rb = GetComponent<Rigidbody>();
+		rb.isKinematic = true;
+		rb.detectCollisions = false;
 	}
 }

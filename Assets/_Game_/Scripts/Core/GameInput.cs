@@ -412,6 +412,10 @@ public class GameInput : MonoBehaviour
 					if (itemToUse)
 					{
 						selectedCharacter.LookWorldPosition(hit.point, Time.deltaTime);
+						foreach (var projectileInHand in selectedCharacter.GetComponentsInChildren<Projectile>())
+						{
+							projectileInHand.Simulate(selectedCharacter.GetCenterPosition(), hit.point, selectedCharacter.GetProjectileHeight(hit.point, itemToUse.GetUseRange()));
+						}
 					}
 				}
 				//else if(isDebugMode) Debug.Log("no selected character");

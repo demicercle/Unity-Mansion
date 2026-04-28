@@ -790,4 +790,10 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		return (itemToUse = itemInHand) != null;
 	}
+
+	[SerializeField] private AnimationCurve projectileCurve = AnimationCurve.Linear(0f, 0f, 1f, 0f);
+	public float GetProjectileHeight(Vector3 worldPosition, float maxRange)
+	{
+		return projectileCurve.Evaluate(NavUtils.NavDistanceRoundY(GetCenterPosition(), worldPosition) / maxRange);
+	}
 }

@@ -16,6 +16,7 @@ public static class Layers
 	public static int MaskNavigation => LayerMask.GetMask("Ground");
 	public static int MaskInteraction => LayerMask.GetMask("Character", "Prop");
 	public static int MaskObstruction => LayerMask.GetMask("Ground", "Wall", "Fog");
+	public static int MaskProjectile => LayerMask.GetMask("Ground", "Wall", "Prop");
 }
 
 public static class Tags
