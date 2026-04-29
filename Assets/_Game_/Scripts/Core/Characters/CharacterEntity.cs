@@ -51,6 +51,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private const float MovePointsToHit = 0.01f;
 	
 	public static int debugStats { get; set; }
+	public static bool disableKarma { get; set; }
 	
 	public static List<CharacterEntity> AllCharacters => _allCharacters;
 
@@ -96,7 +97,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public void SetLuck(float newValue) => currentLuck = Mathf.Clamp(newValue, -1f, 1f);
 	public void SetKarma(float newValue) => currentKarma = Mathf.Clamp(newValue, -1f, 1f);
-	public bool HasKarma() => !noKarma;
+	public bool HasKarma() => !noKarma && !disableKarma;
 	
 	public float lastTimeRested { get; private set; }
 
@@ -197,7 +198,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public float RollDice()
 	{
 		var rolled = Random.Range(0f, 1f);
-		if (noKarma) return rolled;
+		if (!HasKarma()) return rolled;
 		
 		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
 		currentLuck = Mathf.Clamp(currentLuck, -1f, 1f);

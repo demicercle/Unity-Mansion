@@ -195,6 +195,12 @@ public class ConsoleCommands : MonoBehaviour
 		GameCanvas.Instance.gameLog.AppendLine(message);
 	}
 
+	[ConsoleMethod("no_karma", "")]
+	public static void NoKarma(int value)
+	{
+		CharacterEntity.disableKarma = value > 0;
+	}
+
 	[ConsoleMethod("no_detection", "")]
 	public static void NoDetection(int value)
 	{
@@ -320,17 +326,24 @@ public class ConsoleCommands : MonoBehaviour
 	
 	#endregion
 
-	[Min(0)] public int skipCommands;
-	public List<string> commandsOnStart = new List<string>();
+	public TextAsset batchCommands;
+	public List<string> executeAtStart = new List<string>();
 	
 	private void Start()
 	{
-		for (int i = skipCommands; i < commandsOnStart.Count; i++)
+		if(batchCommands)
+			executeAtStart.AddRange(batchCommands.text.Replace('\r', '\n').Split('\n'));
+
+		int i = 0;
+		while(i < executeAtStart.Count)
 		{
-			if (commandsOnStart[i].StartsWith("#") || commandsOnStart[i].StartsWith("//"))
+			if (string.IsNullOrWhiteSpace(executeAtStart[i]) || executeAtStart[i].StartsWith("#") || executeAtStart[i].StartsWith("//"))
+			{
+				executeAtStart.RemoveAt(i);
 				continue;
+			}
 			
-			DebugLogConsole.ExecuteCommand(commandsOnStart[i]);
+			DebugLogConsole.ExecuteCommand(executeAtStart[i++]);
 		}
 	}
 }
