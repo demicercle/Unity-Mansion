@@ -61,7 +61,7 @@ public class Destructible : MonoBehaviour, IAttackable
 
 		gameObject.layer = Layers.LayerIgnore;
 		
-		GameTurnManager.Instance.SetNavigationDirty();
+		NavmeshRebuilder.SetNavigationDirty();
 		
 		foreach (var rb in rigidbodies)
 		{

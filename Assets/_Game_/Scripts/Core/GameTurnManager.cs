@@ -102,6 +102,8 @@ public class GameTurnManager : MonoBehaviour
 		_instance = this;
 		Debug.Log(this + " Awake");
 
+		Utils.GetOrAddComponent<NavmeshRebuilder>(gameObject).isMainInstance = true;
+
 		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
 	}
 
@@ -139,8 +141,6 @@ public class GameTurnManager : MonoBehaviour
 			yield return new WaitForSeconds(postLoadDuration);
 		} while (SceneLoader.AnyInstanceActive);
 
-		navmeshDirty = true;
-		StartCoroutine(DoNavmeshRebuild());
 		yield return WaitNavigationDirty();
 		
 		Debug.Log(" loading scene complete");
@@ -394,12 +394,6 @@ public class GameTurnManager : MonoBehaviour
 		while (CharacterRoutines.AnyActiveRoutines()) ;
 	}
 
-	private bool navmeshDirty = true;
-	private bool isNavmeshRebuild = false;
-
-	public void SetNavigationDirty() => navmeshDirty = true;
-	public bool IsNavigationDirty() => navmeshDirty || isNavmeshRebuild;
-
 	private Coroutine WaitNavigationDirty()
 	{
 		return StartCoroutine(DoWaitNavigationDirty());
@@ -410,26 +404,7 @@ public class GameTurnManager : MonoBehaviour
 		do
 		{
 			yield return null;
-		} while (IsNavigationDirty());
-	}
-	
-	private IEnumerator DoNavmeshRebuild()
-	{
-		while (true)
-		{
-			if (!navmeshDirty) yield return null;
-			else
-			{
-				navmeshDirty = false;
-				isNavmeshRebuild = true;
-				foreach (var pr in AstarPath.active.ScanAsync())
-				{
-					if (NavmeshRebuilder.debugMode > 0) Debug.Log(this + " Scanning... " + pr.progress);
-					yield return null;
-				}
-				isNavmeshRebuild = false;
-			}
-		}
+		} while (NavmeshRebuilder.IsNavigationDirty());
 	}
 	
 	private void EndTurn()

@@ -608,7 +608,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
 			if(detection) detection.ClearAll();
-			GameTurnManager.Instance.SetNavigationDirty();
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();

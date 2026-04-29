@@ -80,7 +80,7 @@ public class CharacterAgent : MonoBehaviour
 				};
 			}
 
-			GameTurnManager.Instance.SetNavigationDirty();
+			NavmeshRebuilder.SetNavigationDirty();
 		}
 		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
 	}
@@ -410,7 +410,7 @@ public class CharacterAgent : MonoBehaviour
 		{
 			aiPath.canSearch = false;
 			yield return null;
-		} while (GameTurnManager.Instance.IsNavigationDirty());
+		} while (NavmeshRebuilder.IsNavigationDirty());
 		aiPath.canSearch = true;
 	}
 	

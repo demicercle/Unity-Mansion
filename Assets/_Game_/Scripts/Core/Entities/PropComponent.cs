@@ -201,7 +201,7 @@ public class PropComponent : MonoBehaviour
 		var wasEnabled = graphUpdate.enabled;
 		graphUpdate.enabled = GameTurnManager.Instance.IsPlayerTurn() || !GameTurnManager.Instance.IsTurnBasedMode();
 		if(wasEnabled != graphUpdate.enabled) 
-			GameTurnManager.Instance.SetNavigationDirty();
+			NavmeshRebuilder.SetNavigationDirty();
 	}
 	#endregion
 	
