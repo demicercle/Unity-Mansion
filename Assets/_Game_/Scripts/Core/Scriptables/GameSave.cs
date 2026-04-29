@@ -192,6 +192,13 @@ public class GameSave : ScriptableObject
 		String
 	}
 
+	public static bool IsDisabled()
+	{
+		return Current.disableSave;
+	}
+
+	[SerializeField] private bool disableSave = false;
+
 	[Min(0)] public int version;
 	public List<SavedLevel> savedLevels = new List<SavedLevel>();
 	public int selectedCharacter;

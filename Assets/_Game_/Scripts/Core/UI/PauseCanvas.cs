@@ -49,8 +49,8 @@ public class PauseCanvas : MonoBehaviour
 		ResumeGame();
 	}
 
-	private void Update()
+	private void LateUpdate()
 	{
-		toggleAllowSave.isOn = GameTurnManager.Instance.PlayerCanSave();
+		toggleAllowSave.isOn = !GameSave.IsDisabled() && GameTurnManager.Instance.PlayerCanSave();
 	}
 }
