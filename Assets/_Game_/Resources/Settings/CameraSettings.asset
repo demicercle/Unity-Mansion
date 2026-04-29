@@ -20,5 +20,6 @@ MonoBehaviour:
   panSpeed: 20
   zoomSpeed: 1
   rotationSpeed: {x: 1, y: 16}
-  orbitSpeed: {x: 3, y: 0}
-  orbitMaxSpeed: {x: 3, y: -1}
+  orbitSpeed: {x: 4, y: 0}
+  orbitMaxSpeed: {x: 2, y: -1}
+  orbitInertia: 6

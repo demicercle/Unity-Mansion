@@ -33,7 +33,8 @@ public class GameInput : MonoBehaviour
 	[SerializeField] private CircleRenderer navigationTarget;
 	[Header("Camera Control")]
 	[SerializeField] [Range(0f, 360f)] private float orbitSpeedAngle = 180f;
-	[SerializeField] [Min(0f)] private float orbitSpeedInput = 3.0f;
+
+	private float OrbitInertia => CameraSettings.DefaultSettings.orbitInertia;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
 	[SerializeField] private bool orbitCameraY = false;
 	[Header("Character Control")]
@@ -342,8 +343,8 @@ public class GameInput : MonoBehaviour
 			
 			if (orbitWithInputs)
 			{
-				orbitDelta.x = orbitSpeedInput <= 0 ? orbitAxis.x : Mathf.Lerp(orbitDelta.x, orbitAxis.x, Time.unscaledDeltaTime * orbitSpeedInput);
-				orbitDelta.y = orbitSpeedInput <= 0 ? orbitAxis.y :Mathf.Lerp(orbitDelta.y, orbitAxis.y, Time.unscaledDeltaTime * orbitSpeedInput);
+				orbitDelta.x = OrbitInertia <= 0 ? orbitAxis.x : Mathf.Lerp(orbitDelta.x, orbitAxis.x, Time.unscaledDeltaTime * OrbitInertia);
+				orbitDelta.y = OrbitInertia <= 0 ? orbitAxis.y :Mathf.Lerp(orbitDelta.y, orbitAxis.y, Time.unscaledDeltaTime * OrbitInertia);
 				
 				if(debugMode > 1)
 					Debug.Log(this + " orbitDelta=" + orbitDelta + " orbitAxis=" + orbitAxis);
