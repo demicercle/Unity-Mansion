@@ -777,11 +777,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	}
 
 	private ItemData itemInHand;
-	public void SetItemToUse(ItemData itemToUse)
+	public void SetItemToUse(ItemData itemToUse, bool verbose = false)
 	{
 		if (itemInHand != itemToUse)
 		{
-			Debug.Log(this + " SetItemToUse " + itemToUse);
+			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
 			itemInHand = itemToUse;
 			characterAnimation?.WeaponChanged();
 		}

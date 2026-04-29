@@ -661,7 +661,7 @@ public class CharacterRoutines : MonoBehaviour
 			anim.WaitEvents(EventType.Hit, EventType.Shoot);
 			do
 			{
-				_selfCharacter.SetItemToUse(itemToUse);
+				_selfCharacter.SetItemToUse(itemToUse, debugMode > 0);
 				yield return null;
 			} while (anim.IsWaitingEvents);
 			if(debugMode > 0) Debug.Log(this + " item Shoot or Hit");
@@ -677,7 +677,7 @@ public class CharacterRoutines : MonoBehaviour
 		itemToUse.LaunchProjectile(_selfCharacter.gameObject, position);
 		inventory.NotifyUsed(itemToUse, position);
 		yield return new WaitForSeconds(DefaultWaitSeconds); // to end anim?
-		_selfCharacter.SetItemToUse(null);
+		_selfCharacter.SetItemToUse(null, debugMode > 0);
 	}
 	#endregion
 

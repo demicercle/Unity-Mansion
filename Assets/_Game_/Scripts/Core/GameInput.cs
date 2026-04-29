@@ -643,7 +643,7 @@ public class GameInput : MonoBehaviour
 		{
 			if (itemToUse)
 			{
-				SetItemToUse(null); // right click RELEASED
+				SetItemToUse(null, true); // right click RELEASED
 			}
 			
 			else if (gameTurnManager.IsPlayerTurn())
@@ -680,7 +680,7 @@ public class GameInput : MonoBehaviour
 				if (selectedCharacter && itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject, out var objectTo))
 				{
 					selectedCharacter.Routines.AssignUseItemOn(itemToUse, objectTo);
-					SetItemToUse(null); // AssignUseItem On
+					SetItemToUse(null, false); // AssignUseItem On
 				}
 				
 				else if (hit.collider.TryGetComponent(out CharacterEntity clickedCharacter)) // click character
@@ -705,7 +705,7 @@ public class GameInput : MonoBehaviour
 					if (itemToUse.CanBeUsedAt(hit.point))
 					{
 						selectedCharacter.Routines.AssignUseItemAt(itemToUse, hit.point);
-						itemToUse = null; // clear off without setting the selected character
+						SetItemToUse(null, false);
 					}
 				}
 
@@ -731,7 +731,7 @@ public class GameInput : MonoBehaviour
 
 	private void SelectionChanged()
 	{
-		SetItemToUse(null);//selection changed
+		SetItemToUse(null, true);//selection changed
 		
 		if (CharacterSelection.TryGetSelectedCharacter(out var newSelected) && newSelected != selectedCharacter)
 		{
@@ -960,12 +960,14 @@ public class GameInput : MonoBehaviour
 
 	private ItemData itemToUse;
 	
-	public void SetItemToUse(ItemData itemData)
+	public void SetItemToUse(ItemData itemData, bool updateSelected)
 	{
-		itemToUse = itemData;
-		
-		if (selectedCharacter && !selectedCharacter.Routines.AnyActive())
-			selectedCharacter.SetItemToUse(itemToUse);
+		if (itemToUse != itemData)
+		{
+			if(debugMode >0 ) Debug.Log(this + " SetItemToUse " + itemData + " " + updateSelected);
+			itemToUse = itemData;
+			if(updateSelected) selectedCharacter?.SetItemToUse(itemToUse, debugMode > 0);
+		}
 	}
 
 	public ItemData GetItemToUse() => itemToUse;

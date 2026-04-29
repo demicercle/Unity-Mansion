@@ -9,6 +9,7 @@ public class Projectile : MonoBehaviour
 	[ReadOnly] public ItemData itemData;
 	[Min(1f)]public float gravityScale = 1f;
 	public int segments = 16;
+	public float detectCollisionsDelay = 0.25f;
 	[ReadOnly] public float calculatedDuration;
 
 	public UnityEvent onHit;
@@ -87,7 +88,6 @@ public class Projectile : MonoBehaviour
 		clone.rb.isKinematic = false;
 		clone.rb.linearVelocity = initialVelocity;
 		clone.rb.mass *= gravityScale;
-		clone.rb.detectCollisions = true;
 		clone.rb.includeLayers = Layers.MaskProjectile;
 		clone.rb.excludeLayers = ~clone.rb.includeLayers;
 		clone.calculatedDuration = duration;
@@ -98,6 +98,16 @@ public class Projectile : MonoBehaviour
 	{
 		rb = GetComponent<Rigidbody>();
 		StopSimulate();
+	}
+
+	private IEnumerator Start()
+	{
+		if (!rb.isKinematic)
+		{
+			rb.detectCollisions = false;
+			yield return new WaitForSeconds(detectCollisionsDelay);
+			rb.detectCollisions = true;
+		}
 	}
 }
 

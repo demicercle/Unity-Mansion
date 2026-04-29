@@ -194,6 +194,12 @@ public class ConsoleCommands : MonoBehaviour
 	{
 		GameCanvas.Instance.gameLog.AppendLine(message);
 	}
+
+	[ConsoleMethod("no_detection", "")]
+	public static void NoDetection(int value)
+	{
+		CharacterDetection.forceNoDetection = value > 0;
+	}
 	
 	#region DEBUG
 
