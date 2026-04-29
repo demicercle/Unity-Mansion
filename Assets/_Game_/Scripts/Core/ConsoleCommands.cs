@@ -206,7 +206,7 @@ public class ConsoleCommands : MonoBehaviour
 			{
 				foreach (var other in CharacterEntity.AllCharacters)
 				{
-					if (other.InParty() || other.IsDead()) continue;
+					if (other.InParty() || other.IsDead() || !other.IsCharacterRevealed()) continue;
 					other.TryGetComponent(out CharacterDetection characterDetection);
 					if (!characterDetection) continue;
 					characterDetection.SetDetected(partyChar, true);

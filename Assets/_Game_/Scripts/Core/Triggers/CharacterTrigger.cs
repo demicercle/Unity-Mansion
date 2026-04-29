@@ -18,6 +18,7 @@ public class CharacterTrigger : MonoBehaviour
 	[Min(-1)] [SerializeField] private int maxCount = 1;
 	
 	[SerializeField] private UnityEvent triggered;
+	[SerializeField] private string broadcastUp;
 	
 	public event System.Action<CharacterTrigger> onTriggered;
 
@@ -67,6 +68,7 @@ public class CharacterTrigger : MonoBehaviour
 		if (maxCount == 0) return;
 		triggerCount++;
 		onTriggered?.Invoke(this);
+		if(!string.IsNullOrEmpty(broadcastUp))SendMessageUpwards(broadcastUp, SendMessageOptions.DontRequireReceiver);
 		triggered.Invoke();
 		if (triggerCount > maxCount)
 		{

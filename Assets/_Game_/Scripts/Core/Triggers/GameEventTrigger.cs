@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 public class GameEventTrigger : MonoBehaviour
 {
-	public UnityEvent turnEnded, turnStarted;
+	public UnityEvent turnEnded, turnStarted, turnChanged;
 	public UnityEvent onFightStarts, onFightEnds;
 
 	GameTurnManager _gameTurnManager;
@@ -29,7 +29,16 @@ public class GameEventTrigger : MonoBehaviour
 	{
 		(value ? onFightStarts : onFightEnds)?.Invoke();
 	}
+
+	void TurnEnded()
+	{
+		turnEnded?.Invoke();
+		turnChanged?.Invoke();
+	}
 	
-	void TurnEnded() => turnEnded?.Invoke();
-	void TurnStarted() =>  turnStarted?.Invoke();
+	void TurnStarted()
+	{ 
+		turnStarted?.Invoke();
+		turnChanged?.Invoke();
+	}
 }

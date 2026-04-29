@@ -21,7 +21,6 @@ public class PropComponent : MonoBehaviour
 	[SerializeField] private CursorType cursorType = CursorType.OpenDoor;
 	[SerializeField] private CharacterAction consumeAction = CharacterAction.Interact;
 	[SerializeField] private bool saveProp = false;
-	[SerializeField] private GraphUpdateScene graphUpdate; 
 	
 	[Header("Trigger")]
 	[SerializeField] private bool onlyOnce;
@@ -152,15 +151,11 @@ public class PropComponent : MonoBehaviour
 		defaultLayer = gameObject.layer;
 		selfCollider = GetComponent<Collider>();
 		allInstances.Add(this);
-		GameTurnManager.Instance.onTurnEnded += UpdateObstacle;
-		GameTurnManager.Instance.onTurnStarted += UpdateObstacle;
 	}
 
 	private void OnDestroy()
 	{
 		allInstances.Remove(this);
-		GameTurnManager.Instance.onTurnEnded -= UpdateObstacle;
-		GameTurnManager.Instance.onTurnStarted -= UpdateObstacle;
 	}
 
 	private IEnumerator Start()
@@ -193,15 +188,6 @@ public class PropComponent : MonoBehaviour
 
 		Debug.Log("yield " + triggerDelay);
 		yield return new WaitForSeconds(triggerDelay);
-	}
-
-	private void UpdateObstacle()
-	{
-		if (!graphUpdate) return;
-		var wasEnabled = graphUpdate.enabled;
-		graphUpdate.enabled = GameTurnManager.Instance.IsPlayerTurn() || !GameTurnManager.Instance.IsTurnBasedMode();
-		if(wasEnabled != graphUpdate.enabled) 
-			NavmeshRebuilder.SetNavigationDirty();
 	}
 	#endregion
 	

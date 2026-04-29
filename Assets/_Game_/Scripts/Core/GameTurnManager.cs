@@ -102,7 +102,7 @@ public class GameTurnManager : MonoBehaviour
 		_instance = this;
 		Debug.Log(this + " Awake");
 
-		Utils.GetOrAddComponent<NavmeshRebuilder>(gameObject).isMainInstance = true;
+		Utils.GetOrAddComponent<NavmeshRebuilder>(gameObject); // "isMainInstance"
 
 		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
 	}

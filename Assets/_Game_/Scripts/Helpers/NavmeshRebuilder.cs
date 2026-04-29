@@ -12,11 +12,15 @@ public class NavmeshRebuilder : MonoBehaviour
 
 	public static void SetNavigationDirty() => navmeshDirty = true;
 	public static bool IsNavigationDirty() => navmeshDirty || isNavmeshRebuild;
-	
-	public bool isMainInstance { get; set; }
 
+	private bool isMainInstance;
 	private static bool navmeshDirty;
 	private static bool isNavmeshRebuild;
+
+	public void SetDirty()
+	{
+		SetNavigationDirty();
+	}
 	
 	private void OnEnable()
 	{
@@ -30,6 +34,7 @@ public class NavmeshRebuilder : MonoBehaviour
 
 	private IEnumerator Start()
 	{
+		isMainInstance = GetComponent<GameTurnManager>();
 		if(!isMainInstance)
 			yield break;
 
