@@ -20,6 +20,7 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	public Vector3 GetPosition() => transform.position;
 	public float GetRadius() => radius;
+	public float GetHeight() => radius;
 
 	public bool damagedWithRangeWeapons;
 	public UnityEvent takeDamage;

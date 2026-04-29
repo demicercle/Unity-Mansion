@@ -7,6 +7,7 @@ using UnityEngine;
 public interface IAttackable
 {
 	Vector3 GetPosition();
+	float GetHeight();
 	float GetRadius();
 	void TakeDamage(DamageInfo damageInfo, object instigator);
 }
@@ -106,6 +107,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public void FloatingText_Cant() // TODO: in character animation
 	{
+		Debug.Log(this + " Cant!");
 		if(IsCurrentTurn()) FloatingText(!HasActions() ? "No actions!" : "Can't");
 	}
 	
@@ -649,11 +651,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool LOSCheck(IAttackable other)
 	{
 		var start = GetEyesPosition();
-		var end = other.GetPosition();
+		return LOSCheck(start, other.GetPosition())
+		       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight());
+	}
+
+	public bool LOSCheck(Vector3 start, Vector3 end)
+	{
 		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
 		{
 			if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
-			Debug.Log(this + " LOSCheck " + other + " collide " + hit.collider);
+			if(CharacterRoutines.debugMode > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
 			return false;
 		}
 
