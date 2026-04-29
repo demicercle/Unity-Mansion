@@ -81,7 +81,7 @@ public class DiceLauncher : MonoBehaviour
 			}
 
 			var result = DicePool.LastResult;
-			var index = Mathf.RoundToInt(result * numberSprites.Length);
+			var index = (int)Mathf.Lerp(0, 19, result);
 			spriteImage.sprite = numberSprites[index];
 			if(DicePool.debugMode>0) Debug.Log(this + " #" + animCount + " animated, index=" + index + " for result=" + result);
 			animCount--;
