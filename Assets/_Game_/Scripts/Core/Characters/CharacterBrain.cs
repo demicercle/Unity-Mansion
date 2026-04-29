@@ -155,6 +155,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			{
 				SaveTargetPosition();
 				
+				yield return StartCoroutine(YieldTryFindNewTarget());
 				yield return null;
 				
 			} while (CharacterRoutines.AnyActiveRoutines());
@@ -281,6 +282,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			_chaseCharacter = newTarget;
 			Debug.Log(this + " gets new target: " + _chaseCharacter);
 			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red, 1.0f);
+			_selfCharacter.Routines.StopAllRoutines();
 			yield return CharacterRoutines.DoLookPositionOn(_selfCharacter, newTarget.GetPosition());
 		}
 	}
