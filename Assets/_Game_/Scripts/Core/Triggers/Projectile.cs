@@ -7,9 +7,9 @@ using UnityEngine.Events;
 public class Projectile : MonoBehaviour
 {
 	[ReadOnly] public ItemData itemData;
-	[Min(1f)]public float gravityScale = 1f;
+	[Min(1f)] public float gravityScale = 1f;
 	public int segments = 16;
-	public float detectCollisionsDelay = 0.25f;
+	public float detectCollisionsDelay = 0.5f;
 	[ReadOnly] public float calculatedDuration;
 
 	public UnityEvent onHit;
@@ -88,8 +88,6 @@ public class Projectile : MonoBehaviour
 		clone.rb.isKinematic = false;
 		clone.rb.linearVelocity = initialVelocity;
 		clone.rb.mass *= gravityScale;
-		clone.rb.includeLayers = Layers.MaskProjectile;
-		clone.rb.excludeLayers = ~clone.rb.includeLayers;
 		clone.calculatedDuration = duration;
 		return true;
 	}
@@ -104,9 +102,12 @@ public class Projectile : MonoBehaviour
 	{
 		if (!rb.isKinematic)
 		{
-			rb.detectCollisions = false;
-			yield return new WaitForSeconds(detectCollisionsDelay);
 			rb.detectCollisions = true;
+			rb.includeLayers = Layers.MaskNavigation;
+			rb.excludeLayers = ~rb.includeLayers;
+			yield return new WaitForSeconds(detectCollisionsDelay);
+			rb.includeLayers = Layers.MaskProjectile;
+			rb.excludeLayers = ~rb.includeLayers;
 		}
 	}
 }

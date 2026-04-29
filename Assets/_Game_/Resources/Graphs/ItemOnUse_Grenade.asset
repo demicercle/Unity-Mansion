@@ -1,58 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8358213146585325149
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 900c231c1264460896f5ff5fde06f796, type: 3}
-  m_Name: Random Range
-  m_EditorClassIdentifier: Assembly-CSharp::NodeRandomRange
-  graph: {fileID: 11400000}
-  position: {x: -440, y: -8}
-  ports:
-    keys:
-    - _min
-    - _max
-    - _result
-    values:
-    - _fieldName: _min
-      _node: {fileID: -8358213146585325149}
-      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _max
-      _node: {fileID: -8358213146585325149}
-      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _result
-      _node: {fileID: -8358213146585325149}
-      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections:
-      - fieldName: _damage
-        node: {fileID: 4832534939016810699}
-        reroutePoints: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  _min: 7
-  _max: 9
-  _result: 1.1526892
 --- !u!114 &-6631334845870373768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100,9 +47,6 @@ MonoBehaviour:
         PublicKeyToken=null
       connections:
       - fieldName: _in
-        node: {fileID: -2629015613768665479}
-        reroutePoints: []
-      - fieldName: _in
         node: {fileID: 337713039080081053}
         reroutePoints: []
       - fieldName: _in
@@ -115,7 +59,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _delay: 1.5
+  _delay: 3
 --- !u!114 &-4956880278572576541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,7 +73,7 @@ MonoBehaviour:
   m_Name: Destroy Script
   m_EditorClassIdentifier: Assembly-CSharp::NodeDestroyScript
   graph: {fileID: 11400000}
-  position: {x: -88, y: 104}
+  position: {x: -56, y: 104}
   ports:
     keys:
     - _in
@@ -158,7 +102,7 @@ MonoBehaviour:
       _dynamic: 0
   _delay: 0.1
   destroyGameObject: 1
---- !u!114 &-2629015613768665479
+--- !u!114 &-3092285336613203082
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -167,38 +111,50 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
-  m_Name: Debug Log
-  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
+  m_Script: {fileID: 11500000, guid: 2cd995d035ec405f8205787a4423db96, type: 3}
+  m_Name: Launch Dices
+  m_EditorClassIdentifier: Assembly-CSharp::NodeLaunchDices
   graph: {fileID: 11400000}
-  position: {x: -104, y: -328}
+  position: {x: -424, y: -40}
   ports:
     keys:
-    - _in
-    - message
+    - _count
+    - _faces
+    - _result
     values:
-    - _fieldName: _in
-      _node: {fileID: -2629015613768665479}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _out
-        node: {fileID: -6631334845870373768}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: message
-      _node: {fileID: -2629015613768665479}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+    - _fieldName: _count
+      _node: {fileID: -3092285336613203082}
+      _typeQualifiedName: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
         PublicKeyToken=b77a5c561934e089
       connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  message: BOOM!
+    - _fieldName: _faces
+      _node: {fileID: -3092285336613203082}
+      _typeQualifiedName: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _result
+      _node: {fileID: -3092285336613203082}
+      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: _damage
+        node: {fileID: 4832534939016810699}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _count: 3
+  _faces: 6
+  _result: 3
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,13 +169,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
   nodes:
   - {fileID: 7167503854543085475}
-  - {fileID: -2629015613768665479}
   - {fileID: -6631334845870373768}
-  - {fileID: 7961756573820633797}
   - {fileID: 337713039080081053}
   - {fileID: -4956880278572576541}
   - {fileID: 4832534939016810699}
-  - {fileID: -8358213146585325149}
+  - {fileID: -3092285336613203082}
 --- !u!114 &337713039080081053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -311,7 +265,7 @@ MonoBehaviour:
         PublicKeyToken=b77a5c561934e089
       connections:
       - fieldName: _result
-        node: {fileID: -8358213146585325149}
+        node: {fileID: -3092285336613203082}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
@@ -328,8 +282,8 @@ MonoBehaviour:
       _dynamic: 0
   _position:
     findName: 
-  _damage: 1.1526892
-  _radius: 3
+  _damage: 8.501692
+  _radius: 4
   _fallOff:
     serializedVersion: 2
     m_Curve:
@@ -344,7 +298,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 1
-      value: 0
+      value: 0.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -378,53 +332,9 @@ MonoBehaviour:
         PublicKeyToken=null
       connections:
       - fieldName: _in
-        node: {fileID: 7961756573820633797}
-        reroutePoints: []
-      - fieldName: _in
         node: {fileID: -6631334845870373768}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
---- !u!114 &7961756573820633797
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
-  m_Name: Debug Log
-  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
-  graph: {fileID: 11400000}
-  position: {x: -424, y: -328}
-  ports:
-    keys:
-    - _in
-    - message
-    values:
-    - _fieldName: _in
-      _node: {fileID: 7961756573820633797}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _out
-        node: {fileID: 7167503854543085475}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: message
-      _node: {fileID: 7961756573820633797}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  message: Grenade!
