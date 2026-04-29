@@ -168,7 +168,8 @@ public class GameInput : MonoBehaviour
 		inputSystem.Player.SelectNext.performed += OnInputSelectNext;
 		inputSystem.Player.FocusSelected.performed += OnInputFocusSelected;
 		inputSystem.Player.ToggleGroup.performed += OnInputToggleGroup;
-		inputSystem.Player.Action_Run.performed += OnInputAction_Run; // TODO other actions inputs?
+		inputSystem.Player.Action_Run.performed += OnInputAction_Run;
+		inputSystem.Player.Action_Defend.performed += OnInputAction_Defend;
 		
 		CharacterSelection.selectionChanged += SelectionChanged;
 
@@ -199,6 +200,7 @@ public class GameInput : MonoBehaviour
 		inputSystem.Player.FocusSelected.performed -= OnInputFocusSelected;
 		inputSystem.Player.ToggleGroup.performed -= OnInputToggleGroup;
 		inputSystem.Player.Action_Run.performed -= OnInputAction_Run;
+		inputSystem.Player.Action_Defend.performed -= OnInputAction_Defend;
 		
 		CharacterSelection.selectionChanged -= SelectionChanged;
 
@@ -289,7 +291,8 @@ public class GameInput : MonoBehaviour
 				gameTurnManager.TryEndPlayerTurn();
 			}
 			
-			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(0);
+			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.
+				SelectCharacterAt(0);
 			if (inputSystem.Player.SelectParty2.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(1);
 			if (inputSystem.Player.SelectParty3.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(2);
 		
@@ -564,11 +567,14 @@ public class GameInput : MonoBehaviour
 
 	private void OnInputAction_Run(CallbackContext ctx)
 	{
-		if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
-		{
-			if(selectedCharacter.CanUseAction(CharacterAction.Run))
-				selectedCharacter.Routines.AssignRunAction();
-		}
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Run))
+				selectedCharacter.Routines.AssignWaitAction(CharacterAction.Run);
+	}
+	
+	private void OnInputAction_Defend(CallbackContext ctx)
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Defend))
+			selectedCharacter.Routines.AssignWaitAction(CharacterAction.Defend);
 	}
 	
 	private void OnInputCameraZoom(CallbackContext ctx)
@@ -942,6 +948,19 @@ public class GameInput : MonoBehaviour
 
 	public bool IsBlocked() => currentCursor == CursorType.Blocked;
 
+	public bool WantsToAttack(out CharacterEntity target)
+	{
+		if (currentCursor == CursorType.Attack)
+		{
+			return lastMouseOverObject.TryGetComponent(out target);
+		}
+
+		target = null;
+		return false;
+	}
+
+	public CharacterEntity GetSelectedCharacter() => selectedCharacter;
+	
 	public Vector3 GetMousePosition()
 	{
 		return mousePosition;

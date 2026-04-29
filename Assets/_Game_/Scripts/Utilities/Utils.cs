@@ -313,8 +313,25 @@ public static class Utils
 		aiPathPosition.y = dest.y;
 		return Vector3.Distance(aiPathPosition, dest);
 	}
-	
-	
+
+	public static float FlatDot(Vector3 dir1, Vector3 dir2)
+	{
+		dir1.y = dir2.y;
+		return  Vector3.Dot(dir1, dir2);
+	}
+
+	public static string IntToStringWithZero(int value)
+	{
+		return RepeatChar('0', Mathf.FloorToInt((float)value / 10f)) + value.ToString();
+	}
+
+	private static string tempStr;
+	public static string RepeatChar(char c, int count)
+	{
+		tempStr = "";
+		while(count-- > 0) tempStr += c;
+		return tempStr;
+	}
 }
 
 public static class NavUtils

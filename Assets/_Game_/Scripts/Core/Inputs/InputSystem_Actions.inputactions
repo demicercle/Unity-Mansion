@@ -133,6 +133,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Action_Defend",
+                    "type": "Button",
+                    "id": "6b7a97a1-5d89-49d7-8c8f-5b2c7465c924",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "SelectNext",
                     "type": "Button",
                     "id": "9942e7c4-eef1-479b-ac1e-b7d17afd92b7",
@@ -665,6 +674,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Action_Run",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9a6d7b2c-46d4-4570-8d4f-ed88740e8bd1",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Action_Defend",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

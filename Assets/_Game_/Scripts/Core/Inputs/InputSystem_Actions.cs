@@ -219,6 +219,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Action_Defend"",
+                    ""type"": ""Button"",
+                    ""id"": ""6b7a97a1-5d89-49d7-8c8f-5b2c7465c924"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""SelectNext"",
                     ""type"": ""Button"",
                     ""id"": ""9942e7c4-eef1-479b-ac1e-b7d17afd92b7"",
@@ -751,6 +760,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Action_Run"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9a6d7b2c-46d4-4570-8d4f-ed88740e8bd1"",
+                    ""path"": ""<Keyboard>/g"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Action_Defend"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1484,6 +1504,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
         m_Player_EndTurn = m_Player.FindAction("EndTurn", throwIfNotFound: true);
         m_Player_Action_Run = m_Player.FindAction("Action_Run", throwIfNotFound: true);
+        m_Player_Action_Defend = m_Player.FindAction("Action_Defend", throwIfNotFound: true);
         m_Player_SelectNext = m_Player.FindAction("SelectNext", throwIfNotFound: true);
         m_Player_FocusSelected = m_Player.FindAction("FocusSelected", throwIfNotFound: true);
         m_Player_Orbit = m_Player.FindAction("Orbit", throwIfNotFound: true);
@@ -1599,6 +1620,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Sprint;
     private readonly InputAction m_Player_EndTurn;
     private readonly InputAction m_Player_Action_Run;
+    private readonly InputAction m_Player_Action_Defend;
     private readonly InputAction m_Player_SelectNext;
     private readonly InputAction m_Player_FocusSelected;
     private readonly InputAction m_Player_Orbit;
@@ -1674,6 +1696,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Action_Run".
         /// </summary>
         public InputAction @Action_Run => m_Wrapper.m_Player_Action_Run;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Action_Defend".
+        /// </summary>
+        public InputAction @Action_Defend => m_Wrapper.m_Player_Action_Defend;
         /// <summary>
         /// Provides access to the underlying input action "Player/SelectNext".
         /// </summary>
@@ -1774,6 +1800,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Action_Run.started += instance.OnAction_Run;
             @Action_Run.performed += instance.OnAction_Run;
             @Action_Run.canceled += instance.OnAction_Run;
+            @Action_Defend.started += instance.OnAction_Defend;
+            @Action_Defend.performed += instance.OnAction_Defend;
+            @Action_Defend.canceled += instance.OnAction_Defend;
             @SelectNext.started += instance.OnSelectNext;
             @SelectNext.performed += instance.OnSelectNext;
             @SelectNext.canceled += instance.OnSelectNext;
@@ -1851,6 +1880,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Action_Run.started -= instance.OnAction_Run;
             @Action_Run.performed -= instance.OnAction_Run;
             @Action_Run.canceled -= instance.OnAction_Run;
+            @Action_Defend.started -= instance.OnAction_Defend;
+            @Action_Defend.performed -= instance.OnAction_Defend;
+            @Action_Defend.canceled -= instance.OnAction_Defend;
             @SelectNext.started -= instance.OnSelectNext;
             @SelectNext.performed -= instance.OnSelectNext;
             @SelectNext.canceled -= instance.OnSelectNext;
@@ -2273,6 +2305,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnAction_Run(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Action_Defend" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAction_Defend(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "SelectNext" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

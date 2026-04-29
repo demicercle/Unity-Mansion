@@ -8,6 +8,7 @@ public class ScreenFollowsWorld : MonoBehaviour
 	public Camera mainCamera;
 	public Transform target;
 	public Vector3 worldOffset;
+	public Vector2 screenSize;
 
 	public ScreenFollowsWorld SetTarget(Transform newTarget)
 	{
@@ -30,6 +31,15 @@ public class ScreenFollowsWorld : MonoBehaviour
 
 	private void Update()
 	{
-		if(target) rectTransform.anchoredPosition = mainCamera.WorldToScreenPoint(target.position + worldOffset);
+		screenSize = GameCanvas.Instance.referenceResolution;
+		
+		if (target)
+		{
+			rectTransform.anchoredPosition = mainCamera.WorldToViewportPoint(target.position + worldOffset) * screenSize;
+		}
+		else
+		{
+			rectTransform.anchoredPosition = mainCamera.WorldToViewportPoint(worldOffset) * screenSize;
+		}
 	}
 }

@@ -47,6 +47,7 @@ public class GameLog : MonoBehaviour
 		CharacterEntity.onRemovedFromParty += CharacterRemovedFromParty;
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
 		CharacterEntity.onAnyCharacterHealed += OnAnyCharacterHealed;
+		CharacterEntity.onAttackResult += OnAttackResult;
 		Inventory.onAnyItemAdded += OnItemAdded;
 		Inventory.onAnyItemRemoved += OnItemRemoved;
 	}
@@ -60,10 +61,22 @@ public class GameLog : MonoBehaviour
 		CharacterEntity.onRemovedFromParty -= CharacterRemovedFromParty;
 		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
 		CharacterEntity.onAnyCharacterHealed -= OnAnyCharacterHealed;
+		CharacterEntity.onAttackResult -= OnAttackResult;
 		Inventory.onAnyItemAdded -= OnItemAdded;
 		Inventory.onAnyItemRemoved -= OnItemRemoved;
 
 		Clear();
+	}
+
+	private void OnAttackResult(CharacterEntity arg1, IAttackable arg2, CharacterEntity.AttackResult arg3)
+	{
+		 if (arg2 is CharacterEntity)
+		{
+			AppendLine(GetLocalizedLine(18, "<CHARACTER> attacks <TARGET>: <RESULT>")
+				.Replace("<CHARACTER>", arg1.GetDisplayName())
+				.Replace("<TARGET>", (arg2 as CharacterEntity).GetDisplayName())
+				.Replace("<RESULT>", LanguageSettings.Main.AttackResult(arg3)));
+		}
 	}
 
 	private void CharacterAddedToParty(CharacterEntity character)
@@ -107,11 +120,11 @@ public class GameLog : MonoBehaviour
 			.Replace("<ACTION>", action.ToString())); // TODO Localization "CharacterAction"
 	}
 
-	private void OnAnyCharacterDamaged(CharacterEntity character, float amount, object objectFrom)
+	private void OnAnyCharacterDamaged(CharacterEntity character, DamageInfo damageInfo, object objectFrom)
 	{
 		AppendLine(GetLocalizedLine(15, "<CHARACTER> receives <DAMAGE> damage(s)")
 			.Replace("<CHARACTER>", character.GetDisplayName())
-			.Replace("<DAMAGE>", Mathf.CeilToInt(amount).ToString()));
+			.Replace("<DAMAGE>", Mathf.CeilToInt(damageInfo.amount).ToString()));
 	}
 
 	private void OnAnyCharacterHealed(CharacterEntity character, float amount)

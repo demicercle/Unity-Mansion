@@ -13,8 +13,8 @@ public class GameTurnManager : MonoBehaviour
 	
 	public static int debugMode { get; set; }
 
-	public System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
-	public System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
+	public event System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
+	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool firstTurnIsPlayer = true;
@@ -51,13 +51,14 @@ public class GameTurnManager : MonoBehaviour
 										return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
 									});
 	
-	public bool SelectedCharacterCanUseRunAction() =>
+	public bool SelectedCharacterCanUseAction(CharacterAction action) =>
 		!CharacterRoutines.AnyActiveRoutines() && IsPlayerTurn() 
 		                                       && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
-		                                       && selectedCharacter.CanUseAction(CharacterAction.Run);
+		                                       && selectedCharacter.CanUseAction(action);
 
 	public bool SelectedCharacterIsControllable() => IsPlayerTurn() 
 	                                                 && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
+	                                                 && selectedCharacter.IsCurrentTurn()
 	                                                 && selectedCharacter.IsControllableByPlayer();
 	
 	public int GetCurrentTurn() => currentTurn;

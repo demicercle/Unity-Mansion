@@ -54,10 +54,10 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToWaypoint " + waypoint + " canUseRunAction=" + canUseRunAction);
 		StartNewRoutine(WaitMoveCharacterToWaypoint(waypoint, canUseRunAction, onComplete));
 	}
-	public void AssignRunAction()
+	public void AssignWaitAction(CharacterAction waitAction)
 	{
-		if(debugMode > 0) Debug.Log(this + " AssignRunAction ");
-		StartNewRoutine(WaitAction(CharacterAction.Run));
+		if(debugMode > 0) Debug.Log(this + " AssignWaitAction " + waitAction);
+		StartNewRoutine(WaitAction(waitAction));
 	}
 	public void AssignLookPosition(Vector3 lookPosition)
 	{
@@ -351,11 +351,29 @@ public class CharacterRoutines : MonoBehaviour
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
-		target.TakeDamage(new DamageInfo()
+
+		switch (_selfCharacter.TryHit(target))
 		{
-			amount = _selfCharacter.GetLastAttackDamage(),
-			isRanged =  _selfCharacter.IsUsingRangeWeapon()
-		}, _selfCharacter);
+			case CharacterEntity.AttackResult.Miss:
+				Debug.Log(this + " AttackResult.Miss " + target);
+				//GameCanvas.Instance.FloatingText(_selfCharacter, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
+				break;
+			
+			case CharacterEntity.AttackResult.Dodge:
+				Debug.Log(this + " AttackResult.Dodge by " + target);
+				//GameCanvas.Instance.FloatingText(target, LanguageSettings.GetSettings(DialogFiles.main).GetLine(11, "dodge!"));
+				break;
+			
+			case CharacterEntity.AttackResult.Hit:
+				Debug.Log(this + " AttackResult.Hit " + target);
+				var damageInfo = new DamageInfo()
+				{
+					amount = _selfCharacter.GetLastAttackDamage(),
+					isRanged = _selfCharacter.IsUsingRangeWeapon()
+				};
+				target.TakeDamage(damageInfo, _selfCharacter);
+				break;
+		}
 
 		if(debugMode > 0) Debug.Log("attack ends");
 	}
@@ -523,9 +541,10 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		debugString = "WaitAction " + action;
 		if(debugMode > 0) Debug.Log(">> WaitAction: " + this + " " + action);
-		yield return new WaitForSeconds(DefaultWaitSeconds);
+		yield return new WaitForSeconds(DefaultWaitSeconds*0.25f);
 		_selfCharacter.UseAction(action);
 		_selfCharacter.FloatingText(action.ToString());
+		yield return new WaitForSeconds(DefaultWaitSeconds*0.75f);
 	}
 
 	private IEnumerator WaitCharacterTalk(CharacterEntity npc)

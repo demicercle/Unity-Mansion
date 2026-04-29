@@ -15,3 +15,4 @@ Turn Ended
 <CHARACTER> receives <DAMAGE> damage(s)
 <CHARACTER> uses action <ACTION>
 <CHARACTER> healed: <AMOUNT>
+<CHARACTER> attacks <TARGET>: <RESULT>

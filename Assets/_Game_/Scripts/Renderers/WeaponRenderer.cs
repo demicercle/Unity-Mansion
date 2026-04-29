@@ -28,9 +28,15 @@ public class WeaponRenderer : MonoBehaviour
                 shootLine.useWorldSpace = true;
                 shootLine.positionCount = 2;
                 shootLine.SetPosition(0, shootLine.transform.position);
-                shootLine.SetPosition(1, shootLine.transform.position
+                
+                var lastAttackTarget = selfCharacter.GetLastAttackTarget();
+                if(lastAttackTarget != null) 
+                    shootLine.SetPosition(1, lastAttackTarget.GetPosition());
+                else 
+                    shootLine.SetPosition(1, shootLine.transform.position                              // TODO shoot forward, broken
                                          + Vector3.Scale(new Vector3(1,0,1), shootLine.transform.forward) 
                                          * (selfCharacter.GetLastAttackTarget().GetPosition() - selfCharacter.GetPosition()).magnitude);
+                
                 shootLine.GetComponent<Animation>()?.Play();
             }
         }

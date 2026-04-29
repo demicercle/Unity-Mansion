@@ -12,13 +12,13 @@ public struct TextReference
 		return this;
 	}
 
-	public TextReference SetWorldPosition(Vector3 position)
+	public TextReference SetWorldPosition(Vector3 position, Vector2 screenSize)
 	{
-		GetGameObject().transform.position = Camera.main.WorldToScreenPoint(position);
+		GetGameObject().transform.position = Camera.main.WorldToViewportPoint(position) * screenSize;
 		return this;
 	}
 
-	public TextReference SetFollows(Transform target, Vector3 worldOffset)
+	public TextReference SetFollows(Transform target, Vector3 worldOffset,  Vector2 screenSize)
 	{
 		Utils.GetOrAddComponent<ScreenFollowsWorld>(GetGameObject())
 			.SetTarget(target)

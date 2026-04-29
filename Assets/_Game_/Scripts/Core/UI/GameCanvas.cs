@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using IngameDebugConsole;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
-
+[RequireComponent(typeof(CanvasScaler))]
 public class GameCanvas : MonoBehaviour
 {
 	private static GameCanvas instance;
@@ -25,17 +22,21 @@ public class GameCanvas : MonoBehaviour
 	[Header("Viewport")]
 	[SerializeField] private RectTransform viewportRect;
 	[SerializeField] private RawImage viewportOverlay;
-	[Header("Buttons")]
+	[Header("Toggles")]
 	[SerializeField] private Toggle toggleGroupMode;
 	[SerializeField] private Toggle toggleTurnBased;
 	[SerializeField] private Toggle toggleActions;
-	[SerializeField] private Button button_actionRun;
-	[SerializeField] private Button button_endTurn;
+	[Header("Buttons")]
+	[SerializeField] private Button buttonEndTurn;
+	[SerializeField] private Button buttonActionRun;
+	[SerializeField] private Button buttonActionDefend;
 	[Header("Portraits")]
 	[SerializeField] private CharacterPortrait[] portraits;
 	[Header("Inventory")]
 	[SerializeField] private InventoryPanel inventoryPanel;
 	[SerializeField] private RawImage itemCursorImage;
+	[Header("Cursor")] 
+	[SerializeField] private TMP_Text cursorText;
 
 	[Space] [Header("Animation")]
 	[SerializeField] [Tooltip("Blend Weight Layer1")] private List<Animator> endTurnAnimators;
@@ -50,18 +51,39 @@ public class GameCanvas : MonoBehaviour
 	
 	//public bool mouseOverViewport { get; private set; }
 
-	public TextReference FloatingText(Object obj, string label)
+	public Vector2 referenceResolution
+	{
+		get
+		{
+			if (canvasScaler.screenMatchMode == CanvasScaler.ScreenMatchMode.MatchWidthOrHeight)
+			{
+				return canvasScaler.referenceResolution;
+			}
+			else
+			{
+				return new Vector2(Screen.width, Screen.height);
+			}
+		}
+	}
+
+	public TextReference FloatingText(object obj, string label)
 	{
 		if (obj is CharacterEntity)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetFollows((obj as CharacterEntity).transform, (obj as CharacterEntity).GetCenterPosition(true));
+				.SetFollows((obj as CharacterEntity).transform, (obj as CharacterEntity).GetCenterPosition(true), referenceResolution);
+		}
+
+		if (obj is IAttackable)
+		{
+			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
+				.SetWorldPosition((obj as IAttackable).GetPosition(), referenceResolution);
 		}
 		
 		if (obj is Component)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetFollows((obj as Component).transform, default);
+				.SetFollows((obj as Component).transform, default, referenceResolution);
 		}
 		
 		Debug.LogWarning(this + " invalid floating text object: " + obj + " label=" + label);
@@ -70,7 +92,7 @@ public class GameCanvas : MonoBehaviour
 	
 	public TextReference FloatingText(Vector3 worldPosition, string label)
 	{
-		return floatingText.Duplicate().SetParent(transform).SetWorldPosition(worldPosition).SetText(label).SetActive();
+		return floatingText.Duplicate().SetParent(transform).SetWorldPosition(worldPosition, referenceResolution).SetText(label).SetActive();
 	}
 
 	public void SetOverlayRenderTexture(RenderTexture rt)
@@ -87,14 +109,18 @@ public class GameCanvas : MonoBehaviour
 	private CharacterEntity[] partyCharacters;
 	private MouseOverHandler viewportMouseHandler;
 	private ItemData currentItemToUse;
+	private CanvasScaler canvasScaler;
 	
 	private void Awake()
 	{
 		if (instance) Debug.LogError(this + " duplicated!");
 		instance = this;
 		
-		button_endTurn.onClick.AddListener(ClickEndTurn);
-		button_actionRun.onClick.AddListener(ClickRunAction);
+		canvasScaler = GetComponent<CanvasScaler>();
+		
+		buttonEndTurn.onClick.AddListener(ClickEndTurn);
+		buttonActionRun.onClick.AddListener(ClickRunAction);
+		buttonActionDefend.onClick.AddListener(ClickDefendAction);
 
 		viewportMouseHandler = viewportRect.GetComponent<MouseOverHandler>();
 		if(!viewportMouseHandler) viewportMouseHandler = viewportRect.gameObject.AddComponent<MouseOverHandler>();
@@ -104,7 +130,12 @@ public class GameCanvas : MonoBehaviour
 		floatingText.SetActive(false);
 
 		CharacterEntity.onPartyChanged += UpdatePortraits;
+		CharacterEntity.onAttackResult += OnAttackResult;
+		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
+		
 		CharacterSelection.selectionChanged += OnSelectionChanged;
+		
+		Destructible.onAnyDestructibleHit += OnAnyDestructibleHit;
 		
 		gameTurnManager.onLoadingGame += OnLoadingGame;
 		gameTurnManager.onPlayerChanged += OnPlayerChanged;
@@ -112,17 +143,43 @@ public class GameCanvas : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		button_endTurn.onClick.RemoveListener( ClickEndTurn);
-		button_actionRun.onClick.RemoveListener(ClickRunAction);
+		buttonEndTurn.onClick.RemoveListener( ClickEndTurn);
+		buttonActionRun.onClick.RemoveListener(ClickRunAction);
+		buttonActionDefend.onClick.RemoveListener(ClickDefendAction);
 		
 		viewportMouseHandler.onMouseOverChanged -= OnViewportRectMouseOver;
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
 		
 		CharacterEntity.onPartyChanged -= UpdatePortraits;
+		CharacterEntity.onAttackResult -= OnAttackResult;
+		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+
+		Destructible.onAnyDestructibleHit -= OnAnyDestructibleHit;
+		
 		CharacterSelection.selectionChanged -= OnSelectionChanged;
 		
 		gameTurnManager.onLoadingGame -= OnLoadingGame;
 		gameTurnManager.onPlayerChanged -= OnPlayerChanged;
+	}
+
+	private void OnAnyDestructibleHit(Destructible arg1, DamageInfo arg2, object arg3)
+	{
+		FloatingText(arg1, Mathf.CeilToInt(arg2.amount).ToString());
+	}
+
+	private void OnAnyCharacterDamaged(CharacterEntity target, DamageInfo damageInfo, object objectFrom)
+	{
+		FloatingText(target, Mathf.CeilToInt(damageInfo.amount).ToString());
+	}
+
+	private void OnAttackResult(CharacterEntity arg1, IAttackable arg2, CharacterEntity.AttackResult arg3)
+	{
+		if (arg3 == CharacterEntity.AttackResult.Undefined)
+			FloatingText(arg2, LanguageSettings.Main.Cant);
+		else if (arg3 == CharacterEntity.AttackResult.Dodge)
+			FloatingText(arg2, LanguageSettings.Main.Dodge);
+		else if (arg3 == CharacterEntity.AttackResult.Miss)
+			FloatingText(arg1, LanguageSettings.Main.Miss);
 	}
 
 	private void Start()
@@ -158,6 +215,17 @@ public class GameCanvas : MonoBehaviour
 			itemCursorImage.transform.position = gameInput.GetMousePosition();
 			itemCursorImage.transform.SetAsLastSibling();
 		}
+
+		cursorText.gameObject.SetActive(gameInput.WantsToAttack(out var targetCharacter));
+		if (targetCharacter && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		{
+			cursorText.transform.position = gameInput.GetMousePosition();
+			cursorText.raycastTarget = false;
+			cursorText.text =
+				Mathf.RoundToInt(
+					selectedCharacter.CalculateHitChance(targetCharacter) *
+					100) + "%";
+		}
 	}
 
 	private void OnPlayerChanged(bool isPlayerTurn)
@@ -187,7 +255,22 @@ public class GameCanvas : MonoBehaviour
 		{
 			if (selected.CanUseAction(CharacterAction.Run))
 			{
-				selected.Routines.AssignRunAction();
+				selected.Routines.AssignWaitAction(CharacterAction.Run);
+			}
+			else
+			{
+				selected.FloatingText_Cant();
+			}
+		}
+	}
+
+	private void ClickDefendAction()
+	{
+		if (CharacterSelection.TryGetSelectedCharacter(out var selected))
+		{
+			if (selected.CanUseAction(CharacterAction.Defend))
+			{
+				selected.Routines.AssignWaitAction(CharacterAction.Defend);
 			}
 			else
 			{
@@ -219,15 +302,16 @@ public class GameCanvas : MonoBehaviour
 		toggleGroupMode.isOn = gameInput.IsLeaderMode();
 		toggleTurnBased.isOn = gameTurnManager.IsTurnBasedMode();
 		toggleActions.isOn = gameTurnManager.SelectedCharacterIsControllable();
-		button_actionRun.interactable = gameTurnManager.SelectedCharacterCanUseRunAction();
+		buttonActionRun.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Run);
+		buttonActionDefend.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Defend);
 		
 		if (gameTurnManager.PlayerCanEndTurn())
 		{
-			button_endTurn.interactable = true;
+			buttonEndTurn.interactable = true;
 		}
 		else
 		{
-			button_endTurn.interactable = false;
+			buttonEndTurn.interactable = false;
 		}
 
 		if (lerpSpeed > 0)
