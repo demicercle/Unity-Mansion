@@ -246,12 +246,6 @@ public class GameTurnManager : MonoBehaviour
 				}
 
 				Debug.Log(this + " found turnBasedCharacter=" + turnBasedCharacters.Count);
-				
-				if (!playerTurn && firstTurnIsPlayer) // probably useless unless GD ("initiative")
-				{
-					playerTurn = true;
-					onPlayerChanged?.Invoke(true);
-				}
 			}
 			
 			NewTurn();
@@ -271,7 +265,7 @@ public class GameTurnManager : MonoBehaviour
 					yield return null;
 				} while (levelCharacters.Any(c => c.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons));
 				
-				yield return new WaitForSeconds(firstTurnSeconds); 
+				yield return new WaitForSeconds(firstTurnSeconds);
 			}
 			else // it is NOT the first turn
 			{

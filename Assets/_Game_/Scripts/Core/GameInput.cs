@@ -15,6 +15,7 @@ public class GameInput : MonoBehaviour
 {
 	public static int debugMode { get; set; }
 
+	private const float MinDelayBetweenAssignTarget = 0.5f;
 	public const float MaxMouseDeltaToClick = 3.0f;
 	public const float AutoAssignDestinationToCLickedPropDistance = 1.0f;
 	
@@ -816,25 +817,28 @@ public class GameInput : MonoBehaviour
 			if (selectedCharacter)
 			{
 				onClick?.Invoke();
-				
-				// assign attack
-				if (selectedCharacter.CanAttack(false))
+
+				if (CanAssignOnClick(selectedCharacter))
 				{
-					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
-						selectedCharacter.FloatingText_Cant();
-					else
+					// assign attack
+					if (selectedCharacter.CanAttack(false))
 					{
-						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
-						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+						if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
+							selectedCharacter.FloatingText_Cant();
 						else
-							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false);
-						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+						{
+							if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
+							if (!IsLeaderMode())
+								selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+							else
+								selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false);
+							//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+						}
+						return;
 					}
-					return;
-				}
 					
-				selectedCharacter.FloatingText_Cant();
+					selectedCharacter.FloatingText_Cant();
+				}
 			}
 			else if(isDebugMode)  Debug.Log("> IsEnemyToPlayer no selected character");
 		}
@@ -870,7 +874,7 @@ public class GameInput : MonoBehaviour
 		{
 			onClick?.Invoke();
 			
-			if (CanAssignOnClick(selectedCharacter))
+			if (CanAssignOnClick(selectedCharacter)) // interact with prop
 			{
 				if (!selectedCharacter.CanUseAction(CharacterAction.Interact))
 				{
@@ -899,25 +903,27 @@ public class GameInput : MonoBehaviour
 		if (selectedCharacter)
 		{
 			onClick?.Invoke();
-			
-			// assign attack
-			if (selectedCharacter.CanAttack(false))
+
+			if (CanAssignOnClick(selectedCharacter)) // attackable
 			{
-				if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
-					selectedCharacter.FloatingText_Cant();
-				else
+				if (selectedCharacter.CanAttack(false))
 				{
-					if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + attackable);
-					if (!IsLeaderMode())
-						selectedCharacter.Routines.AssignAttack(attackable, false, false);
+					if(hasNoActionsCursor && !selectedCharacter.CanUseAction(CharacterAction.Attack))
+						selectedCharacter.FloatingText_Cant();
 					else
-						selectedCharacter.Routines.Leader_AssignAttack(attackable, false);
-					//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+					{
+						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + attackable);
+						if (!IsLeaderMode())
+							selectedCharacter.Routines.AssignAttack(attackable, false, false);
+						else
+							selectedCharacter.Routines.Leader_AssignAttack(attackable, false);
+						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+					}
+					return;
 				}
-				return;
-			}
 				
-			selectedCharacter.FloatingText_Cant();
+				selectedCharacter.FloatingText_Cant();
+			}
 		}
 		else if(isDebugMode)  Debug.Log("> IsEnemyToPlayer no selected character");
 	}
@@ -930,7 +936,7 @@ public class GameInput : MonoBehaviour
 		{
 			onClick?.Invoke();
 			
-			if (CanAssignOnClick(selectedCharacter))
+			if (CanAssignOnClick(selectedCharacter)) // move to dest
 			{
 				if (!IsLeaderMode())
 					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
@@ -944,13 +950,15 @@ public class GameInput : MonoBehaviour
 	}
 	
 	private bool CanAssignOnClickSelected() => CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter) 
-	                                              && CanAssignOnClick(selectedCharacter);
+	                                              && CanAssignOnClick(selectedCharacter); // CanAssignOnClickSelected
 	
 	private bool CanAssignOnClick(CharacterEntity character)
 	{
-		return hasFocus 
-		       && (!gameTurnManager.IsTurnBasedMode() || (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines()))
-		       && character.IsControllableByPlayer();
+		return hasFocus
+		       && (!gameTurnManager.IsTurnBasedMode() ||
+		           (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines()))
+		       && character.IsControllableByPlayer()
+		       && (Time.time - character.Routines.LastTimeAssignedTarget > MinDelayBetweenAssignTarget);
 	}
 
 	private bool CanAssignOnMouseOver(CharacterEntity character)

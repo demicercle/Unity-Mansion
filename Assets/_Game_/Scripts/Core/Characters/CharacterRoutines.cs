@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 using EventType = CharacterAnimation.EventType;
 
 public class CharacterRoutines : MonoBehaviour
@@ -24,6 +25,8 @@ public class CharacterRoutines : MonoBehaviour
 	public System.Action onStarted, onStopped;
 
 	private object assignedTarget;
+	
+	public float LastTimeAssignedTarget { get; private set; }
 
 	public bool HasAssignedTarget() => assignedTarget != null;
 	
@@ -34,12 +37,14 @@ public class CharacterRoutines : MonoBehaviour
 	
 	public void AssignAttack(IAttackable target, bool canUseRunAction, bool losCheck)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
-		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck);
+		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck + " time=" + LastTimeAssignedTarget);
 		StartNewRoutine(WaitCharacterAttack(target, canUseRunAction, losCheck));
 	}
 	public void AssignAttackInstant(IAttackable target, bool useAction)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
 		if(debugMode > 0) Debug.Log(this + " AssignAttackInstant " + target + " usesActions=" + useAction);
 		StartNewRoutine(WaitCharacterPerformAttack(target, useAction));
@@ -47,6 +52,7 @@ public class CharacterRoutines : MonoBehaviour
 	}
 	public void AssignInteract(PropComponent clickedProp) 
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = clickedProp;
 		if(debugMode > 0) Debug.Log(this + " AssignInteract " + clickedProp);
 		StartNewRoutine(WaitCharacterInteract(clickedProp));
@@ -78,12 +84,14 @@ public class CharacterRoutines : MonoBehaviour
 	}
 	public void AssignTalk(CharacterEntity npc) // TODO all " Assign " methods should return the coroutine
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = npc;
 		if(debugMode > 0) Debug.Log(this + " AssignTalk " + npc);
 		StartCoroutine(WaitCharacterTalk(npc));
 	}
 	public void AssignUseItemOn(ItemData itemToUse, object objectTo)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = objectTo;
 		if(debugMode > 0) Debug.Log(this + " AssignUseItem " + itemToUse + " on " + objectTo);
 		StartCoroutine(WaitCharacterUseItemOn(itemToUse, objectTo));
@@ -91,6 +99,7 @@ public class CharacterRoutines : MonoBehaviour
 
 	public void AssignUseItemAt(ItemData itemToUse, Vector3 position)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignUseItem " + itemToUse + " at " + position);
 		StartCoroutine(WaitCharacterUseItemAt(itemToUse, position));
@@ -451,6 +460,8 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance)
 	{
+		reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAgent().GetMinReachDistance());
+		
 		var currentDistance = NavUtils.NavDistanceRoundY(dest,  _selfCharacter.GetPosition());
 		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
 		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " " + reachDistance + " currentDistance=" + currentDistance);
@@ -467,6 +478,7 @@ public class CharacterRoutines : MonoBehaviour
 		
 		yield return agent.SearchPathAsync(dest, false);
 		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved ends");
 	}
 
 	private IEnumerator WaitMoveLastPath(Vector3 dest, float forcedReachDistance = 0f)
@@ -557,7 +569,7 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " reached destination! " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));
+		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));
 		agent.StopMovement();
 	}
 	
