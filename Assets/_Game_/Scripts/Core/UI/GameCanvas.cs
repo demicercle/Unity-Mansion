@@ -221,10 +221,11 @@ public class GameCanvas : MonoBehaviour
 		{
 			cursorText.transform.position = gameInput.GetMousePosition();
 			cursorText.raycastTarget = false;
-			cursorText.text =
+			cursorText.text = Mathf.Clamp(20 - Mathf.RoundToInt(selectedCharacter.CalculateHitChance(targetCharacter) * 20), 1, 20) + "+";
+			/*cursorText.text =
 				Mathf.RoundToInt(
 					selectedCharacter.CalculateHitChance(targetCharacter) *
-					100) + "%";
+					100) + "%";*/
 		}
 	}
 
