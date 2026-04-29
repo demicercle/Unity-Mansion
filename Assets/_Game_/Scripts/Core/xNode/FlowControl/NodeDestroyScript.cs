@@ -21,6 +21,8 @@ public class NodeDestroyScript : GameNode
 
 	private IEnumerator WaitAndDestroy()
 	{
+		_delay = GetInputValue("_delay", _delay);
+		
 		if (_delay > 0)
 			yield return new WaitForSeconds(_delay);
 		else

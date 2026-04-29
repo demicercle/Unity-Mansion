@@ -19,6 +19,7 @@ public class NodeInstantiate : GameNode
 				return;
 			}
 
+			_position = GetInputValue("_position", _position);
 			if (!_position.TryGetComponent(this, out Transform transform))
 			{
 				DebugWarningThis("no valid position setup");
