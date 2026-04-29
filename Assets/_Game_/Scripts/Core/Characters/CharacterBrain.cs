@@ -118,25 +118,20 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 
 	private IEnumerator TryChase()
 	{
-		if (!_selfCharacter.CanAttack())
-		{
-			if(debugMode > 0) Debug.Log(this + " can't attack");
-			yield return StartCoroutine(YieldCantAttack());
-			yield break;
-		}
-
 		yield return StartCoroutine(YieldTryFindNewTarget());
 		
 		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
 		{
 			if (!_selfCharacter.CanAttack())
 			{
+				if(debugMode > 0) Debug.Log(this + " can't attack");
 				yield return StartCoroutine(YieldCantAttack());
 				yield break;
 			}
 		
 			if (_chaseCharacter.IsDead())
 			{
+				if (debugMode > 0) Debug.Log(this + " is dead");
 				ForgetTarget();
 				if (!TryFindTarget())
 					yield break;
@@ -144,6 +139,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		
 			if (!_characterDetection.IsCharacterDetected(_chaseCharacter))
 			{
+				if (debugMode > 0) Debug.Log(this + " chase target not detected");
 				ForgetTarget();
 				if (!TryFindTarget())
 					yield break;

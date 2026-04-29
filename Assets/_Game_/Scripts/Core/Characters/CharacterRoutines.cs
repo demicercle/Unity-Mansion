@@ -570,10 +570,30 @@ public class CharacterRoutines : MonoBehaviour
 			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
 				//agent.DropOnGround(); // to avoid overlapping obstacles
+				if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 				startTime = Time.time; // reset timeout
+				
+				/*if (!_selfCharacter.InParty()) // attempt to break door, now this is done with triggers
+				{
+					var ray = new Ray(_selfCharacter.GetCenterPosition(), _selfCharacter.GetDirection());
+					var max = _selfCharacter.GetAttackRange();
+					if (Physics.Raycast(ray, out var propHit, max, Layers.LayerProp))
+					{
+						if(debugMode > 0) DebugDrawer.Line(ray.origin, ray.GetPoint(max), Color.blueViolet, 0f);
+						if (propHit.collider.TryGetComponent(out Destructible destructible))
+						{
+							if (debugMode > 0) Debug.Log(this + " breaks: " + destructible);
+							_selfCharacter.StopAgent();
+							yield return StartCoroutine(WaitCharacterAttack(destructible, true, false));
+							yield break;
+						}
+					}
+					else
+					{
+						if(debugMode > 0) DebugDrawer.Line(ray.origin, ray.GetPoint(max), Color.magenta, 0f);
+					}
+				}*/
 			}
-			
-			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			
 			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
 		}

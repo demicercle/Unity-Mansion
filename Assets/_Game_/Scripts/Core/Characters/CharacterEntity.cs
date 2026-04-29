@@ -45,7 +45,7 @@ public struct DamageInfo
 public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
-	private const float MinAttackRange = 0.15f;
+	private const float MinAttackRange = 0.25f;
 	private const float DiceToKarma = Mathf.PI * 0.02f;
 	private const float MovePointsToDodge = 0.02f;
 	private const float MovePointsToHit = 0.01f;
@@ -636,6 +636,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	}
 
+	public float GetAttackRange() => Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + MinAttackRange);
 	public float GetAttackRange(IAttackable target)
 	{
 		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + MinAttackRange);

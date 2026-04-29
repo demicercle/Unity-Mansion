@@ -12,6 +12,7 @@ public class CharacterTrigger : MonoBehaviour
 	
 	[Header("Settings")]
 	[SerializeField] private bool partyOnly = true;
+	[SerializeField] private bool enemyOnly = false;
 	[SerializeField] private bool triggerOnEnter = true;
 	[SerializeField] private bool triggerOnExit = false;
 	[Min(-1)] [SerializeField] private int maxCount = 1;
@@ -54,7 +55,7 @@ public class CharacterTrigger : MonoBehaviour
 	[Header("Debug")]
 	[ReadOnly][SerializeField] private List<CharacterEntity> characters = new List<CharacterEntity>();
 
-	bool IsCharacterValid(CharacterEntity character) => !character.IsDead() && (!partyOnly || character.InParty());
+	bool IsCharacterValid(CharacterEntity character) => !character.IsDead() && (!partyOnly || character.InParty()) && (!enemyOnly || character.IsEnemyToPlayer());
 
 	private void OnDrawGizmosSelected()
 	{

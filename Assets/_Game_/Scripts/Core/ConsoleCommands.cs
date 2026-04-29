@@ -199,6 +199,20 @@ public class ConsoleCommands : MonoBehaviour
 	public static void NoDetection(int value)
 	{
 		CharacterDetection.forceNoDetection = value > 0;
+		
+		if (value < 0)
+		{
+			foreach (var partyChar in CharacterEntity.GetPartyCharacters())
+			{
+				foreach (var other in CharacterEntity.AllCharacters)
+				{
+					if (other.InParty() || other.IsDead()) continue;
+					other.TryGetComponent(out CharacterDetection characterDetection);
+					if (!characterDetection) continue;
+					characterDetection.SetDetected(partyChar, true);
+				}
+			}
+		}
 	}
 	
 	#region DEBUG
