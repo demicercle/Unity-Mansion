@@ -62,9 +62,27 @@ public class ItemData : ScriptableObject
 		return false;
 	}
 
-	public void Launch(Vector3 origin, Vector3 destination)
+	public void LaunchProjectile(GameObject target, Vector3 destination)
 	{
-		
+		foreach (var weapon in target.GetComponentsInChildren<WeaponRenderer>())
+		{
+			if (weapon.rpgWeapon == Weapon.RightItem && CompareTags(weapon.itemTags))
+			{
+				if (weapon.TryGetComponent(out Projectile projectile))
+				{
+					var startPosition = projectile.transform.position;
+					
+					if (target.TryGetComponent(out CharacterEntity characterEntity))
+						startPosition = characterEntity.GetCenterPosition();
+
+					if (projectile.Launch(startPosition, destination, out var clone))
+					{
+						UseOn(clone.gameObject);
+						return;
+					}
+				}
+			}
+		}
 	}
 
 	public void UseOn(GameObject target)

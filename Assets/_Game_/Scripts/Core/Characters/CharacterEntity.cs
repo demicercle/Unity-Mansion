@@ -781,6 +781,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		if (itemInHand != itemToUse)
 		{
+			Debug.Log(this + " SetItemToUse " + itemToUse);
 			itemInHand = itemToUse;
 			characterAnimation?.WeaponChanged();
 		}
@@ -789,11 +790,5 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool HasItemToUse(out ItemData itemToUse)
 	{
 		return (itemToUse = itemInHand) != null;
-	}
-
-	[SerializeField] private AnimationCurve projectileCurve = AnimationCurve.Linear(0f, 0f, 1f, 0f);
-	public float GetProjectileHeight(Vector3 worldPosition, float maxRange)
-	{
-		return projectileCurve.Evaluate(NavUtils.NavDistanceRoundY(GetCenterPosition(), worldPosition) / maxRange);
 	}
 }

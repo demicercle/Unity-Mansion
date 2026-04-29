@@ -1638,9 +1638,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponsAnimation
   leftWeapon: 0
   rightWeapon: 0
-  debugWalkthrough: 0
-  debugDoWeaponSwitch: 0
-  debugSetAnimator: 0
   ikHands: {fileID: 8073295698513471931}
   attackNumber: 1
 --- !u!114 &7960912902921319732
@@ -1683,6 +1680,23 @@ MonoBehaviour:
         - m_Target: {fileID: 6536868086427863390}
           m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
           m_MethodName: Activate
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - actionType: 5
+    filters: Grenade
+    onActionUsed:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6536868086427863390}
+          m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
+          m_MethodName: Attack_Right
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}

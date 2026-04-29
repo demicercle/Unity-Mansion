@@ -91,27 +91,29 @@ public class CharacterAnimation : MonoBehaviour
 	public bool IsSwitchingWeapons => isSwitchingWeapons;
 
 	public bool HasAnimationEvent(EventType eventType) => eventTypes.Contains(eventType);
+	public bool IsWaitingEvents => waitForEvents.Count > 0;
 
-	public Coroutine WaitEvent(EventType eventType, float timeout = 6.0f) => StartCoroutine(DoWaitEvent(eventType, timeout));
+	public Coroutine WaitEvent(EventType eventType, float timeout = 6.0f) => StartCoroutine(DoWaitEvents(timeout, eventType));
+	public Coroutine WaitEvents(params EventType[] eventTypes) => StartCoroutine(DoWaitEvents(6.0f, eventTypes));
 	
-	private IEnumerator DoWaitEvent(EventType eventType, float timeout)
+	private IEnumerator DoWaitEvents(float timeout, params EventType[] eventTypes)
 	{
 		var startTime = Time.time;
-		if (debugMode > 0) Debug.Log(this + " DoWaitEvent " + eventType);
-		waitForEvent = eventType;
-		do
+		if (debugMode > 0) Debug.Log(this + " DoWaitEvent " + Utils.ArrayStr(eventTypes));
+		waitForEvents.AddRange(eventTypes);
+		while(waitForEvents.Count > 0)
 		{
 			if(_selfCharacter.IsDead())
 				yield break;
 			
 			if (timeout > 0f && Time.time - startTime > timeout)
 			{
-				Debug.LogWarning(this + " timeout! "  + eventType);
+				Debug.LogWarning(this + " timeout! ");
 				yield break;
 			}
 			
 			yield return null;
-		} while (waitForEvent != EventType.Undefined);
+		} 
 	}
 
 	public void InstantSwitchWeapons(bool force = false)
@@ -168,7 +170,7 @@ public class CharacterAnimation : MonoBehaviour
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
 	private CharacterEntity _selfCharacter;
-	private EventType waitForEvent;
+	private List<EventType> waitForEvents = new List<EventType>();
 	private bool weaponSwitched;
 	private bool wasDamaged, wasAttacking, wasMoving;
 	private bool hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
@@ -236,9 +238,6 @@ public class CharacterAnimation : MonoBehaviour
 		
 		if(!TrySwitchWeapons(weaponSwitched))
 			UpdateWeaponRenderers(); // instant update
-		
-		if (waitForEvent != EventType.Undefined) 
-			Debug.LogError(this + " has waitForEvent on start " + waitForEvent);
 	}
 
 	private void OnDisable()
@@ -267,12 +266,10 @@ public class CharacterAnimation : MonoBehaviour
 
 	private void OnCharacterAnimationEvent(EventType eventType)
 	{
-		if (waitForEvent != EventType.Undefined)
+		if (waitForEvents.Contains(eventType))
 		{
-			if (waitForEvent == eventType)
-			{
-				waitForEvent = EventType.Undefined;
-			}
+			if(debugMode > 0) Debug.Log(this + " OnCharacterAnimationEvent " + eventType + ", clear waitForEvents");
+			waitForEvents.Clear();
 		}
 	}
 	

@@ -649,8 +649,35 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItemAt " + itemToUse);
 		debugString = "WaitCharacterUseItemAt " + itemToUse;
-		DebugDrawer.Line(_selfCharacter.GetCenterPosition(), position, Color.red, DefaultWaitSeconds);
-		yield return new WaitForSeconds(DefaultWaitSeconds);
+		if (!_selfCharacter.TryGetComponent(out Inventory inventory))
+		{
+			Debug.LogWarning(_selfCharacter + " has no inventory");
+			yield break;
+		}
+				
+		_selfCharacter.UseAction(CharacterAction.UseItem, itemToUse);
+		if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
+		{
+			anim.WaitEvents(EventType.Hit, EventType.Shoot);
+			do
+			{
+				_selfCharacter.SetItemToUse(itemToUse);
+				yield return null;
+			} while (anim.IsWaitingEvents);
+			if(debugMode > 0) Debug.Log(this + " item Shoot or Hit");
+		}
+
+		if (!inventory.TryRemoveItem(itemToUse))
+		{
+			Debug.LogWarning("item cannot be removed from inventory");
+			yield break;
+		}
+
+		if (debugMode > 0) Debug.Log(this + " launch projectile");
+		itemToUse.LaunchProjectile(_selfCharacter.gameObject, position);
+		inventory.NotifyUsed(itemToUse, position);
+		yield return new WaitForSeconds(DefaultWaitSeconds); // to end anim?
+		_selfCharacter.SetItemToUse(null);
 	}
 	#endregion
 

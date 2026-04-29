@@ -31,7 +31,7 @@ public class GameScript : MonoBehaviour
 		
 		if(debugMode > 0) Debug.Log(this + " Start " + graph);
 		#if UNITY_EDITOR
-		if (debugMode > 0) UnityEditor.Selection.activeObject = graph;
+		if (debugMode > 1) UnityEditor.Selection.activeObject = graph;
 		#endif
 
 		foreach (var node in graph.nodes.OfType<GameNode>())

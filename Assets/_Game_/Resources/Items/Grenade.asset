@@ -18,6 +18,6 @@ MonoBehaviour:
   icon: {fileID: 2800000, guid: a34885405289bb34585d132b60c4cd7e, type: 3}
   targetType: 2
   useRange: 8
-  onUseScript: {fileID: 11400000, guid: 5468590fc2e38c848a62a25eaced5191, type: 2}
+  onUseScript: {fileID: 11400000, guid: 90fe40b23bddf1c4f9bbfc8c0174fd43, type: 2}
   itemTags: Grenade
   useGroundRadius: 0.2
