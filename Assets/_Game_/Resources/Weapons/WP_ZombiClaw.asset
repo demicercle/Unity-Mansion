@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26b91483504440d7b3e2d5878f8dde34, type: 3}
-  m_Name: Knife
+  m_Name: WP_ZombiClaw
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  minDamage: 1
-  maxDamage: 2
+  minDamage: 2
+  maxDamage: 3
   isRanged: 0
   attackRange: 0
-  hitChance: 0.75
+  hitChance: 0.6
   noAttack: 0
-  rpgWeaponR: 13
+  rpgWeaponR: -1
   rpgWeaponL: -1

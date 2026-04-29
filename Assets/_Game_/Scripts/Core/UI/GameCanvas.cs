@@ -179,7 +179,7 @@ public class GameCanvas : MonoBehaviour
 		else if (arg3 == CharacterEntity.AttackResult.Dodge)
 			FloatingText(arg2, LanguageSettings.Main.Dodge);
 		else if (arg3 == CharacterEntity.AttackResult.Miss)
-			FloatingText(arg1, LanguageSettings.Main.Miss);
+			FloatingText(arg2, LanguageSettings.Main.Miss);
 	}
 
 	private void Start()

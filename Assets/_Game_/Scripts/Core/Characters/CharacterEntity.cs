@@ -48,7 +48,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private const float MinAttackRange = 0.25f;
 	private const float DiceToKarma = Mathf.PI * 0.02f;
 	private const float MovePointsToDodge = 0.02f;
-	private const float MovePointsToHit = 0.01f;
+	private const float MovePointsToHit = 0.00f;
 	
 	public static int debugStats { get; set; }
 	public static bool disableKarma { get; set; }
@@ -197,7 +197,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public float RollDice()
 	{
-		var rolled = Random.Range(0f, 1f);
+		var rolled = DicePool.LastResult;
+		if(DicePool.debugMode>0) Debug.Log(this + " RollDice takes last result: " + rolled);
+		DicePool.RollNewDice();
 		if (!HasKarma()) return rolled;
 		
 		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
@@ -284,7 +286,10 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public AttackResult TryHit(CharacterEntity target)
 	{
-		if (RollDice() > CalculateHitChance(target.GetCenterPosition()))
+		var atkRoll = RollDice();
+		var hitChance = CalculateHitChance(target.GetCenterPosition());
+		if(DicePool.debugMode>0) Debug.Log(this + " TryHit " + target + " roll=" + atkRoll + " hitChance=" + hitChance);
+		if (1f - atkRoll > hitChance) // miss
 		{
 			onAttackResult?.Invoke(this, target, AttackResult.Miss);
 			return AttackResult.Miss;

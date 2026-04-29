@@ -2,6 +2,7 @@
   "dependencies": {
     "com.github.siccity.xnode": "https://github.com/Siccity/xNode.git",
     "com.oddworm.dbgdraw": "https://github.com/pschraut/UnityDbgDraw.git",
+    "com.unity.2d.sprite": "1.0.0",
     "com.unity.collab-proxy": "2.12.4",
     "com.unity.feature.development": "1.0.2",
     "com.unity.inputsystem": "1.19.0",

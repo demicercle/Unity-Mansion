@@ -121,12 +121,9 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("roll_dices", "")]
 	public static void RollDices(int count)
 	{
-		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
+		while (count-- > 0)
 		{
-			while (count-- > 0)
-			{
-				Debug.Log("RollDices: " + character.RollDice());
-			}
+			DicePool.RollNewDice();
 		}
 	}
 
@@ -262,6 +259,12 @@ public class ConsoleCommands : MonoBehaviour
 	public static void _DebugStats(int value)
 	{
 		Debug.Log("debug_stats=" + (CharacterEntity.debugStats= value));
+	}
+
+	[ConsoleMethod("debug_dices", "")]
+	public static void _DebugDices(int value)
+	{
+		Debug.Log("debug_dices=" + (DicePool.debugMode= value));
 	}
 
 	[ConsoleMethod("debug_anim", "")]
