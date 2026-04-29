@@ -127,6 +127,12 @@ public class ConsoleCommands : MonoBehaviour
 		}
 	}
 
+	[ConsoleMethod("add_roll_dices", "")]
+	public static void AddRollDices(int count)
+	{
+		Utils.FindFirstObject<DiceLauncher>().allowedDiceRolls += count;
+	}
+
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()
 	{

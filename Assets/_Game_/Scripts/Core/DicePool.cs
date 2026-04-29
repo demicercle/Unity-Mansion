@@ -7,6 +7,12 @@ public static class DicePool
 	public static int debugMode { get; set; }
 	
 	public static event System.Action onDiceRolled;
+
+	public static void RollNewDices(int count)
+	{
+		while(count--> 0)
+			RollNewDice();
+	}
 	
 	public static void RollNewDice()
 	{
@@ -17,7 +23,6 @@ public static class DicePool
 		nextResult = (float)rng.NextDouble();
 		if(debugMode >0) Debug.Log("DicePool>> Last Result: " + lastResult.ToString("N4") + " Next Result: " + nextResult.ToString("N4"));
 		
-		rollCount++;
 		onDiceRolled?.Invoke();
 	}
 	
@@ -25,7 +30,6 @@ public static class DicePool
 	
 	public static float LastResult => lastResult;
 	public static float NextResult => nextResult;
-	public static int TotalRolls => rollCount;
 	public static int Seed => seed;
 
 	public static void SetSeed(int newSeed)
@@ -34,7 +38,6 @@ public static class DicePool
 		rng = new Random(seed);
 	}
 	
-	private static int rollCount;
 	private static int seed;
 	private static float lastResult;
 	private static float nextResult;
