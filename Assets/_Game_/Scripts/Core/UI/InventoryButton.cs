@@ -92,7 +92,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		//toggle.isOn = false;
 		if (isOn && itemData)
 		{
-			GameInput.Instance.SetItemToUse(itemData);
+			GameInput.Instance.SetItemToUse(itemData, true);
 		}
 	}
 

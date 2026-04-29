@@ -81,10 +81,11 @@ public class CharacterEventTrigger : MonoBehaviour
 	{
 		foreach (var actionEvt in actionEvents)
 		{
-			if (action == actionEvt.actionType && Utils.TagCheck(actionEvt.filters, target))
+			if (action == actionEvt.actionType && TagCheck(actionEvt.filters, target))
 			{
-				Debug.Log(this + " OnCharacterUseAction onActionUsed.Invoke " + action);
+				Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " filters=" + actionEvt.filters + "onActionUsed.Invoke " + action);
 				actionEvt.Invoke();
+				break;
 			};
 		}
 
@@ -135,4 +136,23 @@ public class CharacterEventTrigger : MonoBehaviour
 	}
 
 	private bool CheckState() => character && !character.IsDead() && (!revealedOnly || character.IsCharacterRevealed());
+	
+	private bool TagCheck(string filters, object obj)
+	{
+		if (obj is ItemData)
+			return (obj as ItemData).CompareTags(filters);
+		
+		return obj == null || string.IsNullOrWhiteSpace(filters) ||
+		       filters.Split(',').ToList().Any(tag =>
+		       {
+			       if (obj is Component)
+				       return (obj as Component).CompareTag(tag);
+
+			       if (obj is GameObject)
+				       return (obj as GameObject).CompareTag(tag);
+
+
+			       return false;
+		       });
+	}
 }

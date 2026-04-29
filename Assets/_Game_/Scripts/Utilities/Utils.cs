@@ -23,21 +23,6 @@ public static class Utils
 		guiPosition += offset;
 		GUI.Box(new Rect(guiPosition, guiRect.size), guiContent, guiStyle);
 	}
-	
-	public static bool TagCheck(string filters, object obj)
-	{
-		return obj == null || string.IsNullOrWhiteSpace(filters) ||
-		       filters.Split(',').ToList().Any(tag =>
-		       {
-			       if (obj is Component)
-				       return (obj as Component).CompareTag(tag);
-
-			       if (obj is GameObject)
-				       return (obj as GameObject).CompareTag(tag);
-
-			       return false;
-		       });
-	}
 
 	public static bool IsEditorPrefabStage()
 	{

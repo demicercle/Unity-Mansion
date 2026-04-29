@@ -80,7 +80,7 @@ public class GameInput : MonoBehaviour
 		{
 			if (itemToUse)
 			{
-				if (!itemToUse.CanBeUsedOn(navigationHit.collider.gameObject, out var _))
+				if (!itemToUse.CanBeUsedAt(navigationHit.point))
 					return CursorRaycastResult_None;
 			}
 			
@@ -408,6 +408,15 @@ public class GameInput : MonoBehaviour
 					{
 						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
 					}
+
+					if (itemToUse)
+					{
+						selectedCharacter.LookWorldPosition(hit.point, Time.deltaTime);
+						foreach (var projectileInHand in selectedCharacter.GetComponentsInChildren<Projectile>())
+						{
+							projectileInHand.Simulate(selectedCharacter.GetCenterPosition(), hit.point);
+						}
+					}
 				}
 				//else if(isDebugMode) Debug.Log("no selected character");
 			}
@@ -634,7 +643,7 @@ public class GameInput : MonoBehaviour
 		{
 			if (itemToUse)
 			{
-				SetItemToUse(null);
+				SetItemToUse(null, true); // right click RELEASED
 			}
 			
 			else if (gameTurnManager.IsPlayerTurn())
@@ -670,8 +679,8 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter && itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject, out var objectTo))
 				{
-					selectedCharacter.Routines.AssignUseItem(itemToUse, objectTo);
-					SetItemToUse(null);
+					selectedCharacter.Routines.AssignUseItemOn(itemToUse, objectTo);
+					SetItemToUse(null, false); // AssignUseItem On
 				}
 				
 				else if (hit.collider.TryGetComponent(out CharacterEntity clickedCharacter)) // click character
@@ -691,7 +700,19 @@ public class GameInput : MonoBehaviour
 			}
 			else if (raycastResult == CursorRaycastResult_Navigation) // click navigation
 			{
-				ClickNavigation(hit.point);
+				if (selectedCharacter && itemToUse)
+				{
+					if (itemToUse.CanBeUsedAt(hit.point))
+					{
+						selectedCharacter.Routines.AssignUseItemAt(itemToUse, hit.point);
+						SetItemToUse(null, false);
+					}
+				}
+
+				else
+				{
+					ClickNavigation(hit.point);
+				}
 			}
 		}
 
@@ -710,7 +731,7 @@ public class GameInput : MonoBehaviour
 
 	private void SelectionChanged()
 	{
-		SetItemToUse(null);
+		SetItemToUse(null, true);//selection changed
 		
 		if (CharacterSelection.TryGetSelectedCharacter(out var newSelected) && newSelected != selectedCharacter)
 		{
@@ -939,9 +960,14 @@ public class GameInput : MonoBehaviour
 
 	private ItemData itemToUse;
 	
-	public void SetItemToUse(ItemData itemData)
+	public void SetItemToUse(ItemData itemData, bool updateSelected)
 	{
-		itemToUse = itemData;
+		if (itemToUse != itemData)
+		{
+			if(debugMode >0 ) Debug.Log(this + " SetItemToUse " + itemData + " " + updateSelected);
+			itemToUse = itemData;
+			if(updateSelected) selectedCharacter?.SetItemToUse(itemToUse, debugMode > 0);
+		}
 	}
 
 	public ItemData GetItemToUse() => itemToUse;

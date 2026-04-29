@@ -662,7 +662,9 @@ MonoBehaviour:
   - '#debug_detection 1'
   - '#debug_brains 1'
   - '#debug_routines 1'
+  - '#debug_anim 1'
   - '#debug_gtm 1'
+  - '#debug_script 1'
 --- !u!1 &1720306999441167422
 GameObject:
   m_ObjectHideFlags: 0

@@ -41,10 +41,9 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	// Weapon Parameters.
 	//public List<Weapon> switchableWeapons = new List<Weapon>();
 
-	[Header("Debug Options")]
-	public bool debugWalkthrough = true;
-	public bool debugDoWeaponSwitch = true;
-	public bool debugSetAnimator = true;
+	public bool debugWalkthrough => CharacterAnimation.debugMode > 0;
+	public bool debugDoWeaponSwitch => CharacterAnimation.debugMode > 0;
+	public bool debugSetAnimator => CharacterAnimation.debugMode > 0;
 
 	public IKHands ikHands;
 	public int attackNumber = 1;

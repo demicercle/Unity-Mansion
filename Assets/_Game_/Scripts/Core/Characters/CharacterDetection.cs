@@ -6,6 +6,7 @@ using UnityEngine.TextCore.Text;
 public class CharacterDetection : MonoBehaviour
 {
 	public static int debugMode { get; set; }
+	public static bool forceNoDetection { get; set; }
 
 	public static event System.Action<CharacterEntity, CharacterEntity, bool> onAnyCharacterDetectionChanged;
 	
@@ -169,6 +170,9 @@ public class CharacterDetection : MonoBehaviour
 	{
 		if (selfCharacter.IsPlayer() && otherCharacter.IsPlayer())  // party characters will always detect each other
 			return true;
+		
+		if (forceNoDetection)
+			return false;
 		
 		if (!selfCharacter.IsCharacterRevealed() || !otherCharacter.IsCharacterRevealed()) // ignore not revealed characters
 			return false;

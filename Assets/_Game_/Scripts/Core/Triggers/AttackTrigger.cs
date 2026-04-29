@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 public class AttackTrigger : MonoBehaviour
@@ -69,7 +70,7 @@ public class AttackTrigger : MonoBehaviour
 		
 		if (other.TryGetComponent(out CharacterEntity otherCharacter))
 		{
-			if (!otherCharacter.IsDead() && Utils.TagCheck(filters, otherCharacter))
+			if (!otherCharacter.IsDead() && TagCheck(filters, otherCharacter))
 			{
 				if (movingCharacterOnly && !otherCharacter.IsMoving()) 
 					return;
@@ -103,6 +104,21 @@ public class AttackTrigger : MonoBehaviour
 	private void OnCharacterStatsChanged()
 	{
 		sphereCollider.radius = selfCharacter.GetRadius() + triggerRangeOffset;
+	}
+	
+	private bool TagCheck(string filters, object obj)
+	{
+		return obj == null || string.IsNullOrWhiteSpace(filters) ||
+		       filters.Split(',').ToList().Any(tag =>
+		       {
+			       if (obj is Component)
+				       return (obj as Component).CompareTag(tag);
+
+			       if (obj is GameObject)
+				       return (obj as GameObject).CompareTag(tag);
+
+			       return false;
+		       });
 	}
 	
 	#if UNITY_EDITOR

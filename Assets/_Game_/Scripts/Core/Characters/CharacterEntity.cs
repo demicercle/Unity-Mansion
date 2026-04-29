@@ -775,4 +775,20 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 				), "label");
 		}
 	}
+
+	private ItemData itemInHand;
+	public void SetItemToUse(ItemData itemToUse, bool verbose = false)
+	{
+		if (itemInHand != itemToUse)
+		{
+			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
+			itemInHand = itemToUse;
+			characterAnimation?.WeaponChanged();
+		}
+	}
+
+	public bool HasItemToUse(out ItemData itemToUse)
+	{
+		return (itemToUse = itemInHand) != null;
+	}
 }

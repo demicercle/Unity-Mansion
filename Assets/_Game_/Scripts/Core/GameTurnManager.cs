@@ -219,7 +219,9 @@ public class GameTurnManager : MonoBehaviour
 					turnBasedCharacters.Add(character);
 					if(restCharacterAtFirstTurn) character.Rest();
 			
-					character.Routines.StopAllRoutines();
+					if(!character.InParty())
+						character.Routines.StopAllRoutines();
+					
 					character.StopAgent();
 					character.GetAgent().UpdateObstacle();
 					character.GetAgent().EnableAvoidance(false);
