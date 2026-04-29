@@ -20,8 +20,8 @@ public class CharacterAgent : MonoBehaviour
 	private const float WaypointSearchSeconds = 0.10f;
 	
 	public static int debugMode { get; set; }
-	
-	[Header("Movement")]
+
+	//[Header("Movement")] [SerializeField] private bool forceNoObstacle = false;
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
@@ -61,6 +61,7 @@ public class CharacterAgent : MonoBehaviour
 		if (isObstacle == value)
 			return;
 
+		rvoController.enabled = !value;
 		isObstacle = value;
 		if (debugMode > 0) Debug.Log(this + " SetObstacle " + isObstacle);
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
@@ -466,10 +467,10 @@ public class CharacterAgent : MonoBehaviour
 
 	public void SetDefaultReachDistance() => aiPath.endReachedDistance = endReachDistance;
 
-	public void EnableAvoidance(bool b)
+	/*public void EnableAvoidance(bool b)
 	{
-		rvoController.enabled = b;
-	}
+		rvoController.enabled = b || forceNoObstacle;
+	}*/
 	   
 	public bool pathPending => aiPath.pathPending || lastPath == null || lastPath.Length <= 1;
 
@@ -570,8 +571,15 @@ public class CharacterAgent : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (lastPath?.Length > 0 && debugMode > 0) DebugDrawer.Path(lastPath, false, isPathValid ? Color.cyan : Color.red);
-		if (hasDestination && debugMode > 0) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, isPathValid ? Color.cyan : Color.red);
+		//rvoController.enabled = !_selfCharacter.IsCurrentTurn() || !_selfCharacter.IsSelected();
+		
+		if (debugMode > 0)
+		{
+			if (lastPath?.Length > 0) DebugDrawer.Path(lastPath, false, isPathValid ? Color.cyan : Color.red);
+			if (hasDestination) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, isPathValid ? Color.cyan : Color.red);
+			if (rvoController.enabled) DebugDrawer.WireCapsule(transform.position, transform.rotation, rvoController.radius, rvoController.height, Color.magenta, 0f);
+		}
+		
 		
 		//if (CharacterRoutines.AnyActiveRoutines()) // todo
 		//	UpdatePathAndTarget(true);

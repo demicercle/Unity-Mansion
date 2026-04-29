@@ -224,7 +224,6 @@ public class GameTurnManager : MonoBehaviour
 					
 					character.StopAgent();
 					character.GetAgent().UpdateObstacle();
-					character.GetAgent().EnableAvoidance(false);
 
 					if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
 						otherAnimation.TrySwitchWeapons(true);
@@ -346,11 +345,6 @@ public class GameTurnManager : MonoBehaviour
 	{
 		Debug.Log(this + " Enters RealTimeCoroutine");
 		onTurnBasedChanged?.Invoke(false);
-
-		foreach (var character in levelCharacters)
-		{
-			character.GetAgent().EnableAvoidance(true);
-		}
 		
 		currentTurn = -1;
 		NewTurn();

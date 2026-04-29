@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,7 +18,8 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	private const float WanderingSearchTimeout = 6.0f;
 	private const float SearchWaypointSeconds = 0.5f;
 	private const float ThinkingTimeout = 10.0f;
-	private const float AggroDistanceScale = 0.9f;
+	private const float AggroHDistanceScale = 0.9f;
+	private const float AggroVDistanceScale = 1.9f;
 	private const float MaxAggro = 10.0f;
 	private const float DefaultWaitSeconds = 0.25f;
 	private const float MinDistanceToDetectMovement = 0.20f;
@@ -275,12 +277,28 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 
 	private IEnumerator YieldTryFindNewTarget()
 	{
-		if (TryFindNewTarget(out var newTarget))
+		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
+
+		var newTarget = allTargets.LastOrDefault();
+		if (newTarget && newTarget != _chaseCharacter)
 		{
 			_chaseCharacter = newTarget;
 			Debug.Log(this + " gets new target: " + _chaseCharacter);
+			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red, 1.0f);
 			yield return CharacterRoutines.DoLookPositionOn(_selfCharacter, newTarget.GetPosition());
 		}
+	}
+
+	private float CalculateAggro(CharacterEntity other)
+	{
+		var maxDist = _selfCharacter.GetMaxVisionRange();
+		var hDist = Utils.HDistance(_selfCharacter.GetPosition(), other.GetPosition());
+		var vDist = Utils.VDistance(_selfCharacter.GetPosition(), other.GetPosition());
+		if (hDist + vDist > maxDist * 2)
+			return -Mathf.Infinity;
+			
+		var aggro = _aggroMap[other];
+		return aggro - hDist * AggroHDistanceScale - vDist * AggroVDistanceScale;
 	}
 	
 	private CharacterEntity _selfCharacter;
@@ -391,18 +409,6 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		_aggroMap[other] = Mathf.Min(_aggroMap[other], MaxAggro);
 	}
 
-	private bool TryFindNewTarget(out CharacterEntity newTarget)
-	{
-		newTarget = _aggroMap.Keys.OrderBy(other =>
-		{
-			var dist = Vector3.Distance(other.GetPosition(), _selfCharacter.GetPosition());
-			var aggro = _aggroMap[other];
-			return aggro - dist * AggroDistanceScale;
-		}).LastOrDefault();
-
-		return newTarget && newTarget != _chaseCharacter;
-	}
-
 	private void OnCharacterDetected(CharacterEntity otherCharacter)
 	{
 		if(_selfCharacter.IsEnemyTo(otherCharacter))
@@ -475,8 +481,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 				
 				foreach (var other in _aggroMap.Keys)
 				{
-					var dist = Vector3.Distance(other.GetPosition(), _selfCharacter.GetPosition());
-					var totalAggro = _aggroMap[other] - dist * AggroDistanceScale;
+					var totalAggro = CalculateAggro(other);
 					debugString += (_chaseCharacter == other ? ">" : " ") + totalAggro.ToString("N2") + " " + other.name + "\n";
 				}
 

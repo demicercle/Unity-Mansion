@@ -678,8 +678,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool WeaponsReady() => characterAnimation && characterAnimation.WeaponsSwitched();
 
 	public bool IsCharacterRevealed() => InParty() || RoomTrigger.IsCharacterVisible(this);
+
+	public float GetMaxVisionRange() => InParty() ? visionRange : detection.GetMaxSeeingDistance();
 	
-	public bool CanSeeAnyEnemyAround() => _allCharacters.FirstOrDefault((other) =>
+	public bool CanSeeAnyEnemyAround() => !InParty() ? detection.GetDetectedCharacters().Any(IsEnemyTo)
+		: _allCharacters.FirstOrDefault((other) =>
 	{
 		if (!IsEnemyTo(other.GetCurrentFaction())) return false;
 		if (!other.IsCharacterRevealed()) return false;

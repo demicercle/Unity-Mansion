@@ -10,6 +10,7 @@ public class CharacterRoutines : MonoBehaviour
 	public const float SearchPathTimeout = 6.0f;
 	public const float DefaultWaitSeconds = 1.0f;
 	public const float MinReachDistance = 0.1f;
+	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
 	public const float MinDeltaToMove = 0.1f;
 	
 	public static int debugMode { get; set; }
@@ -476,7 +477,7 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // stop any movement
 		agent.SetReachDistance(reachDistance);
 		
-		yield return agent.SearchPathAsync(dest, false);
+		yield return agent.SearchPathAsync(dest, true);
 		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved ends");
 	}
@@ -491,7 +492,15 @@ public class CharacterRoutines : MonoBehaviour
 		if (path.Length <= 1)
 		{
 			Debug.LogWarning(_selfCharacter + " path invalid\nfrom " + _selfCharacter.GetPosition() + " points: " + Utils.ArrayStr(path));;
-			if(debugMode > 2) Debug.DebugBreak();
+			yield return null;
+			yield break;
+		}
+
+		var lastPoint = path.Last();
+		if (MinDistanceFromPathLastPoint > 0 && Vector3.Distance(dest, lastPoint) > MinDistanceFromPathLastPoint)
+		{
+			if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath path incomplete");
+			if (debugMode > 0) DebugDrawer.Line(lastPoint, dest, Color.magenta, 1.0f);
 			yield return null;
 			yield break;
 		}

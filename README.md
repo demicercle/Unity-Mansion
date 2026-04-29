@@ -1,6 +1,7 @@
 # Unity-Mansion
 
 - add namespaces
+- tweak "range to hit chance" and take height into account
 
 - Talk Action
 - DebugGUI Draw Character stats (movePoints, etc)

@@ -293,6 +293,13 @@ public static class Utils
 		return t;
 	}
 	
+	public static float VDistance(Vector3 aiPathPosition, Vector3 dest)
+	{
+		aiPathPosition.x = dest.x;
+		aiPathPosition.z = dest.z;
+		return Vector3.Distance(aiPathPosition, dest);
+	}
+	
 	public static float HDistance(Vector3 aiPathPosition, Vector3 dest)
 	{
 		aiPathPosition.y = dest.y;

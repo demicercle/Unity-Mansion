@@ -16,7 +16,6 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
-	[SerializeField] private LayerMask obstructionLayers;
 	[SerializeField] private bool setDetectedOnDamaged = true;
 	[SerializeField] private bool lookAtDetected = true;
 	[SerializeField] private bool warnOthersInRoom = true;
@@ -24,7 +23,8 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField] [Min(0f)] private float looseTargetDistance;
 	
 	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
-	
+
+	public float GetMaxSeeingDistance() => Mathf.Max(hearingDistance, seeingDistance);
 	public CharacterEntity[] GetDetectedCharacters() => detectedCharacters.ToArray();
 	
 	public void SetDetected(CharacterEntity otherCharacter, bool value)
@@ -227,7 +227,7 @@ public class CharacterDetection : MonoBehaviour
 	{
 		Vector3 eyesPos = selfCharacter.GetEyesPosition();
 		Vector3 otherPos =  otherCharacter.GetCenterPosition();
-		if(Physics.Linecast(eyesPos, otherPos, out var hit,obstructionLayers))
+		if(Physics.Linecast(eyesPos, otherPos, out var hit,Layers.MaskDetection))
 		{
 			if (debugMode > 0) DebugDrawer.Line(eyesPos, hit.point, Color.red);
 			return false;
