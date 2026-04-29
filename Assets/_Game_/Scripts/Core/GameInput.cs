@@ -107,6 +107,24 @@ public class GameInput : MonoBehaviour
 
 	public bool IsLeaderMode() => !ungroupMode && !gameTurnManager.IsTurnBasedMode();
 
+	public bool TryGetNavigationTarget(out Transform navTarget)
+	{
+		navTarget = null;
+		
+		if (navigationTarget.gameObject.activeSelf)
+		{
+			navTarget = navigationTarget.transform;
+		}
+
+		else if (lastMouseOverObject)
+		{
+			if (lastMouseOverObject.TryGetComponent(out CharacterEntity other))
+				navTarget = lastMouseOverObject.transform;
+		}
+
+		return navTarget;
+	}
+
 	#region PRIVATE
 	private static GameInput instance;
 	
@@ -568,8 +586,11 @@ public class GameInput : MonoBehaviour
 	private void LateUpdate()
 	{
 		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading);
-		if(navigationTarget.gameObject.activeSelf) 
+		
+		if (navigationTarget.gameObject.activeSelf)
+		{
 			navigationTarget.transform.position = navigationHit.point;
+		}
 		
 		lastMousePosition = mousePosition;
 		mouseHasMoved = false;

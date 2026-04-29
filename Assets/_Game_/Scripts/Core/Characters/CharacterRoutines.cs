@@ -21,7 +21,7 @@ public class CharacterRoutines : MonoBehaviour
 		return character.StartCoroutine(character.Routines.WaitCharacterLookPosition(lookPosition));
 	}
 
-	public System.Action OnStarted;
+	public System.Action onStarted, onStopped;
 
 	private object assignedTarget;
 
@@ -174,6 +174,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			StopAllCoroutines();
 			activeInstances.Remove(this);
+			Stopped();
 		}
 	}
 	
@@ -192,7 +193,7 @@ public class CharacterRoutines : MonoBehaviour
 		StopAllRoutines();
 		coroutine = StartCoroutine(routine);
 		StartCoroutine(_WaitComplete());
-		OnStarted?.Invoke();
+		onStarted?.Invoke();
 	}
 	
 	//public Coroutine WaitComplete() => StartCoroutine(_WaitComplete());
@@ -209,7 +210,10 @@ public class CharacterRoutines : MonoBehaviour
 		activeInstances.Remove(this);
 		if(debugMode > 0) Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
 		debugString = "";
+		Stopped();
 	}
+	
+	private void Stopped() => onStopped?.Invoke();
 	
 	private IEnumerator WaitCharacterInteract(PropComponent clickedProp)
 	{

@@ -91,11 +91,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private WeaponData defaultWeapon;
 	[SerializeField] private bool noKarma;
 	[SerializeField] [Range(-1f, 1f)] private float baseKarma = 0.0f;
+	public CharacterRoutines Routines => routines;
 	
 	public void SetLuck(float newValue) => currentLuck = Mathf.Clamp(newValue, -1f, 1f);
 	public void SetKarma(float newValue) => currentKarma = Mathf.Clamp(newValue, -1f, 1f);
 	public bool HasKarma() => !noKarma;
-	public CharacterRoutines Routines => routines;
 	
 	public float lastTimeRested { get; private set; }
 
@@ -144,6 +144,27 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		//agent.SetObstacle(!value);//todo not in selection
 		if (value) StopFollow();
 		onSelectionChanged?.Invoke(value);
+	}
+
+	public bool TryGetClosestEnemy(out CharacterEntity closestEnemy)
+	{
+		closestEnemy = null;
+		
+		var closestDistance = 0f;
+		foreach (var enemy in CharacterEntity.AllCharacters)
+		{
+			if (IsEnemyTo(enemy) && !enemy.IsDead() && enemy.IsCharacterRevealed())
+			{
+				var distance = Vector3.Distance(GetPosition(), enemy.GetPosition());
+				if (!closestEnemy || closestDistance > distance)
+				{
+					closestDistance = distance;
+					closestEnemy = enemy;
+				}
+			}
+		}
+
+		return closestEnemy;
 	}
 
 	public void Rest(bool verbose = true)
@@ -471,6 +492,18 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		follows.enabled = false;
 	}
 
+	public bool TryGetFollowing(out CharacterEntity leader)
+	{
+		leader = null;
+		
+		if (follows.enabled)
+		{
+			leader = follows.GetLeader();
+		}
+
+		return leader != null;
+	}
+
 	public Vector3 GetVelocity()
 	{
 		return GetAgent().velocity;
@@ -667,6 +700,20 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			yield return characterAnimation.WaitEvent(eventType);
 		}
 	}
+	public void SetItemToUse(ItemData itemToUse, bool verbose = false)
+	{
+		if (itemInHand != itemToUse)
+		{
+			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
+			itemInHand = itemToUse;
+			characterAnimation?.WeaponChanged();
+		}
+	}
+
+	public bool HasItemToUse(out ItemData itemToUse)
+	{
+		return (itemToUse = itemInHand) != null;
+	}
 	
 	#region PRIVATE
 	private static List<CharacterEntity> _allCharacters = new List<CharacterEntity>();
@@ -692,6 +739,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private float currentKarma;
 	private float currentLuck = 0.0f;
 	private int dodgeCount;
+	private ItemData itemInHand;
+//	private CharacterLookAt characterLookAt;
 	
 	private void Awake()
 	{
@@ -776,19 +825,5 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 	}
 
-	private ItemData itemInHand;
-	public void SetItemToUse(ItemData itemToUse, bool verbose = false)
-	{
-		if (itemInHand != itemToUse)
-		{
-			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
-			itemInHand = itemToUse;
-			characterAnimation?.WeaponChanged();
-		}
-	}
-
-	public bool HasItemToUse(out ItemData itemToUse)
-	{
-		return (itemToUse = itemInHand) != null;
-	}
+	
 }

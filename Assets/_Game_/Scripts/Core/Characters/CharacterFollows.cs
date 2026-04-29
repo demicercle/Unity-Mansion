@@ -18,6 +18,8 @@ public class CharacterFollows : MonoBehaviour
 		leaderCharacter = newLeader;
 	}
 
+	public CharacterEntity GetLeader() => leaderCharacter;
+
 	private CharacterEntity selfCharacter;
 	private CharacterEntity leaderCharacter;
 	private CharacterAgent agent;
@@ -45,7 +47,7 @@ public class CharacterFollows : MonoBehaviour
 			if (!selfCharacter) Debug.LogError(this + " no character");
 			agent = selfCharacter.GetAgent();
 		}
-		selfCharacter.Routines.OnStarted += OnNewRoutineStarted;
+		selfCharacter.Routines.onStarted += OnNewRoutineStarted;
 		StartCoroutine(FollowCoroutine());
 	}
 
@@ -54,7 +56,7 @@ public class CharacterFollows : MonoBehaviour
 		if (selfCharacter)
 		{
 			if (debugMode>0) Debug.Log(this + " OnDisable");
-			selfCharacter.Routines.OnStarted -= OnNewRoutineStarted;
+			selfCharacter.Routines.onStarted -= OnNewRoutineStarted;
 			StopAllCoroutines();
 			agent.AssignFollowTransform(null);
 			agent.updateRotation = true;
@@ -109,7 +111,7 @@ public class CharacterFollows : MonoBehaviour
 			if (leaderCharacter && agent.velocity.magnitude <= MinVelocityToLook)
 			{
 				agent.updateRotation = false;
-				selfCharacter.LookWorldPosition(leaderCharacter.GetCenterPosition(), Time.deltaTime);
+				//selfCharacter.HeadLookAt(leaderCharacter.GetEyesPosition(), Time.deltaTime);
 			}
 			else
 			{
