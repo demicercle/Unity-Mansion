@@ -8,6 +8,8 @@ using Random = UnityEngine.Random;
 
 public class DiceLauncher : MonoBehaviour
 {
+	public static event System.Action onDiceRollEnds;
+	
 	public Image spriteImage;
 	public Sprite[] numberSprites;
 	public Sprite[] animatedSprites;
@@ -22,7 +24,7 @@ public class DiceLauncher : MonoBehaviour
 	public void LaunchNew()
 	{
 		allowedDiceRolls -= 1;
-		DicePool.RollNewDice();
+		DicePool.RollNewDice(null);
 	}
 
 	private void Awake()
@@ -90,5 +92,6 @@ public class DiceLauncher : MonoBehaviour
 
 		allowedRollsText.enabled = true;
 		launchButton.interactable = allowedDiceRolls > 0;
+		onDiceRollEnds?.Invoke();
 	}
 }

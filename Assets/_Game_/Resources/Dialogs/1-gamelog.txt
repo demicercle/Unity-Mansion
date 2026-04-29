@@ -1,5 +1,5 @@
 ﻿
-
+Dice launched by <CHARACTER>! Result: <RESULT>
 
 
 

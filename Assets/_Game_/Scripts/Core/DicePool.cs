@@ -11,14 +11,15 @@ public static class DicePool
 	public static void RollNewDices(int count)
 	{
 		while(count--> 0)
-			RollNewDice();
+			RollNewDice(null);
 	}
 	
-	public static void RollNewDice()
+	public static void RollNewDice(object instigator)
 	{
 		if (seed == 0 || rng == null)
 			SetSeed(GetRandomSeed());
 
+		lastInstigator = instigator;
 		lastResult = nextResult;
 		nextResult = (float)rng.NextDouble();
 		if(debugMode >0) Debug.Log("DicePool>> Last Result: " + lastResult.ToString("N4") + " Next Result: " + nextResult.ToString("N4"));
@@ -29,6 +30,7 @@ public static class DicePool
 	public static int GetRandomSeed() => int.Parse(System.DateTime.Now.Minute.ToString() + System.DateTime.Now.Second.ToString() + System.DateTime.Now.Millisecond.ToString());
 	
 	public static float LastResult => lastResult;
+	public static object LastInstigator => lastInstigator;
 	public static float NextResult => nextResult;
 	public static int Seed => seed;
 
@@ -42,4 +44,5 @@ public static class DicePool
 	private static float lastResult;
 	private static float nextResult;
 	private static Random rng;
+	private static object lastInstigator;
 }

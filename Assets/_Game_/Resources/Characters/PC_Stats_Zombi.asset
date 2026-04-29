@@ -19,6 +19,6 @@ MonoBehaviour:
   maxMovePoints: 8
   runActionExtraMovePoints: 8
   dodgeCount: 1
-  dodgeChance: 0.1
+  dodgeChance: 0
   luck: 0
   maxHealth: 7

@@ -199,7 +199,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		var rolled = DicePool.LastResult;
 		if(DicePool.debugMode>0) Debug.Log(this + " RollDice takes last result: " + rolled);
-		DicePool.RollNewDice();
+		DicePool.RollNewDice(this);
 		if (!HasKarma()) return rolled;
 		
 		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
@@ -217,6 +217,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return result;
 	}
 
+	public bool CanDodge() => dodgeCount > 0 && characterData.dodgeChance > 0;
 	public float GetDodgeChance() => Mathf.Clamp01(characterData.dodgeChance + GetRemainingMovePoints() * MovePointsToDodge);
 
 	
@@ -297,7 +298,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 		if (!IsUsingRangeWeapon())
 		{
-			while (target.dodgeCount > 0)
+			while (target.CanDodge())
 			{
 				if(debugStats > 0) Debug.Log(target + " try dodge " + this + " dodgeCount=" + target.dodgeCount);
 				target.dodgeCount -= 1;

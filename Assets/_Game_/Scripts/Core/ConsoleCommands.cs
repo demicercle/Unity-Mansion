@@ -123,7 +123,7 @@ public class ConsoleCommands : MonoBehaviour
 	{
 		while (count-- > 0)
 		{
-			DicePool.RollNewDice();
+			DicePool.RollNewDice(null);
 		}
 	}
 
