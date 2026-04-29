@@ -154,7 +154,7 @@ MonoBehaviour:
       _dynamic: 0
   _count: 3
   _faces: 6
-  _result: 12
+  _result: 9
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -282,7 +282,7 @@ MonoBehaviour:
       _dynamic: 0
   _position:
     findName: 
-  _damage: 12
+  _damage: 9
   _radius: 4
   _fallOff:
     serializedVersion: 2
@@ -308,6 +308,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  explosionForce: 100
 --- !u!114 &7167503854543085475
 MonoBehaviour:
   m_ObjectHideFlags: 0

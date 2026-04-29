@@ -27,6 +27,7 @@ public class NavmeshRebuilder : MonoBehaviour
 	private float delay;
 	private float progress;
 	private IEnumerable<Progress> scanProgress;
+	private Rigidbody body;
 
 	private void Awake()
 	{
@@ -59,6 +60,13 @@ public class NavmeshRebuilder : MonoBehaviour
 		
 		if(delay > 0f) 
 			yield return new WaitForSeconds(delay);
+		
+		body =  GetComponent<Rigidbody>();
+		if (body && body.isKinematic == false)
+		{
+			do yield return null;
+			while (body.linearVelocity.magnitude > Consts.MinMagnitude);
+		}
 		
 		while (instances[0] != this) 
 			yield return null;

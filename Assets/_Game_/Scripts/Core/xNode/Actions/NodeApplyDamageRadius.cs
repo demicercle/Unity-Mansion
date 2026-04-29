@@ -9,6 +9,7 @@ public class NodeApplyDamageRadius : GameNode
 	[Input] public float _radius;
 	
 	public AnimationCurve _fallOff = AnimationCurve.EaseInOut(0, 1, 1, 0);
+	[Min(0)] public float explosionForce = 0.0f;
 	
 	protected override void OnScriptStart()
 	{
@@ -30,15 +31,33 @@ public class NodeApplyDamageRadius : GameNode
 			
 			foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskInteraction))
 			{
+				var distance = Vector3.Distance(transform.position, obj.transform.position);
 				if (obj.TryGetComponent(out IAttackable attackable))
 				{
-					var distance = Vector3.Distance(transform.position, obj.transform.position);
 					var amount = _damage * _fallOff.Evaluate(Mathf.Clamp01(distance / _radius));
 					
 					attackable.TakeDamage(new DamageInfo()
 					{
 						amount = amount, isRanged = false
 					}, script.gameObject);
+				}
+			}
+
+			if (explosionForce > 0)
+			{
+				foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskPhysics))
+				{
+					if (!obj.CompareTag(Tags.TagCollide))
+						continue;
+					
+					if (obj.TryGetComponent(out Rigidbody rigidbody))
+					{
+						DebugLogThis(this + " AddExplosionForce " + rigidbody + " " + explosionForce);
+						rigidbody.isKinematic = false;
+						rigidbody.WakeUp();
+						rigidbody.AddExplosionForce(explosionForce, transform.position, _radius);
+						NavmeshRebuilder.RebuildNavigationOn(rigidbody.gameObject);
+					}
 				}
 			}
 		});
