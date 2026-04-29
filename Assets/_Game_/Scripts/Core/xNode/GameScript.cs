@@ -7,7 +7,13 @@ public class GameScript : MonoBehaviour
 {
 	public static int debugMode { get; set; }
 
-	public void Destroy() => Destroy(this);
+	public void DestroyScript(bool destroyGameObject)
+	{
+		if(destroyGameObject)
+			Destroy(gameObject);
+		else
+			Destroy(this);
+	}
 	
 	[SerializeField] private GameScriptGraph graph;
 
@@ -23,7 +29,7 @@ public class GameScript : MonoBehaviour
 		if (!graph)
 		{
 			Debug.LogWarning(this + " has no graph, destroys");
-			Destroy();
+			DestroyScript(false);
 			return;
 		}
 		
