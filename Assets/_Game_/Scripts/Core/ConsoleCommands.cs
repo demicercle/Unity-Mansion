@@ -198,8 +198,8 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("no_detection", "")]
 	public static void NoDetection(int value)
 	{
-		CharacterDetection.forceNoDetection = value > 0;
-		
+		CharacterDetection.forceNoDetection = value > 0;   
+		Debug.Log("no_detection " + value);
 		if (value < 0)
 		{
 			foreach (var partyChar in CharacterEntity.GetPartyCharacters())
