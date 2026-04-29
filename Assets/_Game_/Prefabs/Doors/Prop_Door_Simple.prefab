@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 3377801738707463130}
   - component: {fileID: 7241956466656801432}
   - component: {fileID: 2873865922495436259}
+  - component: {fileID: 391730494764251212}
   m_Layer: 0
-  m_Name: Obstacle
+  m_Name: NavObstacle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -81,6 +82,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GraphUpdateHelper
   size: {x: 0.6, y: 0, z: 0.2}
+--- !u!114 &391730494764251212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2283852087915108632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd42acbbceaf4f30863fe2d411049667, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NavmeshRebuilder
 --- !u!1 &2391487571019325414
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,7 +266,7 @@ GameObject:
   - component: {fileID: 2499502545850936314}
   - component: {fileID: 2534705340137759022}
   m_Layer: 14
-  m_Name: Wall
+  m_Name: BlockVision
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -409,7 +422,6 @@ MonoBehaviour:
   saveProp: 1
   graphUpdate: {fileID: 7241956466656801432}
   onlyOnce: 1
-  rebuildNavigation: 1
   autoTriggerDelay: 0
   animatorTrigger: Toggle
   triggerDelay: 0.2
@@ -443,6 +455,18 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 2391487571019325414}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 2717041642884981971}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 6

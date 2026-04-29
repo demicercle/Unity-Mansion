@@ -608,7 +608,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
 			if(detection) detection.ClearAll();
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
+			GameTurnManager.Instance.SetNavigationDirty();
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();

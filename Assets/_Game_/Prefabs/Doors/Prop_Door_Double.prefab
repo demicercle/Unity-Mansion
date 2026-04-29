@@ -164,8 +164,8 @@ GameObject:
   - component: {fileID: 4370615069523771355}
   - component: {fileID: 7397524866164420617}
   - component: {fileID: 587715760064613030}
-  m_Layer: 7
-  m_Name: Wall
+  m_Layer: 14
+  m_Name: BlockVision
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -274,8 +274,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6678441125461939849}
   - component: {fileID: 1952733099085584136}
+  - component: {fileID: 1975796208147005191}
   m_Layer: 0
-  m_Name: Obstacle
+  m_Name: NavObstacle (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -331,6 +332,18 @@ MonoBehaviour:
   legacyMode: 0
   legacyUseWorldSpace: 0
   setTagCompatibility: -1
+--- !u!114 &1975796208147005191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5422619696475103785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd42acbbceaf4f30863fe2d411049667, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NavmeshRebuilder
 --- !u!1 &5979024513141798256
 GameObject:
   m_ObjectHideFlags: 0
@@ -341,8 +354,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6803646578418546483}
   - component: {fileID: 1697219871550987023}
+  - component: {fileID: 1186756798156826427}
   m_Layer: 0
-  m_Name: Obstacle
+  m_Name: 'NavObstacle '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -398,6 +412,18 @@ MonoBehaviour:
   legacyMode: 0
   legacyUseWorldSpace: 0
   setTagCompatibility: -1
+--- !u!114 &1186756798156826427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5979024513141798256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd42acbbceaf4f30863fe2d411049667, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NavmeshRebuilder
 --- !u!1 &7939727362816494209
 GameObject:
   m_ObjectHideFlags: 0
@@ -452,8 +478,8 @@ MonoBehaviour:
   cursorType: 6
   consumeAction: 3
   saveProp: 1
+  graphUpdate: {fileID: 0}
   onlyOnce: 1
-  rebuildNavigation: 1
   autoTriggerDelay: 0
   animatorTrigger: Toggle
   triggerDelay: 0.2
@@ -466,6 +492,54 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: AudioTrigger, Assembly-CSharp
         m_MethodName: PlayNext
         m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 5979024513141798256}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 5422619696475103785}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1778287930946362042}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 8076320565232302806}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -521,8 +595,8 @@ GameObject:
   - component: {fileID: 8206040002685070791}
   - component: {fileID: 5246266327273405981}
   - component: {fileID: 4506877477984545139}
-  m_Layer: 7
-  m_Name: Wall
+  m_Layer: 14
+  m_Name: BlockVision (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

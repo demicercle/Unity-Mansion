@@ -25,7 +25,7 @@ public class PropComponent : MonoBehaviour
 	
 	[Header("Trigger")]
 	[SerializeField] private bool onlyOnce;
-	[SerializeField] private bool rebuildNavigation;  // TODO component NavMeshRebuilder
+	//[SerializeField] private bool rebuildNavigation;  // TODO component NavMeshRebuilder
 	[Min(0f)][SerializeField] private float autoTriggerDelay;
 	[SerializeField] private string animatorTrigger;
 	[SerializeField] private float triggerDelay = 0.0f; // TODO use anim events
@@ -107,8 +107,8 @@ public class PropComponent : MonoBehaviour
 			SetDisabled(true);
 		}
 		
-		if(rebuildNavigation) 
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
+	//	if(rebuildNavigation) 
+	//		GameTurnManager.Instance.SetNavigationDirty();
 	}
 	
 	public CharacterAction GetInteractAction() => consumeAction;
@@ -131,8 +131,8 @@ public class PropComponent : MonoBehaviour
 		
 		animFinished = true;
 
-		if(rebuildNavigation) 
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
+	//	if(rebuildNavigation) 
+	//		GameTurnManager.Instance.SetNavigationDirty();
 	}
 	
 	private void SetDisabled(bool value)
@@ -165,8 +165,8 @@ public class PropComponent : MonoBehaviour
 
 	private IEnumerator Start()
 	{
-		if(rebuildNavigation) 
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
+	//	if(rebuildNavigation) 
+	//		GameTurnManager.Instance.SetNavigationDirty();
 
 		if (autoTriggerDelay > 0f)
 		{
@@ -201,7 +201,7 @@ public class PropComponent : MonoBehaviour
 		var wasEnabled = graphUpdate.enabled;
 		graphUpdate.enabled = GameTurnManager.Instance.IsPlayerTurn() || !GameTurnManager.Instance.IsTurnBasedMode();
 		if(wasEnabled != graphUpdate.enabled) 
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
+			GameTurnManager.Instance.SetNavigationDirty();
 	}
 	#endregion
 	

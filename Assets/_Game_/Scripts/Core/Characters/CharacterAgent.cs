@@ -79,7 +79,8 @@ public class CharacterAgent : MonoBehaviour
 					-Vector3.right * aiPath.radius,
 				};
 			}
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
+
+			GameTurnManager.Instance.SetNavigationDirty();
 		}
 		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
 	}
@@ -409,7 +410,7 @@ public class CharacterAgent : MonoBehaviour
 		{
 			aiPath.canSearch = false;
 			yield return null;
-		} while (NavmeshRebuilder.IsRebuildingAsync());
+		} while (GameTurnManager.Instance.IsNavigationDirty());
 		aiPath.canSearch = true;
 	}
 	
@@ -429,10 +430,9 @@ public class CharacterAgent : MonoBehaviour
 		do
 		{
 			if(!aiPath.pathPending || !aiPath.hasPath)
-				AssignDestination(dest, true); 
-			
-			while (NavmeshRebuilder.IsRebuildingAsync())
-				yield return null;
+				AssignDestination(dest, true);
+
+			yield return StartCoroutine(WaitNavmesh());
 			
 			UpdatePathAndTarget(true);
 			if (timeout >= TimeOut) break;

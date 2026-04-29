@@ -56,7 +56,6 @@ public class NodeApplyDamageRadius : GameNode
 						rigidbody.isKinematic = false;
 						rigidbody.WakeUp();
 						rigidbody.AddExplosionForce(explosionForce, transform.position, _radius);
-						NavmeshRebuilder.RebuildNavigationOn(rigidbody.gameObject);
 					}
 				}
 			}

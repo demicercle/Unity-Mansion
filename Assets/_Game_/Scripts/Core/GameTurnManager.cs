@@ -139,8 +139,9 @@ public class GameTurnManager : MonoBehaviour
 			yield return new WaitForSeconds(postLoadDuration);
 		} while (SceneLoader.AnyInstanceActive);
 
-		Debug.Log(" wait NavmeshRebuilder(s)");
-		do yield return null;	while (NavmeshRebuilder.IsRebuildingAsync()); // wait rebuild
+		navmeshDirty = true;
+		StartCoroutine(DoNavmeshRebuild());
+		yield return WaitNavigationDirty();
 		
 		Debug.Log(" loading scene complete");
 		
@@ -282,11 +283,14 @@ public class GameTurnManager : MonoBehaviour
 				}
 				
 				yield return new WaitForSeconds(realTimeTicks);
+				yield return WaitNavigationDirty();
 			}
 
 			CharacterSelection.SelectCharacter(null);
 			
 			yield return new WaitForSeconds(turnChangedSeconds);
+			
+			yield return WaitNavigationDirty();
 			
 			yield return YieldRoutines();
 		
@@ -319,9 +323,7 @@ public class GameTurnManager : MonoBehaviour
 				}
 
 				otherCharacter.GetAgent().SetObstacle(false);
-				
-				do yield return null;
-				while (NavmeshRebuilder.IsRebuildingAsync());
+				yield return WaitNavigationDirty();
 				
 				if(debugMode > 0) Debug.Log(this + " start think " + otherBrain);
 				do
@@ -376,6 +378,8 @@ public class GameTurnManager : MonoBehaviour
 				Debug.Log(this + " Switch Turn Based Mode");
 			}
 			
+			yield return WaitNavigationDirty();
+			
 		} while (!turnBasedMode);
 	}
 	
@@ -388,6 +392,44 @@ public class GameTurnManager : MonoBehaviour
 			if(debugMode > 0) Debug.Log(this + " WaitRoutines " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
 		}
 		while (CharacterRoutines.AnyActiveRoutines()) ;
+	}
+
+	private bool navmeshDirty = true;
+	private bool isNavmeshRebuild = false;
+
+	public void SetNavigationDirty() => navmeshDirty = true;
+	public bool IsNavigationDirty() => navmeshDirty || isNavmeshRebuild;
+
+	private Coroutine WaitNavigationDirty()
+	{
+		return StartCoroutine(DoWaitNavigationDirty());
+	}
+
+	private IEnumerator DoWaitNavigationDirty()
+	{
+		do
+		{
+			yield return null;
+		} while (IsNavigationDirty());
+	}
+	
+	private IEnumerator DoNavmeshRebuild()
+	{
+		while (true)
+		{
+			if (!navmeshDirty) yield return null;
+			else
+			{
+				navmeshDirty = false;
+				isNavmeshRebuild = true;
+				foreach (var pr in AstarPath.active.ScanAsync())
+				{
+					if (NavmeshRebuilder.debugMode > 0) Debug.Log(this + " Scanning... " + pr.progress);
+					yield return null;
+				}
+				isNavmeshRebuild = false;
+			}
+		}
 	}
 	
 	private void EndTurn()
