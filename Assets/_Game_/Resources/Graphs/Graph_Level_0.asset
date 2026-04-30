@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6727653028786308452
+--- !u!114 &-373289405852831925
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,39 +9,51 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
-  m_Name: Debug Log
-  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
+  m_Script: {fileID: 11500000, guid: 7374969646684444b9cadeaabd49483e, type: 3}
+  m_Name: Interact
+  m_EditorClassIdentifier: Assembly-CSharp::NodeInteract
   graph: {fileID: 11400000}
-  position: {x: 276.5, y: 232.5}
+  position: {x: 40, y: -56}
   ports:
     keys:
     - _in
-    - message
+    - _prop
+    - _instigator
     values:
     - _fieldName: _in
-      _node: {fileID: -6727653028786308452}
+      _node: {fileID: -373289405852831925}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: Out2
+      - fieldName: Out1
         node: {fileID: 3971757747397813678}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: message
-      _node: {fileID: -6727653028786308452}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
+    - _fieldName: _prop
+      _node: {fileID: -373289405852831925}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  message: Enemy Turn 2
-  debugBreak: 1
+    - _fieldName: _instigator
+      _node: {fileID: -373289405852831925}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _prop:
+    findName: Prop_Door_Double_0
+  _instigator:
+    findName: 
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57,9 +69,7 @@ MonoBehaviour:
   nodes:
   - {fileID: 1043153840778916638}
   - {fileID: 3971757747397813678}
-  - {fileID: 8585694892713774460}
-  - {fileID: 4572567705195386026}
-  - {fileID: -6727653028786308452}
+  - {fileID: -373289405852831925}
 --- !u!114 &1043153840778916638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,7 +135,7 @@ MonoBehaviour:
   m_Name: Switch Int
   m_EditorClassIdentifier: Assembly-CSharp::NodeSwitchInt
   graph: {fileID: 11400000}
-  position: {x: -40, y: 24}
+  position: {x: -264, y: -24}
   ports:
     keys:
     - _in
@@ -159,10 +169,7 @@ MonoBehaviour:
       _node: {fileID: 3971757747397813678}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _in
-        node: {fileID: 8585694892713774460}
-        reroutePoints: []
+      connections: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -173,7 +180,7 @@ MonoBehaviour:
         PublicKeyToken=null
       connections:
       - fieldName: _in
-        node: {fileID: 4572567705195386026}
+        node: {fileID: -373289405852831925}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
@@ -183,97 +190,10 @@ MonoBehaviour:
       _node: {fileID: 3971757747397813678}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _in
-        node: {fileID: -6727653028786308452}
-        reroutePoints: []
+      connections: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 1
-  _index: 1
+  _index: 2
   loop: 0
---- !u!114 &4572567705195386026
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
-  m_Name: Debug Log
-  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
-  graph: {fileID: 11400000}
-  position: {x: 280, y: 88}
-  ports:
-    keys:
-    - _in
-    - message
-    values:
-    - _fieldName: _in
-      _node: {fileID: 4572567705195386026}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: Out1
-        node: {fileID: 3971757747397813678}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: message
-      _node: {fileID: 4572567705195386026}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  message: Enemy Turn 1
-  debugBreak: 1
---- !u!114 &8585694892713774460
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
-  m_Name: Debug Log
-  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
-  graph: {fileID: 11400000}
-  position: {x: 280, y: -56}
-  ports:
-    keys:
-    - _in
-    - message
-    values:
-    - _fieldName: _in
-      _node: {fileID: 8585694892713774460}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: Out0
-        node: {fileID: 3971757747397813678}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: message
-      _node: {fileID: 8585694892713774460}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  message: Enemy Turn 0
-  debugBreak: 1
