@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public class CharacterDetection : MonoBehaviour
 {
@@ -12,51 +12,36 @@ public class CharacterDetection : MonoBehaviour
 	
 	public System.Action<CharacterEntity> onCharacterDetected;
 	public System.Action<CharacterEntity> onCharacterLost;
+
+	public System.Action<float> onAwarenessChanged;
 	
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
-	[SerializeField] private LayerMask obstructionLayers;
 	[SerializeField] private bool setDetectedOnDamaged = true;
 	[SerializeField] private bool lookAtDetected = true;
-	[SerializeField] private bool warnOthersInRoom = true;
 	[SerializeField] private bool drawGizmos;
 	[SerializeField] [Min(0f)] private float looseTargetDistance;
+	[SerializeField] [Min(0f)] private float awarenessScale = 1.0f;
+	[SerializeField] [Min(0f)] private float distanceScale = 10.0f;
 	
 	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
-	
+
+	public float GetMaxSeeingDistance() => Mathf.Max(hearingDistance, seeingDistance);
 	public CharacterEntity[] GetDetectedCharacters() => detectedCharacters.ToArray();
 	
-	public void SetDetected(CharacterEntity otherCharacter, bool value)
+	public void SetCharacterDetected(CharacterEntity otherCharacter, bool value)
 	{
 		if (value)
 		{
 			if (!detectedCharacters.Contains(otherCharacter))
 			{
+				awarenessMap.Remove(otherCharacter);
+				awarenessMap.Add(otherCharacter, 1.0f);
+				NotifyAwarenessChanged();
+				
 				if(debugMode > 0) Debug.Log(this + " detects " + otherCharacter);
 				detectedCharacters.Add(otherCharacter);
-				
-				if (selfCharacter.IsEnemyTo(otherCharacter) && warnOthersInRoom)
-				{
-					if (RoomTrigger.TryGetRoom(selfCharacter, out var selfRoom))
-					{
-						var others = selfRoom.GetCharacters();
-						foreach (var other in others)
-						{
-							if (other == selfCharacter) continue;
-							if (other.GetCurrentFaction() == selfCharacter.GetCurrentFaction() 
-							    && !other.IsDead()
-							    && !other.HasDetectedOther(selfCharacter))
-							{
-								if (other.TryGetComponent(out CharacterDetection otherDetection))
-								{
-									if(debugMode > 0) Debug.Log(this + " warnOthersInRoom " + otherDetection + " SetDetected " + otherCharacter);
-									otherDetection.SetDetected(otherCharacter, true);
-								}
-							}
-						}
-					}
-				}
 				
 				onCharacterDetected?.Invoke(otherCharacter);
 				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, true);
@@ -69,6 +54,9 @@ public class CharacterDetection : MonoBehaviour
 		{
 			if (detectedCharacters.Contains(otherCharacter))
 			{
+				awarenessMap.Remove(otherCharacter);
+				NotifyAwarenessChanged();
+				
 				if(debugMode > 0) Debug.Log(this + " looses " + otherCharacter);
 				detectedCharacters.Remove(otherCharacter);
 				onCharacterLost?.Invoke(otherCharacter);
@@ -80,8 +68,33 @@ public class CharacterDetection : MonoBehaviour
 	public void ClearAll() => detectedCharacters.Clear();
 
 	private List<CharacterEntity> detectedCharacters = new List<CharacterEntity>();
+	private Dictionary<CharacterEntity, float> awarenessMap = new Dictionary<CharacterEntity, float>();
 	private CharacterEntity selfCharacter;
 	private string debugString;
+
+	private void AddAwareness(CharacterEntity anyCharacter, float value)
+	{
+		if (value == 0f)
+			return;
+		
+		if (!awarenessMap.TryAdd(anyCharacter, value))
+		{
+			awarenessMap[anyCharacter] += value;
+		}
+
+		if (awarenessMap[anyCharacter] >= 1f)
+		{
+			SetCharacterDetected(anyCharacter, true);
+		}
+		else if (awarenessMap[anyCharacter] <= 0f)
+		{
+			awarenessMap.Remove(anyCharacter);
+		}
+		
+		NotifyAwarenessChanged();
+	}
+
+	private void NotifyAwarenessChanged() => onAwarenessChanged?.Invoke(awarenessMap.Values.OrderBy(v => v).LastOrDefault());
 	
 	private void Awake()
 	{
@@ -113,6 +126,11 @@ public class CharacterDetection : MonoBehaviour
 		selfCharacter.onDamagedBy -= OnDamagedBy;
 	}
 
+	private void Start()
+	{
+		NotifyAwarenessChanged();
+	}
+
 	private void OnTurnStarted()  => OnAnyCharacterMoved(selfCharacter);
 	
 	private void OnTurnEnded()  => OnAnyCharacterMoved(selfCharacter);
@@ -122,7 +140,7 @@ public class CharacterDetection : MonoBehaviour
 		if(debugMode > 1) Debug.Log(this + " OnDamagedBy " + other);
 		
 		if (setDetectedOnDamaged)
-			SetDetected(other, true);
+			SetCharacterDetected(other, true);
 	}
 
 	private void OnAnyCharacterUsesAction(CharacterEntity anyCharacter, CharacterAction _) =>
@@ -151,16 +169,25 @@ public class CharacterDetection : MonoBehaviour
 		{
 			if (!detectedCharacters.Contains(anyCharacter))
 			{
+				var scale = anyCharacter.GetStealth() * awarenessScale;
+				var dist = NavUtils.NavDistanceRoundY(selfCharacter.GetPosition(), anyCharacter.GetPosition());
+				if (dist < hearingDistance)
+					scale *= Mathf.Lerp(distanceScale, 1.0f, dist / hearingDistance);
+				
 				if (IsCharacterVisible(anyCharacter))
 				{
-					SetDetected(anyCharacter, true);
+					AddAwareness(anyCharacter, scale * Time.deltaTime);
+				}
+				else
+				{
+					AddAwareness(anyCharacter, -scale * Time.deltaTime);
 				}
 			}
 			else
 			{
 				if (looseTargetDistance > 0 && Vector3.Distance(selfCharacter.GetPosition(), anyCharacter.GetPosition()) > looseTargetDistance)
 				{
-					SetDetected(anyCharacter, false);
+					SetCharacterDetected(anyCharacter, false);
 				}
 			}
 		}
@@ -227,7 +254,7 @@ public class CharacterDetection : MonoBehaviour
 	{
 		Vector3 eyesPos = selfCharacter.GetEyesPosition();
 		Vector3 otherPos =  otherCharacter.GetCenterPosition();
-		if(Physics.Linecast(eyesPos, otherPos, out var hit,obstructionLayers))
+		if(Physics.Linecast(eyesPos, otherPos, out var hit,Layers.MaskDetection))
 		{
 			if (debugMode > 0) DebugDrawer.Line(eyesPos, hit.point, Color.red);
 			return false;
@@ -237,7 +264,6 @@ public class CharacterDetection : MonoBehaviour
 		return true;
 	}
 	
-	#if UNITY_EDITOR
 	private void LateUpdate()
 	{
 		if (debugMode > 0)
@@ -264,14 +290,9 @@ public class CharacterDetection : MonoBehaviour
 			DebugDrawer.Line(forward, right, lineColor);
 			DebugDrawer.Line(right, center, lineColor);
 
-			debugString = "";
-			foreach (var otherCharacter in detectedCharacters)
+			foreach (var entry in awarenessMap)
 			{
-				if (!string.IsNullOrEmpty(debugString)) debugString += "\n";
-				debugString += ">" + otherCharacter.name;
-				if (debugMode > 0)
-					DebugDrawer.Line(selfCharacter.GetEyesPosition(), otherCharacter.GetCenterPosition(), 
-						ColorSettings.GetCharacterColor(selfCharacter));
+				DebugDrawer.Line(center, entry.Key.GetCenterPosition(), Utils.ColorAlpha(lineColor, entry.Value));
 			}
 		}
 	}
@@ -280,10 +301,17 @@ public class CharacterDetection : MonoBehaviour
 	{
 		if (debugMode > 0)
 		{
+			debugString = "";
+			foreach (var entry in awarenessMap)
+			{
+				if (!string.IsNullOrEmpty(debugString)) debugString += "\n";
+				debugString += entry.Key.name + " : " + entry.Value.ToString("N2");
+			}
 			Utils.DrawWorldGUI(selfCharacter.GetEyesPosition(), debugString);
 		}
 	}
 	
+#if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
 		if (!drawGizmos) return;

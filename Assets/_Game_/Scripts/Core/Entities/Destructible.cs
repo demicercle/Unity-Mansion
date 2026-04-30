@@ -20,6 +20,7 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	public Vector3 GetPosition() => transform.position;
 	public float GetRadius() => radius;
+	public float GetHeight() => radius;
 
 	public bool damagedWithRangeWeapons;
 	public UnityEvent takeDamage;
@@ -60,13 +61,14 @@ public class Destructible : MonoBehaviour, IAttackable
 
 		gameObject.layer = Layers.LayerIgnore;
 		
-		NavmeshRebuilder.RebuildNavigationOn(gameObject);
+		NavmeshRebuilder.SetNavigationDirty();
 		
 		foreach (var rb in rigidbodies)
 		{
 			if (!rb) continue;
 			rb.isKinematic = false;
 			rb.useGravity = true;
+			//rb.angularVelocity = new Vector3(0, Mathf.PI, 0);
 		}
 			
 		breaks?.Invoke();

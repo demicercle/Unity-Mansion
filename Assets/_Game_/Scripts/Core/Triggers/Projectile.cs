@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -52,8 +53,16 @@ public class Projectile : MonoBehaviour
 			float t = (duration * i) / segments;
 			Vector3 currentPoint = startPoint + initialVelocity * t + gravity * (0.5f * t * t);
 			//DebugDrawer.Line(previousPoint, currentPoint, Color.magenta, 1.0f);
+			if (points.Count > 0)
+			{
+				previousPoint = points.Last();
+				if (Physics.Linecast(currentPoint, previousPoint, out var hit, Layers.MaskProjectile))
+				{
+					break; // hit something
+				}
+			}
+			
 			points.Add(currentPoint);
-			previousPoint = currentPoint;
 		}
 		
 		lineRenderer.enabled = true;

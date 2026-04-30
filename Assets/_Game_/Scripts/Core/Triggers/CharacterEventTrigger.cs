@@ -22,8 +22,10 @@ public class CharacterEventTrigger : MonoBehaviour
 	[Space]
 	[Header("Action Events")]
 	[SerializeField] private List<ActionEvent> actionEvents;
-	[Space]
-	[Header("Other Events")]
+
+	[Space] [Header("Other Events")] 
+	public UnityEvent onSpawned;
+	public UnityEvent<bool> onPartyChanged;
 	public UnityEvent onDamaged;
 	public UnityEvent onDeath;
 	public UnityEvent onHealed;
@@ -31,6 +33,7 @@ public class CharacterEventTrigger : MonoBehaviour
 	public UnityEvent onAttack;
 	public UnityEvent<bool> onUseRangeWeapon;
 	public UnityEvent onLastKill;
+	public UnityEvent<float> onAwarenessChanged;
 
 	[ContextMenu("Find Character")]
 	private void FindCharacter()
@@ -56,10 +59,16 @@ public class CharacterEventTrigger : MonoBehaviour
 	private void OnEnable()
 	{
 		if (!character) return;
+		character.onSpawned += onSpawned.Invoke;
 		character.onUseAction += OnCharacterUseAction;
 		character.onDamaged += OnCharacterDamaged;
 		character.onDead += OnCharacterDeath;
 		character.onHealed += OnCharacterHealed;
+		character.onPartyIndexChanged += OnPartyIndexChanged;
+		if (character.TryGetComponent(out CharacterDetection detection))
+		{
+			detection.onAwarenessChanged += onAwarenessChanged.Invoke;
+		}
 		GameTurnManager.Instance.onTurnStarted += OnTurnChanged;
 		GameTurnManager.Instance.onTurnEnded += OnTurnChanged;
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
@@ -68,13 +77,24 @@ public class CharacterEventTrigger : MonoBehaviour
 	private void OnDisable()
 	{
 		if (!character) return;
+		character.onSpawned -= onSpawned.Invoke;
 		character.onUseAction -= OnCharacterUseAction;
 		character.onDamaged -= OnCharacterDamaged;
 		character.onDead -= OnCharacterDeath;
 		character.onHealed -= OnCharacterHealed;
+		character.onPartyIndexChanged -= OnPartyIndexChanged;
+		if (character.TryGetComponent(out CharacterDetection detection))
+		{
+			detection.onAwarenessChanged -= onAwarenessChanged.Invoke;
+		}
 		GameTurnManager.Instance.onTurnStarted -= OnTurnChanged;
 		GameTurnManager.Instance.onTurnEnded -= OnTurnChanged;
 		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+	}
+
+	private void OnPartyIndexChanged(int newIndex, int count)
+	{
+		onPartyChanged?.Invoke(newIndex >= 0);
 	}
 
 	private void OnCharacterUseAction(CharacterAction action, object target)

@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 4816092130728771588}
   - component: {fileID: 3083728991372862651}
   m_Layer: 5
-  m_Name: _GameConsole
+  m_Name: '#GameConsole'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -655,16 +655,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09cf56a0f4054f288362fbccb9156587, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConsoleCommands
-  skipCommands: 0
-  commandsOnStart:
-  - '#debug_agent 2'
-  - '#debug_follows 1'
-  - '#debug_detection 1'
-  - '#debug_brains 1'
-  - '#debug_routines 1'
-  - '#debug_anim 1'
-  - '#debug_gtm 1'
-  - '#debug_script 1'
+  batchCommands: {fileID: 4900000, guid: 6c67ba3924b84638ab68e29cf291fc4e, type: 3}
+  commandsOnStart: []
 --- !u!1 &1720306999441167422
 GameObject:
   m_ObjectHideFlags: 0

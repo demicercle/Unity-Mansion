@@ -10,13 +10,37 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26b91483504440d7b3e2d5878f8dde34, type: 3}
-  m_Name: BaseballBat
+  m_Name: WP_BaseballBat
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   minDamage: 2
   maxDamage: 4
   isRanged: 0
   attackRange: 0
-  hitChance: 0.75
+  hitChance: 0.6
+  rangeHitCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   noAttack: 0
   rpgWeaponR: 3
   rpgWeaponL: -1

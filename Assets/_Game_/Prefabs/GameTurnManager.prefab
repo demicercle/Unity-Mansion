@@ -47,9 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nextLevelName: Level_0
-  firstTurnIsPlayer: 1
   skipInvisibleCharacters: 1
-  restCharacterAtFirstTurn: 0
   restInterval: 1.5
   cameraStartZoom: 0.204
   realTimeTicks: 1
@@ -68,10 +66,10 @@ MonoBehaviour:
   - {fileID: 1961438188781018041, guid: 1abf13e0d98417f43b67e3c232d68eba, type: 3}
   debugGUIRect:
     serializedVersion: 2
-    x: 8
-    y: 128
-    width: 256
-    height: 512
+    x: 0.64
+    y: 0
+    width: 0.35
+    height: 1
 --- !u!1001 &4690182601283876028
 PrefabInstance:
   m_ObjectHideFlags: 0

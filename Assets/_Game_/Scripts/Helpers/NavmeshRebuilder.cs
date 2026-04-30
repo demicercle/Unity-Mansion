@@ -10,90 +10,48 @@ public class NavmeshRebuilder : MonoBehaviour
 {
 	public static int debugMode { get; set; }
 
-	public static bool IsRebuildingAsync() => instances.Count > 0;
+	public static void SetNavigationDirty() => navmeshDirty = true;
+	public static bool IsNavigationDirty() => navmeshDirty || isNavmeshRebuild;
 
-	public static void RebuildNavigationOn(GameObject go, float delay = 0.1f)
+	private bool isMainInstance;
+	private static bool navmeshDirty;
+	private static bool isNavmeshRebuild;
+
+	public void SetDirty()
 	{
-		go.AddComponent<NavmeshRebuilder>().delay = delay;
+		SetNavigationDirty();
 	}
 	
-	private static List<NavmeshRebuilder> instances = new List<NavmeshRebuilder>();
-	
-	public void Activate() => enabled = true; // To be used in unity animation
-
-	[SerializeField] private bool destroySelf = true;
-	[SerializeField] private bool destroyGameObject = false;
-	
-	private float delay;
-	private float progress;
-	private IEnumerable<Progress> scanProgress;
-
-	private void Awake()
-	{
-		if(debugMode > 0) Debug.Log(this + " Awake");
-		
-		foreach (var other in GetComponents<NavmeshRebuilder>())
-		{
-			if (other != this)
-				Destroy(other); // take priority
-		}
-	}
-
 	private void OnEnable()
 	{
-		StartCoroutine(DoRebuild());
+		SetNavigationDirty();
 	}
 
 	private void OnDisable()
 	{
-		if (instances.Contains(this))
-			instances.Remove(this);
-		
-		StopAllCoroutines();
+		SetNavigationDirty();
 	}
 
-	IEnumerator DoRebuild()
+	private IEnumerator Start()
 	{
-		instances.Add(this);
-		if(debugMode >0) Debug.Log(this + " RebuildNavigationAsync Start " + delay);
-		
-		if(delay > 0f) 
-			yield return new WaitForSeconds(delay);
-		
-		while (instances[0] != this) 
-			yield return null;
+		isMainInstance = GetComponent<GameTurnManager>();
+		if(!isMainInstance)
+			yield break;
 
-		foreach (Progress pr in AstarPath.active.ScanAsync())
+		while (true)
 		{
-			progress = pr.progress;
-			if(debugMode > 1) Debug.Log(this + " Scanning... " + pr.ToString());
-			yield return null;
-		}
-
-		instances.Remove(this);
-		
-		if (destroyGameObject) 
-			Destroy(gameObject);
-		else if (destroySelf)
-			Destroy(this);
-		else
-			enabled = false;
-
-		foreach (var character in CharacterEntity.AllCharacters)
-		{
-			var agent = character.GetAgent();
-			if (agent.IsActive())
+			if (!navmeshDirty) yield return null;
+			else
 			{
-				agent.RecalculatePath();
+				navmeshDirty = false;
+				isNavmeshRebuild = true;
+				foreach (var pr in AstarPath.active.ScanAsync())
+				{
+					if (NavmeshRebuilder.debugMode > 0) Debug.Log(this + " Scanning... " + pr.progress);
+					yield return null;
+				}
+				isNavmeshRebuild = false;
 			}
-		}
-	}
-
-	private void OnGUI()
-	{
-		if (debugMode > 0)
-		{
-			Utils.DrawWorldGUI(transform.position, progress.ToString("N2"));
 		}
 	}
 }

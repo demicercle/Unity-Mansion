@@ -20,8 +20,8 @@ public class CharacterAgent : MonoBehaviour
 	private const float WaypointSearchSeconds = 0.10f;
 	
 	public static int debugMode { get; set; }
-	
-	[Header("Movement")]
+
+	//[Header("Movement")] [SerializeField] private bool forceNoObstacle = false;
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
@@ -61,6 +61,7 @@ public class CharacterAgent : MonoBehaviour
 		if (isObstacle == value)
 			return;
 
+		rvoController.enabled = !value;
 		isObstacle = value;
 		if (debugMode > 0) Debug.Log(this + " SetObstacle " + isObstacle);
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
@@ -78,7 +79,8 @@ public class CharacterAgent : MonoBehaviour
 					-Vector3.right * aiPath.radius,
 				};
 			}
-			NavmeshRebuilder.RebuildNavigationOn(gameObject);
+
+			NavmeshRebuilder.SetNavigationDirty();
 		}
 		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
 	}
@@ -408,7 +410,7 @@ public class CharacterAgent : MonoBehaviour
 		{
 			aiPath.canSearch = false;
 			yield return null;
-		} while (NavmeshRebuilder.IsRebuildingAsync());
+		} while (NavmeshRebuilder.IsNavigationDirty());
 		aiPath.canSearch = true;
 	}
 	
@@ -428,10 +430,9 @@ public class CharacterAgent : MonoBehaviour
 		do
 		{
 			if(!aiPath.pathPending || !aiPath.hasPath)
-				AssignDestination(dest, true); 
-			
-			while (NavmeshRebuilder.IsRebuildingAsync())
-				yield return null;
+				AssignDestination(dest, true);
+
+			yield return StartCoroutine(WaitNavmesh());
 			
 			UpdatePathAndTarget(true);
 			if (timeout >= TimeOut) break;
@@ -466,10 +467,10 @@ public class CharacterAgent : MonoBehaviour
 
 	public void SetDefaultReachDistance() => aiPath.endReachedDistance = endReachDistance;
 
-	public void EnableAvoidance(bool b)
+	/*public void EnableAvoidance(bool b)
 	{
-		rvoController.enabled = b;
-	}
+		rvoController.enabled = b || forceNoObstacle;
+	}*/
 	   
 	public bool pathPending => aiPath.pathPending || lastPath == null || lastPath.Length <= 1;
 
@@ -525,6 +526,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.radius = radius;
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
+		aiPath.pickNextWaypointDist = radius + GetMinReachDistance();
 		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
 		if(Application.isPlaying) aiPath.gravity = Physics.gravity; // force gravity
 		rvoController = GetComponent<RVOController>();
@@ -570,13 +572,22 @@ public class CharacterAgent : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (lastPath?.Length > 0 && debugMode > 0) DebugDrawer.Path(lastPath, false, isPathValid ? Color.cyan : Color.red);
-		if (hasDestination && debugMode > 0) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, isPathValid ? Color.cyan : Color.red);
+		//rvoController.enabled = !_selfCharacter.IsCurrentTurn() || !_selfCharacter.IsSelected();
+		
+		if (debugMode > 0)
+		{
+			if (lastPath?.Length > 0) DebugDrawer.Path(lastPath, false, isPathValid ? Color.cyan : Color.red);
+			if (hasDestination) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, isPathValid ? Color.cyan : Color.red);
+			if (rvoController.enabled) DebugDrawer.WireCapsule(transform.position, transform.rotation, rvoController.radius, rvoController.height, Color.magenta, 0f);
+		}
+		
 		
 		//if (CharacterRoutines.AnyActiveRoutines()) // todo
 		//	UpdatePathAndTarget(true);
 	}
 
+	private Vector3[] drawPath;
+	private float maxDrawLength;
 	private bool[] shouldDrawPath = new []{false,false};
 	private bool[] isDrawingPath = new []{false,false};
 	private void UpdatePathAndTarget() => UpdatePathAndTarget(true);
@@ -603,29 +614,38 @@ public class CharacterAgent : MonoBehaviour
 		                    && lastPath.Length > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();
-
+		
 		if (force || shouldDrawPath[0] != isDrawingPath[0])
 		{
+			drawPath = lastPath;
 			pathRenderers[0].enabled = isDrawingPath[0] = shouldDrawPath[0];
 			if (pathRenderers[0].enabled) // draw path thin
 			{
 				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(_selfCharacter.GetCurrentFaction());
-				pathRenderers[0].positionCount = lastPath.Length;
+				pathRenderers[0].positionCount = drawPath.Length;
 				pathRenderers[0].useWorldSpace = true;
-				pathRenderers[0].SetPositions(lastPath);
+				pathRenderers[0].SetPositions(drawPath);
 			}
 		}
 
 		if (force || shouldDrawPath[1] != isDrawingPath[1])
 		{
+			drawPath = lastPath;
 			pathRenderers[1].enabled = isDrawingPath[1] = shouldDrawPath[1];
 			if (pathRenderers[1].enabled) // draw path thick
 			{
-				lastPath = Utils.LimitPathTotalLength(lastPath, _selfCharacter.GetRemainingMovePoints());
+				maxDrawLength = _selfCharacter.GetRemainingMovePoints();
+				if (_selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer()
+				                                && GameInput.Instance.TryGetMouseOver<CharacterEntity>(out var mouseOverCharacter))
+				{
+					if(_selfCharacter.ShouldAttack(mouseOverCharacter))
+						maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackRange(mouseOverCharacter));
+				}
+				drawPath = Utils.LimitPathTotalLength(drawPath, maxDrawLength);
 				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_selfCharacter, true, true);
-				pathRenderers[1].positionCount = lastPath.Length;
+				pathRenderers[1].positionCount = drawPath.Length;
 				pathRenderers[1].useWorldSpace = true;
-				pathRenderers[1].SetPositions(lastPath);
+				pathRenderers[1].SetPositions(drawPath);
 			}
 		}
 		

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 using EventType = CharacterAnimation.EventType;
 
 public class CharacterRoutines : MonoBehaviour
@@ -9,6 +10,7 @@ public class CharacterRoutines : MonoBehaviour
 	public const float SearchPathTimeout = 6.0f;
 	public const float DefaultWaitSeconds = 1.0f;
 	public const float MinReachDistance = 0.1f;
+	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
 	public const float MinDeltaToMove = 0.1f;
 	
 	public static int debugMode { get; set; }
@@ -21,9 +23,11 @@ public class CharacterRoutines : MonoBehaviour
 		return character.StartCoroutine(character.Routines.WaitCharacterLookPosition(lookPosition));
 	}
 
-	public System.Action OnStarted;
+	public System.Action onStarted, onStopped;
 
 	private object assignedTarget;
+	
+	public float LastTimeAssignedTarget { get; private set; }
 
 	public bool HasAssignedTarget() => assignedTarget != null;
 	
@@ -34,12 +38,14 @@ public class CharacterRoutines : MonoBehaviour
 	
 	public void AssignAttack(IAttackable target, bool canUseRunAction, bool losCheck)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
-		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck);
+		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " canUseRunAction=" + canUseRunAction + " losCheck=" + losCheck + " time=" + LastTimeAssignedTarget);
 		StartNewRoutine(WaitCharacterAttack(target, canUseRunAction, losCheck));
 	}
 	public void AssignAttackInstant(IAttackable target, bool useAction)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
 		if(debugMode > 0) Debug.Log(this + " AssignAttackInstant " + target + " usesActions=" + useAction);
 		StartNewRoutine(WaitCharacterPerformAttack(target, useAction));
@@ -47,6 +53,7 @@ public class CharacterRoutines : MonoBehaviour
 	}
 	public void AssignInteract(PropComponent clickedProp) 
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = clickedProp;
 		if(debugMode > 0) Debug.Log(this + " AssignInteract " + clickedProp);
 		StartNewRoutine(WaitCharacterInteract(clickedProp));
@@ -78,12 +85,14 @@ public class CharacterRoutines : MonoBehaviour
 	}
 	public void AssignTalk(CharacterEntity npc) // TODO all " Assign " methods should return the coroutine
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = npc;
 		if(debugMode > 0) Debug.Log(this + " AssignTalk " + npc);
 		StartCoroutine(WaitCharacterTalk(npc));
 	}
 	public void AssignUseItemOn(ItemData itemToUse, object objectTo)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = objectTo;
 		if(debugMode > 0) Debug.Log(this + " AssignUseItem " + itemToUse + " on " + objectTo);
 		StartCoroutine(WaitCharacterUseItemOn(itemToUse, objectTo));
@@ -91,6 +100,7 @@ public class CharacterRoutines : MonoBehaviour
 
 	public void AssignUseItemAt(ItemData itemToUse, Vector3 position)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignUseItem " + itemToUse + " at " + position);
 		StartCoroutine(WaitCharacterUseItemAt(itemToUse, position));
@@ -174,6 +184,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			StopAllCoroutines();
 			activeInstances.Remove(this);
+			Stopped();
 		}
 	}
 	
@@ -192,7 +203,7 @@ public class CharacterRoutines : MonoBehaviour
 		StopAllRoutines();
 		coroutine = StartCoroutine(routine);
 		StartCoroutine(_WaitComplete());
-		OnStarted?.Invoke();
+		onStarted?.Invoke();
 	}
 	
 	//public Coroutine WaitComplete() => StartCoroutine(_WaitComplete());
@@ -209,7 +220,10 @@ public class CharacterRoutines : MonoBehaviour
 		activeInstances.Remove(this);
 		if(debugMode > 0) Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
 		debugString = "";
+		Stopped();
 	}
+	
+	private void Stopped() => onStopped?.Invoke();
 	
 	private IEnumerator WaitCharacterInteract(PropComponent clickedProp)
 	{
@@ -367,12 +381,13 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		
 		_selfCharacter.AttackAction(target);
+		var atkResult = _selfCharacter.RollDice(); // we roll the dice before for the animation
 		if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetPosition(), Color.red, 2.0f);
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
 
-		switch (_selfCharacter.TryHit(target))
+		switch (_selfCharacter.TryHit(target, atkResult))
 		{
 			case CharacterEntity.AttackResult.Miss:
 				Debug.Log(this + " AttackResult.Miss " + target);
@@ -447,6 +462,8 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance)
 	{
+		reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAgent().GetMinReachDistance());
+		
 		var currentDistance = NavUtils.NavDistanceRoundY(dest,  _selfCharacter.GetPosition());
 		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
 		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " " + reachDistance + " currentDistance=" + currentDistance);
@@ -461,8 +478,9 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // stop any movement
 		agent.SetReachDistance(reachDistance);
 		
-		yield return agent.SearchPathAsync(dest, false);
+		yield return agent.SearchPathAsync(dest, true);
 		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved ends");
 	}
 
 	private IEnumerator WaitMoveLastPath(Vector3 dest, float forcedReachDistance = 0f)
@@ -475,7 +493,15 @@ public class CharacterRoutines : MonoBehaviour
 		if (path.Length <= 1)
 		{
 			Debug.LogWarning(_selfCharacter + " path invalid\nfrom " + _selfCharacter.GetPosition() + " points: " + Utils.ArrayStr(path));;
-			if(debugMode > 2) Debug.DebugBreak();
+			yield return null;
+			yield break;
+		}
+
+		var lastPoint = path.Last();
+		if (MinDistanceFromPathLastPoint > 0 && Vector3.Distance(dest, lastPoint) > MinDistanceFromPathLastPoint)
+		{
+			if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath path incomplete");
+			if (debugMode > 0) DebugDrawer.Line(lastPoint, dest, Color.magenta, 1.0f);
 			yield return null;
 			yield break;
 		}
@@ -545,15 +571,35 @@ public class CharacterRoutines : MonoBehaviour
 			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
 				//agent.DropOnGround(); // to avoid overlapping obstacles
+				if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 				startTime = Time.time; // reset timeout
+				
+				/*if (!_selfCharacter.InParty()) // attempt to break door, now this is done with triggers
+				{
+					var ray = new Ray(_selfCharacter.GetCenterPosition(), _selfCharacter.GetDirection());
+					var max = _selfCharacter.GetAttackRange();
+					if (Physics.Raycast(ray, out var propHit, max, Layers.LayerProp))
+					{
+						if(debugMode > 0) DebugDrawer.Line(ray.origin, ray.GetPoint(max), Color.blueViolet, 0f);
+						if (propHit.collider.TryGetComponent(out Destructible destructible))
+						{
+							if (debugMode > 0) Debug.Log(this + " breaks: " + destructible);
+							_selfCharacter.StopAgent();
+							yield return StartCoroutine(WaitCharacterAttack(destructible, true, false));
+							yield break;
+						}
+					}
+					else
+					{
+						if(debugMode > 0) DebugDrawer.Line(ray.origin, ray.GetPoint(max), Color.magenta, 0f);
+					}
+				}*/
 			}
-			
-			if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 			
 			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " reached destination! " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));
+		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));
 		agent.StopMovement();
 	}
 	

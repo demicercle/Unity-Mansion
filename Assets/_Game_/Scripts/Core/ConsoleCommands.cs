@@ -100,40 +100,25 @@ public class ConsoleCommands : MonoBehaviour
 		}
 	}
 
-	[ConsoleMethod("set_luck", "")]
-	public static void SetLuck(float value)
-	{
-		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
-		{
-			character.SetLuck(value);
-		}
-	}
-
-	[ConsoleMethod("set_karma", "")]
-	public static void SetKarma(float value)
-	{
-		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
-		{
-			character.SetKarma(value);
-		}
-	}
-
 	[ConsoleMethod("roll_dices", "")]
 	public static void RollDices(int count)
 	{
-		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
-		{
-			while (count-- > 0)
-			{
-				Debug.Log("RollDices: " + character.RollDice());
-			}
-		}
+		DicePool.RollNewDices(count);
+	}
+
+	[ConsoleMethod("add_roll_dices", "")]
+	public static void AddRollDices(int count)
+	{
+		Utils.FindFirstObject<DiceLauncher>().allowedDiceRolls += count;
 	}
 
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()
 	{
 		Application.Quit();
+		#if UNITY_EDITOR
+		UnityEditor.EditorApplication.isPlaying = false;
+#endif
 	}
 
 	[ConsoleMethod("hard_reset", "")]
@@ -198,7 +183,21 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("no_detection", "")]
 	public static void NoDetection(int value)
 	{
-		CharacterDetection.forceNoDetection = value > 0;
+		CharacterDetection.forceNoDetection = value > 0;   
+		Debug.Log("no_detection " + value);
+		if (value < 0)
+		{
+			foreach (var partyChar in CharacterEntity.GetPartyCharacters())
+			{
+				foreach (var other in CharacterEntity.AllCharacters)
+				{
+					if (other.InParty() || other.IsDead() || !other.IsCharacterRevealed()) continue;
+					other.TryGetComponent(out CharacterDetection characterDetection);
+					if (!characterDetection) continue;
+					characterDetection.SetCharacterDetected(partyChar, true);
+				}
+			}
+		}
 	}
 	
 	#region DEBUG
@@ -242,6 +241,12 @@ public class ConsoleCommands : MonoBehaviour
 	public static void _DebugStats(int value)
 	{
 		Debug.Log("debug_stats=" + (CharacterEntity.debugStats= value));
+	}
+
+	[ConsoleMethod("debug_dices", "")]
+	public static void _DebugDices(int value)
+	{
+		Debug.Log("debug_dices=" + (DicePool.debugMode= value));
 	}
 
 	[ConsoleMethod("debug_anim", "")]
@@ -306,17 +311,24 @@ public class ConsoleCommands : MonoBehaviour
 	
 	#endregion
 
-	[Min(0)] public int skipCommands;
-	public List<string> commandsOnStart = new List<string>();
+	public TextAsset batchCommands;
+	public List<string> executeAtStart = new List<string>();
 	
 	private void Start()
 	{
-		for (int i = skipCommands; i < commandsOnStart.Count; i++)
+		if(batchCommands)
+			executeAtStart.AddRange(batchCommands.text.Replace('\r', '\n').Split('\n'));
+
+		int i = 0;
+		while(i < executeAtStart.Count)
 		{
-			if (commandsOnStart[i].StartsWith("#") || commandsOnStart[i].StartsWith("//"))
+			if (string.IsNullOrWhiteSpace(executeAtStart[i]) || executeAtStart[i].StartsWith("#") || executeAtStart[i].StartsWith("//"))
+			{
+				executeAtStart.RemoveAt(i);
 				continue;
+			}
 			
-			DebugLogConsole.ExecuteCommand(commandsOnStart[i]);
+			DebugLogConsole.ExecuteCommand(executeAtStart[i++]);
 		}
 	}
 }

@@ -14,10 +14,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	public Toggle toggleSelected, toggleHasActions, toggleTurnBased;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
-	public Slider karmaSlider;
-	public TMP_Text karmaLabel;
-	public float karmaLerpSpeed = 1f;
-	public TMP_Text dodgeLabel;
+	public TMP_Text dodgeLabel1, dodgeLabel2;
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
@@ -54,6 +51,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	
 	private CharacterEntity _assignedCharacter;
 	private int karmaInt;
+	private float calculatedDodge;
 
 	private void OnSelectionChanged(bool selected)
 	{
@@ -97,28 +95,17 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		if (_assignedCharacter)
 		{
 			toggleTurnBased.isOn = GameTurnManager.Instance.IsTurnBasedMode();
-			
-			karmaSlider.gameObject.SetActive(_assignedCharacter.HasKarma());
-			
-			if (karmaSlider.gameObject.activeSelf)
+			calculatedDodge = _assignedCharacter.GetDodgeChance();
+			if (calculatedDodge > 0)
 			{
-				karmaSlider.minValue = -999;
-				karmaSlider.maxValue = 999;
-				karmaSlider.value = Mathf.MoveTowards(karmaSlider.value, _assignedCharacter.GetCurrentKarma() * 999, Time.unscaledDeltaTime * 999 * karmaLerpSpeed);
-			
-				karmaInt = Mathf.Abs(Mathf.RoundToInt(karmaSlider.value));
+				dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
+				dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
 			}
-			
-			karmaLabel.gameObject.SetActive(karmaSlider.gameObject.activeSelf);
-			if (karmaLabel.gameObject.activeSelf)
+			else
 			{
-				karmaLabel.text = (karmaSlider.value > 0 ? "+" : karmaSlider.value < 0 ? "-" : "")
-				                  + (karmaInt < 100 ? "0" : "")
-				                  + (karmaInt < 10 ? "0" : "")
-				                  + (karmaInt);
+				dodgeLabel1.text = "X";
+				dodgeLabel2.text = "";
 			}
-
-			dodgeLabel.text = Mathf.RoundToInt(_assignedCharacter.CalculateDodgeChance() * 100) + "%";
 		}
 	}
 }

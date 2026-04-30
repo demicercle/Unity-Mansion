@@ -293,6 +293,13 @@ public static class Utils
 		return t;
 	}
 	
+	public static float VDistance(Vector3 aiPathPosition, Vector3 dest)
+	{
+		aiPathPosition.x = dest.x;
+		aiPathPosition.z = dest.z;
+		return Vector3.Distance(aiPathPosition, dest);
+	}
+	
 	public static float HDistance(Vector3 aiPathPosition, Vector3 dest)
 	{
 		aiPathPosition.y = dest.y;
@@ -316,6 +323,11 @@ public static class Utils
 		tempStr = "";
 		while(count-- > 0) tempStr += c;
 		return tempStr;
+	}
+
+	public static Rect RectScale(Rect r, Rect s)
+	{
+		return new Rect(r.x * s.x, r.y * s.y, r.width * s.width, r.height * s.height);
 	}
 }
 

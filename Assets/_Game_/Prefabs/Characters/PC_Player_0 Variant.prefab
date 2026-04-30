@@ -108,7 +108,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2515509947975489139, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2825705707412753727, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Height
@@ -122,17 +122,29 @@ PrefabInstance:
       propertyPath: m_Name
       value: L_Shield
       objectReference: {fileID: 0}
+    - target: {fileID: 3075781157807719201, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4054300530273574562, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: uniqueID
       value: 6208652644318357256
       objectReference: {fileID: 0}
     - target: {fileID: 4450536792380610129, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5131075226992206587, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: uniqueID
+      value: 3382979083454345884
       objectReference: {fileID: 0}
     - target: {fileID: 5283585177251769578, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Name
       value: L_Mace
+      objectReference: {fileID: 0}
+    - target: {fileID: 5576437340783447147, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5641543191036350023, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Name
