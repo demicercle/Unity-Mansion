@@ -1,5 +1,51 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5606674778576119736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd6bbbe017c448789d1bcdcf0d926946, type: 3}
+  m_Name: Game Object
+  m_EditorClassIdentifier: Assembly-CSharp::NodeGameObject
+  graph: {fileID: 11400000}
+  position: {x: -118.5, y: -247.5}
+  ports:
+    keys:
+    - _out
+    - findName
+    values:
+    - _fieldName: _out
+      _node: {fileID: -5606674778576119736}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _prop
+        node: {fileID: -373289405852831925}
+        reroutePoints: []
+      - fieldName: _target
+        node: {fileID: 2094922989693918644}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: findName
+      _node: {fileID: -5606674778576119736}
+      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  findName: Prop_Door_Double_0
+  _out:
+    findName: Prop_Door_Double_0
 --- !u!114 &-373289405852831925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13,7 +59,7 @@ MonoBehaviour:
   m_Name: Interact
   m_EditorClassIdentifier: Assembly-CSharp::NodeInteract
   graph: {fileID: 11400000}
-  position: {x: 152, y: -136}
+  position: {x: 264, y: -136}
   ports:
     keys:
     - _in
@@ -36,7 +82,10 @@ MonoBehaviour:
       _node: {fileID: -373289405852831925}
       _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _out
+        node: {fileID: -5606674778576119736}
+        reroutePoints: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
@@ -51,7 +100,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   _prop:
-    findName: Prop_Door_Double_0
+    findName: 
   _instigator:
     findName: 
 --- !u!114 &11400000
@@ -70,6 +119,9 @@ MonoBehaviour:
   - {fileID: 1043153840778916638}
   - {fileID: 3971757747397813678}
   - {fileID: -373289405852831925}
+  - {fileID: 5729644215421045415}
+  - {fileID: -5606674778576119736}
+  - {fileID: 2094922989693918644}
 --- !u!114 &1043153840778916638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -122,6 +174,51 @@ MonoBehaviour:
       _dynamic: 0
   _character:
     findName: PC_Zombi_0
+--- !u!114 &2094922989693918644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8160635fe9e84d21830fffc5ef91a15b, type: 3}
+  m_Name: Camera Focus
+  m_EditorClassIdentifier: Assembly-CSharp::NodeCameraFocus
+  graph: {fileID: 11400000}
+  position: {x: 280, y: -328}
+  ports:
+    keys:
+    - _in
+    - _target
+    values:
+    - _fieldName: _in
+      _node: {fileID: 2094922989693918644}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: Out1
+        node: {fileID: 3971757747397813678}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _target
+      _node: {fileID: 2094922989693918644}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: -5606674778576119736}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _target:
+    findName: 
 --- !u!114 &3971757747397813678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,6 +279,12 @@ MonoBehaviour:
       - fieldName: _in
         node: {fileID: -373289405852831925}
         reroutePoints: []
+      - fieldName: _in
+        node: {fileID: 5729644215421045415}
+        reroutePoints: []
+      - fieldName: _in
+        node: {fileID: 2094922989693918644}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -197,3 +300,44 @@ MonoBehaviour:
       _dynamic: 1
   _index: 2
   loop: 0
+--- !u!114 &5729644215421045415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c97f601827e4ef6b2a8d0cffe7fc638, type: 3}
+  m_Name: Wait
+  m_EditorClassIdentifier: Assembly-CSharp::NodeWait
+  graph: {fileID: 11400000}
+  position: {x: 248, y: 24}
+  ports:
+    keys:
+    - _in
+    - _duration
+    values:
+    - _fieldName: _in
+      _node: {fileID: 5729644215421045415}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: Out1
+        node: {fileID: 3971757747397813678}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _duration
+      _node: {fileID: 5729644215421045415}
+      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _duration: 3

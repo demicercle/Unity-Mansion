@@ -32,6 +32,12 @@ public class CharacterDetection : MonoBehaviour
 	
 	public void SetCharacterDetected(CharacterEntity otherCharacter, bool value)
 	{
+		if (!otherCharacter)
+		{
+			Debug.LogWarning(this + " SetCharacterDetected no other character!");
+			return;
+		}
+		
 		if (value)
 		{
 			if (!detectedCharacters.Contains(otherCharacter))

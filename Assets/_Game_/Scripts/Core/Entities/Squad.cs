@@ -33,6 +33,7 @@ public class Squad : MonoBehaviour
 		{
 			foreach (var squadCharacter in characters)
 			{
+				if (!squadCharacter.gameObject.activeInHierarchy) continue; // skip disabled objects
 				if (squadCharacter == selfCharacter)
 				{
 					if(value)
@@ -47,6 +48,7 @@ public class Squad : MonoBehaviour
 		{
 			foreach (var allyCharacter in characters)
 			{
+				if (!allyCharacter.gameObject.activeInHierarchy) continue; // skip disabled objects
 				if (allyCharacter.TryGetComponent(out CharacterDetection detection))
 				{
 					detection.SetCharacterDetected(otherCharacter, value);

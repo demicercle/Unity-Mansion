@@ -100,6 +100,8 @@ public class GameTurnManager : MonoBehaviour
 	public CharacterEntity[] GetLevelCharacters() => levelCharacters.ToArray();
 	public bool IsLevelIndex(int index) => index == 0; // TODO
 	
+	public float WaitTime { get; set; }
+	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
 	private IEnumerable<CharacterEntity> partyCharacters => CharacterEntity.GetPartyCharacters();
@@ -268,7 +270,7 @@ public class GameTurnManager : MonoBehaviour
 						yield break;
 					}
 					
-					yield return new WaitForSeconds(realTimeTicks);
+					yield return YieldRoutines();
 					yield return WaitNavigationDirty();
 				}
 
@@ -380,10 +382,14 @@ public class GameTurnManager : MonoBehaviour
 	{
 		do
 		{
+			if(debugMode > 1) Debug.Log(this + " WaitRoutines WaitTime=" + WaitTime.ToString("N2") + " " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
+			
 			yield return null;
-			if(debugMode > 1) Debug.Log(this + " WaitRoutines " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
+			
+			if(WaitTime > 0)
+				WaitTime -= Time.deltaTime;
 		}
-		while (CharacterRoutines.AnyActiveRoutines()) ;
+		while (CharacterRoutines.AnyActiveRoutines() && WaitTime != 0f);
 	}
 
 	private Coroutine WaitNavigationDirty()
@@ -554,13 +560,13 @@ public class GameTurnManager : MonoBehaviour
 	{
 		if (detected)
 		{
-			if (!turnBasedMode) // only if real time
+			if (!turnBasedMode && !leaveTurnBased) // only if real time
 			{
 				if (!char1.IsDead() && char1.IsEnemyToPlayer() && char2.IsPlayer())
 				{
 					focusCharacter = char1;
 					leaveTurnBased = true;
-					if(debugMode > 0) Debug.Log(this + " OnAnyDetectionChanged " + char1.name + " " + char2.name + " leaveTurnBased");
+					if (debugMode > 0) Debug.Log(this + " OnAnyDetectionChanged " + char1 + " sees " + char2 + " leaveTurnBased");
 				}
 			}
 		}
