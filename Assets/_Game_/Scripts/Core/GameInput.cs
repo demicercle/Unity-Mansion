@@ -1036,4 +1036,10 @@ public class GameInput : MonoBehaviour
 	{
 		return mousePosition;
 	}
+
+	public bool TryGetMouseOver<T>(out T component) where T : Component
+	{
+		component = null;
+		return lastMouseOverObject && lastMouseOverObject.TryGetComponent<T>(out component);
+	}
 }

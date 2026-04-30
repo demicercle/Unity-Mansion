@@ -24,6 +24,7 @@ public class CharacterEventTrigger : MonoBehaviour
 	[SerializeField] private List<ActionEvent> actionEvents;
 
 	[Space] [Header("Other Events")] 
+	public UnityEvent onSpawned;
 	public UnityEvent<bool> onPartyChanged;
 	public UnityEvent onDamaged;
 	public UnityEvent onDeath;
@@ -58,6 +59,7 @@ public class CharacterEventTrigger : MonoBehaviour
 	private void OnEnable()
 	{
 		if (!character) return;
+		character.onSpawned += onSpawned.Invoke;
 		character.onUseAction += OnCharacterUseAction;
 		character.onDamaged += OnCharacterDamaged;
 		character.onDead += OnCharacterDeath;
@@ -75,6 +77,7 @@ public class CharacterEventTrigger : MonoBehaviour
 	private void OnDisable()
 	{
 		if (!character) return;
+		character.onSpawned -= onSpawned.Invoke;
 		character.onUseAction -= OnCharacterUseAction;
 		character.onDamaged -= OnCharacterDamaged;
 		character.onDead -= OnCharacterDeath;

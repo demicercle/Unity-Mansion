@@ -319,6 +319,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public bool IsEnemyToPlayer(CharacterEntity other = null) => currentFaction == CharacterFaction.Enemy;
 
+	public bool ShouldAttack(CharacterEntity other) => !other.IsDead() && IsEnemyTo(other);
 	public bool IsEnemyTo(CharacterEntity other) => IsEnemyTo(other.GetCurrentFaction());
 	public bool IsEnemyTo(CharacterFaction faction)
 	{

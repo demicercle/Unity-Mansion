@@ -526,6 +526,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.radius = radius;
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
+		aiPath.pickNextWaypointDist = radius + GetMinReachDistance();
 		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
 		if(Application.isPlaying) aiPath.gravity = Physics.gravity; // force gravity
 		rvoController = GetComponent<RVOController>();
@@ -630,6 +631,12 @@ public class CharacterAgent : MonoBehaviour
 			if (pathRenderers[1].enabled) // draw path thick
 			{
 				lastPath = Utils.LimitPathTotalLength(lastPath, _selfCharacter.GetRemainingMovePoints());
+				if (_selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer()
+				                                && GameInput.Instance.TryGetMouseOver<CharacterEntity>(out var mouseOverCharacter))
+				{
+					if(_selfCharacter.ShouldAttack(mouseOverCharacter))
+						lastPath = Utils.LimitPathTotalLength(lastPath, Mathf.Min(_selfCharacter.GetRemainingMovePoints(), lastPath.Length - _selfCharacter.GetAttackRange(mouseOverCharacter)));
+				}
 				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_selfCharacter, true, true);
 				pathRenderers[1].positionCount = lastPath.Length;
 				pathRenderers[1].useWorldSpace = true;
