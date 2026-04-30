@@ -194,7 +194,7 @@ public class ConsoleCommands : MonoBehaviour
 					if (other.InParty() || other.IsDead() || !other.IsCharacterRevealed()) continue;
 					other.TryGetComponent(out CharacterDetection characterDetection);
 					if (!characterDetection) continue;
-					characterDetection.SetDetected(partyChar, true);
+					characterDetection.SetCharacterDetected(partyChar, true);
 				}
 			}
 		}

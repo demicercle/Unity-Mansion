@@ -3,16 +3,15 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Toggle))]
 public class ReverseToggle : MonoBehaviour
 {
+	public Toggle toggle;
 	public UnityEvent<bool> onValueChanged;
 	
-	private Toggle toggle;
 
 	private void Awake()
 	{
-		toggle =  GetComponent<Toggle>();
+		if(!toggle) toggle =  GetComponent<Toggle>();
 	}
 
 	private void OnEnable()

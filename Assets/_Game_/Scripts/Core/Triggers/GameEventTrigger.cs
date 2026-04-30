@@ -6,6 +6,7 @@ public class GameEventTrigger : MonoBehaviour
 {
 	public UnityEvent turnEnded, turnStarted, turnChanged;
 	public UnityEvent onFightStarts, onFightEnds;
+	public UnityEvent<bool> onTurnBasedChanged;
 
 	GameTurnManager _gameTurnManager;
 	
@@ -27,6 +28,7 @@ public class GameEventTrigger : MonoBehaviour
 	
 	private void OnTurnBasedChanged(bool value)
 	{
+		onTurnBasedChanged?.Invoke(value);
 		(value ? onFightStarts : onFightEnds)?.Invoke();
 	}
 

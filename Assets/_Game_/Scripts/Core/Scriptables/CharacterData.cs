@@ -16,6 +16,7 @@ public class CharacterData : ScriptableObject
 	public float runActionExtraMovePoints = 3.0f;
 	[Min(0)] public int dodgeCount = 1;
 	[Range(0f, 1f)] public float dodgeChance = 0.1f;
+	[Range(0f, 1f)] public float stealthValue = 0.33f;
 
 	[Header("Health")] 
 	[Range(1, 99)] public int maxHealth;

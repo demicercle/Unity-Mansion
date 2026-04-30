@@ -221,22 +221,20 @@ public class GameTurnManager : MonoBehaviour
 		onTurnBasedChanged?.Invoke(true);
 		
 		currentTurn = 0;
-		focusCharacter = null;
 		
 		while (turnBasedMode)
 		{
 			if (currentTurn == 0) // it is the first turn
 			{
 				FirstTurn();
-				
+
 				if (focusCharacter)
 				{
-					Debug.Log(this + " focusCharacter=" + focusCharacter);
 					cameraPivot.Focus(focusCharacter);
 					focusCharacter = null;
+					
+					yield return new WaitForSeconds(focusCharacterSeconds);
 				}
-				
-				yield return new WaitForSeconds(focusCharacterSeconds);
 				
 				do
 				{
@@ -246,7 +244,10 @@ public class GameTurnManager : MonoBehaviour
 			else // it is NOT the first turn
 			{
 				NewTurn();
-				
+			}
+
+			if (IsPlayerTurn())
+			{
 				if(!CharacterSelection.TryGetSelectedCharacter(out var _))
 					SelectBestPlayerCharacter();
 				
@@ -254,24 +255,23 @@ public class GameTurnManager : MonoBehaviour
 					cameraPivot.Focus(selectedCharacter);
 				
 				yield return new WaitForSeconds(focusCharacterSeconds); 
-			}
-			
-			while (IsPlayerTurn())
-			{
-				if (turnBasedMode && ShouldExitTurnBased())
-				{
-					turnBasedMode = false;
-					Debug.Log(this + " Switch To RealTime");
-					yield break;
-				}
 				
-				yield return new WaitForSeconds(realTimeTicks);
-				yield return WaitNavigationDirty();
-			}
+				while (IsPlayerTurn())
+				{
+					if (turnBasedMode && ShouldExitTurnBased())
+					{
+						turnBasedMode = false;
+						Debug.Log(this + " Switch To RealTime");
+						yield break;
+					}
+					
+					yield return new WaitForSeconds(realTimeTicks);
+					yield return WaitNavigationDirty();
+				}
 
-			CharacterSelection.SelectCharacter(null);
-			
-			yield return new WaitForSeconds(turnChangedSeconds);
+				CharacterSelection.SelectCharacter(null);
+				yield return new WaitForSeconds(turnChangedSeconds);
+			}
 			
 			yield return WaitNavigationDirty();
 			
@@ -294,9 +294,7 @@ public class GameTurnManager : MonoBehaviour
 				currentAICharacter = otherCharacter;
 				
 				cameraPivot.Focus(otherCharacter);
-				//TODO "cameraPivot.Lock(true)"
 				yield return new WaitForSeconds(focusCharacterSeconds);
-				//TODO "cameraPivot.Lock(false)" ? if player can look around while another character is acting
 
 				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
 				{
@@ -379,7 +377,7 @@ public class GameTurnManager : MonoBehaviour
 		do
 		{
 			yield return null;
-			if(debugMode > 0) Debug.Log(this + " WaitRoutines " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
+			if(debugMode > 1) Debug.Log(this + " WaitRoutines " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
 		}
 		while (CharacterRoutines.AnyActiveRoutines()) ;
 	}
@@ -451,15 +449,6 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (character.TryGetComponent(out CharacterBrain otherBrain))
 					otherBrain.StopThink();
-			}
-
-			if (character.IsEnemyToPlayer())
-			{
-				if (focusCharacter == null || cameraPivot.GetDistanceTo(focusCharacter.GetPosition()) >
-				    cameraPivot.GetDistanceTo(character.GetPosition()))
-				{
-					focusCharacter = character;
-				}
 			}
 		}
 
@@ -554,6 +543,7 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (!char1.IsDead() && char1.IsEnemyToPlayer() && char2.IsPlayer())
 				{
+					focusCharacter = char1;
 					leaveTurnBased = true;
 					Debug.Log(this + " OnAnyDetectionChanged " + char1.name + " " + char2.name + " leaveTurnBased");
 				}

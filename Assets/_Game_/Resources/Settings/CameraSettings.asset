@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UserSettings
   editorUpdate: 1
   lerpSpeed: 8
-  cameraFocusLockTime: 1
+  cameraFocusLockTime: 0.5
   inputSpeed: 14
   screenPadding: 2
   panSpeed: 20

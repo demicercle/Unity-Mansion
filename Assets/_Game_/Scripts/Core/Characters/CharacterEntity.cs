@@ -814,5 +814,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 	}
 
-	
+
+	public float GetStealth()
+	{
+		return characterData.stealthValue;
+	}
 }

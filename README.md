@@ -17,6 +17,12 @@
 	
 - retake gamelog : should warn about dice launch
 - dice pool position
+
+- display enemy "awareness"
+- fix weird movement at zombi start
+
+- initiative
+	> take all
 	
 	
 	https://opengameart.org/content/medieval-props-textured
