@@ -96,8 +96,16 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		{
 			toggleTurnBased.isOn = GameTurnManager.Instance.IsTurnBasedMode();
 			calculatedDodge = _assignedCharacter.CalculateDodgeChance();
-			dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
-			dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
+			if (calculatedDodge > 0)
+			{
+				dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
+				dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
+			}
+			else
+			{
+				dodgeLabel1.text = "X";
+				dodgeLabel2.text = "";
+			}
 		}
 	}
 }

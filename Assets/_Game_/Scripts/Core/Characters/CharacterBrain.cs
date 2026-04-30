@@ -118,55 +118,45 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 
 	private IEnumerator TryChase()
 	{
-		yield return StartCoroutine(YieldTryFindNewTarget());
-		
-		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
+		do
 		{
 			if (!_selfCharacter.CanAttack())
 			{
-				if(debugMode > 0) Debug.Log(this + " can't attack");
+				if (debugMode > 0) Debug.Log(this + " can't attack");
 				yield return StartCoroutine(YieldCantAttack());
 				yield break;
 			}
-		
-			if (_chaseCharacter.IsDead())
+
+			if (_chaseCharacter)
 			{
-				if (debugMode > 0) Debug.Log(this + " is dead");
-				ForgetTarget();
-				if (!TryFindTarget())
-					yield break;
+				if (_chaseCharacter.IsDead())
+					ForgetTarget();
 			}
-		
-			if (!_characterDetection.IsCharacterDetected(_chaseCharacter))
-			{
-				if (debugMode > 0) Debug.Log(this + " chase target not detected");
-				ForgetTarget();
-				if (!TryFindTarget())
-					yield break;
-			}
-			
+
 			yield return StartCoroutine(YieldTryFindNewTarget());
-			
-			if(debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
-				
+
+			if (!_chaseCharacter)
+			{
+				if (debugMode > 0) Debug.Log(this + " has no target to chase");
+				yield break;
+			}
+
+			if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
+
 			_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, _selfCharacter.IsUsingRangeWeapon());
-				
+
 			do
 			{
 				SaveTargetPosition();
-				
+
 				yield return StartCoroutine(YieldTryFindNewTarget());
-				yield return null;
 				
 			} while (CharacterRoutines.AnyActiveRoutines());
-			
-			yield return null;
-		}
 
-		if (!_chaseCharacter)
-		{
-			if(debugMode > 1) Debug.Log(this + " !_chaseCharacter");
-		}
+			yield return null;
+		} while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter));
+
+		if (debugMode > 0) Debug.Log(this + " end chase");
 	}
 
 	private IEnumerator TryPatrol()
@@ -272,18 +262,26 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 
-	private IEnumerator YieldTryFindNewTarget()
+	private bool TryFindTarget(out CharacterEntity newTarget)
 	{
 		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
+		newTarget = allTargets.LastOrDefault();
+		return newTarget && newTarget != _chaseCharacter;
+	}
 
-		var newTarget = allTargets.LastOrDefault();
-		if (newTarget && newTarget != _chaseCharacter)
+	private IEnumerator YieldTryFindNewTarget()
+	{
+		if (TryFindTarget(out var newTarget))
 		{
 			_chaseCharacter = newTarget;
-			Debug.Log(this + " gets new target: " + _chaseCharacter);
+			if(debugMode > 0) Debug.Log(this + " gets new target: " + _chaseCharacter);
 			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red, 1.0f);
 			_selfCharacter.Routines.StopAllRoutines();
 			yield return CharacterRoutines.DoLookPositionOn(_selfCharacter, newTarget.GetPosition());
+		}
+		else
+		{
+			yield return null;
 		}
 	}
 
@@ -431,22 +429,6 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 				_targetDetected = false;
 			}
 		}*/
-	}
-
-	private bool TryFindTarget()
-	{
-		if (_characterDetection)
-		{
-			foreach (var otherCharacter in _characterDetection.GetDetectedCharacters())
-			{
-				OnCharacterDetected(otherCharacter);
-				
-				if (_chaseCharacter == otherCharacter)
-					return true;
-			}
-		}
-		
-		return false;
 	}
 
 	private void LateUpdate()
