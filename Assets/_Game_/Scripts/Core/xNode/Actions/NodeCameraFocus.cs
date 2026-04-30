@@ -12,7 +12,12 @@ public class NodeCameraFocus : GameNode
 		_in.InitInput(this, "_in", () =>
 		{
 			_target = GetInputValue("_target", _target);
-			if (_target.TryGetComponent(this, out CharacterEntity character))
+			if (_target.TryGetComponent(this, out Waypoint waypoint))
+			{
+				CameraPivot.Instance.Focus(waypoint.transform);
+				CameraPivot.Instance.OrbitTowards(waypoint.transform.TransformPoint(Vector3.forward));
+			}
+			else if (_target.TryGetComponent(this, out CharacterEntity character))
 			{
 				CameraPivot.Instance.Focus(character);
 			}

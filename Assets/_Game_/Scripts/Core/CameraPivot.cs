@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
+using System.ComponentModel;
 using System.Linq;
 using UnityEngine;
+using Component = UnityEngine.Component;
 using LightType = UnityEngine.LightType;
 
 public class CameraPivot : MonoBehaviour
@@ -171,9 +174,38 @@ public class CameraPivot : MonoBehaviour
         desiredZoom = Mathf.Clamp01(value);
         UpdateAnimator();
     }
-    
+
+    public Coroutine OrbitTowards(Vector3 worldPosition)
+    {
+        return StartCoroutine(DoOrbitTowards(worldPosition));
+    }
+
+    private IEnumerator DoOrbitTowards(Vector3 worldPosition)
+    {
+        orbitCoroutine = true;
+        while (orbitCoroutine)
+        {
+            var dir = (worldPosition - focusPosition);
+            dir.y = 0;
+            dir.Normalize();
+
+            var dot = Vector3.Dot(Quaternion.Euler(0, desiredYaw, 0) * Vector3.forward, dir);
+            if (dot < 0.9f)
+            {
+                Orbit(Mathf.Sign(dir.x), 0, Time.deltaTime);
+                yield return null;
+            }
+            else
+            {
+                orbitCoroutine = false;
+            }
+        }
+    }
+
+    private bool orbitCoroutine;
     public void Orbit(float deltaX, float deltaY, float inputScale = 0f)
     {
+        orbitCoroutine = false;
         orbitScale = new Vector2(deltaX, deltaX);
         if (debugMode > 0) Debug.Log(this + " Orbit " + deltaX + " " + deltaY + " " + inputScale);
         if (inputScale != 0f)

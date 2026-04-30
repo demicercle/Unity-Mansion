@@ -70,7 +70,7 @@ MonoBehaviour:
   m_Name: Game Object
   m_EditorClassIdentifier: Assembly-CSharp::NodeGameObject
   graph: {fileID: 11400000}
-  position: {x: -280, y: -184}
+  position: {x: 552, y: 24}
   ports:
     keys:
     - _out
@@ -80,13 +80,7 @@ MonoBehaviour:
       _node: {fileID: -5606674778576119736}
       _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _prop
-        node: {fileID: -373289405852831925}
-        reroutePoints: []
-      - fieldName: _target
-        node: {fileID: 2094922989693918644}
-        reroutePoints: []
+      connections: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -139,10 +133,7 @@ MonoBehaviour:
       _node: {fileID: -373289405852831925}
       _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _out
-        node: {fileID: -5606674778576119736}
-        reroutePoints: []
+      connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
@@ -268,16 +259,13 @@ MonoBehaviour:
       _node: {fileID: 2094922989693918644}
       _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections:
-      - fieldName: _out
-        node: {fileID: -5606674778576119736}
-        reroutePoints: []
+      connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
   _target:
-    findName: Prop_Door_Double_0
+    findName: Waypoint_Cam_0
 --- !u!114 &3738203550012870745
 MonoBehaviour:
   m_ObjectHideFlags: 0
