@@ -62,6 +62,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public static int PartyCount => _partyCharacters.Count;
 	
 	public static event System.Action onPartyChanged;
+	public static event System.Action<CharacterEntity, float> onAnyCharacterRollDice;
 	public static event System.Action<CharacterEntity, DamageInfo, object> onAnyCharacterDamaged;
 	public static event System.Action<CharacterEntity, float> onAnyCharacterHealed;
 	public static event System.Action<CharacterEntity> onAddedToParty, onRemovedFromParty;
@@ -200,7 +201,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		var rolled = DicePool.LastResult;
 		if(DicePool.debugMode>0) Debug.Log(this + " RollDice takes last result: " + rolled);
-		DicePool.RollNewDice(this);
+		onAnyCharacterRollDice?.Invoke(this, rolled);
+		DicePool.RollNewDice();
 		if (!HasKarma()) return rolled;
 		
 		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);

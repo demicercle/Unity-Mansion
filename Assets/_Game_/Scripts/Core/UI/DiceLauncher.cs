@@ -21,29 +21,24 @@ public class DiceLauncher : MonoBehaviour
 	
 	private int animCount;
 	
-	public void LaunchNew()
+	private void ClickedLaunch()
 	{
 		allowedDiceRolls -= 1;
-		DicePool.RollNewDice(null);
+		DicePool.RollNewDice();
 	}
 
 	private void Awake()
 	{
 		DicePool.onDiceRolled += OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
-		launchButton.onClick.AddListener(LaunchNew);
+		launchButton.onClick.AddListener(ClickedLaunch);
 	}
 
 	private void OnDestroy()
 	{
 		DicePool.onDiceRolled -= OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead -= OnAnyCharacterDead;
-		launchButton.onClick.RemoveListener(LaunchNew);
-	}
-
-	private void Start()
-	{
-		DicePool.RollNewDices(2);
+		launchButton.onClick.RemoveListener(ClickedLaunch);
 	}
 
 	private void OnAnyCharacterDead(CharacterEntity character)
@@ -58,6 +53,11 @@ public class DiceLauncher : MonoBehaviour
 				return;
 			}
 		}
+	}
+
+	private void Start()
+	{
+		DicePool.RollNewDice();
 	}
 
 	private void OnDiceRolled()

@@ -121,10 +121,7 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("roll_dices", "")]
 	public static void RollDices(int count)
 	{
-		while (count-- > 0)
-		{
-			DicePool.RollNewDice(null);
-		}
+		DicePool.RollNewDices(count);
 	}
 
 	[ConsoleMethod("add_roll_dices", "")]

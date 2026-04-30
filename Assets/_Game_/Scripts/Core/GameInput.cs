@@ -706,7 +706,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter  && itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject, out var objectTo))
 				{
-					if (!selectedCharacter.HasActions())
+					if (!selectedCharacter.CanUseAction(CharacterAction.UseItem))
 					{
 						selectedCharacter.FloatingText_Cant();
 					}
@@ -736,7 +736,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter && itemToUse)
 				{
-					if (!selectedCharacter.HasActions())
+					if (!selectedCharacter.CanUseAction(CharacterAction.UseItem))
 					{
 						selectedCharacter.FloatingText_Cant();
 					}
