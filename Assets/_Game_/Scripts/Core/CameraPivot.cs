@@ -125,7 +125,6 @@ public class CameraPivot : MonoBehaviour
     [ReadOnly] [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
     [ReadOnly] [SerializeField] private Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
     [ReadOnly] [SerializeField] private Vector2 orbitMaxSpeed = new Vector2(-1f, -1f);
-    [ReadOnly] [SerializeField] private float orbitDrag = 0.1f;
 
     
     #region PUBLIC

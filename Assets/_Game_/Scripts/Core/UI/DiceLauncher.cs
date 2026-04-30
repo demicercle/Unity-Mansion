@@ -46,7 +46,7 @@ public class DiceLauncher : MonoBehaviour
 		foreach (var other in CharacterEntity.AllCharacters)
 		{
 			if (other == character || other.IsDead() || !other.InParty()) continue;
-			if (other.GetLastAttackTarget() == character)
+			if ((CharacterEntity)other.GetLastAttackTarget() == character)
 			{
 				allowedDiceRolls += 1;
 				if(DicePool.debugMode>0) Debug.Log(this + " " + other + " gains new dice for last kill! " + character);

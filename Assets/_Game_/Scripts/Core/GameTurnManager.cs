@@ -27,12 +27,9 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] [Min(0.1f)] private float turnChangedSeconds = 3.0f;
 	[SerializeField] [Min(0.1f)]  private  float focusCharacterSeconds = 1.5f;
 	[SerializeField] [Min(0.1f)] private  float noActionsSeconds = 3.0f;
-	[SerializeField] [Min(0.1f)] private float defaultActionsSeconds = 1.0f;
-	[SerializeField] [Min(0.1f)] private  float firstTurnSeconds = 1.0f;
-	[SerializeField] [Min(0.1f)] private  float aiThinksSeconds = 0.5f;
 	[Space]
 	[Header("Init")] 
-	[SerializeField] private GameObject[] startupObjects = new GameObject[0];
+	[SerializeField] private GameObject[] startupObjects = Array.Empty<GameObject>();
 
 	public bool IsTurnBasedMode() => turnBasedMode;
 

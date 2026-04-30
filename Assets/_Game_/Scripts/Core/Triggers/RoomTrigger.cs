@@ -55,7 +55,6 @@ public class RoomTrigger : MonoBehaviour
 	[Header("Settings")]
 	[SerializeField] private List<GameObject> doors = new List<GameObject>();
 	[SerializeField] private List<CharacterTrigger> triggers =  new List<CharacterTrigger>();
-	[SerializeField] private float ceilingHeight = 0.1f;
 	
 	private bool createCeilings;
 	private List<BoxCollider> ceilings = new List<BoxCollider>();

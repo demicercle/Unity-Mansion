@@ -12,7 +12,6 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     private Animator animator; 
     private CoroutineQueue coroQueue;
     private bool weaponsSwitched;
-    private bool _isAttacking;
     private bool isHipShooting;
 
     public bool IsSwitchingWeapons() => isWeaponSwitching && (int)rightWeapon > 0; // unarmed
@@ -897,7 +896,6 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	   animator.SetInteger(AnimationParameters.LeftWeapon, (int)leftWeapon);
 	   animator.SetInteger(AnimationParameters.RightWeapon, (int)rightWeapon); // force
 	    animator.SetSide(attackSide);
-	    _isAttacking = true;
 	    Lock(true, true, true, 0, duration);
 
 	    // If shooting, use regular or hipshooting attack.
