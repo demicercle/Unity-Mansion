@@ -97,7 +97,7 @@ public class CharacterSelection : MonoBehaviour
 	[SerializeField] private new Rigidbody rigidbody;
 
 	[Header("Circles")] 
-	[ReadOnly][SerializeField] private float defaultScale = 1f;
+	[SerializeField] private float defaultScale = 1f;
 	[SerializeField] private AnimationCurve alphaCurve = new AnimationCurve();
 	[SerializeField] private CircleRenderer selectionCircle;
 	[SerializeField] private CircleRenderer movePointsCircle;
@@ -166,9 +166,10 @@ public class CharacterSelection : MonoBehaviour
 			selectionCircle.gameObject.SetActive(!_selfCharacter.IsDead() || _selfCharacter.InParty());
 			selectionCircle.SetColor(currentColor, alphaColor);
 		}
-
+		
 		if (movePointsCircle)
 		{
+			movePointsCircle.enabled = GameTurnManager.Instance.IsTurnBasedMode();
 			movePointsCircle.SetColor(currentColor, alphaColor);
 			movePointsCircle.SetProgress(_selfCharacter.GetMovePointsProgress());
 		}

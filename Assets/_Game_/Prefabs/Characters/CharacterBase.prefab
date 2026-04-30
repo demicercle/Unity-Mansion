@@ -406,7 +406,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSelection
   capsuleCollider: {fileID: 7385597297877825555}
   rigidbody: {fileID: 6072534866263412361}
-  defaultScale: 1
+  defaultScale: 0.8
   alphaCurve:
     serializedVersion: 2
     m_Curve:
@@ -445,7 +445,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5613c26fe6a42d782cf4c99a802cdf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceNoObstacle: 1
   moveSpeed: 4.5
   radius: 0.5
   height: 1.5
@@ -532,9 +531,6 @@ MonoBehaviour:
   hearingDistance: 3.09
   seeingDistance: 9.7
   maxAngle: 86
-  obstructionLayers:
-    serializedVersion: 2
-    m_Bits: 192
   setDetectedOnDamaged: 1
   lookAtDetected: 1
   warnOthersInRoom: 1

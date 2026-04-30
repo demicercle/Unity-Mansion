@@ -16,11 +16,6 @@ MonoBehaviour:
   - {r: 0, g: 0, b: 1, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}
-  disabledToFaction: 0.26
+  disabledToFaction: 0.077
   disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   deadColor: {r: 0, g: 0, b: 0, a: 1}
-  whenCameraStarts: 0.25
-  whenTurnChanged: 3
-  whenFocusNextCharacter: 1
-  whenAIThinks: 0.5
-  defaultActionSeconds: 3
