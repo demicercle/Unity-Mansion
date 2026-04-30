@@ -154,6 +154,8 @@ public class RoomTrigger : MonoBehaviour
 		foreach (var door in doors)
 		{
 			door.onInteracted += Explore;
+			if(door.TryGetComponent(out Destructible destructible))
+				destructible.breaks.AddListener(Explore);
 		}
 	}
 
@@ -165,6 +167,8 @@ public class RoomTrigger : MonoBehaviour
 		foreach (var door in doors)
 		{
 			door.onInteracted -= Explore;
+			if(door.TryGetComponent(out Destructible destructible))
+				destructible.breaks.RemoveListener(Explore);
 		}
 	}
 }

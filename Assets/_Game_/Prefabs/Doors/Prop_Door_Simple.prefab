@@ -565,6 +565,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6293895463218654663, guid: 83654f29433652e4cbdea6349422fa5e, type: 3}
+      propertyPath: m_Size.x
+      value: 0.7727239
+      objectReference: {fileID: 0}
+    - target: {fileID: 6293895463218654663, guid: 83654f29433652e4cbdea6349422fa5e, type: 3}
+      propertyPath: m_Size.y
+      value: 1.6628551
+      objectReference: {fileID: 0}
+    - target: {fileID: 6293895463218654663, guid: 83654f29433652e4cbdea6349422fa5e, type: 3}
+      propertyPath: m_Center.x
+      value: 0.47557163
+      objectReference: {fileID: 0}
+    - target: {fileID: 6293895463218654663, guid: 83654f29433652e4cbdea6349422fa5e, type: 3}
+      propertyPath: m_Center.y
+      value: 0.8851142
+      objectReference: {fileID: 0}
+    - target: {fileID: 6293895463218654663, guid: 83654f29433652e4cbdea6349422fa5e, type: 3}
+      propertyPath: m_Center.z
+      value: 1.396293e-13
+      objectReference: {fileID: 0}
     - target: {fileID: 6561074094011911856, guid: 83654f29433652e4cbdea6349422fa5e, type: 3}
       propertyPath: m_Name
       value: Proto_Building_Block_Door_02

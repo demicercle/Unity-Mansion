@@ -68,6 +68,7 @@ public class Destructible : MonoBehaviour, IAttackable
 			if (!rb) continue;
 			rb.isKinematic = false;
 			rb.useGravity = true;
+			//rb.angularVelocity = new Vector3(0, Mathf.PI, 0);
 		}
 			
 		breaks?.Invoke();

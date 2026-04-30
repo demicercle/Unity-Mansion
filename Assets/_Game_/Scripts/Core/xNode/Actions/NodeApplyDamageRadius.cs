@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 [CreateNodeMenu("Actions/Apply Damage Radius")]
 public class NodeApplyDamageRadius : GameNode
@@ -16,7 +17,6 @@ public class NodeApplyDamageRadius : GameNode
 		base.OnScriptStart();
 		_in.StartInput(this, "_in", () =>
 		{
-			
 			_damage = GetInputValue("_damage", _damage);
 			_radius = GetInputValue("_radius", _radius);
 			_position = GetInputValue("_position", _position);
@@ -43,22 +43,29 @@ public class NodeApplyDamageRadius : GameNode
 				}
 			}
 
-			if (explosionForce > 0)
+			script.StartCoroutine(DelayedExplosion(transform));
+		});
+	}
+
+	private IEnumerator DelayedExplosion(Transform transform)
+	{
+		yield return null;
+		
+		if (explosionForce > 0)
+		{
+			foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskPhysics))
 			{
-				foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskPhysics))
-				{
-					if (!obj.CompareTag(Tags.TagCollide))
-						continue;
+				if (!obj.CompareTag(Tags.TagCollide))
+					continue;
 					
-					if (obj.TryGetComponent(out Rigidbody rigidbody))
-					{
-						DebugLogThis(this + " AddExplosionForce " + rigidbody + " " + explosionForce);
-						rigidbody.isKinematic = false;
-						rigidbody.WakeUp();
-						rigidbody.AddExplosionForce(explosionForce, transform.position, _radius);
-					}
+				if (obj.TryGetComponent(out Rigidbody rigidbody))
+				{
+					DebugLogThis(this + " AddExplosionForce " + rigidbody + " " + explosionForce);
+					rigidbody.isKinematic = false;
+					rigidbody.WakeUp();
+					rigidbody.AddExplosionForce(explosionForce, transform.position, _radius);
 				}
 			}
-		});
+		}
 	}
 }
