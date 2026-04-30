@@ -116,6 +116,9 @@ public class ConsoleCommands : MonoBehaviour
 	public static void QuitGame()
 	{
 		Application.Quit();
+		#if UNITY_EDITOR
+		UnityEditor.EditorApplication.isPlaying = false;
+#endif
 	}
 
 	[ConsoleMethod("hard_reset", "")]
