@@ -308,7 +308,7 @@ public class GameInput : MonoBehaviour
 
 			if (inputSystem.Player.EndTurn.WasPressedThisFrame())
 			{
-				gameTurnManager.TryEndPlayerTurn();
+				gameTurnManager.TryEndPlayerTurn(true);
 			}
 			
 			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.

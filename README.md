@@ -11,17 +11,12 @@
 - add a "drop on ground" and "pickup loot bag" Animation
 - zombi do not always "warn other in rooms"
 - grenade should alert damaged enemy
-- optimization nav rebuild
 - clean "CharacterController"
 - damage VFX (blood)
-	
 - retake gamelog : should warn about dice launch
-- dice pool position
-
 - party pc following stuck in door
 - fix weird movement at zombi start
-
-- squad
+- squads
 	
 	
 	https://opengameart.org/content/medieval-props-textured

@@ -20,10 +20,10 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
 	[SerializeField] private bool setDetectedOnDamaged = true;
 	[SerializeField] private bool lookAtDetected = true;
-	[SerializeField] private bool warnOthersInRoom = true;
 	[SerializeField] private bool drawGizmos;
 	[SerializeField] [Min(0f)] private float looseTargetDistance;
 	[SerializeField] [Min(0f)] private float awarenessScale = 1.0f;
+	[SerializeField] [Min(0f)] private float hearingScale = 2.0f;
 	
 	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
 
@@ -42,28 +42,6 @@ public class CharacterDetection : MonoBehaviour
 				
 				if(debugMode > 0) Debug.Log(this + " detects " + otherCharacter);
 				detectedCharacters.Add(otherCharacter);
-				
-				if (selfCharacter.IsEnemyTo(otherCharacter) && warnOthersInRoom)
-				{
-					if (RoomTrigger.TryGetRoom(selfCharacter, out var selfRoom))
-					{
-						var others = selfRoom.GetCharacters();
-						foreach (var other in others)
-						{
-							if (other == selfCharacter) continue;
-							if (other.GetCurrentFaction() == selfCharacter.GetCurrentFaction() 
-							    && !other.IsDead()
-							    && !other.HasDetectedOther(selfCharacter))
-							{
-								if (other.TryGetComponent(out CharacterDetection otherDetection))
-								{
-									if(debugMode > 0) Debug.Log(this + " warnOthersInRoom " + otherDetection + " SetDetected " + otherCharacter);
-									otherDetection.SetCharacterDetected(otherCharacter, true);
-								}
-							}
-						}
-					}
-				}
 				
 				onCharacterDetected?.Invoke(otherCharacter);
 				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, true);
@@ -191,13 +169,18 @@ public class CharacterDetection : MonoBehaviour
 		{
 			if (!detectedCharacters.Contains(anyCharacter))
 			{
+				var scale = anyCharacter.GetStealth() * awarenessScale;
+				
+				if (Vector3.Distance(selfCharacter.GetPosition(), anyCharacter.GetPosition()) < hearingDistance)
+					scale *= hearingScale;
+				
 				if (IsCharacterVisible(anyCharacter))
 				{
-					AddAwareness(anyCharacter, anyCharacter.GetStealth() * awarenessScale * Time.deltaTime);
+					AddAwareness(anyCharacter, scale * Time.deltaTime);
 				}
 				else
 				{
-					AddAwareness(anyCharacter, -anyCharacter.GetStealth() * awarenessScale * Time.deltaTime);
+					AddAwareness(anyCharacter, -scale * Time.deltaTime);
 				}
 			}
 			else

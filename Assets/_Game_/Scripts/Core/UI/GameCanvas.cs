@@ -277,7 +277,7 @@ public class GameCanvas : MonoBehaviour
 		}
 	}
 
-	private void ClickEndTurn() => gameTurnManager.TryEndPlayerTurn();
+	private void ClickEndTurn() => gameTurnManager.TryEndPlayerTurn(false);
 
 	private void ClickNextCharacter() => CharacterSelection.SelectNextCharacter();
 
