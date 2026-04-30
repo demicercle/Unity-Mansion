@@ -427,7 +427,9 @@ public class GameTurnManager : MonoBehaviour
 
 	private void OnRoomChanged()
 	{
-		if (!turnBasedMode) return;
+		if (!turnBasedMode)
+			return;
+		
 		foreach (var levelChar in levelCharacters)
 		{
 			if (!levelChar.IsCharacterRevealed() || levelChar.IsDead()) continue;
@@ -485,10 +487,7 @@ public class GameTurnManager : MonoBehaviour
 		{
 			character.Routines.StopAllRoutines();
 			
-			if (character.IsDead())
-				continue;
-			
-			if (!character.InParty() && !character.HasDetectedAnyPartyCharacter())
+			if (character.IsDead() || !character.IsCharacterRevealed())
 				continue;
 			
 			turnBasedCharacters.Insert(0, character);
