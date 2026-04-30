@@ -99,8 +99,11 @@ public class GameTurnManager : MonoBehaviour
 	public CharacterEntity[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
 	public CharacterEntity[] GetLevelCharacters() => levelCharacters.ToArray();
 	public bool IsLevelIndex(int index) => index == 0; // TODO
-	
-	public float WaitTime { get; set; }
+
+	public void SetWaitTime(float newTime)
+	{
+		waitTime = newTime;
+	}
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
@@ -116,6 +119,7 @@ public class GameTurnManager : MonoBehaviour
 	private bool turnBasedMode;
 	private bool leaveTurnBased;
 	private bool nextFirstTurnIsPlayer;
+	private float waitTime;
 	
 	private void Awake()
 	{
@@ -386,14 +390,14 @@ public class GameTurnManager : MonoBehaviour
 	{
 		do
 		{
-			if(debugMode > 1) Debug.Log(this + " WaitRoutines WaitTime=" + WaitTime.ToString("N2") + " " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
+			if(debugMode > 1) Debug.Log(this + " WaitRoutines WaitTime=" + waitTime.ToString("N2") + " " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
 			
 			yield return null;
 
-			if (WaitTime > 0)
-				WaitTime = Mathf.Max(WaitTime - Time.deltaTime, 0f);
+			if (waitTime > 0)
+				waitTime = Mathf.Max(waitTime - Time.deltaTime, 0f);
 		}
-		while ( (turnBasedMode && CharacterRoutines.AnyActiveRoutines()) || WaitTime != 0f);
+		while ( (turnBasedMode && CharacterRoutines.AnyActiveRoutines()) || waitTime != 0f);
 	}
 
 	private Coroutine WaitNavigationDirty()
@@ -596,7 +600,7 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.BeginVertical("textfield");
 			GUILayout.Label("turnBasedMode: " + turnBasedMode);
 			if(turnBasedMode) GUILayout.Label("isPlayerTurn: " + playerTurn);
-			GUILayout.Label("    wait: " + WaitTime.ToString("N2"));
+			GUILayout.Label("    wait: " + waitTime.ToString("N2"));
 			if (turnBasedMode)
 			{
 				if (CharacterRoutines.AnyActiveRoutines())

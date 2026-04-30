@@ -18,7 +18,7 @@ public class NodeWait : GameNode
 		// init inputs
 		_in.InitInput(this, "_in", () =>
 		{
-			GameTurnManager.Instance.WaitTime = GetInputValue("_duration", _duration);
+			GameTurnManager.Instance.SetWaitTime(GetInputValue("_duration", _duration));
 		});
 	}
 
