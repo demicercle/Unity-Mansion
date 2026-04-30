@@ -88,7 +88,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public event System.Action turnEnded;
 	
 	[SerializeField] private CharacterData characterData;
-	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f;
+	[SerializeField] private Canvas characterCanvas;
+	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f; // TODO remove
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
 	[SerializeField] private WeaponData defaultWeapon;
@@ -120,6 +121,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
 		SetCurrentWeapon(defaultWeapon);
+		characterCanvas.gameObject.SetActive(true);
 		onSpawned?.Invoke();
 		onStatsChanged?.Invoke();
 	}
@@ -757,6 +759,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			defaultWeapon = WeaponData.CreateInstance<WeaponData>();
 		}
 
+		characterCanvas.gameObject.SetActive(false);
 		gameObject.SetActive(false); // wait for "Spawn"
 		
 		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
