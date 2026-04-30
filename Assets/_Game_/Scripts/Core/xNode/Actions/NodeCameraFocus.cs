@@ -15,7 +15,7 @@ public class NodeCameraFocus : GameNode
 			if (_target.TryGetComponent(this, out Waypoint waypoint))
 			{
 				CameraPivot.Instance.Focus(waypoint.transform);
-				CameraPivot.Instance.OrbitTowards(waypoint.transform.TransformPoint(Vector3.forward));
+				CameraPivot.Instance.OrbitTowards(waypoint.GetRotation());
 			}
 			else if (_target.TryGetComponent(this, out CharacterEntity character))
 			{

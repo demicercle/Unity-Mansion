@@ -175,39 +175,28 @@ public class CameraPivot : MonoBehaviour
         UpdateAnimator();
     }
 
-    public Coroutine OrbitTowards(Vector3 worldPosition)
+    public Coroutine OrbitTowards(float yaw)
     {
-        return StartCoroutine(DoOrbitTowards(worldPosition));
+        StopAllCoroutines();
+        return StartCoroutine(DoOrbitTowards(yaw));
     }
 
-    private IEnumerator DoOrbitTowards(Vector3 worldPosition)
+    private bool orbitCoroutine;
+    private IEnumerator DoOrbitTowards(float yaw)
     {
         orbitCoroutine = true;
         while (orbitCoroutine)
         {
-            var dir = (worldPosition - focusPosition);
-            dir.y = 0;
-            dir.Normalize();
-
-            var dot = Vector3.Dot(Quaternion.Euler(0, desiredYaw, 0) * Vector3.forward, dir);
-            if (dot < 0.9f)
-            {
-                Orbit(Mathf.Sign(dir.x), 0, Time.deltaTime);
-                yield return null;
-            }
-            else
-            {
-                orbitCoroutine = false;
-            }
+            desiredYaw = Mathf.MoveTowardsAngle(desiredYaw, yaw, Time.deltaTime * Mathf.Max(orbitMaxSpeed.x, orbitSpeed.x) * Consts.RAD_TO_DEG);
+            yield return null;
         }
     }
 
-    private bool orbitCoroutine;
     public void Orbit(float deltaX, float deltaY, float inputScale = 0f)
     {
         orbitCoroutine = false;
-        orbitScale = new Vector2(deltaX, deltaX);
         if (debugMode > 0) Debug.Log(this + " Orbit " + deltaX + " " + deltaY + " " + inputScale);
+        orbitScale = new Vector2(deltaX, deltaX);
         if (inputScale != 0f)
         {
             orbitScale *= inputScale;

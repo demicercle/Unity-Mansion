@@ -9,3 +9,4 @@
 
 debug_script 1
 debug_gtm 1
+debug_camera 1
