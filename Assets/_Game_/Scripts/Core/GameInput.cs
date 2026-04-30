@@ -704,10 +704,17 @@ public class GameInput : MonoBehaviour
 			var raycastResult = CursorRaycast(out var hit);
 			if (raycastResult == CursorRaycastResult_Interaction)
 			{
-				if (selectedCharacter && itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject, out var objectTo))
+				if (selectedCharacter  && itemToUse && itemToUse.CanBeUsedOn(hit.collider.gameObject, out var objectTo))
 				{
-					selectedCharacter.Routines.AssignUseItemOn(itemToUse, objectTo);
-					SetItemToUse(null, false); // AssignUseItem On
+					if (!selectedCharacter.HasActions())
+					{
+						selectedCharacter.FloatingText_Cant();
+					}
+					else
+					{
+						selectedCharacter.Routines.AssignUseItemOn(itemToUse, objectTo);
+						SetItemToUse(null, false); // AssignUseItem On
+					}
 				}
 				
 				else if (hit.collider.TryGetComponent(out CharacterEntity clickedCharacter)) // click character
@@ -729,7 +736,11 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter && itemToUse)
 				{
-					if (itemToUse.CanBeUsedAt(hit.point))
+					if (!selectedCharacter.HasActions())
+					{
+						selectedCharacter.FloatingText_Cant();
+					}
+					else if (itemToUse.CanBeUsedAt(hit.point))
 					{
 						selectedCharacter.Routines.AssignUseItemAt(itemToUse, hit.point);
 						SetItemToUse(null, false);
