@@ -113,6 +113,7 @@ public class GameTurnManager : MonoBehaviour
 	private CharacterEntity currentAICharacter;
 	private CharacterEntity focusCharacter;
 	private List<CharacterEntity> turnBasedCharacters = new List<CharacterEntity>();
+	private bool turnBasedCharactersChanged;
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
@@ -130,12 +131,14 @@ public class GameTurnManager : MonoBehaviour
 
 		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
+		RoomTrigger.onChanged += OnRoomChanged;
 	}
 
 	private void OnDestroy()
 	{
 		CharacterDetection.onAnyCharacterDetectionChanged -= OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+		RoomTrigger.onChanged -= OnRoomChanged;
 	}
 
 	private IEnumerator Start()
@@ -233,6 +236,12 @@ public class GameTurnManager : MonoBehaviour
 		
 		while (turnBasedMode)
 		{
+			if (turnBasedCharactersChanged)
+			{
+				turnBasedCharactersChanged = false;
+				turnBasedCharacters = turnBasedCharacters.OrderBy(c => (-(int)c.GetCurrentFaction()) + c.ToString()).ToList();
+			}
+			
 			if (currentTurn == 0) // it is the first turn
 			{
 				FirstTurn();
@@ -253,6 +262,9 @@ public class GameTurnManager : MonoBehaviour
 			else // it is NOT the first turn
 			{
 				NewTurn();
+				
+				yield return YieldRoutines();
+				yield return WaitNavigationDirty();
 			}
 
 			if (IsPlayerTurn())
@@ -285,7 +297,7 @@ public class GameTurnManager : MonoBehaviour
 			yield return WaitNavigationDirty();
 			yield return YieldRoutines();
 		
-			foreach (var otherCharacter in levelCharacters)
+			foreach (var otherCharacter in turnBasedCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
@@ -413,8 +425,17 @@ public class GameTurnManager : MonoBehaviour
 		} while (NavmeshRebuilder.IsNavigationDirty());
 	}
 
-	private void NotifyTurnChanged()
+	private void OnRoomChanged()
 	{
+		if (!turnBasedMode) return;
+		foreach (var levelChar in levelCharacters)
+		{
+			if (!levelChar.IsCharacterRevealed() || levelChar.IsDead()) continue;
+			if (!turnBasedCharacters.Contains(levelChar))
+			{
+				turnBasedCharacters.Add(levelChar); // character revealed while in turn based mode
+			}
+		}
 	}
 	
 	private void EndTurn()
@@ -449,8 +470,9 @@ public class GameTurnManager : MonoBehaviour
 		nextFirstTurnIsPlayer = false;
 		if(debugMode > 0) Debug.Log(this + " FirstTurn playerTurn=" + playerTurn);
 				
-		turnBasedCharacters.Clear();
-		foreach (var character in levelCharacters.OrderBy(c => (int)c.GetCurrentFaction()))
+		turnBasedCharacters.Clear(); // first turn
+		turnBasedCharactersChanged = true;
+		foreach (var character in levelCharacters)
 		{
 			character.Routines.StopAllRoutines();
 			

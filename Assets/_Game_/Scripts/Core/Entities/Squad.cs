@@ -14,8 +14,56 @@ public class Squad : MonoBehaviour
 	}
 
 	public CharacterEntity[] GetCharacters() => characters.ToArray();
+
+	public bool AddCharacter(CharacterEntity newChar)
+	{
+		if (!characters.Contains(newChar))
+		{
+			characters.Add(newChar);
+			WarnAllies();
+			return true;
+		}
+
+		return false;
+	}
+
+	public bool RemoveCharacter(CharacterEntity character)
+	{
+		if (characters.Contains(character))
+		{
+			characters.Remove(character);
+			return true;
+		}
+
+		return false;
+	}
 	
 		[SerializeField] private List<CharacterEntity> characters  = new List<CharacterEntity>();
+
+		private void WarnAllies()
+		{
+			foreach (var ally1 in characters)
+			{
+				if (!ally1.gameObject.activeInHierarchy) continue; // skip disabled objects
+				
+				if (ally1.TryGetComponent(out CharacterDetection detection1))
+				{
+					foreach (var otherCharacter in detection1.GetDetectedCharacters())
+					{
+						foreach (var ally2 in characters)
+						{
+							if (ally2 != ally1)
+							{
+								if (ally2.TryGetComponent(out CharacterDetection detection2))
+								{
+									detection2.SetCharacterDetected(otherCharacter, true);
+								}
+							}	
+						}
+					}
+				}
+			}
+		}
 
 		private void OnEnable()
 		{

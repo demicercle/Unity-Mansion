@@ -18,6 +18,7 @@
 - fix weird movement at zombi start
 - squads
 - think timeout brains in real time
+- how to deal with revealed enemies while in battle?
 	
 	
 	https://opengameart.org/content/medieval-props-textured

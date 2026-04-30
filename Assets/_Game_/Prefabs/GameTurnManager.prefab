@@ -50,7 +50,7 @@ MonoBehaviour:
   skipInvisibleCharacters: 1
   restInterval: 1.5
   cameraStartZoom: 0.204
-  realTimeTicks: 1
+  realTimeTicks: 1.5
   postLoadDuration: 1
   turnChangedSeconds: 2
   focusCharacterSeconds: 1
