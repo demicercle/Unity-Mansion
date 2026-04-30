@@ -304,7 +304,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			{
 				if(debugStats > 0) Debug.Log(target + " try dodge " + this + " dodgeCount=" + target.dodgeCount);
 				target.dodgeCount -= 1;
-				if (target.RollDice() < target.GetDodgeChance())
+				if (atkRoll < target.GetDodgeChance())
 				{
 					onAttackResult?.Invoke(this, target, AttackResult.Dodge);
 					return AttackResult.Dodge;

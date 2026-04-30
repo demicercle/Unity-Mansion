@@ -17,7 +17,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	public Slider karmaSlider;
 	public TMP_Text karmaLabel;
 	public float karmaLerpSpeed = 1f;
-	public TMP_Text dodgeLabel;
+	public TMP_Text dodgeLabel1, dodgeLabel2;
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
@@ -54,6 +54,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	
 	private CharacterEntity _assignedCharacter;
 	private int karmaInt;
+	private float calculatedDodge;
 
 	private void OnSelectionChanged(bool selected)
 	{
@@ -118,7 +119,9 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 				                  + (karmaInt);
 			}
 
-			dodgeLabel.text = Mathf.RoundToInt(_assignedCharacter.CalculateDodgeChance() * 100) + "%";
+			calculatedDodge = _assignedCharacter.CalculateDodgeChance();
+			dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
+			dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
 		}
 	}
 }
