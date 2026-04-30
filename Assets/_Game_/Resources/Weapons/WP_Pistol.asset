@@ -16,7 +16,7 @@ MonoBehaviour:
   maxDamage: 3
   isRanged: 1
   attackRange: 12
-  hitChance: 0.65
+  hitChance: 0.5
   rangeHitCurve:
     serializedVersion: 2
     m_Curve:

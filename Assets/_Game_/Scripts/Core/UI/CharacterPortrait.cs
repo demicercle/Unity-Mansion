@@ -95,7 +95,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 		if (_assignedCharacter)
 		{
 			toggleTurnBased.isOn = GameTurnManager.Instance.IsTurnBasedMode();
-			calculatedDodge = _assignedCharacter.CalculateDodgeChance();
+			calculatedDodge = _assignedCharacter.GetDodgeChance();
 			if (calculatedDodge > 0)
 			{
 				dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";

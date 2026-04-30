@@ -46,7 +46,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
 	private const float MinAttackRange = 0.25f;
-	private const float DiceToKarma = Mathf.PI * 0.02f;
+	private const float DodgeCountToChance = 2f / 20f;
 	private const float MovePointsToDodge = 0.02f;
 	private const float MovePointsToHit = 0.00f;
 	
@@ -169,8 +169,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if(verbose) Debug.Log(this + " Rest");
 		usedActions.Clear();
 		usedMovePoints = 0;
+		dodgeCount = 0;
 		lastTimeRested = Time.time;
-		dodgeCount = characterData.dodgeCount;
 		onStatsChanged?.Invoke();
 	}
 	
@@ -197,11 +197,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return rolled;
 	}
 
-	public bool CanDodge() => dodgeCount > 0 && characterData.dodgeChance > 0;
-	public float GetDodgeChance() => Mathf.Clamp01(characterData.dodgeChance + GetRemainingMovePoints() * MovePointsToDodge);
-
-	
-	public int GetDodgeCount() => dodgeCount;
+	public bool CanDodge() => characterData.dodgeChance > 0;
+	public float GetDodgeChance() => Mathf.Clamp01(characterData.dodgeChance + dodgeCount * DodgeCountToChance + GetRemainingMovePoints() * MovePointsToDodge);
 
 	public float GetHitChance() => Mathf.Clamp01(currentWeapon.hitChance + GetRemainingMovePoints() * MovePointsToHit);
 
@@ -250,19 +247,12 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		calculatedHitChance = CalculateHitChance(target.GetCenterPosition());
 		if (!IsUsingRangeWeapon())
 		{
-			for(int i = 0; i < target.dodgeCount; i++)
-				calculatedHitChance *= 1f - target.GetDodgeChance();
+			if (target.CanDodge())
+			{
+				calculatedHitChance -= target.GetDodgeChance();
+			}
 		}
-		return calculatedHitChance;
-	}
-	
-	private float calculatedDodge;
-	public float CalculateDodgeChance()
-	{
-		calculatedDodge = 1f;
-		for( int i = 1; i <= dodgeCount; i++ )
-			calculatedDodge *= 1f - GetDodgeChance();
-		return 1f - calculatedDodge;
+		return Mathf.Clamp01(calculatedHitChance);
 	}
 	
 	public AttackResult TryHit(CharacterEntity target, float atkRoll)
@@ -277,15 +267,10 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 		if (!IsUsingRangeWeapon())
 		{
-			while (target.CanDodge())
+			if (target.CanDodge() && atkRoll < target.GetDodgeChance())
 			{
-				if(debugStats > 0) Debug.Log(target + " try dodge " + this + " dodgeCount=" + target.dodgeCount);
-				target.dodgeCount -= 1;
-				if (atkRoll < target.GetDodgeChance())
-				{
-					onAttackResult?.Invoke(this, target, AttackResult.Dodge);
-					return AttackResult.Dodge;
-				}
+				onAttackResult?.Invoke(this, target, AttackResult.Dodge);
+				return AttackResult.Dodge;
 			}
 		}
 			
@@ -716,7 +701,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private static List<CharacterEntity> _partyCharacters = new List<CharacterEntity>();
 
 	private int partyIndex = -1;
-	
+	private int dodgeCount = 0;
 	private int currentTurn; // TODO not in use
 	private bool isControllable;
 	private float usedMovePoints;
@@ -732,7 +717,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private CharacterFollows follows;
 	private WeaponData currentWeapon;
 	private CharacterDetection detection;
-	private int dodgeCount;
 	private ItemData itemInHand;
 //	private CharacterLookAt characterLookAt;
 	
