@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4197416605773948541}
   - component: {fileID: 1787235473888365522}
   - component: {fileID: 7279023548873077307}
+  - component: {fileID: 7967239589327830260}
   m_Layer: 0
   m_Name: DoorNavObstacle
   m_TagString: Untagged
@@ -109,52 +110,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameEventTrigger
   turnEnded:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8728720412636102918}
-        m_TargetAssemblyTypeName: Pathfinding.GraphUpdateScene, AstarPathfindingProject
-        m_MethodName: set_enabled
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   turnStarted:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8728720412636102918}
-        m_TargetAssemblyTypeName: Pathfinding.GraphUpdateScene, AstarPathfindingProject
-        m_MethodName: set_enabled
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-  turnChanged:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1787235473888365522}
-        m_TargetAssemblyTypeName: NavmeshRebuilder, Assembly-CSharp
-        m_MethodName: SetDirty
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   onFightStarts:
     m_PersistentCalls:
       m_Calls: []
   onFightEnds:
     m_PersistentCalls:
       m_Calls: []
+  onTurnBasedChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onPlayerChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 7967239589327830260}
+        m_TargetAssemblyTypeName: ReverseToggle, Assembly-CSharp
+        m_MethodName: SetValue
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &7967239589327830260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 149712394300254854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b46543bb10e24a6da82c651554468948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReverseToggle
+  toggle: {fileID: 0}
+  onValueChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 149712394300254854}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

@@ -697,6 +697,7 @@ MonoBehaviour:
   warnOthersInRoom: 1
   drawGizmos: 0
   looseTargetDistance: 0
+  awarenessScale: 1
 --- !u!54 &6072534866263412361
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1006,7 +1007,7 @@ MonoBehaviour:
   lockWhenNotMoving: 1
   agentTimeHorizon: 0.5
   obstacleTimeHorizon: 1
-  maxNeighbours: 10
+  maxNeighbours: 3
   layer: 1
   collidesWith: 3
   wallAvoidForce: 1
@@ -1345,9 +1346,6 @@ MonoBehaviour:
   turnStarted:
     m_PersistentCalls:
       m_Calls: []
-  turnChanged:
-    m_PersistentCalls:
-      m_Calls: []
   onFightStarts:
     m_PersistentCalls:
       m_Calls: []
@@ -1369,6 +1367,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onPlayerChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3918123633167891003
 GameObject:
   m_ObjectHideFlags: 0

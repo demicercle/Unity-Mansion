@@ -331,6 +331,8 @@ public class GameTurnManager : MonoBehaviour
 
 		currentTurn = 0;
 		leaveTurnBased = false;
+		playerTurn = false;
+		onPlayerChanged?.Invoke(playerTurn);
 		
 		foreach (var partyChar in partyCharacters)
 		{

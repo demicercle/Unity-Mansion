@@ -18,11 +18,10 @@
 - retake gamelog : should warn about dice launch
 - dice pool position
 
-- display enemy "awareness"
+- party pc following stuck in door
 - fix weird movement at zombi start
 
-- initiative
-	> take all
+- squad
 	
 	
 	https://opengameart.org/content/medieval-props-textured

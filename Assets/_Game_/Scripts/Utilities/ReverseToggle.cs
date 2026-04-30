@@ -7,21 +7,18 @@ public class ReverseToggle : MonoBehaviour
 {
 	public Toggle toggle;
 	public UnityEvent<bool> onValueChanged;
-	
 
-	private void Awake()
-	{
-		if(!toggle) toggle =  GetComponent<Toggle>();
-	}
+	public void SetValue(bool newValue) => onValueChanged?.Invoke(!newValue);
 
 	private void OnEnable()
 	{
-		toggle.onValueChanged.AddListener(OnValueChanged);
+		if(!toggle) toggle =  GetComponent<Toggle>();
+		toggle?.onValueChanged.AddListener(OnValueChanged);
 	}
 
 	private void OnDisable()
 	{
-		toggle.onValueChanged.RemoveListener(OnValueChanged);
+		toggle?.onValueChanged.RemoveListener(OnValueChanged);
 	}
 
 	private void OnValueChanged(bool isOn)
