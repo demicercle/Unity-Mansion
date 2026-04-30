@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Interact
   m_EditorClassIdentifier: Assembly-CSharp::NodeInteract
   graph: {fileID: 11400000}
-  position: {x: 40, y: -56}
+  position: {x: 152, y: -136}
   ports:
     keys:
     - _in
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Name: Switch Int
   m_EditorClassIdentifier: Assembly-CSharp::NodeSwitchInt
   graph: {fileID: 11400000}
-  position: {x: -264, y: -24}
+  position: {x: -280, y: -40}
   ports:
     keys:
     - _in
