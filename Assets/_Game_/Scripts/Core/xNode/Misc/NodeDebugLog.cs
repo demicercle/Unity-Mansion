@@ -25,7 +25,7 @@ public class NodeDebugLog : GameNode
 
 	private void OnCallback()
 	{
-		Debug.Log("<b>LOG: </b>" + GetInputValue("message", message) + "\nin graph=" + graph);
+		Debug.Log("<color=yellow>x_DebugLog</color> " + GetInputValue("message", message) + "\nin graph=" + graph);
 	}
 
 	// Return the correct value of an output port when requested

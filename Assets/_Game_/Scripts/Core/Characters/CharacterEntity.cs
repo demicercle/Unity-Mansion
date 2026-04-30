@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using RPGCharacterAnims.Actions;
@@ -757,11 +758,35 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 
 		gameObject.SetActive(false); // wait for "Spawn"
+		
+		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 	}
 
 	private void OnDestroy()
 	{
 		_allCharacters.Remove(this);
+		
+		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
+	}
+
+	private void OnTurnStarted()
+	{
+		if (IsCurrentTurn())
+		{
+			if(GameTurnManager.debugMode > 0) Debug.Log(this + " OnTurnStarted");
+			turnStarted?.Invoke();
+		}
+	}
+
+	private void OnTurnEnded()
+	{
+		if (IsCurrentTurn())
+		{
+			if(GameTurnManager.debugMode > 0) Debug.Log(this + " OnTurnEnded");
+			turnEnded?.Invoke();
+		}
 	}
 
 	private void SetCurrentWeapon(WeaponData newWeapon)

@@ -107,15 +107,36 @@ public class SceneReference
 {
 	public string findName = "";
 
+	public override string ToString()
+	{
+		return "x_SceneReference";
+	}
+
 	public GameObject GetGameObject(GameNode node)
 	{
-		if (!_gameObject)
-		{
+		//if (!_gameObject)
+		//{
 			if (!string.IsNullOrWhiteSpace(findName))
+			{
 				_gameObject = GameObject.Find(findName);
+				
+				if (!_gameObject)
+				{
+					if(GameScript.debugMode > 0)
+						Debug.LogError(this + " in " + node + " cannot find gameObject named: " + findName);
+					else 
+						Debug.LogWarning(this + " in " + node + " cannot find gameObject named: " + findName);
+
+					_gameObject = node.script.gameObject; // fallback to self
+				}
+			}
 			else
+			{
 				_gameObject = node.script.gameObject;
-		}
+			}
+			
+			//if(GameScript.debugMode > 0) Debug.Log(this + " in " + node + " init gameObject: " + _gameObject + " findName=" + findName);
+		//}
 		
 		return _gameObject;
 	}
@@ -127,7 +148,7 @@ public class SceneReference
 
 	public bool TryGetComponent<T>(GameNode node, out T component) where T : Component
 	{
-		return (component = GetComponent<T>(node));
+		return GetGameObject(node).TryGetComponent<T>(out component);
 	}
 
 	private GameObject _gameObject;

@@ -23,7 +23,7 @@ public class NodeTalked : GameNode, ISceneLoaded
 		_character = GetInputValue<SceneReference>("_character", _character);
 		if (_character.TryGetComponent(this, out character))
 		{
-			DebugLogThis("init character: "  + _character);
+			DebugLogThis("init character: "  + character);
 			character.onTalkedBy += OnTalkedBy;
 		}
 		else

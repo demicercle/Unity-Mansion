@@ -28,10 +28,11 @@ public class NodeSwitchInt : GameNode
 	{
 		CreateOutputs();
 		
-		if (int.TryParse(port.fieldName.Last().ToString(), out var index))
+		if (int.TryParse(port.fieldName.Last().ToString(), out var index)
+		    && index >= 0 && index < _outs.Length)
 			return _outs[index];
 
-		DebugWarningThis(this + " invalid port: " + port.fieldName);
+		DebugWarningThis("invalid port: " + port.fieldName + " parsed index=" + index + " outs=" + _outs.Length);
 		
 		return null; // Replace this
 	}
@@ -44,31 +45,26 @@ public class NodeSwitchInt : GameNode
 		{
 			AddPort();
 		}
-		
-		CreateOutputs();
 	}
 
 	private NodeExec[] _outs;
-	private int _count;
 
 	private void CreateOutputs()
 	{
-		if (_outs == null || _outs.Length == 0)
+		var ports = DynamicOutputs.ToArray();
+		_outs = new NodeExec[ports.Length];
+		for (int i = 0; i < ports.Length; i++)
 		{
-			var ports = DynamicOutputs.ToArray();
-			_outs = new NodeExec[ports.Length];
-			for (int i = 0; i < ports.Length; i++)
-			{
-				_outs[i] = new NodeExec();
-			}
+			_outs[i] = new NodeExec();
 		}
+		
+		DebugLogThis("created outs=" + _outs.Length);
 	}
 	
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
 		
-		_index = 0;
 		_in.StartInput(this, "_in", () =>
 		{
 			CreateOutputs();

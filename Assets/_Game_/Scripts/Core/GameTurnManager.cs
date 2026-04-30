@@ -200,6 +200,8 @@ public class GameTurnManager : MonoBehaviour
 		
 		Debug.Log("loading complete");
 		isLoading = false;
+		yield return null; // for graph events to init
+		
 		onLoadingGame?.Invoke(false);
 		onSceneLoaded?.Invoke();
 		

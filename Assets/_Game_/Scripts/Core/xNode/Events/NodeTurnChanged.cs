@@ -32,6 +32,7 @@ public class NodeTurnChanged : GameNode, ISceneLoaded
 		}
 		else
 		{
+			DebugLogThis("init GTM");
 			GameTurnManager.Instance.onTurnStarted += TurnStarted;
 			GameTurnManager.Instance.onTurnEnded += TurnEnded;
 		}
