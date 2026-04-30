@@ -100,24 +100,6 @@ public class ConsoleCommands : MonoBehaviour
 		}
 	}
 
-	[ConsoleMethod("set_luck", "")]
-	public static void SetLuck(float value)
-	{
-		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
-		{
-			character.SetLuck(value);
-		}
-	}
-
-	[ConsoleMethod("set_karma", "")]
-	public static void SetKarma(float value)
-	{
-		if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
-		{
-			character.SetKarma(value);
-		}
-	}
-
 	[ConsoleMethod("roll_dices", "")]
 	public static void RollDices(int count)
 	{
@@ -193,12 +175,6 @@ public class ConsoleCommands : MonoBehaviour
 	public static void Log(string message)
 	{
 		GameCanvas.Instance.gameLog.AppendLine(message);
-	}
-
-	[ConsoleMethod("no_karma", "")]
-	public static void NoKarma(int value)
-	{
-		CharacterEntity.disableKarma = value > 0;
 	}
 
 	[ConsoleMethod("no_detection", "")]

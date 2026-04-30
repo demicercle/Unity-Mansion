@@ -51,7 +51,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private const float MovePointsToHit = 0.00f;
 	
 	public static int debugStats { get; set; }
-	public static bool disableKarma { get; set; }
 	
 	public static List<CharacterEntity> AllCharacters => _allCharacters;
 
@@ -92,13 +91,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
 	[SerializeField] private WeaponData defaultWeapon;
-	[SerializeField] private bool noKarma;
-	[SerializeField] [Range(-1f, 1f)] private float baseKarma = 0.0f;
 	public CharacterRoutines Routines => routines;
-	
-	public void SetLuck(float newValue) => currentLuck = Mathf.Clamp(newValue, -1f, 1f);
-	public void SetKarma(float newValue) => currentKarma = Mathf.Clamp(newValue, -1f, 1f);
-	public bool HasKarma() => !noKarma && !disableKarma;
 	
 	public float lastTimeRested { get; private set; }
 
@@ -194,8 +187,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public IAttackable GetLastAttackTarget() => lastAttackTarget;
 
-	public float GetCurrentKarma() => currentKarma;
-	public void SetCurrentKarma(float v) => currentKarma = Mathf.Clamp(v, -1f, 1f);
 	
 	public float RollDice()
 	{
@@ -203,21 +194,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if(DicePool.debugMode>0) Debug.Log(this + " RollDice takes last result: " + rolled);
 		onAnyCharacterRollDice?.Invoke(this, rolled);
 		DicePool.RollNewDice();
-		if (!HasKarma()) return rolled;
-		
-		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
-		currentLuck = Mathf.Clamp(currentLuck, -1f, 1f);
-		
-		var result = rolled + currentKarma * 0.5f;
-		
-		if (rolled < 0.5f) currentKarma += rolled * DiceToKarma;
-		if (rolled > 0.5f) currentKarma -= (rolled - (0.5f + 0.5f * currentLuck)) * DiceToKarma;
-		
-		currentKarma = Mathf.Clamp(currentKarma, -1f, 1f);
-		
-		if (debugStats > 0) Debug.Log(this + " RollDice! rolled=" + rolled + " newKarma=" + currentKarma + " luck=" + currentLuck);
-		
-		return result;
+		return rolled;
 	}
 
 	public bool CanDodge() => dodgeCount > 0 && characterData.dodgeChance > 0;
@@ -755,8 +732,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private CharacterFollows follows;
 	private WeaponData currentWeapon;
 	private CharacterDetection detection;
-	private float currentKarma;
-	private float currentLuck = 0.0f;
 	private int dodgeCount;
 	private ItemData itemInHand;
 //	private CharacterLookAt characterLookAt;
@@ -796,9 +771,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			defaultWeapon = WeaponData.CreateInstance<WeaponData>();
 		}
 
-		currentKarma = baseKarma;
-		currentLuck = characterData.luck;
-
 		gameObject.SetActive(false); // wait for "Spawn"
 	}
 
@@ -836,8 +808,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			                                      + "\n" + GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2")
 			                                      + "\n" + "Actions: " + usedActions.Count + "/" + characterData.maxActions
 			                                      + "\n" + "MovePoints: " + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
-			                                      + "\n" + "KARMA: " + currentKarma.ToString("N3")
-			                                      + "\n" + "Luck: " + currentLuck.ToString("N2")
 			                                      + "\n" + "HitChance: " + GetHitChance().ToString("N2")
 			                                      + "\n" + "Dodge: " + GetDodgeChance().ToString("N2") + " (x" + dodgeCount + ")"
 				), "label");
