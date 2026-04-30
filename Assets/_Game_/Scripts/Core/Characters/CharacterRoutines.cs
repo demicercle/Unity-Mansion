@@ -381,12 +381,13 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		
 		_selfCharacter.AttackAction(target);
+		var atkResult = _selfCharacter.RollDice(); // we roll the dice before for the animation
 		if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetPosition(), Color.red, 2.0f);
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
 
-		switch (_selfCharacter.TryHit(target))
+		switch (_selfCharacter.TryHit(target, atkResult))
 		{
 			case CharacterEntity.AttackResult.Miss:
 				Debug.Log(this + " AttackResult.Miss " + target);

@@ -236,11 +236,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		Dodge,
 	}
 	
-	public AttackResult TryHit(IAttackable target)
+	public AttackResult TryHit(IAttackable target, float diceResult)
 	{
 		if (target is CharacterEntity)
 		{
-			return TryHit(target as CharacterEntity);
+			return TryHit(target as CharacterEntity, diceResult);
 		}
 
 		if (target is Destructible)
@@ -288,9 +288,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return 1f - calculatedDodge;
 	}
 	
-	public AttackResult TryHit(CharacterEntity target)
+	public AttackResult TryHit(CharacterEntity target, float atkRoll)
 	{
-		var atkRoll = RollDice();
 		var hitChance = CalculateHitChance(target.GetCenterPosition());
 		if(DicePool.debugMode>0) Debug.Log(this + " TryHit " + target + " roll=" + atkRoll + " hitChance=" + hitChance);
 		if (1f - atkRoll > hitChance) // miss
