@@ -201,6 +201,7 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log("loading complete");
 		isLoading = false;
 		yield return null; // for graph events to init
+		yield return null; // for graph events to init
 		
 		onLoadingGame?.Invoke(false);
 		onSceneLoaded?.Invoke();
@@ -397,26 +398,34 @@ public class GameTurnManager : MonoBehaviour
 			yield return null;
 		} while (NavmeshRebuilder.IsNavigationDirty());
 	}
+
+	private void NotifyTurnChanged()
+	{
+	}
 	
 	private void EndTurn()
 	{
-		playerTurn = false;
-		onPlayerChanged?.Invoke(false);
-		Debug.Log(this + " EndTurn " + currentTurn);
+		if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
 		onTurnEnded?.Invoke();
+		playerTurn = false;
+		onPlayerChanged?.Invoke(playerTurn); 
+		onTurnStarted?.Invoke(); // start other turn
 	}
 	
 	private void NewTurn()
 	{
-		if(currentTurn >= 1) 
+		if (currentTurn >= 1)
+		{
+			if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
+			onTurnEnded?.Invoke();
 			PartyRest(false);
+		}
 		
 		currentTurn += 1;
-
 		playerTurn = true;
-		onPlayerChanged?.Invoke(true);
+		onTurnStarted?.Invoke();
 		
-		Debug.Log(this + " NewTurn " + currentTurn);
+		if(debugMode > 0) Debug.Log(this + " NewTurn " + currentTurn);
 	}
 
 	private void FirstTurn()
@@ -425,8 +434,6 @@ public class GameTurnManager : MonoBehaviour
 		playerTurn = nextFirstTurnIsPlayer;
 		nextFirstTurnIsPlayer = false;
 		if(debugMode > 0) Debug.Log(this + " FirstTurn playerTurn=" + playerTurn);
-		onPlayerChanged?.Invoke(playerTurn);
-		(playerTurn ? onTurnStarted : onTurnEnded)?.Invoke();
 				
 		turnBasedCharacters.Clear();
 		foreach (var character in levelCharacters.OrderBy(c => (int)c.GetCurrentFaction()))
@@ -457,7 +464,10 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 
-		Debug.Log(this + " found turnBasedCharacter=" + turnBasedCharacters.Count);
+		if(debugMode > 0) Debug.Log(this + " found turnBasedCharacter=" + turnBasedCharacters.Count);
+		
+		onPlayerChanged?.Invoke(playerTurn);
+		onTurnStarted?.Invoke();
 	}
 
 	private void SelectBestPlayerCharacter()
@@ -468,7 +478,7 @@ public class GameTurnManager : MonoBehaviour
 			.OrderBy(pc => Vector3.Distance(pc.GetPosition(), center))
 			.FirstOrDefault();
 		
-		Debug.Log(this + " SelectBestPlayerCharacter " + bestCharacter);
+		if(debugMode > 0) Debug.Log(this + " SelectBestPlayerCharacter " + bestCharacter);
 		CharacterSelection.SelectCharacter(bestCharacter);
 	}
 
@@ -550,7 +560,7 @@ public class GameTurnManager : MonoBehaviour
 				{
 					focusCharacter = char1;
 					leaveTurnBased = true;
-					Debug.Log(this + " OnAnyDetectionChanged " + char1.name + " " + char2.name + " leaveTurnBased");
+					if(debugMode > 0) Debug.Log(this + " OnAnyDetectionChanged " + char1.name + " " + char2.name + " leaveTurnBased");
 				}
 			}
 		}

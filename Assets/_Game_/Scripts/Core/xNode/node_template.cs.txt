@@ -1,0 +1,23 @@
+﻿using XNode;
+
+[CreateNodeMenu("MENU/Node_")]
+public class Node_ : GameNode/*, ISceneLoaded*/
+{
+	public override object GetValue(NodePort port)
+	{
+		// return outputs
+		return base.GetValue(port);
+	}
+
+	protected override void OnScriptStart()
+	{
+		base.OnScriptStart();
+		// init inputs
+	}
+
+	protected override void OnScriptDestroy()
+	{
+		// dispose inputs
+		base.OnScriptDestroy();
+	}
+}

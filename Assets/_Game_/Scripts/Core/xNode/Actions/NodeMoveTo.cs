@@ -22,7 +22,8 @@ public class NodeMoveTo : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		_start.StartInput(this, "_start", OnStart);
+		//_start = GetInputValue("_start", _start);
+		_start.InitInput(this, "_start", OnStart);
 	}
 
 	protected override void OnScriptDestroy()

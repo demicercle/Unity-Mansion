@@ -19,10 +19,11 @@ public class NodeDelay : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		_in.StartInput(this, "_in", () =>
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", () =>
 		{
 			if (_scheduler) _scheduler.StopAndDestroy();
-			_scheduler = CoroutineScheduler.Start(script.gameObject, WaitAction());
+			_scheduler = CoroutineScheduler.Start(Script.gameObject, WaitAction());
 		});
 	}
 

@@ -17,6 +17,7 @@
 - party pc following stuck in door
 - fix weird movement at zombi start
 - squads
+- think timeout brains in real time
 	
 	
 	https://opengameart.org/content/medieval-props-textured

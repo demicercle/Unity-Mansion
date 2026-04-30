@@ -2,7 +2,7 @@
 using XNode;
 
 [CreateNodeMenu("Events/Interacted")]
-public class NodeInteracted : GameNode, ISceneLoaded
+public class NodeInteracted : GameNode
 {
 	[Input] public SceneReference _prop;
 	[Output] public NodeExec _out;
@@ -18,8 +18,10 @@ public class NodeInteracted : GameNode, ISceneLoaded
 
 	private PropComponent prop;
 	
-	public void OnSceneLoaded()
+
+	protected override void OnScriptStart()
 	{
+		base.OnScriptStart();
 		_prop = GetInputValue<SceneReference>("_prop", _prop);
 		if (_prop.TryGetComponent(this, out prop))
 		{

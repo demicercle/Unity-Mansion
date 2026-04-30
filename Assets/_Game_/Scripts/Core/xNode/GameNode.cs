@@ -6,24 +6,19 @@ public abstract class GameNode : Node
 {
 	private GameScript _script;
 
-	public GameScript script
+	public GameScript Script
 	{
 		get => _script;
 		set
 		{
-			if(_script != null) 
+			if(_script) 
 				OnScriptDestroy();
 			
 			_script = value;
 			
-			if(_script != null) 
+			if(_script) 
 				OnScriptStart();
 		}
-	}
-
-	virtual protected void SceneLoaded()
-	{
-		
 	}
 	
 	virtual protected void OnScriptStart()
@@ -47,12 +42,13 @@ public abstract class GameNode : Node
 	protected override void Init()
 	{
 		base.Init();
+		_script = null;
 		DebugLogThis("Inits");
 	}
 
 	protected void DebugLogThis(string msg)
 	{
-		if(GameScript.debugMode > 0) Debug.Log("x_" + this + ": " + msg);
+		if(GameScript.debugMode > 0) Debug.Log("x_" + this + ": " + msg + "\nin graph=" + graph);
 	}
 	
 	protected void DebugWarningThis(string msg)
@@ -74,15 +70,12 @@ public class NodeExec
 		callback = null;
 	}
 	
-	public void StartInput(Node node, string inputName, System.Action callback)
+	public void InitInput(Node node, string inputName, System.Action callback)
 	{
 		if (!Application.isPlaying)
 		{
-			Debug.Log(this + " app not playing");
 			return;
 		}
-		
-		//Debug.Log(this + " AwakeInput " + node + " " + inputName + " " + callback);
 		
 		otherExec = node.GetInputPort(inputName).GetInputValue<NodeExec>();
 		if (otherExec != null)
@@ -127,12 +120,12 @@ public class SceneReference
 					else 
 						Debug.LogWarning(this + " in " + node + " cannot find gameObject named: " + findName);
 
-					_gameObject = node.script.gameObject; // fallback to self
+					_gameObject = node.Script.gameObject; // fallback to self
 				}
 			}
 			else
 			{
-				_gameObject = node.script.gameObject;
+				_gameObject = node.Script.gameObject;
 			}
 			
 			//if(GameScript.debugMode > 0) Debug.Log(this + " in " + node + " init gameObject: " + _gameObject + " findName=" + findName);

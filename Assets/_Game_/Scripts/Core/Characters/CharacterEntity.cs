@@ -375,7 +375,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onFactionChanged?.Invoke();
 	}
 
-	public bool IsCurrentTurn() => GameTurnManager.Instance.IsPlayerTurn() && IsPlayer();
+	public bool IsCurrentTurn() => GameTurnManager.Instance.IsPlayerTurn() == IsPlayer();
 	
 	public float GetMaxMovePoints() => characterData.maxMovePoints;
 	

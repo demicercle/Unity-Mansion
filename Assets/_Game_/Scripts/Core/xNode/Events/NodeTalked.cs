@@ -2,7 +2,7 @@
 using XNode;
 
 [CreateNodeMenu("Events/Talked")]
-public class NodeTalked : GameNode, ISceneLoaded
+public class NodeTalked : GameNode
 {
 	[Input] public SceneReference _character;
 	[Output] public NodeExec _out;
@@ -17,8 +17,8 @@ public class NodeTalked : GameNode, ISceneLoaded
 		}
 		return null; // Replace this
 	}
-	
-	public void OnSceneLoaded()
+
+	protected override void OnScriptStart()
 	{
 		_character = GetInputValue<SceneReference>("_character", _character);
 		if (_character.TryGetComponent(this, out character))

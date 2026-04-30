@@ -12,10 +12,10 @@ public class NodeDestroyScript : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		
-		_in.StartInput(this, "_in", () =>
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", () =>
 		{
-			script.StartCoroutine(WaitAndDestroy());
+			Script.StartCoroutine(WaitAndDestroy());
 		});
 	}
 
@@ -34,6 +34,6 @@ public class NodeDestroyScript : GameNode
 		else
 			yield return null;
 		
-		script?.DestroyScript(destroyGameObject);
+		Script?.DestroyScript(destroyGameObject);
 	}
 }

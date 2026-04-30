@@ -26,8 +26,6 @@ public class NodeSwitchInt : GameNode
 	
 	public override object GetValue(NodePort port)
 	{
-		CreateOutputs();
-		
 		if (int.TryParse(port.fieldName.Last().ToString(), out var index)
 		    && index >= 0 && index < _outs.Length)
 			return _outs[index];
@@ -41,6 +39,8 @@ public class NodeSwitchInt : GameNode
 	{
 		base.Init();
 		
+		_outs = DynamicOutputs.ToList().ConvertAll<NodeExec>(o => new NodeExec()).ToArray();
+		
 		if (!DynamicOutputs.Any())
 		{
 			AddPort();
@@ -48,33 +48,20 @@ public class NodeSwitchInt : GameNode
 	}
 
 	private NodeExec[] _outs;
-
-	private void CreateOutputs()
-	{
-		var ports = DynamicOutputs.ToArray();
-		_outs = new NodeExec[ports.Length];
-		for (int i = 0; i < ports.Length; i++)
-		{
-			_outs[i] = new NodeExec();
-		}
-		
-		DebugLogThis("created outs=" + _outs.Length);
-	}
 	
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		
-		_in.StartInput(this, "_in", () =>
+		_index = 0;
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", () =>
 		{
-			CreateOutputs();
-
 			_index = GetInputValue("_index", _index);
 			
 			if (_index >= 0 && _index < _outs.Length)
 			{
+				DebugLogThis("fires: " + _index);
 				_outs[_index].Invoke();
-				DebugLogThis("fired: " + _index);
 			}
 			else DebugLogThis("not fired, invalid index: " + _index);
 

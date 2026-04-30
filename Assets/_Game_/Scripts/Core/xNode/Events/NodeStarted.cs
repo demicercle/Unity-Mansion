@@ -2,7 +2,7 @@
 using XNode;
 
 [CreateNodeMenu("Events/Started")]
-public class NodeStarted : GameNode, ISceneLoaded
+public class NodeStarted : GameNode
 {
 	[Output] public NodeExec _out;
 
@@ -12,9 +12,10 @@ public class NodeStarted : GameNode, ISceneLoaded
 		return base.GetValue(port);
 	}
 	
-	public void OnSceneLoaded()
+	protected override void OnScriptStart()
 	{
-		script.StartCoroutine(WaitAndInvoke());
+		base.OnScriptStart();
+		Script.StartCoroutine(WaitAndInvoke());
 	}
 
 	private IEnumerator WaitAndInvoke()

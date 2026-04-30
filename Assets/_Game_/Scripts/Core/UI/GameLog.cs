@@ -106,12 +106,12 @@ public class GameLog : MonoBehaviour
 
 	private void TurnStarted()
 	{
-		AppendLine(GetLocalizedLine(10, "Turn Started"));
+//		AppendLine(GetLocalizedLine(10, "Turn Started"));
 	}
 
 	private void TurnEnded()
 	{
-		AppendLine(GetLocalizedLine(11, "Turn Ended"));
+//		AppendLine(GetLocalizedLine(11, "Turn Ended"));
 	}
 
 	private void OnAnyCharacterUsesAction(CharacterEntity character, CharacterAction action)

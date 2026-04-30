@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections;
 using System.Linq;
 using UnityEngine;
 
@@ -23,29 +23,7 @@ public class GameScript : MonoBehaviour
 	}
 	
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
-
-	private void Start()
-	{
-		if (!graph)
-		{
-			Debug.LogWarning(this + " has no graph, destroys");
-			DestroyScript(false);
-			return;
-		}
-		
-		graph = Instantiate(graph);
-		
-		if(debugMode > 0) Debug.Log(this + " Start " + graph);
-		#if UNITY_EDITOR
-		if (debugMode > 1) UnityEditor.Selection.activeObject = graph;
-		#endif
-
-		foreach (var node in graph.nodes.OfType<GameNode>())
-		{
-			node.script = this;
-		}
-	}
-
+	
 	private void OnDestroy()
 	{
 		if (!graph) return;
@@ -55,14 +33,19 @@ public class GameScript : MonoBehaviour
 		
 		foreach (var node in graph.nodes.OfType<GameNode>())
 		{
-			node.script = null;
+			node.Script = null;
 		}
-			
-		//Destroy(graph);
 	}
 
 	private void OnEnable()
 	{
+		if (!graph)
+		{
+			Debug.LogWarning(this + " has no graph, destroys");
+			enabled = false;
+			return;
+		}
+		
 		gameTurnManager.onSceneLoaded += OnSceneLoaded;
 	}
 
@@ -74,9 +57,13 @@ public class GameScript : MonoBehaviour
 
 	private void OnSceneLoaded()
 	{
-		foreach (var node in graph.nodes.OfType<ISceneLoaded>())
+		graph = Instantiate(graph);
+		
+		if(debugMode > 0) Debug.Log(this + " OnSceneLoaded " + graph);
+
+		foreach (var node in graph.nodes.OfType<GameNode>())
 		{
-			(node as ISceneLoaded)?.OnSceneLoaded();
+			node.Script = this;
 		}
 	}
 }

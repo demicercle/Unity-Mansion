@@ -15,7 +15,8 @@ public class NodeApplyDamageRadius : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		_in.StartInput(this, "_in", () =>
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", () =>
 		{
 			_damage = GetInputValue("_damage", _damage);
 			_radius = GetInputValue("_radius", _radius);
@@ -39,11 +40,11 @@ public class NodeApplyDamageRadius : GameNode
 					attackable.TakeDamage(new DamageInfo()
 					{
 						amount = amount, isRanged = false
-					}, script.gameObject);
+					}, Script.gameObject);
 				}
 			}
 
-			script.StartCoroutine(DelayedExplosion(transform));
+			Script.StartCoroutine(DelayedExplosion(transform));
 		});
 	}
 

@@ -8,7 +8,8 @@ public class NodeHeal : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		_in.StartInput(this, "_in", () =>
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", () =>
 		{
 			_amount = GetInputValue<float>("_amount", _amount);
 			

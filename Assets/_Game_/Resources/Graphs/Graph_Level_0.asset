@@ -41,117 +41,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   message: Enemy Turn 2
---- !u!114 &-4425122098138281851
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09f27ad7ea59457fbe03365282bd8c12, type: 3}
-  m_Name: Branch
-  m_EditorClassIdentifier: Assembly-CSharp::NodeBranch
-  graph: {fileID: 11400000}
-  position: {x: -264, y: -72}
-  ports:
-    keys:
-    - _in
-    - _condition
-    - _true
-    - _false
-    values:
-    - _fieldName: _in
-      _node: {fileID: -4425122098138281851}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _turnStarted
-        node: {fileID: 1043153840778916638}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _condition
-      _node: {fileID: -4425122098138281851}
-      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections:
-      - fieldName: _isPlayerTurn
-        node: {fileID: 1043153840778916638}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _true
-      _node: {fileID: -4425122098138281851}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _in
-        node: {fileID: -1539233018383208176}
-        reroutePoints: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _false
-      _node: {fileID: -4425122098138281851}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _in
-        node: {fileID: 3971757747397813678}
-        reroutePoints: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  _condition: 1
---- !u!114 &-1539233018383208176
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
-  m_Name: Debug Log
-  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
-  graph: {fileID: 11400000}
-  position: {x: 3.5, y: -176.5}
-  ports:
-    keys:
-    - _in
-    - message
-    values:
-    - _fieldName: _in
-      _node: {fileID: -1539233018383208176}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _true
-        node: {fileID: -4425122098138281851}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: message
-      _node: {fileID: -1539233018383208176}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  message: It's player turn
+  debugBreak: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,12 +56,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
   nodes:
   - {fileID: 1043153840778916638}
-  - {fileID: -4425122098138281851}
   - {fileID: 3971757747397813678}
   - {fileID: 8585694892713774460}
   - {fileID: 4572567705195386026}
   - {fileID: -6727653028786308452}
-  - {fileID: -1539233018383208176}
 --- !u!114 &1043153840778916638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,33 +76,10 @@ MonoBehaviour:
   position: {x: -536, y: -88}
   ports:
     keys:
-    - _turnCount
-    - _isPlayerTurn
     - _turnEnded
     - _turnStarted
     - _character
     values:
-    - _fieldName: _turnCount
-      _node: {fileID: 1043153840778916638}
-      _typeQualifiedName: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _isPlayerTurn
-      _node: {fileID: 1043153840778916638}
-      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections:
-      - fieldName: _condition
-        node: {fileID: -4425122098138281851}
-        reroutePoints: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
     - _fieldName: _turnEnded
       _node: {fileID: 1043153840778916638}
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
@@ -230,7 +95,7 @@ MonoBehaviour:
         PublicKeyToken=null
       connections:
       - fieldName: _in
-        node: {fileID: -4425122098138281851}
+        node: {fileID: 3971757747397813678}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
@@ -247,8 +112,6 @@ MonoBehaviour:
       _dynamic: 0
   _character:
     findName: PC_Zombi_0
-  _isPlayerTurn: 0
-  _turnCount: 1
 --- !u!114 &3971757747397813678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -262,7 +125,7 @@ MonoBehaviour:
   m_Name: Switch Int
   m_EditorClassIdentifier: Assembly-CSharp::NodeSwitchInt
   graph: {fileID: 11400000}
-  position: {x: -8, y: 24}
+  position: {x: -40, y: 24}
   ports:
     keys:
     - _in
@@ -276,8 +139,8 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _false
-        node: {fileID: -4425122098138281851}
+      - fieldName: _turnStarted
+        node: {fileID: 1043153840778916638}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
@@ -328,7 +191,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 1
-  _index: 0
+  _index: 1
   loop: 0
 --- !u!114 &4572567705195386026
 MonoBehaviour:
@@ -371,6 +234,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   message: Enemy Turn 1
+  debugBreak: 1
 --- !u!114 &8585694892713774460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,7 +248,7 @@ MonoBehaviour:
   m_Name: Debug Log
   m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
   graph: {fileID: 11400000}
-  position: {x: 232, y: -24}
+  position: {x: 280, y: -56}
   ports:
     keys:
     - _in
@@ -412,3 +276,4 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   message: Enemy Turn 0
+  debugBreak: 1
