@@ -324,6 +324,11 @@ public static class Utils
 		while(count-- > 0) tempStr += c;
 		return tempStr;
 	}
+
+	public static Rect RectScale(Rect r, Rect s)
+	{
+		return new Rect(r.x * s.x, r.y * s.y, r.width * s.width, r.height * s.height);
+	}
 }
 
 public static class NavUtils

@@ -190,6 +190,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	}
 
 	private IAttackable lastAttackTarget;
+	
 	public IAttackable GetLastAttackTarget() => lastAttackTarget;
 
 	public float GetCurrentKarma() => currentKarma;

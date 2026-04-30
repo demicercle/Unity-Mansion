@@ -15,7 +15,8 @@
 - clean "CharacterController"
 - damage VFX (blood)
 	
-	
+- retake gamelog : should warn about dice launch
+- dice pool position
 	
 	
 	https://opengameart.org/content/medieval-props-textured

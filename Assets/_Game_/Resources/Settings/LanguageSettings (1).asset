@@ -16,7 +16,7 @@ MonoBehaviour:
   lines:
   - 
   - "\r"
-  - "\r"
+  - "Dice launched by <CHARACTER>! Result: <RESULT>\r"
   - "\r"
   - "\r"
   - "\r"
