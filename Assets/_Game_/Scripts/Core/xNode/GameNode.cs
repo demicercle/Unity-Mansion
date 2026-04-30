@@ -95,30 +95,30 @@ public class NodeExec
 [System.Serializable]
 public class SceneReference
 {
-	private GameObject value;
-	
 	public string findName = "";
-
-	public bool TryGetComponent<T>(GameNode node, out T component) where T : Component
-	{
-		value = GetGameObject(node);
-		component = null;
-		return value && value.TryGetComponent(out component);
-	}
 
 	public GameObject GetGameObject(GameNode node)
 	{
-		if (!string.IsNullOrWhiteSpace(findName))
-			return GameObject.Find(findName);
-		else
-			return node.script.gameObject;
+		if (!_gameObject)
+		{
+			if (!string.IsNullOrWhiteSpace(findName))
+				_gameObject = GameObject.Find(findName);
+			else
+				_gameObject = node.script.gameObject;
+		}
+		
+		return _gameObject;
 	}
 
 	public T GetComponent<T>(GameNode node) where T : Component
 	{
-		if (!string.IsNullOrWhiteSpace(findName))
-			return GameObject.Find(findName)?.GetComponent<T>();
-		else
-			return node.script.GetComponent<T>();
+		return GetGameObject(node).GetComponent<T>();
 	}
+
+	public bool TryGetComponent<T>(GameNode node, out T component) where T : Component
+	{
+		return (component = GetComponent<T>(node));
+	}
+
+	private GameObject _gameObject;
 }
