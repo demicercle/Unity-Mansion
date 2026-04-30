@@ -274,7 +274,6 @@ public class GameTurnManager : MonoBehaviour
 			}
 			
 			yield return WaitNavigationDirty();
-			
 			yield return YieldRoutines();
 		
 			foreach (var otherCharacter in levelCharacters)
@@ -430,6 +429,8 @@ public class GameTurnManager : MonoBehaviour
 		turnBasedCharacters.Clear();
 		foreach (var character in levelCharacters.OrderBy(c => (int)c.GetCurrentFaction()))
 		{
+			character.Routines.StopAllRoutines();
+			
 			if (character.IsDead())
 				continue;
 			

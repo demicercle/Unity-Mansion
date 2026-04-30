@@ -586,6 +586,8 @@ public class CharacterAgent : MonoBehaviour
 		//	UpdatePathAndTarget(true);
 	}
 
+	private Vector3[] drawPath;
+	private float maxDrawLength;
 	private bool[] shouldDrawPath = new []{false,false};
 	private bool[] isDrawingPath = new []{false,false};
 	private void UpdatePathAndTarget() => UpdatePathAndTarget(true);
@@ -612,35 +614,38 @@ public class CharacterAgent : MonoBehaviour
 		                    && lastPath.Length > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();
-
+		
 		if (force || shouldDrawPath[0] != isDrawingPath[0])
 		{
+			drawPath = lastPath;
 			pathRenderers[0].enabled = isDrawingPath[0] = shouldDrawPath[0];
 			if (pathRenderers[0].enabled) // draw path thin
 			{
 				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(_selfCharacter.GetCurrentFaction());
-				pathRenderers[0].positionCount = lastPath.Length;
+				pathRenderers[0].positionCount = drawPath.Length;
 				pathRenderers[0].useWorldSpace = true;
-				pathRenderers[0].SetPositions(lastPath);
+				pathRenderers[0].SetPositions(drawPath);
 			}
 		}
 
 		if (force || shouldDrawPath[1] != isDrawingPath[1])
 		{
+			drawPath = lastPath;
 			pathRenderers[1].enabled = isDrawingPath[1] = shouldDrawPath[1];
 			if (pathRenderers[1].enabled) // draw path thick
 			{
-				lastPath = Utils.LimitPathTotalLength(lastPath, _selfCharacter.GetRemainingMovePoints());
+				maxDrawLength = _selfCharacter.GetRemainingMovePoints();
 				if (_selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer()
 				                                && GameInput.Instance.TryGetMouseOver<CharacterEntity>(out var mouseOverCharacter))
 				{
 					if(_selfCharacter.ShouldAttack(mouseOverCharacter))
-						lastPath = Utils.LimitPathTotalLength(lastPath, Mathf.Min(_selfCharacter.GetRemainingMovePoints(), lastPath.Length - _selfCharacter.GetAttackRange(mouseOverCharacter)));
+						maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackRange(mouseOverCharacter));
 				}
+				drawPath = Utils.LimitPathTotalLength(drawPath, maxDrawLength);
 				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_selfCharacter, true, true);
-				pathRenderers[1].positionCount = lastPath.Length;
+				pathRenderers[1].positionCount = drawPath.Length;
 				pathRenderers[1].useWorldSpace = true;
-				pathRenderers[1].SetPositions(lastPath);
+				pathRenderers[1].SetPositions(drawPath);
 			}
 		}
 		

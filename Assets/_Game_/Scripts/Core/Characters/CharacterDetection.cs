@@ -23,7 +23,7 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField] private bool drawGizmos;
 	[SerializeField] [Min(0f)] private float looseTargetDistance;
 	[SerializeField] [Min(0f)] private float awarenessScale = 1.0f;
-	[SerializeField] [Min(0f)] private float hearingScale = 2.0f;
+	[SerializeField] [Min(0f)] private float distanceScale = 10.0f;
 	
 	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
 
@@ -170,9 +170,9 @@ public class CharacterDetection : MonoBehaviour
 			if (!detectedCharacters.Contains(anyCharacter))
 			{
 				var scale = anyCharacter.GetStealth() * awarenessScale;
-				
-				if (Vector3.Distance(selfCharacter.GetPosition(), anyCharacter.GetPosition()) < hearingDistance)
-					scale *= hearingScale;
+				var dist = NavUtils.NavDistanceRoundY(selfCharacter.GetPosition(), anyCharacter.GetPosition());
+				if (dist < hearingDistance)
+					scale *= Mathf.Lerp(distanceScale, 1.0f, dist / hearingDistance);
 				
 				if (IsCharacterVisible(anyCharacter))
 				{
