@@ -2,33 +2,10 @@
 using XNode;
 
 [CreateNodeMenu("Events/Interacted")]
-public class NodeInteracted : GameNode
+public class NodeInteracted : GameNode, ISceneLoaded
 {
 	[Input] public SceneReference _prop;
 	[Output] public NodeExec _out;
-	
-	protected override void OnScriptStart()
-	{
-		base.OnScriptStart();
-		
-		if (_prop.TryGetComponent(this, out PropComponent prop))
-		{
-			prop.onInteracted += Interacted;
-		}
-		else
-		{
-			DebugWarningThis("no prop found");
-		}
-	}
-
-	protected override void OnScriptDestroy()
-	{
-		base.OnScriptDestroy();
-		if (_prop.TryGetComponent(this, out PropComponent prop))
-		{
-			prop.onInteracted -= Interacted;
-		}
-	}
 
 	// Return the correct value of an output port when requested
 	public override object GetValue(NodePort port) {
@@ -37,6 +14,31 @@ public class NodeInteracted : GameNode
 			return _out;
 		}
 		return null; // Replace this
+	}
+
+	private PropComponent prop;
+	
+	public void OnSceneLoaded()
+	{
+		_prop = GetInputValue<SceneReference>("_prop", _prop);
+		if (_prop.TryGetComponent(this, out prop))
+		{
+			DebugLogThis("init prop: "  + prop);
+			prop.onInteracted += Interacted;
+		}
+		else
+		{
+			DebugWarningThis("no prop found");
+		}
+	}
+	
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		if (prop)
+		{
+			prop.onInteracted -= Interacted;
+		}
 	}
 	
 	private void Interacted()

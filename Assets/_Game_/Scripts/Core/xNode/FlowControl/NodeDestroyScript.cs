@@ -19,6 +19,12 @@ public class NodeDestroyScript : GameNode
 		});
 	}
 
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
+	}
+
 	private IEnumerator WaitAndDestroy()
 	{
 		_delay = GetInputValue("_delay", _delay);

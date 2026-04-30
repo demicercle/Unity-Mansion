@@ -47,6 +47,12 @@ public class NodeApplyDamageRadius : GameNode
 		});
 	}
 
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
+	}
+
 	private IEnumerator DelayedExplosion(Transform transform)
 	{
 		yield return null;

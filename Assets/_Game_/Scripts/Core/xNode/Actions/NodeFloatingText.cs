@@ -31,6 +31,12 @@ public class NodeFloatingText : GameNode
 		_in.StartInput(this, "_in", OnCallback);
 	}
 
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
+	}
+
 	private void OnCallback()
 	{
 		if (_character.TryGetComponent(this, out CharacterEntity character))

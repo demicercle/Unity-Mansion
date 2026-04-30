@@ -10,6 +10,16 @@ public class NodeLaunchDices : GameNode
 
 	[Output] public float _result;
 
+	public override object GetValue(NodePort port)
+	{
+		if (port.fieldName == "_result")
+		{
+			RollNow(false);
+			return _result;
+		}
+		return base.GetValue(port);
+	}
+
 	[ContextMenu("Roll!")]
 	private void RollNow() => RollNow(true);
 	private void RollNow(bool debug)
@@ -22,15 +32,5 @@ public class NodeLaunchDices : GameNode
 			_result += Random.Range(0, _faces) + 1f;
 		
 		if(debug) Debug.Log(_result);
-	}
-
-	public override object GetValue(NodePort port)
-	{
-		if (port.fieldName == "_result")
-		{
-			RollNow(false);
-			return _result;
-		}
-		return base.GetValue(port);
 	}
 }

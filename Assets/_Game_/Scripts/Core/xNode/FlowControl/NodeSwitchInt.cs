@@ -6,6 +6,9 @@ using XNode;
 public class NodeSwitchInt : GameNode
 {
 	[Input] public NodeExec _in;
+	[Input] public int _index;
+
+	public bool loop = true;
 
 	[ContextMenu("Add Port")]
 	public void AddPort()
@@ -17,7 +20,7 @@ public class NodeSwitchInt : GameNode
 	[ContextMenu("Remove Port")]
 	public void RemovePort()
 	{
-		RemoveDynamicPort("Out" + DynamicOutputs.ToArray().Length);   
+		RemoveDynamicPort("Out" + (DynamicOutputs.ToArray().Length-1));   
 		Utils.SetDirty(this);
 	}
 	
@@ -46,7 +49,6 @@ public class NodeSwitchInt : GameNode
 	}
 
 	private NodeExec[] _outs;
-	private int _index;
 	private int _count;
 
 	private void CreateOutputs()
@@ -70,13 +72,30 @@ public class NodeSwitchInt : GameNode
 		_in.StartInput(this, "_in", () =>
 		{
 			CreateOutputs();
-			
-			_outs[_index].Invoke();
 
-			do
+			_index = GetInputValue("_index", _index);
+			
+			if (_index >= 0 && _index < _outs.Length)
+			{
+				_outs[_index].Invoke();
+				DebugLogThis("fired: " + _index);
+			}
+			else DebugLogThis("not fired, invalid index: " + _index);
+
+			if (loop)
 			{
 				_index = (_index + 1) % _outs.Length;
-			} while (_outs[_index] == null || !_outs[_index].HasCallbacks());
+			}
+			else
+			{
+				_index = Mathf.Clamp(_index, _index + 1, _outs.Length);
+			}
 		});
+	}
+
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
 	}
 }

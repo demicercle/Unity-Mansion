@@ -7,4 +7,4 @@
 #debug_anim 1
 #debug_stats 1
 #debug_dices 1
-#debug_script 1
+debug_script 1

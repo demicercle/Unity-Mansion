@@ -5,11 +5,24 @@ using RPGCharacterAnims;
 using UnityEngine;
 using XNode;
 
+public interface ISceneLoaded
+{
+	void OnSceneLoaded();
+}
+
 [CreateNodeMenu("Events/SceneLoaded")]
-public class NodeSceneLoaded : GameNode
+public class NodeSceneLoaded : GameNode, ISceneLoaded
 {
 	[Output] public NodeExec _out;
-
+	
+	public override object GetValue(NodePort port) {
+		if (port.fieldName == "_out")
+		{
+			return _out;
+		}
+		return null; // Replace this
+	}
+	
 	public void OnSceneLoaded()
 	{
 		_out.Invoke();
@@ -22,11 +35,5 @@ public class NodeSceneLoaded : GameNode
 	}
 
 	// Return the correct value of an output port when requested
-	public override object GetValue(NodePort port) {
-		if (port.fieldName == "_out")
-		{
-			return _out;
-		}
-		return null; // Replace this
-	}
+	
 }

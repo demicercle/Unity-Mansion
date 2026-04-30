@@ -25,6 +25,12 @@ public class NodeMoveTo : GameNode
 		_start.StartInput(this, "_start", OnStart);
 	}
 
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_start.Dispose();
+	}
+
 	private void OnStart()
 	{
 		DebugLogThis("OnStart");

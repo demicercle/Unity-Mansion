@@ -31,4 +31,10 @@ public class NodeInstantiate : GameNode
 			instance.transform.rotation = transform.rotation;
 		});
 	}
+
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
+	}
 }

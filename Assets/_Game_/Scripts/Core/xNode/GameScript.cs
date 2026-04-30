@@ -74,9 +74,9 @@ public class GameScript : MonoBehaviour
 
 	private void OnSceneLoaded()
 	{
-		foreach (var node in graph.nodes)
+		foreach (var node in graph.nodes.OfType<ISceneLoaded>())
 		{
-			(node as NodeSceneLoaded)?.OnSceneLoaded();
+			(node as ISceneLoaded)?.OnSceneLoaded();
 		}
 	}
 }

@@ -26,8 +26,15 @@ public class NodeDelay : GameNode
 		});
 	}
 
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
+	}
+
 	private IEnumerator WaitAction()
 	{
+		_delay = GetInputValue("_delay", _delay);
 		yield return new WaitForSeconds(_delay);
 		_out.Invoke();
 	}

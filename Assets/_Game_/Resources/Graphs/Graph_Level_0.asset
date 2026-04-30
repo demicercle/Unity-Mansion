@@ -1,0 +1,369 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6727653028786308452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
+  m_Name: Debug Log
+  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
+  graph: {fileID: 11400000}
+  position: {x: 276.5, y: 232.5}
+  ports:
+    keys:
+    - _in
+    - message
+    values:
+    - _fieldName: _in
+      _node: {fileID: -6727653028786308452}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: Out2
+        node: {fileID: 3971757747397813678}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: message
+      _node: {fileID: -6727653028786308452}
+      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  message: Enemy Turn 2
+--- !u!114 &-4425122098138281851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09f27ad7ea59457fbe03365282bd8c12, type: 3}
+  m_Name: Branch
+  m_EditorClassIdentifier: Assembly-CSharp::NodeBranch
+  graph: {fileID: 11400000}
+  position: {x: -264, y: -72}
+  ports:
+    keys:
+    - _in
+    - _condition
+    - _true
+    - _false
+    values:
+    - _fieldName: _in
+      _node: {fileID: -4425122098138281851}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: turnStarted
+        node: {fileID: 1043153840778916638}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _condition
+      _node: {fileID: -4425122098138281851}
+      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: isPlayerTurn
+        node: {fileID: 1043153840778916638}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _true
+      _node: {fileID: -4425122098138281851}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _false
+      _node: {fileID: -4425122098138281851}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _in
+        node: {fileID: 3971757747397813678}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _condition: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 356af8172615ede43a450e1112ea2b1c, type: 3}
+  m_Name: Graph_Level_0
+  m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
+  nodes:
+  - {fileID: 1043153840778916638}
+  - {fileID: -4425122098138281851}
+  - {fileID: 3971757747397813678}
+  - {fileID: 8585694892713774460}
+  - {fileID: 4572567705195386026}
+  - {fileID: -6727653028786308452}
+--- !u!114 &1043153840778916638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41290b5252de4e228848db8d87f4dfcd, type: 3}
+  m_Name: Turn Changed
+  m_EditorClassIdentifier: Assembly-CSharp::NodeTurnChanged
+  graph: {fileID: 11400000}
+  position: {x: -536, y: -72}
+  ports:
+    keys:
+    - turnStarted
+    - turnEnded
+    - isPlayerTurn
+    - turnCount
+    - character
+    values:
+    - _fieldName: turnStarted
+      _node: {fileID: 1043153840778916638}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _in
+        node: {fileID: -4425122098138281851}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: turnEnded
+      _node: {fileID: 1043153840778916638}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: isPlayerTurn
+      _node: {fileID: 1043153840778916638}
+      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: _condition
+        node: {fileID: -4425122098138281851}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: turnCount
+      _node: {fileID: 1043153840778916638}
+      _typeQualifiedName: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: character
+      _node: {fileID: 1043153840778916638}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  character:
+    findName: Zombi_0
+  isPlayerTurn: 0
+  turnCount: 0
+--- !u!114 &3971757747397813678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae79794563fd4776bffcab07c56e368a, type: 3}
+  m_Name: Switch Int
+  m_EditorClassIdentifier: Assembly-CSharp::NodeSwitchInt
+  graph: {fileID: 11400000}
+  position: {x: -40, y: 24}
+  ports:
+    keys:
+    - _in
+    - _index
+    - Out0
+    - Out1
+    - Out2
+    values:
+    - _fieldName: _in
+      _node: {fileID: 3971757747397813678}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _false
+        node: {fileID: -4425122098138281851}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _index
+      _node: {fileID: 3971757747397813678}
+      _typeQualifiedName: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: Out0
+      _node: {fileID: 3971757747397813678}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _in
+        node: {fileID: 8585694892713774460}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+    - _fieldName: Out1
+      _node: {fileID: 3971757747397813678}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _in
+        node: {fileID: 4572567705195386026}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+    - _fieldName: Out2
+      _node: {fileID: 3971757747397813678}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _in
+        node: {fileID: -6727653028786308452}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+  _index: 0
+  loop: 0
+--- !u!114 &4572567705195386026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
+  m_Name: Debug Log
+  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
+  graph: {fileID: 11400000}
+  position: {x: 280, y: 88}
+  ports:
+    keys:
+    - _in
+    - message
+    values:
+    - _fieldName: _in
+      _node: {fileID: 4572567705195386026}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: Out1
+        node: {fileID: 3971757747397813678}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: message
+      _node: {fileID: 4572567705195386026}
+      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  message: Enemy Turn 1
+--- !u!114 &8585694892713774460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
+  m_Name: Debug Log
+  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
+  graph: {fileID: 11400000}
+  position: {x: 232, y: -24}
+  ports:
+    keys:
+    - _in
+    - message
+    values:
+    - _fieldName: _in
+      _node: {fileID: 8585694892713774460}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: Out0
+        node: {fileID: 3971757747397813678}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: message
+      _node: {fileID: 8585694892713774460}
+      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  message: Enemy Turn 0

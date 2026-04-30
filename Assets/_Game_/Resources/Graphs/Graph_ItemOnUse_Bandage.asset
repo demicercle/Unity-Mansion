@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 356af8172615ede43a450e1112ea2b1c, type: 3}
-  m_Name: ItemOnUse_Bandage
+  m_Name: Graph_ItemOnUse_Bandage
   m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
   nodes:
   - {fileID: 7167503854543085475}

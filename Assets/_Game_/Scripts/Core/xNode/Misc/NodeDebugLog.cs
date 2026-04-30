@@ -17,6 +17,12 @@ public class NodeDebugLog : GameNode
 		_in.StartInput(this, "_in", OnCallback);
 	}
 
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
+	}
+
 	private void OnCallback()
 	{
 		Debug.Log("<b>LOG: </b>" + GetInputValue("message", message) + "\nin graph=" + graph);

@@ -37,4 +37,10 @@ public class NodeGiveItem : GameNode
 			}
 		});
 	}
+
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
+	}
 }

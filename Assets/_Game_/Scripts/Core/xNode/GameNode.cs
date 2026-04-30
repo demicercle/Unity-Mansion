@@ -20,6 +20,11 @@ public abstract class GameNode : Node
 				OnScriptStart();
 		}
 	}
+
+	virtual protected void SceneLoaded()
+	{
+		
+	}
 	
 	virtual protected void OnScriptStart()
 	{
@@ -63,6 +68,11 @@ public class NodeExec
 	private System.Action callback;
 	
 	public void Invoke() => callback?.Invoke();
+
+	public void Dispose()
+	{
+		callback = null;
+	}
 	
 	public void StartInput(Node node, string inputName, System.Action callback)
 	{
