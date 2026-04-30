@@ -18,6 +18,7 @@ public class GameTurnManager : MonoBehaviour
 	
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] private bool skipInvisibleCharacters = true;
+	[SerializeField] private bool alertRevealedCharactersInTurnBasedMode = true;
 	[SerializeField] [Range(0f, 6f)] private float restInterval = 3.0f;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
@@ -44,7 +45,7 @@ public class GameTurnManager : MonoBehaviour
 	public bool PlayerCanEndTurn() => !AnyActiveRoutinesPlaying() && IsPlayerTurn();
 	
 	public bool PlayerShouldEndTurn() => PlayerCanEndTurn() 
-	                               && partyCharacters.All(pc => !pc.HasActions());
+	                               && !partyCharacters.Any(pc => !pc.IsDead() && pc.HasActions());
 	
 	public bool SelectedCharacterCanUseAction(CharacterAction action) =>
 		!CharacterRoutines.AnyActiveRoutines() && IsPlayerTurn() 
@@ -104,6 +105,8 @@ public class GameTurnManager : MonoBehaviour
 	{
 		waitTime = newTime;
 	}
+	
+	public bool IsWaiting() => waitTime !=  0f;
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
@@ -431,8 +434,17 @@ public class GameTurnManager : MonoBehaviour
 		foreach (var levelChar in levelCharacters)
 		{
 			if (!levelChar.IsCharacterRevealed() || levelChar.IsDead()) continue;
+			
 			if (!turnBasedCharacters.Contains(levelChar))
 			{
+				if (alertRevealedCharactersInTurnBasedMode && levelChar.TryGetComponent(out CharacterDetection detection))
+				{
+					foreach (var otherTurnBased in turnBasedCharacters)
+					{
+						detection.SetCharacterDetected(otherTurnBased, true);
+					}
+				}
+				
 				turnBasedCharacters.Add(levelChar); // character revealed while in turn based mode
 			}
 		}
@@ -621,8 +633,12 @@ public class GameTurnManager : MonoBehaviour
 			
 			GUILayout.BeginVertical("textfield");
 			GUILayout.Label("turnBasedMode: " + turnBasedMode);
-			if(turnBasedMode) GUILayout.Label("isPlayerTurn: " + playerTurn);
-			GUILayout.Label("    wait: " + waitTime.ToString("N2"));
+			if (turnBasedMode)
+			{
+				GUILayout.Label("isPlayerTurn: " + playerTurn);
+				if (playerTurn) GUILayout.Label("   should end? " + PlayerShouldEndTurn());
+			}
+			if(IsWaiting()) GUILayout.Label("    wait: " + waitTime.ToString("N2"));
 			if (turnBasedMode)
 			{
 				if (CharacterRoutines.AnyActiveRoutines())

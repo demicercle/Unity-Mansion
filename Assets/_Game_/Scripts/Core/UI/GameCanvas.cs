@@ -306,7 +306,7 @@ public class GameCanvas : MonoBehaviour
 		buttonActionRun.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Run);
 		buttonActionDefend.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Defend);
 		
-		if (gameTurnManager.PlayerCanEndTurn())
+		if (gameTurnManager.PlayerCanEndTurn() && !gameTurnManager.IsWaiting())
 		{
 			buttonEndTurn.interactable = true;
 		}
