@@ -18,6 +18,8 @@ public class CharacterRoutines : MonoBehaviour
 	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
 	
+	public static CharacterRoutines[]  GetActiveRoutines() => activeInstances.ToArray();
+	
 	public static Coroutine DoLookPositionOn(CharacterEntity character, Vector3 lookPosition)
 	{
 		return character.StartCoroutine(character.Routines.WaitCharacterLookPosition(lookPosition));

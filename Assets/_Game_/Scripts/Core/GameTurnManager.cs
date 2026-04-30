@@ -295,6 +295,8 @@ public class GameTurnManager : MonoBehaviour
 					continue;
 				}
 				
+				yield return YieldRoutines();
+				
 				currentAICharacter = otherCharacter;
 				
 				cameraPivot.Focus(otherCharacter);
@@ -308,6 +310,7 @@ public class GameTurnManager : MonoBehaviour
 				}
 
 				otherCharacter.GetAgent().SetObstacle(false);
+				yield return YieldRoutines();
 				yield return WaitNavigationDirty();
 				
 				if(debugMode > 0) Debug.Log(this + " start think " + otherBrain);
@@ -364,6 +367,7 @@ public class GameTurnManager : MonoBehaviour
 			}
 
 			yield return new WaitForSeconds(realTimeTicks);
+			yield return YieldRoutines();
 
 			if (!turnBasedMode && (leaveTurnBased || IsAnyEnemyAroundCheck()))
 			{
@@ -385,11 +389,11 @@ public class GameTurnManager : MonoBehaviour
 			if(debugMode > 1) Debug.Log(this + " WaitRoutines WaitTime=" + WaitTime.ToString("N2") + " " + CharacterRoutines.activeInstances.Count + "\n>" + Utils.ArrayStr(CharacterRoutines.activeInstances));
 			
 			yield return null;
-			
-			if(WaitTime > 0)
-				WaitTime -= Time.deltaTime;
+
+			if (WaitTime > 0)
+				WaitTime = Mathf.Max(WaitTime - Time.deltaTime, 0f);
 		}
-		while (CharacterRoutines.AnyActiveRoutines() && WaitTime != 0f);
+		while ( (turnBasedMode && CharacterRoutines.AnyActiveRoutines()) || WaitTime != 0f);
 	}
 
 	private Coroutine WaitNavigationDirty()
@@ -591,19 +595,36 @@ public class GameTurnManager : MonoBehaviour
 			
 			GUILayout.BeginVertical("textfield");
 			GUILayout.Label("turnBasedMode: " + turnBasedMode);
+			if(turnBasedMode) GUILayout.Label("isPlayerTurn: " + playerTurn);
+			GUILayout.Label("    wait: " + WaitTime.ToString("N2"));
 			if (turnBasedMode)
 			{
-				GUILayout.Label("isPlayerTurn: " + playerTurn);
+				if (CharacterRoutines.AnyActiveRoutines())
+				{
+					foreach (var routine in CharacterRoutines.GetActiveRoutines())
+					{
+						GUILayout.Label("    ______" + routine.name);
+					}
+				}
+				
 				foreach (var character in turnBasedCharacters)
 				{
-					var isCurrent = (playerTurn && character.InParty()) ||
-					                (!playerTurn && currentAICharacter == character);
-
 					var label = character.name;
 					if (character.IsDead()) label += " (DEAD)";
 					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
 					
-					GUILayout.Toggle(isCurrent, label);
+					if (!character.IsCharacterRevealed() && skipInvisibleCharacters)
+					{
+						GUILayout.Label("SKIP: " + label);
+					}
+					else
+					{
+						
+						var isCurrent = (playerTurn && character.InParty()) ||
+						                (!playerTurn && currentAICharacter == character);
+						
+						GUILayout.Toggle(isCurrent, label);
+					}
 				}
 			}
 			GUILayout.EndVertical();
