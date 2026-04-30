@@ -138,7 +138,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2632646705321260295
 RectTransform:
   m_ObjectHideFlags: 0
@@ -153,11 +153,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 3275702284188835985}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -31.300201, y: -9.936384}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 13.544945, y: 10.910385}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &6385905870128414222
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -186,7 +186,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'next:'
+  m_text: 'next roll:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a2c1c48505f5995449eb2624b9ad2c60, type: 2}
   m_sharedMaterial: {fileID: 3158124870952310333, guid: a2c1c48505f5995449eb2624b9ad2c60, type: 2}
@@ -298,7 +298,7 @@ RectTransform:
   m_GameObject: {fileID: 6147934962264583011}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.2399625, y: 1.2399625, z: 1.2399625}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 849264098881455715}
@@ -561,9 +561,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 3951078233321064364}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -14.487299, y: 39.59803}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -38.787807, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6300778318494748507

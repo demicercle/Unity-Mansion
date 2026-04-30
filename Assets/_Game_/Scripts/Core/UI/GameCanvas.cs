@@ -26,8 +26,10 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private Toggle toggleGroupMode;
 	[SerializeField] private Toggle toggleTurnBased;
 	[SerializeField] private Toggle toggleActions;
+	[SerializeField] private Toggle toggleShouldEndTurn;
 	[Header("Buttons")]
 	[SerializeField] private Button buttonEndTurn;
+	[SerializeField] private Button buttonNextCharacter;
 	[SerializeField] private Button buttonActionRun;
 	[SerializeField] private Button buttonActionDefend;
 	[Header("Portraits")]
@@ -37,15 +39,8 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private RawImage itemCursorImage;
 	[Header("Cursor")] 
 	[SerializeField] private TMP_Text cursorText;
-
-	[Space] [Header("Animation")]
-	[SerializeField] [Tooltip("Blend Weight Layer1")] private List<Animator> endTurnAnimators;
-	[SerializeField] private int endTurnLayer;
-	[SerializeField] private float lerpSpeed;
-	[Space]
 	[Header("References")]
 	[SerializeField] private TextReference floatingText;
-	[Space]
 	[Header("UnityEvents")]
 	public UnityEvent<bool> onPlayerTurnChanged;
 	
@@ -119,6 +114,7 @@ public class GameCanvas : MonoBehaviour
 		canvasScaler = GetComponent<CanvasScaler>();
 		
 		buttonEndTurn.onClick.AddListener(ClickEndTurn);
+		buttonNextCharacter.onClick.AddListener(ClickNextCharacter);
 		buttonActionRun.onClick.AddListener(ClickRunAction);
 		buttonActionDefend.onClick.AddListener(ClickDefendAction);
 
@@ -144,6 +140,7 @@ public class GameCanvas : MonoBehaviour
 	private void OnDestroy()
 	{
 		buttonEndTurn.onClick.RemoveListener( ClickEndTurn);
+		buttonNextCharacter.onClick.RemoveListener(ClickNextCharacter);
 		buttonActionRun.onClick.RemoveListener(ClickRunAction);
 		buttonActionDefend.onClick.RemoveListener(ClickDefendAction);
 		
@@ -282,6 +279,8 @@ public class GameCanvas : MonoBehaviour
 
 	private void ClickEndTurn() => gameTurnManager.TryEndPlayerTurn();
 
+	private void ClickNextCharacter() => CharacterSelection.SelectNextCharacter();
+
 	private void UpdatePortraits()
 	{
 		if (portraits.Length == 0)
@@ -303,6 +302,7 @@ public class GameCanvas : MonoBehaviour
 		toggleGroupMode.isOn = gameInput.IsLeaderMode();
 		toggleTurnBased.isOn = gameTurnManager.IsTurnBasedMode();
 		toggleActions.isOn = gameTurnManager.SelectedCharacterIsControllable();
+		toggleShouldEndTurn.isOn = gameTurnManager.PlayerShouldEndTurn();
 		buttonActionRun.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Run);
 		buttonActionDefend.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Defend);
 		
@@ -315,10 +315,8 @@ public class GameCanvas : MonoBehaviour
 			buttonEndTurn.interactable = false;
 		}
 
-		if (lerpSpeed > 0)
-		{
-			endTurnAnimators.ForEach(anim => anim.SetLayerWeight(endTurnLayer, Mathf.Lerp(anim.GetLayerWeight(endTurnLayer), gameTurnManager.PlayerShouldEndTurn() ? 1f : 0f, Time.unscaledDeltaTime * lerpSpeed)));
-		}
+		buttonNextCharacter.interactable = CharacterEntity.CountLivingPartyCharacters() > 1;
+		buttonNextCharacter.gameObject.SetActive(buttonEndTurn.interactable);
 	}
 
 	private void OnSelectionChanged()

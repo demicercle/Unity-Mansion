@@ -44,10 +44,7 @@ public class GameTurnManager : MonoBehaviour
 	public bool PlayerCanEndTurn() => !AnyActiveRoutinesPlaying() && IsPlayerTurn();
 	
 	public bool PlayerShouldEndTurn() => PlayerCanEndTurn() 
-	                               && partyCharacters.All(pc =>
-									{
-										return !pc.HasActions() && pc.GetRemainingMovePoints() < 0.5f;
-									});
+	                               && partyCharacters.All(pc => !pc.HasActions());
 	
 	public bool SelectedCharacterCanUseAction(CharacterAction action) =>
 		!CharacterRoutines.AnyActiveRoutines() && IsPlayerTurn() 
@@ -65,16 +62,37 @@ public class GameTurnManager : MonoBehaviour
 
 	public void TryEndPlayerTurn()
 	{
-		if (!IsTurnBasedMode()) return;
+		if (!IsTurnBasedMode()) 
+			return;
 		
 		if (IsPlayerTurn())
 		{
-			Debug.Log(this + " TryEndTurn");
-			EndTurn();
+			if (PlayerShouldEndTurn())
+			{
+				if(debugMode > 0) Debug.Log(this + " TryEndTurn");
+				EndTurn();
+			}
+			else
+			{
+				if(debugMode > 0) Debug.Log(this + " TrySelectNext");
+				
+				int maxCount = CharacterEntity.CountLivingPartyCharacters();
+				while(maxCount-- > 0)
+				{
+					CharacterSelection.SelectNextCharacter();
+					
+					if (CharacterSelection.TryGetSelectedCharacter(out var newSelected)
+					    && !newSelected.IsDead()
+					    && newSelected.HasActions())
+					{
+						break;
+					}
+				}
+			}
 		}
 		else
 		{
-			Debug.Log(this + " TryEndPlayerTurn failed: not in player turn");
+			if(debugMode > 0) Debug.Log(this + " TryEndPlayerTurn failed: not in player turn");
 		}
 	}
 
@@ -216,21 +234,25 @@ public class GameTurnManager : MonoBehaviour
 					Debug.Log(this + " focusCharacter=" + focusCharacter);
 					cameraPivot.Focus(focusCharacter);
 					focusCharacter = null;
-					yield return new WaitForSeconds(focusCharacterSeconds);
 				}
+				
+				yield return new WaitForSeconds(focusCharacterSeconds);
 				
 				do
 				{
 					yield return null;
 				} while (levelCharacters.Any(c => c.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons));
-				
-				yield return new WaitForSeconds(firstTurnSeconds);
 			}
 			else // it is NOT the first turn
 			{
 				NewTurn();
 				
-				SelectBestPlayerCharacter();
+				if(!CharacterSelection.TryGetSelectedCharacter(out var _))
+					SelectBestPlayerCharacter();
+				
+				if(CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+					cameraPivot.Focus(selectedCharacter);
+				
 				yield return new WaitForSeconds(focusCharacterSeconds); 
 			}
 			
