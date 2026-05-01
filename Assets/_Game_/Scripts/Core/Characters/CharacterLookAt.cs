@@ -83,6 +83,11 @@ public class CharacterLookAt : MonoBehaviour
 				return;
 			}
 		}
+
+		if (_selfCharacter.IsDead())
+		{
+			_followTarget = null;
+		}
 		
 		var f = Time.deltaTime;
 		if (_followTarget)
