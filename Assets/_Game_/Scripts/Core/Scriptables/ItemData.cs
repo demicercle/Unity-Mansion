@@ -24,6 +24,12 @@ public class ItemData : ScriptableObject
 	[SerializeField] private GameScriptGraph onUseScript;
 	[SerializeField] private string itemTags;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
+	[SerializeField] private bool isProjectile;
+
+	public bool RaycastInteraction() => targetType == TargetType.AnyCharacter;
+	public bool RaycastNavigation() => targetType == TargetType.GroundPosition;
+	
+	public bool IsProjectile() => isProjectile;
 	
 	public bool CompareTags(string tags)
 	{
@@ -47,18 +53,16 @@ public class ItemData : ScriptableObject
 			&& NavUtils.TryGetNearestNavPosition(position, useGroundRadius, out var _);
 	}
 	
-	public bool CanBeUsedOn(GameObject target, out object objectTo)
+	public bool CanBeUsedOn(object target)
 	{
-		if (target)
+		if (target != null)
 		{
-			if (targetType == TargetType.AnyCharacter && target.TryGetComponent<CharacterEntity>(out var character))
+			if (targetType == TargetType.AnyCharacter)
 			{
-				objectTo = character;
-				return true;
+				return target is CharacterEntity;
 			}
 		}
-
-		objectTo = null;
+		
 		return false;
 	}
 
@@ -77,7 +81,7 @@ public class ItemData : ScriptableObject
 
 					if (projectile.Launch(startPosition, destination, out var clone))
 					{
-						UseOn(clone.gameObject);
+						UseOn(clone.gameObject, target.gameObject);
 						return;
 					}
 				}
@@ -85,10 +89,12 @@ public class ItemData : ScriptableObject
 		}
 	}
 
-	public void UseOn(GameObject target)
+	public void UseOn(GameObject target, GameObject instigator)
 	{
-		Debug.Log(this + " UseOn " + target);
-		target.AddComponent<GameScript>().SetGraph(onUseScript);
+		Debug.Log(this + " UseOn " + target + " by " + instigator);
+		var script = target.AddComponent<GameScript>();
+		script.SetInstigator(instigator);
+		script.SetGraph(onUseScript);
 	}
 
 	public string GetDisplayName() => displayName.GetValue(DialogFiles.items);

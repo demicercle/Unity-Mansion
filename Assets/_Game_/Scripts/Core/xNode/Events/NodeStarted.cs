@@ -11,12 +11,11 @@ public class NodeStarted : GameNode
 		if (port.fieldName == "_out") return _out;
 		return base.GetValue(port);
 	}
-
+	
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-
-		script.StartCoroutine(WaitAndInvoke());
+		Script.StartCoroutine(WaitAndInvoke());
 	}
 
 	private IEnumerator WaitAndInvoke()

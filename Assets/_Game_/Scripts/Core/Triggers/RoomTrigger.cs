@@ -53,9 +53,8 @@ public class RoomTrigger : MonoBehaviour
 	public static System.Action onChanged;
 	
 	[Header("Settings")]
-	[SerializeField] private List<PropComponent> doors = new List<PropComponent>();
+	[SerializeField] private List<GameObject> doors = new List<GameObject>();
 	[SerializeField] private List<CharacterTrigger> triggers =  new List<CharacterTrigger>();
-	[SerializeField] private float ceilingHeight = 0.1f;
 	
 	private bool createCeilings;
 	private List<BoxCollider> ceilings = new List<BoxCollider>();
@@ -102,6 +101,8 @@ public class RoomTrigger : MonoBehaviour
 		doors.Clear();
 		var allDoors = Utils.FindObjects<PropComponent>()
 			.Where(p => p.CompareTag(Tags.TagDoor));
+		var allDestructibles = Utils.FindObjects<Destructible>();
+		
 		foreach (var trigger in triggers)
 		{
 			var bounds = trigger.GetWorldBounds();
@@ -110,8 +111,17 @@ public class RoomTrigger : MonoBehaviour
 			{
 				if (bounds.Contains(door.transform.position))
 				{
-					if (!doors.Contains(door))
-						doors.Add(door);
+					if (!doors.Contains(door.gameObject))
+						doors.Add(door.gameObject);
+				}
+			}
+
+			foreach (var destructible in allDestructibles)
+			{
+				if (bounds.Contains(destructible.transform.position))
+				{
+					if(!doors.Contains(destructible.gameObject))
+						doors.Add(destructible.gameObject);
 				}
 			}
 		}
@@ -124,7 +134,7 @@ public class RoomTrigger : MonoBehaviour
 		{
 			if (!door) continue;
 			//Gizmos.DrawLine(transform.position, door.transform.position);
-			door.DrawGizmoBox();
+			if(door.TryGetComponent<PropComponent>(out var prop)) prop.DrawGizmoBox();
 		}
 
 		foreach (var trigger in triggers)
@@ -151,10 +161,11 @@ public class RoomTrigger : MonoBehaviour
 		activeRooms.Add(this);
 		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
-		foreach (var door in doors)
+		foreach (var doorObj in doors)
 		{
-			door.onInteracted += Explore;
-			if(door.TryGetComponent(out Destructible destructible))
+			if(doorObj.TryGetComponent(out PropComponent door))
+				door.onInteracted += Explore;
+			if(doorObj.TryGetComponent(out Destructible destructible))
 				destructible.breaks.AddListener(Explore);
 		}
 	}
@@ -164,10 +175,11 @@ public class RoomTrigger : MonoBehaviour
 		activeRooms.Remove(this);
 		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
-		foreach (var door in doors)
+		foreach (var doorObj in doors)
 		{
-			door.onInteracted -= Explore;
-			if(door.TryGetComponent(out Destructible destructible))
+			if(doorObj.TryGetComponent(out PropComponent door))
+				door.onInteracted -= Explore;
+			if(doorObj.TryGetComponent(out Destructible destructible))
 				destructible.breaks.RemoveListener(Explore);
 		}
 	}

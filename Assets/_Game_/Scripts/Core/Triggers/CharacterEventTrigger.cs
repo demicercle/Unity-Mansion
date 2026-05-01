@@ -15,6 +15,9 @@ public class CharacterEventTrigger : MonoBehaviour
 		public UnityEvent onActionUsed;
 		public void Invoke() => onActionUsed?.Invoke();
 	}
+
+	[SerializeField] private bool debugMode;
+	[Space]
 	
 	[Header("Reference")]
 	[SerializeField] private CharacterEntity character;
@@ -103,7 +106,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		{
 			if (action == actionEvt.actionType && TagCheck(actionEvt.filters, target))
 			{
-				Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " filters=" + actionEvt.filters + "onActionUsed.Invoke " + action);
+				if(debugMode) Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " filters=" + actionEvt.filters + "onActionUsed.Invoke " + action);
 				actionEvt.Invoke();
 				break;
 			};

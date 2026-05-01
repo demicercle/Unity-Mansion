@@ -172,7 +172,6 @@ public class CharacterAnimation : MonoBehaviour
 	private CharacterEntity _selfCharacter;
 	private List<EventType> waitForEvents = new List<EventType>();
 	private bool weaponSwitched;
-	private bool wasDamaged, wasAttacking, wasMoving;
 	private bool hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
 	private WeaponRenderer[] weaponRenderers;
 	
@@ -298,7 +297,6 @@ public class CharacterAnimation : MonoBehaviour
 	//public UnityEvent onDamaged;
 	private void OnDamaged(float amount)
 	{
-		wasDamaged = true;
 		_selfCharacter.FloatingText(Mathf.CeilToInt(amount).ToString());
 		TrySetTrigger(parameters.getHitTrigger);
 		//onDamaged?.Invoke();
@@ -330,8 +328,6 @@ public class CharacterAnimation : MonoBehaviour
 		
 		else if (actionType == CharacterAction.Attack)
 		{
-			wasAttacking = true;
-			
 			if (!TrySetTrigger(parameters.attackTrigger))
 			{
 				if (rpgAnimationHandler)
@@ -353,7 +349,7 @@ public class CharacterAnimation : MonoBehaviour
 			InstantSwitchWeapons();
 	}
 
-	private bool itemSwitched;
+	//private bool itemSwitched;
 	private void UpdateWeaponRenderers()
 	{
 		if (!rpgAnimationHandler) return; // only for RPG weapon shit
@@ -372,7 +368,7 @@ public class CharacterAnimation : MonoBehaviour
 				}
 			}
 			
-			itemSwitched = true;
+			//itemSwitched = true;
 			rpgAnimationHandler.rightWeapon = Weapon.RightItem;
 			rpgAnimationHandler.leftWeapon = default;
 		}
@@ -391,7 +387,7 @@ public class CharacterAnimation : MonoBehaviour
 			rpgAnimationHandler.rightWeapon = rwp;
 			rpgAnimationHandler.leftWeapon = lwp;
 			
-			itemSwitched = false;
+			//itemSwitched = false;
 		}
 			
 		foreach (var wpr in weaponRenderers)
@@ -549,7 +545,6 @@ public class CharacterAnimation : MonoBehaviour
 
 	private void OnCharacterMoved()
 	{
-		wasMoving = true;
 	}
 
 	private void LateUpdate()
@@ -558,14 +553,12 @@ public class CharacterAnimation : MonoBehaviour
 		var isMoving = _selfCharacter.IsMoving();
 		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
 		{
-			isMoving = true;
+			isMoving = true; // force running
 			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
 		}
 		TrySetFloat(parameters.velocityX, 0);      
 		TrySetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
 		TrySetBool(parameters.moving, isMoving);
-
-		wasDamaged = wasAttacking = wasMoving = false;
 	}
 
 	// TODO keep for later?

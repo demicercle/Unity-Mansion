@@ -14,14 +14,8 @@ public class WeaponData : ScriptableObject
 	public Weapon rpgWeaponR = Weapon.Relax;
 	public Weapon rpgWeaponL = Weapon.Relax;
 	
-	public int RollDamage()
+	public int RollDamage(float result)
 	{
-		if (minDamage > maxDamage)
-		{
-			//Debug.LogWarning(this + " has invalid min max damages " + minDamage + " > " + maxDamage);
-			return minDamage;
-		}
-		
-		return Random.Range(minDamage, maxDamage);
+		return (int)Mathf.Lerp(minDamage, maxDamage, result);
 	}
 }

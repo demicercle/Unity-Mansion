@@ -387,6 +387,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterData: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
+  characterCanvas: {fileID: 437776869319342895}
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
@@ -527,15 +528,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0bc9e79e4be4434a2987e81780b76d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterDetection
+  awarenessScale: 3
   hearingDistance: 3.09
   seeingDistance: 9.7
   maxAngle: 86
+  distanceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 3
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.28333333
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: -0
+      outSlope: -0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.11250001
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   setDetectedOnDamaged: 1
   lookAtDetected: 1
   drawGizmos: 0
-  looseTargetDistance: 0
-  awarenessScale: 1
-  hearingScale: 2
 --- !u!54 &6072534866263412361
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -844,7 +867,7 @@ MonoBehaviour:
   locked: 0
   lockWhenNotMoving: 1
   agentTimeHorizon: 0.5
-  obstacleTimeHorizon: 1
+  obstacleTimeHorizon: 0.5
   maxNeighbours: 3
   layer: 1
   collidesWith: 3
@@ -1520,6 +1543,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2682672067756541164}
     m_Modifications:
+    - target: {fileID: 1816827557539698385, guid: 2075a8715591258439c8e622238c822f, type: 3}
+      propertyPath: onSpawned.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2664158097149689473, guid: 2075a8715591258439c8e622238c822f, type: 3}
+      propertyPath: selfCharacter
+      value: 
+      objectReference: {fileID: 1077634328985660634}
     - target: {fileID: 6596224862295543569, guid: 2075a8715591258439c8e622238c822f, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1613,6 +1644,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2075a8715591258439c8e622238c822f, type: 3}
+--- !u!223 &437776869319342895 stripped
+Canvas:
+  m_CorrespondingSourceObject: {fileID: 273456224625672732, guid: 2075a8715591258439c8e622238c822f, type: 3}
+  m_PrefabInstance: {fileID: 421307852758956339}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &6796695804330276386 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6596224862295543569, guid: 2075a8715591258439c8e622238c822f, type: 3}

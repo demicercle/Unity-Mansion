@@ -6,29 +6,29 @@ public abstract class GameNode : Node
 {
 	private GameScript _script;
 
-	public GameScript script
+	public GameScript Script
 	{
 		get => _script;
 		set
 		{
-			if(_script != null) 
+			if(_script) 
 				OnScriptDestroy();
 			
 			_script = value;
 			
-			if(_script != null) 
+			if(_script) 
 				OnScriptStart();
 		}
 	}
 	
-	virtual protected void OnScriptStart()
+	protected virtual void OnScriptStart()
 	{
-		DebugLogThis("OnScriptStart");
+		DebugLogThis("OnScriptStart", 1);
 	}
 
-	virtual protected void OnScriptDestroy()
+	protected virtual void OnScriptDestroy()
 	{
-		DebugLogThis("OnScriptDestroy");
+		DebugLogThis("OnScriptDestroy", 1);
 	}
 
 	private void Reset()
@@ -42,12 +42,13 @@ public abstract class GameNode : Node
 	protected override void Init()
 	{
 		base.Init();
-		DebugLogThis("Inits");
+		_script = null;
+		DebugLogThis("Inits", 1);
 	}
 
-	protected void DebugLogThis(string msg)
+	protected void DebugLogThis(string msg, int minDebugMode = 0)
 	{
-		if(GameScript.debugMode > 0) Debug.Log("x_" + this + ": " + msg);
+		if(GameScript.debugMode > minDebugMode) Debug.Log("x_" + this + ": " + msg + "\nin graph=" + graph);
 	}
 	
 	protected void DebugWarningThis(string msg)
@@ -63,20 +64,23 @@ public class NodeExec
 	private System.Action callback;
 	
 	public void Invoke() => callback?.Invoke();
+
+	public void Dispose()
+	{
+		callback = null;
+	}
 	
-	public void StartInput(Node node, string inputName, System.Action callback)
+	public void InitInput(Node node, string inputName, System.Action callback)
 	{
 		if (!Application.isPlaying)
 		{
-			Debug.Log(this + " app not playing");
 			return;
 		}
-		
-		//Debug.Log(this + " AwakeInput " + node + " " + inputName + " " + callback);
 		
 		otherExec = node.GetInputPort(inputName).GetInputValue<NodeExec>();
 		if (otherExec != null)
 		{
+//			Debug.Log(this + " connect " + node + " to " + inputName);
 			otherExec.callback += callback;
 			return;
 		}
@@ -95,30 +99,32 @@ public class NodeExec
 [System.Serializable]
 public class SceneReference
 {
-	private GameObject value;
-	
-	public string findName = "";
-
-	public bool TryGetComponent<T>(GameNode node, out T component) where T : Component
+	public override string ToString()
 	{
-		value = GetGameObject(node);
-		component = null;
-		return value && value.TryGetComponent(out component);
+		return "x_SceneReference";
+	}
+
+	public void SetGameObject(GameObject newObject)
+	{
+		_gameObject = newObject;
 	}
 
 	public GameObject GetGameObject(GameNode node)
 	{
-		if (!string.IsNullOrWhiteSpace(findName))
-			return GameObject.Find(findName);
-		else
-			return node.script.gameObject;
+		if (!_gameObject)
+			_gameObject = node.Script.gameObject;
+		return _gameObject;
 	}
 
 	public T GetComponent<T>(GameNode node) where T : Component
 	{
-		if (!string.IsNullOrWhiteSpace(findName))
-			return GameObject.Find(findName)?.GetComponent<T>();
-		else
-			return node.script.GetComponent<T>();
+		return GetGameObject(node).GetComponent<T>();
 	}
+
+	public bool TryGetComponent<T>(GameNode node, out T component) where T : Component
+	{
+		return GetGameObject(node).TryGetComponent<T>(out component);
+	}
+
+	private GameObject _gameObject;
 }

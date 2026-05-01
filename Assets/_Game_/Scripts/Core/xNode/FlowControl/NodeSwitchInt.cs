@@ -6,6 +6,9 @@ using XNode;
 public class NodeSwitchInt : GameNode
 {
 	[Input] public NodeExec _in;
+	[Input] public int _index;
+
+	public bool loop = true;
 
 	[ContextMenu("Add Port")]
 	public void AddPort()
@@ -17,18 +20,17 @@ public class NodeSwitchInt : GameNode
 	[ContextMenu("Remove Port")]
 	public void RemovePort()
 	{
-		RemoveDynamicPort("Out" + DynamicOutputs.ToArray().Length);   
+		RemoveDynamicPort("Out" + (DynamicOutputs.ToArray().Length-1));   
 		Utils.SetDirty(this);
 	}
 	
 	public override object GetValue(NodePort port)
 	{
-		CreateOutputs();
-		
-		if (int.TryParse(port.fieldName.Last().ToString(), out var index))
+		if (int.TryParse(port.fieldName.Last().ToString(), out var index)
+		    && index >= 0 && index < _outs.Length)
 			return _outs[index];
 
-		DebugWarningThis(this + " invalid port: " + port.fieldName);
+		DebugWarningThis("invalid port: " + port.fieldName + " parsed index=" + index + " outs=" + _outs.Length);
 		
 		return null; // Replace this
 	}
@@ -37,46 +39,46 @@ public class NodeSwitchInt : GameNode
 	{
 		base.Init();
 		
+		_outs = DynamicOutputs.ToList().ConvertAll<NodeExec>(o => new NodeExec()).ToArray();
+		
 		if (!DynamicOutputs.Any())
 		{
 			AddPort();
 		}
-		
-		CreateOutputs();
 	}
 
 	private NodeExec[] _outs;
-	private int _index;
-	private int _count;
-
-	private void CreateOutputs()
-	{
-		if (_outs == null || _outs.Length == 0)
-		{
-			var ports = DynamicOutputs.ToArray();
-			_outs = new NodeExec[ports.Length];
-			for (int i = 0; i < ports.Length; i++)
-			{
-				_outs[i] = new NodeExec();
-			}
-		}
-	}
 	
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		
 		_index = 0;
-		_in.StartInput(this, "_in", () =>
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", () =>
 		{
-			CreateOutputs();
+			_index = GetInputValue("_index", _index);
 			
-			_outs[_index].Invoke();
+			if (_index >= 0 && _index < _outs.Length)
+			{
+				DebugLogThis("fires: " + _index);
+				_outs[_index].Invoke();
+			}
+			else DebugLogThis("not fired, invalid index: " + _index);
 
-			do
+			if (loop)
 			{
 				_index = (_index + 1) % _outs.Length;
-			} while (_outs[_index] == null || !_outs[_index].HasCallbacks());
+			}
+			else
+			{
+				_index = Mathf.Clamp(_index, _index + 1, _outs.Length);
+			}
 		});
+	}
+
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
 	}
 }

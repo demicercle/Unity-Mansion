@@ -165,7 +165,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 356af8172615ede43a450e1112ea2b1c, type: 3}
-  m_Name: ItemOnUse_Grenade
+  m_Name: Graph_Item_Grenade
   m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
   nodes:
   - {fileID: 7167503854543085475}
@@ -174,6 +174,7 @@ MonoBehaviour:
   - {fileID: -4956880278572576541}
   - {fileID: 4832534939016810699}
   - {fileID: -3092285336613203082}
+  - {fileID: 2846710604673029695}
 --- !u!114 &337713039080081053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,7 +188,7 @@ MonoBehaviour:
   m_Name: Instantiate
   m_EditorClassIdentifier: Assembly-CSharp::NodeInstantiate
   graph: {fileID: 11400000}
-  position: {x: -56, y: -216}
+  position: {x: -56, y: -264}
   ports:
     keys:
     - _in
@@ -214,9 +215,37 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _position:
-    findName: 
   prefab: {fileID: 1257399411437645990, guid: e6cd9fa2f288a30469925fe17f654d5a, type: 3}
+--- !u!114 &2846710604673029695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5aff9b23701c429fa0b23d6488afcc4a, type: 3}
+  m_Name: Get Instigator
+  m_EditorClassIdentifier: Assembly-CSharp::NodeGetInstigator
+  graph: {fileID: 11400000}
+  position: {x: -427.5, y: 150.5}
+  ports:
+    keys:
+    - _out
+    values:
+    - _fieldName: _out
+      _node: {fileID: 2846710604673029695}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _instigator
+        node: {fileID: 4832534939016810699}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
 --- !u!114 &4832534939016810699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -230,13 +259,14 @@ MonoBehaviour:
   m_Name: Apply Damage Radius
   m_EditorClassIdentifier: Assembly-CSharp::NodeApplyDamageRadius
   graph: {fileID: 11400000}
-  position: {x: -56, y: -88}
+  position: {x: -56, y: -120}
   ports:
     keys:
     - _in
     - _position
     - _damage
     - _radius
+    - _instigator
     values:
     - _fieldName: _in
       _node: {fileID: 4832534939016810699}
@@ -280,8 +310,18 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _position:
-    findName: 
+    - _fieldName: _instigator
+      _node: {fileID: 4832534939016810699}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 2846710604673029695}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
   _damage: 7
   _radius: 4
   _fallOff:

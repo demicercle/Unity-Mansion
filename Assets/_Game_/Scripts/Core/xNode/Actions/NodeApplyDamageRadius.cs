@@ -6,6 +6,7 @@ public class NodeApplyDamageRadius : GameNode
 {
 	[Input] public NodeExec _in;
 	[Input] public SceneReference _position;
+	[Input] public SceneReference _instigator;
 	[Input] public float _damage;
 	[Input] public float _radius;
 	
@@ -15,11 +16,13 @@ public class NodeApplyDamageRadius : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		_in.StartInput(this, "_in", () =>
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", () =>
 		{
 			_damage = GetInputValue("_damage", _damage);
 			_radius = GetInputValue("_radius", _radius);
 			_position = GetInputValue("_position", _position);
+			_instigator = GetInputValue("_instigator", _instigator);
 			
 			if (!_position.TryGetComponent(this, out Transform transform))
 			{
@@ -39,12 +42,18 @@ public class NodeApplyDamageRadius : GameNode
 					attackable.TakeDamage(new DamageInfo()
 					{
 						amount = amount, isRanged = false
-					}, script.gameObject);
+					}, _instigator.TryGetComponent(this, out CharacterEntity instigatorCharacter) ? instigatorCharacter : null);
 				}
 			}
 
-			script.StartCoroutine(DelayedExplosion(transform));
+			Script.StartCoroutine(DelayedExplosion(transform));
 		});
+	}
+
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
 	}
 
 	private IEnumerator DelayedExplosion(Transform transform)

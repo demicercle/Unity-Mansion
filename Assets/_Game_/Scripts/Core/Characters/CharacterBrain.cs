@@ -7,13 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
-public interface ICharacterBrain
-{
-	void StartThink();
-	void StopThink();
-}
-
-public class CharacterBrain : MonoBehaviour, ICharacterBrain
+public class CharacterBrain : MonoBehaviour
 {
 	private const float WanderingSearchTimeout = 6.0f;
 	private const float SearchWaypointSeconds = 0.5f;
@@ -30,7 +24,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	[SerializeField] private bool canPatrol = true;
 	//[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
 	[SerializeField] private Waypoint wanderingPoint;
-	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
+	//private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 
 	public UnityEvent onStartThink;
 	
@@ -41,7 +35,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		if (!IsThinking) 
 			return;
 		
-		if (debugMode > 0) Debug.Log(this + " StopThink");
+		if (debugMode > 1) Debug.Log(this + " StopThink");
 		
 		StopAllCoroutines();
 		IsThinking = false;
@@ -49,7 +43,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 	
 	public void StartThink()
 	{
-		if (debugMode > 0) Debug.Log(this + " StartThink ; wasThinking=" + IsThinking);
+		if (debugMode > 1) Debug.Log(this + " StartThink");
 		
 		StopAllCoroutines();
 		StartCoroutine(Think());
@@ -86,7 +80,7 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		// fallback
 		
 		yield return new WaitForSeconds(DefaultWaitSeconds);
-		if(debugMode > 0) Debug.Log(this + " ends");
+		if(debugMode > 1) Debug.Log(this + " ends");
 
 		IsThinking = false;
 	}
@@ -118,21 +112,22 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 
 	private IEnumerator TryChase()
 	{
-		do
+		if (GameTurnManager.Instance.IsTurnBasedMode() == false)
 		{
-			if (!_selfCharacter.CanAttack())
+			//if(debugMode > 0) Debug.Log(this + " TryChase !IsTurnBasedMode");
+			yield break;
+		}
+		
+		if (_chaseCharacter)
+		{
+			if (_chaseCharacter.IsDead())
 			{
-				if (debugMode > 0) Debug.Log(this + " can't attack");
-				yield return StartCoroutine(YieldCantAttack());
-				yield break;
+				ForgetTarget();
 			}
+		}
 
-			if (_chaseCharacter)
-			{
-				if (_chaseCharacter.IsDead())
-					ForgetTarget();
-			}
-
+		if (!_chaseCharacter)
+		{
 			yield return StartCoroutine(YieldTryFindNewTarget());
 
 			if (!_chaseCharacter)
@@ -140,21 +135,32 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 				if (debugMode > 0) Debug.Log(this + " has no target to chase");
 				yield break;
 			}
+		}
 
-			if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
-
-			_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, _selfCharacter.IsUsingRangeWeapon());
-
-			do
+		if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
+		
+		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
+		{
+			if (!_selfCharacter.Routines.AnyActive())
 			{
 				SaveTargetPosition();
-
-				yield return StartCoroutine(YieldTryFindNewTarget());
 				
-			} while (CharacterRoutines.AnyActiveRoutines());
-
-			yield return null;
-		} while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter));
+				if (_selfCharacter.IsAtAttackRange(_chaseCharacter))
+				{
+					_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
+				}
+				else if (_selfCharacter.HasMovePoints())
+				{
+					_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
+				}
+				else if (_selfCharacter.CanUseAction(CharacterAction.Run))
+				{
+					_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+				}
+			}
+			
+			yield return StartCoroutine(YieldTryFindNewTarget());
+		}
 
 		if (debugMode > 0) Debug.Log(this + " end chase");
 	}
@@ -166,19 +172,31 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 			if(debugMode > 0) Debug.Log(this + " TryPatrol !HasMovePoints");
 			yield break;
 		}
-		
-		if (!_selfCharacter.HasActions())
+
+		if (_selfCharacter.HasDetectedAnyPartyCharacter() && !_selfCharacter.HasActions())
 		{
 			if(debugMode > 0) Debug.Log(this + " TryPatrol !HasActions");
 			yield break;
 		}
+
+		if (_patrolRoute && !_patrolRoute.IsAssignedTo(_selfCharacter))
+		{
+			if (debugMode > 0) Debug.Log(this + " patrol has changed");
+			_patrolRoute = null;
+		}
 		
+		if (!_patrolRoute && PatrolRoute.FindRoute(_selfCharacter, out var newPatrol))
+		{
+			_patrolRoute = newPatrol;
+			_currentWaypoint = null;
+			_waypointList.Clear();
+			if (debugMode > 0) Debug.Log(this + " new patrol: " + _patrolRoute);
+		}
+
 		if (!_patrolRoute)
 		{
-			if(!PatrolRoute.FindRoute(_selfCharacter, out var newPatrol))
-				yield break;
-			
-			_patrolRoute = newPatrol;
+			//if (debugMode > 0) Debug.Log(this + " TryPatrol !_patrolRoute");
+			yield break;
 		}
 
 		if (_currentWaypoint && _selfCharacter.WaypointReached(_currentWaypoint))
@@ -198,9 +216,12 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		}
 
 		if (!_currentWaypoint)
+		{
 			_currentWaypoint = _waypointList.First();
+			if (debugMode > 0) Debug.Log(this + " new waypoint " + _currentWaypoint);
+		}
 		
-		_selfCharacter.Routines.AssignMoveToWaypoint(_currentWaypoint, canUseRunAction);
+		_selfCharacter.Routines.AssignMoveToWaypoint(_currentWaypoint);
 		
 		do
 		{
@@ -218,8 +239,17 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 
 	private IEnumerator TryWander()
 	{
-		if (!_selfCharacter.HasMovePoints() || !_selfCharacter.HasActions())
+		if (!_selfCharacter.HasMovePoints())
+		{
+			if(debugMode > 0) Debug.Log(this + " TryWander !HasMovePoints");
 			yield break;
+		}
+
+		if (_selfCharacter.HasDetectedAnyPartyCharacter() && !_selfCharacter.HasActions())
+		{
+			if(debugMode > 0) Debug.Log(this + " TryWander !HasActions");
+			yield break;
+		}
 
 		float startTime = Time.time;
 		float wanderingDistance = wanderingPoint.radius;

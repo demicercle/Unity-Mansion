@@ -106,6 +106,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -222,6 +223,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -337,6 +339,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -484,6 +487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -599,6 +603,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -746,6 +751,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -861,6 +867,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -976,6 +983,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -1091,6 +1099,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -1207,6 +1216,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -1322,6 +1332,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -1437,6 +1448,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -1552,6 +1564,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -1667,6 +1680,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -1782,6 +1796,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -1897,6 +1912,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -2012,6 +2028,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -2220,6 +2237,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -2335,6 +2353,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: -1
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers: []
@@ -2439,7 +2458,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3789455635990092813, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: onStartThink.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3789455635990092813, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: onStartThink.m_PersistentCalls.m_Calls.Array.data[0].m_Mode

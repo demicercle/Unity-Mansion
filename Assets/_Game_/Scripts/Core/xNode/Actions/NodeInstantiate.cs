@@ -11,7 +11,8 @@ public class NodeInstantiate : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		_in.StartInput(this, "_in", () =>
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", () =>
 		{
 			if (prefab == null)
 			{
@@ -30,5 +31,11 @@ public class NodeInstantiate : GameNode
 			instance.transform.position = transform.position;
 			instance.transform.rotation = transform.rotation;
 		});
+	}
+
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
 	}
 }

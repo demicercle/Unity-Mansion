@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 
 public class PatrolRoute : MonoBehaviour
 {
-	static public List<PatrolRoute> routes = new List<PatrolRoute>();
+	private static List<PatrolRoute> routes = new List<PatrolRoute>();
 	void Awake() { routes.Add(this);}
 	void OnDestroy() { routes.Remove(this); }
 
-	static public bool FindRoute(CharacterEntity character, out PatrolRoute patrolRoute)
+	public static bool FindRoute(CharacterEntity character, out PatrolRoute patrolRoute)
 	{
 		foreach (var route in routes)
 		{
@@ -44,8 +45,23 @@ public class PatrolRoute : MonoBehaviour
 	}
 	
 	public Waypoint[] GetWaypoints() => waypoints.ToArray();
+	
+	public bool IsAssignedTo(CharacterEntity anyCharacter) => assignedCharacter == anyCharacter; 
 
-	public CharacterEntity assignedCharacter;
+	public void AssignPatrol(CharacterEntity newCharacter)
+	{
+		foreach (var otherPatrol in routes)
+		{
+			if (otherPatrol != this && otherPatrol.assignedCharacter == newCharacter)
+			{
+				otherPatrol.assignedCharacter = null;
+			}
+		}
+
+		assignedCharacter = newCharacter;
+	}
+
+	[SerializeField] private CharacterEntity assignedCharacter;
 	[SerializeField] private List<Waypoint> waypoints = new List<Waypoint>();
 	public bool closedLoop = false;
 	public Color color = Color.blue;
@@ -54,25 +70,6 @@ public class PatrolRoute : MonoBehaviour
 			.Where(wp => wp != null)
 			.ToList()
 			.ConvertAll<Vector3>(wp => wp.GetPosition()).ToArray();
-
-		public void DebugDraw(float duration = 0f)
-		{
-			DebugDrawer.Path(GetPath(), closedLoop, color, duration);
-		}
-
-		private void Start() // TODO init patrol in GameData
-		{
-			if(assignedCharacter == null)
-				assignedCharacter = GetComponentInParent<CharacterEntity>();
-			
-			transform.SetParent(null, true); // to prevent waypoints to move in game
-			
-			if (assignedCharacter == null)
-			{
-				Debug.LogWarning(this + " has no assigned character");
-				gameObject.SetActive(false);
-			}
-		}
 
 		private void OnDrawGizmos()
 		{

@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
+using System.ComponentModel;
 using System.Linq;
 using UnityEngine;
+using Component = UnityEngine.Component;
 using LightType = UnityEngine.LightType;
 
 public class CameraPivot : MonoBehaviour
@@ -122,7 +125,6 @@ public class CameraPivot : MonoBehaviour
     [ReadOnly] [SerializeField] private Vector2 rotationSpeed = new Vector2(3.0f, 6.0f);
     [ReadOnly] [SerializeField] private Vector2 orbitSpeed = new Vector2(3.0f, 6.0f);
     [ReadOnly] [SerializeField] private Vector2 orbitMaxSpeed = new Vector2(-1f, -1f);
-    [ReadOnly] [SerializeField] private float orbitDrag = 0.1f;
 
     
     #region PUBLIC
@@ -171,11 +173,29 @@ public class CameraPivot : MonoBehaviour
         desiredZoom = Mathf.Clamp01(value);
         UpdateAnimator();
     }
-    
+
+    public Coroutine OrbitTowards(float yaw)
+    {
+        StopAllCoroutines();
+        return StartCoroutine(DoOrbitTowards(yaw));
+    }
+
+    private bool orbitCoroutine;
+    private IEnumerator DoOrbitTowards(float yaw)
+    {
+        orbitCoroutine = true;
+        while (orbitCoroutine)
+        {
+            desiredYaw = Mathf.MoveTowardsAngle(desiredYaw, yaw, Time.deltaTime * Mathf.Max(orbitMaxSpeed.x, orbitSpeed.x) * Consts.RAD_TO_DEG);
+            yield return null;
+        }
+    }
+
     public void Orbit(float deltaX, float deltaY, float inputScale = 0f)
     {
-        orbitScale = new Vector2(deltaX, deltaX);
+        orbitCoroutine = false;
         if (debugMode > 0) Debug.Log(this + " Orbit " + deltaX + " " + deltaY + " " + inputScale);
+        orbitScale = new Vector2(deltaX, deltaX);
         if (inputScale != 0f)
         {
             orbitScale *= inputScale;

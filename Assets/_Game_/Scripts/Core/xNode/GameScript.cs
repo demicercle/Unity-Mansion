@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections;
 using System.Linq;
 using UnityEngine;
 
@@ -15,51 +15,47 @@ public class GameScript : MonoBehaviour
 			Destroy(this);
 	}
 	
-	[SerializeField] private GameScriptGraph graph;
+	[SerializeField] private GameScriptGraph startGraph;
 
+	private GameScriptGraph graph;
+	
 	public void SetGraph(GameScriptGraph newGraph)
 	{
-		graph = newGraph;
+		if (graph)
+		{
+			if(debugMode > 0) Debug.Log(this + " Dispose graph");
+			
+			foreach (var node in graph.nodes.OfType<GameNode>())
+			{
+				node.Script = null;
+			}
+
+			Destroy(graph);
+			graph = null;
+		}
+
+		if (newGraph)
+		{
+			graph = Instantiate(newGraph);
+			if(debugMode > 0) Debug.Log(this + " SetGraph " + graph);
+		
+			foreach (var node in graph.nodes.OfType<GameNode>())
+			{
+				node.Script = this;
+			}
+		}
 	}
+
+	private GameObject _instigator;
+
+	public void SetInstigator(GameObject newInstigator)
+	{
+		_instigator = newInstigator;
+	}
+
+	public GameObject GetInstigator() => _instigator;
 	
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
-
-	private void Start()
-	{
-		if (!graph)
-		{
-			Debug.LogWarning(this + " has no graph, destroys");
-			DestroyScript(false);
-			return;
-		}
-		
-		graph = Instantiate(graph);
-		
-		if(debugMode > 0) Debug.Log(this + " Start " + graph);
-		#if UNITY_EDITOR
-		if (debugMode > 1) UnityEditor.Selection.activeObject = graph;
-		#endif
-
-		foreach (var node in graph.nodes.OfType<GameNode>())
-		{
-			node.script = this;
-		}
-	}
-
-	private void OnDestroy()
-	{
-		if (!graph) return;
-		if (!Application.isPlaying) return;
-		
-		if(debugMode > 0) Debug.Log(this + " OnDestroy");
-		
-		foreach (var node in graph.nodes.OfType<GameNode>())
-		{
-			node.script = null;
-		}
-			
-		//Destroy(graph);
-	}
 
 	private void OnEnable()
 	{
@@ -68,15 +64,15 @@ public class GameScript : MonoBehaviour
 
 	private void OnDisable()
 	{
-		if (!graph) return;
 		gameTurnManager.onSceneLoaded -= OnSceneLoaded;
+		SetGraph(null);
 	}
 
 	private void OnSceneLoaded()
 	{
-		foreach (var node in graph.nodes)
-		{
-			(node as NodeSceneLoaded)?.OnSceneLoaded();
-		}
+		if(debugMode > 0) Debug.Log(this + " OnSceneLoaded");
+
+		if (startGraph)
+			SetGraph(startGraph);
 	}
 }

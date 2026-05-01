@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 public class DiceLauncher : MonoBehaviour
 {
-	public static event System.Action onDiceRollEnds;
+	public static int debugMode => DicePool.debugMode;
 	
 	public Image spriteImage;
 	public Sprite[] numberSprites;
@@ -43,14 +43,14 @@ public class DiceLauncher : MonoBehaviour
 
 	private void OnAnyCharacterDead(CharacterEntity character)
 	{
-		foreach (var other in CharacterEntity.AllCharacters)
+		if (character.TryGetLastDamageInstigator(out var killer))
 		{
-			if (other == character || other.IsDead() || !other.InParty()) continue;
-			if (other.GetLastAttackTarget() == character)
+			if (killer.InParty())
 			{
+				// last hit
 				allowedDiceRolls += 1;
-				if(DicePool.debugMode>0) Debug.Log(this + " " + other + " gains new dice for last kill! " + character);
-				return;
+				allowedRollsText.text = allowedDiceRolls.ToString();
+				if(debugMode > 0) Debug.Log(this + " last hit " + killer + " " + character + " => allowedDiceRolls=" + allowedDiceRolls);
 			}
 		}
 	}
@@ -92,6 +92,5 @@ public class DiceLauncher : MonoBehaviour
 
 		allowedRollsText.gameObject.SetActive(true);
 		launchButton.interactable = allowedDiceRolls > 0;
-		onDiceRollEnds?.Invoke();
 	}
 }

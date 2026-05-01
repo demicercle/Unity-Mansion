@@ -25,7 +25,7 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
-	[SerializeField] [Min(0f)] private float endReachDistance = 0.0f;
+	[SerializeField] [Min(0f)] private float minReachDistance = 0.1f;
 	
 	[Header("Rendering")]
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -297,8 +297,10 @@ public class CharacterAgent : MonoBehaviour
 	{
 		bestWaypoint = null;
 	}
+
+	private IAttackable lastTarget;
 	
-	public void AssignDestination(Vector3 hitPoint, bool force)
+	public void AssignDestination(Vector3 hitPoint, bool force, IAttackable target = null)
 	{
 		if (force || !hasDestination)
 		{
@@ -308,13 +310,13 @@ public class CharacterAgent : MonoBehaviour
 				AssignFollowTransform(null);
 
 			if(debugMode > 1) Debug.Log(this + " aiPath.SearchPath() ");
-			aiPath.endReachedDistance = endReachDistance;
+			aiPath.endReachedDistance = minReachDistance;
 			aiPath.destination = hitPoint;
 			aiPath.canSearch = true;
 			aiPath.SearchPath();
 			
 			hasDestination = true;
-			
+			lastTarget = target;
 			UpdatePathAndTarget(true);
 		}
 	}
@@ -344,6 +346,7 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if (hasDestination) // ClearDestination
 		{
+			debugString = "";
 			bestWaypoint = null;
 			hasDestination = false;
 //			Debug.Log(aiPath + " hasDestination=" + hasDestination);
@@ -351,13 +354,15 @@ public class CharacterAgent : MonoBehaviour
 		}
 	}
 
+	private string debugString;
 	public bool ReachedDestination() => ReachedDestination(aiPath.destination);
 	public bool ReachedDestination(Vector3 dest)
 	{
 		var dist = NavUtils.NavDistanceRoundY(aiPath.position, dest);
-		dist = Mathf.Round(dist * ReachDestinationScale) / ReachDestinationScale;
 		var reach = Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
-//		Debug.Log("FLOOD ReachedDestination " + dist + " <= " + reach);
+		dist = float.Parse(dist.ToString("N2"));
+		reach = float.Parse(reach.ToString("N2"));
+		debugString = $"{dist}/{reach}";
 		return dist <= reach;
 	}
 
@@ -461,11 +466,11 @@ public class CharacterAgent : MonoBehaviour
 
 	public bool IsMoving() => !aiPath.isStopped /*&& !aiPath.pathPending && velocity.magnitude > Consts.MinMagnitude)*/;
 	   
-	public float GetMinReachDistance() => Mathf.Max(endReachDistance, aiPath.endReachedDistance);
+	public float GetMinReachDistance() => minReachDistance;
 
 	public void SetReachDistance(float value) => aiPath.endReachedDistance = value;
 
-	public void SetDefaultReachDistance() => aiPath.endReachedDistance = endReachDistance;
+	public void SetDefaultReachDistance() => aiPath.endReachedDistance = minReachDistance;
 
 	/*public void EnableAvoidance(bool b)
 	{
@@ -527,7 +532,7 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
 		aiPath.pickNextWaypointDist = radius + GetMinReachDistance();
-		if(endReachDistance > 0f) aiPath.endReachedDistance = endReachDistance;
+		if(minReachDistance > 0f) aiPath.endReachedDistance = minReachDistance;
 		if(Application.isPlaying) aiPath.gravity = Physics.gravity; // force gravity
 		rvoController = GetComponent<RVOController>();
 	}
@@ -558,15 +563,20 @@ public class CharacterAgent : MonoBehaviour
 
 	private void OnPartyIndexChanged(int newIndex, int partyCount)
 	{
-		rvoController.priority = CharacterSelection.IsCharacterSelected(_selfCharacter) ? 0.90f :
-			_selfCharacter.InParty() ? 0.66f : 0.33f;
+		UpdateRVO();
 	}
 
 	private void SelectionChanged()
 	{
+		UpdateRVO();
 		UpdateObstacle();
 		if(!IsMoving()) ClearDestination();
 		UpdatePathAndTarget(true);
+	}
+
+	private void UpdateRVO()
+	{
+		rvoController.priority = CharacterSelection.IsCharacterSelected(_selfCharacter) ? 0.90f : _selfCharacter.InParty() ? 0.66f : 0.33f;
 		rvoController.lockWhenNotMoving = _selfCharacter.IsSelected();
 	}
 
@@ -614,6 +624,16 @@ public class CharacterAgent : MonoBehaviour
 		                    && lastPath.Length > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();
+
+		if (lastTarget != null)
+		{
+			if ( (_selfCharacter.ShouldAttack(lastTarget) && _selfCharacter.IsAtAttackRange(lastTarget))
+			    || (lastTarget is CharacterEntity && _selfCharacter.ShouldTalk(lastTarget as CharacterEntity) 
+			                                      && _selfCharacter.GetDistanceTo(lastTarget.GetPosition()) <= _selfCharacter.GetTalkDistance(lastTarget as CharacterEntity)))
+			{
+				shouldDrawPath[0] = shouldDrawPath[1] = false;
+			}
+		}
 		
 		if (force || shouldDrawPath[0] != isDrawingPath[0])
 		{
@@ -639,7 +659,7 @@ public class CharacterAgent : MonoBehaviour
 				                                && GameInput.Instance.TryGetMouseOver<CharacterEntity>(out var mouseOverCharacter))
 				{
 					if(_selfCharacter.ShouldAttack(mouseOverCharacter))
-						maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackRange(mouseOverCharacter));
+						maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackReachDistance(mouseOverCharacter));
 				}
 				drawPath = Utils.LimitPathTotalLength(drawPath, maxDrawLength);
 				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_selfCharacter, true, true);
@@ -682,5 +702,16 @@ public class CharacterAgent : MonoBehaviour
 	{
 		//aiPath.updateRotation = false;
 		aiPath.rotation = Quaternion.Euler(0, eulerAnglesY, 0);
+	}
+
+	private void OnGUI()
+	{
+		if (debugMode > 0)
+		{
+			if (!string.IsNullOrEmpty(debugString))
+			{
+				Utils.DrawWorldGUI(transform.position, debugString);
+			}
+		}
 	}
 }

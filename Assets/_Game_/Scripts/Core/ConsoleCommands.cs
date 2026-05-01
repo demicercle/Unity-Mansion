@@ -18,12 +18,21 @@ public class ConsoleCommands : MonoBehaviour
 			}, character);
 	}
 
+	[ConsoleMethod("stop_all_routines", "")]
+	public static void StopAllRoutines()
+	{
+		foreach (var character in GameTurnManager.Instance.GetLevelCharacters())
+		{
+			character.Routines.StopAllRoutines();
+		}
+	}
+
 	[ConsoleMethod("kill_all", "")]
 	public static void KillAll()
 	{
-		foreach (var character in GameTurnManager.Instance.GetTurnBasedCharacters())
+		foreach (var character in GameTurnManager.Instance.GetLevelCharacters())
 		{
-			if (!character.IsDead() && !character.InParty() && character.IsEnemyToPlayer())
+			if (!character.InParty() && character.IsCharacterRevealed()  && !character.IsDead() && character.IsEnemyToPlayer())
 				character.TryKill();
 		}
 	}

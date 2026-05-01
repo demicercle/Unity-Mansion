@@ -28,7 +28,14 @@ public class NodeFloatingText : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		_in.StartInput(this, "_in", OnCallback);
+		//_in = GetInputValue("_in", _in);
+		_in.InitInput(this, "_in", OnCallback);
+	}
+
+	protected override void OnScriptDestroy()
+	{
+		base.OnScriptDestroy();
+		_in.Dispose();
 	}
 
 	private void OnCallback()

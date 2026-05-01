@@ -253,7 +253,7 @@ public class GameCanvas : MonoBehaviour
 		{
 			if (selected.CanUseAction(CharacterAction.Run))
 			{
-				selected.Routines.AssignWaitAction(CharacterAction.Run);
+				selected.Routines.AssignUseAction(CharacterAction.Run);
 			}
 			else
 			{
@@ -268,7 +268,7 @@ public class GameCanvas : MonoBehaviour
 		{
 			if (selected.CanUseAction(CharacterAction.Defend))
 			{
-				selected.Routines.AssignWaitAction(CharacterAction.Defend);
+				selected.Routines.AssignUseAction(CharacterAction.Defend);
 			}
 			else
 			{
@@ -279,7 +279,7 @@ public class GameCanvas : MonoBehaviour
 
 	private void ClickEndTurn() => gameTurnManager.TryEndPlayerTurn(false);
 
-	private void ClickNextCharacter() => CharacterSelection.SelectNextCharacter();
+	private void ClickNextCharacter() => CharacterSelection.SelectNextCharacter(true);
 
 	private void UpdatePortraits()
 	{
@@ -306,7 +306,7 @@ public class GameCanvas : MonoBehaviour
 		buttonActionRun.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Run);
 		buttonActionDefend.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Defend);
 		
-		if (gameTurnManager.PlayerCanEndTurn())
+		if (gameTurnManager.PlayerCanEndTurn() && !gameTurnManager.IsWaiting())
 		{
 			buttonEndTurn.interactable = true;
 		}

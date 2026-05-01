@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using RPGCharacterAnims.Actions;
@@ -38,7 +39,7 @@ public struct DamageInfo
 
 	public override string ToString()
 	{
-		return $"DamageInfo (amount={amount}, isRange={isRanged}";
+		return $"DamageInfo (amount={amount}, isRange={isRanged})";
 	}
 }
 
@@ -55,6 +56,18 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public static List<CharacterEntity> AllCharacters => _allCharacters;
 
 	public static CharacterEntity[] GetPartyCharacters() => _partyCharacters.ToArray();
+
+	public static bool TryGetPartyCharacter(int index, out CharacterEntity partyChar)
+	{
+		if (index >= 0 && index < _partyCharacters.Count)
+		{
+			partyChar = _partyCharacters[index];
+			return true;
+		}
+
+		partyChar = null;
+		return false;
+	}
 	
 	public static int CountLivingPartyCharacters() => _partyCharacters.Count(p => !p.IsDead());
 
@@ -87,13 +100,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public event System.Action turnEnded;
 	
 	[SerializeField] private CharacterData characterData;
-	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f;
+	[SerializeField] private Canvas characterCanvas;
+	[SerializeField] private float clearActionsDelay = 3.0f;
+	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f; // TODO remove
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
 	[SerializeField] private WeaponData defaultWeapon;
 	public CharacterRoutines Routines => routines;
-	
-	public float lastTimeRested { get; private set; }
 
 	public bool IsName(string savedPCName)
 	{
@@ -119,6 +132,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
 		SetCurrentWeapon(defaultWeapon);
+		characterCanvas.gameObject.SetActive(true);
 		onSpawned?.Invoke();
 		onStatsChanged?.Invoke();
 	}
@@ -170,7 +184,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		usedActions.Clear();
 		usedMovePoints = 0;
 		dodgeCount = 0;
-		lastTimeRested = Time.time;
 		onStatsChanged?.Invoke();
 	}
 	
@@ -184,9 +197,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	}
 
 	private IAttackable lastAttackTarget;
-	
 	public IAttackable GetLastAttackTarget() => lastAttackTarget;
-
+	
+	private object lastDamageInstigator;
+	public bool TryGetLastDamageInstigator(out CharacterEntity instigator)
+	{
+		return (instigator = lastAttackTarget as CharacterEntity) != null;
+	}
 	
 	public float RollDice()
 	{
@@ -303,6 +320,20 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);
 		onStatsChanged?.Invoke();
+		
+		if (!GameTurnManager.Instance.IsTurnBasedMode())
+		{
+			CancelInvoke("ClearActions");
+			Invoke("ClearActions", clearActionsDelay);
+		}
+	}
+
+	public void ClearActions()
+	{
+		if (GameTurnManager.Instance.IsTurnBasedMode())
+			return;
+
+		usedActions.Clear();
 	}
 	
 	public void UseAllActions(bool consumeMovePoints = true)
@@ -319,6 +350,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public bool IsEnemyToPlayer(CharacterEntity other = null) => currentFaction == CharacterFaction.Enemy;
 
+	public bool ShouldTalk(CharacterEntity other) => other.GetCurrentFaction() == CharacterFaction.Neutral &&
+	                                                 GetCurrentFaction() == CharacterFaction.Player &&
+	                                                 !other.IsDead() && !IsDead();
+
+	public float GetTalkDistance(CharacterEntity other) =>
+		other.GetRadius() + GetRadius() + agent.GetMinReachDistance() + other.agent.GetMinReachDistance();
+
+	public bool ShouldAttack(IAttackable other) =>
+		other is CharacterEntity ? ShouldAttack(other as CharacterEntity) : IsAtAttackRange(other);
+	
 	public bool ShouldAttack(CharacterEntity other) => !other.IsDead() && IsEnemyTo(other);
 	public bool IsEnemyTo(CharacterEntity other) => IsEnemyTo(other.GetCurrentFaction());
 	public bool IsEnemyTo(CharacterFaction faction)
@@ -374,7 +415,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onFactionChanged?.Invoke();
 	}
 
-	public bool IsCurrentTurn() => GameTurnManager.Instance.IsPlayerTurn() && IsPlayer();
+	public bool IsCurrentTurn() => GameTurnManager.Instance.IsPlayerTurn() == IsPlayer();
 	
 	public float GetMaxMovePoints() => characterData.maxMovePoints;
 	
@@ -550,6 +591,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		Debug.Log(this + " TakeDamage " + damageInfo);
 		totalDamages += damageInfo.amount;
+		lastDamageInstigator = objectFrom;
 		
 		StopAgent();
 
@@ -606,16 +648,15 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return agent.ReachedDestination(wp.GetPosition());
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	}
-
-	public float GetAttackRange() => Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + MinAttackRange);
-	public float GetAttackRange(IAttackable target)
+	
+	public float GetAttackReachDistance(IAttackable target)
 	{
-		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + MinAttackRange);
+		return Mathf.Max(0, currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + agent.GetMinReachDistance());
 	}
 
 	public bool IsAtAttackRange(IAttackable target)
 	{
-		var atkRange = GetAttackRange(target);
+		var atkRange = GetAttackReachDistance(target) + MinAttackRange;
 		var dist = NavUtils.NavDistanceRoundY(GetPosition(), target.GetPosition());
 		return dist <= atkRange;
 	}
@@ -640,9 +681,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return true;
 	}
 	
-	public float GetLastAttackDamage()
+	public float GetLastAttackDamage(float atkResult)
 	{
-		return currentWeapon.RollDamage();
+		return currentWeapon.RollDamage(atkResult);
 	}
 
 	public bool IsUsingRangeWeapon() => currentWeapon.isRanged;
@@ -661,6 +702,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
 	});
 
+	public bool InCombat() => GameTurnManager.Instance.IsTurnBasedMode() 
+	                          && !IsDead() 
+	                          && IsCharacterRevealed() 
+	                          && (InParty() || HasDetectedAnyPartyCharacter());
+	
 	public bool HasDetectedAnyPartyCharacter() => _partyCharacters.Any(HasDetectedOther);
 	
 	public bool HasDetectedOther(CharacterEntity other) => detection && detection.IsCharacterDetected(other);
@@ -756,12 +802,37 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			defaultWeapon = WeaponData.CreateInstance<WeaponData>();
 		}
 
+		characterCanvas.gameObject.SetActive(false);
 		gameObject.SetActive(false); // wait for "Spawn"
+		
+		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 	}
 
 	private void OnDestroy()
 	{
 		_allCharacters.Remove(this);
+		
+		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
+	}
+
+	private void OnTurnStarted()
+	{
+		if (IsCurrentTurn())
+		{
+			if(GameTurnManager.debugMode > 0) Debug.Log(this + " OnTurnStarted");
+			turnStarted?.Invoke();
+		}
+	}
+
+	private void OnTurnEnded()
+	{
+		if (IsCurrentTurn())
+		{
+			if(GameTurnManager.debugMode > 0) Debug.Log(this + " OnTurnEnded");
+			turnEnded?.Invoke();
+		}
 	}
 
 	private void SetCurrentWeapon(WeaponData newWeapon)

@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
-public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
+public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
 	public RawImage rawImage;
 	public TMP_Text nameLabel;
@@ -15,12 +15,24 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler
 	public Image healthSprite;
 	public TMP_Text healthLabel;
 	public TMP_Text dodgeLabel1, dodgeLabel2;
+
+	public int GetIndex() => transform.GetSiblingIndex();
 	
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		CharacterSelection.SelectPartyCharacter( transform.GetSiblingIndex());
+		GameInput.Instance.OnClickPortrait(GetIndex());
 	}
-	
+
+	public void OnPointerEnter(PointerEventData eventData)
+	{
+		GameInput.Instance.MouseOverPortrait(GetIndex());
+	}
+
+	public void OnPointerExit(PointerEventData eventData)
+	{
+		GameInput.Instance.MouseOverPortrait(-1);
+	}
+
 	public void AssignCharacter(CharacterEntity character)
 	{
 		if (_assignedCharacter != null)
