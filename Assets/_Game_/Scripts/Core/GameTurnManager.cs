@@ -17,7 +17,6 @@ public class GameTurnManager : MonoBehaviour
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
-	[SerializeField] private bool skipInvisibleCharacters = true;
 	[SerializeField] private bool alertRevealedCharactersInTurnBasedMode = true;
 	[SerializeField] [Range(0f, 6f)] private float restInterval = 3.0f;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
@@ -94,8 +93,8 @@ public class GameTurnManager : MonoBehaviour
 		}
 	}
 
-	public CharacterEntity[] GetTurnBasedCharacters() => turnBasedCharacters.ToArray();
 	public CharacterEntity[] GetLevelCharacters() => levelCharacters.ToArray();
+	
 	public bool IsLevelIndex(int index) => index == 0; // TODO
 
 	public void SetWaitTime(float newTime)
@@ -112,8 +111,6 @@ public class GameTurnManager : MonoBehaviour
 	private CharacterEntity[] levelCharacters;
 	private CharacterEntity currentAICharacter;
 	private CharacterEntity focusCharacter;
-	private List<CharacterEntity> turnBasedCharacters = new List<CharacterEntity>();
-	private bool turnBasedCharactersChanged;
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
@@ -236,12 +233,6 @@ public class GameTurnManager : MonoBehaviour
 		
 		while (turnBasedMode)
 		{
-			if (turnBasedCharactersChanged)
-			{
-				turnBasedCharactersChanged = false;
-				turnBasedCharacters = turnBasedCharacters.OrderBy(c => (-(int)c.GetCurrentFaction()) + c.ToString()).ToList();
-			}
-			
 			if (currentTurn == 0) // it is the first turn
 			{
 				FirstTurn();
@@ -297,19 +288,13 @@ public class GameTurnManager : MonoBehaviour
 			yield return WaitNavigationDirty();
 			yield return YieldRoutines();
 		
-			foreach (var otherCharacter in turnBasedCharacters)
+			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
 				
 				otherCharacter.Rest(); // rest not player character
-
-				if (skipInvisibleCharacters && !otherCharacter.IsCharacterRevealed())
-				{
-					Debug.Log("skipInvisibleCharacters: " + otherCharacter);
-					yield return null;
-					continue;
-				}
+				if (!otherCharacter.IsCharacterRevealed()) continue;
 				
 				yield return YieldRoutines();
 				
@@ -427,26 +412,7 @@ public class GameTurnManager : MonoBehaviour
 
 	private void OnRoomChanged()
 	{
-		if (!turnBasedMode)
-			return;
 		
-		foreach (var levelChar in levelCharacters)
-		{
-			if (!levelChar.IsCharacterRevealed() || levelChar.IsDead()) continue;
-			
-			if (!turnBasedCharacters.Contains(levelChar))
-			{
-				if (alertRevealedCharactersInTurnBasedMode && levelChar.TryGetComponent(out CharacterDetection detection))
-				{
-					foreach (var otherTurnBased in turnBasedCharacters)
-					{
-						detection.SetCharacterDetected(otherTurnBased, true);
-					}
-				}
-				
-				turnBasedCharacters.Add(levelChar); // character revealed while in turn based mode
-			}
-		}
 	}
 	
 	private void EndTurn()
@@ -481,25 +447,14 @@ public class GameTurnManager : MonoBehaviour
 		nextFirstTurnIsPlayer = false;
 		if(debugMode > 0) Debug.Log(this + " FirstTurn playerTurn=" + playerTurn);
 				
-		turnBasedCharacters.Clear(); // first turn
-		turnBasedCharactersChanged = true;
 		foreach (var character in levelCharacters)
 		{
-			character.Routines.StopAllRoutines();
-			
 			if (character.IsDead() || !character.IsCharacterRevealed())
 				continue;
 			
-			turnBasedCharacters.Insert(0, character);
-			
-			if(!character.InParty())
-				character.Routines.StopAllRoutines();
-					
+			character.Routines.StopAllRoutines();
 			character.StopAgent();
 			character.GetAgent().UpdateObstacle();
-
-			if (character.TryGetAnimation(out CharacterAnimation otherAnimation))
-				otherAnimation.TrySwitchWeapons(true);
 
 			if (!character.InParty())
 			{
@@ -508,7 +463,7 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 
-		if(debugMode > 0) Debug.Log(this + " found turnBasedCharacter=" + turnBasedCharacters.Count);
+		if(debugMode > 0) Debug.Log(this + " FirstTurn");
 		
 		onPlayerChanged?.Invoke(playerTurn);
 		onTurnStarted?.Invoke();
@@ -537,25 +492,10 @@ public class GameTurnManager : MonoBehaviour
 
 	private bool ShouldExitTurnBased()
 	{
-		foreach (var enemyCharacter in turnBasedCharacters)
-		{
-			if (enemyCharacter.InParty()) 
-				continue;
-
-			if (enemyCharacter.IsDead())
-				continue;
-			
-			if (!enemyCharacter.IsEnemyToPlayer())
-				continue;
-
-			if (enemyCharacter.HasDetectedAnyPartyCharacter())
-			{
-//				if(debugMode > 0) Debug.Log(this + " Should_not_ExitTurnBased: HasDetectedAnyPartyCharacter enemy " + enemyCharacter);
-				return false;
-			}
-		}
-
-		return true;
+		return turnBasedMode && !levelCharacters.Any(levelCharacter => !levelCharacter.IsDead()
+		                                                              && levelCharacter.IsCharacterRevealed()
+		                                                              && levelCharacter.IsEnemyToPlayer()
+		                                                              && levelCharacter.HasDetectedAnyPartyCharacter());
 	}
 
 	private bool IsAnyEnemyAroundCheck()
@@ -645,24 +585,18 @@ public class GameTurnManager : MonoBehaviour
 					}
 				}
 				
-				foreach (var character in turnBasedCharacters)
+				foreach (var character in levelCharacters)
 				{
+					if (!character.IsCharacterRevealed()) continue;
+					
 					var label = character.name;
 					if (character.IsDead()) label += " (DEAD)";
 					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
 					
-					if (!character.IsCharacterRevealed() && skipInvisibleCharacters)
-					{
-						GUILayout.Label("SKIP: " + label);
-					}
-					else
-					{
+					var isCurrent = (playerTurn && character.InParty()) ||
+					                (!playerTurn && currentAICharacter == character);
 						
-						var isCurrent = (playerTurn && character.InParty()) ||
-						                (!playerTurn && currentAICharacter == character);
-						
-						GUILayout.Toggle(isCurrent, label);
-					}
+					GUILayout.Toggle(isCurrent, label);
 				}
 			}
 			GUILayout.EndVertical();
