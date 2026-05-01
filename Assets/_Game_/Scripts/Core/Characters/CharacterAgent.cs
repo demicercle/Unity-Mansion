@@ -651,7 +651,7 @@ public class CharacterAgent : MonoBehaviour
 				                                && GameInput.Instance.TryGetMouseOver<CharacterEntity>(out var mouseOverCharacter))
 				{
 					if(_selfCharacter.ShouldAttack(mouseOverCharacter))
-						maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackRange(mouseOverCharacter));
+						maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackReachDistance(mouseOverCharacter));
 				}
 				drawPath = Utils.LimitPathTotalLength(drawPath, maxDrawLength);
 				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_selfCharacter, true, true);

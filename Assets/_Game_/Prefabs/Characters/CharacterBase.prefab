@@ -1547,6 +1547,10 @@ PrefabInstance:
       propertyPath: onSpawned.m_PersistentCalls.m_Calls.Array.size
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2664158097149689473, guid: 2075a8715591258439c8e622238c822f, type: 3}
+      propertyPath: selfCharacter
+      value: 
+      objectReference: {fileID: 1077634328985660634}
     - target: {fileID: 6596224862295543569, guid: 2075a8715591258439c8e622238c822f, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1633,7 +1637,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7944228977815162686, guid: 2075a8715591258439c8e622238c822f, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

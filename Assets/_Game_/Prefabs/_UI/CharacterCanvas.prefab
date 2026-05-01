@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 9082311050923498965}
   - component: {fileID: 3074977508885482601}
   - component: {fileID: 3273743221968847579}
+  - component: {fileID: 4271543007479649014}
   m_Layer: 5
   m_Name: DetectionPanel
   m_TagString: Untagged
@@ -137,6 +138,19 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   m_IsOn: 1
+--- !u!114 &4271543007479649014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3712991315622839048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7899fab088d4bf696d029e170dbe4c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LookAtCamera
+  camera: {fileID: 0}
 --- !u!1 &4727856847932240504
 GameObject:
   m_ObjectHideFlags: 0
@@ -224,7 +238,6 @@ GameObject:
   - component: {fileID: 273456224625672732}
   - component: {fileID: 927311393624596697}
   - component: {fileID: 3776022068617880954}
-  - component: {fileID: 4045842785772009129}
   - component: {fileID: 2664158097149689473}
   m_Layer: 5
   m_Name: CharacterCanvas
@@ -316,19 +329,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &4045842785772009129
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7944228977815162686}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7899fab088d4bf696d029e170dbe4c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WorldCanvas
-  lookAtAxis: {x: 0, y: 1, z: 0}
 --- !u!114 &2664158097149689473
 MonoBehaviour:
   m_ObjectHideFlags: 0

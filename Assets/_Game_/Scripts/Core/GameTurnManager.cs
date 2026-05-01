@@ -455,11 +455,19 @@ public class GameTurnManager : MonoBehaviour
 			character.Routines.StopAllRoutines();
 			character.StopAgent();
 			character.GetAgent().UpdateObstacle();
-
+			
 			if (!character.InParty())
 			{
 				if (character.TryGetComponent(out CharacterBrain otherBrain))
 					otherBrain.StopThink();
+			}
+
+			if (character.InParty() || character.HasDetectedAnyPartyCharacter())
+			{
+				if (character.TryGetAnimation(out var anim))
+				{
+					anim.TrySwitchWeapons(true);
+				}
 			}
 		}
 

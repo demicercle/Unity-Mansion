@@ -53,11 +53,13 @@ public class NodeTurnChanged : GameNode
 
 	private void TurnStarted()
 	{
+		if (_initCharacter.IsDead()) return;
 		_turnStarted.Invoke();
 	}
 
 	private void TurnEnded()
 	{
+		if (_initCharacter.IsDead()) return;
 		_turnEnded.Invoke();
 	}
 }

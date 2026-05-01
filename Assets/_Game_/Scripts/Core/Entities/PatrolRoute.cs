@@ -45,7 +45,20 @@ public class PatrolRoute : MonoBehaviour
 	
 	public Waypoint[] GetWaypoints() => waypoints.ToArray();
 
-	public CharacterEntity assignedCharacter;
+	public void AssignPatrol(CharacterEntity newCharacter)
+	{
+		foreach (var otherPatrol in routes)
+		{
+			if (otherPatrol != this && otherPatrol.assignedCharacter == newCharacter)
+			{
+				otherPatrol.assignedCharacter = null;
+			}
+		}
+
+		assignedCharacter = newCharacter;
+	}
+
+	[SerializeField] private CharacterEntity assignedCharacter;
 	[SerializeField] private List<Waypoint> waypoints = new List<Waypoint>();
 	public bool closedLoop = false;
 	public Color color = Color.blue;

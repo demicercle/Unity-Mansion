@@ -619,16 +619,15 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return agent.ReachedDestination(wp.GetPosition());
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	}
-
-	public float GetAttackRange() => Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + MinAttackRange);
-	public float GetAttackRange(IAttackable target)
+	
+	public float GetAttackReachDistance(IAttackable target)
 	{
-		return Mathf.Max(currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + MinAttackRange);
+		return Mathf.Max(0, currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + agent.GetMinReachDistance());
 	}
 
 	public bool IsAtAttackRange(IAttackable target)
 	{
-		var atkRange = GetAttackRange(target);
+		var atkRange = GetAttackReachDistance(target) + MinAttackRange;
 		var dist = NavUtils.NavDistanceRoundY(GetPosition(), target.GetPosition());
 		return dist <= atkRange;
 	}

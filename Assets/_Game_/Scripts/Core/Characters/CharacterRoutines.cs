@@ -318,17 +318,10 @@ public class CharacterRoutines : MonoBehaviour
 		}
 
 		var atAttackRange = _selfCharacter.IsAtAttackRange(target);
-		
-		if (atAttackRange && losCheck && !_selfCharacter.LOSCheck(target))
-		{
-			if (debugMode > 0) Debug.Log(_selfCharacter + " los obstructed, try to find better position");
-			_selfCharacter.FloatingText_Cant();
-			yield break;
-		}
 
 		if (!atAttackRange)
 		{
-			var reachDistance = _selfCharacter.GetAttackRange(target);
+			var reachDistance = _selfCharacter.GetAttackReachDistance(target);
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
 			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), canUseRunAction, reachDistance));
 			atAttackRange = _selfCharacter.IsAtAttackRange(target);
@@ -336,10 +329,25 @@ public class CharacterRoutines : MonoBehaviour
 		
 		if (atAttackRange)
 		{
+			if (losCheck && !LOSCheck(target))
+				yield break;
+			
 			if(debugMode > 0) Debug.Log(_selfCharacter + " atAttackRange of " + target + ", StopAgent");
 			_selfCharacter.StopAgent();
 			yield return StartCoroutine(WaitCharacterPerformAttack(target, true));
 		}
+	}
+
+	private bool LOSCheck(IAttackable target)
+	{
+		if (!_selfCharacter.LOSCheck(target))
+		{
+			if (debugMode > 0) Debug.Log(_selfCharacter + " los obstructed, try to find better position");
+			_selfCharacter.FloatingText_Cant();
+			return false;
+		}
+
+		return true;
 	}
 
 	private IEnumerator WaitCharacterPerformAttack(IAttackable target, bool useAction)
