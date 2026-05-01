@@ -24,7 +24,7 @@ public class CharacterBrain : MonoBehaviour
 	[SerializeField] private bool canPatrol = true;
 	//[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
 	[SerializeField] private Waypoint wanderingPoint;
-	private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
+	//private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 
 	public UnityEvent onStartThink;
 	
@@ -112,21 +112,22 @@ public class CharacterBrain : MonoBehaviour
 
 	private IEnumerator TryChase()
 	{
-		do
+		if (GameTurnManager.Instance.IsTurnBasedMode() == false)
 		{
-			if (!_selfCharacter.CanAttack())
+			if(debugMode > 0) Debug.Log(this + " TryChase !IsTurnBasedMode");
+			yield break;
+		}
+		
+		if (_chaseCharacter)
+		{
+			if (_chaseCharacter.IsDead())
 			{
-				if (debugMode > 0) Debug.Log(this + " can't attack");
-				yield return StartCoroutine(YieldCantAttack());
-				yield break;
+				ForgetTarget();
 			}
+		}
 
-			if (_chaseCharacter)
-			{
-				if (_chaseCharacter.IsDead())
-					ForgetTarget();
-			}
-
+		if (!_chaseCharacter)
+		{
 			yield return StartCoroutine(YieldTryFindNewTarget());
 
 			if (!_chaseCharacter)
@@ -134,21 +135,32 @@ public class CharacterBrain : MonoBehaviour
 				if (debugMode > 0) Debug.Log(this + " has no target to chase");
 				yield break;
 			}
+		}
 
-			if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
-
-			_selfCharacter.Routines.AssignAttack(_chaseCharacter, true, _selfCharacter.IsUsingRangeWeapon());
-
-			do
+		if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
+		
+		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
+		{
+			if (!_selfCharacter.Routines.AnyActive())
 			{
 				SaveTargetPosition();
-
-				yield return StartCoroutine(YieldTryFindNewTarget());
 				
-			} while (CharacterRoutines.AnyActiveRoutines());
-
-			yield return null;
-		} while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter));
+				if (_selfCharacter.IsAtAttackRange(_chaseCharacter))
+				{
+					_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
+				}
+				else if (_selfCharacter.HasMovePoints())
+				{
+					_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
+				}
+				else if (_selfCharacter.CanUseAction(CharacterAction.Run))
+				{
+					_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+				}
+			}
+			
+			yield return StartCoroutine(YieldTryFindNewTarget());
+		}
 
 		if (debugMode > 0) Debug.Log(this + " end chase");
 	}
@@ -200,7 +212,7 @@ public class CharacterBrain : MonoBehaviour
 		if (!_currentWaypoint)
 			_currentWaypoint = _waypointList.First();
 		
-		_selfCharacter.Routines.AssignMoveToWaypoint(_currentWaypoint, canUseRunAction);
+		_selfCharacter.Routines.AssignMoveToWaypoint(_currentWaypoint);
 		
 		do
 		{

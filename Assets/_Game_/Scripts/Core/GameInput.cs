@@ -604,13 +604,13 @@ public class GameInput : MonoBehaviour
 	private void OnInputAction_Run(CallbackContext ctx)
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Run))
-				selectedCharacter.Routines.AssignWaitAction(CharacterAction.Run);
+				selectedCharacter.Routines.AssignUseAction(CharacterAction.Run);
 	}
 	
 	private void OnInputAction_Defend(CallbackContext ctx)
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Defend))
-			selectedCharacter.Routines.AssignWaitAction(CharacterAction.Defend);
+			selectedCharacter.Routines.AssignUseAction(CharacterAction.Defend);
 	}
 	
 	private void OnInputCameraZoom(CallbackContext ctx)
@@ -841,9 +841,9 @@ public class GameInput : MonoBehaviour
 						{
 							if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
 							if (!IsLeaderMode())
-								selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
+								selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter, selectedCharacter.IsUsingRangeWeapon());
 							else
-								selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter, false);
+								selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter);
 							//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 						}
 						return;
@@ -926,9 +926,9 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + attackable);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignAttack(attackable, false, false);
+							selectedCharacter.Routines.AssignMoveAndAttack(attackable, selectedCharacter.IsUsingRangeWeapon());
 						else
-							selectedCharacter.Routines.Leader_AssignAttack(attackable, false);
+							selectedCharacter.Routines.Leader_AssignAttack(attackable);
 						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
 					}
 					return;

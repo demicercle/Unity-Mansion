@@ -67,7 +67,7 @@ public class CharacterSelection : MonoBehaviour
 	public static void SelectFirstCharacter() =>
 		SelectCharacter(CharacterEntity.GetPartyCharacters().FirstOrDefault());
 	
-	public static void SelectNextCharacter()
+	public static void SelectNextCharacter(bool withActions = false, bool checkDead = true)
 	{
 		var startIndex = TryGetSelectedCharacter(out var selected) ? selected.GetPartyIndex() : -1;
 		if (startIndex < 0)
@@ -81,9 +81,15 @@ public class CharacterSelection : MonoBehaviour
 		var newIndex = (startIndex + 1) % partyCount;
 		if(debugMode >0) Debug.Log("SelectNextCharacter " + startIndex + " " + selected + " > " + newIndex);
 		SelectCharacter(party[newIndex]);
-		if (party[newIndex].IsDead() && CharacterEntity.CountLivingPartyCharacters() > 1)
+		if (checkDead && party[newIndex].IsDead() && CharacterEntity.CountLivingPartyCharacters() > 1)
 		{
 			if(debugMode >0) Debug.Log(party[newIndex] + " is dead, select next");
+			SelectNextCharacter();
+		}
+
+		if (withActions && !party[newIndex].HasActions())
+		{
+			if(debugMode >0) Debug.Log(party[newIndex] + " !HasActions, select next");
 			SelectNextCharacter();
 		}
 	}

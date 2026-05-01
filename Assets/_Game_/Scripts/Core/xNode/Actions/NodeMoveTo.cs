@@ -7,7 +7,6 @@ public class NodeMoveTo : GameNode
 	[Input] public NodeExec _start;
 	[Input] public SceneReference _character;
 	[Input] public SceneReference _to;
-	[Input] public bool canUseRunAction;
 	[Space]	
 	[Output] public NodeExec _finished;
 	
@@ -39,7 +38,7 @@ public class NodeMoveTo : GameNode
 		{
 			if (_to.TryGetComponent(this, out Waypoint waypoint))
 			{
-				character.Routines.AssignMoveToWaypoint(waypoint, canUseRunAction, OnComplete);
+				character.Routines.AssignMoveToWaypoint(waypoint, OnComplete);
 			}
 		}
 	}

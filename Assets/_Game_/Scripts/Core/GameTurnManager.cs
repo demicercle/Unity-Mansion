@@ -72,19 +72,7 @@ public class GameTurnManager : MonoBehaviour
 			else
 			{
 				if(debugMode > 0) Debug.Log(this + " TrySelectNext");
-				
-				int maxCount = CharacterEntity.CountLivingPartyCharacters();
-				while(maxCount-- > 0)
-				{
-					CharacterSelection.SelectNextCharacter();
-					
-					if (CharacterSelection.TryGetSelectedCharacter(out var newSelected)
-					    && !newSelected.IsDead()
-					    && newSelected.HasActions())
-					{
-						break;
-					}
-				}
+				CharacterSelection.SelectNextCharacter(true);
 			}
 		}
 		else
@@ -482,6 +470,7 @@ public class GameTurnManager : MonoBehaviour
 		var center = cameraPivot.GetFocusPosition();
 
 		var bestCharacter = partyCharacters
+			.Where(pc => !pc.IsDead())
 			.OrderBy(pc => Vector3.Distance(pc.GetPosition(), center))
 			.FirstOrDefault();
 		

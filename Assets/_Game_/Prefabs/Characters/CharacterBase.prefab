@@ -868,7 +868,7 @@ MonoBehaviour:
   lockWhenNotMoving: 1
   agentTimeHorizon: 0.5
   obstacleTimeHorizon: 0.5
-  maxNeighbours: 1
+  maxNeighbours: 3
   layer: 1
   collidesWith: 3
   wallAvoidForce: 1
