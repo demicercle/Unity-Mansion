@@ -23,12 +23,10 @@
 - check clicks on "IsWaiting" while real time
 - assign attack : should update destination if target moves
 - click portrait to use item
-- killing an enemy should give a "reroll" point
-- check navmesh in staircase hallway
 - retakes "scene reference" with a list of references in GameScript
+- dialog line reference bug in editor
 
 ART
-- retake fog cube so it's transparent below a black unlit plane
 - add a "roof" (ceiling plane) to cull sun light, and point light in the buildings
 
 NODES

@@ -56,6 +56,18 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public static List<CharacterEntity> AllCharacters => _allCharacters;
 
 	public static CharacterEntity[] GetPartyCharacters() => _partyCharacters.ToArray();
+
+	public static bool TryGetPartyCharacter(int index, out CharacterEntity partyChar)
+	{
+		if (index >= 0 && index < _partyCharacters.Count)
+		{
+			partyChar = _partyCharacters[index];
+			return true;
+		}
+
+		partyChar = null;
+		return false;
+	}
 	
 	public static int CountLivingPartyCharacters() => _partyCharacters.Count(p => !p.IsDead());
 

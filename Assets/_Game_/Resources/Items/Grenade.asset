@@ -21,3 +21,4 @@ MonoBehaviour:
   onUseScript: {fileID: 11400000, guid: 90fe40b23bddf1c4f9bbfc8c0174fd43, type: 2}
   itemTags: Grenade
   useGroundRadius: 0.2
+  isProjectile: 1
