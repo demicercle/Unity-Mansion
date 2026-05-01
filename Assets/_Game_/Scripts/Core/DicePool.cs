@@ -17,15 +17,20 @@ public static class DicePool
 	public static void RollNewDice()
 	{
 		if (seed == 0 || rng == null)
+		{
+			Debug.LogWarning("DicePool GetRandomSeed()");
 			SetSeed(GetRandomSeed());
+		}
 
 		lastResult = (float)rng.NextDouble();
 		if(debugMode >0) Debug.Log("DicePool>> Last Result: " + lastResult.ToString("N4"));
 		
 		onDiceRolled?.Invoke();
 	}
-	
-	public static int GetRandomSeed() => int.Parse(System.DateTime.Now.Minute.ToString() + System.DateTime.Now.Second.ToString() + System.DateTime.Now.Millisecond.ToString());
+
+	public static int GetRandomSeed() => int.Parse(System.DateTime.Now.Minute.ToString() +
+	                                               System.DateTime.Now.Second.ToString() +
+	                                               System.DateTime.Now.Millisecond.ToString());
 	
 	public static float LastResult => lastResult;
 	public static int Seed => seed;
@@ -34,6 +39,7 @@ public static class DicePool
 	{
 		seed = newSeed;
 		rng = new Random(seed);
+		Debug.Log("DicePool SetSeed " + newSeed);
 	}
 	
 	private static int seed;

@@ -14,7 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameSave
   disableSave: 0
   version: 0
+  gameSeed: 2247790
   savedLevels: []
   selectedCharacter: 0
   savedPCs: []
-  savedValues: []
+  savedValues:
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3

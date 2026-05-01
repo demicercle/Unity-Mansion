@@ -212,6 +212,7 @@ public class GameSave : ScriptableObject
 	[SerializeField] private bool disableSave = false;
 
 	[Min(0)] public int version;
+	public int gameSeed;
 	public List<SavedLevel> savedLevels = new List<SavedLevel>();
 	public int selectedCharacter;
 	public List<SavedPC> savedPCs = new List<SavedPC>();
@@ -258,6 +259,8 @@ public class GameSave : ScriptableObject
 		savedPCs.Clear();
 		selectedCharacter = 0;
 		version = 0;
+		gameSeed = DicePool.GetRandomSeed();
+		DicePool.SetSeed(gameSeed);
 		if(!Application.isPlaying) Utils.SetDirty(this);
 	}
 
@@ -273,6 +276,10 @@ public class GameSave : ScriptableObject
 		
 		if (fromFile)
 			LoadFromFile();
+
+		if(gameSeed > 0)
+			DicePool.SetSeed(gameSeed);
+		else Debug.LogWarning(this + " invalid game seed: " + gameSeed);
 
 		foreach (var savedValue in savedValues)
 		{
@@ -376,6 +383,8 @@ public class GameSave : ScriptableObject
 		Clear();
 
 		version = LastGameVersion;
+
+		gameSeed = DicePool.Seed;
 		
 		savedValues.Add(new SavedValue(){ name = SavedValue.Karma, value = DiceLauncher.AllowedDiceRolls});
 
