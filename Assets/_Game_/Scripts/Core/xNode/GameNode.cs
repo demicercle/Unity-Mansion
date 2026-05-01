@@ -80,6 +80,7 @@ public class NodeExec
 		otherExec = node.GetInputPort(inputName).GetInputValue<NodeExec>();
 		if (otherExec != null)
 		{
+//			Debug.Log(this + " connect " + node + " to " + inputName);
 			otherExec.callback += callback;
 			return;
 		}

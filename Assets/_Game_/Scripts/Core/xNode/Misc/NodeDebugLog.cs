@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using XNode;
 
-[CreateNodeMenu("Misc/DebugLog")]
+[CreateNodeMenu("Misc/Debug Log")]
 public class NodeDebugLog : GameNode
 {
 	[Input] public NodeExec _in;
@@ -21,7 +21,6 @@ public class NodeDebugLog : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		//_in = GetInputValue("_in", _in);
 		_in.InitInput(this, "_in", () =>
 		{
 			Debug.Log("<b>x_DebugLog</b> " + GetInputValue("message", message) + "\nin graph=" + graph);

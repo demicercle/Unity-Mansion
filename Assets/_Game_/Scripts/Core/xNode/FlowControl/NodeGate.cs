@@ -10,6 +10,13 @@ public class NodeGate : GameNode
 	[Output] public NodeExec _out;
 
 	public bool startsClosed;
+	public bool autoClose;
+
+	public override object GetValue(NodePort port)
+	{
+		if (port.fieldName == "_out") return _out;
+		return base.GetValue(port);
+	}
 	
 	private bool isClosed;
 
@@ -19,8 +26,14 @@ public class NodeGate : GameNode
 		isClosed = startsClosed;
 		_in.InitInput(this, "_in", () =>
 		{
-			if(!isClosed)
+			DebugLogThis("isClosed: " + isClosed);
+			if (!isClosed)
+			{
+				if (autoClose)
+					isClosed = true;
+				
 				_out.Invoke();
+			}
 		});
 		_open.InitInput(this, "_open", () =>
 		{

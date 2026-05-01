@@ -8,5 +8,4 @@
 #debug_camera 1
 #debug_routines 1
 #debug_brains 1
-
-debug_script 1
+#debug_script 1

@@ -7,11 +7,13 @@ public class NodeTurnChanged : GameNode
 	[Input] public SceneReference _character;
 	[Output] public NodeExec _turnStarted;
 	[Output] public NodeExec _turnEnded;
+	[Output] public int _currentTurn;
 
 	private CharacterEntity selfCharacter;
 
 	public override object GetValue(NodePort port)
 	{
+		if (port.fieldName == "_currentTurn") return _currentTurn;
 		if (port.fieldName == "_turnStarted") return _turnStarted;
 		if (port.fieldName == "_turnEnded") return _turnEnded;
 		return base.GetValue(port);
@@ -60,14 +62,16 @@ public class NodeTurnChanged : GameNode
 	private void TurnStarted()
 	{
 		if (selfCharacter && selfCharacter.IsDead()) return;
-		DebugLogThis("turn started");
+		_currentTurn = GameTurnManager.Instance.GetCurrentTurn();
+		DebugLogThis("turn started #" + _currentTurn);
 		_turnStarted.Invoke();
 	}
 
 	private void TurnEnded()
 	{
 		if (selfCharacter && selfCharacter.IsDead()) return;
-		DebugLogThis("turn ended");
+		_currentTurn = GameTurnManager.Instance.GetCurrentTurn();
+		DebugLogThis("turn ended #" + _currentTurn);
 		_turnEnded.Invoke();
 	}
 }
