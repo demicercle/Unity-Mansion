@@ -1,5 +1,55 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8835191273465707991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41290b5252de4e228848db8d87f4dfcd, type: 3}
+  m_Name: Turn Changed
+  m_EditorClassIdentifier: Assembly-CSharp::NodeTurnChanged
+  graph: {fileID: 11400000}
+  position: {x: -1256, y: -152}
+  ports:
+    keys:
+    - _character
+    - _turnStarted
+    - _turnEnded
+    values:
+    - _fieldName: _character
+      _node: {fileID: -8835191273465707991}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _turnStarted
+      _node: {fileID: -8835191273465707991}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _turnEnded
+      _node: {fileID: -8835191273465707991}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _in
+        node: {fileID: 8443757372734954696}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
 --- !u!114 &-6333504337139077274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -220,7 +270,6 @@ MonoBehaviour:
   m_Name: Graph_Level_0
   m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
   nodes:
-  - {fileID: 1043153840778916638}
   - {fileID: 3971757747397813678}
   - {fileID: -373289405852831925}
   - {fileID: 5729644215421045415}
@@ -237,6 +286,9 @@ MonoBehaviour:
   - {fileID: 8982146529360608915}
   - {fileID: 491524707927891582}
   - {fileID: 3872703963223777726}
+  - {fileID: 8443757372734954696}
+  - {fileID: 3032324045232946370}
+  - {fileID: -8835191273465707991}
 --- !u!114 &491524707927891582
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -278,59 +330,6 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: Waypoint_Script_2
---- !u!114 &1043153840778916638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41290b5252de4e228848db8d87f4dfcd, type: 3}
-  m_Name: Turn Changed
-  m_EditorClassIdentifier: Assembly-CSharp::NodeTurnChanged
-  graph: {fileID: 11400000}
-  position: {x: -920, y: -88}
-  ports:
-    keys:
-    - _turnEnded
-    - _turnStarted
-    - _character
-    values:
-    - _fieldName: _turnEnded
-      _node: {fileID: 1043153840778916638}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _in
-        node: {fileID: 3971757747397813678}
-        reroutePoints: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _turnStarted
-      _node: {fileID: 1043153840778916638}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _character
-      _node: {fileID: 1043153840778916638}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections:
-      - fieldName: _out
-        node: {fileID: 3007218651998927448}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
 --- !u!114 &1913820063056849607
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,7 +489,7 @@ MonoBehaviour:
   m_Name: Find Game Object
   m_EditorClassIdentifier: Assembly-CSharp::NodeFindGameObject
   graph: {fileID: 11400000}
-  position: {x: -1144, y: -72}
+  position: {x: -1432, y: 104}
   ports:
     keys:
     - findName
@@ -511,13 +510,57 @@ MonoBehaviour:
         PublicKeyToken=null
       connections:
       - fieldName: _character
-        node: {fileID: 1043153840778916638}
+        node: {fileID: 3032324045232946370}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
   findName: PC_Zombi_0
+--- !u!114 &3032324045232946370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2faff9819c345e7a95f59477f2aae7d, type: 3}
+  m_Name: Is In Combat
+  m_EditorClassIdentifier: Assembly-CSharp::NodeIsInCombat
+  graph: {fileID: 11400000}
+  position: {x: -1192, y: 104}
+  ports:
+    keys:
+    - _character
+    - _inCombat
+    values:
+    - _fieldName: _character
+      _node: {fileID: 3032324045232946370}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 3007218651998927448}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _inCombat
+      _node: {fileID: 3032324045232946370}
+      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: _condition
+        node: {fileID: 8443757372734954696}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _inCombat: 1
 --- !u!114 &3047157872543670551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -641,7 +684,6 @@ MonoBehaviour:
     - _start
     - _character
     - _to
-    - _finished
     values:
     - _fieldName: _start
       _node: {fileID: 3872703963223777726}
@@ -679,15 +721,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _finished
-      _node: {fileID: 3872703963223777726}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
 --- !u!114 &3971757747397813678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -715,8 +748,8 @@ MonoBehaviour:
       _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
-      - fieldName: _turnEnded
-        node: {fileID: 1043153840778916638}
+      - fieldName: _true
+        node: {fileID: 8443757372734954696}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
@@ -848,6 +881,73 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: Patrol_4
+--- !u!114 &8443757372734954696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09f27ad7ea59457fbe03365282bd8c12, type: 3}
+  m_Name: Branch
+  m_EditorClassIdentifier: Assembly-CSharp::NodeBranch
+  graph: {fileID: 11400000}
+  position: {x: -920, y: -56}
+  ports:
+    keys:
+    - _in
+    - _condition
+    - _true
+    - _false
+    values:
+    - _fieldName: _in
+      _node: {fileID: 8443757372734954696}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _turnEnded
+        node: {fileID: -8835191273465707991}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _condition
+      _node: {fileID: 8443757372734954696}
+      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: _inCombat
+        node: {fileID: 3032324045232946370}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _true
+      _node: {fileID: 8443757372734954696}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _in
+        node: {fileID: 3971757747397813678}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _false
+      _node: {fileID: 8443757372734954696}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _condition: 1
 --- !u!114 &8982146529360608915
 MonoBehaviour:
   m_ObjectHideFlags: 0

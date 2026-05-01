@@ -702,6 +702,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
 	});
 
+	public bool InCombat() => GameTurnManager.Instance.IsTurnBasedMode() 
+	                          && !IsDead() 
+	                          && IsCharacterRevealed() 
+	                          && (InParty() || HasDetectedAnyPartyCharacter());
+	
 	public bool HasDetectedAnyPartyCharacter() => _partyCharacters.Any(HasDetectedOther);
 	
 	public bool HasDetectedOther(CharacterEntity other) => detection && detection.IsCharacterDetected(other);

@@ -8,7 +8,7 @@ public class NodeTurnChanged : GameNode
 	[Output] public NodeExec _turnStarted;
 	[Output] public NodeExec _turnEnded;
 
-	private CharacterEntity _initCharacter;
+	private CharacterEntity selfCharacter;
 
 	public override object GetValue(NodePort port)
 	{
@@ -17,15 +17,21 @@ public class NodeTurnChanged : GameNode
 		return base.GetValue(port);
 	}
 
+	protected override void Init()
+	{
+		base.Init();
+		selfCharacter = null;
+	}
+
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
 		_character = GetInputValue("_character", _character);
-		if (_character.TryGetComponent(this, out _initCharacter))
+		if (_character.TryGetComponent(this, out selfCharacter))
 		{
-			DebugLogThis("init character: "  + _initCharacter);
-			_initCharacter.turnStarted += TurnStarted;
-			_initCharacter.turnEnded += TurnEnded;
+			DebugLogThis("init character: "  + selfCharacter);
+			selfCharacter.turnStarted += TurnStarted;
+			selfCharacter.turnEnded += TurnEnded;
 		}
 		else
 		{
@@ -39,10 +45,10 @@ public class NodeTurnChanged : GameNode
 	{
 		base.OnScriptDestroy();
 
-		if (_initCharacter)
+		if (selfCharacter)
 		{
-			_initCharacter.turnStarted -= TurnStarted;
-			_initCharacter.turnEnded -= TurnEnded;
+			selfCharacter.turnStarted -= TurnStarted;
+			selfCharacter.turnEnded -= TurnEnded;
 		}
 		else
 		{
@@ -53,13 +59,15 @@ public class NodeTurnChanged : GameNode
 
 	private void TurnStarted()
 	{
-		if (_initCharacter.IsDead()) return;
+		if (selfCharacter && selfCharacter.IsDead()) return;
+		DebugLogThis("turn started");
 		_turnStarted.Invoke();
 	}
 
 	private void TurnEnded()
 	{
-		if (_initCharacter.IsDead()) return;
+		if (selfCharacter && selfCharacter.IsDead()) return;
+		DebugLogThis("turn ended");
 		_turnEnded.Invoke();
 	}
 }
