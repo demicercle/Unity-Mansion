@@ -5,6 +5,8 @@
 - "prepare" action
 - display cursor text "attack will miss" or "attack will hit" 
 - min time between assigns
+- randomize hp on game seed 
+- 
 
 
 REFACTO

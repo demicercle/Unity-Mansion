@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class AttackTrigger : MonoBehaviour
 {
+	public static int debugMode => CharacterTrigger.debugMode;
+	
 	[SerializeField] private CharacterEntity selfCharacter;
-	[SerializeField] [Range(0.1f, 1.0f)] private float triggerRangeOffset = 0.3f;
+	[SerializeField] private float triggerRangeOffset = 0.1f;
 	[SerializeField] private bool triggerOnExit = true;
 	[SerializeField] private bool triggerOnEnter = false;
 	[SerializeField] private bool movingCharacterOnly = true;
@@ -34,7 +36,7 @@ public class AttackTrigger : MonoBehaviour
 			return;
 		}
 
-		sphereCollider.radius = selfCharacter.GetRadius() + triggerRangeOffset;
+		sphereCollider.radius = selfCharacter.GetAttackRange() + triggerRangeOffset;
 		sphereCollider.isTrigger = true;
 	}
 
@@ -42,6 +44,7 @@ public class AttackTrigger : MonoBehaviour
 	{
 		sphereCollider.enabled = true;
 		selfCharacter.onStatsChanged += OnCharacterStatsChanged;
+		if(debugMode > 0) Debug.Log(this + " OnEnable");
 	}
 
 	private void OnDisable()
@@ -50,6 +53,7 @@ public class AttackTrigger : MonoBehaviour
 
 		if (!selfCharacter) return;
 		selfCharacter.onStatsChanged -= OnCharacterStatsChanged;
+		if(debugMode > 0) Debug.Log(this + " OnDisable");
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -80,14 +84,25 @@ public class AttackTrigger : MonoBehaviour
 				
 				if (requiresWeaponReady && !selfCharacter.WeaponsReady())
 				{
-					Debug.Log(this + " weapons not ready");
+					if(debugMode > 0) Debug.Log(this + " weapons not ready");
 					return;
+				}
+
+				if (selfCharacter.IsUsingRangeWeapon())
+				{
+					if (!selfCharacter.LOSCheck(otherCharacter))
+					{
+						if(debugMode > 0) Debug.Log(this + " !LOSCheck on " + otherCharacter);
+						return;
+					}
 				}
 				
 				// trigger opportunity attack
 				
 				if (stopAgent) 
 					otherCharacter.StopAgent();
+
+				if (debugMode > 0) Debug.Log(this + " triggers instant:" + isInstantAttack + " on " + otherCharacter);
 				
 				if (isInstantAttack) 
 					selfCharacter.Routines.AssignPerformAttack(otherCharacter, useAttackAction);
@@ -127,7 +142,7 @@ public class AttackTrigger : MonoBehaviour
 		if (selfCharacter)
 		{
 			Gizmos.color = Color.red;
-			Utils.DrawGizmosCircle(selfCharacter.GetPosition(), Vector3.up, selfCharacter.GetRadius() + triggerRangeOffset);
+			Utils.DrawGizmosCircle(selfCharacter.GetPosition(), Vector3.up, selfCharacter.GetAttackRange() + triggerRangeOffset);
 			//Gizmos.DrawWireSphere(selfCharacter.GetPosition(), selfCharacter.GetRadius() + triggerRangeOffset);
 		}
 	}

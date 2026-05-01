@@ -29,7 +29,8 @@ public enum CharacterAction
 	Interact,
 	Talk,
 	UseItem,
-	Defend
+	Defend,
+	Prepare
 }
 
 public struct DamageInfo
@@ -648,10 +649,15 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return agent.ReachedDestination(wp.GetPosition());
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	}
+
+	public float GetAttackRange()
+	{
+		return Mathf.Max( currentWeapon ? currentWeapon.attackRange : defaultWeapon ? defaultWeapon.attackRange : 0f, agent.GetRadius() + MinAttackRange);
+	}
 	
 	public float GetAttackReachDistance(IAttackable target)
 	{
-		return Mathf.Max(0, currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + agent.GetMinReachDistance());
+		return Mathf.Max(MinAttackRange, currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + agent.GetMinReachDistance());
 	}
 
 	public bool IsAtAttackRange(IAttackable target)

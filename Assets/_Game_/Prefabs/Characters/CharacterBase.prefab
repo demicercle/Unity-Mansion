@@ -318,6 +318,151 @@ LineRenderer:
   m_UseWorldSpace: 0
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!1 &1584257507030370590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7379727962941096717}
+  - component: {fileID: 7844060609931826540}
+  - component: {fileID: 6277928149642577305}
+  m_Layer: 9
+  m_Name: PrepareAttackTrigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7379727962941096717
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584257507030370590}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2682672067756541164}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7844060609931826540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584257507030370590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9a099e67414fd58832499e8efb2e91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AttackTrigger
+  selfCharacter: {fileID: 1077634328985660634}
+  triggerRangeOffset: 0.592
+  triggerOnExit: 0
+  triggerOnEnter: 1
+  movingCharacterOnly: 1
+  enemyCharacterOnly: 1
+  meleeWeaponOnly: 0
+  isInstantAttack: 1
+  stopAgent: 1
+  useAttackAction: 0
+  requiresWeaponReady: 1
+  maxTriggerCount: -1
+  filters: 
+--- !u!114 &6277928149642577305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584257507030370590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd8bf315116540e8aace59c6f3be0352, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterEventTrigger
+  debugMode: 0
+  character: {fileID: 1077634328985660634}
+  revealedOnly: 1
+  actionEvents:
+  - actionType: 7
+    filters: 
+    onActionUsed:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1584257507030370590}
+          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_MethodName: SetActive
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 1
+          m_CallState: 2
+  onSpawned:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1584257507030370590}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onPartyChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDamaged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDeath:
+    m_PersistentCalls:
+      m_Calls: []
+  onHealed:
+    m_PersistentCalls:
+      m_Calls: []
+  onTurnStart:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1584257507030370590}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  onAttack:
+    m_PersistentCalls:
+      m_Calls: []
+  onUseRangeWeapon:
+    m_PersistentCalls:
+      m_Calls: []
+  onLastKill:
+    m_PersistentCalls:
+      m_Calls: []
+  onAwarenessChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1837400758454604685
 GameObject:
   m_ObjectHideFlags: 0
@@ -370,6 +515,7 @@ Transform:
   - {fileID: 9096084158670190266}
   - {fileID: 8685941105244977515}
   - {fileID: 7028977729492440801}
+  - {fileID: 7379727962941096717}
   - {fileID: 2502466264985211623}
   - {fileID: 6796695804330276386}
   m_Father: {fileID: 0}
@@ -747,7 +893,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  endReachedDistance: 0.2
+  endReachedDistance: 0.1
   whenCloseToDestination: 0
   rvoDensityBehavior:
     enabled: 0
@@ -768,7 +914,7 @@ MonoBehaviour:
   maxAcceleration: -2.5
   rotationSpeed: 360
   slowdownDistance: 0.5
-  pickNextWaypointDist: 0.7
+  pickNextWaypointDist: 0.6
   alwaysDrawGizmos: 0
   slowWhenNotFacingTarget: 1
   preventMovingBackwards: 1
@@ -1215,7 +1361,6 @@ MonoBehaviour:
   - {fileID: 2283550923626056868}
   renderers: []
   colliders: []
-  debugLog: 1
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0
