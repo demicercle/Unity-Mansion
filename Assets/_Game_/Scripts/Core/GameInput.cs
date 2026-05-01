@@ -426,7 +426,7 @@ public class GameInput : MonoBehaviour
 					
 					if (CanAssignOnMouseOver(selectedCharacter) && mouseHasMoved)
 					{
-						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved); // mouse over navigation
+						selectedCharacter.GetAgent().AssignDestination(hit.point, mouseHasMoved, null); // mouse over navigation
 					}
 
 					if (itemToUse)
@@ -463,14 +463,14 @@ public class GameInput : MonoBehaviour
 							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
 							
 							if (CanAssignOnMouseOver(selectedCharacter))
-								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over enemy
+								agent.AssignDestination(overCharacter.GetPosition(), true, overCharacter); // mouse over enemy
 						}
 						else
 						{
 							SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
 							
 							if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
-								agent.AssignDestination(overCharacter.GetPosition(), true); // mouse over character
+								agent.AssignDestination(overCharacter.GetPosition(), true, overCharacter); // mouse over character
 						}
 						debugString += "\n>" + currentCursor;
 					}
@@ -485,12 +485,12 @@ public class GameInput : MonoBehaviour
 						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
 							: overProp.GetCursorType());
 							
-						if (CanAssignOnMouseOver(selectedCharacter)) // mouse over prop
+						if (CanAssignOnMouseOver(selectedCharacter)) 
 						{
 							if (mouseOverChanged) // assign waypoint destination only if it changed
 							{
 								selectedAgent = selectedCharacter.GetAgent();
-								selectedAgent.AssignWaypointDestinationAsync(overProp);
+								selectedAgent.AssignWaypointDestinationAsync(overProp); // mouse over prop
 							}
 						}
 						debugString += "\n>" + currentCursor;
@@ -506,9 +506,9 @@ public class GameInput : MonoBehaviour
 						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions
 							: CursorType.Attack);
 							
-						if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) // mouse over prop
+						if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) 
 						{
-							selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition(), true);
+							selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition(), true, overAttackable); // mouse over prop attackable
 						}
 						debugString += "\n>" + currentCursor;
 					}

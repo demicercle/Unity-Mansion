@@ -297,8 +297,10 @@ public class CharacterAgent : MonoBehaviour
 	{
 		bestWaypoint = null;
 	}
+
+	private IAttackable lastTarget;
 	
-	public void AssignDestination(Vector3 hitPoint, bool force)
+	public void AssignDestination(Vector3 hitPoint, bool force, IAttackable target = null)
 	{
 		if (force || !hasDestination)
 		{
@@ -314,7 +316,7 @@ public class CharacterAgent : MonoBehaviour
 			aiPath.SearchPath();
 			
 			hasDestination = true;
-			
+			lastTarget = target;
 			UpdatePathAndTarget(true);
 		}
 	}
@@ -614,6 +616,16 @@ public class CharacterAgent : MonoBehaviour
 		                    && lastPath.Length > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();
+
+		if (lastTarget != null)
+		{
+			if ( (_selfCharacter.ShouldAttack(lastTarget) && _selfCharacter.IsAtAttackRange(lastTarget))
+			    || (lastTarget is CharacterEntity && _selfCharacter.ShouldTalk(lastTarget as CharacterEntity) 
+			                                      && _selfCharacter.GetDistanceTo(lastTarget.GetPosition()) <= _selfCharacter.GetTalkDistance(lastTarget as CharacterEntity)))
+			{
+				shouldDrawPath[0] = shouldDrawPath[1] = false;
+			}
+		}
 		
 		if (force || shouldDrawPath[0] != isDrawingPath[0])
 		{

@@ -322,6 +322,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public bool IsEnemyToPlayer(CharacterEntity other = null) => currentFaction == CharacterFaction.Enemy;
 
+	public bool ShouldTalk(CharacterEntity other) => other.GetCurrentFaction() == CharacterFaction.Neutral &&
+	                                                 GetCurrentFaction() == CharacterFaction.Player &&
+	                                                 !other.IsDead() && !IsDead();
+
+	public float GetTalkDistance(CharacterEntity other) =>
+		other.GetRadius() + GetRadius() + agent.GetMinReachDistance() + other.agent.GetMinReachDistance();
+
+	public bool ShouldAttack(IAttackable other) =>
+		other is CharacterEntity ? ShouldAttack(other as CharacterEntity) : IsAtAttackRange(other);
+	
 	public bool ShouldAttack(CharacterEntity other) => !other.IsDead() && IsEnemyTo(other);
 	public bool IsEnemyTo(CharacterEntity other) => IsEnemyTo(other.GetCurrentFaction());
 	public bool IsEnemyTo(CharacterFaction faction)

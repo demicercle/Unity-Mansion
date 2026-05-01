@@ -21,6 +21,7 @@
 - how to deal with revealed enemies while in battle?
 - deselect dead character
 - awareness should work on "tick" or update and be disabled in turn based
+- can fire pistol through walls
 	
 	
 	https://opengameart.org/content/medieval-props-textured

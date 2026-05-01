@@ -9,7 +9,6 @@ public class CharacterRoutines : MonoBehaviour
 {
 	public const float SearchPathTimeout = 6.0f;
 	public const float DefaultWaitSeconds = 1.0f;
-	public const float MinReachDistance = 0.1f;
 	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
 	public const float MinDeltaToMove = 0.1f;
 	
@@ -565,8 +564,8 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitCharacterTalk " + npc;
 		if(debugMode > 0) Debug.Log(">> WaitCharacterTalk: " + this + " " + npc);
 
-		var talkDistance = npc.GetRadius() + _selfCharacter.GetRadius() + MinReachDistance;
-		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(), canUseRunAction,talkDistance+ MinReachDistance));
+		var talkDistance = _selfCharacter.GetTalkDistance(npc);
+		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(), canUseRunAction,talkDistance));
 
 		if (!_selfCharacter.GetAgent().ReachedDestination())
 		{
