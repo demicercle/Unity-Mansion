@@ -1,6 +1,12 @@
 # Unity-Mansion
 
 
+- disable save&quit in battle
+- "prepare" action
+- display cursor text "attack will miss" or "attack will hit" 
+- min time between assigns
+
+
 REFACTO
 - add namespaces
 - clean "CharacterController"

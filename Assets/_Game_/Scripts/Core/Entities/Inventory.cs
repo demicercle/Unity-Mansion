@@ -48,25 +48,17 @@ public class Inventory : MonoBehaviour
 			return;
 		}
 		
-		var item = ItemData.GetItemFromName(itemName);
-		if (item == null)
-		{
-			Debug.LogWarning(this + " invalid item name: " + itemName);
-			return;
-		}
+		var newItem = ItemData.GetItemFromName(itemName);
 		
-		if(items[index] != null)
-			Debug.LogWarning(this + " SetItemName already has an item at index " + index + ", overwrite !");
-
 		var lastItem = items[index];
 		if (lastItem)
 		{
 			onAnyItemRemoved?.Invoke(this, lastItem);
 		}
 		
-		items[index] = item;
+		items[index] = newItem;
 
-		if (!lastItem)
+		if (items[index])
 		{
 			onAnyItemAdded?.Invoke(this, items[index]);
 		}
