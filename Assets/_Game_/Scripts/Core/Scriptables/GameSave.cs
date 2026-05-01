@@ -140,7 +140,7 @@ public class GameSave : ScriptableObject
 				Save(prop);
 		}
 	}
-
+	
 	[System.Serializable]
 	public class SavedInventory
 	{
@@ -176,17 +176,10 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedValue
 	{
+		public static string Karma = "KARMA";
+		
 		public string name;
-		public ValueType type;
-		[ReadOnly] public bool value;
-	}
-	
-	public enum ValueType
-	{
-		Bool,
-		Int,
-		Float,
-		String
+		public int value;
 	}
 
 	public static bool IsDisabled()
@@ -200,8 +193,38 @@ public class GameSave : ScriptableObject
 	public List<SavedLevel> savedLevels = new List<SavedLevel>();
 	public int selectedCharacter;
 	public List<SavedPC> savedPCs = new List<SavedPC>();
-
+	public List<SavedValue> savedValues = new List<SavedValue>();
+	
 	public bool IsEmpty() => version == 0;
+
+	public void SetSavedValue(string valueName, int newValue)
+	{
+		for (int i = 0; i < savedValues.Count; i++)
+		{
+			if (savedValues[i].name == valueName)
+			{
+				savedValues[i].value = newValue;
+				return;
+			}
+		}
+		
+		savedValues.Add(new SavedValue(){name = valueName, value = newValue});
+	}
+
+	public bool TryGetSavedValue(string valueName, out int outValue)
+	{
+		for (int i = 0; i < savedValues.Count; i++)
+		{
+			if (savedValues[i].name == valueName)
+			{
+				outValue = savedValues[i].value;
+				return true;
+			}
+		}
+
+		outValue = 0;
+		return false;
+	}
 
 	[ContextMenu("Clear")]
 	public void Clear()
@@ -228,6 +251,11 @@ public class GameSave : ScriptableObject
 		
 		if (fromFile)
 			LoadFromFile();
+
+		foreach (var savedValue in savedValues)
+		{
+			if (savedValue.name == SavedValue.Karma) DiceLauncher.AllowedDiceRolls = savedValue.value;
+		}
 		
 		var partyCharacters = CharacterEntity.GetPartyCharacters();
 		foreach (var savedPC in savedPCs)
@@ -326,6 +354,8 @@ public class GameSave : ScriptableObject
 		Clear();
 
 		version = GAME_VERSION;
+		
+		savedValues.Add(new SavedValue(){ name = SavedValue.Karma, value = DiceLauncher.AllowedDiceRolls});
 
 		selectedCharacter = CharacterSelection.GetSelectedPartyCharacterIndex();
 		

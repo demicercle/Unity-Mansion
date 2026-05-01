@@ -18,7 +18,7 @@ public class NodeIsInCombat : GameNode
 			}
 			else
 			{
-				DebugWarningThis("cannot find character: " + _character);
+				DebugLogWarning("cannot find character: " + _character);
 			}
 			
 			return _inCombat;

@@ -118,7 +118,7 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("add_roll_dices", "")]
 	public static void AddRollDices(int count)
 	{
-		Utils.FindFirstObject<DiceLauncher>().allowedDiceRolls += count;
+		DiceLauncher.AllowedDiceRolls += count;
 	}
 
 	[ConsoleMethod("quit_game", "")]

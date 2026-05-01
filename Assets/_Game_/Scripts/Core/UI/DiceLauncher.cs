@@ -8,14 +8,15 @@ using Random = UnityEngine.Random;
 
 public class DiceLauncher : MonoBehaviour
 {
-	public static int debugMode => DicePool.debugMode;
+	public static int AllowedDiceRolls { get; set; }
 	
+	public static int debugMode => DicePool.debugMode;
+
+	public int defaultDiceRolls = 3;
 	public Image spriteImage;
 	public Sprite[] numberSprites;
 	public Sprite[] animatedSprites;
 	public int framesDuration;
-
-	public int allowedDiceRolls = 3;
 	public TMPro.TMP_Text allowedRollsText;
 	public Button launchButton;
 	
@@ -23,12 +24,14 @@ public class DiceLauncher : MonoBehaviour
 	
 	private void ClickedLaunch()
 	{
-		allowedDiceRolls -= 1;
+		AllowedDiceRolls -= 1;
 		DicePool.RollNewDice();
 	}
 
 	private void Awake()
 	{
+		AllowedDiceRolls = defaultDiceRolls;
+		
 		DicePool.onDiceRolled += OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
 		launchButton.onClick.AddListener(ClickedLaunch);
@@ -48,9 +51,8 @@ public class DiceLauncher : MonoBehaviour
 			if (killer.InParty())
 			{
 				// last hit
-				allowedDiceRolls += 1;
-				allowedRollsText.text = allowedDiceRolls.ToString();
-				if(debugMode > 0) Debug.Log(this + " last hit " + killer + " " + character + " => allowedDiceRolls=" + allowedDiceRolls);
+				AllowedDiceRolls += 1;
+				if(debugMode > 0) Debug.Log(this + " last hit " + killer + " " + character + " => allowedDiceRolls=" + AllowedDiceRolls);
 			}
 		}
 	}
@@ -63,7 +65,6 @@ public class DiceLauncher : MonoBehaviour
 	private void OnDiceRolled()
 	{
 		animCount++;
-		allowedRollsText.text = allowedDiceRolls.ToString();
 		if(DicePool.debugMode>0) Debug.Log(this + " OnDiceRolled " + animCount);
 		if(animCount == 1) StartCoroutine("Animate");
 	}
@@ -91,6 +92,11 @@ public class DiceLauncher : MonoBehaviour
 		}
 
 		allowedRollsText.gameObject.SetActive(true);
-		launchButton.interactable = allowedDiceRolls > 0;
+		launchButton.interactable = AllowedDiceRolls > 0;
+	}
+
+	private void LateUpdate()
+	{
+		allowedRollsText.text = AllowedDiceRolls.ToString();
 	}
 }

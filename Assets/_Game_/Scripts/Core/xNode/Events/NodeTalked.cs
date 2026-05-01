@@ -23,12 +23,12 @@ public class NodeTalked : GameNode
 		_character = GetInputValue<SceneReference>("_character", _character);
 		if (_character.TryGetComponent(this, out character))
 		{
-			DebugLogThis("init character: "  + character);
+			DebugLog("init character: "  + character);
 			character.onTalkedBy += OnTalkedBy;
 		}
 		else
 		{
-			DebugWarningThis("no character found");
+			DebugLogWarning("no character found");
 		}
 	}
 

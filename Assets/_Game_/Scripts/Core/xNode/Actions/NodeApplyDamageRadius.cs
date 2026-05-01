@@ -26,7 +26,7 @@ public class NodeApplyDamageRadius : GameNode
 			
 			if (!_position.TryGetComponent(this, out Transform transform))
 			{
-				DebugWarningThis("invalid position");
+				DebugLogWarning("invalid position");
 				return;
 			}
 
@@ -69,7 +69,7 @@ public class NodeApplyDamageRadius : GameNode
 					
 				if (obj.TryGetComponent(out Rigidbody rigidbody))
 				{
-					DebugLogThis(this + " AddExplosionForce " + rigidbody + " " + explosionForce);
+					DebugLog(this + " AddExplosionForce " + rigidbody + " " + explosionForce);
 					rigidbody.isKinematic = false;
 					rigidbody.WakeUp();
 					rigidbody.AddExplosionForce(explosionForce, transform.position, _radius);

@@ -26,7 +26,7 @@ public class NodeGate : GameNode
 		isClosed = startsClosed;
 		_in.InitInput(this, "_in", () =>
 		{
-			DebugLogThis("isClosed: " + isClosed);
+			DebugLog("isClosed: " + isClosed);
 			if (!isClosed)
 			{
 				if (autoClose)
@@ -38,12 +38,12 @@ public class NodeGate : GameNode
 		_open.InitInput(this, "_open", () =>
 		{
 			isClosed = false;
-			DebugLogThis("isClosed: " + isClosed);
+			DebugLog("isClosed: " + isClosed);
 		});
 		_close.InitInput(this, "_close", () =>
 		{
 			isClosed = true;
-			DebugLogThis("isClosed: " + isClosed);
+			DebugLog("isClosed: " + isClosed);
 		});
 	}
 

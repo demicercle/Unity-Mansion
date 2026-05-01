@@ -28,11 +28,8 @@ ENV ART
 
 NODES
 - retakes "scene reference" with a list of references in GameScript
-- "combat started" (parameter: squad, optional)
-- "wait turn"
 
 GAMEPLAY
-- damage should scale with atk roll
 - tweak "range to hit chance" and take height into account
 - grenade should alert damaged enemy
 - "prepare attack" Action

@@ -24,7 +24,7 @@ public class NodeBranch : GameNode
 		_in.InitInput(this, "_in", () =>
 		{
 			_condition = GetInputValue("_condition", _condition);
-			DebugLogThis("condition: " + _condition);
+			DebugLog("condition: " + _condition);
 			if(_condition)
 				_true.Invoke();
 			else 
