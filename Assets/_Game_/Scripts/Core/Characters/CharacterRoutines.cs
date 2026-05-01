@@ -391,7 +391,7 @@ public class CharacterRoutines : MonoBehaviour
 				Debug.Log(this + " AttackResult.Hit " + target);
 				var damageInfo = new DamageInfo()
 				{
-					amount = _selfCharacter.GetLastAttackDamage(),
+					amount = _selfCharacter.GetLastAttackDamage(atkResult),
 					isRanged = _selfCharacter.IsUsingRangeWeapon()
 				};
 				target.TakeDamage(damageInfo, _selfCharacter);

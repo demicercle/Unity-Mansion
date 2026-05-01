@@ -681,9 +681,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return true;
 	}
 	
-	public float GetLastAttackDamage()
+	public float GetLastAttackDamage(float atkResult)
 	{
-		return currentWeapon.RollDamage();
+		return currentWeapon.RollDamage(atkResult);
 	}
 
 	public bool IsUsingRangeWeapon() => currentWeapon.isRanged;
