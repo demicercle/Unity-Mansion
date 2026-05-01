@@ -101,13 +101,12 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private Canvas characterCanvas;
+	[SerializeField] private float clearActionsDelay = 3.0f;
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f; // TODO remove
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
 	[SerializeField] private WeaponData defaultWeapon;
 	public CharacterRoutines Routines => routines;
-	
-	public float lastTimeRested { get; private set; }
 
 	public bool IsName(string savedPCName)
 	{
@@ -185,7 +184,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		usedActions.Clear();
 		usedMovePoints = 0;
 		dodgeCount = 0;
-		lastTimeRested = Time.time;
 		onStatsChanged?.Invoke();
 	}
 	
@@ -322,6 +320,20 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);
 		onStatsChanged?.Invoke();
+		
+		if (!GameTurnManager.Instance.IsTurnBasedMode())
+		{
+			CancelInvoke("ClearActions");
+			Invoke("ClearActions", clearActionsDelay);
+		}
+	}
+
+	public void ClearActions()
+	{
+		if (GameTurnManager.Instance.IsTurnBasedMode())
+			return;
+
+		usedActions.Clear();
 	}
 	
 	public void UseAllActions(bool consumeMovePoints = true)

@@ -196,8 +196,6 @@ public class GameInput : MonoBehaviour
 
 		canvas.onViewportClicked += OnClickedViewport;
 		canvas.onViewportMouseOver += OnMouseOverViewport;
-		
-		onClick.AddListener(TryRestSelected);
 	}
 
 	private void OnDisable()
@@ -227,8 +225,6 @@ public class GameInput : MonoBehaviour
 		
 		canvas.onViewportClicked -= OnClickedViewport;
 		canvas.onViewportMouseOver -= OnMouseOverViewport;
-		
-		onClick.RemoveListener(TryRestSelected);
 		
 		Cursor.SetCursor(null, default, default);
 		Cursor.lockState = default;
@@ -806,12 +802,6 @@ public class GameInput : MonoBehaviour
 				inputSystem.UI.Disable();
 			}
 		}
-	}
-
-	private void TryRestSelected()
-	{
-		if(selectedCharacter && !gameTurnManager.IsTurnBasedMode() && !selectedCharacter.HasActions()) 
-			selectedCharacter.Rest();
 	}
 
 	private void ClickCharacter(CharacterEntity clickedCharacter)

@@ -281,6 +281,7 @@ public class GameTurnManager : MonoBehaviour
 				if (otherCharacter.IsDead()) continue;
 				
 				otherCharacter.Rest(); // rest not player character
+				
 				if (!otherCharacter.IsCharacterRevealed()) continue;
 				
 				yield return YieldRoutines();
@@ -340,13 +341,10 @@ public class GameTurnManager : MonoBehaviour
 
 		do
 		{
-			PartyRest(true);
-
 			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
-				if (Time.time - otherCharacter.lastTimeRested >= restInterval) otherCharacter.Rest(debugMode > 1);
 				if (otherCharacter.Routines.AnyActive()) continue;
 				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain)) continue;
 				
@@ -417,7 +415,7 @@ public class GameTurnManager : MonoBehaviour
 		{
 			if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
 			onTurnEnded?.Invoke();
-			PartyRest(false);
+			PartyRest();
 		}
 		
 		currentTurn += 1;
@@ -477,12 +475,11 @@ public class GameTurnManager : MonoBehaviour
 		CharacterSelection.SelectCharacter(bestCharacter);
 	}
 
-	private void PartyRest(bool checkInterval)
+	private void PartyRest()
 	{
 		foreach (var character in partyCharacters)
 		{
-			if(!checkInterval || Time.time - character.lastTimeRested > restInterval)
-				character.Rest(debugMode > 1);
+			character.Rest(debugMode > 1);
 		}
 	}
 
