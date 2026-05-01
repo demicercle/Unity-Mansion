@@ -117,4 +117,10 @@ public class CharacterTrigger : MonoBehaviour
 	{
 		collider.enabled = true; // refresh events
 	}
+
+	public void Refresh()
+	{
+		collider.enabled = false;
+		collider.enabled = true;
+	}
 }

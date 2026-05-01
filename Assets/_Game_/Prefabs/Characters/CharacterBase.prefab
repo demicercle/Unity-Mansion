@@ -388,6 +388,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterData: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
   characterCanvas: {fileID: 437776869319342895}
+  clearActionsDelay: 3
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
@@ -448,7 +449,7 @@ MonoBehaviour:
   moveSpeed: 4.5
   radius: 0.5
   height: 1.5
-  endReachDistance: 0.2
+  minReachDistance: 0.1
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
@@ -1214,7 +1215,7 @@ MonoBehaviour:
   - {fileID: 2283550923626056868}
   renderers: []
   colliders: []
-  debugLog: 0
+  debugLog: 1
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0

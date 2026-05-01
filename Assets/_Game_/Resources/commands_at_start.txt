@@ -9,3 +9,4 @@
 #debug_routines 1
 #debug_brains 1
 #debug_script 1
+debug_rooms 1

@@ -228,6 +228,12 @@ public class ConsoleCommands : MonoBehaviour
 		_DebugGtm(value);
 	}
 
+	[ConsoleMethod("debug_rooms", "")]
+	public static void _DebugRooms(int value)
+	{
+		Debug.Log("debug_script=" + (RoomTrigger.debugMode = value));
+	}
+
 	[ConsoleMethod("debug_script", "")]
 	public static void _DebugScript(int value)
 	{

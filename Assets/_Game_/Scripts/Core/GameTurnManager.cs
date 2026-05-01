@@ -17,7 +17,6 @@ public class GameTurnManager : MonoBehaviour
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
-	[SerializeField] [Range(0f, 6f)] private float restInterval = 3.0f;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
@@ -153,12 +152,13 @@ public class GameTurnManager : MonoBehaviour
 
 			yield return new WaitForSeconds(postLoadDuration);
 		} while (SceneLoader.AnyInstanceActive);
-
+		
 		yield return WaitNavigationDirty();
 		
 		Debug.Log(" loading scene complete");
 		
-		yield return new WaitForSeconds(0.1f); // for triggers
+		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
+		yield return new WaitForSeconds(postLoadDuration); // for triggers
 
 		levelCharacters = CharacterEntity.AllCharacters
 			.OrderBy(c => c.transform.GetSiblingIndex())

@@ -134,7 +134,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		SetCurrentWeapon(defaultWeapon);
 		characterCanvas.gameObject.SetActive(true);
 		onSpawned?.Invoke();
-		onStatsChanged?.Invoke();
+		Rest();
 	}
 
 	public CharacterAgent GetAgent()
@@ -423,7 +423,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
 	
-	public bool HasMovePoints(float d = 0f) => usedMovePoints + d < GetMaxMovePoints();
+	public bool HasMovePoints(float d = 0f) => !GameTurnManager.Instance.IsTurnBasedMode() || usedMovePoints + d < GetMaxMovePoints();
 	
 	public bool CanInteract()
 	{

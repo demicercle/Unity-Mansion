@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -31,11 +32,23 @@ public class PauseCanvas : MonoBehaviour
 		Time.timeScale = 1f;
 	}
 
-	public void QuitGame(bool doSave)
+	public void QuitGame()
 	{
-		if(doSave)
-			GameSave.Current.SaveGame(true);
-		
+		StopAllCoroutines();
+		StartCoroutine(BackToFirstScene(0.1f));
+	}
+	
+	public void SaveAndQuit()
+	{
+		StopAllCoroutines();
+		GameSave.Current.SaveGame(true);
+		StartCoroutine(BackToFirstScene(0.5f));
+	}
+
+	private IEnumerator BackToFirstScene(float time)
+	{
+		yield return new WaitForSecondsRealtime(time);
+		Debug.Log(this + " Back to first scene");
 		SceneManager.LoadScene(0);
 	}
 	

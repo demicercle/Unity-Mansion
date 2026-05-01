@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class RoomTrigger : MonoBehaviour
 {
+	public static int debugMode { get; set; }
+	
 	public static List<RoomTrigger> allRooms = new List<RoomTrigger>();
 	public static List<RoomTrigger> activeRooms = new List<RoomTrigger>();
 
@@ -65,12 +67,21 @@ public class RoomTrigger : MonoBehaviour
 	{
 		if (!gameObject.activeSelf)
 		{
-			Debug.Log(this + " already explored");
+			if(debugMode > 0) Debug.Log(this + " already explored");
 			return;
 		}
 		
 		gameObject.SetActive(false);
 		onChanged?.Invoke();
+	}
+
+	public void Refresh()
+	{
+		if(debugMode > 0) Debug.Log(this + " Refresh triggers");
+		foreach (var trigger in triggers)
+		{
+			trigger.Refresh();
+		}
 	}
 	
 	public bool HasCharacter(CharacterEntity character)
@@ -159,7 +170,7 @@ public class RoomTrigger : MonoBehaviour
 	private void OnEnable()
 	{
 		activeRooms.Add(this);
-		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		if(debugMode > 0) Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
 		foreach (var doorObj in doors)
 		{
@@ -173,7 +184,7 @@ public class RoomTrigger : MonoBehaviour
 	private void OnDisable()
 	{
 		activeRooms.Remove(this);
-		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		if(debugMode > 0) Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
 		foreach (var doorObj in doors)
 		{

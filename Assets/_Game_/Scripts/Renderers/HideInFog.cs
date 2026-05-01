@@ -6,11 +6,12 @@ using UnityEngine;
 
 public class HideInFog : MonoBehaviour
 {
+	public static int debugMode => RoomTrigger.debugMode;
+	
 	[SerializeField] private CharacterEntity character;
 	[SerializeField] private List<Renderer> transparentFX = new List<Renderer>();
 	[SerializeField] private List<Renderer> renderers = new List<Renderer>();
 	[SerializeField] private List<Collider> colliders = new List<Collider>();
-	[SerializeField] private bool debugLog;
 	
 	private bool isHidden;
 
@@ -25,28 +26,37 @@ public class HideInFog : MonoBehaviour
 
 	private void OnEnable()
 	{
+		if (!character) return;
 		character.onSpawned += OnSpawned;
-		RoomTrigger.onChanged += UpdateVisibility;
+		RoomTrigger.onChanged += RoomChanged;
 	}
 
 	private void OnDisable()
 	{
-		if (character) character.onSpawned -= OnSpawned;
-		RoomTrigger.onChanged -= UpdateVisibility;
+		if (!character) return;
+		character.onSpawned -= OnSpawned;
+		RoomTrigger.onChanged -= RoomChanged;
 	}
 
 	private void OnSpawned()
 	{
-		Invoke("UpdateVisibility", 0.1f);
+		StopAllCoroutines();
+		StartCoroutine(UpdateVisibility());
 	}
 
-	private void UpdateVisibility()
+	private void RoomChanged()
 	{
-		CancelInvoke("UpdateVisibility");
+		StopAllCoroutines();
+		StartCoroutine(UpdateVisibility());
+	}
+
+	private IEnumerator UpdateVisibility()
+	{
+		yield return null;
 		isHidden = !character.IsCharacterRevealed();
 		transparentFX.ForEach(r => r.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerTransparentFX);
 		renderers.ForEach(r => r.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerCharacter);
 		colliders.ForEach(c => c.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerCharacter);
-		if(debugLog) Debug.Log(this + " " + character + " UpdateVisibility " + isHidden);
+		if(debugMode > 0) Debug.Log(this + " " + character + " room changed or spawn UpdateVisibility " + isHidden);
 	}
 }
