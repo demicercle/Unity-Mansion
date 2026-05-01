@@ -15,55 +15,55 @@ public class GameScript : MonoBehaviour
 			Destroy(this);
 	}
 	
-	[SerializeField] private GameScriptGraph graph;
+	[SerializeField] private GameScriptGraph startGraph;
 
+	private GameScriptGraph graph;
+	
 	public void SetGraph(GameScriptGraph newGraph)
 	{
-		graph = newGraph;
+		if (graph)
+		{
+			if(debugMode > 0) Debug.Log(this + " Dispose graph");
+			
+			foreach (var node in graph.nodes.OfType<GameNode>())
+			{
+				node.Script = null;
+			}
+
+			Destroy(graph);
+			graph = null;
+		}
+
+		if (newGraph)
+		{
+			graph = Instantiate(newGraph);
+			if(debugMode > 0) Debug.Log(this + " SetGraph " + graph);
+		
+			foreach (var node in graph.nodes.OfType<GameNode>())
+			{
+				node.Script = this;
+			}
+		}
 	}
 	
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
-	
-	private void OnDestroy()
-	{
-		if (!graph) return;
-		if (!Application.isPlaying) return;
-		
-		if(debugMode > 0) Debug.Log(this + " OnDestroy");
-		
-		foreach (var node in graph.nodes.OfType<GameNode>())
-		{
-			node.Script = null;
-		}
-	}
 
 	private void OnEnable()
 	{
-		if (!graph)
-		{
-			Debug.LogWarning(this + " has no graph, destroys");
-			enabled = false;
-			return;
-		}
-		
 		gameTurnManager.onSceneLoaded += OnSceneLoaded;
 	}
 
 	private void OnDisable()
 	{
-		if (!graph) return;
 		gameTurnManager.onSceneLoaded -= OnSceneLoaded;
+		SetGraph(null);
 	}
 
 	private void OnSceneLoaded()
 	{
-		graph = Instantiate(graph);
-		
-		if(debugMode > 0) Debug.Log(this + " OnSceneLoaded " + graph);
+		if(debugMode > 0) Debug.Log(this + " OnSceneLoaded");
 
-		foreach (var node in graph.nodes.OfType<GameNode>())
-		{
-			node.Script = this;
-		}
+		if (startGraph)
+			SetGraph(startGraph);
 	}
 }

@@ -7,13 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
-public interface ICharacterBrain
-{
-	void StartThink();
-	void StopThink();
-}
-
-public class CharacterBrain : MonoBehaviour, ICharacterBrain
+public class CharacterBrain : MonoBehaviour
 {
 	private const float WanderingSearchTimeout = 6.0f;
 	private const float SearchWaypointSeconds = 0.5f;
@@ -171,6 +165,12 @@ public class CharacterBrain : MonoBehaviour, ICharacterBrain
 		{
 			if(debugMode > 0) Debug.Log(this + " TryPatrol !HasActions");
 			yield break;
+		}
+
+		if (_patrolRoute && !_patrolRoute.IsAssignedTo(_selfCharacter))
+		{
+			if (debugMode > 0) Debug.Log(this + " patrol has changed");
+			_patrolRoute = null;
 		}
 		
 		if (!_patrolRoute)

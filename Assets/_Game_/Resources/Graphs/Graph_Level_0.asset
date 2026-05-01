@@ -186,6 +186,7 @@ MonoBehaviour:
   - {fileID: -6333504337139077274}
   - {fileID: 3738203550012870745}
   - {fileID: -2494798922176130470}
+  - {fileID: 1913820063056849607}
 --- !u!114 &1043153840778916638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,6 +239,60 @@ MonoBehaviour:
       _dynamic: 0
   _character:
     findName: PC_Zombi_0
+--- !u!114 &1913820063056849607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 158f05cf985d4fc2908ec82c24da7f72, type: 3}
+  m_Name: Teleport
+  m_EditorClassIdentifier: Assembly-CSharp::NodeTeleport
+  graph: {fileID: 11400000}
+  position: {x: 217.0473, y: 83.50662}
+  ports:
+    keys:
+    - _in
+    - _character
+    - _waypoint
+    values:
+    - _fieldName: _in
+      _node: {fileID: 1913820063056849607}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 3738203550012870745}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: 1913820063056849607}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _waypoint
+      _node: {fileID: 1913820063056849607}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _character:
+    findName: PC_Zombi_7
+  _waypoint:
+    findName: Waypoint_Script_1
 --- !u!114 &2094922989693918644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -279,7 +334,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   _target:
-    findName: Waypoint_Cam_0
+    findName: Waypoint_Script_0
 --- !u!114 &3738203550012870745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,6 +386,9 @@ MonoBehaviour:
         reroutePoints: []
       - fieldName: _in
         node: {fileID: -2494798922176130470}
+        reroutePoints: []
+      - fieldName: _in
+        node: {fileID: 1913820063056849607}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
@@ -413,7 +471,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 1
-  _index: 0
+  _index: 2
   loop: 0
 --- !u!114 &5729644215421045415
 MonoBehaviour:

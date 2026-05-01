@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ public class PatrolRoute : MonoBehaviour
 	void Awake() { routes.Add(this);}
 	void OnDestroy() { routes.Remove(this); }
 
-	static public bool FindRoute(CharacterEntity character, out PatrolRoute patrolRoute)
+	public static bool FindRoute(CharacterEntity character, out PatrolRoute patrolRoute)
 	{
 		foreach (var route in routes)
 		{
@@ -44,6 +45,8 @@ public class PatrolRoute : MonoBehaviour
 	}
 	
 	public Waypoint[] GetWaypoints() => waypoints.ToArray();
+	
+	public bool IsAssignedTo(CharacterEntity anyCharacter) => assignedCharacter == anyCharacter; 
 
 	public void AssignPatrol(CharacterEntity newCharacter)
 	{
@@ -67,25 +70,6 @@ public class PatrolRoute : MonoBehaviour
 			.Where(wp => wp != null)
 			.ToList()
 			.ConvertAll<Vector3>(wp => wp.GetPosition()).ToArray();
-
-		public void DebugDraw(float duration = 0f)
-		{
-			DebugDrawer.Path(GetPath(), closedLoop, color, duration);
-		}
-
-		private void Start() // TODO init patrol in GameData
-		{
-			if(assignedCharacter == null)
-				assignedCharacter = GetComponentInParent<CharacterEntity>();
-			
-			transform.SetParent(null, true); // to prevent waypoints to move in game
-			
-			if (assignedCharacter == null)
-			{
-				Debug.LogWarning(this + " has no assigned character");
-				gameObject.SetActive(false);
-			}
-		}
 
 		private void OnDrawGizmos()
 		{

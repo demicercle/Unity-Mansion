@@ -22,6 +22,10 @@
 - deselect dead character
 - awareness should work on "tick" or update and be disabled in turn based
 - can fire pistol through walls
+- "missed" attacks should warn target
+- check clicks on "IsWaiting" while real time
+- item script aren't working anymore
+- zombi "no actions", "run" bug in turn based
 	
 	
 	https://opengameart.org/content/medieval-props-textured
