@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameSave", menuName = "GameSave", order = 0)]
 public class GameSave : ScriptableObject
 {
-	public const int GAME_VERSION = 1;
+	public const int LastGameVersion = 2;
 	
 	private static GameSave currentInstance;
 
@@ -353,7 +353,7 @@ public class GameSave : ScriptableObject
 		
 		Clear();
 
-		version = GAME_VERSION;
+		version = LastGameVersion;
 		
 		savedValues.Add(new SavedValue(){ name = SavedValue.Karma, value = DiceLauncher.AllowedDiceRolls});
 
@@ -408,25 +408,25 @@ public class GameSave : ScriptableObject
 	}
 
 	[ContextMenu("Load From File")]
-	public void LoadFromFile()
+	public bool LoadFromFile()
 	{
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Load From File");
 #endif
 		var backup = JsonUtility.ToJson(this, true);
-		var lastVersion = version;
 		var json = System.IO.File.ReadAllText(filePath);
 		JsonUtility.FromJsonOverwrite(json, this);
-		if (lastVersion != version)
+		if (LastGameVersion != version)
 		{
-			Debug.LogWarning(this + " incompatible version: " + lastVersion + " > " + version);
+			Debug.LogWarning(this + " incompatible version: " + version + " > LastGameVersion: " + LastGameVersion);
 			JsonUtility.FromJsonOverwrite(backup, this);
-			return;
+			return false;
 		}
 		Debug.Log(this + " Loaded From File " + filePath);
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.EditorUtility.SetDirty(this);
 #endif
+		return true;
 	}
 
 	[ContextMenu("Open file")]

@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5dd240e700d42499999efd830201ea6, type: 3}
   m_Name: GameSave
   m_EditorClassIdentifier: Assembly-CSharp::GameSave
-  disableSave: 1
+  disableSave: 0
   version: 0
   savedLevels: []
   selectedCharacter: 0
   savedPCs: []
+  savedValues: []
