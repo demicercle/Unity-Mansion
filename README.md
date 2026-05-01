@@ -16,8 +16,6 @@
 - retake gamelog : should warn about dice launch
 - party pc following stuck in door
 - fix weird movement at zombi start
-- squads
-- think timeout brains in real time
 - how to deal with revealed enemies while in battle?
 - deselect dead character
 - can fire pistol through walls
@@ -27,6 +25,25 @@
 - click portrait to use item
 - killing an enemy should give a "reroll" point
 - check navmesh in staircase hallway
+- retakes "scene reference" with a list of references in GameScript
+
+ART
+- retake fog cube so it's transparent below a black unlit plane
+- add a "roof" (ceiling plane) to cull sun light, and point light in the buildings
+
+NODES
+- "combat started" (parameter: squad, optional)
+- "wait turn"
+
+GAMEPLAY
+- equip, drop and equip weapons
+- pistol ammo
+- create new items:
+	> a "key" to use on a "locked" door
+	> "Soda" (give 1 extra action next turn)
+	> "Chicken" (heal HP)
+	> replace "Bandage" by "First aid kit" (to revive characters)
+	> "Grigri" (roll the dice for free, but cost 1 action, unlimited uses)
 	
 	
 	https://opengameart.org/content/medieval-props-textured

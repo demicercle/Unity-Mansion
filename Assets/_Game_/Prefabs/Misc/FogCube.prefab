@@ -61,9 +61,13 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 001b3d4f7eca15542b935b87c33e66a9, type: 2}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
+      propertyPath: m_ReceiveShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
       propertyPath: m_Name
       value: FogCube
@@ -140,10 +144,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterTrigger
   partyOnly: 0
+  enemyOnly: 0
   triggerOnEnter: 0
   triggerOnExit: 0
   maxCount: 0
   triggered:
     m_PersistentCalls:
       m_Calls: []
+  broadcastUp: 
   characters: []

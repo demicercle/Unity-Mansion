@@ -19355,9 +19355,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: LD_bench (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 6215856617682096606, guid: 5f479b1bf19f5fc479f6d3c6bee76cc4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6703880748870634340, guid: 5f479b1bf19f5fc479f6d3c6bee76cc4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -20.04
+      value: -20.5
       objectReference: {fileID: 0}
     - target: {fileID: 6703880748870634340, guid: 5f479b1bf19f5fc479f6d3c6bee76cc4, type: 3}
       propertyPath: m_LocalPosition.y
@@ -19365,7 +19369,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6703880748870634340, guid: 5f479b1bf19f5fc479f6d3c6bee76cc4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 10.91
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 6703880748870634340, guid: 5f479b1bf19f5fc479f6d3c6bee76cc4, type: 3}
       propertyPath: m_LocalRotation.w
