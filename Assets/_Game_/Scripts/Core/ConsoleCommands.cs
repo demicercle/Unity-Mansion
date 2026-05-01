@@ -227,6 +227,13 @@ public class ConsoleCommands : MonoBehaviour
 		_DebugTriggers(value);
 		_DebugGtm(value);
 	}
+	
+
+	[ConsoleMethod("debug_save", "")]
+	public static void _DebugSave(int value)
+	{
+		Debug.Log("debug_save=" + (GameSave.debugMode = value));
+	}
 
 	[ConsoleMethod("debug_rooms", "")]
 	public static void _DebugRooms(int value)

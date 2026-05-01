@@ -7,10 +7,11 @@ using EventType = CharacterAnimation.EventType;
 
 public class CharacterRoutines : MonoBehaviour
 {
-	public const float SearchPathTimeout = 6.0f;
-	public const float DefaultWaitSeconds = 1.0f;
+	private const float SearchPathTimeout = 6.0f;
+	private const float UnfreezeAgentTimeout = 0.0f;
+	private const float DefaultWaitSeconds = 1.0f;
 	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
-	public const float MinDeltaToMove = 0.1f;
+	private const float MinDeltaToMove = 0.1f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -489,41 +490,57 @@ public class CharacterRoutines : MonoBehaviour
 		var dir = (firstPoint - _selfCharacter.GetPosition()).normalized;
 		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
 		{
+			if (debugMode > 1) Debug.Log(this + " WaitMoveLastPath LookDirection");
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
 		
-//		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
+		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
 		agent.StartMove();
 
 		if (forcedReachDistance > 0)
+		{
+			if(debugMode > 0) Debug.Log(this + " agent.SetReachDistance "  + forcedReachDistance);
 			agent.SetReachDistance(forcedReachDistance);
+		}
 		
 		var startTime = Time.time;
+		var freezeTime = Time.time;
+		var hasMoved = false;
 		while (!agent.ReachedDestination(dest))
 		{
 			debugTimeout = (Time.time - startTime);
 			
-			if (forcedReachDistance > 0)
-				agent.SetReachDistance(forcedReachDistance);
-			
 			if (Time.time - startTime > SearchPathTimeout)
 			{
-				Debug.LogWarning(_selfCharacter + " TIMED_OUT!");
+				Debug.LogWarning(this + " TIMED_OUT!");
 				_selfCharacter.FloatingText_Cant();
 				_selfCharacter.StopAgent();
 				yield break;
 			}
 
+			if (UnfreezeAgentTimeout > 0 && !hasMoved && Time.time - freezeTime > UnfreezeAgentTimeout)
+			{
+				freezeTime =  Time.time;
+				if (debugMode > 0) Debug.Log(this + " retry agent");
+				agent.StopMovement();
+				yield return agent.SearchPathAsync(dest, true);
+				agent.StartMove(); // retry agent
+				yield return null;
+			}
+
 			if (!_selfCharacter.IsMoving())
 			{
-				if(debugMode > 0) Debug.Log(_selfCharacter + " something stopped movement");
-				yield break;
+				if (hasMoved)
+				{
+					if(debugMode > 0) Debug.Log(this + " something stopped movement");
+					yield break;
+				}
 			}
 			
 			if (!_selfCharacter.HasMovePoints())
 			{
-				if(debugMode > 0) Debug.Log(_selfCharacter + " !HasMovePoints");
+				if(debugMode > 0) Debug.Log(this + " !HasMovePoints");
 				if(_selfCharacter.IsControllableByPlayer()) _selfCharacter.FloatingText_Cant();
 				agent.StopMovement();
 				yield break;
@@ -541,6 +558,7 @@ public class CharacterRoutines : MonoBehaviour
 			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
+				hasMoved = true;
 				//agent.DropOnGround(); // to avoid overlapping obstacles
 				if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 				startTime = Time.time; // reset timeout

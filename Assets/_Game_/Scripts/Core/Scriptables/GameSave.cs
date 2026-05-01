@@ -8,6 +8,8 @@ public class GameSave : ScriptableObject
 {
 	public const int LastGameVersion = 2;
 	
+	public static int debugMode { get; set; }
+	
 	private static GameSave currentInstance;
 
 	public static GameSave Current
@@ -32,6 +34,8 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedLevel
 	{
+		public override string ToString() => base.ToString() + " (" + levelIndex + ")";
+		
 		public int levelIndex;
 		public List<SavedCharacter> levelCharacters = new List<SavedCharacter>();
 		public List<string> revealedRooms = new List<string>();
@@ -43,6 +47,8 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedPC
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
 		public string name;
 		public Vector3 position;
 		public int rotation;
@@ -52,6 +58,7 @@ public class GameSave : ScriptableObject
 
 		public void Save(CharacterEntity character)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + character);
 			name = character.name;
 			position = character.GetSavedPosition();
 			rotation = character.GetRotation();
@@ -65,6 +72,7 @@ public class GameSave : ScriptableObject
 
 		public void Load(CharacterEntity character)
 		{
+			if(debugMode >0) Debug.Log(this + " Load " + character);
 			character.Teleport(position, rotation);
 			
 			if (isDead)
@@ -86,6 +94,8 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedCharacter
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
 		public string name;
 		public Vector3 position;
 		public int rotation;
@@ -93,6 +103,7 @@ public class GameSave : ScriptableObject
 
 		public void Save(CharacterEntity character)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + character);
 			name = character.name;
 			position = character.GetSavedPosition();
 			rotation = character.GetRotation();
@@ -101,7 +112,8 @@ public class GameSave : ScriptableObject
 
 		public void Load(CharacterEntity character)
 		{
-			character.Teleport(position, rotation);
+			if(debugMode >0) Debug.Log(this + " Load " + character);
+			character.Teleport(position, rotation, false);
 			
 			if (isDead)
 				character.TryKill();
@@ -117,17 +129,21 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedProp
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
 		public string name;
 		public int count;
 
 		public void Save(PropComponent prop)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + prop);
 			name = prop.name;
 			count = prop.GetInteractionCount();
 		}
 
 		public void Load(PropComponent prop)
 		{
+			if(debugMode >0) Debug.Log(this + " Load " + prop);
 			if (prop.IsName(name))
 			{
 				prop.SetInteractionCount(count);
@@ -144,17 +160,21 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedInventory
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
 		public string name;
 		public string[] slots = Array.Empty<string>();
 
 		public void Save(Inventory inventory)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			name = inventory.GetName();
 			slots = inventory.GetItemNames();
 		}
 
 		public void Load(Inventory inventory)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			if (inventory.IsName(name))
 			{
 				for (int i = 0; i < slots.Length; i++)
@@ -176,6 +196,8 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedValue
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+
 		public static string Karma = "KARMA";
 		
 		public string name;
