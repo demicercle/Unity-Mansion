@@ -20,7 +20,8 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
-	[SerializeField] [Min(0.1f)] private float postLoadDuration = 1.0f;
+	[SerializeField] [Min(0.1f)] private float postLoadSceneDuration = 1.0f;
+	[SerializeField] [Min(0.1f)] private float postLoadSaveDuration = 1.0f;
 	[SerializeField] [Min(0.1f)] private float turnChangedSeconds = 3.0f;
 	[SerializeField] [Min(0.1f)]  private  float focusCharacterSeconds = 1.5f;
 	[SerializeField] [Min(0.1f)] private  float noActionsSeconds = 3.0f;
@@ -150,7 +151,7 @@ public class GameTurnManager : MonoBehaviour
 				yield return null;
 			} while (SceneLoader.AnyInstanceActive);
 
-			yield return new WaitForSeconds(postLoadDuration);
+			yield return new WaitForSeconds(postLoadSceneDuration);
 		} while (SceneLoader.AnyInstanceActive);
 		
 		yield return WaitNavigationDirty();
@@ -158,7 +159,7 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log(" loading scene complete");
 		
 		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
-		yield return new WaitForSeconds(postLoadDuration); // for triggers
+		yield return null; // for triggers
 
 		levelCharacters = CharacterEntity.AllCharacters
 			.OrderBy(c => c.transform.GetSiblingIndex())
@@ -190,6 +191,8 @@ public class GameTurnManager : MonoBehaviour
 				CharacterSelection.SelectCharacter(previouslySelected);
 			}
 		}
+		
+		yield return new WaitForSeconds(postLoadSaveDuration);
 		
 		Debug.Log("loading complete");
 		isLoading = false;
