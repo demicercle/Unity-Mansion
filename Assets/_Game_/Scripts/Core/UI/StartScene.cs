@@ -13,7 +13,7 @@ public class StartScene : MonoBehaviour
 
 	private void Awake()
 	{
-		errorLabel.text = "";
+		errorLabel.enabled = false;
 		newGameButton.onClick.AddListener(ClickNewGame);
 		loadGameButton.onClick.AddListener(ClickLoadGame);
 		quitGameButton.onClick.AddListener(ClickQuitGame);
@@ -45,7 +45,7 @@ public class StartScene : MonoBehaviour
 		}
 		else
 		{
-			errorLabel.text = "ERROR, sorry version might be incompatible";
+			errorLabel.enabled = true;
 		}
 	}
 
