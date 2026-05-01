@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -198,10 +199,15 @@ public class CharacterRoutines : MonoBehaviour
 	private Coroutine coroutine;
 	private CharacterEntity _selfCharacter;
 
-	private void Awake()
+	private void OnEnable()
 	{
 		_selfCharacter = GetComponent<CharacterEntity>();
 		if(!_selfCharacter) Debug.LogError(this + " absolutely needs a character!");
+	}
+
+	private void OnDisable()
+	{
+		StopAllRoutines();
 	}
 
 	private void StartNewRoutine(IEnumerator routine)
