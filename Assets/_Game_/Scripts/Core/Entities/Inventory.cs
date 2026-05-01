@@ -10,11 +10,23 @@ public class Inventory : MonoBehaviour
 
 	public static Inventory[] GetSavedInventories() => allInventories.Where(i => i.saveInventory && !i.IsPartyInventory()).ToArray();
 	
+	public static Inventory[] GetLootBags() => allInventories.Where(i => i.isLootBag).ToArray();
+
+	public static Inventory CreateLootBag(Inventory lootBagPrefab, Vector3 navPosition)
+	{
+		var bag = Instantiate(lootBagPrefab.gameObject).GetComponent<Inventory>();
+		bag.isLootBag = true;
+		bag.maxSize = 1;
+		bag.destroyIfEmpty = true;
+		NavUtils.TryGetNearestNavPosition(navPosition, CreateLootNavDistance, out navPosition);
+		bag.transform.position = navPosition;
+		return bag;
+	}
+	
 	private const float CreateLootNavDistance = 1.0f;
 	
 	public string GetName() => name;
 	public bool IsName(string s) => s == name;
-	public bool ShouldSave() => saveInventory;
 	
 	public static int debugMode { get; set; }
 	public static event System.Action<Inventory> onAnyInventoryChanged;
@@ -26,6 +38,8 @@ public class Inventory : MonoBehaviour
 	[SerializeField] private Inventory lootBagPrefab = null;
 	[SerializeField] private bool saveInventory;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
+	
+	private bool isLootBag;
 	
 	public string[] GetItemNames()
 	{
@@ -82,11 +96,8 @@ public class Inventory : MonoBehaviour
 			return false;
 		}
 
-		bag = Instantiate(lootBagPrefab.gameObject).GetComponent<Inventory>();
-		bag.maxSize = 1;
-		bag.items.Add(itemData);
-		bag.destroyIfEmpty = true;
-		bag.transform.position = navPosition;
+		bag = CreateLootBag(lootBagPrefab, navPosition);
+		bag.TryAddItem(itemData);
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
 		return true;
 	}

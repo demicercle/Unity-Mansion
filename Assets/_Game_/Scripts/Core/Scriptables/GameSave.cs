@@ -42,6 +42,7 @@ public class GameSave : ScriptableObject
 		public List<SavedProp> savedProps = new List<SavedProp>();
 		public List<SavedInventory> savedInventories = new List<SavedInventory>();
 		public List<string> destroyedProps = new List<string>();
+		public List<SavedLoot> savedLoots = new List<SavedLoot>();
 	}
 
 	[System.Serializable]
@@ -194,6 +195,13 @@ public class GameSave : ScriptableObject
 	}
 
 	[System.Serializable]
+	public class SavedLoot
+	{
+		public Vector3 position;
+		public SavedInventory inventory;
+	}
+
+	[System.Serializable]
 	public class SavedValue
 	{
 		public override string ToString() => base.ToString() + " (" + name + ")";
@@ -210,13 +218,15 @@ public class GameSave : ScriptableObject
 	}
 
 	[SerializeField] private bool disableSave = false;
-
-	[Min(0)] public int version;
-	public int gameSeed;
-	public List<SavedLevel> savedLevels = new List<SavedLevel>();
-	public int selectedCharacter;
-	public List<SavedPC> savedPCs = new List<SavedPC>();
-	public List<SavedValue> savedValues = new List<SavedValue>();
+	[SerializeField] private Inventory lootBagPrefab;
+	[Space]
+	[Header("Debug")]
+	[ReadOnly] [Min(0)] public int version;
+	[ReadOnly] public int gameSeed;
+	[ReadOnly] public int selectedCharacter;
+	[ReadOnly] public List<SavedPC> savedPCs = new List<SavedPC>();
+	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
+	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
 	
 	public bool IsEmpty() => version == 0;
 
@@ -363,6 +373,11 @@ public class GameSave : ScriptableObject
 					destructible.Break();
 				}
 			}
+
+			foreach (var savedLoot in savedLevel.savedLoots)
+			{
+				savedLoot.inventory.Load(Inventory.CreateLootBag(lootBagPrefab, savedLoot.position));
+			}
 		}
 		
 		CharacterSelection.SelectCharacterAt(selectedCharacter);
@@ -422,6 +437,15 @@ public class GameSave : ScriptableObject
 		{
 			if(destructible.IsBroken())
 				savedLevels[0].destroyedProps.Add(destructible.GetName());
+		}
+
+		foreach (var lootBag in Inventory.GetLootBags())
+		{
+			savedLevels[0].savedLoots.Add(new SavedLoot()
+			{
+				position = lootBag.GetPosition(),
+				inventory = new SavedInventory(lootBag)
+			});
 		}
 		
 		Debug.Log(this + " Game saved");

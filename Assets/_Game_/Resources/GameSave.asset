@@ -13,8 +13,58 @@ MonoBehaviour:
   m_Name: GameSave
   m_EditorClassIdentifier: Assembly-CSharp::GameSave
   disableSave: 0
+  lootBagPrefab: {fileID: 3870844094002656079, guid: e06b8a3ef8b241e4290237da71253253, type: 3}
   version: 2
   gameSeed: 2241760
+  selectedCharacter: 0
+  savedPCs:
+  - name: PC_Player_0
+    position: {x: 18.46, y: 3.75, z: -11.73}
+    rotation: 213
+    isDead: 0
+    damages: 0
+    slots:
+    - Bandage
+    - Grenade
+    - null
+    - null
+    - null
+    - null
+  - name: PC_Player_1
+    position: {x: 15.45, y: 3.75, z: -9.95}
+    rotation: 61
+    isDead: 0
+    damages: 0
+    slots:
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+  - name: PC_Player_2
+    position: {x: 15.71, y: 3.75, z: -10.94}
+    rotation: 86
+    isDead: 0
+    damages: 0
+    slots:
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+  savedValues:
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
   savedLevels:
   - levelIndex: 0
     levelCharacters:
@@ -108,52 +158,4 @@ MonoBehaviour:
       - null
     destroyedProps:
     - DestructiblePlanks
-  selectedCharacter: 0
-  savedPCs:
-  - name: PC_Player_0
-    position: {x: 18.46, y: 3.75, z: -11.73}
-    rotation: 213
-    isDead: 0
-    damages: 0
-    slots:
-    - Bandage
-    - Grenade
-    - null
-    - null
-    - null
-    - null
-  - name: PC_Player_1
-    position: {x: 15.45, y: 3.75, z: -9.95}
-    rotation: 61
-    isDead: 0
-    damages: 0
-    slots:
-    - null
-    - null
-    - null
-    - null
-    - null
-    - null
-  - name: PC_Player_2
-    position: {x: 15.71, y: 3.75, z: -10.94}
-    rotation: 86
-    isDead: 0
-    damages: 0
-    slots:
-    - null
-    - null
-    - null
-    - null
-    - null
-    - null
-  savedValues:
-  - name: KARMA
-    value: 3
-  - name: KARMA
-    value: 3
-  - name: KARMA
-    value: 3
-  - name: KARMA
-    value: 3
-  - name: KARMA
-    value: 3
+    savedLoots: []
