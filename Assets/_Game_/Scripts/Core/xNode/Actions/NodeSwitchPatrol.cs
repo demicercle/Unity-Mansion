@@ -1,4 +1,5 @@
-﻿using XNode;
+﻿using UnityEngine;
+using XNode;
 
 [Node.CreateNodeMenu("Actions/Patrol Switch")]
 public class NodeSwitchPatrol : GameNode
@@ -17,6 +18,7 @@ public class NodeSwitchPatrol : GameNode
 			if (_character.TryGetComponent(this, out CharacterEntity character) &&
 			    _patrol.TryGetComponent(this, out PatrolRoute patrol))
 			{
+				DebugLogThis("assign patrol " + patrol + " to " + character);
 				patrol.AssignPatrol(character);
 			}
 		});

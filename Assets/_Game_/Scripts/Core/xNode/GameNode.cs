@@ -21,14 +21,14 @@ public abstract class GameNode : Node
 		}
 	}
 	
-	virtual protected void OnScriptStart()
+	protected virtual void OnScriptStart()
 	{
-		DebugLogThis("OnScriptStart");
+		DebugLogThis("OnScriptStart", 1);
 	}
 
-	virtual protected void OnScriptDestroy()
+	protected virtual void OnScriptDestroy()
 	{
-		DebugLogThis("OnScriptDestroy");
+		DebugLogThis("OnScriptDestroy", 1);
 	}
 
 	private void Reset()
@@ -43,12 +43,12 @@ public abstract class GameNode : Node
 	{
 		base.Init();
 		_script = null;
-		DebugLogThis("Inits");
+		DebugLogThis("Inits", 1);
 	}
 
-	protected void DebugLogThis(string msg)
+	protected void DebugLogThis(string msg, int minDebugMode = 0)
 	{
-		if(GameScript.debugMode > 0) Debug.Log("x_" + this + ": " + msg + "\nin graph=" + graph);
+		if(GameScript.debugMode > minDebugMode) Debug.Log("x_" + this + ": " + msg + "\nin graph=" + graph);
 	}
 	
 	protected void DebugWarningThis(string msg)
@@ -98,39 +98,20 @@ public class NodeExec
 [System.Serializable]
 public class SceneReference
 {
-	public string findName = "";
-
 	public override string ToString()
 	{
 		return "x_SceneReference";
 	}
 
+	public void SetGameObject(GameObject newObject)
+	{
+		_gameObject = newObject;
+	}
+
 	public GameObject GetGameObject(GameNode node)
 	{
-		//if (!_gameObject)
-		//{
-			if (!string.IsNullOrWhiteSpace(findName))
-			{
-				_gameObject = GameObject.Find(findName);
-				
-				if (!_gameObject)
-				{
-					if(GameScript.debugMode > 0)
-						Debug.LogError(this + " in " + node + " cannot find gameObject named: " + findName);
-					else 
-						Debug.LogWarning(this + " in " + node + " cannot find gameObject named: " + findName);
-
-					_gameObject = node.Script.gameObject; // fallback to self
-				}
-			}
-			else
-			{
-				_gameObject = node.Script.gameObject;
-			}
-			
-			//if(GameScript.debugMode > 0) Debug.Log(this + " in " + node + " init gameObject: " + _gameObject + " findName=" + findName);
-		//}
-		
+		if (!_gameObject)
+			_gameObject = node.Script.gameObject;
 		return _gameObject;
 	}
 

@@ -7,44 +7,27 @@ public class NodeMoveTo : GameNode
 	[Input] public NodeExec _start;
 	[Input] public SceneReference _character;
 	[Input] public SceneReference _to;
-	[Space]	
-	[Output] public NodeExec _finished;
-	
-
-	public override object GetValue(NodePort port)
-	{
-		if (port.fieldName == "_finished")
-			return _finished;
-		return base.GetValue(port);
-	}
 
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
 		//_start = GetInputValue("_start", _start);
-		_start.InitInput(this, "_start", OnStart);
+		_start.InitInput(this, "_start", () =>
+		{
+			_character = GetInputValue("_character", _character);
+			_to = GetInputValue("_to", _to);
+			if (_character.TryGetComponent(this, out CharacterEntity character)
+			    && _to.TryGetComponent(this, out Waypoint waypoint))
+			{
+				DebugLogThis("Assign move: " + character + " to waypoint: " + waypoint);
+				character.Routines.AssignMoveToWaypoint(waypoint);
+			}
+		});
 	}
 
 	protected override void OnScriptDestroy()
 	{
 		base.OnScriptDestroy();
 		_start.Dispose();
-	}
-
-	private void OnStart()
-	{
-		DebugLogThis("OnStart");
-		if (_character.TryGetComponent(this, out CharacterEntity character))
-		{
-			if (_to.TryGetComponent(this, out Waypoint waypoint))
-			{
-				character.Routines.AssignMoveToWaypoint(waypoint, OnComplete);
-			}
-		}
-	}
-
-	private void OnComplete()
-	{
-		_finished.Invoke();
 	}
 }

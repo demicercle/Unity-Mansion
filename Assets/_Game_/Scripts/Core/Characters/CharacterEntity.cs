@@ -39,7 +39,7 @@ public struct DamageInfo
 
 	public override string ToString()
 	{
-		return $"DamageInfo (amount={amount}, isRange={isRanged}";
+		return $"DamageInfo (amount={amount}, isRange={isRanged})";
 	}
 }
 

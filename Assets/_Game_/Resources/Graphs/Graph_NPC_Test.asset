@@ -38,6 +38,48 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   message: ' talked'
+  debugBreak: 0
+--- !u!114 &-7592384207479827874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd6bbbe017c448789d1bcdcf0d926946, type: 3}
+  m_Name: Find Game Object
+  m_EditorClassIdentifier: Assembly-CSharp::NodeFindGameObject
+  graph: {fileID: 11400000}
+  position: {x: -120, y: 696}
+  ports:
+    keys:
+    - findName
+    - _out
+    values:
+    - _fieldName: findName
+      _node: {fileID: -7592384207479827874}
+      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out
+      _node: {fileID: -7592384207479827874}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _to
+        node: {fileID: -454481680373365717}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  findName: Waypoint_NPC_1
 --- !u!114 &-6396237199070666795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58,7 +100,6 @@ MonoBehaviour:
     - _character
     - _to
     - _finished
-    - canUseRunAction
     values:
     - _fieldName: _start
       _node: {fileID: -6396237199070666795}
@@ -85,7 +126,10 @@ MonoBehaviour:
       _node: {fileID: -6396237199070666795}
       _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _out
+        node: {fileID: 3831391080928794222}
+        reroutePoints: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
@@ -99,20 +143,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: canUseRunAction
-      _node: {fileID: -6396237199070666795}
-      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  _character:
-    findName: 
-  _to:
-    findName: Waypoint_NPC_3
-  canUseRunAction: 0
 --- !u!114 &-4710916101070361956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,7 +163,6 @@ MonoBehaviour:
     - _character
     - _to
     - _finished
-    - canUseRunAction
     values:
     - _fieldName: _start
       _node: {fileID: -4710916101070361956}
@@ -160,7 +189,10 @@ MonoBehaviour:
       _node: {fileID: -4710916101070361956}
       _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _out
+        node: {fileID: -459421777807978833}
+        reroutePoints: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
@@ -174,20 +206,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: canUseRunAction
-      _node: {fileID: -4710916101070361956}
-      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  _character:
-    findName: 
-  _to:
-    findName: Waypoint_NPC_1
-  canUseRunAction: 0
 --- !u!114 &-1777878850390571389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -209,6 +227,7 @@ MonoBehaviour:
     - Out1
     - Out2
     - Out3
+    - _index
     values:
     - _fieldName: _in
       _node: {fileID: -1777878850390571389}
@@ -270,6 +289,17 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 1
+    - _fieldName: _index
+      _node: {fileID: -1777878850390571389}
+      _typeQualifiedName: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _index: 0
+  loop: 1
 --- !u!114 &-1036241989258757978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -320,11 +350,50 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _character:
-    findName: 
   message:
     lineIndex: 13
     text: Stop that
+--- !u!114 &-459421777807978833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd6bbbe017c448789d1bcdcf0d926946, type: 3}
+  m_Name: Find Game Object
+  m_EditorClassIdentifier: Assembly-CSharp::NodeFindGameObject
+  graph: {fileID: 11400000}
+  position: {x: -97.5, y: 894.5}
+  ports:
+    keys:
+    - findName
+    - _out
+    values:
+    - _fieldName: findName
+      _node: {fileID: -459421777807978833}
+      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out
+      _node: {fileID: -459421777807978833}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _to
+        node: {fileID: -4710916101070361956}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  findName: Waypoint_NPC_3
 --- !u!114 &-454481680373365717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -345,7 +414,6 @@ MonoBehaviour:
     - _character
     - _to
     - _finished
-    - canUseRunAction
     values:
     - _fieldName: _start
       _node: {fileID: -454481680373365717}
@@ -372,7 +440,10 @@ MonoBehaviour:
       _node: {fileID: -454481680373365717}
       _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
-      connections: []
+      connections:
+      - fieldName: _out
+        node: {fileID: -7592384207479827874}
+        reroutePoints: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
@@ -386,20 +457,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: canUseRunAction
-      _node: {fileID: -454481680373365717}
-      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  _character:
-    findName: 
-  _to:
-    findName: Waypoint_NPC_2
-  canUseRunAction: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -425,6 +482,9 @@ MonoBehaviour:
   - {fileID: 7751640997977408073}
   - {fileID: 6982387692696900501}
   - {fileID: 1070369955433569779}
+  - {fileID: -7592384207479827874}
+  - {fileID: 3831391080928794222}
+  - {fileID: -459421777807978833}
 --- !u!114 &1070369955433569779
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -529,11 +589,50 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _character:
-    findName: 
   message:
     lineIndex: 10
     text: "Hello\r"
+--- !u!114 &3831391080928794222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd6bbbe017c448789d1bcdcf0d926946, type: 3}
+  m_Name: Find Game Object
+  m_EditorClassIdentifier: Assembly-CSharp::NodeFindGameObject
+  graph: {fileID: 11400000}
+  position: {x: -104.5, y: 798.5}
+  ports:
+    keys:
+    - findName
+    - _out
+    values:
+    - _fieldName: findName
+      _node: {fileID: 3831391080928794222}
+      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _out
+      _node: {fileID: 3831391080928794222}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _to
+        node: {fileID: -6396237199070666795}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  findName: Waypoint_NPC_2
 --- !u!114 &4533588354387013093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -584,8 +683,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _character:
-    findName: 
   message:
     lineIndex: 12
     text: "Let me alone\r"
@@ -639,8 +736,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _character:
-    findName: 
   message:
     lineIndex: 11
     text: "I don't want to speak\r"
@@ -657,7 +752,7 @@ MonoBehaviour:
   m_Name: Node Talked
   m_EditorClassIdentifier: Assembly-CSharp::NodeTalked
   graph: {fileID: 11400000}
-  position: {x: -920, y: 120}
+  position: {x: -888, y: 88}
   ports:
     keys:
     - _character
@@ -687,8 +782,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  _character:
-    findName: 
 --- !u!114 &7751640997977408073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -709,6 +802,7 @@ MonoBehaviour:
     - Out0
     - Out1
     - Out2
+    - _index
     values:
     - _fieldName: _in
       _node: {fileID: 7751640997977408073}
@@ -758,3 +852,14 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 1
+    - _fieldName: _index
+      _node: {fileID: 7751640997977408073}
+      _typeQualifiedName: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _index: 0
+  loop: 1

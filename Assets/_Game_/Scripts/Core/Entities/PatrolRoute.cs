@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class PatrolRoute : MonoBehaviour
 {
-	static public List<PatrolRoute> routes = new List<PatrolRoute>();
+	private static List<PatrolRoute> routes = new List<PatrolRoute>();
 	void Awake() { routes.Add(this);}
 	void OnDestroy() { routes.Remove(this); }
 

@@ -45,6 +45,15 @@ public class GameScript : MonoBehaviour
 			}
 		}
 	}
+
+	private GameObject _instigator;
+
+	public void SetInstigator(GameObject newInstigator)
+	{
+		_instigator = newInstigator;
+	}
+
+	public GameObject GetInstigator() => _instigator;
 	
 	private GameTurnManager gameTurnManager => GameTurnManager.Instance;
 

@@ -6,6 +6,7 @@ public class NodeApplyDamageRadius : GameNode
 {
 	[Input] public NodeExec _in;
 	[Input] public SceneReference _position;
+	[Input] public SceneReference _instigator;
 	[Input] public float _damage;
 	[Input] public float _radius;
 	
@@ -21,6 +22,7 @@ public class NodeApplyDamageRadius : GameNode
 			_damage = GetInputValue("_damage", _damage);
 			_radius = GetInputValue("_radius", _radius);
 			_position = GetInputValue("_position", _position);
+			_instigator = GetInputValue("_instigator", _instigator);
 			
 			if (!_position.TryGetComponent(this, out Transform transform))
 			{
@@ -40,7 +42,7 @@ public class NodeApplyDamageRadius : GameNode
 					attackable.TakeDamage(new DamageInfo()
 					{
 						amount = amount, isRanged = false
-					}, Script.gameObject);
+					}, _instigator.TryGetComponent(this, out CharacterEntity instigatorCharacter) ? instigatorCharacter : null);
 				}
 			}
 

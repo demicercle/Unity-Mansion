@@ -635,7 +635,7 @@ public class CharacterRoutines : MonoBehaviour
 					yield break;
 				}
 				
-				itemToUse.UseOn(otherCharacter.gameObject);
+				itemToUse.UseOn(otherCharacter.gameObject, _selfCharacter.gameObject);
 				inventory.NotifyUsed(itemToUse, otherCharacter);
 			}
 		}

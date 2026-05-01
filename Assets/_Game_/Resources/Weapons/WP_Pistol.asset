@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: WP_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   minDamage: 1
-  maxDamage: 5
+  maxDamage: 3
   isRanged: 1
   attackRange: 12
   hitChance: 0.5

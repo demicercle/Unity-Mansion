@@ -1,39 +1,46 @@
 # Unity-Mansion
 
+
+REFACTO
 - add namespaces
-- tweak "range to hit chance" and take height into account
+- clean "CharacterController"
 - retake "door breaks trigger" with enemy tag (zombi will destroy, others will open...)
-- display zombies hp to the player?
-- "prepare attack" Action
-- retake hit chance with range attack
-- save brains, door state if destroyed
+- dialog line reference bug in editor
+
+ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - add a "drop on ground" and "pickup loot bag" Animation
-- zombi do not always "warn other in rooms"
-- grenade should alert damaged enemy
-- clean "CharacterController"
 - damage VFX (blood)
-- retake gamelog : should warn about dice launch
-- party pc following stuck in door
-- fix weird movement at zombi start
-- how to deal with revealed enemies while in battle?
-- deselect dead character
-- can fire pistol through walls
-- "missed" attacks should warn target
-- check clicks on "IsWaiting" while real time
-- assign attack : should update destination if target moves
-- retakes "scene reference" with a list of references in GameScript
-- dialog line reference bug in editor
-- do not use actions or move points if not in turn based mode
 
-ART
+SAVE
+- brain state
+- door / destructible state
+- reroll dice points
+
+UI
+- popup "are you sure you want to reroll dices?"
+- popup "you have no karma points!"
+- display zombies hp to the player?
+- retake gamelog : should warn about dice launch
+
+ENV ART
 - add a "roof" (ceiling plane) to cull sun light, and point light in the buildings
 
 NODES
+- retakes "scene reference" with a list of references in GameScript
 - "combat started" (parameter: squad, optional)
 - "wait turn"
 
 GAMEPLAY
+- damage should scale with atk roll
+- tweak "range to hit chance" and take height into account
+- grenade should alert damaged enemy
+- "prepare attack" Action
+- check can fire pistol through walls
+- check clicks on "IsWaiting" while real time
+- assign attack : should update destination if target moves
+
+ITEMS
 - equip, drop and equip weapons
 - pistol ammo
 - create new items:
@@ -43,7 +50,7 @@ GAMEPLAY
 	> replace "Bandage" by "First aid kit" (to revive characters)
 	> "Grigri" (roll the dice for free, but cost 1 action, unlimited uses)
 	
-	
+URLs
 	https://opengameart.org/content/medieval-props-textured
 	https://kaylousberg.itch.io/halloween-bits
 	https://kenney.nl/assets/retro-urban-kit

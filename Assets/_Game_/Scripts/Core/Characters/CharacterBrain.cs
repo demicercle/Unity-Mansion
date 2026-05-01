@@ -35,7 +35,7 @@ public class CharacterBrain : MonoBehaviour
 		if (!IsThinking) 
 			return;
 		
-		if (debugMode > 0) Debug.Log(this + " StopThink");
+		if (debugMode > 1) Debug.Log(this + " StopThink");
 		
 		StopAllCoroutines();
 		IsThinking = false;
@@ -43,7 +43,7 @@ public class CharacterBrain : MonoBehaviour
 	
 	public void StartThink()
 	{
-		if (debugMode > 0) Debug.Log(this + " StartThink ; wasThinking=" + IsThinking);
+		if (debugMode > 1) Debug.Log(this + " StartThink");
 		
 		StopAllCoroutines();
 		StartCoroutine(Think());
@@ -80,7 +80,7 @@ public class CharacterBrain : MonoBehaviour
 		// fallback
 		
 		yield return new WaitForSeconds(DefaultWaitSeconds);
-		if(debugMode > 0) Debug.Log(this + " ends");
+		if(debugMode > 1) Debug.Log(this + " ends");
 
 		IsThinking = false;
 	}
@@ -114,7 +114,7 @@ public class CharacterBrain : MonoBehaviour
 	{
 		if (GameTurnManager.Instance.IsTurnBasedMode() == false)
 		{
-			if(debugMode > 0) Debug.Log(this + " TryChase !IsTurnBasedMode");
+			//if(debugMode > 0) Debug.Log(this + " TryChase !IsTurnBasedMode");
 			yield break;
 		}
 		
@@ -172,8 +172,8 @@ public class CharacterBrain : MonoBehaviour
 			if(debugMode > 0) Debug.Log(this + " TryPatrol !HasMovePoints");
 			yield break;
 		}
-		
-		if (!_selfCharacter.HasActions())
+
+		if (_selfCharacter.HasDetectedAnyPartyCharacter() && !_selfCharacter.HasActions())
 		{
 			if(debugMode > 0) Debug.Log(this + " TryPatrol !HasActions");
 			yield break;
@@ -185,12 +185,18 @@ public class CharacterBrain : MonoBehaviour
 			_patrolRoute = null;
 		}
 		
+		if (!_patrolRoute && PatrolRoute.FindRoute(_selfCharacter, out var newPatrol))
+		{
+			_patrolRoute = newPatrol;
+			_currentWaypoint = null;
+			_waypointList.Clear();
+			if (debugMode > 0) Debug.Log(this + " new patrol: " + _patrolRoute);
+		}
+
 		if (!_patrolRoute)
 		{
-			if(!PatrolRoute.FindRoute(_selfCharacter, out var newPatrol))
-				yield break;
-			
-			_patrolRoute = newPatrol;
+			//if (debugMode > 0) Debug.Log(this + " TryPatrol !_patrolRoute");
+			yield break;
 		}
 
 		if (_currentWaypoint && _selfCharacter.WaypointReached(_currentWaypoint))
@@ -210,7 +216,10 @@ public class CharacterBrain : MonoBehaviour
 		}
 
 		if (!_currentWaypoint)
+		{
 			_currentWaypoint = _waypointList.First();
+			if (debugMode > 0) Debug.Log(this + " new waypoint " + _currentWaypoint);
+		}
 		
 		_selfCharacter.Routines.AssignMoveToWaypoint(_currentWaypoint);
 		
@@ -230,8 +239,17 @@ public class CharacterBrain : MonoBehaviour
 
 	private IEnumerator TryWander()
 	{
-		if (!_selfCharacter.HasMovePoints() || !_selfCharacter.HasActions())
+		if (!_selfCharacter.HasMovePoints())
+		{
+			if(debugMode > 0) Debug.Log(this + " TryWander !HasMovePoints");
 			yield break;
+		}
+
+		if (_selfCharacter.HasDetectedAnyPartyCharacter() && !_selfCharacter.HasActions())
+		{
+			if(debugMode > 0) Debug.Log(this + " TryWander !HasActions");
+			yield break;
+		}
 
 		float startTime = Time.time;
 		float wanderingDistance = wanderingPoint.radius;

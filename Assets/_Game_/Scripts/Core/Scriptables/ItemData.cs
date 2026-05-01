@@ -81,7 +81,7 @@ public class ItemData : ScriptableObject
 
 					if (projectile.Launch(startPosition, destination, out var clone))
 					{
-						UseOn(clone.gameObject);
+						UseOn(clone.gameObject, target.gameObject);
 						return;
 					}
 				}
@@ -89,10 +89,12 @@ public class ItemData : ScriptableObject
 		}
 	}
 
-	public void UseOn(GameObject target)
+	public void UseOn(GameObject target, GameObject instigator)
 	{
-		Debug.Log(this + " UseOn " + target);
-		target.AddComponent<GameScript>().SetGraph(onUseScript);
+		Debug.Log(this + " UseOn " + target + " by " + instigator);
+		var script = target.AddComponent<GameScript>();
+		script.SetInstigator(instigator);
+		script.SetGraph(onUseScript);
 	}
 
 	public string GetDisplayName() => displayName.GetValue(DialogFiles.items);

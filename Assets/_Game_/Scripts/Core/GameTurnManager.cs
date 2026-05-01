@@ -336,6 +336,7 @@ public class GameTurnManager : MonoBehaviour
 				anim.TrySwitchWeapons(false); // relax after fight
 		}
 		
+		PartyRest();
 		SelectBestPlayerCharacter();
 		CameraPivot.Instance.SetZoom(cameraStartZoom);
 
