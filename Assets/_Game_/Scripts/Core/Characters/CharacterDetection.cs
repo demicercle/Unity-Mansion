@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,16 +15,15 @@ public class CharacterDetection : MonoBehaviour
 	public System.Action<CharacterEntity> onCharacterLost;
 
 	public System.Action<float> onAwarenessChanged;
-	
+
+	[SerializeField] [Min(0f)] private float awarenessScale = 1.0f;
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
+	[SerializeField] private AnimationCurve distanceCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 	[SerializeField] private bool setDetectedOnDamaged = true;
 	[SerializeField] private bool lookAtDetected = true;
 	[SerializeField] private bool drawGizmos;
-	[SerializeField] [Min(0f)] private float looseTargetDistance;
-	[SerializeField] [Min(0f)] private float awarenessScale = 1.0f;
-	[SerializeField] [Min(0f)] private float distanceScale = 10.0f;
 	
 	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
 
@@ -109,26 +109,28 @@ public class CharacterDetection : MonoBehaviour
 		{
 			Debug.LogWarning(this + " has no character controller!");
 			enabled = false;
+			return;
 		}
+
+		selfCharacter.onDead += OnCharacterDead;
+	}
+
+	private void OnDestroy()
+	{
+		if (!selfCharacter) return;
+		selfCharacter.onDead -= OnCharacterDead;
 	}
 
 	private void OnEnable()
 	{
-		CharacterEntity.onAnyCharacterMoved += OnAnyCharacterMoved;
-		CharacterEntity.onAnyCharacterUsesAction += OnAnyCharacterUsesAction;
-		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
-		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 		selfCharacter.onDamagedBy += OnDamagedBy;
+		StartCoroutine("UpdateDetection");
 	}
 
 	private void OnDisable()
 	{
 		if (!selfCharacter) return;
-		
-		CharacterEntity.onAnyCharacterMoved -= OnAnyCharacterMoved;
-		CharacterEntity.onAnyCharacterUsesAction -= OnAnyCharacterUsesAction;
-		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
-		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
+		StopCoroutine("UpdateDetection");
 		selfCharacter.onDamagedBy -= OnDamagedBy;
 	}
 
@@ -137,10 +139,11 @@ public class CharacterDetection : MonoBehaviour
 		NotifyAwarenessChanged();
 	}
 
-	private void OnTurnStarted()  => OnAnyCharacterMoved(selfCharacter);
+	private void OnCharacterDead()
+	{
+		enabled = false;
+	}
 	
-	private void OnTurnEnded()  => OnAnyCharacterMoved(selfCharacter);
-
 	private void OnDamagedBy(CharacterEntity other, float amount)
 	{
 		if(debugMode > 1) Debug.Log(this + " OnDamagedBy " + other);
@@ -149,59 +152,52 @@ public class CharacterDetection : MonoBehaviour
 			SetCharacterDetected(other, true);
 	}
 
-	private void OnAnyCharacterUsesAction(CharacterEntity anyCharacter, CharacterAction _) =>
-		OnAnyCharacterMoved(anyCharacter);
-	
-	private void OnAnyCharacterMoved(CharacterEntity anyCharacter)
+	private IEnumerator UpdateDetection()
 	{
-		if (anyCharacter.IsDead()) 
-			return;
+		while (true)
+		{
+			yield return null;
 
-		if (debugMode > 1)
-			Debug.Log(this + " revealed:" + selfCharacter.IsCharacterRevealed() + " OnAnyCharacterMoved "+ anyCharacter + " revealed:" + anyCharacter.IsCharacterRevealed());
-		
-		if (!selfCharacter.IsCharacterRevealed() || !anyCharacter.IsCharacterRevealed())  // ignore not revealed characters
-			return; 
-		
-		if (anyCharacter == selfCharacter)
-		{
-			foreach (var otherCharacter in CharacterEntity.AllCharacters)
+			if (selfCharacter.InParty() || !selfCharacter.IsCharacterRevealed() || selfCharacter.IsDead())
+				continue;
+
+			var deltaTime = Time.deltaTime;
+			foreach (var anyCharacter in CharacterEntity.AllCharacters)
 			{
-				if (otherCharacter == selfCharacter) continue;
-				OnAnyCharacterMoved(otherCharacter);
-			}
-		}
-		else
-		{
-			if (!detectedCharacters.Contains(anyCharacter))
-			{
-				var scale = anyCharacter.GetStealth() * awarenessScale;
-				var dist = NavUtils.NavDistanceRoundY(selfCharacter.GetPosition(), anyCharacter.GetPosition());
-				if (dist < hearingDistance)
-					scale *= Mathf.Lerp(distanceScale, 1.0f, dist / hearingDistance);
+				if (anyCharacter == selfCharacter) continue;
+				if (anyCharacter.IsDead()) continue;
+				if (!selfCharacter.IsEnemyTo(anyCharacter)) continue;
+				if (IsCharacterDetected(anyCharacter)) continue;
+
+				if (debugMode > 1) Debug.Log(this + " UpdateDetection " + anyCharacter);
 				
-				if (IsCharacterVisible(anyCharacter))
+				var selfPosition = selfCharacter.GetPosition();
+				var otherPosition = anyCharacter.GetPosition();
+				var distance = Vector3.Distance(selfPosition, otherPosition);
+				var maxDistance = Mathf.Max(hearingDistance, seeingDistance);
+				if (distance >= maxDistance) continue;
+
+				var scale = awarenessScale
+				            * distanceCurve.Evaluate(distance / maxDistance)
+				            * anyCharacter.GetStealth();
+				
+				if (IsCharacterVisible(anyCharacter, distance))
 				{
-					AddAwareness(anyCharacter, scale * Time.deltaTime);
+					AddAwareness(anyCharacter, scale * deltaTime);
 				}
 				else
 				{
-					AddAwareness(anyCharacter, -scale * Time.deltaTime);
+					AddAwareness(anyCharacter, -scale * deltaTime);
 				}
-			}
-			else
-			{
-				if (looseTargetDistance > 0 && Vector3.Distance(selfCharacter.GetPosition(), anyCharacter.GetPosition()) > looseTargetDistance)
-				{
-					SetCharacterDetected(anyCharacter, false);
-				}
+				
+				yield return null;
 			}
 		}
 	}
-
-	private bool IsCharacterVisible(CharacterEntity otherCharacter)
+	
+	private bool IsCharacterVisible(CharacterEntity otherCharacter, float distance)
 	{
-		if (selfCharacter.IsPlayer() && otherCharacter.IsPlayer())  // party characters will always detect each other
+		if (selfCharacter.InParty() && otherCharacter.InParty())  // party characters will always detect each other
 			return true;
 		
 		if (forceNoDetection)
@@ -212,12 +208,7 @@ public class CharacterDetection : MonoBehaviour
 		
 		if(debugMode > 1) Debug.Log(this + " IsCharacterVisible " + otherCharacter);
 		
-		var selfPosition = selfCharacter.GetPosition();
-		var otherPosition = otherCharacter.GetPosition();
-		
-		var distance = Vector3.Distance(selfPosition, otherPosition);
-		
-		if (selfCharacter.IsPlayer())
+		if (selfCharacter.InParty())
 		{
 			return distance <= Mathf.Max(seeingDistance, hearingDistance)
 			       && otherCharacter.IsCharacterRevealed(); // characters player can see through walls and behind
@@ -350,10 +341,6 @@ public class CharacterDetection : MonoBehaviour
 			
 			Gizmos.color = Utils.ColorScale(Color.magenta, Mathf.PI * 0.1f);
 			Utils.DrawGizmosCircle((left + right) / 2, Vector3.up, (left - right).magnitude/2f);
-			//Gizmos.DrawWireSphere(selfCharacter.GetPosition(), selfCharacter.GetRadius() + triggerRangeOffset);
-			
-			Gizmos.color = Color.darkOrchid;
-			Utils.DrawGizmosCircle(transform.position, Vector3.up, looseTargetDistance);
 		}
 	}
 	#endif
