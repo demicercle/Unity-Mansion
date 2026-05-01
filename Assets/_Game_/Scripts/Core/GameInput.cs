@@ -1125,7 +1125,7 @@ public class GameInput : MonoBehaviour
 		return lastMouseOverObject && lastMouseOverObject.TryGetComponent<T>(out component);
 	}
 
-	private int mouseOverPortrait;
+	private int mouseOverPortrait = -1;
 	public void MouseOverPortrait(int index)
 	{
 		mouseOverPortrait = index;

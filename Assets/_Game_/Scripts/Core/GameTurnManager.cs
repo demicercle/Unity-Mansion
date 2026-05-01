@@ -17,7 +17,6 @@ public class GameTurnManager : MonoBehaviour
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
-	[SerializeField] private bool alertRevealedCharactersInTurnBasedMode = true;
 	[SerializeField] [Range(0f, 6f)] private float restInterval = 3.0f;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[Header("Timings")]

@@ -22,9 +22,9 @@
 - "missed" attacks should warn target
 - check clicks on "IsWaiting" while real time
 - assign attack : should update destination if target moves
-- click portrait to use item
 - retakes "scene reference" with a list of references in GameScript
 - dialog line reference bug in editor
+- do not use actions or move points if not in turn based mode
 
 ART
 - add a "roof" (ceiling plane) to cull sun light, and point light in the buildings

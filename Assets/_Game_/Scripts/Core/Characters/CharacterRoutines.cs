@@ -397,6 +397,11 @@ public class CharacterRoutines : MonoBehaviour
 				target.TakeDamage(damageInfo, _selfCharacter);
 				break;
 		}
+
+		if (target is CharacterEntity && !(target as CharacterEntity).IsDead() && (target as CharacterEntity).TryGetComponent(out CharacterDetection detection))
+		{
+			detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+		}
 		
 		if(debugMode > 0) Debug.Log("attack ends");
 	}
