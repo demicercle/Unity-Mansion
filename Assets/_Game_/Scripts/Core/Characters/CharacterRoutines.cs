@@ -15,6 +15,8 @@ public class CharacterRoutines : MonoBehaviour
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
 	
+	
+	
 	public static bool AnyActiveRoutines() => activeInstances.Count > 0;
 	
 	public static CharacterRoutines[]  GetActiveRoutines() => activeInstances.ToArray();
@@ -395,7 +397,7 @@ public class CharacterRoutines : MonoBehaviour
 				target.TakeDamage(damageInfo, _selfCharacter);
 				break;
 		}
-
+		
 		if(debugMode > 0) Debug.Log("attack ends");
 	}
 

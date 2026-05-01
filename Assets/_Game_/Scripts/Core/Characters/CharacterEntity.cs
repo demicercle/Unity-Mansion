@@ -187,9 +187,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	}
 
 	private IAttackable lastAttackTarget;
-	
 	public IAttackable GetLastAttackTarget() => lastAttackTarget;
-
+	
+	private object lastDamageInstigator;
+	public bool TryGetLastDamageInstigator(out CharacterEntity instigator)
+	{
+		return (instigator = lastAttackTarget as CharacterEntity) != null;
+	}
 	
 	public float RollDice()
 	{
@@ -563,6 +567,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		Debug.Log(this + " TakeDamage " + damageInfo);
 		totalDamages += damageInfo.amount;
+		lastDamageInstigator = objectFrom;
 		
 		StopAgent();
 
