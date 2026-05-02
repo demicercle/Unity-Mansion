@@ -9,6 +9,7 @@ using Random = UnityEngine.Random;
 public class DiceLauncher : MonoBehaviour
 {
 	public static int AllowedDiceRolls { get; set; }
+	public static int MissCount { get; set; }
 	
 	public static int debugMode => DicePool.debugMode;
 
@@ -19,6 +20,7 @@ public class DiceLauncher : MonoBehaviour
 	public int framesDuration;
 	public TMPro.TMP_Text allowedRollsText;
 	public Button launchButton;
+	public Image missFill;
 	
 	private int animCount;
 	
@@ -34,6 +36,7 @@ public class DiceLauncher : MonoBehaviour
 		
 		DicePool.onDiceRolled += OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
+		CharacterEntity.onAttackResult += OnAttackResult;
 		launchButton.onClick.AddListener(ClickedLaunch);
 	}
 
@@ -41,7 +44,21 @@ public class DiceLauncher : MonoBehaviour
 	{
 		DicePool.onDiceRolled -= OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead -= OnAnyCharacterDead;
+		CharacterEntity.onAttackResult -= OnAttackResult;
 		launchButton.onClick.RemoveListener(ClickedLaunch);
+	}
+
+	private void OnAttackResult(CharacterEntity attacker, IAttackable target, CharacterEntity.AttackResult atkResult)
+	{
+		if (atkResult != CharacterEntity.AttackResult.Hit && attacker.InParty())
+		{
+			MissCount++;
+			if (MissCount > CharacterEntity.PartyCount)
+			{
+				MissCount = 0;
+				AllowedDiceRolls += 1;
+			}
+		}
 	}
 
 	private void OnAnyCharacterDead(CharacterEntity character)
@@ -97,5 +114,6 @@ public class DiceLauncher : MonoBehaviour
 	{
 		allowedRollsText.text = AllowedDiceRolls.ToString();
 		launchButton.interactable = AllowedDiceRolls > 0 && animCount <= 0;
+		missFill.fillAmount = (float)MissCount / (float)CharacterEntity.PartyCount;
 	}
 }

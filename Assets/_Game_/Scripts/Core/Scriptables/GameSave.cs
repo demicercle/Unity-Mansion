@@ -208,6 +208,7 @@ public class GameSave : ScriptableObject
 		public override string ToString() => base.ToString() + " (" + name + ")";
 
 		public static string Karma = "KARMA";
+		public static string MissCount = "MISS_COUNT";
 		
 		public string name;
 		public int value;
@@ -298,6 +299,7 @@ public class GameSave : ScriptableObject
 		foreach (var savedValue in savedValues)
 		{
 			if (savedValue.name == SavedValue.Karma) DiceLauncher.AllowedDiceRolls = savedValue.value;
+			if (savedValue.name == SavedValue.MissCount) DiceLauncher.MissCount = savedValue.value;
 		}
 		
 		var partyCharacters = CharacterEntity.GetPartyCharacters();
@@ -406,6 +408,7 @@ public class GameSave : ScriptableObject
 		gameSeed = DicePool.Seed;
 		
 		savedValues.Add(new SavedValue(){ name = SavedValue.Karma, value = DiceLauncher.AllowedDiceRolls});
+		savedValues.Add(new SavedValue(){ name = SavedValue.MissCount, value = DiceLauncher.MissCount});
 
 		selectedCharacter = CharacterSelection.GetSelectedPartyCharacterIndex();
 		

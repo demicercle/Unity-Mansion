@@ -175,9 +175,12 @@ public class CharacterAgent : MonoBehaviour
 		}
 		
 		waypointProvider = provider;
-		
+
 		if (!waypointProvider)
+		{
+			if(debugMode > 0) Debug.Log(this + " clear waypointProvider");
 			return null;
+		}
 		
 		return StartCoroutine(SearchBestWaypoint());
 	}
@@ -189,7 +192,7 @@ public class CharacterAgent : MonoBehaviour
 		bestWaypoint = null;
 		waypoints = waypointProvider.GetComponentsInChildren<Waypoint>().ToList();
 		
-		if (debugMode > 1)
+		if (debugMode > 0)
 		{
 			Debug.Log(this + " SearchBestWaypoint from " + _selfCharacter + " to " + waypointProvider + " waypoints=" + waypoints.Count);
 			DebugDrawer.Line(_selfCharacter.GetCenterPosition(), waypointProvider.transform.position, Color.blueViolet, 1.0f);
