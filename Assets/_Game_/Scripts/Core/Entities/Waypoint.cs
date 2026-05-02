@@ -13,7 +13,7 @@ public class Waypoint : MonoBehaviour
 	public int GetRotation() => (int)transform.eulerAngles.y;
 	public Vector3 GetDirection() => transform.forward;
 
-	public static Waypoint[] GetOrderedWaypointsFrom(Vector3 world, float heightPenalty = 2f)
+	public static Waypoint[] GetOrderedWaypointsFrom(Vector3 world, float heightPenalty = 10f)
 	{
 		return waypoints.OrderBy(wp => NavUtils.NavHDistance(wp.GetPosition(), world) + NavUtils.NavVDistance(wp.GetPosition(), world) * heightPenalty).ToArray();
 	}

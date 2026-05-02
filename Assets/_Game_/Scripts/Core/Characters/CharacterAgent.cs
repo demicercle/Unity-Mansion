@@ -17,7 +17,8 @@ public class CharacterAgent : MonoBehaviour
 	private const float WaypointMaxEndPointDistance = 0.2f;
 	private const int WaypointRoundDecimals = 1000;
 	private const float WaypointMaxSearchDistance = 28.0f;
-	private const float WaypointSearchSeconds = 0.10f;
+	private const float PartialPathTolerance = 0.5f;
+	private const float PartialPathHeightPenalty = 2.0f;
 	
 	public static int debugMode { get; set; }
 
@@ -507,7 +508,7 @@ public class CharacterAgent : MonoBehaviour
 				if(hasDestination)
 					debugString += NavUtils.NavDistance(aiPath.position, aiPath.destination).ToString("N2") 
 					               + ":" + aiPath.endReachedDistance.ToString("N2")
-					               + ":" + NavUtils.NavDistance(aiPath.endOfPath, aiPath.destination).ToString("N2");
+					               + ":" + CalculatePartialPathDistance(aiPath.endOfPath, aiPath.destination).ToString("N2");
 			}
 				
 			if (lastVectorPath?.Length > 0) DebugDrawer.Path(lastVectorPath, false,Color.cyan);
@@ -534,7 +535,13 @@ public class CharacterAgent : MonoBehaviour
 		}
 	}
 
-	private IEnumerator DoSearchPathAsync(Vector3 dest, System.Action onComplete = null)
+	private bool ValidateDistance(Vector3 endPoint, Vector3 dest) => CalculatePartialPathDistance(endPoint, dest) <= PartialPathTolerance;
+	
+	private float CalculatePartialPathDistance(Vector3 endPoint, Vector3 dest) => NavUtils.NavHDistance(endPoint, dest) 
+	                                                                     + NavUtils.NavVDistance(endPoint, dest) * PartialPathHeightPenalty;
+
+	private IEnumerator DoSearchPathAsync(Vector3 newDest) => DoSearchPathAsync(newDest, newDest);
+	private IEnumerator DoSearchPathAsync(Vector3 newDest, Vector3 finalDest)
 	{
 		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync");
 
@@ -542,7 +549,7 @@ public class CharacterAgent : MonoBehaviour
 		
 		// Crée une requête de chemin
 		var startPoint = aiPath.position;
-		var endPoint = dest;
+		var endPoint = newDest;
 		lastSearchPath = ABPath.Construct(startPoint, endPoint, null);
 		lastSearchPath.calculatePartial = false;
 		
@@ -551,17 +558,17 @@ public class CharacterAgent : MonoBehaviour
 		// Envoie la requête au système de pathfinding
 		AstarPath.StartPath(lastSearchPath);
 		yield return StartCoroutine(lastSearchPath.WaitForPath());
-
-		if (lastSearchPath.error)
+		
+		if (lastSearchPath.error || !ValidateDistance(lastSearchPath.endPoint, newDest))
 		{
-			if(debugMode > 0) Debug.Log(this + " path error to " + dest);
-			foreach (var wp in Waypoint.GetOrderedWaypointsFrom(dest))
+			if(debugMode > 0) Debug.Log(this + " path error to " + newDest);
+			foreach (var wp in Waypoint.GetOrderedWaypointsFrom(finalDest))
 			{
 				if (!ignoreWaypointList.Contains(wp))
 				{
 					if(debugMode > 0) Debug.Log(this + " try reach waypoint " + wp);
 					ignoreWaypointList.Add(wp);
-					yield return StartCoroutine(DoSearchPathAsync(wp.GetPosition(), onComplete));
+					yield return StartCoroutine(DoSearchPathAsync(wp.GetPosition(), finalDest));
 					yield break;
 				}
 			}
@@ -574,7 +581,6 @@ public class CharacterAgent : MonoBehaviour
 		
 		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync onComplete lastPath=" + lastVectorPath.Length);
 		ignoreWaypointList.Clear();
-		onComplete?.Invoke();
 	}
 
 	private IEnumerator WaitNavmesh()
@@ -585,6 +591,38 @@ public class CharacterAgent : MonoBehaviour
 			yield return null;
 		} while (NavmeshRebuilder.IsNavigationDirty());
 		aiPath.canSearch = true;
+	}
+	
+	private bool IsDestinationValid(Vector3 target)
+	{
+		var layeredGraph = AstarPath.active.graphs.OfType<LayerGridGraph>().First();
+	    
+        // Crée une contrainte pour forcer la bonne couche
+        NNConstraint constraint = NNConstraint.Default;
+        constraint.constrainWalkability = true;
+        constraint.constrainDistance = true;
+
+        // Trouve le nœud le plus proche SUR LA BONNE COUCHE
+        NNInfo nearest = AstarPath.active.GetNearest(target, constraint);
+
+        if (nearest.node != null)
+        {
+            // Vérifie si le nœud est sur la bonne couche (Y)
+            var node = nearest.node as GridNode;
+            if (node != null)
+            {
+                // Calcule la différence de hauteur entre la cible et le nœud
+                float heightDiff = Mathf.Abs(target.y - (float)node.position.y);
+
+                // Si la différence est trop grande, cherche un nœud sur une autre couche
+                if (heightDiff > layeredGraph.nodeSize) // Seuil = taille d'un nœud
+                {
+	                return false;
+                }
+            }
+        }
+
+        return true;
 	}
 	
 	private void UpdatePathAndTarget() => UpdatePathAndTarget(true);
