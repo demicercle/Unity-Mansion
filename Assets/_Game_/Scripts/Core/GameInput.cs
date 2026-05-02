@@ -1046,8 +1046,7 @@ public class GameInput : MonoBehaviour
 	private bool CanAssignOnClick(CharacterEntity character)
 	{
 		return hasFocus
-		       && (!gameTurnManager.IsTurnBasedMode() ||
-		           (gameTurnManager.IsPlayerTurn() && !CharacterRoutines.AnyActiveRoutines()))
+		       && !gameTurnManager.IsWaiting()
 		       && character.IsControllableByPlayer()
 		       && (Time.time - character.Routines.LastTimeAssignedTarget > MinDelayBetweenAssignTarget);
 	}
