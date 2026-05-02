@@ -48,6 +48,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nextLevelName: Level_0
   cameraStartZoom: 0.204
+  rollDiceWhenTurnStarts: 0
+  rollDiceWhenTurnEnds: 1
   realTimeTicks: 1.5
   postLoadSceneDuration: 1
   postLoadSaveDuration: 2

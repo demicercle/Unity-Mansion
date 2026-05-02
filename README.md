@@ -6,7 +6,11 @@
 - display cursor text "attack will miss" or "attack will hit" 
 - min time between assigns
 - randomize hp on game seed 
-- 
+- zombi 7 stuck in patrol after load
+- zombi can attack from below
+
+- "miss" gauge
+- save dodge dice for later
 
 
 REFACTO

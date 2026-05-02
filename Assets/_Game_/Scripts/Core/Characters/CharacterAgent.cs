@@ -26,6 +26,7 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] [Min(0f)] private float minReachDistance = 0.1f;
+	[SerializeField] private bool reversePriority = false;
 	
 	[Header("Rendering")]
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -531,7 +532,6 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.radius = radius;
 		aiPath.height = height;
 		aiPath.maxSpeed = moveSpeed;
-		aiPath.pickNextWaypointDist = radius + GetMinReachDistance();
 		if(minReachDistance > 0f) aiPath.endReachedDistance = minReachDistance;
 		if(Application.isPlaying) aiPath.gravity = Physics.gravity; // force gravity
 		rvoController = GetComponent<RVOController>();
@@ -577,6 +577,7 @@ public class CharacterAgent : MonoBehaviour
 	private void UpdateRVO()
 	{
 		rvoController.priority = CharacterSelection.IsCharacterSelected(_selfCharacter) ? 0.90f : _selfCharacter.InParty() ? 0.66f : 0.33f;
+		if(reversePriority) rvoController.priority = 1f - rvoController.priority;
 		rvoController.lockWhenNotMoving = _selfCharacter.IsSelected();
 	}
 

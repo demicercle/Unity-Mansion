@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -56,10 +57,18 @@ public class CharacterEventTrigger : MonoBehaviour
 		{
 			Debug.LogWarning(this + " has no character");
 			enabled = false;
+			return;
 		}
+		
+		RegisterEvents();
 	}
-	
-	private void OnEnable()
+
+	private void OnDestroy()
+	{
+		DisposeEvents();
+	}
+
+	private void RegisterEvents()
 	{
 		if (!character) return;
 		character.onSpawned += onSpawned.Invoke;
@@ -77,7 +86,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
 	}
 
-	private void OnDisable()
+	private void DisposeEvents()
 	{
 		if (!character) return;
 		character.onSpawned -= onSpawned.Invoke;

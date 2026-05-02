@@ -18,6 +18,11 @@ public class GameTurnManager : MonoBehaviour
 	
 	[SerializeField] private string nextLevelName = "Level_0";
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
+	[Space]
+	[Header("Game Rules")]
+	[SerializeField] private bool rollDiceWhenTurnStarts = true;
+	[SerializeField] private bool rollDiceWhenTurnEnds = true;
+	[Space]
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
 	[SerializeField] [Min(0.1f)] private float postLoadSceneDuration = 1.0f;
@@ -403,7 +408,7 @@ public class GameTurnManager : MonoBehaviour
 	{
 		
 	}
-	
+
 	private void EndTurn()
 	{
 		if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
@@ -411,22 +416,20 @@ public class GameTurnManager : MonoBehaviour
 		playerTurn = false;
 		onPlayerChanged?.Invoke(playerTurn); 
 		onTurnStarted?.Invoke(); // start other turn
+		if(rollDiceWhenTurnEnds) DicePool.RollNewDice();
 	}
 	
 	private void NewTurn()
 	{
-		if (currentTurn >= 1)
-		{
-			if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
-			onTurnEnded?.Invoke();
-			PartyRest();
-		}
+		if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
+		onTurnEnded?.Invoke();
+		PartyRest();
 		
 		currentTurn += 1;
 		playerTurn = true;
 		onTurnStarted?.Invoke();
-		
 		if(debugMode > 0) Debug.Log(this + " NewTurn " + currentTurn);
+		if(rollDiceWhenTurnStarts) DicePool.RollNewDice();
 	}
 
 	private void FirstTurn()

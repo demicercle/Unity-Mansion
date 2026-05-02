@@ -11,7 +11,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 {
 	public RawImage rawImage;
 	public TMP_Text nameLabel;
-	public Toggle toggleSelected, toggleHasActions, toggleTurnBased;
+	public Toggle toggleSelected, toggleHasActions, toggleTurnBased, toggleDodge;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
 	public TMP_Text dodgeLabel1, dodgeLabel2;
@@ -107,16 +107,12 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 		if (_assignedCharacter)
 		{
 			toggleTurnBased.isOn = GameTurnManager.Instance.IsTurnBasedMode();
-			calculatedDodge = _assignedCharacter.GetDodgeChance();
-			if (calculatedDodge > 0)
+			toggleDodge.isOn = _assignedCharacter.CanDodge();
+			if (toggleDodge.isOn)
 			{
+				calculatedDodge = _assignedCharacter.GetDodgeChance();
 				dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
 				dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
-			}
-			else
-			{
-				dodgeLabel1.text = "X";
-				dodgeLabel2.text = "";
 			}
 		}
 	}

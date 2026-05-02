@@ -48,7 +48,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
 	private const float MinAttackRange = 0.25f;
-	private const float DodgeCountToChance = 2f / 20f;
+	//private const float DodgeCountToChance = 2f / 20f;
 	private const float MovePointsToDodge = 0.02f;
 	private const float MovePointsToHit = 0.00f;
 	
@@ -103,6 +103,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private CharacterData characterData;
 	[SerializeField] private Canvas characterCanvas;
 	[SerializeField] private float clearActionsDelay = 3.0f;
+	[SerializeField] private bool rollDiceToDodge = false;
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f; // TODO remove
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
@@ -188,7 +189,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onStatsChanged?.Invoke();
 	}
 	
-	public bool HasActions() => usedActions.Count < characterData.maxActions;
+	public bool HasActions() => usedActions.Count < characterData.GetMaxActions();
 
 	public bool HasUsedAction(CharacterAction action) => usedActions.Contains(action);
 
@@ -215,10 +216,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return rolled;
 	}
 
-	public bool CanDodge() => characterData.dodgeChance > 0;
-	public float GetDodgeChance() => Mathf.Clamp01(characterData.dodgeChance + dodgeCount * DodgeCountToChance + GetRemainingMovePoints() * MovePointsToDodge);
+	public bool CanDodge() => characterData.GetDodgeChance() > 0 && dodgeCount > 0;
+	
+	public float GetDodgeChance() => Mathf.Clamp01(characterData.GetDodgeChance() + GetRemainingMovePoints() * MovePointsToDodge);
 
-	public float GetHitChance() => Mathf.Clamp01(currentWeapon.hitChance + GetRemainingMovePoints() * MovePointsToHit);
+	public float GetHitChance() => Mathf.Clamp01(currentWeapon.GetHitChance() + GetRemainingMovePoints() * MovePointsToHit);
 
 	public enum AttackResult
 	{
@@ -252,7 +254,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (IsUsingRangeWeapon())
 		{
 			targetRange = Vector3.Distance(GetCenterPosition(), targetPosition);
-			return GetHitChance() * currentWeapon.rangeHitCurve.Evaluate(Mathf.Clamp01(targetRange / currentWeapon.attackRange));
+			return GetHitChance() * currentWeapon.EvaluateRange(targetRange);
 		}
 		else
 		{
@@ -267,7 +269,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if (target.CanDodge())
 			{
-				calculatedHitChance -= target.GetDodgeChance();
+				calculatedHitChance *= (1f - target.GetDodgeChance());
 			}
 		}
 		return Mathf.Clamp01(calculatedHitChance);
@@ -285,10 +287,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 		if (!IsUsingRangeWeapon())
 		{
-			if (target.CanDodge() && atkRoll < target.GetDodgeChance())
+			if (target.CanDodge())
 			{
-				onAttackResult?.Invoke(this, target, AttackResult.Dodge);
-				return AttackResult.Dodge;
+				target.dodgeCount = Mathf.Max(0, target.dodgeCount - 1);
+				if (rollDiceToDodge ? 1f - target.RollDice() > target.GetDodgeChance() : target.GetDodgeChance() > hitChance)
+				{
+					onAttackResult?.Invoke(this, target, AttackResult.Dodge);
+					return AttackResult.Dodge;
+				}
 			}
 		}
 			
@@ -308,7 +314,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		Debug.Log(this + " usedAction=" + usedActions.Last() + " param=" + param);
 		if (actionType == CharacterAction.Run)
 		{
-			usedMovePoints -= characterData.runActionExtraMovePoints;
+			usedMovePoints -= characterData.GetRunActionExtraMovePoints();
 		}
 		else if (actionType == CharacterAction.Talk)
 		{
@@ -418,11 +424,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool IsCurrentTurn() => GameTurnManager.Instance.IsPlayerTurn() == IsPlayer();
 	
-	public float GetMaxMovePoints() => characterData.maxMovePoints;
+	public float GetMaxMovePoints() => characterData.GetMaxMovePoints();
 	
-	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.maxMovePoints - usedMovePoints);
+	public float GetRemainingMovePoints() => Mathf.Max(0, characterData.GetMaxMovePoints() - usedMovePoints);
 	
-	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.maxMovePoints;
+	public float GetMovePointsProgress() => 1f - usedMovePoints / characterData.GetMaxMovePoints();
 	
 	public bool HasMovePoints(float d = 0f) => !GameTurnManager.Instance.IsTurnBasedMode() || usedMovePoints + d < GetMaxMovePoints();
 	
@@ -555,13 +561,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public float GetTotalDamages() => totalDamages;
 	
-	public int GetMaxHealth() => characterData.maxHealth;
+	public int GetMaxHealth() => characterData.GetMaxHealth();
 	public int GetCurrentHealth() => GetMaxHealth() - Mathf.CeilToInt(GetTotalDamages());
 	public float GetDamageProgress() => Mathf.Clamp01(GetCurrentHealth() / (float)GetMaxHealth());
 	public bool IsDead() => isDead;
 
-	public Texture2D GetPortraitTexture() => characterData.portraitTexture;
-	public string GetDisplayName() => characterData.displayName;
+	public Texture2D GetPortraitTexture() => characterData.GetPortrait();
+	public string GetDisplayName() => characterData.GetDisplayName();
 	
 	public void Heal(float amount = 0f)
 	{
@@ -652,12 +658,12 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public float GetAttackRange()
 	{
-		return Mathf.Max( currentWeapon ? currentWeapon.attackRange : defaultWeapon ? defaultWeapon.attackRange : 0f, agent.GetRadius() + MinAttackRange);
+		return Mathf.Max( currentWeapon ? currentWeapon.GetAttackRange() : defaultWeapon ? defaultWeapon.GetAttackRange() : 0f, agent.GetRadius() + MinAttackRange);
 	}
 	
 	public float GetAttackReachDistance(IAttackable target)
 	{
-		return Mathf.Max(MinAttackRange, currentWeapon.attackRange, agent.GetRadius() + target.GetRadius() + agent.GetMinReachDistance());
+		return Mathf.Max(MinAttackRange, currentWeapon.GetAttackRange(), agent.GetRadius() + target.GetRadius() + agent.GetMinReachDistance());
 	}
 
 	public bool IsAtAttackRange(IAttackable target)
@@ -692,7 +698,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return currentWeapon.RollDamage(atkResult);
 	}
 
-	public bool IsUsingRangeWeapon() => currentWeapon.isRanged;
+	public bool IsUsingRangeWeapon() => currentWeapon.IsRanged();
 
 	public bool WeaponsReady() => characterAnimation && characterAnimation.WeaponsSwitched();
 
@@ -795,7 +801,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		characterAnimation = GetComponent<CharacterAnimation>();
 		//if(!characterAnimation) characterAnimation = gameObject.AddComponent<CharacterAnimation>(); //TODO is it possible to have characters with no anims?
 		
-		currentFaction = characterData.faction;
+		currentFaction = characterData.GetFaction();
 		if (factionOverride != CharacterFaction.None)
 		{
 			Debug.Log(this + " factionOverride=" + factionOverride);
@@ -868,7 +874,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			Utils.DrawWorldGUI(GetEyesPosition(), name  + (IsDead() ? "\nDEAD" : ""
 			                                      + "\n" + GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2")
-			                                      + "\n" + "Actions: " + usedActions.Count + "/" + characterData.maxActions
+			                                      + "\n" + "Actions: " + usedActions.Count + "/" + characterData.GetMaxActions()
 			                                      + "\n" + "MovePoints: " + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
 			                                      + "\n" + "HitChance: " + GetHitChance().ToString("N2")
 			                                      + "\n" + "Dodge: " + GetDodgeChance().ToString("N2") + " (x" + dodgeCount + ")"
@@ -879,6 +885,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public float GetStealth()
 	{
-		return characterData.stealthValue;
+		return characterData.GetStealthValue();
 	}
 }

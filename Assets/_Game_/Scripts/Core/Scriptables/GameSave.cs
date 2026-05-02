@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -468,6 +469,8 @@ public class GameSave : ScriptableObject
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Load From File");
 #endif
+		var savedObjects = new Hashtable();
+		savedObjects["lootBagPrefab"] = lootBagPrefab;
 		var backup = JsonUtility.ToJson(this, true);
 		var json = System.IO.File.ReadAllText(filePath);
 		JsonUtility.FromJsonOverwrite(json, this);
@@ -478,6 +481,7 @@ public class GameSave : ScriptableObject
 			return false;
 		}
 		Debug.Log(this + " Loaded From File " + filePath);
+		lootBagPrefab = (Inventory)savedObjects["lootBagPrefab"];
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.EditorUtility.SetDirty(this);
 #endif

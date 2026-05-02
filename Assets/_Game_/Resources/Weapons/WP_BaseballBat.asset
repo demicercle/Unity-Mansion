@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   minDamage: 2
   maxDamage: 4
+  hitChance: 12
   isRanged: 0
   attackRange: 0
-  hitChance: 0.6
   rangeHitCurve:
     serializedVersion: 2
     m_Curve:

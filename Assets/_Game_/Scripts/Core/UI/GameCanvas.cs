@@ -218,7 +218,7 @@ public class GameCanvas : MonoBehaviour
 		{
 			cursorText.transform.position = gameInput.GetMousePosition();
 			cursorText.raycastTarget = false;
-			cursorText.text = (int)Mathf.Lerp(20, 1, Mathf.Clamp01(selectedCharacter.CalculateHitChance(targetCharacter))) + "+";
+			cursorText.text = (21-DicePool.FloatToDice(20, selectedCharacter.CalculateHitChance(targetCharacter))) + "+";
 			/*cursorText.text =
 				Mathf.RoundToInt(
 					selectedCharacter.CalculateHitChance(targetCharacter) *
