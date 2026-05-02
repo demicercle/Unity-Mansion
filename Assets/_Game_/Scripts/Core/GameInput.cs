@@ -607,9 +607,9 @@ public class GameInput : MonoBehaviour
 			navigationTarget.transform.position = navigationHit.point;
 		}
 		
-		foreach (var character in CharacterEntity.AllCharacters)
+		foreach (var character in CharacterEntity.GetPartyCharacters())
 		{
-			if (character.IsSelected() && character.IsControllableByPlayer() && gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn())
+			if (character.IsSelected() && gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn())
 			{
 				character.GetAgent().DrawPath();
 			}

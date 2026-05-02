@@ -373,8 +373,6 @@ public class CharacterAgent : MonoBehaviour
 	private bool isObstacle;
 	private Vector3[] drawPath;
 	private float maxDrawLength;
-	private bool[] shouldDrawPath = new []{false,false};
-	private bool[] isDrawingPath = new []{false,false};
 
 	private void OnDrawGizmosSelected()
 	{
@@ -501,7 +499,7 @@ public class CharacterAgent : MonoBehaviour
 	public void DrawPath()
 	{
 		drawPath = lastVectorPath.ToArray();
-		pathRenderers[0].enabled = true;
+		pathRenderers[0].enabled = hasDestination;
 		if (pathRenderers[0].enabled) // draw path thin
 		{
 			pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(_selfCharacter.GetCurrentFaction());
@@ -512,7 +510,7 @@ public class CharacterAgent : MonoBehaviour
 		}
 		
 		drawPath = lastVectorPath.ToArray();
-		pathRenderers[1].enabled = true;
+		pathRenderers[1].enabled = !IsMoving();
 		if (pathRenderers[1].enabled) // draw path thick
 		{
 			maxDrawLength = _selfCharacter.GetRemainingMovePoints();

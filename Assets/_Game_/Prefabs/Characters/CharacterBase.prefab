@@ -392,6 +392,7 @@ MonoBehaviour:
   clearActionsDelay: 3
   rollDiceToDodge: 0
   rollDiceOnDefense: 1
+  rollDiceOnRun: 1
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
@@ -456,6 +457,7 @@ MonoBehaviour:
   priorityLeader: 0.7
   priorityFollower: 0.5
   priorityOther: 0.3
+  heightTolerance: 0.5
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
