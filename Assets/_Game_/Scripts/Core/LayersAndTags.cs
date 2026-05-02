@@ -19,6 +19,7 @@ public static class Layers
 	public static int MaskObstruction => LayerMask.GetMask("Ground", "Wall", "Fog", "Door");
 	public static int MaskDetection => LayerMask.GetMask("Ground", "Wall", "Fog", "BlockVision", "Door");
 	public static int MaskProjectile => LayerMask.GetMask("Ground", "Wall", "Prop", "Door");
+	public static int MaskDestructible => LayerMask.GetMask("Prop", "Door");
 }
 
 public static class Tags

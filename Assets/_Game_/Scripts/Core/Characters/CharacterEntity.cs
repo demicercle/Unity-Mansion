@@ -897,4 +897,19 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		return characterData.GetStealthValue();
 	}
+
+	public bool RaycastForDestructible(out Destructible o)
+	{
+		if (Physics.SphereCast(new Ray(GetCenterPosition(), transform.forward), GetRadius() / 2f, out var hit, Mathf.Max(GetRadius(), GetAttackRange()), Layers.MaskDestructible))
+		{
+			if (hit.collider.TryGetComponent(out Destructible destructible))
+			{
+				o = destructible;
+				return true;
+			}
+		}
+
+		o = null;
+		return false;
+	}
 }

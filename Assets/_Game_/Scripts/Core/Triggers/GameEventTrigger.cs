@@ -8,7 +8,8 @@ public class GameEventTrigger : MonoBehaviour
 	public UnityEvent onFightStarts, onFightEnds;
 	public UnityEvent<bool> onTurnBasedChanged;
 	public UnityEvent<bool> onPlayerChanged;
-
+	public bool debugMode;
+	
 	GameTurnManager _gameTurnManager;
 	
 	private void Awake()
