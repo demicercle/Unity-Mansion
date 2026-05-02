@@ -337,8 +337,8 @@ public class GameTurnManager : MonoBehaviour
 
 		currentTurn = 0;
 		leaveTurnBased = false;
+		onPlayerChanged?.Invoke(true);
 		playerTurn = false;
-		onPlayerChanged?.Invoke(playerTurn);
 		
 		foreach (var partyChar in partyCharacters)
 		{
@@ -476,7 +476,7 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 
-		if(debugMode > 0) Debug.Log(this + " FirstTurn");
+		if(debugMode > 0) Debug.Log(this + " FirstTurn: " + playerTurn);
 		
 		onPlayerChanged?.Invoke(playerTurn);
 		onTurnStarted?.Invoke();

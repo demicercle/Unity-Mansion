@@ -27,11 +27,18 @@ public class RoomTrigger : MonoBehaviour
 	public bool IsName(string n) => name == n;
 	public string GetName() => name;
 
-	public static bool TryGetRoom(CharacterEntity character, out RoomTrigger inRoom)
+	public RoomTrigger[] GetConnectedRooms(System.Func<RoomTrigger, bool> predicate = null)
+	{
+		return allRooms.Where(otherRoom => otherRoom != this
+		                                   && otherRoom.doors.Any(otherDoor => doors.Contains(otherDoor))
+		                                   && (predicate == null || predicate(otherRoom))).ToArray();
+	}
+
+	public static bool TryGetRoom(Vector3 position, out RoomTrigger inRoom)
 	{
 		foreach (var room in allRooms)
 		{
-			if (room.HasCharacter(character))
+			if (room.HasPosition(position))
 			{
 				inRoom = room;
 				return true;
@@ -41,6 +48,13 @@ public class RoomTrigger : MonoBehaviour
 		inRoom = null;
 		return false;
 	}
+	
+	public static bool TryGetRoom(CharacterEntity character, out RoomTrigger inRoom)
+	{
+		return TryGetRoom(character.GetCenterPosition(), out inRoom);
+	}
+
+	public GameObject[] GetDoors() => doors.ToArray();
 	
 	public List<CharacterEntity> GetCharacters()
 	{

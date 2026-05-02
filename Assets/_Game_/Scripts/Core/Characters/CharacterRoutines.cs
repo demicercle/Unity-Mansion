@@ -13,6 +13,7 @@ public class CharacterRoutines : MonoBehaviour
 	private const float DefaultWaitSeconds = 1.0f;
 	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
 	private const float MinDeltaToMove = 0.1f;
+	private const float HeightPenalty = 1.0f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -455,6 +456,7 @@ public class CharacterRoutines : MonoBehaviour
 		onComplete?.Invoke();
 	}
 
+	private List<Waypoint> ignoreWaypoints = new List<Waypoint>();
 	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance)
 	{
 		reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAgent().GetMinReachDistance());
@@ -474,27 +476,26 @@ public class CharacterRoutines : MonoBehaviour
 		agent.SetReachDistance(reachDistance);
 		
 		yield return agent.AssignDestination(dest);
-		if (agent.hasDestination)
+		
+		if (!agent.hasDestination)
 		{
-			yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
-		}
-		else
-		{
-			foreach (var possibleDoor in GameObject.FindGameObjectsWithTag(Tags.TagDoor)
-				         .OrderBy(door => Vector3.Distance(door.transform.position, dest)))
+			foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(_selfCharacter.GetPosition(), dest))
 			{
-				if (possibleDoor.TryGetComponent(out PropComponent doorProp) && !doorProp.IsOpened())
-				{
-					yield return agent.AssignWaypointDestinationAsync(doorProp);
-					var doorWp = agent.GetBestWaypoint();
-					if (doorWp)
-					{
-						yield return StartCoroutine(WaitCharacterInteractAtWaypoint(doorProp, doorWp));
-						yield break;
-					}
-				}
+				dest = wp.GetPosition();
+				
+				yield return agent.AssignDestination(dest);
+				if (agent.hasDestination)
+					break;
 			}
 		}
+
+		if (!agent.hasDestination)
+		{
+			Debug.LogWarning(this + " WaitCharacterMoved !agent.hasDestination");
+			yield break;
+		}
+		
+		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
 	}
 
 	private IEnumerator WaitMoveLastPath(Vector3 dest, float forcedReachDistance = 0f)

@@ -253,12 +253,32 @@ public class CharacterAgent : MonoBehaviour
 			
 		if (IsFollowing()) 
 			AssignFollowTransform(null);
-
-		waypoints.Clear();
+		
 		StopAllCoroutines();
 		return StartCoroutine(DoAssignDestination(hitPoint));
 	}
 
+	private IEnumerator DoAssignDestination(Vector3 dest)
+	{
+		hasDestination = false;
+
+		aiPath.destination = dest;
+		aiPath.canSearch = true;
+		aiPath.SearchPath();
+		
+		do
+		{
+			yield return null;
+			lastVectorPath.Clear();
+			aiPath.GetRemainingPath(lastVectorPath, out var _);
+			//if (debugMode > 0) DebugDrawer.Path(lastVectorPath.ToArray(), false, Color.yellow, 0f);
+		}
+		while (aiPath.pathPending);
+
+		hasDestination = aiPath.hasPath;
+		//if (debugMode > 0) DebugDrawer.WireDisc(dest, aiPath.endReachedDistance, hasDestination ? Color.green : Color.yellow, 1.0f);
+	}
+	
 	public bool IsFollowing() => aiDestinationSetter && aiDestinationSetter.target;
 
 	public void AssignFollowTransform(Transform followTarget, float distance = 0f)
@@ -463,25 +483,6 @@ public class CharacterAgent : MonoBehaviour
 			if (hasDestination) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, Color.cyan);
 			if (rvoController.enabled) DebugDrawer.WireCapsule(transform.position, transform.rotation, rvoController.radius, rvoController.height, Color.magenta, 0f);
 		}
-	}
-
-	private IEnumerator DoAssignDestination(Vector3 dest)
-	{
-		hasDestination = false;
-		
-		aiPath.destination = dest;
-		aiPath.canSearch = true;
-		aiPath.SearchPath();
-
-		do
-		{
-			yield return null;
-			lastVectorPath.Clear();
-			aiPath.GetRemainingPath(lastVectorPath, out var _);
-		}
-		while (aiPath.pathPending);
-
-		hasDestination = aiPath.hasPath;
 	}
 
 	private IEnumerator WaitNavmesh()
