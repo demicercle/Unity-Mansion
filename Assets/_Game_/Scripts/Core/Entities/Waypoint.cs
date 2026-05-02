@@ -9,6 +9,11 @@ public class Waypoint : MonoBehaviour
 {
 	private static List<Waypoint> waypoints = new List<Waypoint>();
 	
+	public static IEnumerable<Waypoint> GetAllInstances()
+	{
+		return waypoints.ToArray();
+	}
+	
 	public Vector3 GetPosition() => transform.position;
 	public int GetRotation() => (int)transform.eulerAngles.y;
 	public Vector3 GetDirection() => transform.forward;
@@ -74,4 +79,5 @@ public class Waypoint : MonoBehaviour
 		if(!ignoreRotation)DebugDrawer.WireArrow(GetPosition(), GetDirection(), radius * Vector3.one, color, d);
 		DebugDrawer.WireDisc(GetPosition(), GetDirection(), radius, color, d);
 	}
+
 }

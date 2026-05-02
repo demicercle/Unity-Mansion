@@ -17,8 +17,6 @@ public class CharacterAgent : MonoBehaviour
 	private const float WaypointMaxEndPointDistance = 0.2f;
 	private const int WaypointRoundDecimals = 1000;
 	private const float WaypointMaxSearchDistance = 28.0f;
-	private const float PartialPathTolerance = 0.5f;
-	private const float PartialPathHeightPenalty = 2.0f;
 	
 	public static int debugMode { get; set; }
 
@@ -403,7 +401,7 @@ public class CharacterAgent : MonoBehaviour
 	private string debugString;
 	private IAttackable lastTarget;
 	private bool isObstacle;
-	private List<Waypoint> ignoreWaypointList  = new List<Waypoint>();
+	private Dictionary<Waypoint, ABPath> waypointsPaths = new Dictionary<Waypoint, ABPath>();
 	private Vector3[] drawPath;
 	private float maxDrawLength;
 	private bool[] shouldDrawPath = new []{false,false};
@@ -508,17 +506,13 @@ public class CharacterAgent : MonoBehaviour
 				if(hasDestination)
 					debugString += NavUtils.NavDistance(aiPath.position, aiPath.destination).ToString("N2") 
 					               + ":" + aiPath.endReachedDistance.ToString("N2")
-					               + ":" + CalculatePartialPathDistance(aiPath.endOfPath, aiPath.destination).ToString("N2");
+					               + ":" + NavUtils.NavDistance(aiPath.endOfPath, aiPath.destination).ToString("N2");
 			}
 				
 			if (lastVectorPath?.Length > 0) DebugDrawer.Path(lastVectorPath, false,Color.cyan);
-			if (hasDestination) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance,Color.cyan);
+			if (hasDestination) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, Color.cyan);
 			if (rvoController.enabled) DebugDrawer.WireCapsule(transform.position, transform.rotation, rvoController.radius, rvoController.height, Color.magenta, 0f);
 		}
-		
-		
-		//if (CharacterRoutines.AnyActiveRoutines()) // todo
-		//	UpdatePathAndTarget(true);
 	}
 
 	private IEnumerator DoAssignDestination(Vector3 dest)
@@ -527,23 +521,61 @@ public class CharacterAgent : MonoBehaviour
 		
 		yield return StartCoroutine(DoSearchPathAsync(dest));
 
+		if (!ValidatePath(lastSearchPath.endPoint, dest))
+		{
+			// path is found but distance between end point and destination is too high
+			// attempt to find another reachable position
+			lastSearchPath = new ABPath();
+			waypointsPaths.Clear();
+			
+			foreach (var wp in Waypoint.GetAllInstances())
+			{
+				if (Vector3.Distance(wp.GetPosition(), dest) >= WaypointMaxSearchDistance
+				    || Vector3.Distance(wp.GetPosition(), dest) >= WaypointMaxSearchDistance)
+					continue;
+
+				if (Mathf.Abs(wp.GetPosition().y - dest.y) > endPointYTolerance)
+					continue;
+				
+				yield return StartCoroutine(DoSearchPathAsync(wp.GetPosition()));
+				if (!lastSearchPath.error && ValidatePath(lastSearchPath.endPoint, wp.GetPosition()))
+				{
+					waypointsPaths.Add(wp, lastSearchPath);
+					if (debugMode > 0) Debug.Log(this + " waypointsPaths Add " + wp);
+					if (debugMode > 0) DebugDrawer.Path(lastVectorPath, false, Color.yellow, 1.0f);
+				}
+			}
+
+			foreach (var wp in waypointsPaths
+				         .OrderBy(pair => pair.Value.GetTotalLength() + NavUtils.NavDistance(dest, pair.Key.GetPosition())))
+			{
+				if (debugMode > 0) Debug.Log(this + " waypointsPaths pick " + wp);
+				dest = wp.Key.GetPosition();
+				lastSearchPath = wp.Value;
+				break;
+			}
+		}
+
 		if (!lastSearchPath.error)
 		{
-			hasDestination = true;
-			aiPath.destination = dest;
-			aiPath.SetPath(lastSearchPath);
+			lastVectorPath = lastSearchPath.vectorPath.ToArray();
+			if (debugMode > 0) DebugDrawer.Path(lastVectorPath, false, Color.green, 1.0f);
+			aiPath.destination = lastSearchPath.endPoint;
+			aiPath.canSearch = true;
+			aiPath.SearchPath();
+			do yield return null;
+			while (aiPath.pathPending);
+			hasDestination = aiPath.hasPath;
 		}
+		
+		if(!hasDestination)
+			Debug.LogWarning(this + " cannot find path to " + dest);
 	}
-
-	private bool ValidateDistance(Vector3 endPoint, Vector3 dest) => CalculatePartialPathDistance(endPoint, dest) <= PartialPathTolerance;
-	
-	private float CalculatePartialPathDistance(Vector3 endPoint, Vector3 dest) => NavUtils.NavHDistance(endPoint, dest) 
-	                                                                     + NavUtils.NavVDistance(endPoint, dest) * PartialPathHeightPenalty;
 
 	private IEnumerator DoSearchPathAsync(Vector3 newDest) => DoSearchPathAsync(newDest, newDest);
 	private IEnumerator DoSearchPathAsync(Vector3 newDest, Vector3 finalDest)
 	{
-		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync");
+		//if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync");
 
 		yield return StartCoroutine(WaitNavmesh());
 		
@@ -559,28 +591,15 @@ public class CharacterAgent : MonoBehaviour
 		AstarPath.StartPath(lastSearchPath);
 		yield return StartCoroutine(lastSearchPath.WaitForPath());
 		
-		if (lastSearchPath.error || !ValidateDistance(lastSearchPath.endPoint, newDest))
+		if (lastSearchPath.error)
 		{
 			if(debugMode > 0) Debug.Log(this + " path error to " + newDest);
-			foreach (var wp in Waypoint.GetOrderedWaypointsFrom(finalDest))
-			{
-				if (!ignoreWaypointList.Contains(wp))
-				{
-					if(debugMode > 0) Debug.Log(this + " try reach waypoint " + wp);
-					ignoreWaypointList.Add(wp);
-					yield return StartCoroutine(DoSearchPathAsync(wp.GetPosition(), finalDest));
-					yield break;
-				}
-			}
-			
-			Debug.LogWarning(this + " cannot find waypoint to destination, abort");
 			yield break;
 		}
 
 		lastVectorPath = lastSearchPath.vectorPath.ToArray();
 		
-		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync onComplete lastPath=" + lastVectorPath.Length);
-		ignoreWaypointList.Clear();
+		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync lastPath=" + lastVectorPath.Length);
 	}
 
 	private IEnumerator WaitNavmesh()
@@ -592,38 +611,13 @@ public class CharacterAgent : MonoBehaviour
 		} while (NavmeshRebuilder.IsNavigationDirty());
 		aiPath.canSearch = true;
 	}
+
+
+	[SerializeField] [Min(0f)] private float endPointDistance = 0.25f;
+	[SerializeField] [Min(0f)] private float endPointYTolerance = 0.5f;
 	
-	private bool IsDestinationValid(Vector3 target)
-	{
-		var layeredGraph = AstarPath.active.graphs.OfType<LayerGridGraph>().First();
-	    
-        // Crée une contrainte pour forcer la bonne couche
-        NNConstraint constraint = NNConstraint.Default;
-        constraint.constrainWalkability = true;
-        constraint.constrainDistance = true;
-
-        // Trouve le nœud le plus proche SUR LA BONNE COUCHE
-        NNInfo nearest = AstarPath.active.GetNearest(target, constraint);
-
-        if (nearest.node != null)
-        {
-            // Vérifie si le nœud est sur la bonne couche (Y)
-            var node = nearest.node as GridNode;
-            if (node != null)
-            {
-                // Calcule la différence de hauteur entre la cible et le nœud
-                float heightDiff = Mathf.Abs(target.y - (float)node.position.y);
-
-                // Si la différence est trop grande, cherche un nœud sur une autre couche
-                if (heightDiff > layeredGraph.nodeSize) // Seuil = taille d'un nœud
-                {
-	                return false;
-                }
-            }
-        }
-
-        return true;
-	}
+	private bool ValidatePath(Vector3 endPoint, Vector3 dest)  => Vector3.Distance(endPoint, dest) <= endPointDistance 
+	                                                              && Mathf.Abs(endPoint.y - dest.y) <= endPointYTolerance;
 	
 	private void UpdatePathAndTarget() => UpdatePathAndTarget(true);
 	
