@@ -120,7 +120,6 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.simulateMovement = true;
 		aiPath.isStopped = false;
 		aiPath.canSearch = true;
-		UpdatePathAndTarget(true);
 	}
 
 	public void StopMovement(bool clamp = false)
@@ -249,8 +248,9 @@ public class CharacterAgent : MonoBehaviour
 	
 	public Coroutine AssignDestination(Vector3 hitPoint)
 	{
-		if(debugMode > 1) Debug.Log(this + " Assign_new_Destination");
-			
+		//if(debugMode > 1) Debug.Log(this + " Assign_new_Destination");
+		ClearPath();
+		
 		if (IsFollowing()) 
 			AssignFollowTransform(null);
 		
@@ -261,6 +261,8 @@ public class CharacterAgent : MonoBehaviour
 	private IEnumerator DoAssignDestination(Vector3 dest)
 	{
 		hasDestination = false;
+		
+		lastVectorPath.Clear();
 
 		aiPath.destination = dest;
 		aiPath.canSearch = true;
@@ -269,7 +271,6 @@ public class CharacterAgent : MonoBehaviour
 		do
 		{
 			yield return null;
-			lastVectorPath.Clear();
 			aiPath.GetRemainingPath(lastVectorPath, out var _);
 			//if (debugMode > 0) DebugDrawer.Path(lastVectorPath.ToArray(), false, Color.yellow, 0f);
 		}
@@ -297,7 +298,6 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.canSearch = followTarget != null;
 		aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
 		if (followTarget && !IsMoving()) StartMove();
-		UpdatePathAndTarget(true);
 	}
 
 	public void ClearDestination()
@@ -307,7 +307,6 @@ public class CharacterAgent : MonoBehaviour
 		hasDestination = false;
 		lastVectorPath = new List<Vector3>();
 		StopAllCoroutines();
-		UpdatePathAndTarget(true);
 	}
 
 	public bool ReachedDestination() => ReachedDestination(aiPath.destination);
@@ -392,8 +391,6 @@ public class CharacterAgent : MonoBehaviour
 		UpdateComponent();
 		
 		_gameTurnManager = GameTurnManager.Instance;
-		_gameTurnManager.onTurnEnded += UpdatePathAndTarget;
-		_gameTurnManager.onTurnStarted += UpdatePathAndTarget;
 		CharacterSelection.selectionChanged += SelectionChanged;
 
 		moveTarget.name += " (" + name + ")";
@@ -420,22 +417,17 @@ public class CharacterAgent : MonoBehaviour
 		if(moveTarget) Destroy(moveTarget.gameObject);
 		_selfCharacter.onUseAction -= OnUseAction;
 		_selfCharacter.onPartyIndexChanged -= OnPartyIndexChanged;
-		_gameTurnManager.onTurnEnded -= UpdatePathAndTarget;
-		_gameTurnManager.onTurnStarted -= UpdatePathAndTarget;
 		CharacterSelection.selectionChanged -= SelectionChanged;
 	}
 
 	private void Start()
 	{
 		if (!hasDestination) aiPath.isStopped = true; // Start
-		
-		UpdatePathAndTarget(true);
 	}
 
 	private void OnUseAction(CharacterAction action, object param)
 	{
 		StopMovement();
-		UpdatePathAndTarget(true);
 	}
 
 	private void OnPartyIndexChanged(int newIndex, int partyCount)
@@ -448,7 +440,6 @@ public class CharacterAgent : MonoBehaviour
 		UpdateRVO();
 		UpdateObstacle();
 		if(!IsMoving()) ClearDestination();
-		UpdatePathAndTarget(true);
 	}
 
 	private void UpdateRVO()
@@ -464,6 +455,8 @@ public class CharacterAgent : MonoBehaviour
 	private void LateUpdate()
 	{
 		//rvoController.enabled = !_selfCharacter.IsCurrentTurn() || !_selfCharacter.IsSelected();
+		
+		UpdateMoveTarget(_selfCharacter.IsMoving());
 		
 		if (debugMode > 0)
 		{
@@ -498,92 +491,43 @@ public class CharacterAgent : MonoBehaviour
 
 	[SerializeField] [Min(0f)] private float endPointDistance = 0.25f;
 	[SerializeField] [Min(0f)] private float endPointYTolerance = 0.5f;
-	
-	private bool ValidatePath(Vector3 endPoint, Vector3 dest)  => Vector3.Distance(endPoint, dest) <= endPointDistance 
-	                                                              && Mathf.Abs(endPoint.y - dest.y) <= endPointYTolerance;
-	
-	private void UpdatePathAndTarget() => UpdatePathAndTarget(true);
-	
-	private void UpdatePathAndTarget(bool force)
+
+	public void ClearPath()
 	{
-		//TODO: controller.IsActing(), controller.IsMoving(), controller.IsRotating()
-
-		shouldDrawPath[0] = hasDestination // "thin" path
-		                    && !IsFollowing()
-		                    && !IsMoving()
-		                    && GameTurnManager.Instance.IsTurnBasedMode()
-		                    && CharacterSelection.IsCharacterSelected(_selfCharacter)
-		                    && _selfCharacter.IsControllableByPlayer()
-		                    && (!CharacterRoutines.AnyActiveRoutines() || _selfCharacter.IsMoving())
-		                    && lastVectorPath.Count > 1;
-
-		shouldDrawPath[1] = hasDestination  // "thin" path
-		                    && !IsFollowing()
-		                    && !IsMoving()
-		                    && GameTurnManager.Instance.IsTurnBasedMode()
-		                    && CharacterSelection.IsCharacterSelected(_selfCharacter) 
-		                    && _selfCharacter.IsControllableByPlayer() 
-		                    && !CharacterRoutines.AnyActiveRoutines()
-		                    && lastVectorPath.Count > 1;
-								//&& !controller.IsRotating()
-								//&& !controller.IsMoving();
-
-		if (lastTarget != null)
-		{
-			if ( (_selfCharacter.ShouldAttack(lastTarget) && _selfCharacter.IsAtAttackRange(lastTarget))
-			    || (lastTarget is CharacterEntity && _selfCharacter.ShouldTalk(lastTarget as CharacterEntity) 
-			                                      && _selfCharacter.GetDistanceTo(lastTarget.GetPosition()) <= _selfCharacter.GetTalkDistance(lastTarget as CharacterEntity)))
-			{
-				shouldDrawPath[0] = shouldDrawPath[1] = false;
-			}
-		}
-		
-		if (force || shouldDrawPath[0] != isDrawingPath[0])
-		{
-			drawPath = lastVectorPath.ToArray();
-			pathRenderers[0].enabled = isDrawingPath[0] = shouldDrawPath[0];
-			if (pathRenderers[0].enabled) // draw path thin
-			{
-				pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(_selfCharacter.GetCurrentFaction());
-				pathRenderers[0].positionCount = drawPath.Length;
-				pathRenderers[0].useWorldSpace = true;
-				pathRenderers[0].SetPositions(drawPath);
-			}
-		}
-
-		if (force || shouldDrawPath[1] != isDrawingPath[1])
-		{
-			drawPath = lastVectorPath.ToArray();
-			pathRenderers[1].enabled = isDrawingPath[1] = shouldDrawPath[1];
-			if (pathRenderers[1].enabled) // draw path thick
-			{
-				maxDrawLength = _selfCharacter.GetRemainingMovePoints();
-				if (_selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer()
-				                                && GameInput.Instance.TryGetMouseOver<CharacterEntity>(out var mouseOverCharacter))
-				{
-					if(_selfCharacter.ShouldAttack(mouseOverCharacter))
-						maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackReachDistance(mouseOverCharacter));
-				}
-				drawPath = Utils.LimitPathTotalLength(drawPath, maxDrawLength);
-				pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_selfCharacter, true, true);
-				pathRenderers[1].positionCount = drawPath.Length;
-				pathRenderers[1].useWorldSpace = true;
-				pathRenderers[1].SetPositions(drawPath);
-			}
-		}
-		
-		UpdateMoveTarget(_selfCharacter.IsMoving());
+		pathRenderers[0].enabled = false;
+		pathRenderers[1].enabled = false;
 	}
-
-	private bool ShowMoveTarget()
+	
+	public void DrawPath()
 	{
-		if (IsFollowing() || !_selfCharacter.IsPlayer())
-			return false;
-
-		if (bestWaypoint)
-			return true;
-
-		return hasDestination;
+		drawPath = lastVectorPath.ToArray();
+		pathRenderers[0].enabled = true;
+		if (pathRenderers[0].enabled) // draw path thin
+		{
+			pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(_selfCharacter.GetCurrentFaction());
+			pathRenderers[0].positionCount = drawPath.Length;
+			pathRenderers[0].useWorldSpace = true;
+			pathRenderers[0].SetPositions(drawPath);
+//			Debug.Log(this + " draw path " + drawPath.Length);
+		}
+		
+		drawPath = lastVectorPath.ToArray();
+		pathRenderers[1].enabled = true;
+		if (pathRenderers[1].enabled) // draw path thick
+		{
+			maxDrawLength = _selfCharacter.GetRemainingMovePoints();
+			if (_selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer()
+			                                && GameInput.Instance.TryGetMouseOver<CharacterEntity>(out var mouseOverCharacter))
+			{
+				if(_selfCharacter.ShouldAttack(mouseOverCharacter))
+					maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackReachDistance(mouseOverCharacter));
+			}
+			drawPath = Utils.LimitPathTotalLength(drawPath, maxDrawLength);
+			pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_selfCharacter, true, true);
+			pathRenderers[1].positionCount = drawPath.Length;
+			pathRenderers[1].useWorldSpace = true;
+			pathRenderers[1].SetPositions(drawPath);
+		}
 	}
 
 	private void UpdateMoveTarget(bool isBlinking)
@@ -597,6 +541,17 @@ public class CharacterAgent : MonoBehaviour
 		moveTarget.transform.position = aiPath.destination;
 		moveTarget.SetColor(ColorSettings.GetCharacterColor(_selfCharacter, true, true));
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
+	}
+
+	private bool ShowMoveTarget()
+	{
+		if (IsFollowing() || !_selfCharacter.IsPlayer())
+			return false;
+
+		if (bestWaypoint)
+			return true;
+
+		return hasDestination;
 	}
 
 	public void SetRotationY(float eulerAnglesY)

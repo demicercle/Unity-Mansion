@@ -9,7 +9,7 @@ public class HeightPathModifier : MonoModifier
 
 	public AIPath aiPath;
 	public float heightTolerance = 0.5f;
-	public int debugMode = 1;
+	public int debugMode => CharacterAgent.debugMode;
 	
 	public override void Apply(Path path)
 	{

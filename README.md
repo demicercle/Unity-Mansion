@@ -12,6 +12,10 @@
 - "miss" gauge
 - taunt action
 
+- squad alert turn order
+- run should also roll dices
+- display enemies portraits
+
 
 REFACTO
 - add namespaces

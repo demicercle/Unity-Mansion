@@ -17,7 +17,6 @@ public class GameInput : MonoBehaviour
 
 	private const float MinDelayBetweenAssignTarget = 0.5f;
 	public const float MaxMouseDeltaToClick = 3.0f;
-	public const float AutoAssignDestinationToCLickedPropDistance = 1.0f;
 	
 	public const int CursorRaycastResult_None = 0;
 	public const int CursorRaycastResult_Navigation = 1;
@@ -405,7 +404,7 @@ public class GameInput : MonoBehaviour
 			lastCursorResult = CursorRaycast(out var hit);
 			mouseOverChanged = lastMouseOverObject != hit.collider;
 			lastMouseOverObject = hit.collider;
-			mouseHasMoved = mouseHasMoved || mouseOverChanged || NavUtils.NavDistance(hit.point, lastMousePosition) >= nodeSize;
+			mouseHasMoved = mouseHasMoved || mouseOverChanged || NavUtils.NavDistance(hit.point, lastNavPosition) >= nodeSize;
 			lastNavPosition = hit.point;
 		}
 		else
@@ -606,6 +605,18 @@ public class GameInput : MonoBehaviour
 		if (navigationTarget.gameObject.activeSelf)
 		{
 			navigationTarget.transform.position = navigationHit.point;
+		}
+		
+		foreach (var character in CharacterEntity.AllCharacters)
+		{
+			if (character.IsSelected() && character.IsControllableByPlayer() && gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn())
+			{
+				character.GetAgent().DrawPath();
+			}
+			else
+			{
+				character.GetAgent().ClearPath();
+			}
 		}
 		
 		lastMousePosition = mousePosition;

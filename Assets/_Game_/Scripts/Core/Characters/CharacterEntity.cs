@@ -105,6 +105,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private float clearActionsDelay = 3.0f;
 	[SerializeField] private bool rollDiceToDodge = false;
 	[SerializeField] private bool rollDiceOnDefense = false;
+	[SerializeField] private bool rollDiceOnRun = false;
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f; // TODO remove
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
@@ -315,6 +316,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		Debug.Log(this + " usedAction=" + usedActions.Last() + " param=" + param);
 		if (actionType == CharacterAction.Run)
 		{
+			if (rollDiceOnRun) RollDice();
 			usedMovePoints -= characterData.GetRunActionExtraMovePoints();
 		}
 		else if (actionType == CharacterAction.Talk)
