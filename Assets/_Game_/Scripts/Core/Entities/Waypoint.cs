@@ -1,14 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pathfinding;
 using UnityEngine;
 
 
 public class Waypoint : MonoBehaviour
 {
+	private static List<Waypoint> waypoints = new List<Waypoint>();
+	
 	public Vector3 GetPosition() => transform.position;
 	public int GetRotation() => (int)transform.eulerAngles.y;
 	public Vector3 GetDirection() => transform.forward;
+
+	public static Waypoint[] GetOrderedWaypointsFrom(Vector3 world, float heightPenalty = 2f)
+	{
+		return waypoints.OrderBy(wp => NavUtils.NavHDistance(wp.GetPosition(), world) + NavUtils.NavVDistance(wp.GetPosition(), world) * heightPenalty).ToArray();
+	}
 		
 	[Range(0.1f, 10.0f)] public float radius = 0.4f;
 	public bool ignoreRotation;
@@ -46,12 +54,12 @@ public class Waypoint : MonoBehaviour
 
 	private void OnEnable()
 	{
-		//waypoints.Add(this);
+		waypoints.Add(this);
 	}
 
 	private void OnDisable()
 	{
-		//waypoints.Remove(this);
+		waypoints.Remove(this);
 	}
 
 	private void OnDrawGizmos()

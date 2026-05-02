@@ -503,7 +503,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public float GetRadius() => GetAgent().GetRadius();
 	public float GetHeight() => GetAgent().GetHeight();
 	public bool IsMoving() => GetAgent().IsMoving();
-	public bool IsPathAssignable() =>  agent.isPathValid;
 	
 	public void StopAgent()
 	{

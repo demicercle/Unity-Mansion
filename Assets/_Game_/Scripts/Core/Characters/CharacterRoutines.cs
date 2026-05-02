@@ -117,64 +117,29 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignMoveToDestination(Vector3 navPosition)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignMoveToDestination ");
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-		{
-			if (partyCharacter == _selfCharacter)
-			{
-				partyCharacter.Routines.AssignMoveToDestination(navPosition);
-			}
-			else
-			{
-				partyCharacter.Routines.AssignFollows(_selfCharacter);
-			}
-		}
+		_selfCharacter.Routines.AssignMoveToDestination(navPosition);
+		Leader_AssignFollows();
 	}
 	public void Leader_AssignInteract(PropComponent clickedProp)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignInteract ");
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-		{
-			if (partyCharacter == _selfCharacter)
-			{
-				partyCharacter.Routines.AssignInteract(clickedProp);
-			}
-			else
-			{
-				partyCharacter.Routines.AssignFollows(_selfCharacter);
-			}
-		}
+		_selfCharacter.Routines.AssignInteract(clickedProp);
+		Leader_AssignFollows();
 	}
 	public void Leader_AssignAttack(IAttackable other)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-		{
-			if (partyCharacter == _selfCharacter)
-			{
-				partyCharacter.Routines.AssignMoveAndAttack(other, partyCharacter.IsUsingRangeWeapon());
-			}
-			else
-			{
-				partyCharacter.Routines.AssignFollows(_selfCharacter);
-			}
-		}
+		_selfCharacter.Routines.AssignMoveAndAttack(other, _selfCharacter.IsUsingRangeWeapon());
+		Leader_AssignFollows();
 	}
 	public void Leader_AssignTalk(CharacterEntity npc)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignTalk ");
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-		{
-			if (partyCharacter == _selfCharacter)
-			{
-				partyCharacter.Routines.AssignTalk(npc);
-			}
-			else
-			{
-				partyCharacter.Routines.AssignFollows(_selfCharacter);
-			}
-		}
+		_selfCharacter.Routines.AssignTalk(npc);
+		Leader_AssignFollows();
 	}
-	public void AssignFollows(CharacterEntity leader)
+	
+	private void AssignFollows(CharacterEntity leader)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignFollows " + leader);
 		StopAllRoutines();
@@ -185,6 +150,35 @@ public class CharacterRoutines : MonoBehaviour
 		follow.enabled = true;
 	}
 
+	private void Leader_AssignFollows()
+	{
+		var leader = default(CharacterEntity);
+		
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
+		{
+			if (partyCharacter == _selfCharacter)
+			{
+				leader = partyCharacter;
+				break;
+			}
+		}
+		
+		if (!leader)
+		{
+			Debug.LogWarning(this + " can't Leader_AssignFollows");
+			return;
+		}
+
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
+		{
+			if (partyCharacter != _selfCharacter)
+			{
+				partyCharacter.Routines.AssignFollows(leader);
+				leader = partyCharacter;
+			}
+		}
+	}
+	
 	public void StopAllRoutines()
 	{
 		if (activeInstances.Contains(this))
@@ -269,7 +263,7 @@ public class CharacterRoutines : MonoBehaviour
 				yield break;
 			}
 			
-			yield return agent.SearchPathAsync(destination, false);
+			yield return agent.AssignDestination(destination);
 
 			var path = agent.GetCurrentPath();
 			pathValid = path.Length > 1 && NavUtils.NavDistance(path.Last(), destination) <= reachRadius + agent.GetRadius();
@@ -464,7 +458,7 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // stop any movement
 		agent.SetReachDistance(reachDistance);
 		
-		yield return agent.SearchPathAsync(dest, true);
+		yield return agent.AssignDestination(dest);
 		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved ends");
 	}
@@ -530,7 +524,7 @@ public class CharacterRoutines : MonoBehaviour
 				freezeTime =  Time.time;
 				if (debugMode > 0) Debug.Log(this + " retry agent");
 				agent.StopMovement();
-				yield return agent.SearchPathAsync(dest, true);
+				yield return agent.AssignDestination(dest);
 				agent.StartMove(); // retry agent
 				yield return null;
 			}

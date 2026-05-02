@@ -229,6 +229,8 @@ public class GameSave : ScriptableObject
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
 	
+	public bool ShouldLoad { get; set; }
+	
 	public bool IsEmpty() => version == 0;
 
 	public void SetSavedValue(string valueName, int newValue)
