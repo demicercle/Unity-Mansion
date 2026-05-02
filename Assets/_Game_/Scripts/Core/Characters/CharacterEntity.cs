@@ -104,6 +104,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private Canvas characterCanvas;
 	[SerializeField] private float clearActionsDelay = 3.0f;
 	[SerializeField] private bool rollDiceToDodge = false;
+	[SerializeField] private bool rollDiceOnDefense = false;
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f; // TODO remove
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
@@ -290,7 +291,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			if (target.CanDodge())
 			{
 				target.dodgeCount = Mathf.Max(0, target.dodgeCount - 1);
-				if (rollDiceToDodge ? 1f - target.RollDice() > target.GetDodgeChance() : target.GetDodgeChance() > hitChance)
+				if (rollDiceToDodge ? 1f - target.RollDice() > target.GetDodgeChance() : target.GetDodgeChance() > atkRoll)
 				{
 					onAttackResult?.Invoke(this, target, AttackResult.Dodge);
 					return AttackResult.Dodge;
@@ -322,6 +323,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 		else if (actionType == CharacterAction.Defend)
 		{
+			if (rollDiceOnDefense) RollDice();
 			dodgeCount++;
 		}
 		onUseAction?.Invoke(actionType, param);

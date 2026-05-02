@@ -318,10 +318,10 @@ public class GameTurnManager : MonoBehaviour
 					
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
-
-				if(debugMode > 0) Debug.Log(this + " yield");
+				
+				otherCharacter.GetAgent().SetObstacle(true);
 				yield return YieldRoutines();
-				if(debugMode > 0) Debug.Log(this + " end yield");
+				yield return WaitNavigationDirty();
 			}
 			
 			yield return new WaitForSeconds(turnChangedSeconds);

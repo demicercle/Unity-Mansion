@@ -99,7 +99,7 @@ public class CharacterLookAt : MonoBehaviour
 			 worldDir = _selfCharacter.GetDirectionTo(lookTarget.position);
 			 worldDot = Utils.FlatDot(transform.forward, worldDir);
 			 minDotToRotate = _isRotating ? dotRange.y : dotRange.x;
-			if (worldDot < minDotToRotate && !_selfCharacter.Routines.AnyActive())
+			if (worldDot < minDotToRotate && !_selfCharacter.Routines.AnyActive() && !_selfCharacter.GetAgent().IsMoving())
 			{
 				_isRotating = true;
 				_selfCharacter.LookWorldPosition(lookTarget.position, f);

@@ -26,7 +26,9 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] [Min(0f)] private float minReachDistance = 0.1f;
-	[SerializeField] private bool reversePriority = false;
+	[SerializeField] [Range(0f, 1f)] private float priorityLeader = 0.7f;
+	[SerializeField] [Range(0f, 1f)] private float priorityFollower = 0.5f;
+	[SerializeField] [Range(0f, 1f)] private float priorityOther = 0.3f;
 	
 	[Header("Rendering")]
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -576,9 +578,12 @@ public class CharacterAgent : MonoBehaviour
 
 	private void UpdateRVO()
 	{
-		rvoController.priority = CharacterSelection.IsCharacterSelected(_selfCharacter) ? 0.90f : _selfCharacter.InParty() ? 0.66f : 0.33f;
-		if(reversePriority) rvoController.priority = 1f - rvoController.priority;
-		rvoController.lockWhenNotMoving = _selfCharacter.IsSelected();
+		rvoController.lockWhenNotMoving = _selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer() 
+		                                                              && (GameTurnManager.Instance.IsPlayerTurn() || !GameTurnManager.Instance.IsTurnBasedMode());
+		
+		rvoController.priority = rvoController.lockWhenNotMoving ? priorityLeader 
+								: _selfCharacter.InParty() ? priorityFollower 
+								: priorityOther;
 	}
 
 	private void LateUpdate()

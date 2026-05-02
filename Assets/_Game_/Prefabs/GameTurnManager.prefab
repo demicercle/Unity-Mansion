@@ -49,7 +49,7 @@ MonoBehaviour:
   nextLevelName: Level_0
   cameraStartZoom: 0.204
   rollDiceWhenTurnStarts: 0
-  rollDiceWhenTurnEnds: 1
+  rollDiceWhenTurnEnds: 0
   realTimeTicks: 1.5
   postLoadSceneDuration: 1
   postLoadSaveDuration: 2

@@ -13,31 +13,14 @@ public class ActionButton : MonoBehaviour
 	{
 		button = GetComponent<Button>();
 		button.onClick.AddListener(OnButtonClick);
-		CharacterSelection.selectionChanged += SelectionChanged;
-		GameTurnManager.Instance.onTurnEnded += TurnChanged;
-		GameTurnManager.Instance.onTurnStarted += TurnChanged;
 	}
 
 	private void OnDisable()
 	{
 		button.onClick.RemoveListener(OnButtonClick);
-		CharacterSelection.selectionChanged -= SelectionChanged;
-		GameTurnManager.Instance.onTurnEnded -= TurnChanged;
-		GameTurnManager.Instance.onTurnStarted -= TurnChanged;
 	}
 
-	private void SelectionChanged()
-	{
-		RefreshState();
-	}
-
-	private void TurnChanged()
-	{
-		button.interactable = false;
-		Invoke("RefreshState", 0.1f);
-	}
-
-	private void RefreshState()
+	private void LateUpdate()
 	{
 		button.interactable = CharacterSelection.TryGetSelectedCharacter(out var selected) 
 		                      && selected.IsControllableByPlayer() 

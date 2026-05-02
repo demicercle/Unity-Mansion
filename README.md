@@ -10,7 +10,7 @@
 - zombi can attack from below
 
 - "miss" gauge
-- save dodge dice for later
+- taunt action
 
 
 REFACTO

@@ -390,6 +390,7 @@ MonoBehaviour:
   characterCanvas: {fileID: 437776869319342895}
   clearActionsDelay: 3
   rollDiceToDodge: 0
+  rollDiceOnDefense: 1
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
@@ -451,7 +452,9 @@ MonoBehaviour:
   radius: 0.5
   height: 1.5
   minReachDistance: 0.1
-  reversePriority: 0
+  priorityLeader: 0.7
+  priorityFollower: 0.5
+  priorityOther: 0.3
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
@@ -769,8 +772,8 @@ MonoBehaviour:
     visualizeSensitivity: 0
   maxAcceleration: -2.5
   rotationSpeed: 360
-  slowdownDistance: 0.5
-  pickNextWaypointDist: 0.25
+  slowdownDistance: 1.5
+  pickNextWaypointDist: 0.5
   alwaysDrawGizmos: 0
   slowWhenNotFacingTarget: 1
   preventMovingBackwards: 1
@@ -869,9 +872,9 @@ MonoBehaviour:
   centerBackingField: 1
   locked: 0
   lockWhenNotMoving: 1
-  agentTimeHorizon: 1.5
-  obstacleTimeHorizon: 1.5
-  maxNeighbours: 5
+  agentTimeHorizon: 2
+  obstacleTimeHorizon: 2
+  maxNeighbours: 10
   layer: 1
   collidesWith: 3
   wallAvoidForce: 1
