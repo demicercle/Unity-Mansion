@@ -33,7 +33,7 @@ public class StartScene : MonoBehaviour
 
 	private void ClickNewGame()
 	{
-		GameSave.Current.Clear();
+		GameSave.Current.Clear(true);
 		GameSave.Current.ShouldLoad = false;
 		sceneLoader.LoadNow();
 	}

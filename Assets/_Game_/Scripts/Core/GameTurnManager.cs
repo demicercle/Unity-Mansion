@@ -95,8 +95,17 @@ public class GameTurnManager : MonoBehaviour
 	{
 		waitTime = newTime;
 	}
-	
-	public bool IsWaiting() => waitTime !=  0f;
+
+	public bool IsWaiting()
+	{
+		if (waitTime != 0f)
+			return true;
+
+		if (IsTurnBasedMode())
+			return !IsPlayerTurn() || AnyActiveRoutinesPlaying();
+
+		return false;
+	}
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;

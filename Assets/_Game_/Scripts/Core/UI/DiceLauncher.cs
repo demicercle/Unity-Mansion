@@ -71,7 +71,6 @@ public class DiceLauncher : MonoBehaviour
 
 	private IEnumerator Animate()
 	{
-		launchButton.interactable = false;
 		allowedRollsText.gameObject.SetActive(false);
 
 		while (animCount > 0)
@@ -92,11 +91,11 @@ public class DiceLauncher : MonoBehaviour
 		}
 
 		allowedRollsText.gameObject.SetActive(true);
-		launchButton.interactable = AllowedDiceRolls > 0;
 	}
 
 	private void LateUpdate()
 	{
 		allowedRollsText.text = AllowedDiceRolls.ToString();
+		launchButton.interactable = AllowedDiceRolls > 0 && animCount <= 0;
 	}
 }

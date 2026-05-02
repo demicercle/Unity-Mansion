@@ -556,7 +556,7 @@ public class GameInput : MonoBehaviour
 
 		if (mouseOverViewport)
 		{
-			if (CharacterRoutines.AnyActiveRoutines() && gameTurnManager.IsTurnBasedMode())
+			if (gameTurnManager.IsWaiting())
 			{
 				SetCurrentCursorType(CursorType.Waiting);
 				SetItemToUse(null, false);
@@ -600,7 +600,7 @@ public class GameInput : MonoBehaviour
 	
 	private void LateUpdate()
 	{
-		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading);
+		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading && !gameTurnManager.IsWaiting());
 		
 		if (navigationTarget.gameObject.activeSelf)
 		{

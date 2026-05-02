@@ -492,8 +492,11 @@ public class CharacterAgent : MonoBehaviour
 
 	public void ClearPath()
 	{
-		pathRenderers[0].enabled = false;
-		pathRenderers[1].enabled = false;
+		for (int i = 0; i < pathRenderers.Count; i++)
+		{
+			if (pathRenderers[i])
+				pathRenderers[i].enabled = false;
+		}
 	}
 	
 	public void DrawPath()
