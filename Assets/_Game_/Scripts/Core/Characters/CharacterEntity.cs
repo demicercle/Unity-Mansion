@@ -648,7 +648,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public WeaponData GetCurrentWeapon() => currentWeapon;
 
-	public float GetDistanceTo(Vector3 world) => Vector3.Distance(GetPosition(), world);
+	public float GetDistanceTo(Vector3 world) => NavUtils.NavDistance(GetPosition(), world);
 	
 	public bool WaypointReached(Waypoint wp)
 	{
@@ -669,8 +669,17 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool IsAtAttackRange(IAttackable target)
 	{
 		var atkRange = GetAttackReachDistance(target) + MinAttackRange;
-		var dist = NavUtils.NavDistanceRoundY(GetPosition(), target.GetPosition());
-		return dist <= atkRange;
+		if (IsUsingRangeWeapon())
+		{
+			var dist = GetDistanceTo(target.GetPosition());
+			return dist <= atkRange;
+		}
+		else
+		{
+			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetPosition());
+			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetPosition());
+			return vDist <= GetHeight() && hDist <= atkRange;
+		}
 	}
 	
 	public bool LOSCheck(IAttackable other)

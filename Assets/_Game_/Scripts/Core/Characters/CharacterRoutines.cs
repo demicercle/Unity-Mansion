@@ -272,7 +272,7 @@ public class CharacterRoutines : MonoBehaviour
 			yield return agent.SearchPathAsync(destination, false);
 
 			var path = agent.GetCurrentPath();
-			pathValid = path.Length > 1 && NavUtils.NavDistanceRoundY(path.Last(), destination) <= reachRadius + agent.GetRadius();
+			pathValid = path.Length > 1 && NavUtils.NavDistance(path.Last(), destination) <= reachRadius + agent.GetRadius();
 			
 		} while (!pathValid);
 
@@ -306,7 +306,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else if(debugMode > 0) 
 		{
-			var dist = NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), destination);
+			var dist = NavUtils.NavDistance(_selfCharacter.GetPosition(), destination);
 			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + destination);
 		}
 	}
@@ -450,7 +450,7 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAgent().GetMinReachDistance());
 		
-		var currentDistance = NavUtils.NavDistanceRoundY(dest,  _selfCharacter.GetPosition());
+		var currentDistance = NavUtils.NavDistance(dest,  _selfCharacter.GetPosition());
 		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
 		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " " + reachDistance + " currentDistance=" + currentDistance);
 		
@@ -573,7 +573,7 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));
+		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination " + NavUtils.NavDistance(dest, _selfCharacter.GetPosition()));
 		agent.StopMovement();
 	}
 	
@@ -623,7 +623,7 @@ public class CharacterRoutines : MonoBehaviour
 		if (objectTo is CharacterEntity)
 		{
 			var otherCharacter = objectTo as CharacterEntity;
-			if (useRange > 0 && NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) >
+			if (useRange > 0 && NavUtils.NavDistance(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) >
 			    useRange)
 			{
 				if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItem WaitCharacterMoved");
@@ -631,7 +631,7 @@ public class CharacterRoutines : MonoBehaviour
 			}
 
 			if (useRange <= 0 ||
-			    NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
+			    NavUtils.NavDistance(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
 			{
 				if (debugMode > 0) Debug.Log(this + " WaitCharacterUseItem at useRange");
 				while (otherCharacter != _selfCharacter && !_selfCharacter.IsFacingPosition(otherCharacter.GetPosition()))

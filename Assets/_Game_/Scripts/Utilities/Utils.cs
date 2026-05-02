@@ -334,14 +334,27 @@ public static class Utils
 
 public static class NavUtils
 {
-	public const float MinNavDistance = 0.1f;
-	public const float RoundYDecimals = 100f;
-	
-	public static float NavDistanceRoundY(Vector3 from, Vector3 to)
+	public static float NavDistance(Vector3 from, Vector3 to, float decimals = 100f)
 	{
-		from.y = to.y = Mathf.Round(from.y * RoundYDecimals) / RoundYDecimals;
+		from = (Vector3)RoundVec3(from * decimals) / decimals;
+		to = (Vector3)RoundVec3(to * decimals) / decimals;
 		return Vector3.Distance(from, to);
 	}
+	
+	public static float NavHDistance(Vector3 from, Vector3 to, float decimals = 100f)
+	{
+		from.y = to.y = 0;
+		return NavDistance(from, to, decimals);
+	}
+	
+	public static float NavVDistance(Vector3 from, Vector3 to, float decimals = 100f)
+	{
+		from.x = to.x = 0;
+		from.z = to.z = 0;
+		return NavDistance(from, to, decimals);
+	}
+
+	public static Vector3Int RoundVec3(Vector3 v) => new Vector3Int((int)v.x, (int)v.y, (int)v.z);
 	
 	/// <summary>
 	/// Récupère un point aléatoire accessible sur le graphe, dans un rayon donné autour d'un centre.

@@ -205,7 +205,7 @@ public class CharacterAgent : MonoBehaviour
 		{
 			var endPoint = wp.GetPosition();
 
-			if (NavUtils.NavDistanceRoundY(startPoint, endPoint) > WaypointMaxSearchDistance)
+			if (NavUtils.NavDistance(startPoint, endPoint) > WaypointMaxSearchDistance)
 				continue;
 
 			if (!RoomTrigger.IsPositionVisible(endPoint)) // ignore not revealed waypoint
@@ -252,8 +252,8 @@ public class CharacterAgent : MonoBehaviour
 					float pathLength = path.GetTotalLength();
 					if (waypointOut && (int)pathLength * WaypointRoundDecimals == (int)bestLength * WaypointRoundDecimals) // sometimes results are wrong, this is a hak
 					{
-						var bestDist = NavUtils.NavDistanceRoundY(startPoint, waypointOut.GetPosition());
-						var pathDist = NavUtils.NavDistanceRoundY(startPoint, endPoint);
+						var bestDist = NavUtils.NavDistance(startPoint, waypointOut.GetPosition());
+						var pathDist = NavUtils.NavDistance(startPoint, endPoint);
 						if (bestDist < pathDist)
 							pathLength = -1f; // override path length because the path is actually not shorter
 					}
@@ -359,7 +359,7 @@ public class CharacterAgent : MonoBehaviour
 	public bool ReachedDestination() => ReachedDestination(aiPath.destination);
 	public bool ReachedDestination(Vector3 dest)
 	{
-		var dist = NavUtils.NavDistanceRoundY(aiPath.position, dest);
+		var dist = NavUtils.NavDistance(aiPath.position, dest);
 		var reach = Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
 		dist = float.Parse(dist.ToString("N2"));
 		reach = float.Parse(reach.ToString("N2"));
