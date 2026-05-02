@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
+using Pathfinding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,6 +23,7 @@ public class GameTurnManager : MonoBehaviour
 	[Header("Game Rules")]
 	[SerializeField] private bool rollDiceWhenTurnStarts = true;
 	[SerializeField] private bool rollDiceWhenTurnEnds = true;
+	[SerializeField] private bool forceEnemyDetectParty = true;
 	[Space]
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
@@ -452,6 +454,17 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (character.TryGetComponent(out CharacterBrain otherBrain))
 					otherBrain.StopThink();
+
+				if (forceEnemyDetectParty && character.IsEnemyToPlayer())
+				{
+					if (character.TryGetComponent(out CharacterDetection otherDetection))
+					{
+						foreach (var partyChar in partyCharacters)
+						{
+							otherDetection.SetCharacterDetected(partyChar, true);
+						}
+					}
+				}
 			}
 
 			if (character.InParty() || character.HasDetectedAnyPartyCharacter())

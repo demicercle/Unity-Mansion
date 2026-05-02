@@ -25,6 +25,7 @@ public class Waypoint : MonoBehaviour
 		
 	[Range(0.1f, 10.0f)] public float radius = 0.4f;
 	public bool ignoreRotation;
+	public bool ignoreNavigation;
 	public Color color = Color.cyan;
 
 	[ContextMenu("Assign Wandering/True")]

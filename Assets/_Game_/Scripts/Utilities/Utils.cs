@@ -286,6 +286,12 @@ public static class Utils
 		foreach (var obj in objs) str += obj?.ToString() + separator;
 		return str;
 	}
+	
+	public static bool TryGetParent<T>(GameObject gameObject, out T parent)
+	{
+		parent = gameObject.GetComponentInParent<T>();
+		return parent != null;
+	}
 
 	public static T GetOrAddComponent<T>(GameObject gameObject) where T:Component
 	{

@@ -12,10 +12,15 @@ public class HeightPathModifier : MonoModifier
 	
 	public override void Apply(Path path)
 	{
-		var endPoint = path.vectorPath.Last();
-		if (Mathf.Abs(endPoint.y - aiPath.destination.y) > heightTolerance)
+		if (path.CompleteState == PathCompleteState.Complete)
 		{
-			path.Error();
+			var endPoint = path.vectorPath.Last();
+			var heightOffset = Mathf.Abs(endPoint.y - aiPath.destination.y);
+			if (heightOffset > heightTolerance)
+			{
+				Debug.Log(this + " Apply Error: " + heightOffset);
+				path.Error();
+			}
 		}
 	}
 }

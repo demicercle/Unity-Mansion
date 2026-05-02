@@ -169,7 +169,7 @@ public class CharacterRoutines : MonoBehaviour
 			return;
 		}
 
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters().OrderBy(c => Vector3.Distance(leader.GetPosition(), c.GetPosition())))
 		{
 			if (partyCharacter != _selfCharacter)
 			{

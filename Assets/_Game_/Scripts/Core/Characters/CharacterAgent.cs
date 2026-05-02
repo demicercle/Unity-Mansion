@@ -278,9 +278,6 @@ public class CharacterAgent : MonoBehaviour
 		else
 		{
 			lastWaypointProvider = waypointProvider;
-			aiPath.destination = waypointOut.GetPosition();
-			aiPath.SetPath(bestPath);
-			
 			bestWaypoint = waypointOut; // assign it so it can returns "GetBestWaypoint"
 			if (debugMode > 0)
 			{
@@ -517,7 +514,7 @@ public class CharacterAgent : MonoBehaviour
 	private IEnumerator DoAssignDestination(Vector3 dest)
 	{
 		hasDestination = false;
-
+		
 		aiPath.destination = dest;
 		aiPath.canSearch = true;
 		aiPath.SearchPath();
@@ -537,7 +534,7 @@ public class CharacterAgent : MonoBehaviour
 			if(debugMode > 0) Debug.Log(this + " cannot find path, try to reach waypoints");
 			foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(aiPath.position, dest))
 			{
-				if (!waypoints.Contains(wp) && Mathf.Abs(wp.GetPosition().y - dest.y) <= heightTolerance)
+				if (!waypoints.Contains(wp) && !wp.ignoreNavigation && Mathf.Abs(wp.GetPosition().y - dest.y) <= heightTolerance)
 				{
 					waypoints.Add(wp);
 					if (debugMode > 0) Debug.Log(this + " try waypoint dest: " + wp);
