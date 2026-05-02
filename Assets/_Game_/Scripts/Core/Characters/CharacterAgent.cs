@@ -199,8 +199,6 @@ public class CharacterAgent : MonoBehaviour
 		var waypointOut = default(Waypoint);
 		var startPoint = _selfCharacter.GetPosition();
 		var bestLength = 0f;
-		var bestPath = default(ABPath);
-		var index = 0;
 		foreach (var wp in waypoints)
 		{
 			var endPoint = wp.GetPosition();
@@ -211,63 +209,16 @@ public class CharacterAgent : MonoBehaviour
 			if (!RoomTrigger.IsPositionVisible(endPoint)) // ignore not revealed waypoint
 				continue;
 
+			yield return StartCoroutine(DoAssignDestination(endPoint));
 			
-			yield return StartCoroutine(WaitNavmesh());
-			
-			aiPath.canSearch = true;
-				
-			// Crée une requête de chemin
-			ABPath waypointPath = ABPath.Construct(startPoint, endPoint, null);
-			waypointPath.calculatePartial = false;
-			
-			// Envoie la requête au système de pathfinding
-			AstarPath.StartPath(waypointPath);
-			
-			// Attends que le chemin soit calculé (asynchrone)
-			if (debugMode > 1) Debug.Log(" StartPath to " + wp + " pathRequest=" + waypointPath);
-			yield return StartCoroutine(waypointPath.WaitForPath());
-				
-			// Récupère le chemin calculé
-			if (waypointPath.error)
+			if (hasDestination)
 			{
-				if (debugMode > 1) DebugDrawer.Line(startPoint, endPoint, Color.red, debugDrawDuration);
-				
-				Debug.LogWarning("Erreur lors du calcul du chemin : " + waypointPath.errorLog);
-			}
-			else
-			{
-				//if (debugMode > 1) DebugDrawer.Line(startPoint, endPoint, Color.darkBlue, debugDrawDuration);
-				Vector3[] pathPoints = waypointPath.vectorPath.ToArray();
-				bool isPartial = waypointPath.CompleteState == PathCompleteState.Partial || 
-				                 !NavUtils.TryGetNearestNavPosition(pathPoints.LastOrDefault(), WaypointMaxEndPointDistance, out var _);
-				
-				if (isPartial)
+				var pathLength = Utils.PathLength(lastVectorPath.ToArray());
+				if (!waypointOut || pathLength < bestLength)
 				{
-					if (debugMode > 1) Debug.Log(index + " partialPath, skip it       pathPoints=" + pathPoints.Length);
-					if(debugMode > 1) DebugDrawer.Path(pathPoints, false, Color.darkRed, debugDrawDuration);
+					bestLength = pathLength;
+					waypointOut = wp;
 				}
-				else
-				{
-					if(debugMode > 1) DebugDrawer.Path(pathPoints, false, Color.blueViolet, debugDrawDuration);
-					float pathLength = waypointPath.GetTotalLength();
-					if (waypointOut && (int)pathLength * WaypointRoundDecimals == (int)bestLength * WaypointRoundDecimals) // sometimes results are wrong, this is a hak
-					{
-						var bestDist = NavUtils.NavDistance(startPoint, waypointOut.GetPosition());
-						var pathDist = NavUtils.NavDistance(startPoint, endPoint);
-						if (bestDist < pathDist)
-							pathLength = -1f; // override path length because the path is actually not shorter
-					}
-					if(debugMode > 1) Debug.Log(index+ " waypointOut=" + waypointOut + " pathLength=" + pathLength + " from bestLength=" + bestLength + " path.Length=" + pathPoints.Length);
-					if (!waypointOut || (pathLength > 0 && pathLength < bestLength))
-					{
-						bestPath = waypointPath;
-						bestLength = pathLength;
-						waypointOut = wp;
-					}
-				}
-				
-				// Tu peux maintenant utiliser 'waypoints' comme tu le souhaites
-				index++;
 			}
 		}
 
@@ -343,6 +294,9 @@ public class CharacterAgent : MonoBehaviour
 	
 	public bool ReachedDestination(Vector3 dest)
 	{
+		if (aiPath.hasPath && aiPath.reachedDestination)
+			return true;
+		
 		var dist = NavUtils.NavDistance(aiPath.position, dest);
 		var reach = Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
 		dist = float.Parse(dist.ToString("N2"));
@@ -383,7 +337,7 @@ public class CharacterAgent : MonoBehaviour
 	public float rotationSpeed => aiPath.rotationSpeed;
 
 	///private float lastAssignTime;
-	private bool hasDestination;
+	public bool hasDestination { get; private set; }
 
 	//private Transform followTarget;
 	private AIDestinationSetter aiDestinationSetter;
@@ -528,22 +482,6 @@ public class CharacterAgent : MonoBehaviour
 		while (aiPath.pathPending);
 
 		hasDestination = aiPath.hasPath;
-
-		if (!hasDestination)
-		{
-			if(debugMode > 0) Debug.Log(this + " cannot find path, try to reach waypoints");
-			foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(aiPath.position, dest))
-			{
-				if (!waypoints.Contains(wp) && !wp.ignoreNavigation && Mathf.Abs(wp.GetPosition().y - dest.y) <= heightTolerance)
-				{
-					waypoints.Add(wp);
-					if (debugMode > 0) Debug.Log(this + " try waypoint dest: " + wp);
-					yield return StartCoroutine(DoAssignDestination(wp.GetPosition()));
-					if (hasDestination)
-						yield break;
-				}
-			}
-		}
 	}
 
 	private IEnumerator WaitNavmesh()

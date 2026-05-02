@@ -54,6 +54,8 @@ public class PropComponent : MonoBehaviour
 	public Vector3 GetPosition() => transform.position;
 
 	public int GetInteractionCount() => interactionCount;
+
+	public bool IsOpened() => interactionCount % 2 != 0;
 	
 	public void SetInteractionCount(int newCount)
 	{

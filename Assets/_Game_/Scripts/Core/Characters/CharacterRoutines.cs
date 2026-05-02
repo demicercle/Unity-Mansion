@@ -65,6 +65,13 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignInteract " + clickedProp);
 		StartNewRoutine(WaitCharacterInteract(clickedProp));
 	}
+	public void AssignInteractAtWaypoint(PropComponent clickedProp, Waypoint waypoint)
+	{
+		LastTimeAssignedTarget = Time.time;
+		assignedTarget = clickedProp;
+		if(debugMode > 0) Debug.Log(this + " AssignInteractAtWaypoint " + clickedProp + " " + waypoint);
+		StartNewRoutine(WaitCharacterInteractAtWaypoint(clickedProp, waypoint));
+	}
 	public void AssignMoveToDestination(Vector3 navPosition)
 	{
 		assignedTarget = null;
@@ -240,19 +247,27 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // force agent to stop while calculating destination path
 		
 		yield return agent.AssignWaypointDestinationAsync(clickedProp);
-
-		var destination = clickedProp.GetPosition();
-		var reachRadius = clickedProp.GetRadius();
-		var direction = (_selfCharacter.GetPosition() - clickedProp.GetPosition()).normalized;
+		
 		var foundWaypoint = agent.GetBestWaypoint();
 		if (foundWaypoint)
 		{
-			if(debugMode > 0) Debug.Log(_selfCharacter + " waypoint found: " + foundWaypoint + ", move to");
-			agent.SetReachDistance(foundWaypoint.radius);
-			destination = foundWaypoint.GetPosition();
-			direction = foundWaypoint.GetDirection();
+			yield return StartCoroutine(WaitCharacterInteractAtWaypoint(clickedProp, foundWaypoint));
 		}
+		else
+		{
+			Debug.LogWarning(this + " no waypoint found to interact with " + clickedProp);
+		}
+	}
 
+	private IEnumerator WaitCharacterInteractAtWaypoint(PropComponent clickedProp, Waypoint foundWaypoint)
+	{
+		var destination = foundWaypoint.GetPosition();
+		var direction = foundWaypoint.GetDirection();
+		var reachRadius = clickedProp.GetRadius();
+
+		var agent = _selfCharacter.GetAgent();
+		agent.SetReachDistance(foundWaypoint.radius);
+		
 		var startTime = Time.time;
 		var pathValid = false;
 		do
@@ -459,8 +474,27 @@ public class CharacterRoutines : MonoBehaviour
 		agent.SetReachDistance(reachDistance);
 		
 		yield return agent.AssignDestination(dest);
-		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
-		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved ends");
+		if (agent.hasDestination)
+		{
+			yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
+		}
+		else
+		{
+			foreach (var possibleDoor in GameObject.FindGameObjectsWithTag(Tags.TagDoor)
+				         .OrderBy(door => Vector3.Distance(door.transform.position, dest)))
+			{
+				if (possibleDoor.TryGetComponent(out PropComponent doorProp) && !doorProp.IsOpened())
+				{
+					yield return agent.AssignWaypointDestinationAsync(doorProp);
+					var doorWp = agent.GetBestWaypoint();
+					if (doorWp)
+					{
+						yield return StartCoroutine(WaitCharacterInteractAtWaypoint(doorProp, doorWp));
+						yield break;
+					}
+				}
+			}
+		}
 	}
 
 	private IEnumerator WaitMoveLastPath(Vector3 dest, float forcedReachDistance = 0f)
