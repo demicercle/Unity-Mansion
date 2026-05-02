@@ -28,6 +28,7 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0f, 1f)] private float priorityLeader = 0.7f;
 	[SerializeField] [Range(0f, 1f)] private float priorityFollower = 0.5f;
 	[SerializeField] [Range(0f, 1f)] private float priorityOther = 0.3f;
+	[SerializeField] private float heightTolerance = 0.5f;
 	
 	[Header("Rendering")]
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -187,11 +188,11 @@ public class CharacterAgent : MonoBehaviour
 		float debugDrawDuration = 1.0f;
 		
 		bestWaypoint = null;
-		waypoints = waypointProvider.GetComponentsInChildren<Waypoint>();
+		waypoints = waypointProvider.GetComponentsInChildren<Waypoint>().ToList();
 		
 		if (debugMode > 1)
 		{
-			Debug.Log(this + " SearchBestWaypoint from " + _selfCharacter + " to " + waypointProvider + " waypoints=" + waypoints.Length);
+			Debug.Log(this + " SearchBestWaypoint from " + _selfCharacter + " to " + waypointProvider + " waypoints=" + waypoints.Count);
 			DebugDrawer.Line(_selfCharacter.GetCenterPosition(), waypointProvider.transform.position, Color.blueViolet, 1.0f);
 		}
 
@@ -272,7 +273,7 @@ public class CharacterAgent : MonoBehaviour
 
 		if (!waypointOut)
 		{
-			if(debugMode > 0) Debug.Log(this + " no waypoint found! provider=" + waypointProvider + " count=" + waypoints.Length);
+			if(debugMode > 0) Debug.Log(this + " no waypoint found! provider=" + waypointProvider + " count=" + waypoints.Count);
 		}
 		else
 		{
@@ -305,6 +306,7 @@ public class CharacterAgent : MonoBehaviour
 		if (IsFollowing()) 
 			AssignFollowTransform(null);
 
+		waypoints.Clear();
 		StopAllCoroutines();
 		return StartCoroutine(DoAssignDestination(hitPoint));
 	}
@@ -335,8 +337,7 @@ public class CharacterAgent : MonoBehaviour
 		debugString = "";
 		bestWaypoint = null;
 		hasDestination = false;
-		lastSearchPath = null;
-		lastVectorPath = Array.Empty<Vector3>();
+		lastVectorPath = new List<Vector3>();
 		StopAllCoroutines();
 		UpdatePathAndTarget(true);
 	}
@@ -392,16 +393,14 @@ public class CharacterAgent : MonoBehaviour
 	private AIPath aiPath;
 	private CharacterEntity _selfCharacter;
 	private GameTurnManager _gameTurnManager; // TODO
-	private Vector3[] lastVectorPath;
-	private ABPath lastSearchPath;
+	private List<Vector3> lastVectorPath = new List<Vector3>();
 	private MonoBehaviour waypointProvider, lastWaypointProvider;
 	private Waypoint bestWaypoint;
-	private Waypoint[] waypoints;
+	private List<Waypoint> waypoints = new List<Waypoint>();
 	private RVOController rvoController;
 	private string debugString;
 	private IAttackable lastTarget;
 	private bool isObstacle;
-	private Dictionary<Waypoint, ABPath> waypointsPaths = new Dictionary<Waypoint, ABPath>();
 	private Vector3[] drawPath;
 	private float maxDrawLength;
 	private bool[] shouldDrawPath = new []{false,false};
@@ -499,9 +498,9 @@ public class CharacterAgent : MonoBehaviour
 		{
 			debugString = "";
 
-			if (lastVectorPath?.Length > 0)
+			if (lastVectorPath.Count > 0)
 			{
-				debugString += "path:" + lastVectorPath.Length + "\n";
+				debugString += "path:" + lastVectorPath.Count + "\n";
 				
 				if(hasDestination)
 					debugString += NavUtils.NavDistance(aiPath.position, aiPath.destination).ToString("N2") 
@@ -509,7 +508,7 @@ public class CharacterAgent : MonoBehaviour
 					               + ":" + NavUtils.NavDistance(aiPath.endOfPath, aiPath.destination).ToString("N2");
 			}
 				
-			if (lastVectorPath?.Length > 0) DebugDrawer.Path(lastVectorPath, false,Color.cyan);
+			if (lastVectorPath.Count > 0) DebugDrawer.Path(lastVectorPath.ToArray(), false,Color.cyan);
 			if (hasDestination) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, Color.cyan);
 			if (rvoController.enabled) DebugDrawer.WireCapsule(transform.position, transform.rotation, rvoController.radius, rvoController.height, Color.magenta, 0f);
 		}
@@ -518,88 +517,36 @@ public class CharacterAgent : MonoBehaviour
 	private IEnumerator DoAssignDestination(Vector3 dest)
 	{
 		hasDestination = false;
-		
-		yield return StartCoroutine(DoSearchPathAsync(dest));
 
-		if (!ValidatePath(lastSearchPath.endPoint, dest))
+		aiPath.destination = dest;
+		aiPath.canSearch = true;
+		aiPath.SearchPath();
+
+		do
 		{
-			// path is found but distance between end point and destination is too high
-			// attempt to find another reachable position
-			lastSearchPath = new ABPath();
-			waypointsPaths.Clear();
-			
-			foreach (var wp in Waypoint.GetAllInstances())
-			{
-				if (Vector3.Distance(wp.GetPosition(), dest) >= WaypointMaxSearchDistance
-				    || Vector3.Distance(wp.GetPosition(), dest) >= WaypointMaxSearchDistance)
-					continue;
+			yield return null;
+			lastVectorPath.Clear();
+			aiPath.GetRemainingPath(lastVectorPath, out var _);
+		}
+		while (aiPath.pathPending);
 
-				if (Mathf.Abs(wp.GetPosition().y - dest.y) > endPointYTolerance)
-					continue;
-				
-				yield return StartCoroutine(DoSearchPathAsync(wp.GetPosition()));
-				if (!lastSearchPath.error && ValidatePath(lastSearchPath.endPoint, wp.GetPosition()))
+		hasDestination = aiPath.hasPath;
+
+		if (!hasDestination)
+		{
+			if(debugMode > 0) Debug.Log(this + " cannot find path, try to reach waypoints");
+			foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(aiPath.position, dest))
+			{
+				if (!waypoints.Contains(wp) && Mathf.Abs(wp.GetPosition().y - dest.y) <= heightTolerance)
 				{
-					waypointsPaths.Add(wp, lastSearchPath);
-					if (debugMode > 0) Debug.Log(this + " waypointsPaths Add " + wp);
-					if (debugMode > 0) DebugDrawer.Path(lastVectorPath, false, Color.yellow, 1.0f);
+					waypoints.Add(wp);
+					if (debugMode > 0) Debug.Log(this + " try waypoint dest: " + wp);
+					yield return StartCoroutine(DoAssignDestination(wp.GetPosition()));
+					if (hasDestination)
+						yield break;
 				}
 			}
-
-			foreach (var wp in waypointsPaths
-				         .OrderBy(pair => pair.Value.GetTotalLength() + NavUtils.NavDistance(dest, pair.Key.GetPosition())))
-			{
-				if (debugMode > 0) Debug.Log(this + " waypointsPaths pick " + wp);
-				dest = wp.Key.GetPosition();
-				lastSearchPath = wp.Value;
-				break;
-			}
 		}
-
-		if (!lastSearchPath.error)
-		{
-			lastVectorPath = lastSearchPath.vectorPath.ToArray();
-			if (debugMode > 0) DebugDrawer.Path(lastVectorPath, false, Color.green, 1.0f);
-			aiPath.destination = lastSearchPath.endPoint;
-			aiPath.canSearch = true;
-			aiPath.SearchPath();
-			do yield return null;
-			while (aiPath.pathPending);
-			hasDestination = aiPath.hasPath;
-		}
-		
-		if(!hasDestination)
-			Debug.LogWarning(this + " cannot find path to " + dest);
-	}
-
-	private IEnumerator DoSearchPathAsync(Vector3 newDest) => DoSearchPathAsync(newDest, newDest);
-	private IEnumerator DoSearchPathAsync(Vector3 newDest, Vector3 finalDest)
-	{
-		//if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync");
-
-		yield return StartCoroutine(WaitNavmesh());
-		
-		// Crée une requête de chemin
-		var startPoint = aiPath.position;
-		var endPoint = newDest;
-		lastSearchPath = ABPath.Construct(startPoint, endPoint, null);
-		lastSearchPath.calculatePartial = false;
-		
-		lastVectorPath = Array.Empty<Vector3>();
-		
-		// Envoie la requête au système de pathfinding
-		AstarPath.StartPath(lastSearchPath);
-		yield return StartCoroutine(lastSearchPath.WaitForPath());
-		
-		if (lastSearchPath.error)
-		{
-			if(debugMode > 0) Debug.Log(this + " path error to " + newDest);
-			yield break;
-		}
-
-		lastVectorPath = lastSearchPath.vectorPath.ToArray();
-		
-		if (debugMode > 1) Debug.Log(this + " DoSearchPathAsync lastPath=" + lastVectorPath.Length);
 	}
 
 	private IEnumerator WaitNavmesh()
@@ -632,7 +579,7 @@ public class CharacterAgent : MonoBehaviour
 		                    && CharacterSelection.IsCharacterSelected(_selfCharacter)
 		                    && _selfCharacter.IsControllableByPlayer()
 		                    && (!CharacterRoutines.AnyActiveRoutines() || _selfCharacter.IsMoving())
-		                    && lastVectorPath.Length > 1;
+		                    && lastVectorPath.Count > 1;
 
 		shouldDrawPath[1] = hasDestination  // "thin" path
 		                    && !IsFollowing()
@@ -641,7 +588,7 @@ public class CharacterAgent : MonoBehaviour
 		                    && CharacterSelection.IsCharacterSelected(_selfCharacter) 
 		                    && _selfCharacter.IsControllableByPlayer() 
 		                    && !CharacterRoutines.AnyActiveRoutines()
-		                    && lastVectorPath.Length > 1;
+		                    && lastVectorPath.Count > 1;
 								//&& !controller.IsRotating()
 								//&& !controller.IsMoving();
 
@@ -657,7 +604,7 @@ public class CharacterAgent : MonoBehaviour
 		
 		if (force || shouldDrawPath[0] != isDrawingPath[0])
 		{
-			drawPath = lastVectorPath;
+			drawPath = lastVectorPath.ToArray();
 			pathRenderers[0].enabled = isDrawingPath[0] = shouldDrawPath[0];
 			if (pathRenderers[0].enabled) // draw path thin
 			{
@@ -670,7 +617,7 @@ public class CharacterAgent : MonoBehaviour
 
 		if (force || shouldDrawPath[1] != isDrawingPath[1])
 		{
-			drawPath = lastVectorPath;
+			drawPath = lastVectorPath.ToArray();
 			pathRenderers[1].enabled = isDrawingPath[1] = shouldDrawPath[1];
 			if (pathRenderers[1].enabled) // draw path thick
 			{
