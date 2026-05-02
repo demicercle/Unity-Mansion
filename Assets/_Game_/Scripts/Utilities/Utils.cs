@@ -286,6 +286,12 @@ public static class Utils
 		foreach (var obj in objs) str += obj?.ToString() + separator;
 		return str;
 	}
+	
+	public static bool TryGetParent<T>(GameObject gameObject, out T parent)
+	{
+		parent = gameObject.GetComponentInParent<T>();
+		return parent != null;
+	}
 
 	public static T GetOrAddComponent<T>(GameObject gameObject) where T:Component
 	{
@@ -343,15 +349,12 @@ public static class NavUtils
 	
 	public static float NavHDistance(Vector3 from, Vector3 to, float decimals = 100f)
 	{
-		from.y = to.y = 0;
-		return NavDistance(from, to, decimals);
+		return NavDistance(new Vector3(from.x, 0, from.z), new Vector3(to.x, 0, to.z), decimals);
 	}
 	
 	public static float NavVDistance(Vector3 from, Vector3 to, float decimals = 100f)
 	{
-		from.x = to.x = 0;
-		from.z = to.z = 0;
-		return NavDistance(from, to, decimals);
+		return NavDistance(new Vector3(0, from.y, 0), new Vector3(0, to.y, 0), decimals);
 	}
 
 	public static Vector3Int RoundVec3(Vector3 v) => new Vector3Int((int)v.x, (int)v.y, (int)v.z);

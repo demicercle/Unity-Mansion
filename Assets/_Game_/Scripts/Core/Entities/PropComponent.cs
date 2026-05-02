@@ -43,6 +43,10 @@ public class PropComponent : MonoBehaviour
 		return Mathf.Max(worldBounds.size.x, worldBounds.size.y, worldBounds.size.z) / 2f;
 	}
 
+	public bool IsDoor() => CompareTag(Tags.TagDoor);
+	
+	
+	
 	public bool AnimFinished() => animFinished;
 	
 	public CursorType GetCursorType() => cursorType;
@@ -50,6 +54,8 @@ public class PropComponent : MonoBehaviour
 	public Vector3 GetPosition() => transform.position;
 
 	public int GetInteractionCount() => interactionCount;
+
+	public bool IsOpened() => interactionCount % 2 != 0;
 	
 	public void SetInteractionCount(int newCount)
 	{
@@ -151,6 +157,9 @@ public class PropComponent : MonoBehaviour
 		defaultLayer = gameObject.layer;
 		selfCollider = GetComponent<Collider>();
 		allInstances.Add(this);
+		
+		foreach (var wp in GetComponentsInChildren<Waypoint>())
+			wp.ignoreNavigation = true;
 	}
 
 	private void OnDestroy()

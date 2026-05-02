@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
+using Pathfinding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,6 +23,7 @@ public class GameTurnManager : MonoBehaviour
 	[Header("Game Rules")]
 	[SerializeField] private bool rollDiceWhenTurnStarts = true;
 	[SerializeField] private bool rollDiceWhenTurnEnds = true;
+	[SerializeField] private bool forceEnemyDetectParty = true;
 	[Space]
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
@@ -93,8 +95,17 @@ public class GameTurnManager : MonoBehaviour
 	{
 		waitTime = newTime;
 	}
-	
-	public bool IsWaiting() => waitTime !=  0f;
+
+	public bool IsWaiting()
+	{
+		if (waitTime != 0f)
+			return true;
+
+		if (IsTurnBasedMode())
+			return !IsPlayerTurn() || AnyActiveRoutinesPlaying();
+
+		return false;
+	}
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
@@ -180,7 +191,7 @@ public class GameTurnManager : MonoBehaviour
 				character.SetPartyIndex(partyIndex++);
 		}
 
-		if (!GameSave.Current.IsEmpty())
+		if (GameSave.Current.ShouldLoad)
 		{
 			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
 			GameSave.Current.LoadGame();
@@ -335,8 +346,8 @@ public class GameTurnManager : MonoBehaviour
 
 		currentTurn = 0;
 		leaveTurnBased = false;
+		onPlayerChanged?.Invoke(true);
 		playerTurn = false;
-		onPlayerChanged?.Invoke(playerTurn);
 		
 		foreach (var partyChar in partyCharacters)
 		{
@@ -452,6 +463,17 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (character.TryGetComponent(out CharacterBrain otherBrain))
 					otherBrain.StopThink();
+
+				if (forceEnemyDetectParty && character.IsEnemyToPlayer())
+				{
+					if (character.TryGetComponent(out CharacterDetection otherDetection))
+					{
+						foreach (var partyChar in partyCharacters)
+						{
+							otherDetection.SetCharacterDetected(partyChar, true);
+						}
+					}
+				}
 			}
 
 			if (character.InParty() || character.HasDetectedAnyPartyCharacter())
@@ -463,7 +485,7 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 
-		if(debugMode > 0) Debug.Log(this + " FirstTurn");
+		if(debugMode > 0) Debug.Log(this + " FirstTurn: " + playerTurn);
 		
 		onPlayerChanged?.Invoke(playerTurn);
 		onTurnStarted?.Invoke();

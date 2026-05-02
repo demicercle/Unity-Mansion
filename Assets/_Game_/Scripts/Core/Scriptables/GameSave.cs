@@ -229,6 +229,8 @@ public class GameSave : ScriptableObject
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
 	
+	public bool ShouldLoad { get; set; }
+	
 	public bool IsEmpty() => version == 0;
 
 	public void SetSavedValue(string valueName, int newValue)
@@ -261,7 +263,8 @@ public class GameSave : ScriptableObject
 	}
 
 	[ContextMenu("Clear")]
-	public void Clear()
+	public void Clear() => Clear(true);
+	public void Clear(bool newSeed)
 	{
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Clear");
@@ -270,7 +273,7 @@ public class GameSave : ScriptableObject
 		savedPCs.Clear();
 		selectedCharacter = 0;
 		version = 0;
-		gameSeed = DicePool.GetRandomSeed();
+		if(newSeed) gameSeed = DicePool.GetRandomSeed();
 		DicePool.SetSeed(gameSeed);
 		if(!Application.isPlaying) Utils.SetDirty(this);
 	}
@@ -396,7 +399,7 @@ public class GameSave : ScriptableObject
 			return;
 		}
 		
-		Clear();
+		Clear(false);
 
 		version = LastGameVersion;
 

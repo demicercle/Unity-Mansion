@@ -1,17 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pathfinding;
 using UnityEngine;
 
 
 public class Waypoint : MonoBehaviour
 {
+	private static List<Waypoint> waypoints = new List<Waypoint>();
+	
+	public static IEnumerable<Waypoint> GetAllInstances()
+	{
+		return waypoints.ToArray();
+	}
+	
 	public Vector3 GetPosition() => transform.position;
 	public int GetRotation() => (int)transform.eulerAngles.y;
 	public Vector3 GetDirection() => transform.forward;
+
+	public static Waypoint[] GetOrderedWaypointsFromTo(Vector3 from, Vector3 to)
+	{
+		return waypoints.OrderBy(wp => NavUtils.NavDistance(wp.GetPosition(), from) + NavUtils.NavDistance(wp.GetPosition(), to)).ToArray();
+	}
 		
 	[Range(0.1f, 10.0f)] public float radius = 0.4f;
 	public bool ignoreRotation;
+	public bool ignoreNavigation;
 	public Color color = Color.cyan;
 
 	[ContextMenu("Assign Wandering/True")]
@@ -46,12 +60,12 @@ public class Waypoint : MonoBehaviour
 
 	private void OnEnable()
 	{
-		//waypoints.Add(this);
+		waypoints.Add(this);
 	}
 
 	private void OnDisable()
 	{
-		//waypoints.Remove(this);
+		waypoints.Remove(this);
 	}
 
 	private void OnDrawGizmos()
@@ -66,4 +80,5 @@ public class Waypoint : MonoBehaviour
 		if(!ignoreRotation)DebugDrawer.WireArrow(GetPosition(), GetDirection(), radius * Vector3.one, color, d);
 		DebugDrawer.WireDisc(GetPosition(), GetDirection(), radius, color, d);
 	}
+
 }
