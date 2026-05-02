@@ -10,6 +10,7 @@ public class DiceLauncher : MonoBehaviour
 {
 	public static int AllowedDiceRolls { get; set; }
 	public static int MissCount { get; set; }
+	public static int PartyCount => CharacterEntity.PartyCount;
 	
 	public static int debugMode => DicePool.debugMode;
 
@@ -26,7 +27,15 @@ public class DiceLauncher : MonoBehaviour
 	
 	private void ClickedLaunch()
 	{
-		AllowedDiceRolls -= 1;
+		if (MissCount >= PartyCount)
+		{
+			MissCount = 0;
+		}
+		else
+		{
+			AllowedDiceRolls -= 1;
+		}
+		
 		DicePool.RollNewDice();
 	}
 
@@ -52,12 +61,7 @@ public class DiceLauncher : MonoBehaviour
 	{
 		if (atkResult != CharacterEntity.AttackResult.Hit && attacker.InParty())
 		{
-			MissCount++;
-			if (MissCount > CharacterEntity.PartyCount)
-			{
-				MissCount = 0;
-				AllowedDiceRolls += 1;
-			}
+			MissCount = Mathf.Min(PartyCount, MissCount + 1);
 		}
 	}
 
@@ -113,7 +117,8 @@ public class DiceLauncher : MonoBehaviour
 	private void LateUpdate()
 	{
 		allowedRollsText.text = AllowedDiceRolls.ToString();
-		launchButton.interactable = AllowedDiceRolls > 0 && animCount <= 0;
-		missFill.fillAmount = (float)MissCount / (float)CharacterEntity.PartyCount;
+		launchButton.interactable = (AllowedDiceRolls > 0 || MissCount >= PartyCount) && animCount <= 0;
+		missFill.fillAmount = (float)MissCount / (float)PartyCount;
+		missFill.color = Utils.ColorAlpha(missFill.color, MissCount >= PartyCount ? Mathf.PingPong(Time.unscaledTime * 3f, 1f) : 1f);
 	}
 }
