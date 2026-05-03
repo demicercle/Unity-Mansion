@@ -8,7 +8,7 @@ REFACTO
 - door nav obstacle
 - items can be weapons
 - spawn decals
-- look at muzzle flash
+- weapons have "random curve"
 - no "take this" if target is not a character
 - retake action toggles:
 	- aim (and other) disabled if any routines

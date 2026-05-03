@@ -7,6 +7,7 @@ public static class Consts
 	public const string ResPath_Settings = "Settings/";
 	public const string ResPath_Cursors = "Cursors/";
 	public const string ResPath_Items = "Items/";
+	public const string ResPath_Decals = "Decals/";
 
 	public const float MinTimeDuration = 0.25f;
 	public const float MinMagnitude = 0.01f;

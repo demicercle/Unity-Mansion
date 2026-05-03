@@ -453,7 +453,7 @@ public class GameInput : MonoBehaviour
 					
 					if (mouseHasMoved || mouseOverChanged)
 					{
-						selectedCharacter.RaycastShoot(out var lastHit);
+						selectedCharacter.RaycastShoot(out var lastHit); // mouse over aiming
 						if(debugMode > 0) Debug.Log(this + " RaycastShoot " + lastHit.collider);
 					}
 
@@ -580,7 +580,7 @@ public class GameInput : MonoBehaviour
 					
 					else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) 
 					{
-						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition()); // mouse over prop attackable
+						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetCenterPosition()); // mouse over prop attackable
 					}
 					debugString += "\n>" + currentCursor;
 				}

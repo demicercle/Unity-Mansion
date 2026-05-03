@@ -19,7 +19,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	[SerializeField] private GameObject[] deactivateObjects;
 	[SerializeField] private Destructible linkedDestructible;
 
-	public Vector3 GetPosition() => transform.position;
+	public Vector3 GetCenterPosition() => transform.position;
 	public float GetRadius() => radius;
 	public float GetHeight() => radius;
 
@@ -125,7 +125,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.yellow;
-		Utils.DrawGizmosCircle(GetPosition(), transform.up, radius);
+		Utils.DrawGizmosCircle(GetCenterPosition(), transform.up, radius);
 		foreach (var rb in rigidbodies)
 		{
 			if (!rb) continue;

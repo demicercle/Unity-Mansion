@@ -375,7 +375,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			var reachDistance = _selfCharacter.GetAttackReachDistance(target);
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
-			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
+			yield return StartCoroutine(WaitCharacterMoved(target.GetCenterPosition(), reachDistance, raycastForDestructible));
 			atAttackRange = _selfCharacter.IsAtAttackRange(target);
 		}
 		
@@ -418,6 +418,7 @@ public class CharacterRoutines : MonoBehaviour
 		RaycastHit hit = default;
 
 		_selfCharacter.RaycastShoot(out hit);
+		
 		hit.collider?.TryGetComponent(out other);
 		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterShootAt touch " + other);
@@ -431,8 +432,8 @@ public class CharacterRoutines : MonoBehaviour
 
 		yield return null;
 		
-		if(!_selfCharacter.IsFacingPosition(target.GetPosition()))
-			yield return StartCoroutine(WaitCharacterLookPosition(target.GetPosition()));
+		if(!_selfCharacter.IsFacingPosition(target.GetCenterPosition()))
+			yield return StartCoroutine(WaitCharacterLookPosition(target.GetCenterPosition()));
 
 		if (useAction && !_selfCharacter.HasActions())
 		{
@@ -440,31 +441,39 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.FloatingText_Cant();
 			yield break;
 		}
+		
+		_selfCharacter.SetAimingPosition(target.GetCenterPosition());
 
 		yield return StartCoroutine(WaitCharacterHitOrShoot(target, useAction, default));
 	}
 
 	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit hitResult)
 	{
-		var atkResult = 0.0f;
+		var atkRoll = 0.0f;
 		
 		if(useAction) 
 			_selfCharacter.UseAction(CharacterAction.Attack, target);
 		
 		if (target != null)
 		{
-			atkResult = _selfCharacter.RollDice(); // we roll the dice before for the animation
-			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetPosition(), Color.red, 2.0f);
+			atkRoll = _selfCharacter.RollDice(); // we roll the dice before for the animation
+			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetCenterPosition(), Color.red, 2.0f);
 		}
 		
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
+
+		_selfCharacter.TryGetLastShootHit(out var shootHit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
-		
-		if(target == null)
-			yield break;
 
-		switch (_selfCharacter.TryHit(target, atkResult))
+		if (target == null)
+		{
+			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
+			yield break;
+		}
+
+		var atkResult = _selfCharacter.TryHit(target, atkRoll);
+		switch (atkResult)
 		{
 			case CharacterEntity.AttackResult.Miss:
 				Debug.Log(this + " AttackResult.Miss " + target);
@@ -480,12 +489,15 @@ public class CharacterRoutines : MonoBehaviour
 				Debug.Log(this + " AttackResult.Hit " + target);
 				var damageInfo = new DamageInfo()
 				{
-					amount = _selfCharacter.GetLastAttackDamage(atkResult),
+					amount = _selfCharacter.GetLastAttackDamage(atkRoll),
 					isRanged = _selfCharacter.IsUsingRangeWeapon()
 				};
 				target.TakeDamage(damageInfo, _selfCharacter);
 				break;
 		}
+		
+		if(atkResult == CharacterEntity.AttackResult.Hit)
+			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
 
 		if (target is CharacterEntity)
 		{

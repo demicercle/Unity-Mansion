@@ -1,4 +1,5 @@
-﻿using RPGCharacterAnims.Lookups;
+﻿using System.Linq;
+using RPGCharacterAnims.Lookups;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "WeaponData", order = 0)]
@@ -18,6 +19,39 @@ public class WeaponData : ScriptableObject
 	[SerializeField] private AnimationCurve heightHitBonus = AnimationCurve.Linear(-1f, -0.25f, 1f, 0.25f);
 	public float EvaluateHeight(float height) => heightHitBonus.Evaluate(height);
 	[SerializeField] private bool noAttack = false;
+
+	public bool TrySpawnDecal(RaycastHit lastShootHitResult)
+	{
+		if (!lastShootHitResult.collider)
+			return false;
+		
+		var shootRenderers = lastShootHitResult.collider.GetComponents<Renderer>()
+			.Concat(lastShootHitResult.collider.GetComponentsInChildren<Renderer>());
+
+		var instances = 0;
+		foreach (var shootRenderer in shootRenderers)
+		{
+			if (shootRenderer.bounds.Contains(lastShootHitResult.point) && TryGetDecalPrefab(shootRenderer.sharedMaterial, out var decal))
+			{
+				Instantiate(decal, lastShootHitResult.point, Quaternion.LookRotation(lastShootHitResult.normal));
+				instances++;
+			}
+		}
+
+		return instances > 0;
+	}
+
+	private bool TryGetDecalPrefab(Material hitMaterial, out GameObject decal)
+	{
+		if (hitMaterial && DecalData.TryGetDecal(hitMaterial, out var decalData))
+		{
+			decal = decalData.decalPrefab;
+			return true;
+		}
+
+		decal = null;
+		return false;
+	}
 	
 	public Weapon rpgWeaponR = Weapon.Relax;
 	public Weapon rpgWeaponL = Weapon.Relax;
