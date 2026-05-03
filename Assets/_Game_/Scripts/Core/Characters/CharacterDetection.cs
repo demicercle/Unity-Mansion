@@ -16,7 +16,9 @@ public class CharacterDetection : MonoBehaviour
 
 	public System.Action<float> onAwarenessChanged;
 
-	[SerializeField] [Min(0f)] private float awarenessScale = 1.0f;
+	[SerializeField] [Min(0f)] private float awarenessScaleUp = 1.0f;
+	[SerializeField] [Min(0f)] private float awarenessScaleDown = 1.0f;
+	[SerializeField] [Min(0f)] private float awarenessHoldUpTime = 1.0f; 
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
@@ -24,6 +26,8 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField] private bool setDetectedOnDamaged = true;
 	[SerializeField] private bool lookAtDetected = true;
 	[SerializeField] private bool drawGizmos;
+
+	private float lastTimeAwarenessUp;
 	
 	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
 
@@ -72,6 +76,8 @@ public class CharacterDetection : MonoBehaviour
 	}
 
 	public void ClearAll() => detectedCharacters.Clear();
+
+	public float GetAwarenessValueMax() => awarenessMap.Values.OrderBy(v => v).LastOrDefault();
 
 	private List<CharacterEntity> detectedCharacters = new List<CharacterEntity>();
 	private Dictionary<CharacterEntity, float> awarenessMap = new Dictionary<CharacterEntity, float>();
@@ -176,18 +182,19 @@ public class CharacterDetection : MonoBehaviour
 				var distance = Vector3.Distance(selfPosition, otherPosition);
 				var maxDistance = Mathf.Max(hearingDistance, seeingDistance);
 				if (distance >= maxDistance) continue;
-
-				var scale = awarenessScale
-				            * distanceCurve.Evaluate(distance / maxDistance)
-				            * anyCharacter.GetStealth();
 				
 				if (IsCharacterVisible(anyCharacter, distance))
 				{
-					AddAwareness(anyCharacter, scale * deltaTime);
+					lastTimeAwarenessUp = Time.time;
+
+					var scale = distanceCurve.Evaluate(distance / maxDistance)
+					            * anyCharacter.GetStealth();
+					
+					AddAwareness(anyCharacter, scale * awarenessScaleUp * deltaTime);
 				}
-				else
+				else if (Time.time - lastTimeAwarenessUp > awarenessHoldUpTime)
 				{
-					AddAwareness(anyCharacter, -scale * deltaTime);
+					AddAwareness(anyCharacter, -awarenessScaleDown * deltaTime);
 				}
 				
 				yield return null;
