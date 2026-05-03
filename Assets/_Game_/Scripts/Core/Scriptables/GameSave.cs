@@ -199,7 +199,24 @@ public class GameSave : ScriptableObject
 	public class SavedLoot
 	{
 		public Vector3 position;
-		public SavedInventory inventory;
+		public string[] itemNames;
+
+		public void Load(Inventory lootBagPrefab)
+		{
+			var lootBag = Inventory.CreateLootBag(lootBagPrefab, position);
+			lootBag.SetItemNames(itemNames);
+		}
+
+		public void Save(Inventory inv)
+		{
+			position = inv.GetPosition();
+			itemNames = inv.GetItemNames();
+		}
+
+		public SavedLoot(Inventory inv = null)
+		{
+			if (inv) Save(inv);
+		}
 	}
 
 	[System.Serializable]
@@ -382,7 +399,7 @@ public class GameSave : ScriptableObject
 
 			foreach (var savedLoot in savedLevel.savedLoots)
 			{
-				savedLoot.inventory.Load(Inventory.CreateLootBag(lootBagPrefab, savedLoot.position));
+				savedLoot.Load(lootBagPrefab);
 			}
 		}
 		
@@ -448,11 +465,7 @@ public class GameSave : ScriptableObject
 
 		foreach (var lootBag in Inventory.GetLootBags())
 		{
-			savedLevels[0].savedLoots.Add(new SavedLoot()
-			{
-				position = lootBag.GetPosition(),
-				inventory = new SavedInventory(lootBag)
-			});
+			savedLevels[0].savedLoots.Add(new SavedLoot(lootBag));
 		}
 		
 		Debug.Log(this + " Game saved");

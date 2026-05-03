@@ -670,6 +670,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();
 			gameObject.layer = Layers.LayerDead;
+			if (TryGetComponent(out Inventory inv)) inv.DropOnGround(out var loot);
 			return true;
 		}
 

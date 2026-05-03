@@ -48,6 +48,7 @@ public class Inventory : MonoBehaviour
 
 	public void SetItemNames(string[] slots)
 	{
+		if(slots == null) return;
 		for (int i = 0; i < slots.Length; i++)
 		{
 			SetItemName(i, slots[i]);
@@ -99,6 +100,30 @@ public class Inventory : MonoBehaviour
 		bag = CreateLootBag(lootBagPrefab, navPosition);
 		bag.TryAddItem(itemData);
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+		return true;
+	}
+
+	public bool DropOnGround(out Inventory bag)
+	{
+		if (!lootBagPrefab)
+		{
+			Debug.LogWarning(this + " cannot CreateLootBag because no prefab set!");
+			bag = null;
+			return false;
+		}
+
+		if (!NavUtils.TryGetNearestNavPosition(transform.position, CreateLootNavDistance, out var navPosition))
+		{
+			Debug.LogWarning(this + " cannot CreateLootBag: no nav position found");
+			bag = null;
+			return false;
+		}
+		
+		bag = CreateLootBag(lootBagPrefab, navPosition);
+		bag.items.AddRange(items);
+		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+		items.Clear();
+		onAnyInventoryChanged?.Invoke(this);
 		return true;
 	}
 	
