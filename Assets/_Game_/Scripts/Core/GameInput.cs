@@ -439,7 +439,17 @@ public class GameInput : MonoBehaviour
 				if (CanAssignOnMouseOver(selectedCharacter))
 				{
 					selectedCharacter.SetAimingPosition(aimHit.point);
+					
+					if (mouseHasMoved || mouseOverChanged)
+					{
+						selectedCharacter.RaycastShoot(out var lastHit);
+						if(debugMode > 0) Debug.Log(this + " RaycastShoot " + lastHit.collider);
+					}
+
+					if (selectedCharacter.TryGetLastShootHit(out var hitResult))
+						debugString += "\n>hit:" + hitResult.collider;
 				}
+				
 			}
 		}
 		else if (lastCursorResult == CursorRaycastResult_Navigation)

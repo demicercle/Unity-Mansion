@@ -94,10 +94,11 @@ public class WeaponRenderer : MonoBehaviour
     {
         if (parentCharacter)
         {
-            if (!parentCharacter.Routines.AnyActive() && parentCharacter.TryGetAimingPosition(out var aimingPos))
+            if (!parentCharacter.Routines.AnyActive())
             {
                 wasAiming = true;
-                DisplayAimLine(aimingPos);
+                if (parentCharacter.TryGetAimingPosition(out var aimingPos))
+                    DisplayAimLine(aimingPos);
             }
             else if (wasAiming)
             {

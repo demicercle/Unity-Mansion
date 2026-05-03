@@ -414,12 +414,10 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 
-		CharacterEntity other = null;
+		IAttackable other = null;
 		RaycastHit hit = default;
-		
-		Physics.Linecast( _selfCharacter.GetEyesPosition() + _selfCharacter.transform.forward * _selfCharacter.GetRadius(),
-			worldPosition, out hit, Layers.MaskAiming);
-		
+
+		_selfCharacter.RaycastShoot(out hit);
 		hit.collider?.TryGetComponent(out other);
 		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterShootAt touch " + other);
@@ -449,8 +447,6 @@ public class CharacterRoutines : MonoBehaviour
 	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit hitResult)
 	{
 		var atkResult = 0.0f;
-		
-		_selfCharacter.SetLastShootHit(hitResult);
 		
 		if(useAction) 
 			_selfCharacter.UseAction(CharacterAction.Attack, target);

@@ -989,18 +989,34 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public event System.Action<bool, Vector3> onAiming;
 
 	public bool IsAiming() => isAiming;
-
-	public void SetLastShootHit(RaycastHit newHit) => lastShootHitResult = newHit;
-
+	
 	public bool TryGetLastShootHit(out RaycastHit hit)
 	{
 		hit = lastShootHitResult;
 		return hit.collider;
 	}
 
+	public bool RaycastShoot(out RaycastHit hit)
+	{
+		var shootStart = GetEyesPosition() + transform.forward * (GetRadius() + MinAttackRange);
+		var shootEnd = aimingPosition;
+		var shootDir = (shootEnd - shootStart).normalized;
+		if (isAiming && Physics.Linecast(shootStart, shootEnd + shootDir, out hit, Layers.MaskAiming))
+		{
+			lastShootHitResult = hit;
+			return true;
+		}
+		else
+		{
+			lastShootHitResult = hit = default;
+			return false;
+		}
+	}
+
 	public bool TryGetAimingPosition(out Vector3 world)
 	{
 		world = aimingPosition;
+		
 		return isAiming;
 	}
 

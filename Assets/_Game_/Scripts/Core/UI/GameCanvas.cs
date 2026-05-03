@@ -109,6 +109,8 @@ public class GameCanvas : MonoBehaviour
 	private float calculatedHitChance;
 	private bool willHit;
 	private bool hitBlocked;
+	private CharacterEntity selectedCharacter;
+	private CharacterEntity targetCharacter;
 	
 	private void Awake()
 	{
@@ -217,23 +219,38 @@ public class GameCanvas : MonoBehaviour
 			itemCursorImage.transform.SetAsLastSibling();
 		}
 
-		cursorText.gameObject.SetActive(gameInput.WantsToAttack(out var targetCharacter));
-		if (targetCharacter && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		targetCharacter = null;
+		
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
-			cursorText.transform.position = gameInput.GetMousePosition();
-			cursorText.raycastTarget = false;
-			calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
-			willHit = DicePool.LastResult > 1f - calculatedHitChance;
-			hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
-			cursorText.text = (21-DicePool.FloatToDice(20, calculatedHitChance)) + "+";
-			if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
-			cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
-			if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
-			/*cursorText.text =
-				Mathf.RoundToInt(
-					selectedCharacter.CalculateHitChance(targetCharacter) *
-					100) + "%";*/
+			gameInput.WantsToAttack(out targetCharacter);
+
+			if (selectedCharacter.IsAiming()
+			    && selectedCharacter.TryGetLastShootHit(out var lastHit)
+			    && lastHit.collider.TryGetComponent(out CharacterEntity hitTarget))
+			{
+				targetCharacter = hitTarget; // over target, display attack stats
+			}
+			
+			if (targetCharacter)
+			{
+				cursorText.transform.position = gameInput.GetMousePosition();
+				cursorText.raycastTarget = false;
+				calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
+				willHit = DicePool.LastResult > 1f - calculatedHitChance;
+				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
+				cursorText.text = (21-DicePool.FloatToDice(20, calculatedHitChance)) + "+";
+				if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
+				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
+				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
+				/*cursorText.text =
+					Mathf.RoundToInt(
+						selectedCharacter.CalculateHitChance(targetCharacter) *
+						100) + "%";*/
+			}
 		}
+		
+		cursorText.gameObject.SetActive(targetCharacter != null);
 	}
 
 	private void OnPlayerChanged(bool isPlayerTurn)
