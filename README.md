@@ -7,10 +7,9 @@ REFACTO
 - dialog line reference bug in editor
 - door nav obstacle
 - items can be weapons
-- toggle aim false notifies false when routines start attack
-
 - spawn decals
 - look at muzzle flash
+- no "take this" if target is not a character
 - retake action toggles:
 	- aim (and other) disabled if any routines
 	- toggle stop enabled if any routines
