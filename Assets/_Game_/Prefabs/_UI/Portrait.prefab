@@ -1408,7 +1408,7 @@ MonoBehaviour:
   toggleDodge: {fileID: 4263158431536801585}
   healthSprite: {fileID: 7741850551411540515}
   healthLabel: {fileID: 3746229692758425950}
-  dodgeLabel1: {fileID: 1621066839055312336}
+  dodgeLabel1: {fileID: 2855484550958183973}
   dodgeLabel2: {fileID: 6599854392802489248}
 --- !u!1 &5909375885710630655
 GameObject:
