@@ -1042,13 +1042,18 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public void ToggleAim(bool value)
 	{
-		if (isAiming != value)
-		{
-			isAiming = value;
-			if(debugAim > 0) Debug.Log(this + " ToggleAim " + value);
-		
-			if (characterAnimation)
-				characterAnimation.TrySwitchWeapons(isAiming || InBattle());
-		}
+		isAiming = value;
+		//if(debugAim > 0) Debug.Log(this + " ToggleAim " + value);
+			
+		if (characterAnimation && !characterAnimation.IsSwitchingWeapons)
+			characterAnimation.TrySwitchWeapons(isAiming || InBattle());
+	}
+
+	public bool IsActing() => IsMoving() || Routines.AnyActive();
+
+	public void Stop()
+	{
+		StopAgent();
+		Routines.StopAllRoutines();
 	}
 }

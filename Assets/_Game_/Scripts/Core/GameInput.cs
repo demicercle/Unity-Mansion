@@ -758,8 +758,8 @@ public class GameInput : MonoBehaviour
 				{
 					if (selectedCharacter.IsAiming()) 
 						selectedCharacter.ToggleAim(false);
-					else if (selectedCharacter.IsMoving())
-						selectedCharacter.StopAgent();
+					else if (selectedCharacter.IsActing())
+						selectedCharacter.Stop();
 					else
 						CharacterSelection.SelectCharacter(null);
 				}

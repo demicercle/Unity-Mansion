@@ -96,8 +96,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.4715681, y: 2.6456778, z: 0.31670666}
-  m_Center: {x: 0.0336833, y: 1.2366642, z: -0.05293131}
+  m_Size: {x: 1.9565604, y: 2.8131158, z: 0.31670666}
+  m_Center: {x: 0.03368318, y: 1.3203832, z: -0.05293131}
 --- !u!114 &8594193827675412845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -120,6 +120,7 @@ MonoBehaviour:
   - {fileID: 4595218120299172886}
   deactivateObjects:
   - {fileID: 6754133440724357226}
+  linkedDestructible: {fileID: 0}
   damagedWithRangeWeapons: 0
   takeDamage:
     m_PersistentCalls:
@@ -283,9 +284,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.5
-  defaultSize: 0.5
-  defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1001 &1957830015112320731
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -389,9 +387,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.5
-  defaultSize: 0.5
-  defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!4 &4947661213930574136 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6882067233146750947, guid: e74867efe17844d45b66507a794cb5ab, type: 3}
@@ -593,9 +588,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.5
-  defaultSize: 0.5
-  defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!4 &9166477675239254095 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6882067233146750947, guid: e74867efe17844d45b66507a794cb5ab, type: 3}
@@ -725,9 +717,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.5
-  defaultSize: 0.5
-  defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1001 &3499666743312870971
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -852,9 +841,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.5
-  defaultSize: 0.5
-  defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1001 &4066076228339011944
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1254,9 +1240,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.5
-  defaultSize: 0.5
-  defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!54 &8941232270439520124 stripped
 Rigidbody:
   m_CorrespondingSourceObject: {fileID: 1104559300014488109, guid: e74867efe17844d45b66507a794cb5ab, type: 3}

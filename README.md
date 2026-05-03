@@ -7,20 +7,14 @@ REFACTO
 - dialog line reference bug in editor
 - door nav obstacle
 - items can be weapons
-
 - toggle aim false notifies false when routines start attack
 
-- remove "RapidGui"
-
-- shootLine / aimLine
 - spawn decals
 - look at muzzle flash
 - retake action toggles:
 	- aim (and other) disabled if any routines
 	- toggle stop enabled if any routines
 	- toggle reload enabled if using a "ammo" weapon, display "full" or "no ammo"
-- highlight over aimed object 
-- display chance to hit when aiming target
 - training mannequin (invicible life)
 
 ANIMS / VFX
