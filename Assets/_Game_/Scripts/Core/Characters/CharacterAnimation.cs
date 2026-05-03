@@ -342,6 +342,8 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		if (!rpgAnimationHandler) return; // only for RPG weapon shit
 
+		if (_selfCharacter.IsAiming()) return;
+
 		if (_selfCharacter.HasItemToUse(out var item) && weaponRenderers.Any(wp => wp.DisplaysItem(item)))
 		{
 			if (rpgAnimationHandler.rightWeapon != Weapon.RightItem)
@@ -515,9 +517,13 @@ public class CharacterAnimation : MonoBehaviour
 			if(GameTurnManager.Instance.IsTurnBasedMode())
 				yield break;
 			
-			if (_selfCharacter.Routines.AnyActive() || _selfCharacter.HasItemToUse(out var _))
+			if (_selfCharacter.Routines.AnyActive() || _selfCharacter.HasItemToUse(out var _) || _selfCharacter.IsAiming())
 			{
-				time = 0f;
+				if (time > 0f)
+				{
+					time = 0f;
+					if(debugMode > 0) Debug.Log(this + " WaitToRelax reset time");
+				}
 			}
 			else
 			{
