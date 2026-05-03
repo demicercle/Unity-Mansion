@@ -12,7 +12,6 @@ ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - add a "drop on ground" and "pickup loot bag" Animation
 - damage VFX (blood)
-- revive zombi trigger, "canBeRevived" flag
 - display setItemToUse with others than grenades
 
 SAVE
