@@ -6,9 +6,16 @@ using UnityEngine.UI;
 public class ReverseToggle : MonoBehaviour
 {
 	public Toggle toggle;
+	public bool debugLog;
 	public UnityEvent<bool> onValueChanged;
 
-	public void SetValue(bool newValue) => onValueChanged?.Invoke(!newValue);
+	public void SetValue(bool newValue)
+	{
+		if (toggle)
+			toggle.isOn = newValue;
+		else 
+			OnValueChanged(newValue);
+	}
 
 	private void OnEnable()
 	{
@@ -23,6 +30,7 @@ public class ReverseToggle : MonoBehaviour
 
 	private void OnValueChanged(bool isOn)
 	{
+		if(debugLog) Debug.Log(this + " OnValueChanged " + isOn);
 		onValueChanged?.Invoke(!isOn);
 	}
 }

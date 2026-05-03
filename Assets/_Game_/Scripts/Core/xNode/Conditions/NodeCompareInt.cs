@@ -17,21 +17,21 @@ public class NodeCompareInt : GameNode
 		if (port.fieldName == "_Equals")
 		{
 			_Equals = _A == _B;
-			DebugLogThis("_Equals: " + _Equals);
+			DebugLog("_Equals: " + _Equals);
 			return _Equals;
 		}
 
 		if (port.fieldName == "_Greater")
 		{
 			_Greater = _A > _B;
-			DebugLogThis("_Greater: " + _Greater);
+			DebugLog("_Greater: " + _Greater);
 			return _Greater;
 		}
 
 		if (port.fieldName == "_Lower")
 		{
 			_Lower = _A < _B;
-			DebugLogThis("_Lower: " + _Lower);
+			DebugLog("_Lower: " + _Lower);
 			return _Lower;
 		}
 		

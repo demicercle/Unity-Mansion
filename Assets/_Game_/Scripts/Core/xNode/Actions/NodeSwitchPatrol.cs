@@ -18,7 +18,7 @@ public class NodeSwitchPatrol : GameNode
 			if (_character.TryGetComponent(this, out CharacterEntity character) &&
 			    _patrol.TryGetComponent(this, out PatrolRoute patrol))
 			{
-				DebugLogThis("assign patrol " + patrol + " to " + character);
+				DebugLog("assign patrol " + patrol + " to " + character);
 				patrol.AssignPatrol(character);
 			}
 		});

@@ -23,12 +23,12 @@ public abstract class GameNode : Node
 	
 	protected virtual void OnScriptStart()
 	{
-		DebugLogThis("OnScriptStart", 1);
+		DebugLog("OnScriptStart", 1);
 	}
 
 	protected virtual void OnScriptDestroy()
 	{
-		DebugLogThis("OnScriptDestroy", 1);
+		DebugLog("OnScriptDestroy", 1);
 	}
 
 	private void Reset()
@@ -43,15 +43,15 @@ public abstract class GameNode : Node
 	{
 		base.Init();
 		_script = null;
-		DebugLogThis("Inits", 1);
+		DebugLog("Inits", 1);
 	}
 
-	protected void DebugLogThis(string msg, int minDebugMode = 0)
+	protected void DebugLog(string msg, int minDebugMode = 0)
 	{
 		if(GameScript.debugMode > minDebugMode) Debug.Log("x_" + this + ": " + msg + "\nin graph=" + graph);
 	}
 	
-	protected void DebugWarningThis(string msg)
+	protected void DebugLogWarning(string msg)
 	{
 		Debug.LogWarning("x_" + this + ": " + msg);
 	}

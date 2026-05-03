@@ -8,6 +8,7 @@ using UnityEngine;
 
 public static class Utils
 {
+	
 	public static void DrawWorldGUI(Vector3 position, string debugString) =>
 		DrawWorldGUI(position, debugString, Vector2.zero);
 	public static void DrawWorldGUI(Vector3 position, string debugString, Vector2 offset) =>
@@ -139,6 +140,13 @@ public static class Utils
 //			Debug.Log("Scanning... " + progress.ToString());
 			yield return null;
 		}
+	}
+
+	public static bool TryFindObject<T>(string withName, out T component) where T : Component
+	{
+		var go = GameObject.Find(withName);
+		component = null;
+		return go && go.TryGetComponent(out component);
 	}
 
 	public static T[] FindObjects<T>() where T : Object => Object.FindObjectsByType<T>(default);
@@ -285,6 +293,12 @@ public static class Utils
 		foreach (var obj in objs) str += obj?.ToString() + separator;
 		return str;
 	}
+	
+	public static bool TryGetParent<T>(GameObject gameObject, out T parent)
+	{
+		parent = gameObject.GetComponentInParent<T>();
+		return parent != null;
+	}
 
 	public static T GetOrAddComponent<T>(GameObject gameObject) where T:Component
 	{
@@ -333,14 +347,24 @@ public static class Utils
 
 public static class NavUtils
 {
-	public const float MinNavDistance = 0.1f;
-	public const float RoundYDecimals = 100f;
-	
-	public static float NavDistanceRoundY(Vector3 from, Vector3 to)
+	public static float NavDistance(Vector3 from, Vector3 to, float decimals = 100f)
 	{
-		from.y = to.y = Mathf.Round(from.y * RoundYDecimals) / RoundYDecimals;
+		from = (Vector3)RoundVec3(from * decimals) / decimals;
+		to = (Vector3)RoundVec3(to * decimals) / decimals;
 		return Vector3.Distance(from, to);
 	}
+	
+	public static float NavHDistance(Vector3 from, Vector3 to, float decimals = 100f)
+	{
+		return NavDistance(new Vector3(from.x, 0, from.z), new Vector3(to.x, 0, to.z), decimals);
+	}
+	
+	public static float NavVDistance(Vector3 from, Vector3 to, float decimals = 100f)
+	{
+		return NavDistance(new Vector3(0, from.y, 0), new Vector3(0, to.y, 0), decimals);
+	}
+
+	public static Vector3Int RoundVec3(Vector3 v) => new Vector3Int((int)v.x, (int)v.y, (int)v.z);
 	
 	/// <summary>
 	/// Récupère un point aléatoire accessible sur le graphe, dans un rayon donné autour d'un centre.

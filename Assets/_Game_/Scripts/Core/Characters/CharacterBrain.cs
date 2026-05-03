@@ -101,7 +101,7 @@ public class CharacterBrain : MonoBehaviour
 				yield break;
 			}
 			
-			if (_selfCharacter.IsMoving() || NavUtils.NavDistanceRoundY(_lastPosition, _selfCharacter.GetPosition()) >= MinDistanceToDetectMovement)
+			if (_selfCharacter.IsMoving() || NavUtils.NavDistance(_lastPosition, _selfCharacter.GetPosition()) >= MinDistanceToDetectMovement)
 				_startedThinkingTime = Time.time; // reset timeout
 			
 			yield return null;

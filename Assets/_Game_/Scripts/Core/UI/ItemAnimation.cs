@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -7,13 +8,16 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Animation))]
 public class ItemAnimation : MonoBehaviour
 {
+	private static List<ItemAnimation> activeInstances  = new List<ItemAnimation>();
+	
 	public enum TriggerType
 	{
 		None = -1,
 		Loot = 0,
 		Use = 1
 	}
-	
+
+	[SerializeField] private float startDelay = 0.5f;
 	[SerializeField] private RawImage iconContainer;
 	[SerializeField] private TriggerType triggerType;
 
@@ -91,6 +95,12 @@ public class ItemAnimation : MonoBehaviour
 			gameObject.SetActive(false);
 			yield break;
 		}
+
+		activeInstances.Add(this);
+		
+		iconContainer.enabled = false;
+		yield return new WaitForSeconds(activeInstances.Count * startDelay);
+		iconContainer.enabled = true;
 		
 		animation.clip = animation.GetClip(typeof(ItemAnimation) + "_" + triggerType.ToString());
 		animation.Play(animation.clip.name);

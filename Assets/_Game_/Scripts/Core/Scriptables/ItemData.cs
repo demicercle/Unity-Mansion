@@ -20,6 +20,7 @@ public class ItemData : ScriptableObject
 	[SerializeField] private LocalizedText displayName;
 	[SerializeField] private Texture2D icon;
 	[SerializeField] private TargetType targetType;
+	[SerializeField] private bool usableOnDead;
 	[SerializeField] [Range(0f, 12f)] private float useRange;
 	[SerializeField] private GameScriptGraph onUseScript;
 	[SerializeField] private string itemTags;
@@ -28,6 +29,11 @@ public class ItemData : ScriptableObject
 
 	public bool RaycastInteraction() => targetType == TargetType.AnyCharacter;
 	public bool RaycastNavigation() => targetType == TargetType.GroundPosition;
+
+	public bool CanBeUsedOnDead()
+	{
+		return targetType == TargetType.AnyCharacter && usableOnDead;
+	}
 	
 	public bool IsProjectile() => isProjectile;
 	

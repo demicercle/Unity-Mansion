@@ -26,13 +26,13 @@ public class NodeApplyDamageRadius : GameNode
 			
 			if (!_position.TryGetComponent(this, out Transform transform))
 			{
-				DebugWarningThis("invalid position");
+				DebugLogWarning("invalid position");
 				return;
 			}
 
 			DebugDrawer.WireCapsule(transform.position, transform.rotation, _radius, _radius, Color.red, 1.0f);
 			
-			foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskInteraction))
+			foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskInteraction(false)))
 			{
 				var distance = Vector3.Distance(transform.position, obj.transform.position);
 				if (obj.TryGetComponent(out IAttackable attackable))
@@ -69,7 +69,7 @@ public class NodeApplyDamageRadius : GameNode
 					
 				if (obj.TryGetComponent(out Rigidbody rigidbody))
 				{
-					DebugLogThis(this + " AddExplosionForce " + rigidbody + " " + explosionForce);
+					DebugLog(this + " AddExplosionForce " + rigidbody + " " + explosionForce);
 					rigidbody.isKinematic = false;
 					rigidbody.WakeUp();
 					rigidbody.AddExplosionForce(explosionForce, transform.position, _radius);

@@ -16,14 +16,14 @@ public class NodeInstantiate : GameNode
 		{
 			if (prefab == null)
 			{
-				DebugWarningThis("no prefab setup");
+				DebugLogWarning("no prefab setup");
 				return;
 			}
 
 			_position = GetInputValue("_position", _position);
 			if (!_position.TryGetComponent(this, out Transform transform))
 			{
-				DebugWarningThis("no valid position setup");
+				DebugLogWarning("no valid position setup");
 				return;
 			}
 			

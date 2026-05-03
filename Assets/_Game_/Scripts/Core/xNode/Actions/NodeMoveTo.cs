@@ -19,7 +19,7 @@ public class NodeMoveTo : GameNode
 			if (_character.TryGetComponent(this, out CharacterEntity character)
 			    && _to.TryGetComponent(this, out Waypoint waypoint))
 			{
-				DebugLogThis("Assign move: " + character + " to waypoint: " + waypoint);
+				DebugLog("Assign move: " + character + " to waypoint: " + waypoint);
 				character.Routines.AssignMoveToWaypoint(waypoint);
 			}
 		});

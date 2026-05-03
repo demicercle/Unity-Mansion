@@ -15,7 +15,23 @@ public class ConsoleCommands : MonoBehaviour
 			{
 				amount = amount,
 				isRanged = false
-			}, character);
+			}, null);
+	}
+	
+	[ConsoleMethod("apply_dmg_any", "")]
+	public static void ApplyDamageAny(string objectName, int amount)
+	{
+		foreach (var character in CharacterEntity.AllCharacters)
+		{
+			if (character.name.StartsWith(objectName))
+			{
+				character.TakeDamage(new DamageInfo()
+				{
+					amount = amount,
+					isRanged = false
+				}, null);
+			}
+		}
 	}
 
 	[ConsoleMethod("stop_all_routines", "")]
@@ -55,10 +71,20 @@ public class ConsoleCommands : MonoBehaviour
 	}
 
 	[ConsoleMethod("heal", "")]
-	public static void Heal(int amount)
+	public static void Heal(int amount= 0)
 	{
 		if(CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
 			character.Heal(amount);
+	}
+	
+	[ConsoleMethod("heal_any", "")]
+	public static void HealAny(string objectName, int amount = 0)
+	{
+		foreach (var character in CharacterEntity.AllCharacters)
+		{
+			if(character.name.StartsWith(objectName))
+				character.Heal(amount);
+		}
 	}
 
 	[ConsoleMethod("rest", "")]
@@ -118,7 +144,7 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("add_roll_dices", "")]
 	public static void AddRollDices(int count)
 	{
-		Utils.FindFirstObject<DiceLauncher>().allowedDiceRolls += count;
+		DiceLauncher.AllowedDiceRolls += count;
 	}
 
 	[ConsoleMethod("quit_game", "")]
@@ -150,7 +176,7 @@ public class ConsoleCommands : MonoBehaviour
 		Time.timeScale = Mathf.Clamp(value, 0.1f, 10.0f);
 	}
 
-	[ConsoleMethod("give_item", "")]
+	[ConsoleMethod("give", "")]
 	public static void GiveItem(string itemName)
 	{
 		var itemData = Resources.LoadAll<ItemData>(Consts.ResPath_Items)
@@ -226,6 +252,19 @@ public class ConsoleCommands : MonoBehaviour
 		_DebugRoutines(value);
 		_DebugTriggers(value);
 		_DebugGtm(value);
+	}
+	
+
+	[ConsoleMethod("debug_save", "")]
+	public static void _DebugSave(int value)
+	{
+		Debug.Log("debug_save=" + (GameSave.debugMode = value));
+	}
+
+	[ConsoleMethod("debug_rooms", "")]
+	public static void _DebugRooms(int value)
+	{
+		Debug.Log("debug_script=" + (RoomTrigger.debugMode = value));
 	}
 
 	[ConsoleMethod("debug_script", "")]

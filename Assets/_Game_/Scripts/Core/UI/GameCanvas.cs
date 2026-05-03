@@ -30,8 +30,8 @@ public class GameCanvas : MonoBehaviour
 	[Header("Buttons")]
 	[SerializeField] private Button buttonEndTurn;
 	[SerializeField] private Button buttonNextCharacter;
-	[SerializeField] private Button buttonActionRun;
-	[SerializeField] private Button buttonActionDefend;
+	//[SerializeField] private Button buttonActionRun;
+	//[SerializeField] private Button buttonActionDefend;
 	[Header("Portraits")]
 	[SerializeField] private CharacterPortrait[] portraits;
 	[Header("Inventory")]
@@ -39,6 +39,7 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private RawImage itemCursorImage;
 	[Header("Cursor")] 
 	[SerializeField] private TMP_Text cursorText;
+	[SerializeField] private bool displayLastResultDice;
 	[Header("References")]
 	[SerializeField] private TextReference floatingText;
 	[Header("UnityEvents")]
@@ -105,6 +106,9 @@ public class GameCanvas : MonoBehaviour
 	private MouseOverHandler viewportMouseHandler;
 	private ItemData currentItemToUse;
 	private CanvasScaler canvasScaler;
+	private float calculatedHitChance;
+	private bool willHit;
+	private bool hitBlocked;
 	
 	private void Awake()
 	{
@@ -115,8 +119,8 @@ public class GameCanvas : MonoBehaviour
 		
 		buttonEndTurn.onClick.AddListener(ClickEndTurn);
 		buttonNextCharacter.onClick.AddListener(ClickNextCharacter);
-		buttonActionRun.onClick.AddListener(ClickRunAction);
-		buttonActionDefend.onClick.AddListener(ClickDefendAction);
+		//buttonActionRun.onClick.AddListener(ClickRunAction);
+		//buttonActionDefend.onClick.AddListener(ClickDefendAction);
 
 		viewportMouseHandler = viewportRect.GetComponent<MouseOverHandler>();
 		if(!viewportMouseHandler) viewportMouseHandler = viewportRect.gameObject.AddComponent<MouseOverHandler>();
@@ -141,8 +145,8 @@ public class GameCanvas : MonoBehaviour
 	{
 		buttonEndTurn.onClick.RemoveListener( ClickEndTurn);
 		buttonNextCharacter.onClick.RemoveListener(ClickNextCharacter);
-		buttonActionRun.onClick.RemoveListener(ClickRunAction);
-		buttonActionDefend.onClick.RemoveListener(ClickDefendAction);
+		//buttonActionRun.onClick.RemoveListener(ClickRunAction);
+		//buttonActionDefend.onClick.RemoveListener(ClickDefendAction);
 		
 		viewportMouseHandler.onMouseOverChanged -= OnViewportRectMouseOver;
 		viewportMouseHandler.onClicked -= OnViewportRectClicked;
@@ -218,7 +222,13 @@ public class GameCanvas : MonoBehaviour
 		{
 			cursorText.transform.position = gameInput.GetMousePosition();
 			cursorText.raycastTarget = false;
-			cursorText.text = (int)Mathf.Lerp(20, 1, Mathf.Clamp01(selectedCharacter.CalculateHitChance(targetCharacter))) + "+";
+			calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
+			willHit = DicePool.LastResult > 1f - calculatedHitChance;
+			hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
+			cursorText.text = (21-DicePool.FloatToDice(20, calculatedHitChance)) + "+";
+			if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
+			cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
+			if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
 			/*cursorText.text =
 				Mathf.RoundToInt(
 					selectedCharacter.CalculateHitChance(targetCharacter) *
@@ -303,8 +313,8 @@ public class GameCanvas : MonoBehaviour
 		toggleTurnBased.isOn = gameTurnManager.IsTurnBasedMode();
 		toggleActions.isOn = gameTurnManager.SelectedCharacterIsControllable();
 		toggleShouldEndTurn.isOn = gameTurnManager.PlayerShouldEndTurn();
-		buttonActionRun.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Run);
-		buttonActionDefend.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Defend);
+		//buttonActionRun.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Run);
+		//buttonActionDefend.interactable = gameTurnManager.SelectedCharacterCanUseAction(CharacterAction.Defend);
 		
 		if (gameTurnManager.PlayerCanEndTurn() && !gameTurnManager.IsWaiting())
 		{

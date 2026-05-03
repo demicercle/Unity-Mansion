@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,7 +7,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameSave", menuName = "GameSave", order = 0)]
 public class GameSave : ScriptableObject
 {
-	public const int GAME_VERSION = 1;
+	public const int LastGameVersion = 2;
+	
+	public static int debugMode { get; set; }
 	
 	private static GameSave currentInstance;
 
@@ -32,17 +35,22 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedLevel
 	{
+		public override string ToString() => base.ToString() + " (" + levelIndex + ")";
+		
 		public int levelIndex;
 		public List<SavedCharacter> levelCharacters = new List<SavedCharacter>();
 		public List<string> revealedRooms = new List<string>();
 		public List<SavedProp> savedProps = new List<SavedProp>();
 		public List<SavedInventory> savedInventories = new List<SavedInventory>();
 		public List<string> destroyedProps = new List<string>();
+		public List<SavedLoot> savedLoots = new List<SavedLoot>();
 	}
 
 	[System.Serializable]
 	public class SavedPC
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
 		public string name;
 		public Vector3 position;
 		public int rotation;
@@ -52,6 +60,7 @@ public class GameSave : ScriptableObject
 
 		public void Save(CharacterEntity character)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + character);
 			name = character.name;
 			position = character.GetSavedPosition();
 			rotation = character.GetRotation();
@@ -65,6 +74,7 @@ public class GameSave : ScriptableObject
 
 		public void Load(CharacterEntity character)
 		{
+			if(debugMode >0) Debug.Log(this + " Load " + character);
 			character.Teleport(position, rotation);
 			
 			if (isDead)
@@ -86,6 +96,8 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedCharacter
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
 		public string name;
 		public Vector3 position;
 		public int rotation;
@@ -93,6 +105,7 @@ public class GameSave : ScriptableObject
 
 		public void Save(CharacterEntity character)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + character);
 			name = character.name;
 			position = character.GetSavedPosition();
 			rotation = character.GetRotation();
@@ -101,7 +114,8 @@ public class GameSave : ScriptableObject
 
 		public void Load(CharacterEntity character)
 		{
-			character.Teleport(position, rotation);
+			if(debugMode >0) Debug.Log(this + " Load " + character);
+			character.Teleport(position, rotation, false);
 			
 			if (isDead)
 				character.TryKill();
@@ -117,17 +131,21 @@ public class GameSave : ScriptableObject
 	[System.Serializable]
 	public class SavedProp
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
 		public string name;
 		public int count;
 
 		public void Save(PropComponent prop)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + prop);
 			name = prop.name;
 			count = prop.GetInteractionCount();
 		}
 
 		public void Load(PropComponent prop)
 		{
+			if(debugMode >0) Debug.Log(this + " Load " + prop);
 			if (prop.IsName(name))
 			{
 				prop.SetInteractionCount(count);
@@ -140,21 +158,25 @@ public class GameSave : ScriptableObject
 				Save(prop);
 		}
 	}
-
+	
 	[System.Serializable]
 	public class SavedInventory
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
 		public string name;
 		public string[] slots = Array.Empty<string>();
 
 		public void Save(Inventory inventory)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			name = inventory.GetName();
 			slots = inventory.GetItemNames();
 		}
 
 		public void Load(Inventory inventory)
 		{
+			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			if (inventory.IsName(name))
 			{
 				for (int i = 0; i < slots.Length; i++)
@@ -174,19 +196,39 @@ public class GameSave : ScriptableObject
 	}
 
 	[System.Serializable]
+	public class SavedLoot
+	{
+		public Vector3 position;
+		public string[] itemNames;
+
+		public void Load(Inventory lootBagPrefab)
+		{
+			var lootBag = Inventory.CreateLootBag(lootBagPrefab, position);
+			lootBag.SetItemNames(itemNames);
+		}
+
+		public void Save(Inventory inv)
+		{
+			position = inv.GetPosition();
+			itemNames = inv.GetItemNames();
+		}
+
+		public SavedLoot(Inventory inv = null)
+		{
+			if (inv) Save(inv);
+		}
+	}
+
+	[System.Serializable]
 	public class SavedValue
 	{
+		public override string ToString() => base.ToString() + " (" + name + ")";
+		
+		public static string Karma = "KARMA";
+		//public static string MissCount = "MISS_COUNT";
+		
 		public string name;
-		public ValueType type;
-		[ReadOnly] public bool value;
-	}
-	
-	public enum ValueType
-	{
-		Bool,
-		Int,
-		Float,
-		String
+		public int value;
 	}
 
 	public static bool IsDisabled()
@@ -195,16 +237,52 @@ public class GameSave : ScriptableObject
 	}
 
 	[SerializeField] private bool disableSave = false;
-
-	[Min(0)] public int version;
-	public List<SavedLevel> savedLevels = new List<SavedLevel>();
-	public int selectedCharacter;
-	public List<SavedPC> savedPCs = new List<SavedPC>();
-
+	[SerializeField] private Inventory lootBagPrefab;
+	[Space]
+	[Header("Debug")]
+	[ReadOnly] [Min(0)] public int version;
+	[ReadOnly] public int gameSeed;
+	[ReadOnly] public int selectedCharacter;
+	[ReadOnly] public List<SavedPC> savedPCs = new List<SavedPC>();
+	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
+	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
+	
+	public bool ShouldLoad { get; set; }
+	
 	public bool IsEmpty() => version == 0;
 
+	public void SetSavedValue(string valueName, int newValue)
+	{
+		for (int i = 0; i < savedValues.Count; i++)
+		{
+			if (savedValues[i].name == valueName)
+			{
+				savedValues[i].value = newValue;
+				return;
+			}
+		}
+		
+		savedValues.Add(new SavedValue(){name = valueName, value = newValue});
+	}
+
+	public bool TryGetSavedValue(string valueName, out int outValue)
+	{
+		for (int i = 0; i < savedValues.Count; i++)
+		{
+			if (savedValues[i].name == valueName)
+			{
+				outValue = savedValues[i].value;
+				return true;
+			}
+		}
+
+		outValue = 0;
+		return false;
+	}
+
 	[ContextMenu("Clear")]
-	public void Clear()
+	public void Clear() => Clear(true);
+	public void Clear(bool newSeed)
 	{
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Clear");
@@ -213,6 +291,8 @@ public class GameSave : ScriptableObject
 		savedPCs.Clear();
 		selectedCharacter = 0;
 		version = 0;
+		if(newSeed) gameSeed = DicePool.GetRandomSeed();
+		DicePool.SetSeed(gameSeed);
 		if(!Application.isPlaying) Utils.SetDirty(this);
 	}
 
@@ -228,6 +308,16 @@ public class GameSave : ScriptableObject
 		
 		if (fromFile)
 			LoadFromFile();
+
+		if(gameSeed > 0)
+			DicePool.SetSeed(gameSeed);
+		else Debug.LogWarning(this + " invalid game seed: " + gameSeed);
+
+		foreach (var savedValue in savedValues)
+		{
+			if (savedValue.name == SavedValue.Karma) DiceLauncher.AllowedDiceRolls = savedValue.value;
+			//if (savedValue.name == SavedValue.MissCount) DiceLauncher.MissCount = savedValue.value;
+		}
 		
 		var partyCharacters = CharacterEntity.GetPartyCharacters();
 		foreach (var savedPC in savedPCs)
@@ -306,6 +396,11 @@ public class GameSave : ScriptableObject
 					destructible.Break();
 				}
 			}
+
+			foreach (var savedLoot in savedLevel.savedLoots)
+			{
+				savedLoot.Load(lootBagPrefab);
+			}
 		}
 		
 		CharacterSelection.SelectCharacterAt(selectedCharacter);
@@ -323,9 +418,14 @@ public class GameSave : ScriptableObject
 			return;
 		}
 		
-		Clear();
+		Clear(false);
 
-		version = GAME_VERSION;
+		version = LastGameVersion;
+
+		gameSeed = DicePool.Seed;
+		
+		savedValues.Add(new SavedValue(){ name = SavedValue.Karma, value = DiceLauncher.AllowedDiceRolls});
+		//savedValues.Add(new SavedValue(){ name = SavedValue.MissCount, value = DiceLauncher.MissCount});
 
 		selectedCharacter = CharacterSelection.GetSelectedPartyCharacterIndex();
 		
@@ -362,6 +462,11 @@ public class GameSave : ScriptableObject
 			if(destructible.IsBroken())
 				savedLevels[0].destroyedProps.Add(destructible.GetName());
 		}
+
+		foreach (var lootBag in Inventory.GetLootBags())
+		{
+			savedLevels[0].savedLoots.Add(new SavedLoot(lootBag));
+		}
 		
 		Debug.Log(this + " Game saved");
 		
@@ -378,25 +483,28 @@ public class GameSave : ScriptableObject
 	}
 
 	[ContextMenu("Load From File")]
-	public void LoadFromFile()
+	public bool LoadFromFile()
 	{
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Load From File");
 #endif
+		var savedObjects = new Hashtable();
+		savedObjects["lootBagPrefab"] = lootBagPrefab;
 		var backup = JsonUtility.ToJson(this, true);
-		var lastVersion = version;
 		var json = System.IO.File.ReadAllText(filePath);
 		JsonUtility.FromJsonOverwrite(json, this);
-		if (lastVersion != version)
+		if (LastGameVersion != version)
 		{
-			Debug.LogWarning(this + " incompatible version: " + lastVersion + " > " + version);
+			Debug.LogWarning(this + " incompatible version: " + version + " > LastGameVersion: " + LastGameVersion);
 			JsonUtility.FromJsonOverwrite(backup, this);
-			return;
+			return false;
 		}
 		Debug.Log(this + " Loaded From File " + filePath);
+		lootBagPrefab = (Inventory)savedObjects["lootBagPrefab"];
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.EditorUtility.SetDirty(this);
 #endif
+		return true;
 	}
 
 	[ContextMenu("Open file")]

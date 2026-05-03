@@ -344,6 +344,7 @@ GameObject:
   - component: {fileID: 3491681411637616590}
   - component: {fileID: -9001009375405151572}
   - component: {fileID: 4619242293538590057}
+  - component: {fileID: -7056101742899210363}
   m_Layer: 8
   m_Name: CharacterBase
   m_TagString: Player
@@ -388,6 +389,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterData: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
   characterCanvas: {fileID: 437776869319342895}
+  clearActionsDelay: 3
+  rollDiceToDodge: 0
+  rollDiceOnDefense: 1
+  rollDiceOnRun: 0
+  rollDiceOnRiposte: 1
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
@@ -448,11 +454,17 @@ MonoBehaviour:
   moveSpeed: 4.5
   radius: 0.5
   height: 1.5
-  endReachDistance: 0.2
+  minReachDistance: 0.1
+  priorityLeader: 0.7
+  priorityFollower: 0.5
+  priorityOther: 0.3
+  heightTolerance: 0.5
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
   moveTarget: {fileID: 6868811281604459853}
+  endPointDistance: 0.25
+  endPointYTolerance: 0.5
 --- !u!114 &6410703130520739872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -528,7 +540,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0bc9e79e4be4434a2987e81780b76d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterDetection
-  awarenessScale: 3
+  awarenessScaleUp: 3
+  awarenessScaleDown: 0.66
   hearingDistance: 3.09
   seeingDistance: 9.7
   maxAngle: 86
@@ -746,12 +759,12 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  endReachedDistance: 0.2
+  endReachedDistance: 0.1
   whenCloseToDestination: 0
   rvoDensityBehavior:
     enabled: 0
     densityThreshold: 0.5
-    returnAfterBeingPushedAway: 0
+    returnAfterBeingPushedAway: 1
     progressAverage: 0
     lastJobDensityResult: 0
   repathRateCompatibility: NaN
@@ -766,8 +779,8 @@ MonoBehaviour:
     visualizeSensitivity: 0
   maxAcceleration: -2.5
   rotationSpeed: 360
-  slowdownDistance: 0.5
-  pickNextWaypointDist: 0.7
+  slowdownDistance: 1.5
+  pickNextWaypointDist: 0.5
   alwaysDrawGizmos: 0
   slowWhenNotFacingTarget: 1
   preventMovingBackwards: 1
@@ -866,9 +879,9 @@ MonoBehaviour:
   centerBackingField: 1
   locked: 0
   lockWhenNotMoving: 1
-  agentTimeHorizon: 0.5
-  obstacleTimeHorizon: 0.5
-  maxNeighbours: 3
+  agentTimeHorizon: 2
+  obstacleTimeHorizon: 2
+  maxNeighbours: 10
   layer: 1
   collidesWith: 3
   wallAvoidForce: 1
@@ -897,6 +910,21 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+--- !u!114 &-7056101742899210363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837400758454604685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 877c5737cf4847ad9c884e42ff8e5a51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HeightPathModifier
+  version: 1073741824
+  aiPath: {fileID: 3402239913564902258}
+  heightTolerance: 0.5
 --- !u!1 &3549809914347783905
 GameObject:
   m_ObjectHideFlags: 0
@@ -1214,7 +1242,6 @@ MonoBehaviour:
   - {fileID: 2283550923626056868}
   renderers: []
   colliders: []
-  debugLog: 0
 --- !u!1 &7960376793328208188
 GameObject:
   m_ObjectHideFlags: 0

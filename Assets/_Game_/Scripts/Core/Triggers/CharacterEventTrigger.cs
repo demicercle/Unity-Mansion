@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -31,6 +32,7 @@ public class CharacterEventTrigger : MonoBehaviour
 	public UnityEvent<bool> onPartyChanged;
 	public UnityEvent onDamaged;
 	public UnityEvent onDeath;
+	public UnityEvent onRevive;
 	public UnityEvent onHealed;
 	public UnityEvent onTurnStart;
 	public UnityEvent onAttack;
@@ -56,13 +58,22 @@ public class CharacterEventTrigger : MonoBehaviour
 		{
 			Debug.LogWarning(this + " has no character");
 			enabled = false;
+			return;
 		}
+		
+		RegisterEvents();
 	}
-	
-	private void OnEnable()
+
+	private void OnDestroy()
+	{
+		DisposeEvents();
+	}
+
+	private void RegisterEvents()
 	{
 		if (!character) return;
 		character.onSpawned += onSpawned.Invoke;
+		character.onRevive += onRevive.Invoke;
 		character.onUseAction += OnCharacterUseAction;
 		character.onDamaged += OnCharacterDamaged;
 		character.onDead += OnCharacterDeath;
@@ -77,10 +88,11 @@ public class CharacterEventTrigger : MonoBehaviour
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
 	}
 
-	private void OnDisable()
+	private void DisposeEvents()
 	{
 		if (!character) return;
 		character.onSpawned -= onSpawned.Invoke;
+		character.onRevive -= onRevive.Invoke;
 		character.onUseAction -= OnCharacterUseAction;
 		character.onDamaged -= OnCharacterDamaged;
 		character.onDead -= OnCharacterDeath;

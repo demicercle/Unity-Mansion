@@ -30,7 +30,7 @@ public class NodeSwitchInt : GameNode
 		    && index >= 0 && index < _outs.Length)
 			return _outs[index];
 
-		DebugWarningThis("invalid port: " + port.fieldName + " parsed index=" + index + " outs=" + _outs.Length);
+		DebugLogWarning("invalid port: " + port.fieldName + " parsed index=" + index + " outs=" + _outs.Length);
 		
 		return null; // Replace this
 	}
@@ -60,10 +60,10 @@ public class NodeSwitchInt : GameNode
 			
 			if (_index >= 0 && _index < _outs.Length)
 			{
-				DebugLogThis("fires: " + _index);
+				DebugLog("fires: " + _index);
 				_outs[_index].Invoke();
 			}
-			else DebugLogThis("not fired, invalid index: " + _index);
+			else DebugLog("not fired, invalid index: " + _index);
 
 			if (loop)
 			{

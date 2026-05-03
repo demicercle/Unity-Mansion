@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
+using Pathfinding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,11 +18,17 @@ public class GameTurnManager : MonoBehaviour
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
-	[SerializeField] [Range(0f, 6f)] private float restInterval = 3.0f;
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
+	[Space]
+	[Header("Game Rules")]
+	[SerializeField] private bool rollDiceWhenTurnStarts = true;
+	[SerializeField] private bool rollDiceWhenTurnEnds = true;
+	[SerializeField] private bool forceEnemyDetectParty = true;
+	[Space]
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
-	[SerializeField] [Min(0.1f)] private float postLoadDuration = 1.0f;
+	[SerializeField] [Min(0.1f)] private float postLoadSceneDuration = 1.0f;
+	[SerializeField] [Min(0.1f)] private float postLoadSaveDuration = 1.0f;
 	[SerializeField] [Min(0.1f)] private float turnChangedSeconds = 3.0f;
 	[SerializeField] [Min(0.1f)]  private  float focusCharacterSeconds = 1.5f;
 	[SerializeField] [Min(0.1f)] private  float noActionsSeconds = 3.0f;
@@ -88,8 +95,17 @@ public class GameTurnManager : MonoBehaviour
 	{
 		waitTime = newTime;
 	}
-	
-	public bool IsWaiting() => waitTime !=  0f;
+
+	public bool IsWaiting()
+	{
+		if (waitTime != 0f)
+			return true;
+
+		if (IsTurnBasedMode())
+			return !IsPlayerTurn() || AnyActiveRoutinesPlaying();
+
+		return false;
+	}
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
@@ -151,14 +167,15 @@ public class GameTurnManager : MonoBehaviour
 				yield return null;
 			} while (SceneLoader.AnyInstanceActive);
 
-			yield return new WaitForSeconds(postLoadDuration);
+			yield return new WaitForSeconds(postLoadSceneDuration);
 		} while (SceneLoader.AnyInstanceActive);
-
+		
 		yield return WaitNavigationDirty();
 		
 		Debug.Log(" loading scene complete");
 		
-		yield return new WaitForSeconds(0.1f); // for triggers
+		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
+		yield return null; // for triggers
 
 		levelCharacters = CharacterEntity.AllCharacters
 			.OrderBy(c => c.transform.GetSiblingIndex())
@@ -174,7 +191,7 @@ public class GameTurnManager : MonoBehaviour
 				character.SetPartyIndex(partyIndex++);
 		}
 
-		if (!GameSave.Current.IsEmpty())
+		if (GameSave.Current.ShouldLoad)
 		{
 			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
 			GameSave.Current.LoadGame();
@@ -190,6 +207,8 @@ public class GameTurnManager : MonoBehaviour
 				CharacterSelection.SelectCharacter(previouslySelected);
 			}
 		}
+		
+		yield return new WaitForSeconds(postLoadSaveDuration);
 		
 		Debug.Log("loading complete");
 		isLoading = false;
@@ -310,10 +329,10 @@ public class GameTurnManager : MonoBehaviour
 					
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
-
-				if(debugMode > 0) Debug.Log(this + " yield");
+				
+				otherCharacter.GetAgent().SetObstacle(true);
 				yield return YieldRoutines();
-				if(debugMode > 0) Debug.Log(this + " end yield");
+				yield return WaitNavigationDirty();
 			}
 			
 			yield return new WaitForSeconds(turnChangedSeconds);
@@ -327,8 +346,8 @@ public class GameTurnManager : MonoBehaviour
 
 		currentTurn = 0;
 		leaveTurnBased = false;
+		onPlayerChanged?.Invoke(true);
 		playerTurn = false;
-		onPlayerChanged?.Invoke(playerTurn);
 		
 		foreach (var partyChar in partyCharacters)
 		{
@@ -400,7 +419,7 @@ public class GameTurnManager : MonoBehaviour
 	{
 		
 	}
-	
+
 	private void EndTurn()
 	{
 		if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
@@ -408,22 +427,20 @@ public class GameTurnManager : MonoBehaviour
 		playerTurn = false;
 		onPlayerChanged?.Invoke(playerTurn); 
 		onTurnStarted?.Invoke(); // start other turn
+		if(rollDiceWhenTurnEnds) DicePool.RollNewDice();
 	}
 	
 	private void NewTurn()
 	{
-		if (currentTurn >= 1)
-		{
-			if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
-			onTurnEnded?.Invoke();
-			PartyRest();
-		}
+		if(debugMode > 0) Debug.Log(this + " EndTurn playerTurn=" + playerTurn);
+		onTurnEnded?.Invoke();
+		PartyRest();
 		
 		currentTurn += 1;
 		playerTurn = true;
 		onTurnStarted?.Invoke();
-		
 		if(debugMode > 0) Debug.Log(this + " NewTurn " + currentTurn);
+		if(rollDiceWhenTurnStarts) DicePool.RollNewDice();
 	}
 
 	private void FirstTurn()
@@ -432,7 +449,12 @@ public class GameTurnManager : MonoBehaviour
 		playerTurn = nextFirstTurnIsPlayer;
 		nextFirstTurnIsPlayer = false;
 		if(debugMode > 0) Debug.Log(this + " FirstTurn playerTurn=" + playerTurn);
-				
+
+		levelCharacters = levelCharacters.OrderBy((character) => (int)character.GetCurrentFaction()
+		                                                         + "_" + (character.TryGetComponent(out CharacterDetection detection) ? detection.GetLastTimeDetectedInterval() : 0).ToString("N3")
+		                                                         + "_" + character.name)
+			.ToArray();
+		
 		foreach (var character in levelCharacters)
 		{
 			if (character.IsDead() || !character.IsCharacterRevealed())
@@ -446,6 +468,17 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (character.TryGetComponent(out CharacterBrain otherBrain))
 					otherBrain.StopThink();
+
+				if (forceEnemyDetectParty && character.IsEnemyToPlayer())
+				{
+					if (character.TryGetComponent(out CharacterDetection otherDetection))
+					{
+						foreach (var partyChar in partyCharacters)
+						{
+							otherDetection.SetCharacterDetected(partyChar, true);
+						}
+					}
+				}
 			}
 
 			if (character.InParty() || character.HasDetectedAnyPartyCharacter())
@@ -457,7 +490,7 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 
-		if(debugMode > 0) Debug.Log(this + " FirstTurn");
+		if(debugMode > 0) Debug.Log(this + " FirstTurn: " + playerTurn);
 		
 		onPlayerChanged?.Invoke(playerTurn);
 		onTurnStarted?.Invoke();

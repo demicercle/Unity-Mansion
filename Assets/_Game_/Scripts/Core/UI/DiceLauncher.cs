@@ -8,37 +8,70 @@ using Random = UnityEngine.Random;
 
 public class DiceLauncher : MonoBehaviour
 {
-	public static int debugMode => DicePool.debugMode;
+	public static int AllowedDiceRolls { get; set; }
+	public static int MissCount { get; set; }
+	public static int PartyCount => CharacterEntity.PartyCount;
 	
+	public static int debugMode => DicePool.debugMode;
+
+	public int defaultDiceRolls = 3;
 	public Image spriteImage;
 	public Sprite[] numberSprites;
 	public Sprite[] animatedSprites;
 	public int framesDuration;
-
-	public int allowedDiceRolls = 3;
 	public TMPro.TMP_Text allowedRollsText;
 	public Button launchButton;
+	public Image missFill;
+	public Toggle toggleMissCount;
 	
 	private int animCount;
 	
 	private void ClickedLaunch()
 	{
-		allowedDiceRolls -= 1;
+		if (MissCount >= PartyCount)
+		{
+			MissCount = 0;
+		}
+		else
+		{
+			AllowedDiceRolls -= 1;
+		}
+		
 		DicePool.RollNewDice();
 	}
 
 	private void Awake()
 	{
+		AllowedDiceRolls = defaultDiceRolls;
+		
+		GameTurnManager.Instance.onTurnBasedChanged += OnTurnBasedChanged;
 		DicePool.onDiceRolled += OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
+		CharacterEntity.onAttackResult += OnAttackResult;
 		launchButton.onClick.AddListener(ClickedLaunch);
 	}
 
 	private void OnDestroy()
 	{
+		GameTurnManager.Instance.onTurnBasedChanged -= OnTurnBasedChanged;
 		DicePool.onDiceRolled -= OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead -= OnAnyCharacterDead;
+		CharacterEntity.onAttackResult -= OnAttackResult;
 		launchButton.onClick.RemoveListener(ClickedLaunch);
+	}
+
+	private void OnTurnBasedChanged(bool value)
+	{
+		toggleMissCount.isOn = value;
+		MissCount = 0;
+	}
+
+	private void OnAttackResult(CharacterEntity attacker, IAttackable target, CharacterEntity.AttackResult atkResult)
+	{
+		if (atkResult != CharacterEntity.AttackResult.Hit && attacker.InParty())
+		{
+			MissCount = Mathf.Min(PartyCount, MissCount + 1);
+		}
 	}
 
 	private void OnAnyCharacterDead(CharacterEntity character)
@@ -48,9 +81,8 @@ public class DiceLauncher : MonoBehaviour
 			if (killer.InParty())
 			{
 				// last hit
-				allowedDiceRolls += 1;
-				allowedRollsText.text = allowedDiceRolls.ToString();
-				if(debugMode > 0) Debug.Log(this + " last hit " + killer + " " + character + " => allowedDiceRolls=" + allowedDiceRolls);
+				AllowedDiceRolls += 1;
+				if(debugMode > 0) Debug.Log(this + " last hit " + killer + " " + character + " => allowedDiceRolls=" + AllowedDiceRolls);
 			}
 		}
 	}
@@ -63,14 +95,12 @@ public class DiceLauncher : MonoBehaviour
 	private void OnDiceRolled()
 	{
 		animCount++;
-		allowedRollsText.text = allowedDiceRolls.ToString();
 		if(DicePool.debugMode>0) Debug.Log(this + " OnDiceRolled " + animCount);
 		if(animCount == 1) StartCoroutine("Animate");
 	}
 
 	private IEnumerator Animate()
 	{
-		launchButton.interactable = false;
 		allowedRollsText.gameObject.SetActive(false);
 
 		while (animCount > 0)
@@ -91,6 +121,13 @@ public class DiceLauncher : MonoBehaviour
 		}
 
 		allowedRollsText.gameObject.SetActive(true);
-		launchButton.interactable = allowedDiceRolls > 0;
+	}
+
+	private void LateUpdate()
+	{
+		allowedRollsText.text = AllowedDiceRolls.ToString();
+		launchButton.interactable = (AllowedDiceRolls > 0 || MissCount >= PartyCount) && animCount <= 0;
+		missFill.fillAmount = (float)MissCount / (float)PartyCount;
+		missFill.color = Utils.ColorAlpha(missFill.color, MissCount >= PartyCount ? Mathf.PingPong(Time.unscaledTime * 3f, 1f) : 1f);
 	}
 }

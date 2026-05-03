@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Pathfinding;
+﻿using System.Collections;
 using UnityEngine;
 
 
@@ -45,6 +41,7 @@ public class NavmeshRebuilder : MonoBehaviour
 			{
 				navmeshDirty = false;
 				isNavmeshRebuild = true;
+				while (!AstarPath.active) yield return null;
 				foreach (var pr in AstarPath.active.ScanAsync())
 				{
 					if (NavmeshRebuilder.debugMode > 0) Debug.Log(this + " Scanning... " + pr.progress);

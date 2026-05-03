@@ -11,7 +11,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 {
 	public RawImage rawImage;
 	public TMP_Text nameLabel;
-	public Toggle toggleSelected, toggleHasActions, toggleTurnBased;
+	public Toggle toggleSelected, toggleHasActions, toggleTurnBased, toggleDodge, togglePrepare;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
 	public TMP_Text dodgeLabel1, dodgeLabel2;
@@ -72,6 +72,8 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 
 	private void UpdateStats()
 	{
+		togglePrepare.isOn = _assignedCharacter.CanRiposte();
+		
 		toggleSelected.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
 		toggleSelected.interactable = _assignedCharacter.IsControllableByPlayer();
 
@@ -107,16 +109,12 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 		if (_assignedCharacter)
 		{
 			toggleTurnBased.isOn = GameTurnManager.Instance.IsTurnBasedMode();
-			calculatedDodge = _assignedCharacter.GetDodgeChance();
-			if (calculatedDodge > 0)
+			toggleDodge.isOn = _assignedCharacter.CanDodge();
+			if (toggleDodge.isOn)
 			{
-				dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
-				dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
-			}
-			else
-			{
-				dodgeLabel1.text = "X";
-				dodgeLabel2.text = "";
+				calculatedDodge = _assignedCharacter.GetDodgeChance();
+				if(dodgeLabel1) dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
+				if(dodgeLabel2) dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
 			}
 		}
 	}

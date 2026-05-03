@@ -31,13 +31,13 @@ public class NodeTurnChanged : GameNode
 		_character = GetInputValue("_character", _character);
 		if (_character.TryGetComponent(this, out selfCharacter))
 		{
-			DebugLogThis("init character: "  + selfCharacter);
+			DebugLog("init character: "  + selfCharacter);
 			selfCharacter.turnStarted += TurnStarted;
 			selfCharacter.turnEnded += TurnEnded;
 		}
 		else
 		{
-			DebugLogThis("init GTM");
+			DebugLog("init GTM");
 			GameTurnManager.Instance.onTurnStarted += TurnStarted;
 			GameTurnManager.Instance.onTurnEnded += TurnEnded;
 		}
@@ -63,7 +63,7 @@ public class NodeTurnChanged : GameNode
 	{
 		if (selfCharacter && selfCharacter.IsDead()) return;
 		_currentTurn = GameTurnManager.Instance.GetCurrentTurn();
-		DebugLogThis("turn started #" + _currentTurn);
+		DebugLog("turn started #" + _currentTurn);
 		_turnStarted.Invoke();
 	}
 
@@ -71,7 +71,7 @@ public class NodeTurnChanged : GameNode
 	{
 		if (selfCharacter && selfCharacter.IsDead()) return;
 		_currentTurn = GameTurnManager.Instance.GetCurrentTurn();
-		DebugLogThis("turn ended #" + _currentTurn);
+		DebugLog("turn ended #" + _currentTurn);
 		_turnEnded.Invoke();
 	}
 }

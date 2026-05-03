@@ -18,7 +18,7 @@ public class CharacterCanvas : MonoBehaviour
 		
 		if (selfCharacter.TryGetComponent(out selfDetection))
 		{
-			selfDetection.onAwarenessChanged += OnAwarenessChanged;
+			//selfDetection.onAwarenessChanged += OnAwarenessChanged;
 		}
 
 		detectionFill.fillAmount = detectionAmount = 0f;
@@ -28,7 +28,7 @@ public class CharacterCanvas : MonoBehaviour
 	{
 		if (selfDetection)
 		{
-			selfDetection.onAwarenessChanged -= OnAwarenessChanged;
+			//selfDetection.onAwarenessChanged -= OnAwarenessChanged;
 		}
 	}
 
@@ -39,6 +39,8 @@ public class CharacterCanvas : MonoBehaviour
 
 	private void LateUpdate()
 	{
+		detectionAmount = selfDetection ? selfDetection.GetAwarenessValueMax() : 0f;
+		
 		toggleDetection.isOn = selfCharacter.IsCharacterRevealed() && !selfCharacter.IsDead()
 		                                                           && !selfCharacter.InParty()
 		                                                           && !selfCharacter.HasDetectedAnyPartyCharacter()

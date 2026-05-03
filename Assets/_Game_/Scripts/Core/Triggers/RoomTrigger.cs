@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class RoomTrigger : MonoBehaviour
 {
+	public static int debugMode { get; set; }
+	
 	public static List<RoomTrigger> allRooms = new List<RoomTrigger>();
 	public static List<RoomTrigger> activeRooms = new List<RoomTrigger>();
 
@@ -25,11 +27,18 @@ public class RoomTrigger : MonoBehaviour
 	public bool IsName(string n) => name == n;
 	public string GetName() => name;
 
-	public static bool TryGetRoom(CharacterEntity character, out RoomTrigger inRoom)
+	public RoomTrigger[] GetConnectedRooms(System.Func<RoomTrigger, bool> predicate = null)
+	{
+		return allRooms.Where(otherRoom => otherRoom != this
+		                                   && otherRoom.doors.Any(otherDoor => doors.Contains(otherDoor))
+		                                   && (predicate == null || predicate(otherRoom))).ToArray();
+	}
+
+	public static bool TryGetRoom(Vector3 position, out RoomTrigger inRoom)
 	{
 		foreach (var room in allRooms)
 		{
-			if (room.HasCharacter(character))
+			if (room.HasPosition(position))
 			{
 				inRoom = room;
 				return true;
@@ -39,6 +48,13 @@ public class RoomTrigger : MonoBehaviour
 		inRoom = null;
 		return false;
 	}
+	
+	public static bool TryGetRoom(CharacterEntity character, out RoomTrigger inRoom)
+	{
+		return TryGetRoom(character.GetCenterPosition(), out inRoom);
+	}
+
+	public GameObject[] GetDoors() => doors.ToArray();
 	
 	public List<CharacterEntity> GetCharacters()
 	{
@@ -65,12 +81,21 @@ public class RoomTrigger : MonoBehaviour
 	{
 		if (!gameObject.activeSelf)
 		{
-			Debug.Log(this + " already explored");
+			if(debugMode > 0) Debug.Log(this + " already explored");
 			return;
 		}
 		
 		gameObject.SetActive(false);
 		onChanged?.Invoke();
+	}
+
+	public void Refresh()
+	{
+		if(debugMode > 0) Debug.Log(this + " Refresh triggers");
+		foreach (var trigger in triggers)
+		{
+			trigger.Refresh();
+		}
 	}
 	
 	public bool HasCharacter(CharacterEntity character)
@@ -159,7 +184,7 @@ public class RoomTrigger : MonoBehaviour
 	private void OnEnable()
 	{
 		activeRooms.Add(this);
-		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		if(debugMode > 0) Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
 		foreach (var doorObj in doors)
 		{
@@ -173,7 +198,7 @@ public class RoomTrigger : MonoBehaviour
 	private void OnDisable()
 	{
 		activeRooms.Remove(this);
-		//Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		if(debugMode > 0) Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
 		
 		foreach (var doorObj in doors)
 		{

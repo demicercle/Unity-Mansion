@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,10 +8,12 @@ using EventType = CharacterAnimation.EventType;
 
 public class CharacterRoutines : MonoBehaviour
 {
-	public const float SearchPathTimeout = 6.0f;
-	public const float DefaultWaitSeconds = 1.0f;
+	private const float SearchPathTimeout = 6.0f;
+	private const float UnfreezeAgentTimeout = 0.0f;
+	private const float DefaultWaitSeconds = 1.0f;
 	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
-	public const float MinDeltaToMove = 0.1f;
+	private const float MinDeltaToMove = 0.1f;
+	private const float HeightPenalty = 1.0f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -44,7 +47,7 @@ public class CharacterRoutines : MonoBehaviour
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
 		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target  + " losCheck=" + losCheck + " time=" + LastTimeAssignedTarget);
-		StartNewRoutine(WaitCharacterAttack(target, losCheck));
+		StartNewRoutine(WaitCharacterAttack(target, losCheck, true));
 	}
 	
 	public void AssignPerformAttack(IAttackable target, bool useAction)
@@ -63,11 +66,18 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignInteract " + clickedProp);
 		StartNewRoutine(WaitCharacterInteract(clickedProp));
 	}
-	public void AssignMoveToDestination(Vector3 navPosition)
+	public void AssignInteractAtWaypoint(PropComponent clickedProp, Waypoint waypoint)
+	{
+		LastTimeAssignedTarget = Time.time;
+		assignedTarget = clickedProp;
+		if(debugMode > 0) Debug.Log(this + " AssignInteractAtWaypoint " + clickedProp + " " + waypoint);
+		StartNewRoutine(WaitCharacterInteractAtWaypoint(clickedProp, waypoint));
+	}
+	public void AssignMoveToDestination(Vector3 navPosition, bool raycastForDestructible = false)
 	{
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToDestination " + navPosition);
-		StartNewRoutine(WaitCharacterMoved(navPosition, 0f));
+		StartNewRoutine(WaitCharacterMoved(navPosition, 0f, raycastForDestructible));
 	}
 	public void AssignMoveToWaypoint(Waypoint waypoint, System.Action onComplete = null)
 	{
@@ -115,64 +125,29 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignMoveToDestination(Vector3 navPosition)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignMoveToDestination ");
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-		{
-			if (partyCharacter == _selfCharacter)
-			{
-				partyCharacter.Routines.AssignMoveToDestination(navPosition);
-			}
-			else
-			{
-				partyCharacter.Routines.AssignFollows(_selfCharacter);
-			}
-		}
+		_selfCharacter.Routines.AssignMoveToDestination(navPosition, false);
+		Leader_AssignFollows();
 	}
 	public void Leader_AssignInteract(PropComponent clickedProp)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignInteract ");
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-		{
-			if (partyCharacter == _selfCharacter)
-			{
-				partyCharacter.Routines.AssignInteract(clickedProp);
-			}
-			else
-			{
-				partyCharacter.Routines.AssignFollows(_selfCharacter);
-			}
-		}
+		_selfCharacter.Routines.AssignInteract(clickedProp);
+		Leader_AssignFollows();
 	}
 	public void Leader_AssignAttack(IAttackable other)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-		{
-			if (partyCharacter == _selfCharacter)
-			{
-				partyCharacter.Routines.AssignMoveAndAttack(other, partyCharacter.IsUsingRangeWeapon());
-			}
-			else
-			{
-				partyCharacter.Routines.AssignFollows(_selfCharacter);
-			}
-		}
+		_selfCharacter.Routines.AssignMoveAndAttack(other, _selfCharacter.IsUsingRangeWeapon());
+		Leader_AssignFollows();
 	}
 	public void Leader_AssignTalk(CharacterEntity npc)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignTalk ");
-		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-		{
-			if (partyCharacter == _selfCharacter)
-			{
-				partyCharacter.Routines.AssignTalk(npc);
-			}
-			else
-			{
-				partyCharacter.Routines.AssignFollows(_selfCharacter);
-			}
-		}
+		_selfCharacter.Routines.AssignTalk(npc);
+		Leader_AssignFollows();
 	}
-	public void AssignFollows(CharacterEntity leader)
+	
+	private void AssignFollows(CharacterEntity leader)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignFollows " + leader);
 		StopAllRoutines();
@@ -183,6 +158,35 @@ public class CharacterRoutines : MonoBehaviour
 		follow.enabled = true;
 	}
 
+	private void Leader_AssignFollows()
+	{
+		var leader = default(CharacterEntity);
+		
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
+		{
+			if (partyCharacter == _selfCharacter)
+			{
+				leader = partyCharacter;
+				break;
+			}
+		}
+		
+		if (!leader)
+		{
+			Debug.LogWarning(this + " can't Leader_AssignFollows");
+			return;
+		}
+
+		foreach (var partyCharacter in CharacterEntity.GetPartyCharacters().OrderBy(c => Vector3.Distance(leader.GetPosition(), c.GetPosition())))
+		{
+			if (partyCharacter != _selfCharacter)
+			{
+				partyCharacter.Routines.AssignFollows(leader);
+				leader = partyCharacter;
+			}
+		}
+	}
+	
 	public void StopAllRoutines()
 	{
 		if (activeInstances.Contains(this))
@@ -194,34 +198,38 @@ public class CharacterRoutines : MonoBehaviour
 	}
 	
 #region PRIVATE
-	private Coroutine coroutine;
+
+	private void StartNewRoutine(IEnumerator routine)
+	{
+		StopAllRoutines();
+		StartCoroutine(_WaitComplete(routine));
+		onStarted?.Invoke();
+	}
+
 	private CharacterEntity _selfCharacter;
 
-	private void Awake()
+	private void OnEnable()
 	{
 		_selfCharacter = GetComponent<CharacterEntity>();
 		if(!_selfCharacter) Debug.LogError(this + " absolutely needs a character!");
 	}
 
-	private void StartNewRoutine(IEnumerator routine)
+	private void OnDisable()
 	{
 		StopAllRoutines();
-		coroutine = StartCoroutine(routine);
-		StartCoroutine(_WaitComplete());
-		onStarted?.Invoke();
 	}
 	
 	//public Coroutine WaitComplete() => StartCoroutine(_WaitComplete());
-	private IEnumerator _WaitComplete()
+	private IEnumerator _WaitComplete(IEnumerator routine)
 	{
 		if(activeInstances.Contains(this)) Debug.LogError(this + " _WaitComplete activeInstances.Contains(this)");
 		activeInstances.Add(this);
 		
-		while (activeInstances[0] != this) // wait other routines
-			yield return null; 
+		//while (activeInstances[0] != this) // wait other routines
+		//	yield return null; 
 		
 		if(debugMode > 0) Debug.Log(this + " routine started " + activeInstances.Count);
-		yield return coroutine;
+		yield return StartCoroutine(routine);
 		activeInstances.Remove(this);
 		if(debugMode > 0) Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
 		debugString = "";
@@ -239,37 +247,28 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // force agent to stop while calculating destination path
 		
 		yield return agent.AssignWaypointDestinationAsync(clickedProp);
-
-		var destination = clickedProp.GetPosition();
-		var reachRadius = clickedProp.GetRadius();
-		var direction = (_selfCharacter.GetPosition() - clickedProp.GetPosition()).normalized;
+		
 		var foundWaypoint = agent.GetBestWaypoint();
 		if (foundWaypoint)
 		{
-			if(debugMode > 0) Debug.Log(_selfCharacter + " waypoint found: " + foundWaypoint + ", move to");
-			agent.SetReachDistance(foundWaypoint.radius);
-			destination = foundWaypoint.GetPosition();
-			direction = foundWaypoint.GetDirection();
+			yield return StartCoroutine(WaitCharacterInteractAtWaypoint(clickedProp, foundWaypoint));
 		}
-
-		var startTime = Time.time;
-		var pathValid = false;
-		do
+		else
 		{
-			if (Time.time - startTime > SearchPathTimeout)
-			{
-				Debug.LogWarning(this + " search path to waypoint timeout");
-				yield break;
-			}
-			
-			yield return agent.SearchPathAsync(destination, false);
+			yield return StartCoroutine(WaitCharacterInteractAtPosition(clickedProp, clickedProp.GetPosition()));
+		}
+	}
 
-			var path = agent.GetCurrentPath();
-			pathValid = path.Length > 1 && NavUtils.NavDistanceRoundY(path.Last(), destination) <= reachRadius + agent.GetRadius();
-			
-		} while (!pathValid);
+	private IEnumerator WaitCharacterInteractAtWaypoint(PropComponent clickedProp, Waypoint foundWaypoint)
+	{
+		var destination = foundWaypoint.GetPosition();
+		var direction = foundWaypoint.GetDirection();
+		var reachRadius = foundWaypoint.radius;
 
-		yield return StartCoroutine(WaitMoveLastPath(destination));
+		var agent = _selfCharacter.GetAgent();
+		agent.SetReachDistance(reachRadius);
+
+		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
 		
 		if (agent.ReachedDestination(destination))
 		{
@@ -299,12 +298,55 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else if(debugMode > 0) 
 		{
-			var dist = NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), destination);
+			var dist = NavUtils.NavDistance(_selfCharacter.GetPosition(), destination);
+			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + destination);
+		}
+	}
+
+	private IEnumerator WaitCharacterInteractAtPosition(PropComponent clickedProp, Vector3 destination)
+	{
+		var direction = Vector3.Scale(new Vector3(1,0,1), (destination - _selfCharacter.GetPosition()).normalized);
+		var reachRadius = _selfCharacter.GetRadius() + clickedProp.GetRadius();
+
+		var agent = _selfCharacter.GetAgent();
+		agent.SetReachDistance(reachRadius);
+
+		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
+		
+		if (agent.ReachedDestination(destination))
+		{
+			// waypoint reach
+			if (_selfCharacter.CanInteract())
+			{
+				while (!_selfCharacter.IsFacingDirection(direction))
+				{
+					_selfCharacter.LookDirection(direction, Time.deltaTime);
+					yield return null;
+				}
+		
+				_selfCharacter.UseAction(clickedProp.GetInteractAction(), clickedProp);
+				yield return clickedProp.WaitInteraction(_selfCharacter);
+		
+				clickedProp.InteractedBy(_selfCharacter);
+
+				do
+				{
+					yield return null;
+				} while (!clickedProp.AnimFinished());
+			}
+			else
+			{
+				_selfCharacter.FloatingText_Cant();
+			}
+		}
+		else if(debugMode > 0) 
+		{
+			var dist = NavUtils.NavDistance(_selfCharacter.GetPosition(), destination);
 			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + destination);
 		}
 	}
 	
-	private IEnumerator WaitCharacterAttack(IAttackable target, bool losCheck)
+	private IEnumerator WaitCharacterAttack(IAttackable target, bool losCheck, bool raycastForDestructible)
 	{
 		if(debugMode > 0) Debug.Log("WaitCharacterAttackCharacter " + _selfCharacter + " " + target + " losCheck=" + losCheck);
 
@@ -327,7 +369,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			var reachDistance = _selfCharacter.GetAttackReachDistance(target);
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
-			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance));
+			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
 			atAttackRange = _selfCharacter.IsAtAttackRange(target);
 		}
 		
@@ -358,8 +400,11 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		debugString = "WaitCharacterPerformAttack";
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterPerformAttack " + target );
+
+		yield return null;
 		
-		yield return StartCoroutine(WaitCharacterLookPosition(target.GetPosition()));
+		if(!_selfCharacter.IsFacingPosition(target.GetPosition()))
+			yield return StartCoroutine(WaitCharacterLookPosition(target.GetPosition()));
 
 		if (useAction && !_selfCharacter.HasActions())
 		{
@@ -398,12 +443,23 @@ public class CharacterRoutines : MonoBehaviour
 				break;
 		}
 
-		if (target is CharacterEntity && !(target as CharacterEntity).IsDead() && (target as CharacterEntity).TryGetComponent(out CharacterDetection detection))
+		if (target is CharacterEntity)
 		{
-			detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+			var defender = target as CharacterEntity;
+			
+			if (!defender.IsDead() && defender.TryGetComponent(out CharacterDetection detection))
+			{
+				detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+			}
+
+			if (defender.TryRiposte(_selfCharacter))
+			{
+				do yield return null;
+				while (defender.Routines.AnyActive());
+			}
 		}
 		
-		if(debugMode > 0) Debug.Log("attack ends");
+		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
 
 	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection((pos - _selfCharacter.GetPosition()).normalized);
@@ -428,7 +484,7 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitMoveCharacterToWaypoint";
 		if(debugMode > 0) Debug.Log(this + " WaitMoveCharacterToWaypoint " + waypoint);
 		
-		yield return StartCoroutine(WaitCharacterMoved(waypoint.GetPosition(), waypoint.radius));
+		yield return StartCoroutine(WaitCharacterMoved(waypoint.GetPosition(), waypoint.radius, false));
 		
 		if (_selfCharacter.WaypointReached(waypoint))
 		{
@@ -439,11 +495,12 @@ public class CharacterRoutines : MonoBehaviour
 		onComplete?.Invoke();
 	}
 
-	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance)
+	private List<Waypoint> ignoreWaypoints = new List<Waypoint>();
+	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance, bool raycastForDestructible)
 	{
 		reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAgent().GetMinReachDistance());
-		
-		var currentDistance = NavUtils.NavDistanceRoundY(dest,  _selfCharacter.GetPosition());
+
+		var currentDistance = NavUtils.NavDistance(dest,  _selfCharacter.GetPosition());
 		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
 		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " " + reachDistance + " currentDistance=" + currentDistance);
 		
@@ -457,59 +514,58 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // stop any movement
 		agent.SetReachDistance(reachDistance);
 		
-		yield return agent.SearchPathAsync(dest, true);
-		yield return StartCoroutine(WaitMoveLastPath(dest, reachDistance));
-		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved ends");
-	}
+		yield return agent.AssignDestination(dest);
+		
+		if (!agent.hasDestination)
+		{
+			foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(_selfCharacter.GetPosition(), dest))
+			{
+				dest = wp.GetPosition();
+				
+				yield return agent.AssignDestination(dest);
+				if (agent.hasDestination)
+					break;
+			}
+		}
 
-	private IEnumerator WaitMoveLastPath(Vector3 dest, float forcedReachDistance = 0f)
-	{
-		if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath " + forcedReachDistance); 
-		var agent = _selfCharacter.GetAgent();
+		if (!agent.hasDestination)
+		{
+			Debug.LogWarning(this + " WaitCharacterMoved !agent.hasDestination");
+			yield break;
+		}
+		
 		var path = agent.GetCurrentPath();
-		if(debugMode > 0) Debug.Log(this + " move to last path: " + path.Length);
+		if (path.Length < 1)
+		{
+			Debug.LogWarning(this + " path invalid");
+			yield break;
+		}
+		
+		if(debugMode > 0) Debug.Log(this + " move to path: " + path.Length);
 		if(debugMode > 0) DebugDrawer.Path(path, false, Color.blue, 1.0f);
-		if (path.Length <= 1)
-		{
-			Debug.LogWarning(_selfCharacter + " path invalid\nfrom " + _selfCharacter.GetPosition() + " points: " + Utils.ArrayStr(path));;
-			yield return null;
-			yield break;
-		}
-
-		var lastPoint = path.Last();
-		if (MinDistanceFromPathLastPoint > 0 && Vector3.Distance(dest, lastPoint) > MinDistanceFromPathLastPoint)
-		{
-			if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath path incomplete");
-			if (debugMode > 0) DebugDrawer.Line(lastPoint, dest, Color.magenta, 1.0f);
-			yield return null;
-			yield break;
-		}
 
 		var firstPoint = path[1];
 		var dir = (firstPoint - _selfCharacter.GetPosition()).normalized;
 		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
 		{
+			if (debugMode > 1) Debug.Log(this + " WaitMoveLastPath LookDirection");
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
 		
-//		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
+		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
 		agent.StartMove();
-
-		if (forcedReachDistance > 0)
-			agent.SetReachDistance(forcedReachDistance);
 		
 		var startTime = Time.time;
+		var freezeTime = Time.time;
+		var hasMoved = false;
 		while (!agent.ReachedDestination(dest))
 		{
 			debugTimeout = (Time.time - startTime);
 			
-			if (forcedReachDistance > 0)
-				agent.SetReachDistance(forcedReachDistance);
-			
 			if (Time.time - startTime > SearchPathTimeout)
 			{
-				Debug.LogWarning(_selfCharacter + " TIMED_OUT!");
+				Debug.LogWarning(this + " TIMED_OUT!");
 				_selfCharacter.FloatingText_Cant();
 				_selfCharacter.StopAgent();
 				yield break;
@@ -517,15 +573,25 @@ public class CharacterRoutines : MonoBehaviour
 
 			if (!_selfCharacter.IsMoving())
 			{
-				if(debugMode > 0) Debug.Log(_selfCharacter + " something stopped movement");
-				yield break;
+				if (hasMoved)
+				{
+					if(debugMode > 0) Debug.Log(this + " something stopped movement");
+					yield break;
+				}
 			}
 			
 			if (!_selfCharacter.HasMovePoints())
 			{
-				if(debugMode > 0) Debug.Log(_selfCharacter + " !HasMovePoints");
+				if(debugMode > 0) Debug.Log(this + " !HasMovePoints");
 				if(_selfCharacter.IsControllableByPlayer()) _selfCharacter.FloatingText_Cant();
 				agent.StopMovement();
+				yield break;
+			}
+
+			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(out var destructible))
+			{
+				if(debugMode > 0) Debug.Log(this + " RaycastForDestructible " + destructible);
+				yield return StartCoroutine(WaitCharacterAttack(destructible, false, false));
 				yield break;
 			}
 
@@ -541,6 +607,7 @@ public class CharacterRoutines : MonoBehaviour
 			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
+				hasMoved = true;
 				//agent.DropOnGround(); // to avoid overlapping obstacles
 				if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
 				startTime = Time.time; // reset timeout
@@ -549,7 +616,7 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination " + NavUtils.NavDistanceRoundY(dest, _selfCharacter.GetPosition()));
+		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination " + NavUtils.NavDistance(dest, _selfCharacter.GetPosition()));
 		agent.StopMovement();
 	}
 	
@@ -569,7 +636,7 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(">> WaitCharacterTalk: " + this + " " + npc);
 
 		var talkDistance = _selfCharacter.GetTalkDistance(npc);
-		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(),talkDistance));
+		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(),talkDistance,false));
 
 		if (!_selfCharacter.GetAgent().ReachedDestination())
 		{
@@ -599,15 +666,15 @@ public class CharacterRoutines : MonoBehaviour
 		if (objectTo is CharacterEntity)
 		{
 			var otherCharacter = objectTo as CharacterEntity;
-			if (useRange > 0 && NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) >
+			if (useRange > 0 && NavUtils.NavDistance(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) >
 			    useRange)
 			{
 				if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItem WaitCharacterMoved");
-				yield return StartCoroutine(WaitCharacterMoved(otherCharacter.GetPosition(), useRange));
+				yield return StartCoroutine(WaitCharacterMoved(otherCharacter.GetPosition(), useRange, false));
 			}
 
 			if (useRange <= 0 ||
-			    NavUtils.NavDistanceRoundY(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
+			    NavUtils.NavDistance(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
 			{
 				if (debugMode > 0) Debug.Log(this + " WaitCharacterUseItem at useRange");
 				while (otherCharacter != _selfCharacter && !_selfCharacter.IsFacingPosition(otherCharacter.GetPosition()))

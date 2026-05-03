@@ -10,11 +10,24 @@ public class Inventory : MonoBehaviour
 
 	public static Inventory[] GetSavedInventories() => allInventories.Where(i => i.saveInventory && !i.IsPartyInventory()).ToArray();
 	
+	public static Inventory[] GetLootBags() => allInventories.Where(i => i.isLootBag).ToArray();
+
+	public static Inventory CreateLootBag(Inventory lootBagPrefab, Vector3 navPosition)
+	{
+		var bag = Instantiate(lootBagPrefab.gameObject).GetComponent<Inventory>();
+		bag.isLootBag = true;
+		bag.maxSize = 1;
+		bag.destroyIfEmpty = true;
+		NavUtils.TryGetNearestNavPosition(navPosition, CreateLootNavDistance, out navPosition);
+		bag.transform.position = navPosition;
+		lootBagPrefab.gameObject.SetActive(true);
+		return bag;
+	}
+	
 	private const float CreateLootNavDistance = 1.0f;
 	
 	public string GetName() => name;
 	public bool IsName(string s) => s == name;
-	public bool ShouldSave() => saveInventory;
 	
 	public static int debugMode { get; set; }
 	public static event System.Action<Inventory> onAnyInventoryChanged;
@@ -27,6 +40,8 @@ public class Inventory : MonoBehaviour
 	[SerializeField] private bool saveInventory;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
 	
+	private bool isLootBag;
+	
 	public string[] GetItemNames()
 	{
 		return items.ConvertAll(i => !i ? "null" : i.name).ToArray();
@@ -34,6 +49,7 @@ public class Inventory : MonoBehaviour
 
 	public void SetItemNames(string[] slots)
 	{
+		if(slots == null) return;
 		for (int i = 0; i < slots.Length; i++)
 		{
 			SetItemName(i, slots[i]);
@@ -48,25 +64,17 @@ public class Inventory : MonoBehaviour
 			return;
 		}
 		
-		var item = ItemData.GetItemFromName(itemName);
-		if (item == null)
-		{
-			Debug.LogWarning(this + " invalid item name: " + itemName);
-			return;
-		}
+		var newItem = ItemData.GetItemFromName(itemName);
 		
-		if(items[index] != null)
-			Debug.LogWarning(this + " SetItemName already has an item at index " + index + ", overwrite !");
-
 		var lastItem = items[index];
 		if (lastItem)
 		{
 			onAnyItemRemoved?.Invoke(this, lastItem);
 		}
 		
-		items[index] = item;
+		items[index] = newItem;
 
-		if (!lastItem)
+		if (items[index])
 		{
 			onAnyItemAdded?.Invoke(this, items[index]);
 		}
@@ -90,12 +98,42 @@ public class Inventory : MonoBehaviour
 			return false;
 		}
 
-		bag = Instantiate(lootBagPrefab.gameObject).GetComponent<Inventory>();
-		bag.maxSize = 1;
-		bag.items.Add(itemData);
-		bag.destroyIfEmpty = true;
-		bag.transform.position = navPosition;
+		bag = CreateLootBag(lootBagPrefab, navPosition);
+		bag.TryAddItem(itemData);
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+		return true;
+	}
+
+	public bool IsEmpty() => items.All(it => !it);
+
+	public bool DropOnGround(out Inventory bag)
+	{
+		if (!lootBagPrefab)
+		{
+			Debug.LogWarning(this + " cannot CreateLootBag because no prefab set!");
+			bag = null;
+			return false;
+		}
+
+		if (IsEmpty())
+		{
+			bag = null;
+			return false;
+		}
+
+		if (!NavUtils.TryGetNearestNavPosition(transform.position, CreateLootNavDistance, out var navPosition))
+		{
+			Debug.LogWarning(this + " cannot CreateLootBag: no nav position found");
+			bag = null;
+			return false;
+		}
+		
+		bag = CreateLootBag(lootBagPrefab, navPosition);
+		bag.items.AddRange(items);
+		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+		items.Clear();
+		foreach(var it in bag.items) items.Add(null);
+		onAnyInventoryChanged?.Invoke(this);
 		return true;
 	}
 	

@@ -4,13 +4,21 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WeaponData", menuName = "WeaponData", order = 0)]
 public class WeaponData : ScriptableObject
 {
-	[Range(1, 12)] public int minDamage = 1;
-	[Range(1, 12)] public int maxDamage = 1;
-	public bool isRanged = false;
-	[Range(0f, 32f)] public float attackRange = 0f;
-	[Range(0f, 1f)] public float hitChance = 0.9f;
-	public AnimationCurve rangeHitCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
-	public bool noAttack = false;
+	[Range(1, 12)] [SerializeField] private int minDamage = 1;
+	[Range(1, 12)] [SerializeField] private int maxDamage = 1;
+	[Range(1, 20)] [SerializeField] private int hitChance = 10;
+	public float GetHitChance() => DicePool.DiceToFloat(20, hitChance);
+	
+	[SerializeField] private bool isRanged = false;
+	public bool IsRanged() => isRanged;
+	[Range(0f, 32f)] [SerializeField] private float attackRange = 0f;
+	public float GetAttackRange() => attackRange;
+	[SerializeField] private AnimationCurve rangeHitCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
+	public float EvaluateRange(float range, float radius) => range <= radius ? 1.0f : Mathf.Clamp01(rangeHitCurve.Evaluate(range / attackRange));
+	[SerializeField] private AnimationCurve heightHitBonus = AnimationCurve.Linear(-1f, -0.25f, 1f, 0.25f);
+	public float EvaluateHeight(float height) => heightHitBonus.Evaluate(height);
+	[SerializeField] private bool noAttack = false;
+	
 	public Weapon rpgWeaponR = Weapon.Relax;
 	public Weapon rpgWeaponL = Weapon.Relax;
 	

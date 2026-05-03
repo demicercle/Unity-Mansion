@@ -10,12 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdc478c8643c45d6a47c13b529165a46, type: 3}
-  m_Name: Bandage
+  m_Name: Item_Grenade
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
-    lineIndex: 1
-    text: "Bandage\r"
-  icon: {fileID: 2800000, guid: 1b310b4f2926ae14280a4e0543f9607a, type: 3}
-  targetType: 1
-  useRange: 2
-  onUseScript: {fileID: 11400000, guid: 5468590fc2e38c848a62a25eaced5191, type: 2}
+    lineIndex: 2
+    text: "\r"
+  icon: {fileID: 2800000, guid: a34885405289bb34585d132b60c4cd7e, type: 3}
+  targetType: 2
+  useRange: 8
+  onUseScript: {fileID: 11400000, guid: 90fe40b23bddf1c4f9bbfc8c0174fd43, type: 2}
+  itemTags: Grenade
+  useGroundRadius: 0.2
+  isProjectile: 1

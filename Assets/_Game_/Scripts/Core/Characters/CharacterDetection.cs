@@ -16,7 +16,9 @@ public class CharacterDetection : MonoBehaviour
 
 	public System.Action<float> onAwarenessChanged;
 
-	[SerializeField] [Min(0f)] private float awarenessScale = 1.0f;
+	[SerializeField] [Min(0f)] private float awarenessScaleUp = 1.0f;
+	[SerializeField] [Min(0f)] private float awarenessScaleDown = 1.0f;
+	[SerializeField] [Min(0f)] private float awarenessHoldUpTime = 1.0f; 
 	[SerializeField][Range(0f, 16f)] private float hearingDistance = 3.0f;
 	[SerializeField][Range(0f, 32f)] private float seeingDistance = 3.0f;
 	[SerializeField][Range(0f, 360f)] private float maxAngle = 30f;
@@ -24,11 +26,28 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField] private bool setDetectedOnDamaged = true;
 	[SerializeField] private bool lookAtDetected = true;
 	[SerializeField] private bool drawGizmos;
+
+	private float lastTimeAwarenessUp;
+	private float lastTimeDetected;
+	public float GetLastTimeDetectedInterval() => currentTime - lastTimeDetected;
+	private float currentTime => Time.realtimeSinceStartup;
 	
-	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
+	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.ContainsKey(other);
 
 	public float GetMaxSeeingDistance() => Mathf.Max(hearingDistance, seeingDistance);
-	public CharacterEntity[] GetDetectedCharacters() => detectedCharacters.ToArray();
+	public CharacterEntity[] GetDetectedCharacters() => detectedCharacters.Keys.ToArray();
+	
+	public bool GetLastTimeDetectedInterval(CharacterEntity other, out float interval)
+	{
+		if (detectedCharacters.ContainsKey(other))
+		{
+			interval = currentTime - detectedCharacters[other];
+			return true;
+		}
+
+		interval = 0;
+		return false;
+	}
 	
 	public void SetCharacterDetected(CharacterEntity otherCharacter, bool value)
 	{
@@ -37,17 +56,19 @@ public class CharacterDetection : MonoBehaviour
 			Debug.LogWarning(this + " SetCharacterDetected no other character!");
 			return;
 		}
+
 		
 		if (value)
 		{
-			if (!detectedCharacters.Contains(otherCharacter))
+			if (!detectedCharacters.ContainsKey(otherCharacter))
 			{
 				awarenessMap.Remove(otherCharacter);
 				awarenessMap.Add(otherCharacter, 1.0f);
 				NotifyAwarenessChanged();
 				
 				if(debugMode > 0) Debug.Log(this + " detects " + otherCharacter);
-				detectedCharacters.Add(otherCharacter);
+				detectedCharacters.Add(otherCharacter, currentTime);
+				lastTimeDetected = currentTime;
 				
 				onCharacterDetected?.Invoke(otherCharacter);
 				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, true);
@@ -58,7 +79,7 @@ public class CharacterDetection : MonoBehaviour
 		}
 		else
 		{
-			if (detectedCharacters.Contains(otherCharacter))
+			if (detectedCharacters.ContainsKey(otherCharacter))
 			{
 				awarenessMap.Remove(otherCharacter);
 				NotifyAwarenessChanged();
@@ -73,7 +94,9 @@ public class CharacterDetection : MonoBehaviour
 
 	public void ClearAll() => detectedCharacters.Clear();
 
-	private List<CharacterEntity> detectedCharacters = new List<CharacterEntity>();
+	public float GetAwarenessValueMax() => awarenessMap.Values.OrderBy(v => v).LastOrDefault();
+
+	private Dictionary<CharacterEntity, float> detectedCharacters =  new Dictionary<CharacterEntity, float>(); // last time detected
 	private Dictionary<CharacterEntity, float> awarenessMap = new Dictionary<CharacterEntity, float>();
 	private CharacterEntity selfCharacter;
 	private string debugString;
@@ -113,12 +136,14 @@ public class CharacterDetection : MonoBehaviour
 		}
 
 		selfCharacter.onDead += OnCharacterDead;
+		selfCharacter.onRevive += OnCharacterRevive;
 	}
 
 	private void OnDestroy()
 	{
 		if (!selfCharacter) return;
 		selfCharacter.onDead -= OnCharacterDead;
+		selfCharacter.onRevive -= OnCharacterRevive;
 	}
 
 	private void OnEnable()
@@ -141,7 +166,13 @@ public class CharacterDetection : MonoBehaviour
 
 	private void OnCharacterDead()
 	{
+		ClearAll();
 		enabled = false;
+	}
+
+	private void OnCharacterRevive()
+	{
+		enabled = true;
 	}
 	
 	private void OnDamagedBy(CharacterEntity other, float amount)
@@ -176,18 +207,19 @@ public class CharacterDetection : MonoBehaviour
 				var distance = Vector3.Distance(selfPosition, otherPosition);
 				var maxDistance = Mathf.Max(hearingDistance, seeingDistance);
 				if (distance >= maxDistance) continue;
-
-				var scale = awarenessScale
-				            * distanceCurve.Evaluate(distance / maxDistance)
-				            * anyCharacter.GetStealth();
 				
 				if (IsCharacterVisible(anyCharacter, distance))
 				{
-					AddAwareness(anyCharacter, scale * deltaTime);
+					lastTimeAwarenessUp = Time.time;
+
+					var scale = distanceCurve.Evaluate(distance / maxDistance)
+					            * anyCharacter.GetStealth();
+					
+					AddAwareness(anyCharacter, scale * awarenessScaleUp * deltaTime);
 				}
-				else
+				else if (Time.time - lastTimeAwarenessUp > awarenessHoldUpTime)
 				{
-					AddAwareness(anyCharacter, -scale * deltaTime);
+					AddAwareness(anyCharacter, -awarenessScaleDown * deltaTime);
 				}
 				
 				yield return null;
@@ -298,6 +330,7 @@ public class CharacterDetection : MonoBehaviour
 	{
 		if (debugMode > 0)
 		{
+			//debugString = "Time: " + lastTimeDetected.ToString("N3") + "\n";
 			debugString = "";
 			foreach (var entry in awarenessMap)
 			{

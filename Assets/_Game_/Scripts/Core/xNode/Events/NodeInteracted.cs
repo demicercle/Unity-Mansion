@@ -25,12 +25,12 @@ public class NodeInteracted : GameNode
 		_prop = GetInputValue<SceneReference>("_prop", _prop);
 		if (_prop.TryGetComponent(this, out prop))
 		{
-			DebugLogThis("init prop: "  + prop);
+			DebugLog("init prop: "  + prop);
 			prop.onInteracted += Interacted;
 		}
 		else
 		{
-			DebugWarningThis("no prop found");
+			DebugLogWarning("no prop found");
 		}
 	}
 	

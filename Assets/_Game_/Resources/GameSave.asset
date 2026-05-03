@@ -12,8 +12,169 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5dd240e700d42499999efd830201ea6, type: 3}
   m_Name: GameSave
   m_EditorClassIdentifier: Assembly-CSharp::GameSave
-  disableSave: 1
-  version: 0
-  savedLevels: []
+  disableSave: 0
+  lootBagPrefab: {fileID: 3870844094002656079, guid: e06b8a3ef8b241e4290237da71253253, type: 3}
+  version: 2
+  gameSeed: 3639651
   selectedCharacter: 0
-  savedPCs: []
+  savedPCs:
+  - name: PC_Player_0
+    position: {x: 18.46, y: 3.75, z: -11.73}
+    rotation: 173
+    isDead: 0
+    damages: 0
+    slots:
+    - null
+    - null
+    - Grenade
+    - null
+    - null
+    - null
+  - name: PC_Player_1
+    position: {x: 15.45, y: 3.75, z: -9.95}
+    rotation: 61
+    isDead: 0
+    damages: 0
+    slots:
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+  - name: PC_Player_2
+    position: {x: 15.71, y: 3.75, z: -10.94}
+    rotation: 86
+    isDead: 0
+    damages: 0
+    slots:
+    - null
+    - null
+    - null
+    - null
+    - null
+    - null
+  savedValues:
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  - name: KARMA
+    value: 3
+  savedLevels:
+  - levelIndex: 0
+    levelCharacters:
+    - name: PC_Zombi_0
+      position: {x: 17.17, y: 3.75, z: -3.15}
+      rotation: 278
+      isDead: 1
+    - name: PC_Zombi_1
+      position: {x: 16.4, y: 0.2, z: 4.43}
+      rotation: 115
+      isDead: 0
+    - name: PC_Zombi_2
+      position: {x: 4.13, y: 0.2, z: 5.22}
+      rotation: 2
+      isDead: 0
+    - name: PC_Zombi_3
+      position: {x: -14.2, y: 0.25, z: 0.86}
+      rotation: 112
+      isDead: 0
+    - name: PC_Zombi_4
+      position: {x: -8.37, y: 3.75, z: 7.4}
+      rotation: 277
+      isDead: 0
+    - name: PC_Zombi_6
+      position: {x: -1.36, y: 0.25, z: 2.77}
+      rotation: 26
+      isDead: 0
+    - name: PC_Zombi_5
+      position: {x: -4.58, y: 0.25, z: -3.91}
+      rotation: 111
+      isDead: 0
+    - name: PC_Zombi_7
+      position: {x: 0.33, y: 3.75, z: -9.13}
+      rotation: 188
+      isDead: 0
+    - name: PC_Neutral
+      position: {x: -4.5, y: 0.2, z: -15}
+      rotation: 43
+      isDead: 0
+    revealedRooms:
+    - Staircase
+    - Corridor
+    - BedroomSide
+    savedProps:
+    - name: Prop_Door_Simple (4)
+      count: 0
+    - name: Prop_Door_Simple (8)
+      count: 0
+    - name: Prop_Door_Simple (9)
+      count: 0
+    - name: Prop_Door_Simple (1)
+      count: 1
+    - name: Prop_Door_Simple (5)
+      count: 0
+    - name: Prop_Door_Simple (0)
+      count: 0
+    - name: Prop_Door_Simple (7)
+      count: 0
+    - name: Prop_Door_Simple (6)
+      count: 0
+    - name: Prop_Door_Double_1
+      count: 0
+    - name: Prop_Door_Double_0
+      count: 1
+    - name: Prop_Door_Simple (3)
+      count: 1
+    savedInventories:
+    - name: LOOT_bookcaseClosedDoors
+      slots:
+      - Bandage
+      - null
+      - null
+      - null
+      - null
+      - null
+    - name: LOOT_washer
+      slots:
+      - Bandage
+      - null
+      - null
+      - null
+      - null
+      - null
+    - name: LOOT_cabinetBed
+      slots:
+      - null
+      - null
+      - null
+      - null
+      - null
+      - null
+    - name: LOOT_lootBag(Clone)
+      slots:
+      - null
+    - name: LOOT_lootBag(Clone)
+      slots:
+      - Bandage
+    destroyedProps:
+    - DestructiblePlanks
+    savedLoots:
+    - position: {x: 18.460003, y: 4.21917, z: -11.73}
+      inventory:
+        name: LOOT_lootBag(Clone)
+        slots:
+        - Bandage
