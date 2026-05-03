@@ -286,6 +286,8 @@ public class GameInput : MonoBehaviour
 	{
 		if (isLoading)
 			return;
+
+		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 		
 		if (Application.isEditor)
 		{
@@ -320,10 +322,15 @@ public class GameInput : MonoBehaviour
 				gameTurnManager.TryEndPlayerTurn(true);
 			}
 			
-			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.
-				SelectCharacterAt(0);
+			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(0);
 			if (inputSystem.Player.SelectParty2.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(1);
 			if (inputSystem.Player.SelectParty3.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(2);
+
+			if (selectedCharacter)
+			{
+				if (inputSystem.Player.ToggleAim.WasPressedThisFrame()) selectedCharacter.ToggleAim(true);
+				if (inputSystem.Player.ToggleAim.WasReleasedThisFrame()) selectedCharacter.ToggleAim(false);
+			}
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
@@ -413,8 +420,6 @@ public class GameInput : MonoBehaviour
 			Cursor.visible = true;
 			Cursor.SetCursor(null,default,default);
 		}
-
-		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 		
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
 
@@ -648,7 +653,8 @@ public class GameInput : MonoBehaviour
 	
 	private void LateUpdate()
 	{
-		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading && !gameTurnManager.IsWaiting());
+		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading && !gameTurnManager.IsWaiting() 
+		                                      && (!selectedCharacter || !selectedCharacter.IsAiming()));
 		
 		if (navigationTarget.gameObject.activeSelf)
 		{
