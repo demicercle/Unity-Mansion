@@ -5,16 +5,18 @@ REFACTO
 - clean "CharacterController"
 - retake "door breaks trigger" with enemy tag (zombi will destroy, others will open...)
 - dialog line reference bug in editor
+- door nav obstacle
+- items can be weapons
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - add a "drop on ground" and "pickup loot bag" Animation
 - damage VFX (blood)
+- revive zombi trigger, "canBeRevived" flag
+- display setItemToUse with others than grenades
 
 SAVE
-- brain state
-- door / destructible state
-- reroll dice points
+- travel to next level?
 
 UI
 - popup "are you sure you want to reroll dices?"
@@ -30,12 +32,13 @@ NODES
 
 INPUT
 - min time between assigns
+- aim button and IK hands with pistol (lookAt)
 
 GAMEPLAY
+- pistol ammo / Reload Action
 - run should also roll dices?
 - randomize enemies hp on game seed 
-- is dying state (-1 HP / turn or 6 seconds)
-- grenade should alert damaged enemy
+- is dying state (-1 HP / turn or 6 seconds
 - check can fire pistol through walls
 - check clicks on "IsWaiting" while real time
 - assign attack : should update destination if target moves
