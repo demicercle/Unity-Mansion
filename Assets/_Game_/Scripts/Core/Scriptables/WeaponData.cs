@@ -14,7 +14,9 @@ public class WeaponData : ScriptableObject
 	[Range(0f, 32f)] [SerializeField] private float attackRange = 0f;
 	public float GetAttackRange() => attackRange;
 	[SerializeField] private AnimationCurve rangeHitCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
-	public float EvaluateRange(float value) => rangeHitCurve.Evaluate(value / attackRange);
+	public float EvaluateRange(float range, float radius) => range <= radius ? 1.0f : Mathf.Clamp01(rangeHitCurve.Evaluate(range / attackRange));
+	[SerializeField] private AnimationCurve heightHitBonus = AnimationCurve.Linear(-1f, -0.25f, 1f, 0.25f);
+	public float EvaluateHeight(float height) => heightHitBonus.Evaluate(height);
 	[SerializeField] private bool noAttack = false;
 	
 	public Weapon rpgWeaponR = Weapon.Relax;

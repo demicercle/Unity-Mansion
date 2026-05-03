@@ -268,14 +268,17 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	}
 
 	private float calculatedHitChance;
-	private float targetRange;
+	private float targetRange, targetHeight;
 
-	public float CalculateHitChance(Vector3 targetPosition)
+	public float CalculateHitChance(Vector3 targetPosition, float targetRadius)
 	{
 		if (IsUsingRangeWeapon())
 		{
 			targetRange = Vector3.Distance(GetCenterPosition(), targetPosition);
-			return GetHitChance() * currentWeapon.EvaluateRange(targetRange);
+			targetHeight = GetPosition().y - targetPosition.y;
+			return Mathf.Clamp01(GetHitChance() 
+				* currentWeapon.EvaluateRange(targetRange, GetRadius() + targetRadius)
+				+ currentWeapon.EvaluateHeight(targetHeight));
 		}
 		else
 		{
@@ -285,7 +288,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public float CalculateHitChance(CharacterEntity target)
 	{
-		calculatedHitChance = CalculateHitChance(target.GetCenterPosition());
+		calculatedHitChance = CalculateHitChance(target.GetCenterPosition(), target.GetRadius());
 		if (!IsUsingRangeWeapon())
 		{
 			if (target.CanDodge())
@@ -298,7 +301,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public AttackResult TryHit(CharacterEntity target, float atkRoll)
 	{
-		var hitChance = CalculateHitChance(target.GetCenterPosition());
+		var hitChance = CalculateHitChance(target.GetCenterPosition(), target.GetRadius());
 		if(DicePool.debugMode>0) Debug.Log(this + " TryHit " + target + " roll=" + atkRoll + " hitChance=" + hitChance);
 		if (1f - atkRoll > hitChance) // miss
 		{

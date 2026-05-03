@@ -33,10 +33,8 @@ INPUT
 
 GAMEPLAY
 - run should also roll dices?
-- squad alert turn order
 - randomize enemies hp on game seed 
 - is dying state (-1 HP / turn or 6 seconds)
-- tweak "range to hit chance" and take height into account
 - grenade should alert damaged enemy
 - check can fire pistol through walls
 - check clicks on "IsWaiting" while real time
