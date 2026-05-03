@@ -1,14 +1,5 @@
 # Unity-Mansion
 
-- display cursor text "attack will miss" or "attack will hit" 
-- min time between assigns
-- randomize hp on game seed 
-- zombi 7 stuck in patrol after load
-- taunt action
-- squad alert turn order
-- run should also roll dices?
-- awareness decrease scale
-
 REFACTO
 - add namespaces
 - clean "CharacterController"
@@ -37,10 +28,16 @@ ENV ART
 NODES
 - retakes "scene reference" with a list of references in GameScript
 
+INPUT
+- min time between assigns
+
 GAMEPLAY
+- run should also roll dices?
+- squad alert turn order
+- randomize enemies hp on game seed 
+- is dying state (-1 HP / turn or 6 seconds)
 - tweak "range to hit chance" and take height into account
 - grenade should alert damaged enemy
-- "prepare attack" Action
 - check can fire pistol through walls
 - check clicks on "IsWaiting" while real time
 - assign attack : should update destination if target moves
