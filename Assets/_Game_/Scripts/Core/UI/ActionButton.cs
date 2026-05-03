@@ -26,7 +26,8 @@ public class ActionButton : MonoBehaviour
 		button.interactable = CharacterSelection.TryGetSelectedCharacter(out var selected) 
 		                      && selected.IsControllableByPlayer() 
 		                      && selected.CanUseAction(actionType);
-		toggleUseDice.isOn = selected && selected.ActionUsesDiceRolls(actionType);
+		
+		toggleUseDice.isOn = selected && selected.ActionUsesDiceRolls(actionType) && selected.CanUseAction(actionType);
 	}
 
 	private void OnButtonClick()

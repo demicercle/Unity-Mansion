@@ -113,8 +113,8 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 			if (toggleDodge.isOn)
 			{
 				calculatedDodge = _assignedCharacter.GetDodgeChance();
-				dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
-				dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
+				if(dodgeLabel1) dodgeLabel1.text = Mathf.RoundToInt(Mathf.Lerp(20, 1, calculatedDodge)) + "+";
+				if(dodgeLabel2) dodgeLabel2.text = "(" + Mathf.RoundToInt( calculatedDodge * 100) + "%)";
 			}
 		}
 	}
