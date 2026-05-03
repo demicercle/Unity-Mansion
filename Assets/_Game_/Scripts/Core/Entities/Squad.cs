@@ -15,6 +15,11 @@ public class Squad : MonoBehaviour
 		return (squads = activeInstances.Where(s => s.characters.Contains(character)).ToList()).Count > 0;
 	}
 
+	public void AlertAllies(CharacterEntity killedCharacter, CharacterEntity attacker)
+	{
+		StartCoroutine(WarnAllies(killedCharacter, attacker));
+	}
+
 	public CharacterEntity[] GetCharacters() => characters.ToArray();
 	
 	[SerializeField] private bool warnAllies = true;

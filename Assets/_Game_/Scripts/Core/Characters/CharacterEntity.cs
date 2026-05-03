@@ -636,7 +636,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public void TakeDamage(DamageInfo damageInfo, object objectFrom)
 	{
-		Debug.Log(this + " TakeDamage " + damageInfo);
+		Debug.Log(this + " TakeDamage " + damageInfo + " from " + objectFrom);
 		totalDamages += damageInfo.amount;
 		lastDamageInstigator = objectFrom;
 		
@@ -647,8 +647,21 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		
 		if (GetCurrentHealth() <= 0f)
 		{
-			if(TryKill())
+			if (TryKill())
+			{
+				if (objectFrom is CharacterEntity)
+				{
+					if (Squad.TryFindSquads(this, out var squads))
+					{
+						foreach (var squad in squads)
+						{
+							squad.AlertAllies(this, objectFrom as CharacterEntity);
+						}
+					}
+				}
+				
 				return;
+			}
 		}
 
 		onStatsChanged?.Invoke();
