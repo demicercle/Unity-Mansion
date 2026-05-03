@@ -15,7 +15,23 @@ public class ConsoleCommands : MonoBehaviour
 			{
 				amount = amount,
 				isRanged = false
-			}, character);
+			}, null);
+	}
+	
+	[ConsoleMethod("apply_dmg_any", "")]
+	public static void ApplyDamageAny(string objectName, int amount)
+	{
+		foreach (var character in CharacterEntity.AllCharacters)
+		{
+			if (character.name.StartsWith(objectName))
+			{
+				character.TakeDamage(new DamageInfo()
+				{
+					amount = amount,
+					isRanged = false
+				}, null);
+			}
+		}
 	}
 
 	[ConsoleMethod("stop_all_routines", "")]
@@ -55,10 +71,20 @@ public class ConsoleCommands : MonoBehaviour
 	}
 
 	[ConsoleMethod("heal", "")]
-	public static void Heal(int amount)
+	public static void Heal(int amount= 0)
 	{
 		if(CharacterSelection.TryGetSelectedCharacter(out CharacterEntity character))
 			character.Heal(amount);
+	}
+	
+	[ConsoleMethod("heal_any", "")]
+	public static void HealAny(string objectName, int amount = 0)
+	{
+		foreach (var character in CharacterEntity.AllCharacters)
+		{
+			if(character.name.StartsWith(objectName))
+				character.Heal(amount);
+		}
 	}
 
 	[ConsoleMethod("rest", "")]

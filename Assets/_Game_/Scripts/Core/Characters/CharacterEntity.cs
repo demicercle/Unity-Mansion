@@ -112,6 +112,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
 	[SerializeField] private WeaponData defaultWeapon;
+	[SerializeField] private bool noRevive = false;
 	public CharacterRoutines Routines => routines;
 
 	public bool IsName(string savedPCName)
@@ -609,7 +610,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onHealed?.Invoke(amount);
 		onAnyCharacterHealed?.Invoke(this, amount);
 
-		if (isDead && GetCurrentHealth() > 0)
+		if (isDead && !noRevive && GetCurrentHealth() > 0)
 		{
 			Debug.Log(this + " Revive!");
 			isDead = false;
@@ -681,7 +682,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			agent.SetAgentActive(false);
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
-			if(detection) detection.ClearAll();
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();

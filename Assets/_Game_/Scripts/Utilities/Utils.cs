@@ -142,6 +142,13 @@ public static class Utils
 		}
 	}
 
+	public static bool TryFindObject<T>(string withName, out T component) where T : Component
+	{
+		var go = GameObject.Find(withName);
+		component = null;
+		return go && go.TryGetComponent(out component);
+	}
+
 	public static T[] FindObjects<T>() where T : Object => Object.FindObjectsByType<T>(default);
 	public static T FindFirstObject<T>() where T : Object => FindObjects<T>().FirstOrDefault();
 

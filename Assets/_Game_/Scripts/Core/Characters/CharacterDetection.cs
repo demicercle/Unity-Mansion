@@ -136,12 +136,14 @@ public class CharacterDetection : MonoBehaviour
 		}
 
 		selfCharacter.onDead += OnCharacterDead;
+		selfCharacter.onRevive += OnCharacterRevive;
 	}
 
 	private void OnDestroy()
 	{
 		if (!selfCharacter) return;
 		selfCharacter.onDead -= OnCharacterDead;
+		selfCharacter.onRevive -= OnCharacterRevive;
 	}
 
 	private void OnEnable()
@@ -164,7 +166,13 @@ public class CharacterDetection : MonoBehaviour
 
 	private void OnCharacterDead()
 	{
+		ClearAll();
 		enabled = false;
+	}
+
+	private void OnCharacterRevive()
+	{
+		enabled = true;
 	}
 	
 	private void OnDamagedBy(CharacterEntity other, float amount)
