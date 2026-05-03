@@ -1165,7 +1165,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterLookAt
   lookTarget: {fileID: 7155099250292984196}
-  dotRange: {x: 0.2, y: 0.8}
+  dotRange: {x: 0.01, y: 0.2, z: 0.6}
+  tickTime: 0.5
+  lerpSpeed: 1.5
 --- !u!4 &7155099250292984196 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2451085307745320104, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
@@ -1683,6 +1685,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8bf315116540e8aace59c6f3be0352, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEventHandler
+  debugMode: 0
   character: {fileID: 5745611760749173238}
   revealedOnly: 0
   actionEvents:
@@ -1737,10 +1740,19 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  onSpawned:
+    m_PersistentCalls:
+      m_Calls: []
+  onPartyChanged:
+    m_PersistentCalls:
+      m_Calls: []
   onDamaged:
     m_PersistentCalls:
       m_Calls: []
   onDeath:
+    m_PersistentCalls:
+      m_Calls: []
+  onRevive:
     m_PersistentCalls:
       m_Calls: []
   onHealed:
@@ -1756,6 +1768,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onLastKill:
+    m_PersistentCalls:
+      m_Calls: []
+  onAwarenessChanged:
     m_PersistentCalls:
       m_Calls: []
 --- !u!4 &5757940252884301857 stripped

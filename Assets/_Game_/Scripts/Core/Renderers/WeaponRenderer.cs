@@ -25,20 +25,12 @@ public class WeaponRenderer : MonoBehaviour
             var selfCharacter = GetComponentInParent<CharacterEntity>();
             if (selfCharacter)
             {
-                shootLine.gameObject.SetActive(true);
-                shootLine.useWorldSpace = true;
-                shootLine.positionCount = 2;
-                shootLine.SetPosition(0, shootLine.transform.position);
-                
                 var lastAttackTarget = selfCharacter.GetLastAttackTarget();
-                if(lastAttackTarget != null) 
-                    shootLine.SetPosition(1, lastAttackTarget.GetPosition());
-                else 
-                    shootLine.SetPosition(1, shootLine.transform.position                              // TODO shoot forward, broken
-                                         + Vector3.Scale(new Vector3(1,0,1), shootLine.transform.forward) 
-                                         * (selfCharacter.GetLastAttackTarget().GetPosition() - selfCharacter.GetPosition()).magnitude);
-                
-                shootLine.GetComponent<Animation>()?.Play();
+                var shootPosition = lastAttackTarget?.GetPosition() ?? shootLine.transform.position 
+                    + Vector3.Scale(new Vector3(1,0,1), shootLine.transform.forward) 
+                    * (selfCharacter.GetLastAttackTarget().GetPosition() - selfCharacter.GetPosition()).magnitude;
+
+                DisplayLine(shootPosition, true);
             }
         }
     }
@@ -47,16 +39,21 @@ public class WeaponRenderer : MonoBehaviour
     {
         if (!shootLine) return;
         shootLine.gameObject.SetActive(false);
+        if(CharacterEntity.debugAim > 0) Debug.Log("HideLine");
     }
 
-    public void DisplayLine(Vector3 aimingPosition)
+    public void DisplayLine(Vector3 aimingPosition,bool animate)
     {
         if (!shootLine) return;
         shootLine.gameObject.SetActive(true);
-        shootLine.useWorldSpace = true;
+        shootLine.loop = false;
+        shootLine.useWorldSpace = false;
         shootLine.positionCount = 2;
-        shootLine.SetPosition(0, shootLine.transform.position);
-        shootLine.SetPosition(0, aimingPosition);
+        shootLine.SetPosition(0, Vector3.zero);
+        shootLine.SetPosition(1, shootLine.transform.InverseTransformPoint(aimingPosition));
+        if(animate)
+            shootLine.GetComponent<Animation>()?.Play();
+        if(CharacterEntity.debugAim > 0) Debug.Log("DisplayLine: " + aimingPosition + " " + animate);
     }
 
     public bool DisplaysItem(ItemData itemData)
@@ -88,7 +85,7 @@ public class WeaponRenderer : MonoBehaviour
             if (parentCharacter.TryGetAimingPosition(out var aimingPos))
             {
                 wasAiming = true;
-                DisplayLine(aimingPos);
+                DisplayLine(aimingPos, false);
             }
             else if (wasAiming)
             {

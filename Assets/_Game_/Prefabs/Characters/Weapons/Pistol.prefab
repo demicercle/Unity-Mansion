@@ -173,7 +173,7 @@ Animation:
   m_Animations:
   - {fileID: 7400000, guid: 387e1c0e202793a4b92c91fce5e9dbe7, type: 2}
   m_WrapMode: 0
-  m_PlayAutomatically: 1
+  m_PlayAutomatically: 0
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
@@ -5211,6 +5211,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: 17
+  itemTags: 
   inHand: 1
   offHand: 1
   renderers:

@@ -958,6 +958,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	    animator.SetFloat(AnimationParameters.AimHorizontal, horizontalAngle);
 	    animator.SetFloat(AnimationParameters.AimVertical, verticalAngle);
 	    animator.SetFloat(AnimationParameters.BowPull, bowPull);
+	    if(CharacterEntity.debugAim >0) Debug.Log(this + " AimVertical:" + verticalAngle + " AimHorizontal:" + horizontalAngle + " BowPull" + bowPull);
     }
     #endregion
     

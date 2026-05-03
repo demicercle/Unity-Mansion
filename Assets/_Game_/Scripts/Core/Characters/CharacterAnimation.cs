@@ -345,6 +345,8 @@ public class CharacterAnimation : MonoBehaviour
 		if (!value) 
 			timeAiming = 0f;
 		
+		if(CharacterEntity.debugAim > 0) Debug.Log(this + " OnAiming " + value + " " + position + " " + timeAiming.ToString("N2"));
+		
 		if (rpgAnimationHandler)
 		{
 			rpgAnimationHandler.Aim(value, position, rpgAnimationHandler.rightWeapon == Weapon.TwoHandBow ? Mathf.Clamp01(timeAiming) : 0f);
