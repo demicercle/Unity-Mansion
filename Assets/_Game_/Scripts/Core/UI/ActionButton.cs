@@ -6,7 +6,8 @@ using UnityEngine.UI;
 public class ActionButton : MonoBehaviour
 {
 	[SerializeField] private CharacterAction actionType;
-
+	[SerializeField] private Toggle toggleUseDice;
+	
 	private Button button;
 	
 	private void OnEnable()
@@ -25,6 +26,7 @@ public class ActionButton : MonoBehaviour
 		button.interactable = CharacterSelection.TryGetSelectedCharacter(out var selected) 
 		                      && selected.IsControllableByPlayer() 
 		                      && selected.CanUseAction(actionType);
+		toggleUseDice.isOn = selected && selected.ActionUsesDiceRolls(actionType);
 	}
 
 	private void OnButtonClick()

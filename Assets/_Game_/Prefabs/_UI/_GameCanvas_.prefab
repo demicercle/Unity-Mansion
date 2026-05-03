@@ -2825,7 +2825,7 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 082e2debcc70b054c8bafbb29de6c843, type: 3}
     - target: {fileID: 2944619007060816962, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
       propertyPath: m_Name
-      value: ActionButton_Prepare
+      value: ActionButton_Riposte
       objectReference: {fileID: 0}
     - target: {fileID: 3263160687191105880, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
       propertyPath: m_Sprite
@@ -2845,7 +2845,7 @@ PrefabInstance:
       objectReference: {fileID: 2800000, guid: 7b717332490a4244e8fcb9d615e276a1, type: 3}
     - target: {fileID: 6202144238970406237, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
       propertyPath: m_text
-      value: <b>P</b>repare
+      value: <b>R</b>iposte
       objectReference: {fileID: 0}
     - target: {fileID: 7806360799189850706, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
       propertyPath: actionType
@@ -4048,10 +4048,6 @@ PrefabInstance:
     - target: {fileID: 2944619007060816962, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
       propertyPath: m_Name
       value: ActionButton_Run
-      objectReference: {fileID: 0}
-    - target: {fileID: 7806360799189850706, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
-      propertyPath: actionType
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9100710245468494187, guid: 4dfc2cdd45f91ce468ab27b98439d608, type: 3}
       propertyPath: m_Pivot.x

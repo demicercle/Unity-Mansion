@@ -198,7 +198,14 @@ public class CharacterRoutines : MonoBehaviour
 	}
 	
 #region PRIVATE
-	private Coroutine coroutine;
+
+	private void StartNewRoutine(IEnumerator routine)
+	{
+		StopAllRoutines();
+		StartCoroutine(_WaitComplete(routine));
+		onStarted?.Invoke();
+	}
+
 	private CharacterEntity _selfCharacter;
 
 	private void OnEnable()
@@ -211,26 +218,18 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		StopAllRoutines();
 	}
-
-	private void StartNewRoutine(IEnumerator routine)
-	{
-		StopAllRoutines();
-		coroutine = StartCoroutine(routine);
-		StartCoroutine(_WaitComplete());
-		onStarted?.Invoke();
-	}
 	
 	//public Coroutine WaitComplete() => StartCoroutine(_WaitComplete());
-	private IEnumerator _WaitComplete()
+	private IEnumerator _WaitComplete(IEnumerator routine)
 	{
 		if(activeInstances.Contains(this)) Debug.LogError(this + " _WaitComplete activeInstances.Contains(this)");
 		activeInstances.Add(this);
 		
-		while (activeInstances[0] != this) // wait other routines
-			yield return null; 
+		//while (activeInstances[0] != this) // wait other routines
+		//	yield return null; 
 		
 		if(debugMode > 0) Debug.Log(this + " routine started " + activeInstances.Count);
-		yield return coroutine;
+		yield return StartCoroutine(routine);
 		activeInstances.Remove(this);
 		if(debugMode > 0) Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
 		debugString = "";
@@ -358,8 +357,11 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		debugString = "WaitCharacterPerformAttack";
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterPerformAttack " + target );
+
+		yield return null;
 		
-		yield return StartCoroutine(WaitCharacterLookPosition(target.GetPosition()));
+		if(!_selfCharacter.IsFacingPosition(target.GetPosition()))
+			yield return StartCoroutine(WaitCharacterLookPosition(target.GetPosition()));
 
 		if (useAction && !_selfCharacter.HasActions())
 		{
@@ -398,12 +400,23 @@ public class CharacterRoutines : MonoBehaviour
 				break;
 		}
 
-		if (target is CharacterEntity && !(target as CharacterEntity).IsDead() && (target as CharacterEntity).TryGetComponent(out CharacterDetection detection))
+		if (target is CharacterEntity)
 		{
-			detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+			var defender = target as CharacterEntity;
+			
+			if (!defender.IsDead() && defender.TryGetComponent(out CharacterDetection detection))
+			{
+				detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+			}
+
+			if (defender.TryRiposte(_selfCharacter))
+			{
+				do yield return null;
+				while (defender.Routines.AnyActive());
+			}
 		}
 		
-		if(debugMode > 0) Debug.Log("attack ends");
+		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
 
 	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection((pos - _selfCharacter.GetPosition()).normalized);

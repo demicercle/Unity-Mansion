@@ -106,6 +106,7 @@ public class GameCanvas : MonoBehaviour
 	private ItemData currentItemToUse;
 	private CanvasScaler canvasScaler;
 	private float calculatedHitChance;
+	private bool willHit;
 	
 	private void Awake()
 	{
@@ -220,9 +221,10 @@ public class GameCanvas : MonoBehaviour
 			cursorText.transform.position = gameInput.GetMousePosition();
 			cursorText.raycastTarget = false;
 			calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
+			willHit = DicePool.LastResult > 1f - calculatedHitChance;
 			cursorText.text = (21-DicePool.FloatToDice(20, calculatedHitChance)) + "+";
 			cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
-			cursorText.text += " (" + (DicePool.LastResult < calculatedHitChance ? "HIT" : "MISS") + ")";
+			cursorText.text += " (" + (willHit ? "HIT" : "MISS") + ")";
 			/*cursorText.text =
 				Mathf.RoundToInt(
 					selectedCharacter.CalculateHitChance(targetCharacter) *

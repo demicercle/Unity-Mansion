@@ -11,7 +11,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 {
 	public RawImage rawImage;
 	public TMP_Text nameLabel;
-	public Toggle toggleSelected, toggleHasActions, toggleTurnBased, toggleDodge;
+	public Toggle toggleSelected, toggleHasActions, toggleTurnBased, toggleDodge, togglePrepare;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
 	public TMP_Text dodgeLabel1, dodgeLabel2;
@@ -72,6 +72,8 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 
 	private void UpdateStats()
 	{
+		togglePrepare.isOn = _assignedCharacter.CanRiposte();
+		
 		toggleSelected.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
 		toggleSelected.interactable = _assignedCharacter.IsControllableByPlayer();
 

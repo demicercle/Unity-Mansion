@@ -1,21 +1,14 @@
 # Unity-Mansion
 
-
-- disable save&quit in battle
 - "prepare" action
 - display cursor text "attack will miss" or "attack will hit" 
 - min time between assigns
 - randomize hp on game seed 
 - zombi 7 stuck in patrol after load
-- zombi can attack from below
-
-- "miss" gauge
 - taunt action
-
 - squad alert turn order
-- run should also roll dices
-- display enemies portraits
-
+- run should also roll dices?
+- awareness decrease scale
 
 REFACTO
 - add namespaces

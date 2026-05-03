@@ -30,7 +30,7 @@ public enum CharacterAction
 	Talk,
 	UseItem,
 	Defend,
-	Prepare
+	Riposte
 }
 
 public struct DamageInfo
@@ -106,6 +106,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private bool rollDiceToDodge = false;
 	[SerializeField] private bool rollDiceOnDefense = false;
 	[SerializeField] private bool rollDiceOnRun = false;
+	[SerializeField] private bool rollDiceOnRiposte = false;
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f; // TODO remove
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
@@ -188,6 +189,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		usedActions.Clear();
 		usedMovePoints = 0;
 		dodgeCount = 0;
+		riposteCount = 0;
 		onStatsChanged?.Invoke();
 	}
 	
@@ -216,6 +218,22 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onAnyCharacterRollDice?.Invoke(this, rolled);
 		DicePool.RollNewDice();
 		return rolled;
+	}
+
+	public bool CanRiposte() => !IsDead() && riposteCount > 0;
+
+	public bool TryRiposte(CharacterEntity attacker)
+	{
+		Debug.Log(this + " TryRiposte: " + attacker);
+		
+		if (IsAtAttackRange(attacker) && riposteCount > 0)
+		{
+			riposteCount--; // riposte
+			Routines.AssignPerformAttack(attacker, false);
+			return true;
+		}
+
+		return false;
 	}
 
 	public bool CanDodge() => characterData.GetDodgeChance() > 0 && dodgeCount > 0;
@@ -327,6 +345,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if (rollDiceOnDefense) RollDice();
 			dodgeCount++;
+		}
+		else if (actionType == CharacterAction.Riposte)
+		{
+			if (rollDiceOnRiposte) RollDice();
+			riposteCount++;
 		}
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);
@@ -773,6 +796,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	private int partyIndex = -1;
 	private int dodgeCount = 0;
+	private int riposteCount = 0;
 	private int currentTurn; // TODO not in use
 	private bool isControllable;
 	private float usedMovePoints;
@@ -869,7 +893,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 	}
 	
-	
 	#endregion
 
 	#if UNITY_EDITOR
@@ -913,5 +936,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 		o = null;
 		return false;
+	}
+
+	public bool ActionUsesDiceRolls(CharacterAction actionType)
+	{
+		return actionType == CharacterAction.Defend ? rollDiceOnDefense :
+			actionType == CharacterAction.Riposte ? rollDiceOnRiposte :
+			actionType == CharacterAction.Run ? rollDiceOnRun :
+			false;
 	}
 }

@@ -392,7 +392,8 @@ MonoBehaviour:
   clearActionsDelay: 3
   rollDiceToDodge: 0
   rollDiceOnDefense: 1
-  rollDiceOnRun: 1
+  rollDiceOnRun: 0
+  rollDiceOnRiposte: 1
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
