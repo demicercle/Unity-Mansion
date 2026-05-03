@@ -204,6 +204,7 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.turnStarted += OnTurnStarted;
 		_selfCharacter.turnEnded += OnTurnEnded;
 		_selfCharacter.onDamagedBy += OnDamagedBy;
+		_selfCharacter.onAiming += OnAiming;
 	}
 
 	private void OnDisable()
@@ -222,6 +223,7 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.turnStarted -= OnTurnStarted;
 		_selfCharacter.turnEnded -= OnTurnEnded;
 		_selfCharacter.onDamagedBy -= OnDamagedBy;
+		_selfCharacter.onAiming -= OnAiming;
 	}
 
 	private void Start()
@@ -335,6 +337,21 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		if(shouldSwitchWeaponWhenDamaged)
 			InstantSwitchWeapons();
+	}
+
+	private float timeAiming;
+	private void OnAiming(bool value, Vector3 position)
+	{
+		if (!value) 
+			timeAiming = 0f;
+		
+		if (rpgAnimationHandler)
+		{
+			rpgAnimationHandler.Aim(value, position, rpgAnimationHandler.rightWeapon == Weapon.TwoHandBow ? Mathf.Clamp01(timeAiming) : 0f);
+		}
+		
+		if (value) 
+			timeAiming += Time.deltaTime;
 	}
 
 	//private bool itemSwitched;

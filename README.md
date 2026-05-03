@@ -8,6 +8,10 @@ REFACTO
 - door nav obstacle
 - items can be weapons
 
+- toggle aim false notifies false when routines start attack
+
+- remove "RapidGui"
+
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - add a "drop on ground" and "pickup loot bag" Animation

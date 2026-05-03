@@ -924,6 +924,43 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     }
     #endregion
     
+    #region AIM
+    public void Reload()
+    {
+	    animator.SetAnimatorTrigger(AnimatorTrigger.ReloadTrigger);
+	    SetIKPause(2f);
+    }
+
+    /// <summary>
+    /// Updates the animator for directional aiming used by 2-Handed Bow and Rifle.
+    ///
+    /// Use the "Aim" action for a friendly interface.
+    /// </summary>
+    /// <param name="aiming">Whether or not aiming is enabled.</param>
+    /// <param name="target">The position in world space of the target.</param>
+    public void Aim(bool aiming, Vector3 target, float bowPull)
+    {
+	    animator.SetBool(AnimationParameters.Aiming, aiming);
+	    if (!aiming) return;
+
+	    var aimTarget = target - transform.position;
+	    var horizontalTarget = Vector3.ProjectOnPlane(aimTarget, Vector3.up);
+	    var aimRotation = Quaternion.LookRotation(horizontalTarget, Vector3.up);
+
+	    var verticalAngle = Vector3.Angle(horizontalTarget, aimTarget);
+	    if (aimTarget.y - horizontalTarget.y < 0) { verticalAngle *= -1f; }
+	    verticalAngle /= 90f;
+
+	    var horizontalAngle = Vector3.Angle(transform.forward, horizontalTarget);
+	    var angleDirection = (((aimRotation.eulerAngles.y - transform.rotation.eulerAngles.y) + 360f) % 360f) > 180f ? -1 : 1;
+	    horizontalAngle = (horizontalAngle / 180f) * angleDirection;
+
+	    animator.SetFloat(AnimationParameters.AimHorizontal, horizontalAngle);
+	    animator.SetFloat(AnimationParameters.AimVertical, verticalAngle);
+	    animator.SetFloat(AnimationParameters.BowPull, bowPull);
+    }
+    #endregion
+    
     #region EMOTES
      public void Sit()
     {

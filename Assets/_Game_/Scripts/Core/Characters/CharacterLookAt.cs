@@ -89,27 +89,29 @@ public class CharacterLookAt : MonoBehaviour
 			_followTarget = null;
 		}
 		
-		var f = Time.deltaTime;
-		if (_followTarget)
-		{ 
+		if (_selfCharacter.TryGetAimingPosition(out var aimingPosition)) 
+			worldPosition = aimingPosition;
+		else if (_followTarget)
 			worldPosition = _followTarget.position + Vector3.up * _selfCharacter.GetHeight();
-			lookTarget.parent = null;
-			lookTarget.position = lerpSpeed <= 0 ? worldPosition : Vector3.Lerp(lookTarget.position, worldPosition, f * lerpSpeed);
-			
-			 worldDir = _selfCharacter.GetDirectionTo(lookTarget.position);
-			 worldDot = Utils.FlatDot(transform.forward, worldDir);
-			 minDotToRotate = _isRotating ? dotRange.y : dotRange.x;
-			if (worldDot < minDotToRotate && !_selfCharacter.Routines.AnyActive() && !_selfCharacter.GetAgent().IsMoving())
-			{
-				_isRotating = true;
-				_selfCharacter.LookWorldPosition(lookTarget.position, f);
-			}
-			else _isRotating = false;
-		}
 		else
 		{
-			lookTarget.parent = _selfCharacter.transform;
+			lookTarget.parent = _selfCharacter.transform; // no target, back to default pos
 			lookTarget.localPosition = Vector3.forward * (_selfCharacter.GetRadius() * 2) + Vector3.up * _selfCharacter.GetHeight();
+			return;
 		}
+		
+		var f = Time.deltaTime;
+		lookTarget.parent = null;
+		lookTarget.position = lerpSpeed <= 0 ? worldPosition : Vector3.Lerp(lookTarget.position, worldPosition, f * lerpSpeed);
+			
+		worldDir = _selfCharacter.GetDirectionTo(lookTarget.position);
+		worldDot = Utils.FlatDot(transform.forward, worldDir);
+		minDotToRotate = _isRotating ? dotRange.y : dotRange.x;
+		if (worldDot < minDotToRotate && !_selfCharacter.Routines.AnyActive() && !_selfCharacter.GetAgent().IsMoving())
+		{
+			_isRotating = true;
+			_selfCharacter.LookWorldPosition(lookTarget.position, f);
+		}
+		else _isRotating = false;
 	}
 }

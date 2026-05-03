@@ -54,6 +54,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private const float MovePointsToHit = 0.00f;
 	
 	public static int debugStats { get; set; }
+	public static int debugAim { get; set; }
 	
 	public static List<CharacterEntity> AllCharacters => _allCharacters;
 
@@ -983,17 +984,32 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		GameTurnManager.Instance.IsTurnBasedMode() && (InParty() || HasDetectedAnyPartyCharacter());
 
 	private bool isAiming;
+	private Vector3 aimingPosition;
 
-	public System.Action<bool> onAiming;
+	public event System.Action<bool, Vector3> onAiming;
 
 	public bool IsAiming() => isAiming;
+
+	public bool TryGetAimingPosition(out Vector3 world)
+	{
+		world = aimingPosition;
+		return isAiming;
+	}
+
+	public void SetAimingPosition(Vector3 world)
+	{
+		ToggleAim(true);
+		aimingPosition = world;
+		if(debugAim > 0) DebugDrawer.Line(GetEyesPosition(), world, Color.red, 0f);
+		onAiming?.Invoke(isAiming, world);
+	}
 	
 	public void ToggleAim(bool value)
 	{
 		if (isAiming != value)
 		{
 			isAiming = value;
-			onAiming?.Invoke(isAiming);
+			if(debugAim > 0) Debug.Log(this + " ToggleAim " + value);
 		
 			if (characterAnimation)
 				characterAnimation.TrySwitchWeapons(isAiming || InBattle());

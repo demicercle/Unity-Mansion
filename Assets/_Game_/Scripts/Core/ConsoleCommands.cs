@@ -291,6 +291,12 @@ public class ConsoleCommands : MonoBehaviour
 		Debug.Log("debug_stats=" + (CharacterEntity.debugStats= value));
 	}
 
+	[ConsoleMethod("debug_aim", "")]
+	public static void _DebugAim(int value)
+	{
+		Debug.Log("debug_aim=" + (CharacterEntity.debugAim= value));
+	}
+
 	[ConsoleMethod("debug_dices", "")]
 	public static void _DebugDices(int value)
 	{

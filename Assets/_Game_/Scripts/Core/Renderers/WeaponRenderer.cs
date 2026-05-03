@@ -65,8 +65,13 @@ public class WeaponRenderer : MonoBehaviour
     }
     
     public UnityEvent onHit;
+
+    
     public void OnHit() => onHit?.Invoke();
 
+    private CharacterEntity parentCharacter;
+    private bool wasAiming;
+    
     private void OnEnable()
     {
         foreach (var rd in renderers)
@@ -76,8 +81,26 @@ public class WeaponRenderer : MonoBehaviour
         }
     }
 
+    private void LateUpdate()
+    {
+        if (parentCharacter)
+        {
+            if (parentCharacter.TryGetAimingPosition(out var aimingPos))
+            {
+                wasAiming = true;
+                DisplayLine(aimingPos);
+            }
+            else if (wasAiming)
+            {
+                wasAiming = false;
+                HideLine();
+            }
+        }
+    }
+
     private void Awake()
     {
+        parentCharacter = GetComponentInParent<CharacterEntity>();
         if (shootLine)
             shootLine.gameObject.SetActive(false);
     }

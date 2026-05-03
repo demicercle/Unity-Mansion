@@ -22,6 +22,8 @@ public enum CursorType
 	
 	Loot,
 	UseItem,
+	
+	Aim
 }
 
 [CreateAssetMenu(fileName = "CursorData", menuName = "CursorData", order = 0)]

@@ -21,6 +21,7 @@ public class GameInput : MonoBehaviour
 	public const int CursorRaycastResult_None = 0;
 	public const int CursorRaycastResult_Navigation = 1;
 	public const int CursorRaycastResult_Interaction = 2;
+	public const int CursorRaycastResult_Aim = 3;
 	
 	public static bool IsConsoleVisible() => DebugLogManager.Instance.IsLogWindowVisible;
 	public static void Focus(bool value) => instance.OnApplicationFocus(value);
@@ -55,9 +56,19 @@ public class GameInput : MonoBehaviour
 		}
 		
 		raycastRay = cam.ScreenPointToRay(mousePosition);
+
+		hitAim = selectedCharacter && selectedCharacter.IsAiming()
+		                           && Physics.Raycast(raycastRay, out aimHit, 100f, Layers.MaskAiming);
+		if (hitAim && RoomTrigger.IsPositionVisible(aimHit.point))
+		{
+			return CursorRaycastResult_Aim;
+		}
 		
-		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction(itemToUse && itemToUse.CanBeUsedOnDead()));
-		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point) && (!itemToUse || itemToUse.RaycastInteraction()))
+		hitInteractions = (!itemToUse || itemToUse.RaycastInteraction()) 
+		                  && (!selectedCharacter || !selectedCharacter.IsAiming())
+						&& Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction(itemToUse && itemToUse.CanBeUsedOnDead()));
+		
+		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point))
 		{ 
 			outRaycast = interactionHit;
 			
@@ -70,8 +81,10 @@ public class GameInput : MonoBehaviour
 			return CursorRaycastResult_Interaction;
 		}
 		
-		hitNavigation = Physics.Raycast(raycastRay, out navigationHit, 100f, Layers.MaskNavigation);
-		if (hitNavigation && RoomTrigger.IsPositionVisible(navigationHit.point) && (!itemToUse || itemToUse.RaycastNavigation()))
+		hitNavigation = (!itemToUse || itemToUse.RaycastNavigation())
+					&& Physics.Raycast(raycastRay, out navigationHit, 100f, Layers.MaskNavigation);
+		
+		if (hitNavigation && RoomTrigger.IsPositionVisible(navigationHit.point))
 		{
 			if (itemToUse)
 			{
@@ -148,8 +161,8 @@ public class GameInput : MonoBehaviour
 	private bool inputEnabled;
 	private CursorType currentCursor;
 	private Ray raycastRay;
-	private RaycastHit navigationHit, wallsHit, interactionHit;
-	private bool hitNavigation, hitWalls, hitInteractions;
+	private RaycastHit navigationHit, wallsHit, interactionHit, aimHit;
+	private bool hitNavigation, hitWalls, hitInteractions, hitAim;
 	private int lastCursorResult;
 	private string debugString;
 	private bool ungroupMode;
@@ -415,8 +428,21 @@ public class GameInput : MonoBehaviour
 		}
 		
 		debugString += "\nresult==" + lastCursorResult + " " + (lastMouseOverObject ? lastMouseOverObject.name : "no hit");
-			
-		if (lastCursorResult == CursorRaycastResult_Navigation)
+
+		if (lastCursorResult == CursorRaycastResult_Aim)
+		{
+			if (selectedCharacter)
+			{
+				SetCurrentCursorType(CursorType.Aim);
+				debugString += "\n>Aim";
+				
+				if (CanAssignOnMouseOver(selectedCharacter))
+				{
+					selectedCharacter.SetAimingPosition(aimHit.point);
+				}
+			}
+		}
+		else if (lastCursorResult == CursorRaycastResult_Navigation)
 		{
 			if (selectedCharacter)
 			{
@@ -698,9 +724,21 @@ public class GameInput : MonoBehaviour
 				SetItemToUse(null, true); // right click RELEASED
 			}
 			
-			else if (gameTurnManager.IsPlayerTurn())
+			else if (gameTurnManager.IsPlayerTurn() || !gameTurnManager.IsTurnBasedMode())
 			{
-				CharacterSelection.SelectCharacter(null); // deselect all
+				if (selectedCharacter && selectedCharacter.IsControllableByPlayer())
+				{
+					if (selectedCharacter.IsAiming()) 
+						selectedCharacter.ToggleAim(false);
+					else if (selectedCharacter.IsMoving())
+						selectedCharacter.StopAgent();
+					else
+						CharacterSelection.SelectCharacter(null);
+				}
+				else
+				{
+					CharacterSelection.SelectCharacter(null);
+				}
 			}
 		}
 		
