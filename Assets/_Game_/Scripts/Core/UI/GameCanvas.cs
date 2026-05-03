@@ -39,6 +39,7 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private RawImage itemCursorImage;
 	[Header("Cursor")] 
 	[SerializeField] private TMP_Text cursorText;
+	[SerializeField] private bool displayLastResultDice;
 	[Header("References")]
 	[SerializeField] private TextReference floatingText;
 	[Header("UnityEvents")]
@@ -107,6 +108,7 @@ public class GameCanvas : MonoBehaviour
 	private CanvasScaler canvasScaler;
 	private float calculatedHitChance;
 	private bool willHit;
+	private bool hitBlocked;
 	
 	private void Awake()
 	{
@@ -222,9 +224,11 @@ public class GameCanvas : MonoBehaviour
 			cursorText.raycastTarget = false;
 			calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
 			willHit = DicePool.LastResult > 1f - calculatedHitChance;
+			hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
 			cursorText.text = (21-DicePool.FloatToDice(20, calculatedHitChance)) + "+";
-			cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
-			cursorText.text += " (" + (willHit ? "HIT" : "MISS") + ")";
+			if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
+			cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
+			if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
 			/*cursorText.text =
 				Mathf.RoundToInt(
 					selectedCharacter.CalculateHitChance(targetCharacter) *

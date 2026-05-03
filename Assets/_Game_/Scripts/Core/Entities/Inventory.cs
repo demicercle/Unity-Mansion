@@ -20,6 +20,7 @@ public class Inventory : MonoBehaviour
 		bag.destroyIfEmpty = true;
 		NavUtils.TryGetNearestNavPosition(navPosition, CreateLootNavDistance, out navPosition);
 		bag.transform.position = navPosition;
+		lootBagPrefab.gameObject.SetActive(true);
 		return bag;
 	}
 	
@@ -103,11 +104,19 @@ public class Inventory : MonoBehaviour
 		return true;
 	}
 
+	public bool IsEmpty() => items.All(it => !it);
+
 	public bool DropOnGround(out Inventory bag)
 	{
 		if (!lootBagPrefab)
 		{
 			Debug.LogWarning(this + " cannot CreateLootBag because no prefab set!");
+			bag = null;
+			return false;
+		}
+
+		if (IsEmpty())
+		{
 			bag = null;
 			return false;
 		}
@@ -123,6 +132,7 @@ public class Inventory : MonoBehaviour
 		bag.items.AddRange(items);
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
 		items.Clear();
+		foreach(var it in bag.items) items.Add(null);
 		onAnyInventoryChanged?.Invoke(this);
 		return true;
 	}

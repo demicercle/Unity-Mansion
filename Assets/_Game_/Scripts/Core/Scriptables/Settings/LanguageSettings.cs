@@ -19,9 +19,13 @@ public class LanguageSettings : ScriptableObject
 	public class Main
 	{
 		public static string Miss => GetSettings(DialogFiles.main).GetLine(10, "miss!");
+		public static string WillMiss => GetSettings(DialogFiles.main).GetLine(10, "miss!");
 		public static string Dodge => GetSettings(DialogFiles.main).GetLine(11, "dodge!");
 		public static string Hit => GetSettings(DialogFiles.main).GetLine(12, "hit!");
+		public static string WillHit => GetSettings(DialogFiles.main).GetLine(12, "hit!");
 		public static string Cant => GetSettings(DialogFiles.main).GetLine(13, "can't!");
+		public static string HitBlocked => GetSettings(DialogFiles.main).GetLine(13, "can't!");
+
 		public static string AttackResult(CharacterEntity.AttackResult ar) => ar == CharacterEntity.AttackResult.Miss ? Miss : ar == CharacterEntity.AttackResult.Dodge ? Dodge : Hit; 
 	}
 

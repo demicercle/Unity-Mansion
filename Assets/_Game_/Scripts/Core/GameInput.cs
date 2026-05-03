@@ -1101,7 +1101,8 @@ public class GameInput : MonoBehaviour
 	{
 		if (currentCursor == CursorType.Attack)
 		{
-			return lastMouseOverObject.TryGetComponent(out target);
+			if (lastMouseOverObject)
+				return lastMouseOverObject.TryGetComponent(out target);
 		}
 
 		target = null;
