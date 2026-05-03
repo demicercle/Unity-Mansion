@@ -43,6 +43,22 @@ public class WeaponRenderer : MonoBehaviour
         }
     }
 
+    public void HideLine()
+    {
+        if (!shootLine) return;
+        shootLine.gameObject.SetActive(false);
+    }
+
+    public void DisplayLine(Vector3 aimingPosition)
+    {
+        if (!shootLine) return;
+        shootLine.gameObject.SetActive(true);
+        shootLine.useWorldSpace = true;
+        shootLine.positionCount = 2;
+        shootLine.SetPosition(0, shootLine.transform.position);
+        shootLine.SetPosition(0, aimingPosition);
+    }
+
     public bool DisplaysItem(ItemData itemData)
     {
         return (rpgWeapon == Weapon.RightItem || rpgWeapon == Weapon.LeftItem) && itemData.CompareTags(itemTags);

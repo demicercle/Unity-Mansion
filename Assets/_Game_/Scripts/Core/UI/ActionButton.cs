@@ -32,6 +32,8 @@ public class ActionButton : MonoBehaviour
 
 	private void OnButtonClick()
 	{
+		if (actionType == CharacterAction.None) return;
+		
 		if (CharacterSelection.TryGetSelectedCharacter(out var selected))
 		{
 			if (selected.CanUseAction(actionType))

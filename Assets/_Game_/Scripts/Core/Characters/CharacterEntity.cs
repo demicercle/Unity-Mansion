@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RPGCharacterAnims.Actions;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public interface IAttackable
 {
@@ -161,6 +162,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		//agent.SetObstacle(!value);//todo not in selection
 		if (value) StopFollow();
+		if (!value) ToggleAim(false);
 		onSelectionChanged?.Invoke(value);
 	}
 
@@ -682,12 +684,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			agent.SetAgentActive(false);
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
-			onDead?.Invoke();
-			onAnyCharacterDead?.Invoke(this);
-			onStatsChanged?.Invoke();
 			gameObject.layer = Layers.LayerDead;
 			if (TryGetComponent(out Inventory inv)) 
 				inv.DropOnGround(out var loot);
+			
+			onDead?.Invoke();
+			onAnyCharacterDead?.Invoke(this);
+			onStatsChanged?.Invoke();
 			return true;
 		}
 
@@ -974,5 +977,26 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			actionType == CharacterAction.Riposte ? rollDiceOnRiposte :
 			actionType == CharacterAction.Run ? rollDiceOnRun :
 			false;
+	}
+
+	public bool InBattle() =>
+		GameTurnManager.Instance.IsTurnBasedMode() && (InParty() || HasDetectedAnyPartyCharacter());
+
+	private bool isAiming;
+
+	public System.Action<bool> onAiming;
+
+	public bool IsAiming() => isAiming;
+	
+	public void ToggleAim(bool value)
+	{
+		if (isAiming != value)
+		{
+			isAiming = value;
+			onAiming?.Invoke(isAiming);
+		
+			if (characterAnimation)
+				characterAnimation.TrySwitchWeapons(isAiming || InBattle());
+		}
 	}
 }
