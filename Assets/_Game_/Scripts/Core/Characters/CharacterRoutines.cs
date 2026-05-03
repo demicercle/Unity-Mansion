@@ -49,6 +49,12 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target  + " losCheck=" + losCheck + " time=" + LastTimeAssignedTarget);
 		StartNewRoutine(WaitCharacterAttack(target, losCheck, true));
 	}
+
+	public void AssignShootAt(Vector3 position, bool useAction)
+	{
+		if(debugMode > 0) Debug.Log(this + " AssignShootAt " + position);
+		StartNewRoutine(WaitCharacterShootAt(position, useAction));
+	}
 	
 	public void AssignPerformAttack(IAttackable target, bool useAction)
 	{
@@ -396,6 +402,31 @@ public class CharacterRoutines : MonoBehaviour
 		return true;
 	}
 
+	private IEnumerator WaitCharacterShootAt(Vector3 worldPosition, bool useAction)
+	{
+		debugString = "WaitCharacterShootAt";
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterShootAt " + worldPosition );
+		
+		if (useAction && !_selfCharacter.HasActions())
+		{
+			if(debugMode > 0) Debug.Log(this + " cannot attack (no actions)");
+			_selfCharacter.FloatingText_Cant();
+			yield break;
+		}
+
+		if (Physics.Linecast(_selfCharacter.GetEyesPosition() + _selfCharacter.transform.forward * _selfCharacter.GetRadius(), worldPosition, out var hit, Layers.MaskAiming))
+		{
+			if (hit.collider.TryGetComponent(out CharacterEntity other))
+			{
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterShootAt touch " + other);
+				yield return StartCoroutine(WaitCharacterHitOrShoot(other, useAction));
+				yield break;
+			}
+		}
+
+		yield return StartCoroutine(WaitCharacterHitOrShoot(null, useAction));
+	}
+
 	private IEnumerator WaitCharacterPerformAttack(IAttackable target, bool useAction)
 	{
 		debugString = "WaitCharacterPerformAttack";
@@ -412,13 +443,29 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.FloatingText_Cant();
 			yield break;
 		}
+
+		yield return StartCoroutine(WaitCharacterHitOrShoot(target, useAction));
+	}
+
+	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction)
+	{
+		var atkResult = 0.0f;
 		
-		_selfCharacter.AttackAction(target);
-		var atkResult = _selfCharacter.RollDice(); // we roll the dice before for the animation
-		if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetPosition(), Color.red, 2.0f);
+		if(useAction) 
+			_selfCharacter.UseAction(CharacterAction.Attack, target);
+		
+		if (target != null)
+		{
+			atkResult = _selfCharacter.RollDice(); // we roll the dice before for the animation
+			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetPosition(), Color.red, 2.0f);
+		}
+		
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
+		
+		if(target == null)
+			yield break;
 
 		switch (_selfCharacter.TryHit(target, atkResult))
 		{

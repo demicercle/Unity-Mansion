@@ -765,7 +765,14 @@ public class GameInput : MonoBehaviour
 			if (!mouseOverViewport) return;
 			
 			var raycastResult = CursorRaycast(out var hit);
-			if (raycastResult == CursorRaycastResult_Interaction)
+			if (raycastResult == CursorRaycastResult_Aim)
+			{
+				if (selectedCharacter && CanAssignOnClick(selectedCharacter))
+				{
+					selectedCharacter.Routines.AssignShootAt(aimHit.point, true);
+				}
+			}
+			else if (raycastResult == CursorRaycastResult_Interaction)
 			{
 				if (hit.collider.TryGetComponent(out CharacterEntity clickedCharacter)) // click character
 				{

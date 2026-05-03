@@ -330,12 +330,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return AttackResult.Hit;
 	}
 	
-	public void AttackAction(IAttackable target, bool stopAgent = true)
-	{
-		lastAttackTarget = target;
-		UseAction(CharacterAction.Attack, target);
-	}
-	
 	public void UseAction(CharacterAction actionType, object param = null)
 	{
 		usedActions.Add(actionType);
@@ -344,6 +338,10 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if (rollDiceOnRun) RollDice();
 			usedMovePoints -= characterData.GetRunActionExtraMovePoints();
+		}
+		else if (actionType == CharacterAction.Attack)
+		{
+			lastAttackTarget = param as CharacterEntity;
 		}
 		else if (actionType == CharacterAction.Talk)
 		{
@@ -359,6 +357,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			if (rollDiceOnRiposte) RollDice();
 			riposteCount++;
 		}
+		
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);
 		onStatsChanged?.Invoke();

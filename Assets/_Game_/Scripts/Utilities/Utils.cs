@@ -33,6 +33,14 @@ public static class Utils
 		return false;
 		#endif
 	}
+
+	public static void UndoRecord(string name, params Object[] objects)
+	{
+		#if UNITY_EDITOR
+		if (objects.Length == 1) UnityEditor.Undo.RecordObject(objects[0], name);
+		else if (objects.Length > 0) UnityEditor.Undo.RecordObjects(objects, name);
+#endif
+	}
 	
 	public static void SetDirty(params Object[] objects)
 	{

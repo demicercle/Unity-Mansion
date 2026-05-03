@@ -15,6 +15,8 @@ public class WeaponRenderer : MonoBehaviour
 
     [SerializeField] private Renderer[] renderers = Array.Empty<Renderer>();
     [SerializeField] private LineRenderer shootLine;
+    [SerializeField] private float maxShootDistance = 5f;
+    [SerializeField] private bool shootFromEyesPosition;
     
     public UnityEvent onShoot;
 
@@ -26,13 +28,14 @@ public class WeaponRenderer : MonoBehaviour
             if (selfCharacter)
             {
                 var lastAttackTarget = selfCharacter.GetLastAttackTarget();
-                var shootPosition = lastAttackTarget?.GetPosition() ?? shootLine.transform.position 
-                    + Vector3.Scale(new Vector3(1,0,1), shootLine.transform.forward) 
-                    * (selfCharacter.GetLastAttackTarget().GetPosition() - selfCharacter.GetPosition()).magnitude;
+                var shootPosition = selfCharacter.TryGetAimingPosition(out var aimingPos) ? aimingPos :
+                    lastAttackTarget?.GetPosition() ?? shootLine.transform.TransformPoint(Vector3.forward * maxShootDistance);
 
                 DisplayLine(shootPosition, true);
             }
         }
+        
+        onShoot?.Invoke();
     }
 
     public void HideLine()
@@ -49,10 +52,12 @@ public class WeaponRenderer : MonoBehaviour
         shootLine.loop = false;
         shootLine.useWorldSpace = false;
         shootLine.positionCount = 2;
-        shootLine.SetPosition(0, Vector3.zero);
+        shootLine.SetPosition(0, shootFromEyesPosition && parentCharacter ? shootLine.transform.InverseTransformPoint(parentCharacter.GetEyesPosition()) : Vector3.zero);
         shootLine.SetPosition(1, shootLine.transform.InverseTransformPoint(aimingPosition));
-        if(animate)
+        if (animate)
             shootLine.GetComponent<Animation>()?.Play();
+        else
+            shootLine.GetComponent<Animation>()?.Stop();
         if(CharacterEntity.debugAim > 0) Debug.Log("DisplayLine: " + aimingPosition + " " + animate);
     }
 
@@ -82,7 +87,7 @@ public class WeaponRenderer : MonoBehaviour
     {
         if (parentCharacter)
         {
-            if (parentCharacter.TryGetAimingPosition(out var aimingPos))
+            if (!parentCharacter.Routines.AnyActive() && parentCharacter.TryGetAimingPosition(out var aimingPos))
             {
                 wasAiming = true;
                 DisplayLine(aimingPos, false);
