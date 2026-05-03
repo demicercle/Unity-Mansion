@@ -42,6 +42,7 @@ public class CharacterAnimation : MonoBehaviour
 		public string attackTrigger;
 		[Header("Reactions")]
 		public string deathTrigger;
+		public string reviveTrigger;
 		public string getHitTrigger;
 		public string switchOffTrigger;
 		public string switchOnTrigger;
@@ -56,22 +57,6 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
 
 #if UNITY_EDITOR
-	/*[ContextMenu("SetParameters/RPGCharacter")]
-	void SetParameters_RPGCharacter()
-	{
-		UnityEditor.Undo.RecordObject(this, "SetParameters/RPGCharacter");
-		parameters = new Parameters()
-		{
-			moving = "Moving",
-			velocityX = "Velocity X",
-			velocityZ = "Velocity Z",
-			weapon = "Weapon",
-			triggerNumber = "TriggerNumber",
-			trigger = "Trigger"
-		};
-		Utils.SetDirty(this);
-	}*/
-	
 	[ContextMenu("ClearParameters")]
 	void ClearParameters()
 	{
@@ -196,28 +181,47 @@ public class CharacterAnimation : MonoBehaviour
 		
 		_characterAnimationEvent = animator.GetComponent<CharacterAnimationEvent>();
 		if(!_characterAnimationEvent) _characterAnimationEvent = animator.gameObject.AddComponent<CharacterAnimationEvent>();
-		_characterAnimationEvent.onCharacterAnimationEvent += OnCharacterAnimationEvent;
 		
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponent<RPGAnimationHandler>();
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponentInChildren<RPGAnimationHandler>();
 
 		weaponRenderers = GetComponentsInChildren<WeaponRenderer>();
-
-		_selfCharacter.onMoved += OnCharacterMoved;
-		_selfCharacter.onHealed += OnHealed;
-		_selfCharacter.onDamaged += OnDamaged;
-		_selfCharacter.onDead += OnDead;
-		_selfCharacter.onUseAction += OnUseAction;
-		_selfCharacter.turnStarted += OnTurnStarted;
-		_selfCharacter.turnEnded += OnTurnEnded;
-		_selfCharacter.onDamagedBy += OnDamagedBy;
-
-		RoomTrigger.onChanged += OnRoomsChanged;
 	}
 	
 	private void OnEnable()
 	{
 		activeInstances.Add(this);
+		
+		_characterAnimationEvent.onCharacterAnimationEvent += OnCharacterAnimationEvent;
+		RoomTrigger.onChanged += OnRoomsChanged;
+
+		_selfCharacter.onMoved += OnCharacterMoved;
+		_selfCharacter.onHealed += OnHealed;
+		_selfCharacter.onDamaged += OnDamaged;
+		_selfCharacter.onDead += OnDead;
+		_selfCharacter.onRevive += OnRevive;
+		_selfCharacter.onUseAction += OnUseAction;
+		_selfCharacter.turnStarted += OnTurnStarted;
+		_selfCharacter.turnEnded += OnTurnEnded;
+		_selfCharacter.onDamagedBy += OnDamagedBy;
+	}
+
+	private void OnDisable()
+	{
+		activeInstances.Remove(this);
+		
+		RoomTrigger.onChanged -= OnRoomsChanged;
+		_characterAnimationEvent.onCharacterAnimationEvent -= OnCharacterAnimationEvent;
+		
+		_selfCharacter.onMoved -= OnCharacterMoved;
+		_selfCharacter.onHealed -= OnHealed;
+		_selfCharacter.onDamaged -= OnDamaged;
+		_selfCharacter.onDead -= OnDead;
+		_selfCharacter.onRevive -= OnRevive;
+		_selfCharacter.onUseAction -= OnUseAction;
+		_selfCharacter.turnStarted -= OnTurnStarted;
+		_selfCharacter.turnEnded -= OnTurnEnded;
+		_selfCharacter.onDamagedBy -= OnDamagedBy;
 	}
 
 	private void Start()
@@ -237,30 +241,6 @@ public class CharacterAnimation : MonoBehaviour
 		
 		if(!TrySwitchWeapons(weaponSwitched))
 			UpdateWeaponRenderers(); // instant update
-	}
-
-	private void OnDisable()
-	{
-		activeInstances.Remove(this);
-	}
-
-	private void OnDestroy()
-	{
-		RoomTrigger.onChanged -= OnRoomsChanged;
-		
-		_selfCharacter.onMoved -= OnCharacterMoved;
-		_selfCharacter.onHealed -= OnHealed;
-		//controller.onPartyIndexChanged -= (newIndex) =>
-		_selfCharacter.onDamaged -= OnDamaged;
-		_selfCharacter.onDead -= OnDead;
-		//controller.onMoved -= () =>
-		//controller.onRotate -= () =>
-		_selfCharacter.onUseAction -= OnUseAction;
-		_selfCharacter.turnStarted -= OnTurnStarted;
-		_selfCharacter.turnEnded -= OnTurnEnded;
-		_selfCharacter.onDamagedBy -= OnDamagedBy;
-		
-		_characterAnimationEvent.onCharacterAnimationEvent -= OnCharacterAnimationEvent;
 	}
 
 	private void OnCharacterAnimationEvent(EventType eventType)
@@ -310,8 +290,16 @@ public class CharacterAnimation : MonoBehaviour
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
 		if (rpgAnimationHandler) rpgAnimationHandler.Death();
-		//onDead?.Invoke();
-		gameObject.layer = Layers.LayerIgnore;
+	}
+
+	private void OnRevive()
+	{
+		TrySetTrigger(parameters.reviveTrigger);
+		if (rpgAnimationHandler)
+		{
+			InstantSwitchWeapons(true);
+			rpgAnimationHandler.Revive();
+		}
 	}
 
 	private void OnUseAction(CharacterAction actionType, object args = null)

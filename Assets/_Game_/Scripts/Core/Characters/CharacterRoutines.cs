@@ -255,7 +255,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else
 		{
-			Debug.LogWarning(this + " no waypoint found to interact with " + clickedProp);
+			yield return StartCoroutine(WaitCharacterInteractAtPosition(clickedProp, clickedProp.GetPosition()));
 		}
 	}
 
@@ -266,7 +266,50 @@ public class CharacterRoutines : MonoBehaviour
 		var reachRadius = foundWaypoint.radius;
 
 		var agent = _selfCharacter.GetAgent();
-		agent.SetReachDistance(foundWaypoint.radius);
+		agent.SetReachDistance(reachRadius);
+
+		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
+		
+		if (agent.ReachedDestination(destination))
+		{
+			// waypoint reach
+			if (_selfCharacter.CanInteract())
+			{
+				while (!_selfCharacter.IsFacingDirection(direction))
+				{
+					_selfCharacter.LookDirection(direction, Time.deltaTime);
+					yield return null;
+				}
+		
+				_selfCharacter.UseAction(clickedProp.GetInteractAction(), clickedProp);
+				yield return clickedProp.WaitInteraction(_selfCharacter);
+		
+				clickedProp.InteractedBy(_selfCharacter);
+
+				do
+				{
+					yield return null;
+				} while (!clickedProp.AnimFinished());
+			}
+			else
+			{
+				_selfCharacter.FloatingText_Cant();
+			}
+		}
+		else if(debugMode > 0) 
+		{
+			var dist = NavUtils.NavDistance(_selfCharacter.GetPosition(), destination);
+			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + destination);
+		}
+	}
+
+	private IEnumerator WaitCharacterInteractAtPosition(PropComponent clickedProp, Vector3 destination)
+	{
+		var direction = Vector3.Scale(new Vector3(1,0,1), (destination - _selfCharacter.GetPosition()).normalized);
+		var reachRadius = _selfCharacter.GetRadius() + clickedProp.GetRadius();
+
+		var agent = _selfCharacter.GetAgent();
+		agent.SetReachDistance(reachRadius);
 
 		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
 		

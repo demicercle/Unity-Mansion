@@ -56,7 +56,7 @@ public class GameInput : MonoBehaviour
 		
 		raycastRay = cam.ScreenPointToRay(mousePosition);
 		
-		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction);
+		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction(itemToUse && itemToUse.CanBeUsedOnDead()));
 		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point) && (!itemToUse || itemToUse.RaycastInteraction()))
 		{ 
 			outRaycast = interactionHit;

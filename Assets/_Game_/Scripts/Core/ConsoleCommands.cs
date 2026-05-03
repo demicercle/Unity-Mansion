@@ -150,7 +150,7 @@ public class ConsoleCommands : MonoBehaviour
 		Time.timeScale = Mathf.Clamp(value, 0.1f, 10.0f);
 	}
 
-	[ConsoleMethod("give_item", "")]
+	[ConsoleMethod("give", "")]
 	public static void GiveItem(string itemName)
 	{
 		var itemData = Resources.LoadAll<ItemData>(Consts.ResPath_Items)

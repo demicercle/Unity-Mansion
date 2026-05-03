@@ -123,6 +123,18 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 		    SetIKPause(0.6f);
 	    }
     }
+
+    /// <summary>
+    /// Regain consciousness.
+    ///
+    /// Use the "Death" action for a friendly interface.
+    /// </summary>
+    public void Revive()
+    {
+	    animator.SetAnimatorTrigger(AnimatorTrigger.ReviveTrigger);
+	    Lock(true, true, true, 0f, 1f);
+	    SetIKPause(1f);
+    }
     
     #region WEAPONS
 

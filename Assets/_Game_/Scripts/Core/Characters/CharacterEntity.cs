@@ -93,6 +93,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public event System.Action<CharacterEntity, float> onDamagedBy;
 	public event System.Action<int,int> onPartyIndexChanged;
 	public event System.Action onDead;
+	public event System.Action onRevive;
 	public event System.Action onMoved;
 	public event System.Action onRotate;
 	public event System.Action<CharacterAction, object> onUseAction;
@@ -604,6 +605,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		
 		onHealed?.Invoke(amount);
 		onAnyCharacterHealed?.Invoke(this, amount);
+
+		if (isDead && GetCurrentHealth() > 0)
+		{
+			Debug.Log(this + " Revive!");
+			isDead = false;
+			agent.SetAgentActive(true);
+			gameObject.layer = Layers.LayerCharacter;
+			onRevive?.Invoke();
+		}
+		
 		onStatsChanged?.Invoke();
 	}
 
@@ -658,6 +669,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
 			onStatsChanged?.Invoke();
+			gameObject.layer = Layers.LayerDead;
 			return true;
 		}
 

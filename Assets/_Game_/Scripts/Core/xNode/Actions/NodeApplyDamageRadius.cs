@@ -32,7 +32,7 @@ public class NodeApplyDamageRadius : GameNode
 
 			DebugDrawer.WireCapsule(transform.position, transform.rotation, _radius, _radius, Color.red, 1.0f);
 			
-			foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskInteraction))
+			foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskInteraction(false)))
 			{
 				var distance = Vector3.Distance(transform.position, obj.transform.position);
 				if (obj.TryGetComponent(out IAttackable attackable))
