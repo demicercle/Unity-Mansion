@@ -17,6 +17,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
 	[SerializeField] private Rigidbody[] rigidbodies;
 	[SerializeField] private GameObject[] deactivateObjects;
+	[SerializeField] private Destructible linkedDestructible;
 
 	public Vector3 GetPosition() => transform.position;
 	public float GetRadius() => radius;
@@ -46,8 +47,14 @@ public class Destructible : MonoBehaviour, IAttackable
 		
 		damageAmount += dmgInfo.amount;
 		if(debugMode > 0) Debug.Log(this + " take damage " + dmgInfo + " total=" + damageAmount + "/" + maxHealth);
+		
+		if (linkedDestructible)
+		{
+			linkedDestructible.TakeDamage(dmgInfo, instigator);
+		}
 
 		onAnyDestructibleHit?.Invoke(this, dmgInfo, instigator);
+		
 		takeDamage?.Invoke();
 		
 		if (damageAmount >= maxHealth)
