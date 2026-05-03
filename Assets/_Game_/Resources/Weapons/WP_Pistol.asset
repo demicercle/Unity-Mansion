@@ -93,6 +93,10 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   noAttack: 0
-  decalPrefab: {fileID: 100006, guid: 382c72524bd69044fae222eefa70563a, type: 3}
+  decals:
+  - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
+  - {fileID: 11400000, guid: 3d1d45a1c8055ba4f8809c776eadb01b, type: 2}
+  - {fileID: 11400000, guid: 00939702632abb748ba593557a634682, type: 2}
+  - {fileID: 11400000, guid: 2bde35fa989f9c241a8ce26b5d7156d1, type: 2}
   rpgWeaponR: 17
   rpgWeaponL: -1

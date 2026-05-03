@@ -20,6 +20,8 @@ public class WeaponData : ScriptableObject
 	public float EvaluateHeight(float height) => heightHitBonus.Evaluate(height);
 	[SerializeField] private bool noAttack = false;
 
+	[SerializeField] private DecalData[] decals;
+
 	public bool TrySpawnDecal(RaycastHit lastShootHitResult)
 	{
 		if (!lastShootHitResult.collider)
@@ -43,7 +45,7 @@ public class WeaponData : ScriptableObject
 
 	private bool TryGetDecalPrefab(Material hitMaterial, out GameObject decal)
 	{
-		if (hitMaterial && DecalData.TryGetDecal(hitMaterial, out var decalData))
+		if (hitMaterial && DecalData.TryGetDecal(hitMaterial, decals, out var decalData))
 		{
 			decal = decalData.decalPrefab;
 			return true;

@@ -6,15 +6,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DecalData", menuName = "DecalData", order = 0)]
 public class DecalData : ScriptableObject
 {
-	private static DecalData[] allDecals;
-
-	public static bool TryGetDecal(Material material, out DecalData decal)
+	public static bool TryGetDecal(Material material, DecalData[] decals, out DecalData outData)
 	{
-		if (allDecals == null)
-			allDecals = Resources.LoadAll<DecalData>(Consts.ResPath_Decals);
-
-		decal = allDecals.FirstOrDefault(decal => decal.renderedMaterials.Contains(material));
-		return decal;
+		outData = decals.FirstOrDefault(decal => decal && material && decal.renderedMaterials.Contains(material));
+		return outData;
 	}
 	
 		public List<Material> renderedMaterials = new List<Material>();
