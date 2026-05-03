@@ -22,6 +22,7 @@ public class DiceLauncher : MonoBehaviour
 	public TMPro.TMP_Text allowedRollsText;
 	public Button launchButton;
 	public Image missFill;
+	public Toggle toggleMissCount;
 	
 	private int animCount;
 	
@@ -43,6 +44,7 @@ public class DiceLauncher : MonoBehaviour
 	{
 		AllowedDiceRolls = defaultDiceRolls;
 		
+		GameTurnManager.Instance.onTurnBasedChanged += OnTurnBasedChanged;
 		DicePool.onDiceRolled += OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
 		CharacterEntity.onAttackResult += OnAttackResult;
@@ -51,10 +53,17 @@ public class DiceLauncher : MonoBehaviour
 
 	private void OnDestroy()
 	{
+		GameTurnManager.Instance.onTurnBasedChanged -= OnTurnBasedChanged;
 		DicePool.onDiceRolled -= OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead -= OnAnyCharacterDead;
 		CharacterEntity.onAttackResult -= OnAttackResult;
 		launchButton.onClick.RemoveListener(ClickedLaunch);
+	}
+
+	private void OnTurnBasedChanged(bool value)
+	{
+		toggleMissCount.isOn = value;
+		MissCount = 0;
 	}
 
 	private void OnAttackResult(CharacterEntity attacker, IAttackable target, CharacterEntity.AttackResult atkResult)
