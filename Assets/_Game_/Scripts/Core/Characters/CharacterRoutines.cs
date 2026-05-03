@@ -414,17 +414,16 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 
-		if (Physics.Linecast(_selfCharacter.GetEyesPosition() + _selfCharacter.transform.forward * _selfCharacter.GetRadius(), worldPosition, out var hit, Layers.MaskAiming))
-		{
-			if (hit.collider.TryGetComponent(out CharacterEntity other))
-			{
-				if(debugMode > 0) Debug.Log(this + " WaitCharacterShootAt touch " + other);
-				yield return StartCoroutine(WaitCharacterHitOrShoot(other, useAction));
-				yield break;
-			}
-		}
-
-		yield return StartCoroutine(WaitCharacterHitOrShoot(null, useAction));
+		CharacterEntity other = null;
+		RaycastHit hit = default;
+		
+		Physics.Linecast( _selfCharacter.GetEyesPosition() + _selfCharacter.transform.forward * _selfCharacter.GetRadius(),
+			worldPosition, out hit, Layers.MaskAiming);
+		
+		hit.collider?.TryGetComponent(out other);
+		
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterShootAt touch " + other);
+		yield return StartCoroutine(WaitCharacterHitOrShoot(other, useAction, hit));
 	}
 
 	private IEnumerator WaitCharacterPerformAttack(IAttackable target, bool useAction)
@@ -444,12 +443,14 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 
-		yield return StartCoroutine(WaitCharacterHitOrShoot(target, useAction));
+		yield return StartCoroutine(WaitCharacterHitOrShoot(target, useAction, default));
 	}
 
-	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction)
+	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit hitResult)
 	{
 		var atkResult = 0.0f;
+		
+		_selfCharacter.SetLastShootHit(hitResult);
 		
 		if(useAction) 
 			_selfCharacter.UseAction(CharacterAction.Attack, target);

@@ -984,10 +984,19 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	private bool isAiming;
 	private Vector3 aimingPosition;
+	private RaycastHit lastShootHitResult;
 
 	public event System.Action<bool, Vector3> onAiming;
 
 	public bool IsAiming() => isAiming;
+
+	public void SetLastShootHit(RaycastHit newHit) => lastShootHitResult = newHit;
+
+	public bool TryGetLastShootHit(out RaycastHit hit)
+	{
+		hit = lastShootHitResult;
+		return hit.collider;
+	}
 
 	public bool TryGetAimingPosition(out Vector3 world)
 	{

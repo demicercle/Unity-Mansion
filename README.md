@@ -12,6 +12,17 @@ REFACTO
 
 - remove "RapidGui"
 
+- shootLine / aimLine
+- spawn decals
+- look at muzzle flash
+- retake action toggles:
+	- aim (and other) disabled if any routines
+	- toggle stop enabled if any routines
+	- toggle reload enabled if using a "ammo" weapon, display "full" or "no ammo"
+- highlight over aimed object 
+- display chance to hit when aiming target
+- training mannequin (invicible life)
+
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - add a "drop on ground" and "pickup loot bag" Animation

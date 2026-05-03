@@ -14,11 +14,15 @@ public class WeaponRenderer : MonoBehaviour
     public bool offHand = true;
 
     [SerializeField] private Renderer[] renderers = Array.Empty<Renderer>();
-    [SerializeField] private LineRenderer shootLine;
+    [SerializeField] private LineRenderer shootLine, aimLine;
     [SerializeField] private float maxShootDistance = 5f;
     [SerializeField] private bool shootFromEyesPosition;
+    [SerializeField] private bool aimFromEyesPosition;
     
     public UnityEvent onShoot;
+
+    private Vector3 muzzlePosition;
+    private Vector3 shootPosition;
 
     public void OnShoot()
     {
@@ -28,37 +32,37 @@ public class WeaponRenderer : MonoBehaviour
             if (selfCharacter)
             {
                 var lastAttackTarget = selfCharacter.GetLastAttackTarget();
-                var shootPosition = selfCharacter.TryGetAimingPosition(out var aimingPos) ? aimingPos :
-                    lastAttackTarget?.GetPosition() ?? shootLine.transform.TransformPoint(Vector3.forward * maxShootDistance);
 
-                DisplayLine(shootPosition, true);
+                muzzlePosition = shootFromEyesPosition ? selfCharacter.GetEyesPosition() : shootLine.transform.position;
+                
+                shootPosition = selfCharacter.TryGetLastShootHit(out var hit) ? hit.point :
+                    selfCharacter.TryGetAimingPosition(out var aimingPos) ? aimingPos :
+                    lastAttackTarget?.GetPosition() ?? shootLine.transform.TransformPoint(Vector3.forward * maxShootDistance);
+                
+                shootLine.gameObject.SetActive(true);
             }
         }
         
         onShoot?.Invoke();
     }
 
-    public void HideLine()
+    public void HideAimLine()
     {
-        if (!shootLine) return;
-        shootLine.gameObject.SetActive(false);
-        if(CharacterEntity.debugAim > 0) Debug.Log("HideLine");
+        if (!aimLine) return;
+        aimLine.gameObject.SetActive(false);
+        if(CharacterEntity.debugAim > 0) Debug.Log("HideAimLine");
     }
 
-    public void DisplayLine(Vector3 aimingPosition,bool animate)
+    public void DisplayAimLine(Vector3 aimingPosition)
     {
-        if (!shootLine) return;
-        shootLine.gameObject.SetActive(true);
-        shootLine.loop = false;
-        shootLine.useWorldSpace = false;
-        shootLine.positionCount = 2;
-        shootLine.SetPosition(0, shootFromEyesPosition && parentCharacter ? shootLine.transform.InverseTransformPoint(parentCharacter.GetEyesPosition()) : Vector3.zero);
-        shootLine.SetPosition(1, shootLine.transform.InverseTransformPoint(aimingPosition));
-        if (animate)
-            shootLine.GetComponent<Animation>()?.Play();
-        else
-            shootLine.GetComponent<Animation>()?.Stop();
-        if(CharacterEntity.debugAim > 0) Debug.Log("DisplayLine: " + aimingPosition + " " + animate);
+        if (!aimLine) return;
+        aimLine.gameObject.SetActive(true);
+        aimLine.loop = false;
+        aimLine.useWorldSpace = false;
+        aimLine.positionCount = 2;
+        aimLine.SetPosition(0, aimFromEyesPosition && parentCharacter ? aimLine.transform.InverseTransformPoint(parentCharacter.GetEyesPosition()) : Vector3.zero);
+        aimLine.SetPosition(1, aimLine.transform.InverseTransformPoint(aimingPosition));
+        if(CharacterEntity.debugAim > 0) Debug.Log("DisplayAimLine: " + aimingPosition );
     }
 
     public bool DisplaysItem(ItemData itemData)
@@ -81,6 +85,9 @@ public class WeaponRenderer : MonoBehaviour
             rd.gameObject.layer = Layers.LayerEquipment;
             rd.enabled = true;
         }
+        
+        if(shootLine)shootLine.gameObject.SetActive(false);
+        if(aimLine)aimLine.gameObject.SetActive(false);
     }
 
     private void LateUpdate()
@@ -90,13 +97,25 @@ public class WeaponRenderer : MonoBehaviour
             if (!parentCharacter.Routines.AnyActive() && parentCharacter.TryGetAimingPosition(out var aimingPos))
             {
                 wasAiming = true;
-                DisplayLine(aimingPos, false);
+                DisplayAimLine(aimingPos);
             }
             else if (wasAiming)
             {
                 wasAiming = false;
-                HideLine();
+                HideAimLine();
             }
+        }
+
+        if (shootLine && shootLine.gameObject.activeSelf)
+        {
+            shootLine.loop = false;
+            shootLine.useWorldSpace = false;
+            shootLine.positionCount = 2;
+            shootLine.SetPosition(0, shootLine.transform.InverseTransformPoint(muzzlePosition));
+            shootLine.SetPosition(1, shootLine.transform.InverseTransformPoint(shootPosition));
+            if(CharacterEntity.debugAim > 0) Debug.Log("DisplayShootLine: " + shootPosition );
+            
+            HideAimLine();
         }
     }
 
