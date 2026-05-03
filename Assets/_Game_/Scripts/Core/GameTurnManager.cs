@@ -449,7 +449,12 @@ public class GameTurnManager : MonoBehaviour
 		playerTurn = nextFirstTurnIsPlayer;
 		nextFirstTurnIsPlayer = false;
 		if(debugMode > 0) Debug.Log(this + " FirstTurn playerTurn=" + playerTurn);
-				
+
+		levelCharacters = levelCharacters.OrderBy((character) => (int)character.GetCurrentFaction()
+		                                                         + "_" + (character.TryGetComponent(out CharacterDetection detection) ? detection.GetLastTimeDetectedInterval() : 0).ToString("N3")
+		                                                         + "_" + character.name)
+			.ToArray();
+		
 		foreach (var character in levelCharacters)
 		{
 			if (character.IsDead() || !character.IsCharacterRevealed())

@@ -28,11 +28,26 @@ public class CharacterDetection : MonoBehaviour
 	[SerializeField] private bool drawGizmos;
 
 	private float lastTimeAwarenessUp;
+	private float lastTimeDetected;
+	public float GetLastTimeDetectedInterval() => currentTime - lastTimeDetected;
+	private float currentTime => Time.realtimeSinceStartup;
 	
-	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.Contains(other);
+	public bool IsCharacterDetected(CharacterEntity other) => other && detectedCharacters.ContainsKey(other);
 
 	public float GetMaxSeeingDistance() => Mathf.Max(hearingDistance, seeingDistance);
-	public CharacterEntity[] GetDetectedCharacters() => detectedCharacters.ToArray();
+	public CharacterEntity[] GetDetectedCharacters() => detectedCharacters.Keys.ToArray();
+	
+	public bool GetLastTimeDetectedInterval(CharacterEntity other, out float interval)
+	{
+		if (detectedCharacters.ContainsKey(other))
+		{
+			interval = currentTime - detectedCharacters[other];
+			return true;
+		}
+
+		interval = 0;
+		return false;
+	}
 	
 	public void SetCharacterDetected(CharacterEntity otherCharacter, bool value)
 	{
@@ -41,17 +56,19 @@ public class CharacterDetection : MonoBehaviour
 			Debug.LogWarning(this + " SetCharacterDetected no other character!");
 			return;
 		}
+
 		
 		if (value)
 		{
-			if (!detectedCharacters.Contains(otherCharacter))
+			if (!detectedCharacters.ContainsKey(otherCharacter))
 			{
 				awarenessMap.Remove(otherCharacter);
 				awarenessMap.Add(otherCharacter, 1.0f);
 				NotifyAwarenessChanged();
 				
 				if(debugMode > 0) Debug.Log(this + " detects " + otherCharacter);
-				detectedCharacters.Add(otherCharacter);
+				detectedCharacters.Add(otherCharacter, currentTime);
+				lastTimeDetected = currentTime;
 				
 				onCharacterDetected?.Invoke(otherCharacter);
 				onAnyCharacterDetectionChanged?.Invoke(selfCharacter, otherCharacter, true);
@@ -62,7 +79,7 @@ public class CharacterDetection : MonoBehaviour
 		}
 		else
 		{
-			if (detectedCharacters.Contains(otherCharacter))
+			if (detectedCharacters.ContainsKey(otherCharacter))
 			{
 				awarenessMap.Remove(otherCharacter);
 				NotifyAwarenessChanged();
@@ -79,7 +96,7 @@ public class CharacterDetection : MonoBehaviour
 
 	public float GetAwarenessValueMax() => awarenessMap.Values.OrderBy(v => v).LastOrDefault();
 
-	private List<CharacterEntity> detectedCharacters = new List<CharacterEntity>();
+	private Dictionary<CharacterEntity, float> detectedCharacters =  new Dictionary<CharacterEntity, float>(); // last time detected
 	private Dictionary<CharacterEntity, float> awarenessMap = new Dictionary<CharacterEntity, float>();
 	private CharacterEntity selfCharacter;
 	private string debugString;
@@ -305,6 +322,7 @@ public class CharacterDetection : MonoBehaviour
 	{
 		if (debugMode > 0)
 		{
+			//debugString = "Time: " + lastTimeDetected.ToString("N3") + "\n";
 			debugString = "";
 			foreach (var entry in awarenessMap)
 			{
