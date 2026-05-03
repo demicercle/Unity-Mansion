@@ -9,6 +9,7 @@ using UnityEngine.UIElements;
 public interface IAttackable
 {
 	Vector3 GetCenterPosition();
+	Vector3 GetReachPosition();
 	float GetHeight();
 	float GetRadius();
 	void TakeDamage(DamageInfo damageInfo, object instigator);
@@ -49,10 +50,12 @@ public struct DamageInfo
 public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
-	private const float MinAttackRange = 0.25f;
+	private const float MinAttackRange = 0.05f;
 	//private const float DodgeCountToChance = 2f / 20f;
 	private const float MovePointsToDodge = 0.02f;
 	private const float MovePointsToHit = 0.00f;
+
+	public Vector3 GetReachPosition() => GetPosition();
 	
 	public static int debugStats { get; set; }
 	public static int debugAim { get; set; }
@@ -230,10 +233,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool TryRiposte(CharacterEntity attacker)
 	{
-		Debug.Log(this + " TryRiposte: " + attacker);
-		
 		if (IsAtAttackRange(attacker) && riposteCount > 0)
 		{
+			Debug.Log(this + " TryRiposte: " + attacker + " " + riposteCount);
 			riposteCount--; // riposte
 			Routines.AssignPerformAttack(attacker, false);
 			return true;
@@ -279,7 +281,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		if (IsUsingRangeWeapon())
 		{
-			targetRange = Vector3.Distance(GetCenterPosition(), targetPosition);
+			targetRange = Vector3.Distance(GetReachPosition(), targetPosition);
 			targetHeight = GetPosition().y - targetPosition.y;
 			return Mathf.Clamp01(GetHitChance() 
 				* currentWeapon.EvaluateRange(targetRange, GetRadius() + targetRadius)
@@ -293,7 +295,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public float CalculateHitChance(CharacterEntity target)
 	{
-		calculatedHitChance = CalculateHitChance(target.GetCenterPosition(), target.GetRadius());
+		calculatedHitChance = CalculateHitChance(target.GetReachPosition(), target.GetRadius());
 		if (!IsUsingRangeWeapon())
 		{
 			if (target.CanDodge())
@@ -306,7 +308,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public AttackResult TryHit(CharacterEntity target, float atkRoll)
 	{
-		var hitChance = CalculateHitChance(target.GetCenterPosition(), target.GetRadius());
+		var hitChance = CalculateHitChance(target.GetReachPosition(), target.GetRadius());
 		if(DicePool.debugMode>0) Debug.Log(this + " TryHit " + target + " roll=" + atkRoll + " hitChance=" + hitChance);
 		if (1f - atkRoll > hitChance) // miss
 		{
@@ -331,10 +333,15 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return AttackResult.Hit;
 	}
 	
-	public void UseAction(CharacterAction actionType, object param = null)
+	public void UseAction(CharacterAction actionType, bool useAction = true, object param = null)
 	{
-		usedActions.Add(actionType);
-		Debug.Log(this + " usedAction=" + usedActions.Last() + " param=" + param);
+		if (useAction)
+		{
+			usedActions.Add(actionType);
+		}
+		
+		Debug.Log(this + " UseAction " + actionType + " param=" + param + " usedActions=" + usedActions.LastOrDefault());
+		
 		if (actionType == CharacterAction.Run)
 		{
 			if (rollDiceOnRun) RollDice();
@@ -740,13 +747,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		var atkRange = GetAttackReachDistance(target) + MinAttackRange;
 		if (IsUsingRangeWeapon())
 		{
-			var dist = GetDistanceTo(target.GetCenterPosition());
+			var dist = GetDistanceTo(target.GetReachPosition());
 			return dist <= atkRange;
 		}
 		else
 		{
-			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetCenterPosition());
-			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetCenterPosition());
+			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetReachPosition());
+			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetReachPosition());
 			return vDist <= GetHeight() && hDist <= atkRange;
 		}
 	}
@@ -754,8 +761,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool LOSCheck(IAttackable other)
 	{
 		var start = GetEyesPosition();
-		return LOSCheck(start, other.GetCenterPosition())
-		       || LOSCheck(start, other.GetCenterPosition() + Vector3.up * other.GetHeight());
+		return LOSCheck(start, other.GetReachPosition())
+		       || LOSCheck(start, other.GetReachPosition() + Vector3.up * other.GetHeight());
 	}
 
 	public bool LOSCheck(Vector3 start, Vector3 end)

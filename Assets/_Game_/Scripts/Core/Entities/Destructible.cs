@@ -6,7 +6,12 @@ using UnityEngine.Events;
 public class Destructible : MonoBehaviour, IAttackable
 {
 	public static List<Destructible> allInstances = new List<Destructible>();
-	
+
+	public Vector3 GetReachPosition()
+	{
+		return GetCenterPosition();
+	}
+
 	public bool IsName(string s) => name == s;
 	public string GetName() => name;
 	public static int debugMode => CharacterEntity.debugStats;

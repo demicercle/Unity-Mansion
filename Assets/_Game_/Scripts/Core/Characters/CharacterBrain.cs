@@ -147,7 +147,7 @@ public class CharacterBrain : MonoBehaviour
 				
 				if (_selfCharacter.IsAtAttackRange(_chaseCharacter))
 				{
-					_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
+					_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter);
 				}
 				else if (_selfCharacter.HasMovePoints())
 				{

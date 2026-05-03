@@ -15,6 +15,7 @@ REFACTO
 	- toggle stop enabled if any routines
 	- toggle reload enabled if using a "ammo" weapon, display "full" or "no ammo"
 - training mannequin (invicible life)
+- decals depend on weapon data
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

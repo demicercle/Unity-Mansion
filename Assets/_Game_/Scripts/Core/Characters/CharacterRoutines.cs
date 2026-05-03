@@ -42,25 +42,25 @@ public class CharacterRoutines : MonoBehaviour
 		return activeInstances.Contains(this);
 	}
 	
-	public void AssignMoveAndAttack(IAttackable target, bool losCheck)
+	public void AssignMoveAndAttack(IAttackable target, bool losCheck, bool useAction = true)
 	{
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
-		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target  + " losCheck=" + losCheck + " time=" + LastTimeAssignedTarget);
+		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " useAction=" + useAction  + " losCheck=" + losCheck + " time=" + LastTimeAssignedTarget);
 		StartNewRoutine(WaitCharacterAttack(target, losCheck, true));
 	}
 
-	public void AssignShootAt(Vector3 position, bool useAction)
+	public void AssignShootAt(Vector3 position, bool useAction = true)
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignShootAt " + position);
 		StartNewRoutine(WaitCharacterShootAt(position, useAction));
 	}
 	
-	public void AssignPerformAttack(IAttackable target, bool useAction)
+	public void AssignPerformAttack(IAttackable target, bool useAction = true)
 	{
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
-		if(debugMode > 0) Debug.Log(this + " AssignAttackInstant " + target + " usesActions=" + useAction);
+		if(debugMode > 0) Debug.Log(this + " AssignAttackInstant " + target + " useAction=" + useAction);
 		StartNewRoutine(WaitCharacterPerformAttack(target, useAction));
 		//OnAssignAction?.Invoke();
 	}
@@ -374,8 +374,8 @@ public class CharacterRoutines : MonoBehaviour
 		if (!atAttackRange)
 		{
 			var reachDistance = _selfCharacter.GetAttackReachDistance(target);
-			if(debugMode > 0) Debug.Log(this + " starts moving towards target ; reachDistance=" + reachDistance);
-			yield return StartCoroutine(WaitCharacterMoved(target.GetCenterPosition(), reachDistance, raycastForDestructible));
+			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
+			yield return StartCoroutine(WaitCharacterMoved(target.GetReachPosition(), reachDistance, raycastForDestructible));
 			atAttackRange = _selfCharacter.IsAtAttackRange(target);
 		}
 		
@@ -428,12 +428,12 @@ public class CharacterRoutines : MonoBehaviour
 	private IEnumerator WaitCharacterPerformAttack(IAttackable target, bool useAction)
 	{
 		debugString = "WaitCharacterPerformAttack";
-		if(debugMode > 0) Debug.Log(this + " WaitCharacterPerformAttack " + target );
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterPerformAttack " + target + " useAction=" + useAction );
 
 		yield return null;
 		
-		if(!_selfCharacter.IsFacingPosition(target.GetCenterPosition()))
-			yield return StartCoroutine(WaitCharacterLookPosition(target.GetCenterPosition()));
+		if(!_selfCharacter.IsFacingPosition(target.GetReachPosition()))
+			yield return StartCoroutine(WaitCharacterLookPosition(target.GetReachPosition()));
 
 		if (useAction && !_selfCharacter.HasActions())
 		{
@@ -447,12 +447,12 @@ public class CharacterRoutines : MonoBehaviour
 		yield return StartCoroutine(WaitCharacterHitOrShoot(target, useAction, default));
 	}
 
-	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit hitResult)
+	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit shootHit)
 	{
 		var atkRoll = 0.0f;
 		
 		if(useAction) 
-			_selfCharacter.UseAction(CharacterAction.Attack, target);
+			_selfCharacter.UseAction(CharacterAction.Attack, useAction, target);
 		
 		if (target != null)
 		{
@@ -462,56 +462,53 @@ public class CharacterRoutines : MonoBehaviour
 		
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 
-		_selfCharacter.TryGetLastShootHit(out var shootHit);
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
 
-		if (target == null)
+		_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
+		if (target != null)
 		{
-			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
-			yield break;
-		}
-
-		var atkResult = _selfCharacter.TryHit(target, atkRoll);
-		switch (atkResult)
-		{
-			case CharacterEntity.AttackResult.Miss:
-				Debug.Log(this + " AttackResult.Miss " + target);
-				//GameCanvas.Instance.FloatingText(_selfCharacter, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
-				break;
-			
-			case CharacterEntity.AttackResult.Dodge:
-				Debug.Log(this + " AttackResult.Dodge by " + target);
-				//GameCanvas.Instance.FloatingText(target, LanguageSettings.GetSettings(DialogFiles.main).GetLine(11, "dodge!"));
-				break;
-			
-			case CharacterEntity.AttackResult.Hit:
-				Debug.Log(this + " AttackResult.Hit " + target);
-				var damageInfo = new DamageInfo()
-				{
-					amount = _selfCharacter.GetLastAttackDamage(atkRoll),
-					isRanged = _selfCharacter.IsUsingRangeWeapon()
-				};
-				target.TakeDamage(damageInfo, _selfCharacter);
-				break;
-		}
-		
-		if(atkResult == CharacterEntity.AttackResult.Hit)
-			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
-
-		if (target is CharacterEntity)
-		{
-			var defender = target as CharacterEntity;
-			
-			if (!defender.IsDead() && defender.TryGetComponent(out CharacterDetection detection))
+			var atkResult = _selfCharacter.TryHit(target, atkRoll);
+			switch (atkResult)
 			{
-				detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+				case CharacterEntity.AttackResult.Miss:
+					Debug.Log(this + " AttackResult.Miss " + target);
+					//GameCanvas.Instance.FloatingText(_selfCharacter, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
+					break;
+			
+				case CharacterEntity.AttackResult.Dodge:
+					Debug.Log(this + " AttackResult.Dodge by " + target);
+					//GameCanvas.Instance.FloatingText(target, LanguageSettings.GetSettings(DialogFiles.main).GetLine(11, "dodge!"));
+					break;
+			
+				case CharacterEntity.AttackResult.Hit:
+					Debug.Log(this + " AttackResult.Hit " + target);
+					var damageInfo = new DamageInfo()
+					{
+						amount = _selfCharacter.GetLastAttackDamage(atkRoll),
+						isRanged = _selfCharacter.IsUsingRangeWeapon()
+					};
+					target.TakeDamage(damageInfo, _selfCharacter);
+					break;
 			}
+		
+			if(atkResult == CharacterEntity.AttackResult.Hit)
+				_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
 
-			if (defender.TryRiposte(_selfCharacter))
+			if (target is CharacterEntity)
 			{
-				do yield return null;
-				while (defender.Routines.AnyActive());
+				var defender = target as CharacterEntity;
+			
+				if (!defender.IsDead() && defender.TryGetComponent(out CharacterDetection detection))
+				{
+					detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+				}
+
+				if (defender.TryRiposte(_selfCharacter))
+				{
+					do yield return null;
+					while (defender.Routines.AnyActive());
+				}
 			}
 		}
 		
@@ -558,7 +555,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		var currentDistance = NavUtils.NavDistance(dest,  _selfCharacter.GetPosition());
 		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
-		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " " + reachDistance + " currentDistance=" + currentDistance);
+		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " reachDistance=" + reachDistance + " currentDistance=" + currentDistance);
 		
 		if (currentDistance <= reachDistance)
 		{
@@ -568,7 +565,6 @@ public class CharacterRoutines : MonoBehaviour
 			
 		var agent = _selfCharacter.GetAgent();
 		agent.StopMovement(); // stop any movement
-		agent.SetReachDistance(reachDistance);
 		
 		yield return agent.AssignDestination(dest);
 		
@@ -578,6 +574,7 @@ public class CharacterRoutines : MonoBehaviour
 			{
 				dest = wp.GetPosition();
 				
+				if(debugMode > 0) Debug.Log(this + " Assign Waypoint dest=" + wp);
 				yield return agent.AssignDestination(dest);
 				if (agent.hasDestination)
 					break;
@@ -604,20 +601,23 @@ public class CharacterRoutines : MonoBehaviour
 		var dir = (firstPoint - _selfCharacter.GetPosition()).normalized;
 		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
 		{
-			if (debugMode > 1) Debug.Log(this + " WaitMoveLastPath LookDirection");
+			if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath LookDirection");
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " agent.StartMove ");
-		agent.StartMove();
-		
 		var startTime = Time.time;
-		var freezeTime = Time.time;
 		var hasMoved = false;
 		while (!agent.ReachedDestination(dest))
 		{
 			debugTimeout = (Time.time - startTime);
+
+			if (!agent.IsMoving())
+			{
+				if(debugMode > 0) Debug.Log(this + " agent.StartMove and SetReachDistance");
+				agent.SetReachDistance(reachDistance);
+				agent.StartMove();
+			}
 			
 			if (Time.time - startTime > SearchPathTimeout)
 			{
@@ -665,14 +665,14 @@ public class CharacterRoutines : MonoBehaviour
 			{
 				hasMoved = true;
 				//agent.DropOnGround(); // to avoid overlapping obstacles
-				if(debugMode > 2) Debug.Log(this + " moving " + deltaPos);
+				if(debugMode > 1) Debug.Log(this + " moving " + deltaPos);
 				startTime = Time.time; // reset timeout
 			}
 			
 			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination " + NavUtils.NavDistance(dest, _selfCharacter.GetPosition()));
+		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination reachDistance=" + reachDistance + " current navDistance=" + NavUtils.NavDistance(dest, _selfCharacter.GetPosition()));
 		agent.StopMovement();
 	}
 	

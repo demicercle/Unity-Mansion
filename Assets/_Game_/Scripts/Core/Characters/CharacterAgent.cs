@@ -316,8 +316,8 @@ public class CharacterAgent : MonoBehaviour
 	
 	public bool ReachedDestination(Vector3 dest)
 	{
-		if (aiPath.hasPath && aiPath.reachedDestination)
-			return true;
+		if (!aiPath.hasPath || aiPath.pathPending)
+			return false;
 		
 		var dist = NavUtils.NavDistance(aiPath.position, dest);
 		var reach = Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
