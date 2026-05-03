@@ -27,6 +27,15 @@ public class Destructible : MonoBehaviour, IAttackable
 	public UnityEvent breaks;
 
 	public bool IsBroken() => isBroken;
+	
+
+	public void AimedBy(CharacterEntity otherCharacter)
+	{
+		foreach (var outline in GetComponentsInChildren<OutlineRenderer>())
+		{
+			outline.CursorOver();
+		}
+	}
 
 	public void TakeDamage(DamageInfo dmgInfo, object instigator)
 	{

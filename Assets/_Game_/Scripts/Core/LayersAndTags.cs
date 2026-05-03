@@ -16,8 +16,17 @@ public static class Layers
 	public static int MaskWall => LayerMask.GetMask("Ground", "Wall", "Fog");
 	public static int MaskNavigation => LayerMask.GetMask("Ground");
 	public static int MaskAiming => LayerMask.GetMask("Ground", "Wall", "Prop", "Door", "Character", "Default");
-	public static int MaskInteraction(bool includeDead) => includeDead ? LayerMask.GetMask("Character", "Prop", "Door", "Dead")
-																	: LayerMask.GetMask("Character", "Prop", "Door");
+	public static int MaskInteraction => LayerMask.GetMask("Character", "Prop", "Door");
+
+	public static int MaskItem(ItemData itemData, bool raycastCharacter, bool raycastNavigation)
+	{
+		return raycastCharacter && itemData.RaycastAnyCharacter() ? itemData.CanBeUsedOnDead()
+														? LayerMask.GetMask("Character", "Prop", "Door", "Dead")
+														: LayerMask.GetMask("Character", "Prop", "Door")
+				: raycastNavigation && itemData.RaycastNavigation() ? MaskNavigation 
+				: 0;
+	}
+	
 	public static int MaskPhysics => LayerMask.GetMask("Prop", "Door", "Default");
 	public static int MaskObstruction => LayerMask.GetMask("Ground", "Wall", "Fog", "Door");
 	public static int MaskDetection => LayerMask.GetMask("Ground", "Wall", "Fog", "BlockVision", "Door");

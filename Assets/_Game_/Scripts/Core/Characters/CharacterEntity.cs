@@ -12,6 +12,7 @@ public interface IAttackable
 	float GetHeight();
 	float GetRadius();
 	void TakeDamage(DamageInfo damageInfo, object instigator);
+	void AimedBy(CharacterEntity other);
 }
 
 public enum CharacterFaction
@@ -636,6 +637,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		
 		onStatsChanged?.Invoke();
 	}
+
+	public void AimedBy(CharacterEntity otherCharacter)
+	{
+		foreach (var outline in GetComponentsInChildren<OutlineRenderer>())
+		{
+			outline.CursorOver();
+		}
+	}
 	
 	public void TakeDamage(DamageInfo damageInfo, object objectFrom)
 	{
@@ -998,9 +1007,12 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool RaycastShoot(out RaycastHit hit)
 	{
-		var shootStart = GetEyesPosition() + transform.forward * (GetRadius() + MinAttackRange);
+		var shootStart = GetEyesPosition() + transform.forward * (GetRadius() + 0.01f);
 		var shootEnd = aimingPosition;
 		var shootDir = (shootEnd - shootStart).normalized;
+		if (!IsUsingRangeWeapon())
+			shootEnd = GetCenterPosition() + shootDir * MinAttackRange;
+		if (debugAim > 0) DebugDrawer.Line(shootStart, shootEnd, Color.red, 0.5f);
 		if (isAiming && Physics.Linecast(shootStart, shootEnd + shootDir, out hit, Layers.MaskAiming))
 		{
 			lastShootHitResult = hit;

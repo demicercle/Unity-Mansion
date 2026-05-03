@@ -41,6 +41,8 @@ public class GameInput : MonoBehaviour
 	[Min(0f)] public float nodeSize = 0.25f;
 
 	public UnityEvent onClick, onSelect;
+
+	private LayerMask raycastLayers;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
 	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null)
@@ -57,16 +59,19 @@ public class GameInput : MonoBehaviour
 		
 		raycastRay = cam.ScreenPointToRay(mousePosition);
 
-		hitAim = selectedCharacter && selectedCharacter.IsAiming()
-		                           && Physics.Raycast(raycastRay, out aimHit, 100f, Layers.MaskAiming);
-		if (hitAim && RoomTrigger.IsPositionVisible(aimHit.point))
+		if (selectedCharacter && selectedCharacter.IsAiming())
 		{
-			return CursorRaycastResult_Aim;
+			raycastLayers = Layers.MaskAiming;
+			hitAim = Physics.Raycast(raycastRay, out aimHit, 100f, raycastLayers);
+			if(hitAim && RoomTrigger.IsPositionVisible(aimHit.point))
+				return CursorRaycastResult_Aim;
 		}
+
+		hitAim = false;
 		
-		hitInteractions = (!itemToUse || itemToUse.RaycastInteraction()) 
-		                  && (!selectedCharacter || !selectedCharacter.IsAiming())
-						&& Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction(itemToUse && itemToUse.CanBeUsedOnDead()));
+		raycastLayers = itemToUse ? Layers.MaskItem(itemToUse, true, false) : Layers.MaskInteraction;
+		hitInteractions = (!selectedCharacter || !selectedCharacter.IsAiming())
+						&& Physics.Raycast(raycastRay, out interactionHit, 100f, raycastLayers);
 		
 		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point))
 		{ 
@@ -81,8 +86,9 @@ public class GameInput : MonoBehaviour
 			return CursorRaycastResult_Interaction;
 		}
 		
+		raycastLayers = itemToUse ? Layers.MaskItem(itemToUse, false, true) : Layers.MaskNavigation;
 		hitNavigation = (!itemToUse || itemToUse.RaycastNavigation())
-					&& Physics.Raycast(raycastRay, out navigationHit, 100f, Layers.MaskNavigation);
+					&& Physics.Raycast(raycastRay, out navigationHit, 100f, raycastLayers);
 		
 		if (hitNavigation && RoomTrigger.IsPositionVisible(navigationHit.point))
 		{
@@ -447,7 +453,13 @@ public class GameInput : MonoBehaviour
 					}
 
 					if (selectedCharacter.TryGetLastShootHit(out var hitResult))
+					{
 						debugString += "\n>hit:" + hitResult.collider;
+						if (hitResult.collider.TryGetComponent(out IAttackable hitAttackable))
+						{
+							hitAttackable.AimedBy(selectedCharacter);
+						}
+					}
 				}
 				
 			}

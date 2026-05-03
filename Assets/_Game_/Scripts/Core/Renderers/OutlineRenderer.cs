@@ -7,14 +7,16 @@ using UnityEngine.UI;
 [RequireComponent (typeof (QuickOutline))]
 public class OutlineRenderer : MonoBehaviour, ICursorHandler
 {
+	const float HitBoxSize = 0.5f;
+	
 	public static void ForceHightlight()
 	{
 		activeInstances.ForEach(o =>
 		{
 			foreach (var corner in new Vector3[]
 			         {
-				         Vector3.forward * o.boxSize, Vector3.right * o.boxSize, Vector3.up * o.boxSize,
-				         -Vector3.forward * o.boxSize, -Vector3.right * o.boxSize, -Vector3.up * o.boxSize,
+				         Vector3.forward * HitBoxSize, Vector3.right * HitBoxSize, Vector3.up * HitBoxSize,
+				         -Vector3.forward * HitBoxSize, -Vector3.right * HitBoxSize, -Vector3.up * HitBoxSize,
 			         })
 			{
 				if (RoomTrigger.IsPositionVisible(o.transform.position + corner))
@@ -30,34 +32,30 @@ public class OutlineRenderer : MonoBehaviour, ICursorHandler
 	
 	public void CursorOver()
 	{
+		UpdateColorAndSize();
 		quickOutline.enabled = true;
 		
 		StopAllCoroutines();
 		StartCoroutine(WaitAndHide());
 	}
 
-	public float boxSize = 0.5f;
-	public bool ignorePresets;
+	private float defaultSize;
+	private Color defaultColor;
 
-	void Awake()
+	private CharacterEntity parentCharacter;
+
+	private void Awake()
 	{
-		var color = Color.yellow;
-		var size = 5f;
-
 		quickOutline = GetComponent<QuickOutline>();
 		
 		if (!quickOutline)
 			quickOutline =gameObject.AddComponent<QuickOutline>();
-		
-		if (!ignorePresets)
-		{
-			quickOutline.OutlineWidth = size;
-			quickOutline.OutlineColor = color;
-		}
 			
 		quickOutline.enabled = false;
 		
 		activeInstances.Add(this);
+		
+		parentCharacter = GetComponentInParent<CharacterEntity>();
 	}
 
 	private void OnDestroy()
@@ -67,15 +65,26 @@ public class OutlineRenderer : MonoBehaviour, ICursorHandler
 
 	private QuickOutline quickOutline;
 
+	private void UpdateColorAndSize()
+	{
+		if (parentCharacter)
+		{
+			defaultColor = ColorSettings.GetCharacterColor(parentCharacter, false, false);
+			defaultSize = ColorSettings.GetCharacterOutlineSize(parentCharacter);
+		}
+		else
+		{
+			defaultColor = ColorSettings.GetDefaultOutlineColor();
+			defaultSize = ColorSettings.GetDefaultOutlineSize();
+		}
+		
+		quickOutline.OutlineWidth = defaultSize;
+		quickOutline.OutlineColor = defaultColor;
+	}
+
 	IEnumerator WaitAndHide()
 	{
 		yield return null;
 		quickOutline.enabled = false;
-	}
-
-	private void OnDrawGizmosSelected()
-	{
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawWireCube(transform.position, new Vector3(boxSize, boxSize, boxSize));
 	}
 }

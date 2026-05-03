@@ -27,7 +27,8 @@ public class ItemData : ScriptableObject
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
 	[SerializeField] private bool isProjectile;
 
-	public bool RaycastInteraction() => targetType == TargetType.AnyCharacter;
+	public bool RaycastAnyCharacter() => targetType == TargetType.AnyCharacter;
+	
 	public bool RaycastNavigation() => targetType == TargetType.GroundPosition;
 
 	public bool CanBeUsedOnDead()
