@@ -7,20 +7,19 @@ public class ActionToggles : MonoBehaviour
 {
 	[SerializeField] private Toggle toggleStop;
 	[SerializeField] private Toggle toggleAim;
-	[SerializeField] private Toggle toggleReload;
 	
 	private void OnEnable()
 	{
 		if(toggleAim) toggleAim.onValueChanged.AddListener(OnToggleAim);
 		if(toggleStop) toggleStop.onValueChanged.AddListener(OnToggleStop);
-		if(toggleReload) toggleReload.onValueChanged.AddListener(OnToggleReload);
+		//if(toggleReload) toggleReload.onValueChanged.AddListener(OnToggleReload);
 	}
 
 	private void OnDisable()
 	{
 		if(toggleAim) toggleAim.onValueChanged.RemoveListener(OnToggleAim);
 		if(toggleStop) toggleStop.onValueChanged.RemoveListener(OnToggleStop);
-		if(toggleReload) toggleReload.onValueChanged.RemoveListener(OnToggleReload);
+		//if(toggleReload) toggleReload.onValueChanged.RemoveListener(OnToggleReload);
 	}
 
 	private void OnToggleReload(bool wantsReload)
@@ -62,11 +61,11 @@ public class ActionToggles : MonoBehaviour
 				toggleAim.interactable = !toggleStop.interactable;
 			}
 
-			if (toggleReload)
+		/*	if (toggleReload)
 			{
 				toggleReload.gameObject.SetActive(selected.HasWeaponToReload());
 				toggleReload.interactable = !toggleStop.interactable;
-			}
+			}*/
 		}
 		else
 		{
@@ -78,14 +77,14 @@ public class ActionToggles : MonoBehaviour
 				toggleAim.interactable = false;
 			}
 
-			if (toggleReload)
+		/*	if (toggleReload)
 			{
 				toggleReload.gameObject.SetActive(false);
 				toggleReload.interactable = false;
-			}
+			}*/
 		}
 		
 		if(toggleStop) toggleStop.isOn = false;
-		if(toggleReload) toggleReload.isOn = false;
+	//	if(toggleReload) toggleReload.isOn = false;
 	}
 }
