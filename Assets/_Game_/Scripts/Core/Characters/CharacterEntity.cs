@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using RPGCharacterAnims.Actions;
+using RPGCharacterAnims.Lookups;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -831,13 +832,23 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
 			itemInHand = itemToUse;
-			characterAnimation?.WeaponChanged();
+			characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
 		}
 	}
 
 	public bool HasItemToUse(out ItemData itemToUse)
 	{
 		return (itemToUse = itemInHand) != null;
+	}
+	
+
+	private void SetCurrentWeapon(WeaponData newWeapon)
+	{
+		if (currentWeapon != newWeapon)
+		{
+			currentWeapon = newWeapon;
+			characterAnimation?.SwitchWeapon(newWeapon.rpgWeaponR);
+		}
 	}
 	
 	#region PRIVATE
@@ -932,16 +943,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			turnEnded?.Invoke();
 		}
 	}
-
-	private void SetCurrentWeapon(WeaponData newWeapon)
-	{
-		currentWeapon = newWeapon;
-
-		if (characterAnimation)
-		{
-			characterAnimation.WeaponChanged();
-		}
-	}
 	
 	#endregion
 
@@ -1021,7 +1022,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (!IsUsingRangeWeapon())
 			shootEnd = GetCenterPosition() + shootDir * MinAttackRange;
 		if (debugAim > 0) DebugDrawer.Line(shootStart, shootEnd, Color.red, 0.5f);
-		if (isAiming && Physics.Linecast(shootStart, shootEnd + shootDir, out hit, Layers.MaskAiming))
+		if (isAiming && Physics.Linecast(shootStart, shootEnd + shootDir, out hit, Layers.MaskAiming) && hit.collider.gameObject != gameObject)
 		{
 			lastShootHitResult = hit;
 			return true;
@@ -1054,7 +1055,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		//if(debugAim > 0) Debug.Log(this + " ToggleAim " + value);
 			
 		if (characterAnimation && !characterAnimation.IsSwitchingWeapons)
-			characterAnimation.TrySwitchWeapons(isAiming || InBattle());
+			characterAnimation.SwitchWeapons(isAiming || InBattle());
 	}
 
 	public bool IsActing() => IsMoving() || Routines.AnyActive();

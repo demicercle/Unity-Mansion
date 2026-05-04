@@ -358,15 +358,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (_selfCharacter.TryGetAnimation(out var characterAnim))
 		{
-			if (characterAnim.TrySwitchWeapons(true))
-			{
-				do
-				{
-					debugString = "TrySwitchWeapons";
-					yield return null;
-				} while (characterAnim.IsSwitchingWeapons);
-				if(debugMode > 0) Debug.Log("weapons switched for attacking");
-			}
+			yield return characterAnim.SwitchWeapons(true);
 		}
 
 		var atAttackRange = _selfCharacter.IsAtAttackRange(target);

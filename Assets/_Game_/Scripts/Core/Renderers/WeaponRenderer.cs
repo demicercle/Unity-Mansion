@@ -7,6 +7,8 @@ using UnityEngine.TextCore.Text;
 
 public class WeaponRenderer : MonoBehaviour
 {
+    public static int debugMode => CharacterAnimation.debugMode;
+    
     public bool isLeft;
     public Weapon rpgWeapon = Weapon.Relax;
     public string itemTags = "";
@@ -45,11 +47,6 @@ public class WeaponRenderer : MonoBehaviour
         
         onShoot?.Invoke();
     }
-
-    public bool DisplaysItem(ItemData itemData)
-    {
-        return (rpgWeapon == Weapon.RightItem || rpgWeapon == Weapon.LeftItem) && itemData.CompareTags(itemTags);
-    }
     
     public UnityEvent onHit;
 
@@ -80,6 +77,8 @@ public class WeaponRenderer : MonoBehaviour
     
     private void OnEnable()
     {
+        if(debugMode > 0) Debug.Log(this + " OnEnable() parentCharacter=" + parentCharacter);
+        
         foreach (var rd in renderers)
         {
             rd.gameObject.layer = Layers.LayerEquipment;
@@ -88,6 +87,11 @@ public class WeaponRenderer : MonoBehaviour
         
         if(shootLine)shootLine.gameObject.SetActive(false);
         if(aimLine)aimLine.gameObject.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        if(debugMode > 0) Debug.Log(this + " OnDisable() parentCharacter=" + parentCharacter);
     }
 
     private void LateUpdate()
@@ -138,15 +142,19 @@ public class WeaponRenderer : MonoBehaviour
         renderers = GetComponentsInChildren<Renderer>(includeInactive).Concat(GetComponents<Renderer>()).ToArray();
         Utils.SetDirty(this);
     }
-    
-    private void OnDrawGizmosSelected()
+    [ContextMenu("SHOW Renderers")]
+    private void SetRendererVisible_On() => SetRendererVisible(true);
+    [ContextMenu("HIDE Renderers")]
+    private void SetRendererVisible_Off() => SetRendererVisible(false);
+    private void SetRendererVisible(bool visible)
     {
-        if (Application.isPlaying) return;
-        var prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
-        var isVisible = prefabStage && prefabStage.prefabContentsRoot == gameObject;
-        foreach (var rd in renderers)
+        if (renderers != null)
         {
-            rd.enabled = isVisible;
+            foreach (var r in renderers)
+            {
+                r.enabled = visible;
+                Utils.SetDirty(r);
+            }
         }
     }
     #endif

@@ -70,7 +70,6 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	[SerializeField] private float roomsReveleadSeconds = 1.0f;
-	[SerializeField] private bool startsWeaponsReady = true;
 	[SerializeField] private bool shouldSwitchWeaponWhenDamaged = true;
 
 	public bool IsSwitchingWeapons => isSwitchingWeapons;
@@ -101,53 +100,50 @@ public class CharacterAnimation : MonoBehaviour
 		} 
 	}
 
-	public bool TrySwitchWeapons(bool weaponsReady)
-	{
-		if (weaponsReady == wantsWeaponSwitched)
-			return false;
+	public void InstantSwitchWeapons(bool value) =>
+		InstantSwitchWeapons(value ? _selfCharacter.GetCurrentWeapon().rpgWeaponR : Weapon.Relax);
 
-		wantsWeaponSwitched = weaponsReady;
-		if(debugMode >0 )Debug.Log(this + " TrySwitchWeapons " + weaponsReady);
-		StopAllCoroutines();
-		StartCoroutine(DoWeaponSwitch(wantsWeaponSwitched));
-		return true;
-	}
-
-	public void InstantSwitchWeapons(bool weaponsReady)
+	public void InstantSwitchWeapons(Weapon newWeapon)
 	{
-		if (WeaponsSwitched() == weaponsReady)
+		if (weaponInHand != newWeapon)
 		{
-			return;
+			if(debugMode >0 )Debug.Log(this + " InstantSwitchWeapons " + newWeapon);
+			if (rpgAnimationHandler)
+			{
+				rpgAnimationHandler.rightWeapon = newWeapon;
+				rpgAnimationHandler.InstantWeaponSwitch();
+			}
+			TrySetTrigger(parameters.instantSwitchTrigger);
+			weaponInHand = newWeapon;
+			UpdateWeaponRenderers();
 		}
-		
-		wantsWeaponSwitched = weaponsReady;
-		if(debugMode >0 )Debug.Log(this + " InstantSwitchWeapons " + weaponsReady);
-		if (rpgAnimationHandler) rpgAnimationHandler.InstantWeaponSwitch();
-		TrySetTrigger(parameters.instantSwitchTrigger);
-		WeaponChanged();
 	}
 
-	
-	public void WeaponChanged() 
+	public Coroutine SwitchWeapons(bool weaponsReady)
 	{
-		weaponInHand = wantsWeaponSwitched
-			? _selfCharacter.HasItemToUse(out var itemToUse)
-				? itemToUse.GetWeaponInHand()
-				: _selfCharacter.GetCurrentWeapon().rpgWeaponR
-			: Weapon.Relax;
-		
-		Debug.Log(this + " WeaponChanged " + weaponInHand + " " + wantsWeaponSwitched);
-		
-		UpdateWeaponRenderers();
+		return SwitchWeapon(weaponsReady ? _selfCharacter.GetCurrentWeapon().rpgWeaponR : Weapon.Relax);
 	}
 
-	public bool WeaponsSwitched() => wantsWeaponSwitched;
+	public Coroutine SwitchWeapon(Weapon newWeapon)
+	{
+		if (weaponInHand != newWeapon)
+		{
+			weaponInHand = newWeapon;
+			StopCoroutine("DoWeaponSwitch");
+			return StartCoroutine("DoWeaponSwitch");
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	public bool WeaponsSwitched() => weaponInHand != Weapon.Relax;
 	
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
 	private CharacterEntity _selfCharacter;
 	private List<EventType> waitForEvents = new List<EventType>();
-	private bool wantsWeaponSwitched;
 	private Weapon weaponInHand = Weapon.Relax;
 	private bool hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
 	private float lastTimeWeaponSwitched;
@@ -221,11 +217,10 @@ public class CharacterAnimation : MonoBehaviour
 
 	private void Start()
 	{
-		if(startsWeaponsReady)
-			InstantSwitchWeapons(true);
-		
 		hasSwitchOnTrigger = !string.IsNullOrWhiteSpace(parameters.switchOnTrigger);
 		hasSwitchOffTrigger = !string.IsNullOrWhiteSpace(parameters.switchOffTrigger);
+		
+		weaponInHand = Weapon.Relax;
 		
 		TrySetFloat(parameters.velocityX, 0.0f);      
 		TrySetFloat(parameters.velocityZ, 0.0f);        
@@ -233,11 +228,10 @@ public class CharacterAnimation : MonoBehaviour
 
 		if (rpgAnimationHandler)
 		{
-			if(!WeaponsSwitched())
-				rpgAnimationHandler.RelaxOnStart();
+			rpgAnimationHandler.RelaxOnStart();
 		}
 		
-		WeaponChanged();
+		UpdateWeaponRenderers();
 	}
 
 	private void OnCharacterAnimationEvent(EventType eventType)
@@ -349,9 +343,17 @@ public class CharacterAnimation : MonoBehaviour
 	//private bool itemSwitched;
 	private void UpdateWeaponRenderers()
 	{
+		_selfCharacter.HasItemToUse(out var itemToUse);
+		
+		if(debugMode > 0) Debug.Log(this + " UpdateWeaponRenderers weaponInHand=" + weaponInHand + " itemToUse=" + itemToUse);
+		
 		foreach (var wpr in weaponRenderers)
 		{
-			if (!wpr.isLeft)
+			if (itemToUse)
+			{
+				wpr.gameObject.SetActive(wpr.inHand && wpr.rpgWeapon == itemToUse.GetWeaponInHand() && itemToUse.CompareTags(wpr.itemTags));
+			}
+			else if (!wpr.isLeft)
 			{
 				wpr.gameObject.SetActive( (wpr.inHand && wpr.rpgWeapon == weaponInHand) 
 					|| (wpr.offHand && wpr.rpgWeapon != weaponInHand && wpr.rpgWeapon == _selfCharacter.GetCurrentWeapon().rpgWeaponR));
@@ -363,19 +365,19 @@ public class CharacterAnimation : MonoBehaviour
 		}
 	}
 
-	private IEnumerator DoWeaponSwitch(bool weaponReady)
+	private IEnumerator DoWeaponSwitch()
 	{
 		isSwitchingWeapons = true;
-		if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons > " + weaponReady);
+		if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons > " + weaponInHand);
 		
-		if (!weaponReady && hasSwitchOffTrigger)
+		if (weaponInHand == Weapon.Relax && hasSwitchOffTrigger)
 		{
 			if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOffTrigger " + parameters.switchOffTrigger);
 			animator.SetTrigger(parameters.switchOffTrigger);
 			yield return WaitEvent(EventType.WeaponSwitch);
 		}
 
-		else if (weaponReady && hasSwitchOnTrigger)
+		else if (weaponInHand != Weapon.Relax && hasSwitchOnTrigger)
 		{
 			if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOnTrigger " + parameters.switchOnTrigger);
 			animator.SetTrigger(parameters.switchOnTrigger);
@@ -388,21 +390,16 @@ public class CharacterAnimation : MonoBehaviour
 			
 			while(rpgAnimationHandler.IsSwitchingWeapons())
 				yield return null;
-
-			var rightWp = _selfCharacter.GetCurrentWeapon().rpgWeaponR;
-			//TODO var leftWp = Weapon.Relax;
-
-			if (weaponReady)
+			
+			if (weaponInHand != Weapon.Relax)
 			{
-				if(debugMode > 0) Debug.Log(this + " rpg UnsheathWeapon " + rightWp);
-				rpgAnimationHandler.rightWeapon = rightWp;
-				rpgAnimationHandler.UnsheathWeapon(rightWp, false);
+				if(debugMode > 0) Debug.Log(this + " rpg UnsheathWeapon " + weaponInHand);
+				rpgAnimationHandler.UnsheathWeapon(weaponInHand, false);
 			}
 			else
 			{
-				if(debugMode > 0) Debug.Log(this +  "rpg SheathWeapon " + rightWp);
-				rpgAnimationHandler.rightWeapon = rightWp;
-				rpgAnimationHandler.SheathWeapon(rightWp, Weapon.Relax, false);
+				if(debugMode > 0) Debug.Log(this +  "rpg SheathWeapon " + weaponInHand);
+				rpgAnimationHandler.SheathWeapon(weaponInHand, Weapon.Relax, false);
 			}
 		
 			var startedTime = Time.time;
@@ -416,9 +413,11 @@ public class CharacterAnimation : MonoBehaviour
 					yield break;
 				}
 			} while (rpgAnimationHandler.IsSwitchingWeapons());
+			
+			rpgAnimationHandler.rightWeapon = weaponInHand;
 		}
-		
-		WeaponChanged();
+
+		UpdateWeaponRenderers();
 
 		yield return new WaitForSeconds(switchWeaponExtraTime);
 		
@@ -434,7 +433,7 @@ public class CharacterAnimation : MonoBehaviour
 			
 			if (Time.time - lastTimeWeaponSwitched > waitToRelaxTime)
 			{
-				TrySwitchWeapons(false);
+				yield return SwitchWeapons(false);
 			}
 		}
 	}
