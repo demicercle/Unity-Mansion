@@ -148,7 +148,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
-		SetCurrentWeapon(defaultWeapon);
+		if (TryGetComponent(out Inventory inventory) && inventory.TryGetItem(Inventory.InventorySlot_Weapon, out var weaponItem) && weaponItem.IsWeapon(out var weaponData))
+		{
+			SetCurrentWeapon(weaponData);
+		}
+		else
+		{
+			SetCurrentWeapon(defaultWeapon);
+		}
 		characterCanvas.gameObject.SetActive(true);
 		onSpawned?.Invoke();
 		Rest();
@@ -930,18 +937,47 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 
 		characterCanvas.gameObject.SetActive(false);
+	}
+
+	private void Start()
+	{
 		gameObject.SetActive(false); // wait for "Spawn"
-		
-		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
-		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 	}
 
 	private void OnDestroy()
 	{
 		_allCharacters.Remove(this);
-		
+	}
+
+	private void OnEnable()
+	{
+		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
+
+		Inventory.onAnyInventoryChanged += OnAnyInventoryChanged;
+	}
+
+	private void OnDisable()
+	{
 		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
 		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
+		
+		Inventory.onAnyInventoryChanged -= OnAnyInventoryChanged;
+	}
+
+	private void OnAnyInventoryChanged(Inventory inventory)
+	{
+		if (GetComponent<Inventory>() == inventory)
+		{
+			if (inventory.TryGetItem(Inventory.InventorySlot_Weapon, out var weaponItem) && weaponItem.IsWeapon(out var weaponData))
+			{
+				SetCurrentWeapon(weaponData);
+			}
+			else
+			{
+				SetCurrentWeapon(defaultWeapon);
+			}
+		}
 	}
 
 	private void OnTurnStarted()
