@@ -862,6 +862,7 @@ public class GameInput : MonoBehaviour
 	private void SelectionChanged()
 	{
 		SetItemToUse(null, true);//selection changed
+		SetDraggedItem(null);
 		
 		if (CharacterSelection.TryGetSelectedCharacter(out var newSelected) && newSelected != selectedCharacter)
 		{
@@ -1197,6 +1198,7 @@ public class GameInput : MonoBehaviour
 	public void SetDraggedItem(ItemData itemData)
 	{
 		draggedItem = itemData;
+		if (draggedItem) SetItemToUse(null, true);
 	}
 	
 	public void SetItemToUse(ItemData itemData, bool updateSelected)

@@ -34,6 +34,9 @@ public class Inventory : MonoBehaviour
 	public static event System.Action<Inventory, ItemData> onAnyItemAdded, onAnyItemRemoved;
 	public static event System.Action<Inventory, Inventory, ItemData> onAnyItemTransfered;
 	public static event System.Action<Inventory, ItemData, object> onAnyItemUsed;
+
+	public static void NotifyTransfered(Inventory from, Inventory to, ItemData item) =>
+		onAnyItemTransfered?.Invoke(from, to, item);
 	
 	[SerializeField] [Range(1, 32)] private int maxSize = 6;
 	[SerializeField] private Inventory lootBagPrefab = null;
@@ -120,8 +123,10 @@ public class Inventory : MonoBehaviour
 		
 		onAnyInventoryChanged?.Invoke(this);
 	}
-	
-	public bool TryCreateLootBag(ItemData itemData, out Inventory bag)
+
+	public bool TryCreateLootBag(ItemData itemData, out Inventory bag) =>
+		TryCreateLootBag(itemData, GetPosition(), out bag);
+	public bool TryCreateLootBag(ItemData itemData, Vector3 position, out Inventory bag)
 	{
 		if (!lootBagPrefab)
 		{
@@ -139,6 +144,7 @@ public class Inventory : MonoBehaviour
 
 		bag = CreateLootBag(lootBagPrefab, navPosition);
 		bag.TryAddItem(itemData);
+		bag.transform.position = position;
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
 		return true;
 	}

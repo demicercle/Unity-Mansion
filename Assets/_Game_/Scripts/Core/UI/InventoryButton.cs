@@ -123,6 +123,8 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	{
 		toggleSelected.isOn = false;
 		toggleSelected.onValueChanged.AddListener(OnToggleChanged);
+		toggleDrop.isOn = false;
+		toggleDrop.interactable = false;
 		SetInventory();
 	}
 

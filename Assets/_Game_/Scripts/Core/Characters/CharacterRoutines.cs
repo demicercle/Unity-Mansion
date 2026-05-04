@@ -136,7 +136,7 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignGiveItem " + draggedItem + " " + partyChar);
 		StartNewRoutine(WaitCharacterGiveItem(draggedItem, partyChar));
 	}
-
+	
 	public void AssignDropItem(ItemData draggedItem,  Vector3 worldPosition)
 	{
 		LastTimeAssignedTarget = Time.time;
@@ -808,17 +808,6 @@ public class CharacterRoutines : MonoBehaviour
 		yield return new WaitForSeconds(DefaultWaitSeconds); // to end anim?
 		_selfCharacter.SetItemToUse(null, debugMode > 0);
 	}
-	#endregion
-
-	private float debugTimeout = 0;
-	private string debugString = "";
-	private void OnGUI()
-	{
-		if (debugMode > 0)
-		{
-			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString) + "\n" + debugTimeout.ToString("N2"));
-		}
-	}
 
 	private IEnumerator WaitCharacterGiveItem(ItemData draggedItem, CharacterEntity partyChar)
 	{
@@ -838,11 +827,7 @@ public class CharacterRoutines : MonoBehaviour
 				_selfCharacter.LookWorldPosition(partyChar.GetPosition(), Time.deltaTime);
 				yield return null;
 			}
-
-			_selfCharacter.UseAction(CharacterAction.GiveItem, true);
-			if (_selfCharacter.TryGetAnimation(out var anim))
-				yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
-
+			
 			_selfCharacter.TryGetComponent(out Inventory selfInventory);
 			partyChar.TryGetComponent(out Inventory partyInventory);
 			if (selfInventory && partyInventory)
@@ -850,6 +835,15 @@ public class CharacterRoutines : MonoBehaviour
 				if (!partyInventory.TryAddItem(draggedItem) || !selfInventory.TryRemoveItem(draggedItem))
 				{
 					_selfCharacter.FloatingText_Cant();
+				}
+				else
+				{
+					Inventory.NotifyTransfered(selfInventory, partyInventory, draggedItem);
+					
+					_selfCharacter.UseAction(CharacterAction.GiveItem, true);
+					
+					if (_selfCharacter.TryGetAnimation(out var anim))
+						yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
 				}
 			}
 		}
@@ -868,18 +862,35 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (_selfCharacter.GetDistanceTo(worldPosition) <= reachDistance)
 		{
-			_selfCharacter.UseAction(CharacterAction.DropItem, true);
-			if (_selfCharacter.TryGetAnimation(out var anim))
-				yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
-
 			_selfCharacter.TryGetComponent(out Inventory selfInventory);
+			
 			if (selfInventory)
 			{
-				if (!selfInventory.TryCreateLootBag(draggedItem, out var lootBag) || selfInventory.TryRemoveItem(draggedItem))
+				if (!selfInventory.TryCreateLootBag(draggedItem, worldPosition, out var lootBag) || !selfInventory.TryRemoveItem(draggedItem))
 				{
 					_selfCharacter.FloatingText_Cant();
 				}
+				else
+				{
+					Inventory.NotifyTransfered(selfInventory, lootBag, draggedItem);
+					
+					_selfCharacter.UseAction(CharacterAction.DropItem, true);
+					
+					if (_selfCharacter.TryGetAnimation(out var anim))
+						yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
+				}
 			}
+		}
+	}
+	#endregion
+
+	private float debugTimeout = 0;
+	private string debugString = "";
+	private void OnGUI()
+	{
+		if (debugMode > 0)
+		{
+			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString) + "\n" + debugTimeout.ToString("N2"));
 		}
 	}
 }
