@@ -328,8 +328,8 @@ public class GameInput : MonoBehaviour
 
 			if (selectedCharacter)
 			{
-				if (inputSystem.Player.ToggleAim.WasPressedThisFrame()) selectedCharacter.ToggleAim(true);
-				if (inputSystem.Player.ToggleAim.WasReleasedThisFrame()) selectedCharacter.ToggleAim(false);
+				if (inputSystem.Player.ToggleAim.WasPressedThisFrame()) selectedCharacter.SetAiming(true);
+				if (inputSystem.Player.ToggleAim.WasReleasedThisFrame()) selectedCharacter.SetAiming(false);
 			}
 		
 			if (inputSystem.Player.Move.IsPressed())
@@ -445,6 +445,8 @@ public class GameInput : MonoBehaviour
 			if (selectedCharacter)
 			{
 				SetCurrentCursorType(CursorType.Aim);
+				SetMouseOverItem(null);
+				SetDraggedItem(null);
 				debugString += "\n>Aim";
 				
 				if (CanAssignOnMouseOver(selectedCharacter))
@@ -607,15 +609,6 @@ public class GameInput : MonoBehaviour
 			}
 		}
 
-		if (mouseOverViewport)
-		{
-			if (gameTurnManager.IsWaiting())
-			{
-				SetCurrentCursorType(CursorType.Waiting);
-				SetItemToUse(null, false);
-			}
-		}
-
 		if (CharacterEntity.TryGetPartyCharacter(mouseOverPortrait, out CharacterEntity portraitChar))
 		{
 			if (itemToUse && itemToUse.CanBeUsedOn(portraitChar))
@@ -636,6 +629,17 @@ public class GameInput : MonoBehaviour
 		if (draggedItem)
 		{
 			SetCurrentCursorType(CursorType.Drag);
+		}
+
+		if (mouseOverViewport)
+		{
+			if (gameTurnManager.IsWaiting())
+			{
+				SetCurrentCursorType(CursorType.Waiting);
+				SetItemToUse(null, false);
+				SetDraggedItem(null);
+				SetMouseOverItem(null);
+			}
 		}
 
 		if (isLoading)
@@ -757,9 +761,12 @@ public class GameInput : MonoBehaviour
 		
 		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
 		{
+			SetMouseOverItem(null);
+			SetDraggedItem(null);
+			
 			if (itemToUse)
 			{
-				SetItemToUse(null, true); // right click RELEASED
+				SetItemToUse(null, true);
 			}
 			
 			else if (gameTurnManager.IsPlayerTurn() || !gameTurnManager.IsTurnBasedMode())
@@ -767,7 +774,7 @@ public class GameInput : MonoBehaviour
 				if (selectedCharacter && selectedCharacter.IsControllableByPlayer())
 				{
 					if (selectedCharacter.IsAiming()) 
-						selectedCharacter.ToggleAim(false);
+						selectedCharacter.SetAiming(false);
 					else if (selectedCharacter.IsActing())
 						selectedCharacter.Stop();
 					else
@@ -863,6 +870,7 @@ public class GameInput : MonoBehaviour
 	{
 		SetItemToUse(null, true);//selection changed
 		SetDraggedItem(null);
+		SetMouseOverItem(null);
 		
 		if (CharacterSelection.TryGetSelectedCharacter(out var newSelected) && newSelected != selectedCharacter)
 		{
@@ -1198,7 +1206,11 @@ public class GameInput : MonoBehaviour
 	public void SetDraggedItem(ItemData itemData)
 	{
 		draggedItem = itemData;
-		if (draggedItem) SetItemToUse(null, true);
+		if (draggedItem)
+		{
+			SetItemToUse(null, true);
+			if(selectedCharacter) selectedCharacter.SetAiming(false);
+		}
 	}
 	
 	public void SetItemToUse(ItemData itemData, bool updateSelected)

@@ -303,7 +303,7 @@ public class Inventory : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		Locked = selfCharacter && (selfCharacter.IsActing() || selfCharacter.IsAiming());
+		Locked = selfCharacter && selfCharacter.IsActing();
 		
 		if (destroyIfEmpty)
 		{

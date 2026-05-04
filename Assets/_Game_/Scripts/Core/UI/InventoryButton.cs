@@ -22,22 +22,9 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		selfInventory = inventory;
 		selfIndex = index;
 		
-		if (selfInventory && !selfInventory.TryGetItem(index, out itemData))
+		if (selfInventory && selfInventory.TryGetItem(index, out itemData))
 		{
-			toggleSelected.interactable = false;
-			
-			iconImage.texture = null;
-			iconImage.enabled = false;
-			
-			itemLabel.enabled = true;
-			itemLabel.text = string.Empty;
-
-			qtyLabel.enabled = false;
-			qtyLabel.text = string.Empty;
-		}
-		else
-		{
-			toggleSelected.interactable = true;
+			if(toggleSelected) toggleSelected.interactable = true;
 			
 			iconImage.texture = itemData.GetIcon();
 			iconImage.enabled = iconImage.texture;
@@ -48,12 +35,28 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			qtyLabel.enabled = itemData.ShowQuantity();
 			qtyLabel.text = itemData.GetQuantity().ToString();
 		}
+		else
+		{
+			if(toggleSelected) toggleSelected.interactable = false;
+			
+			iconImage.texture = null;
+			iconImage.enabled = false;
+			
+			itemLabel.enabled = true;
+			itemLabel.text = string.Empty;
+
+			qtyLabel.enabled = false;
+			qtyLabel.text = string.Empty;
+		}
 	}
 
 	public void SetToggleGroup(ToggleGroup toggleGroup)
 	{
-		toggleSelected.group = toggleGroup;
-		toggleSelected.isOn = false;
+		if (toggleSelected)
+		{
+			toggleSelected.group = toggleGroup;
+			toggleSelected.isOn = false;
+		}
 	}
 	
 	public void OnPointerEnter(PointerEventData eventData)
@@ -127,8 +130,11 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	
 	private void Awake()
 	{
-		toggleSelected.isOn = false;
-		toggleSelected.onValueChanged.AddListener(OnToggleChanged);
+		if (toggleSelected)
+		{
+			toggleSelected.isOn = false;
+			toggleSelected.onValueChanged.AddListener(OnToggleChanged);
+		}
 		toggleDrop.isOn = false;
 		toggleDrop.interactable = false;
 		SetInventory();
@@ -136,7 +142,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	private void OnDestroy()
 	{
-		toggleSelected.onValueChanged.RemoveListener(OnToggleChanged);
+		if (toggleSelected) toggleSelected.onValueChanged.RemoveListener(OnToggleChanged);
 	}
 
 	private void OnToggleChanged(bool isOn)
@@ -151,8 +157,11 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	private void LateUpdate()
 	{
-		toggleSelected.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn() && selfInventory && !selfInventory.Locked;
-		toggleSelected.isOn = itemData && toggleSelected.interactable && GameInput.Instance.GetItemToUse() == itemData;
+		if (toggleSelected)
+		{
+			toggleSelected.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn() && selfInventory && !selfInventory.Locked;
+			toggleSelected.isOn = itemData && toggleSelected.interactable && GameInput.Instance.GetItemToUse() == itemData;
+		}
 	
 		toggleDrop.isOn = mouseOverIndex >= 0 && mouseOverIndex == selfIndex && (itemData || draggedIndex >= 0);
 
@@ -168,15 +177,18 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 		if (holdFill.enabled)
 		{
-			toggleSelected.isOn = false;
-			toggleSelected.interactable = false;
+			if (toggleSelected)
+			{
+				toggleSelected.isOn = false;
+				toggleSelected.interactable = false;
+			}
 		}
 		
 		if (pressTime >= holdDuration)
 		{
 			pressTime = 0;
 			hold = false;
-			toggleSelected.isOn = false;
+			if(toggleSelected) toggleSelected.isOn = false;
 
 			if (itemData && selfInventory)
 			{

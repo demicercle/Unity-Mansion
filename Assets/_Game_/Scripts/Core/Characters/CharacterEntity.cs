@@ -171,7 +171,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		//agent.SetObstacle(!value);//todo not in selection
 		if (value) StopFollow();
-		if (!value) ToggleAim(false);
+		if (!value) SetAiming(false);
 		onSelectionChanged?.Invoke(value);
 	}
 
@@ -1061,13 +1061,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public void SetAimingPosition(Vector3 world)
 	{
-		ToggleAim(true);
+		SetAiming(true);
 		aimingPosition = world;
 		if(debugAim > 0) DebugDrawer.Line(GetEyesPosition(), world, Color.red, 0f);
 		onAiming?.Invoke(isAiming, world);
 	}
 	
-	public void ToggleAim(bool value)
+	public void SetAiming(bool value)
 	{
 		isAiming = value;
 		//if(debugAim > 0) Debug.Log(this + " ToggleAim " + value);
