@@ -130,9 +130,9 @@ public class GameLog : MonoBehaviour
 
 	private void OnAnyCharacterHealed(CharacterEntity character, float amount)
 	{
-		AppendLine(GetLocalizedLine(16, "<CHARACTER> healed: <AMOUNT>")
-			.Replace("<CHARACTER>", character.GetDisplayName()
-			.Replace("<AMOUNT>", Mathf.CeilToInt(amount).ToString())));
+		AppendLine(GetLocalizedLine(17, "<CHARACTER> healed: <AMOUNT>")
+			.Replace("<CHARACTER>", character.GetDisplayName())
+			.Replace("<AMOUNT>", Mathf.CeilToInt(amount).ToString()));
 	}
 
 	private string GetLocalizedLine(int index, string fallback) =>

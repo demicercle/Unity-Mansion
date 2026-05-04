@@ -80,9 +80,7 @@ public class ItemAnimation : MonoBehaviour
 		instance.iconContainer.texture = itemData.GetIcon();
 		instance.inventoryFrom  = fromInventory;
 		if(objectTo is CharacterEntity) 
-			instance.inventoryTo = (objectTo as CharacterEntity).GetComponent<Inventory>();
-		else 
-			Debug.LogWarning(this + " objectTo=" + objectTo + " cannot find position");
+			instance.inventoryFrom = (objectTo as CharacterEntity).GetComponent<Inventory>();
 	}
 
 	private IEnumerator Start()
@@ -127,19 +125,6 @@ public class ItemAnimation : MonoBehaviour
 				screenFollowsWorld.SetWorldOffset(Vector3.Lerp(inventoryFrom.GetPosition(), inventoryTo.GetPosition(),
 					animation[animation.clip.name].normalizedTime));
 			}
-			
-			/*if (!inventoryTo)
-			{
-				rectTransform.anchoredPosition = GetScreenPosition(inventoryFrom.GetPosition());
-			}
-			else
-			{
-				rectTransform.anchoredPosition = GetScreenPosition(
-					Vector3.Lerp( inventoryFrom.GetPosition(), inventoryTo.GetPosition(), animation[animation.clip.name].normalizedTime)
-				);
-			}*/
 		}
 	}
-
-	private Vector3 GetScreenPosition(Vector3 world) => Camera.main.WorldToScreenPoint(world);
 }
