@@ -460,6 +460,13 @@ public class CharacterRoutines : MonoBehaviour
 	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit shootHit)
 	{
 		var atkRoll = 0.0f;
+
+		var currentWeapon = _selfCharacter.GetCurrentWeapon();
+		if (currentWeapon.IsReloadable() && currentWeapon.IsEmptyAmmo())
+		{
+			_selfCharacter.FloatingText(LanguageSettings.Main.Empty);
+			yield break;
+		}
 		
 		if(useAction) 
 			_selfCharacter.UseAction(CharacterAction.Attack, useAction, target);

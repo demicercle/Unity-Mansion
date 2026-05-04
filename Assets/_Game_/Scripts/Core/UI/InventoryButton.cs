@@ -142,14 +142,25 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			toggleSelected.isOn = false;
 			toggleSelected.onValueChanged.AddListener(OnToggleChanged);
 		}
+		
 		toggleDrop.isOn = false;
 		toggleDrop.interactable = false;
-		SetInventory();
 	}
 
 	private void OnDestroy()
 	{
 		if (toggleSelected) toggleSelected.onValueChanged.RemoveListener(OnToggleChanged);
+	}
+	
+	private void OnEnable()
+	{
+		WeaponData.onWeaponChanged += OnWeaponChanged;
+		SetInventory();
+	}
+
+	private void OnDisable()
+	{
+		WeaponData.onWeaponChanged -= OnWeaponChanged;
 	}
 
 	private void OnToggleChanged(bool isOn)
@@ -159,6 +170,14 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		if (isOn && itemData && itemData.IsUsable())
 		{
 			GameInput.Instance.SetItemToUse(itemData, true);
+		}
+	}
+
+	private void OnWeaponChanged(WeaponData otherWeapon)
+	{
+		if (itemData && itemData.IsWeapon(out var selfWeapon) && selfWeapon == otherWeapon)
+		{
+			SetInventory();
 		}
 	}
 

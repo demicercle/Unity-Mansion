@@ -11,6 +11,8 @@ public class WeaponData : ScriptableObject
 		duplicated.name = name;
 		return duplicated;
 	}
+
+	public static event System.Action<WeaponData> onWeaponChanged; 
 	
 	[Header("General")]
 	[SerializeField] private bool noAttack = false;
@@ -55,11 +57,13 @@ public class WeaponData : ScriptableObject
 	public void AddAmmo(int qty)
 	{
 		currentAmmo = Mathf.Clamp(currentAmmo + qty, 0, maxAmmo);
+		onWeaponChanged?.Invoke(this);
 	}
 
 	public void SetCurrentAmmo(int current)
 	{
 		currentAmmo = Mathf.Clamp(current, 0, maxAmmo);
+		onWeaponChanged?.Invoke(this);
 	}
 	
 	public string GetAmmoTags() => ammoTags;
