@@ -17,7 +17,12 @@ public class ItemData : ScriptableObject
 		return Resources.Load<ItemData>(Consts.ResPath_Items + itemName);
 	}
 
-	public ItemData Duplicate() => Instantiate(this);
+	public ItemData Duplicate()
+	{
+		var duplicated = Instantiate(this);
+		duplicated.name = name;
+		return duplicated;
+	}
 	
 	[SerializeField] private LocalizedText displayName;
 	[SerializeField] private Texture2D icon;
@@ -29,12 +34,15 @@ public class ItemData : ScriptableObject
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
 	[SerializeField] private bool isProjectile;
 	[SerializeField] private bool isAmmo;
-	[SerializeField] [Min(0)] private int maxQuantity;
+	[SerializeField] [Min(1)] private int maxQuantity = 1;
 
 	private int currentQuantity;
 
 	public int GetQuantity() => currentQuantity;
+	
 	public int GetMaxQuantity() => maxQuantity;
+
+	public bool ShowQuantity() => maxQuantity > 1;
 
 	public void SetMaxQuantity()
 	{
@@ -46,9 +54,9 @@ public class ItemData : ScriptableObject
 		currentQuantity = Mathf.Clamp(currentQuantity + qty, 0, maxQuantity);
 	}
 
-	public bool IsFull() => maxQuantity > 0 && currentQuantity >= maxQuantity;
+	public bool IsFull() => currentQuantity >= maxQuantity;
 
-	public bool IsEmpty() => maxQuantity > 0 && currentQuantity == 0;
+	public bool IsEmpty() => currentQuantity == 0;
 	
 	public Weapon GetWeaponInHand() => Weapon.RightItem;
 

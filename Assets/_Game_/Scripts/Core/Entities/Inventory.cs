@@ -44,7 +44,7 @@ public class Inventory : MonoBehaviour
 	
 	public string[] GetItemNames()
 	{
-		return items.ConvertAll(i => !i ? "null" : i.name).ToArray();
+		return items.ConvertAll(i => !i ? "null" : i.name + ":" + i.GetQuantity()).ToArray();
 	}
 
 	public void SetItemNames(string[] slots)
@@ -52,11 +52,29 @@ public class Inventory : MonoBehaviour
 		if(slots == null) return;
 		for (int i = 0; i < slots.Length; i++)
 		{
-			SetItemName(i, slots[i]);
+			var split = slots[i].Split(':');
+			if (split.Length <= 1 || !int.TryParse(split[1], out var qty))
+			{
+				ClearItem(i); // "null"
+				continue;
+			}
+			
+			SetItemName(i, split[0], qty);
 		}
 	}
+
+	public void ClearItem(int index)
+	{
+		if (index < 0 || index >= items.Count)
+			return;
+		
+		if(items[index])
+			Destroy(items[index]);
+
+		items[index] = null;
+	}
 	
-	public void SetItemName(int index, string itemName)
+	public void SetItemName(int index, string itemName, int qty)
 	{
 		if (index < 0 || index >= items.Count)
 		{
@@ -76,6 +94,9 @@ public class Inventory : MonoBehaviour
 
 		if (items[index])
 		{
+			items[index] = items[index].Duplicate();
+			items[index].AddQuantity(qty);
+			
 			onAnyItemAdded?.Invoke(this, items[index]);
 		}
 		

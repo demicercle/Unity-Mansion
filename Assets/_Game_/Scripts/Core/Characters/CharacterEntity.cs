@@ -367,6 +367,21 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			if (rollDiceOnRiposte) RollDice();
 			riposteCount++;
 		}
+		else if (actionType == CharacterAction.Reload)
+		{
+			if (!currentWeapon.IsReloadable())
+			{
+				FloatingText(LanguageSettings.Main.Cant);
+			}
+			else if (currentWeapon.IsFullAmmo())
+			{
+				FloatingText(LanguageSettings.Main.Full);
+			}
+			else
+			{
+				Routines.AssignUseAction(CharacterAction.Reload);
+			}
+		}
 		
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);

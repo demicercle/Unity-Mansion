@@ -65,6 +65,7 @@ public class ActionToggles : MonoBehaviour
 			if (toggleReload)
 			{
 				toggleReload.gameObject.SetActive(selected.HasWeaponToReload());
+				toggleReload.interactable = !toggleStop.interactable;
 			}
 		}
 		else
@@ -80,6 +81,7 @@ public class ActionToggles : MonoBehaviour
 			if (toggleReload)
 			{
 				toggleReload.gameObject.SetActive(false);
+				toggleReload.interactable = false;
 			}
 		}
 		

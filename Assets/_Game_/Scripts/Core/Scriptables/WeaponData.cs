@@ -32,18 +32,9 @@ public class WeaponData : ScriptableObject
 
 	private int currentAmmo;
 
-	public int GetCurrentAmmo() => currentAmmo;
+	public bool IsFullAmmo() => maxAmmo > 0 && currentAmmo >= maxAmmo;
 
-	public bool AddAmmo()
-	{
-		if (currentAmmo < maxAmmo)
-		{
-			currentAmmo++;
-			return true;
-		}
-
-		return false;
-	}
+	public bool IsEmptyAmmo() => maxAmmo > 0 && currentAmmo <= 0;
 	
 	public bool IsReloadable() => maxAmmo > 0;
 

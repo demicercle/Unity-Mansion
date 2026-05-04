@@ -40,6 +40,8 @@ public class LanguageSettings : ScriptableObject
 		public static string TakeThis => GetLine(14, "take this!");
 		public static string Run => GetLine(15, "run!");
 		public static string Heal => GetLine(16, "heal!");
+		public static string Empty => GetLine(17, "empty!");
+		public static string Full => GetLine(18, "full!");
 
 		public static string AttackResult(CharacterEntity.AttackResult ar) => ar == CharacterEntity.AttackResult.Miss ? Miss : ar == CharacterEntity.AttackResult.Dodge ? Dodge : Hit;
 	}

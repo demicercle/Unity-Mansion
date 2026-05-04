@@ -30,8 +30,8 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 			itemLabel.enabled = true;
 			itemLabel.text = itemData.GetDisplayName();
-			
-			qtyLabel.enabled = itemData.GetMaxQuantity() > 0;
+
+			qtyLabel.enabled = itemData.ShowQuantity();
 			qtyLabel.text = itemData.GetQuantity().ToString();
 		}
 		else

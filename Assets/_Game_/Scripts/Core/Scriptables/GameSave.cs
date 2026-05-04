@@ -179,10 +179,7 @@ public class GameSave : ScriptableObject
 			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			if (inventory.IsName(name))
 			{
-				for (int i = 0; i < slots.Length; i++)
-				{
-					inventory.SetItemName(i, slots[i]);
-				}
+				inventory.SetItemNames(slots);
 			}
 		}
 
@@ -289,6 +286,7 @@ public class GameSave : ScriptableObject
 #endif
 		savedLevels.Clear();
 		savedPCs.Clear();
+		savedValues.Clear();
 		selectedCharacter = 0;
 		version = 0;
 		if(newSeed) gameSeed = DicePool.GetRandomSeed();
@@ -312,7 +310,7 @@ public class GameSave : ScriptableObject
 		if(gameSeed > 0)
 			DicePool.SetSeed(gameSeed);
 		else Debug.LogWarning(this + " invalid game seed: " + gameSeed);
-
+		
 		foreach (var savedValue in savedValues)
 		{
 			if (savedValue.name == SavedValue.Karma) DiceLauncher.AllowedDiceRolls = savedValue.value;
