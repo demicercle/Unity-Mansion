@@ -136,7 +136,7 @@ public class GameLog : MonoBehaviour
 	}
 
 	private string GetLocalizedLine(int index, string fallback) =>
-		LanguageSettings.GetSettings(DialogFiles.gamelog).GetLine(index, fallback);
+		LanguageSettings.GetDialogLines(DialogFiles.gamelog).GetLine(index, fallback);
 
 	private void Clear()
 	{

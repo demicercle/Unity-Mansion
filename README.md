@@ -7,15 +7,11 @@ REFACTO
 - dialog line reference bug in editor
 - door nav obstacle
 - items can be weapons
-- spawn decals
 - weapons have "random curve"
 - no "take this" if target is not a character
-- retake action toggles:
-	- aim (and other) disabled if any routines
-	- toggle stop enabled if any routines
-	- toggle reload enabled if using a "ammo" weapon, display "full" or "no ammo"
+- toggle reload
 - training mannequin (invicible life)
-- decals depend on weapon data
+- quick refacto "language settings"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

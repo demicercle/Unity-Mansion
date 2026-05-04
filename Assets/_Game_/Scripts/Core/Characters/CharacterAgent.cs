@@ -549,7 +549,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private bool ShowMoveTarget()
 	{
-		if (IsFollowing() || !_selfCharacter.IsPlayer())
+		if (IsFollowing() || !_selfCharacter.IsPlayer() || _selfCharacter.IsAiming())
 			return false;
 
 		if (bestWaypoint)
