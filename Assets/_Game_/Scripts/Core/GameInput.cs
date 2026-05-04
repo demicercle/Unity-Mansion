@@ -1168,6 +1168,28 @@ public class GameInput : MonoBehaviour
 	private ItemData draggedItem;
 	private ItemData mouseOverItem;
 
+	public void AssignDropItem()
+	{
+		CharacterEntity partyChar;
+		
+		if (draggedItem && selectedCharacter)
+		{
+			if ( (CharacterEntity.TryGetPartyCharacter(mouseOverPortrait, out partyChar) || (lastMouseOverObject && lastMouseOverObject.TryGetComponent(out partyChar)))
+			    && partyChar != selectedCharacter 
+			    && partyChar.InParty())
+			{
+				Debug.Log(this + " Assign Drop Item " + selectedCharacter + " To " + partyChar);
+			}
+			else if (hitNavigation)
+			{
+				Debug.Log(this + " Assign Drop Item " + selectedCharacter + " At " + lastNavPosition);
+				DebugDrawer.WireDisc(lastNavPosition, 0.5f, Color.yellow, 1.0f);
+			}
+		}
+		
+		SetDraggedItem(null);
+	}
+
 	public bool IsDragged(ItemData itemData) => draggedItem == itemData;
 
 	public void SetDraggedItem(ItemData itemData)

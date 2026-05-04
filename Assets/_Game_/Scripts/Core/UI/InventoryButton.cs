@@ -10,7 +10,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	private const float HoldDuration = 1.5f;
 	
 	[SerializeField] private ItemData itemData;
-	[SerializeField] private Toggle toggle;
+	[SerializeField] private Toggle toggleSelected, toggleDrop;
 	[SerializeField] private TMP_Text itemLabel;
 	[SerializeField] private RawImage iconImage;
 	[SerializeField] private Image holdFill;
@@ -24,7 +24,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		
 		if (selfInventory && !selfInventory.TryGetItem(index, out itemData))
 		{
-			toggle.interactable = false;
+			toggleSelected.interactable = false;
 			
 			iconImage.texture = null;
 			iconImage.enabled = false;
@@ -37,7 +37,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		}
 		else
 		{
-			toggle.interactable = true;
+			toggleSelected.interactable = true;
 			
 			iconImage.texture = itemData.GetIcon();
 			iconImage.enabled = iconImage.texture;
@@ -52,8 +52,8 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	public void SetToggleGroup(ToggleGroup toggleGroup)
 	{
-		toggle.group = toggleGroup;
-		toggle.isOn = false;
+		toggleSelected.group = toggleGroup;
+		toggleSelected.isOn = false;
 	}
 	
 	public void OnPointerEnter(PointerEventData eventData)
@@ -83,15 +83,22 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		Debug.Log(this + " OnPointerUp");
 		hold = false;
 		
-		if (mouseOverIndex >= 0 && draggedIndex >= 0)
+		if (draggedIndex >= 0)
 		{
-			// try drop here
-			selfInventory.SwapIndex(mouseOverIndex, draggedIndex);
+			if (mouseOverIndex >= 0)
+			{
+				// try drop here
+				selfInventory.SwapIndex(mouseOverIndex, draggedIndex);
+				GameInput.Instance.SetDraggedItem(null);
+			}
+			else
+			{
+				GameInput.Instance.AssignDropItem();
+			}
+			
+			draggedIndex = -1;
+			mouseOverIndex = -1;
 		}
-		
-		GameInput.Instance.SetDraggedItem(null);
-		draggedIndex = -1;
-		mouseOverIndex = -1;
 	}
 
 	public bool Dragged()
@@ -114,14 +121,14 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	
 	private void Awake()
 	{
-		toggle.isOn = false;
-		toggle.onValueChanged.AddListener(OnToggleChanged);
+		toggleSelected.isOn = false;
+		toggleSelected.onValueChanged.AddListener(OnToggleChanged);
 		SetInventory();
 	}
 
 	private void OnDestroy()
 	{
-		toggle.onValueChanged.RemoveListener(OnToggleChanged);
+		toggleSelected.onValueChanged.RemoveListener(OnToggleChanged);
 	}
 
 	private void OnToggleChanged(bool isOn)
@@ -136,8 +143,10 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	private void LateUpdate()
 	{
-		toggle.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn();
-		toggle.isOn = itemData && toggle.interactable && GameInput.Instance.GetItemToUse() == itemData;
+		toggleSelected.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn();
+		toggleSelected.isOn = itemData && toggleSelected.interactable && GameInput.Instance.GetItemToUse() == itemData;
+
+		toggleDrop.isOn = mouseOverIndex == selfIndex && draggedIndex >= 0;
 
 		iconImage.color = Utils.ColorAlpha(iconImage.color, GameInput.Instance.IsDragged(itemData) ? 0.5f : 1.0f);
 		
@@ -153,7 +162,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		{
 			pressTime = 0;
 			hold = false;
-			toggle.isOn = false;
+			toggleSelected.isOn = false;
 
 			if (itemData && selfInventory)
 			{
@@ -178,6 +187,11 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 					GameInput.Instance.SetDraggedItem(itemData);
 				}
 			}
+		}
+
+		if (!GameInput.Instance.GetDraggedItem() && draggedIndex == selfIndex)
+		{
+			draggedIndex = -1;
 		}
 	}
 }
