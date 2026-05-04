@@ -12,6 +12,7 @@ REFACTO
 - toggle reload
 - training mannequin (invicible life)
 - quick refacto "language settings"
+- floating text uses "world canvas" and connect to events in inspector
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

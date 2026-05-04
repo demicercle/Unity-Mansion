@@ -7,6 +7,13 @@ public class WeaponData : ScriptableObject
 {
 	[Range(1, 12)] [SerializeField] private int minDamage = 1;
 	[Range(1, 12)] [SerializeField] private int maxDamage = 1;
+	[SerializeField] private AnimationCurve damageCurve = AnimationCurve.Linear(0, 0, 1, 1);
+	
+	public int RollDamage(float result)
+	{
+		return (int)Mathf.Lerp(minDamage, maxDamage, damageCurve.Evaluate(result));
+	}
+	
 	[Range(1, 20)] [SerializeField] private int hitChance = 10;
 	public float GetHitChance() => DicePool.DiceToFloat(20, hitChance);
 	
@@ -57,9 +64,4 @@ public class WeaponData : ScriptableObject
 	
 	public Weapon rpgWeaponR = Weapon.Relax;
 	public Weapon rpgWeaponL = Weapon.Relax;
-	
-	public int RollDamage(float result)
-	{
-		return (int)Mathf.Lerp(minDamage, maxDamage, result);
-	}
 }
