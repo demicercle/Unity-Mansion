@@ -53,12 +53,14 @@ public class ActionToggles : MonoBehaviour
 	{
 		if (CharacterSelection.TryGetSelectedCharacter(out var selected))
 		{
-			if (toggleStop) toggleStop.interactable = selected.Routines.AnyActive();
+			if (toggleStop) toggleStop.interactable = selected.IsActing();
 			
 			if (toggleAim) 
 			{ 
 				toggleAim.isOn = selected.IsAiming();
-				toggleAim.interactable = !toggleStop.interactable;
+				toggleAim.interactable = !toggleStop.interactable 
+				                         && !GameInput.Instance.GetDraggedItem() 
+				                         && !GameInput.Instance.GetItemToUse();
 			}
 
 		/*	if (toggleReload)

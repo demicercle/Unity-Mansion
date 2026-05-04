@@ -925,6 +925,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     #region AIM
     public void Reload()
     {
+	    if(CharacterAnimation.debugMode > 0) Debug.Log(this + " Reload()");
 	    animator.SetAnimatorTrigger(AnimatorTrigger.ReloadTrigger);
 	    SetIKPause(2f);
     }

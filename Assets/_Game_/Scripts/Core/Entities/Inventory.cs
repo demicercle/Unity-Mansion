@@ -66,8 +66,8 @@ public class Inventory : MonoBehaviour
 			if (ItemData.TryDeserialize(serializedItem, out var newItem))
 				items[i] = newItem;
 		}
-		
-		onAnyInventoryChanged?.Invoke(this);
+
+		NotifyChanged();
 	}
 
 	public void SwapIndex(int index1, int index2)
@@ -77,7 +77,7 @@ public class Inventory : MonoBehaviour
 		items[index1] = item2;
 		items[index2] = item1;
 		
-		onAnyInventoryChanged?.Invoke(this);
+		NotifyChanged();
 	}
 
 	public void ClearInventory()
@@ -125,7 +125,7 @@ public class Inventory : MonoBehaviour
 			onAnyItemAdded?.Invoke(this, items[index]);
 		}
 		
-		onAnyInventoryChanged?.Invoke(this);
+		NotifyChanged();
 	}
 
 	public bool TryCreateLootBag(ItemData itemData, out Inventory bag) =>
@@ -182,7 +182,7 @@ public class Inventory : MonoBehaviour
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
 		items.Clear();
 		foreach(var it in bag.items) items.Add(null);
-		onAnyInventoryChanged?.Invoke(this);
+		NotifyChanged();
 		return true;
 	}
 	
@@ -235,7 +235,7 @@ public class Inventory : MonoBehaviour
 				items[i] = itemData;
 				if(debugMode > 0) Debug.Log(this + " onAnyItemAdded " + items[i]);
 				onAnyItemAdded?.Invoke(this, items[i]);
-				onAnyInventoryChanged?.Invoke(this);
+				NotifyChanged();
 				return true;
 			}
 		}
@@ -252,7 +252,7 @@ public class Inventory : MonoBehaviour
 				if(debugMode > 0) Debug.Log(this + " onAnyItemRemoved " + items[i]);
 				onAnyItemRemoved?.Invoke(this, items[i]);
 				items[i] = null;
-				onAnyInventoryChanged?.Invoke(this);
+				NotifyChanged();
 				return true;
 			}
 		}
@@ -261,6 +261,11 @@ public class Inventory : MonoBehaviour
 	}
 
 	public bool IsPartyInventory() => selfCharacter && selfCharacter.InParty();
+	
+	public void NotifyChanged()
+	{
+		onAnyInventoryChanged?.Invoke(this);
+	}
 	
 	#region PRIVATE
 	private bool destroyIfEmpty;

@@ -1,7 +1,7 @@
 ﻿#no_detection 1
 #debug_detection 1
 #debug_agent 1
-#debug_anim 1
+debug_anim 1
 #debug_stats 1
 #debug_dices 1
 #debug_gtm 1

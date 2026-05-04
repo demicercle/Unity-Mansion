@@ -19,7 +19,7 @@ MonoBehaviour:
   itemTags: Pistol
   equipOnHand: 0
   weaponData: {fileID: 0}
-  targetType: 0
+  targetType: 3
   usableOnDead: 0
   useRange: 0
   useGroundRadius: 0

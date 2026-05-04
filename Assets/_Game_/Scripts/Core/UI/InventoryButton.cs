@@ -88,8 +88,24 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	public void OnPointerUp(PointerEventData eventData)
 	{
 		if (Locked()) return;
-		Debug.Log(this + " OnPointerUp");
+//		Debug.Log(this + " OnPointerUp " + draggedIndex + " " + mouseOverIndex);
 		hold = false;
+
+		var useItem = GameInput.Instance.GetItemToUse();
+		if (useItem && mouseOverIndex == selfIndex)
+		{
+			if (mouseOverIndex == Inventory.InventorySlot_Weapon && itemData
+			                                                     && itemData.IsWeapon(out var reloadWeapon) 
+			                                                     && reloadWeapon.CanUseAmmo(useItem))
+			{
+				if (selfInventory.TryGetComponent(out CharacterEntity selfCharacter))
+				{
+					GameInput.Instance.SetItemToUse(null, true); // assign reload
+					selfCharacter.Routines.AssignReloadWeapon(reloadWeapon, useItem);
+					return;
+				}
+			}
+		}
 		
 		if (draggedIndex >= 0)
 		{
@@ -97,13 +113,15 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			{
 				// try drop here
 				var draggedItem = GameInput.Instance.GetDraggedItem();
-				Debug.Log(this + " try swap " + mouseOverIndex + " to " + draggedIndex + " draggedItem=" + draggedItem + " isWeapon=" + draggedItem.IsWeapon(out var _));
-				if (mouseOverIndex != Inventory.InventorySlot_Weapon || draggedItem.IsWeapon(out var _))
+				
+				Debug.Log("try drop " + draggedItem + " into " + mouseOverIndex);
+				
+				
+				 if (mouseOverIndex != Inventory.InventorySlot_Weapon || draggedItem.IsWeapon(out var _))
 				{
 					selfInventory.SwapIndex(mouseOverIndex, draggedIndex);
+					GameInput.Instance.SetDraggedItem(null);
 				}
-				
-				GameInput.Instance.SetDraggedItem(null);
 			}
 			else
 			{

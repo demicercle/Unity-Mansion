@@ -71,7 +71,10 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	[SerializeField] private float roomsReveleadSeconds = 1.0f;
 	[SerializeField] private bool shouldSwitchWeaponWhenDamaged = true;
+	[SerializeField] private float reloadAnimDuration = 2.0f;
 
+	public float GetReloadAnimDuration() => reloadAnimDuration;
+	
 	public bool IsSwitchingWeapons => isSwitchingWeapons;
 
 	public bool HasAnimationEvent(EventType eventType) => eventTypes.Contains(eventType);
@@ -327,6 +330,7 @@ public class CharacterAnimation : MonoBehaviour
 	}
 
 	private float timeAiming;
+
 	private void OnAiming(bool value, Vector3 position)
 	{
 		if (!value) 

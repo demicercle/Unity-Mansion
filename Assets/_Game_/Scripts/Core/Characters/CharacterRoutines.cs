@@ -910,4 +910,66 @@ public class CharacterRoutines : MonoBehaviour
 			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString) + "\n" + debugTimeout.ToString("N2"));
 		}
 	}
+
+	public void AssignReloadWeapon(WeaponData weapon, ItemData ammoItem)
+	{
+		if(debugMode > 0) Debug.Log(this + " AssignReloadWeapon " + weapon + " ammo=" + ammoItem);
+		StartNewRoutine(WaitCharacterReloadWeapon(weapon, ammoItem));
+	}
+
+	private IEnumerator WaitCharacterReloadWeapon(WeaponData weapon, ItemData ammoItem)
+	{
+		debugString = "WaitCharacterReloadWeapon";
+		if (debugMode > 0) Debug.Log(this + " WaitCharacterReloadWeapon " + weapon + " ammo=" + ammoItem);
+		
+		_selfCharacter.SetCurrentWeapon(weapon);
+		_selfCharacter.TryGetAnimation(out var anim);
+		
+		if (anim)
+		{
+			anim.SwitchWeapons(true);
+			do yield return null;
+			while (anim.IsSwitchingWeapons);
+		}
+
+		if (!_selfCharacter.TryGetComponent(out Inventory selfInventory))
+		{
+			Debug.LogWarning(this + " has no inventory to reload weapon");
+			yield break;
+		}
+
+		if (weapon.IsFullAmmo())
+		{
+			_selfCharacter.FloatingText(LanguageSettings.Main.Full);
+			yield break;
+		}
+		
+		_selfCharacter.UseAction(CharacterAction.Reload, true);
+
+		while (ammoItem.GetQuantity() > 0 && !weapon.IsFullAmmo())
+		{
+			ammoItem.AddQuantity(-1);
+			weapon.AddAmmo(1);
+			yield return null;
+		}
+		
+		if (ammoItem.GetQuantity() <= 0)
+		{
+			if(!selfInventory.TryRemoveItem(ammoItem))
+			{
+				Debug.LogWarning(this + " unable to remove item " + ammoItem);
+			}
+		}
+
+		selfInventory.NotifyChanged();
+
+		if (anim)
+		{
+			yield return new WaitForSeconds(anim.GetReloadAnimDuration());
+		}
+		else
+		{
+			yield return new WaitForSeconds(DefaultWaitSeconds);
+		}
+	}
 }

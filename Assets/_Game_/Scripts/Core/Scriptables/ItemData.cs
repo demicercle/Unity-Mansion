@@ -5,7 +5,8 @@ public enum TargetType
 {
 	None,
 	AnyCharacter,
-	GroundPosition
+	GroundPosition,
+	OtherItem
 }
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "ItemData", order = 0)]
@@ -121,6 +122,8 @@ public class ItemData : ScriptableObject
 	public bool IsFull() => currentQuantity >= maxQuantity;
 
 	public bool IsEmpty() => currentQuantity == 0;
+	
+	public bool EquipOnHand() => equipOnHand;
 
 	public Weapon GetWeaponInHand() => equipOnHand ? Weapon.RightItem : Weapon.Relax;
 

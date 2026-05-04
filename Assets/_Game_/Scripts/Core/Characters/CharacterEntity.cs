@@ -351,7 +351,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			usedActions.Add(actionType);
 		}
 		
-		Debug.Log(this + " UseAction " + actionType + " param=" + param + " usedActions=" + usedActions.LastOrDefault());
+		if(debugStats > 0) Debug.Log(this + " UseAction " + actionType + " param=" + param + " usedActions=" + usedActions.LastOrDefault());
 		
 		if (actionType == CharacterAction.Run)
 		{
@@ -379,21 +379,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if (rollDiceOnRiposte) RollDice();
 			riposteCount++;
-		}
-		else if (actionType == CharacterAction.Reload)
-		{
-			if (!currentWeapon.IsReloadable())
-			{
-				FloatingText(LanguageSettings.Main.Cant);
-			}
-			else if (currentWeapon.IsFullAmmo())
-			{
-				FloatingText(LanguageSettings.Main.Full);
-			}
-			else
-			{
-				Routines.AssignUseAction(CharacterAction.Reload);
-			}
 		}
 		
 		onUseAction?.Invoke(actionType, param);
@@ -861,7 +846,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
 			itemInHand = itemToUse;
-			characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
+			if (itemInHand)
+			{
+				if (itemInHand.EquipOnHand())
+				{
+					characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
+					SetAiming(false);
+				}
+			}
 		}
 	}
 
@@ -871,7 +863,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	}
 	
 
-	private void SetCurrentWeapon(WeaponData newWeapon)
+	public void SetCurrentWeapon(WeaponData newWeapon)
 	{
 		if (currentWeapon != newWeapon)
 		{
