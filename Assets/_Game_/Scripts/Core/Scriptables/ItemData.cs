@@ -121,8 +121,8 @@ public class ItemData : ScriptableObject
 	public bool IsFull() => currentQuantity >= maxQuantity;
 
 	public bool IsEmpty() => currentQuantity == 0;
-	
-	public Weapon GetWeaponInHand() => Weapon.RightItem;
+
+	public Weapon GetWeaponInHand() => equipOnHand ? Weapon.RightItem : Weapon.Relax;
 
 	public bool RaycastAnyCharacter() => targetType == TargetType.AnyCharacter;
 	

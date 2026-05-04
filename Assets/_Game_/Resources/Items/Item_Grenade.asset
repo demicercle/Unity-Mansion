@@ -17,7 +17,7 @@ MonoBehaviour:
     text: Grenade
   icon: {fileID: 2800000, guid: a34885405289bb34585d132b60c4cd7e, type: 3}
   itemTags: Grenade
-  equipOnHand: 0
+  equipOnHand: 1
   weaponData: {fileID: 0}
   targetType: 2
   usableOnDead: 0
