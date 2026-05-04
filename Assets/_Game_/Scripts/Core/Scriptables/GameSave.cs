@@ -69,7 +69,7 @@ public class GameSave : ScriptableObject
 			damages = character.GetTotalDamages();
 
 			if (character.TryGetComponent(out Inventory inv))
-				slots = inv.GetItemNames();
+				slots = inv.SerializeToSlots();
 		}
 
 		public void Load(CharacterEntity character)
@@ -83,7 +83,7 @@ public class GameSave : ScriptableObject
 			character.SetDamages(damages);
 
 			if (character.TryGetComponent(out Inventory inv))
-				inv.SetItemNames(slots);
+				inv.DeserializeFromSlots(slots);
 		}
 
 		public SavedPC(CharacterEntity character = null)
@@ -171,7 +171,7 @@ public class GameSave : ScriptableObject
 		{
 			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			name = inventory.GetName();
-			slots = inventory.GetItemNames();
+			slots = inventory.SerializeToSlots();
 		}
 
 		public void Load(Inventory inventory)
@@ -179,7 +179,7 @@ public class GameSave : ScriptableObject
 			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			if (inventory.IsName(name))
 			{
-				inventory.SetItemNames(slots);
+				inventory.DeserializeFromSlots(slots);
 			}
 		}
 
@@ -201,13 +201,13 @@ public class GameSave : ScriptableObject
 		public void Load(Inventory lootBagPrefab)
 		{
 			var lootBag = Inventory.CreateLootBag(lootBagPrefab, position);
-			lootBag.SetItemNames(itemNames);
+			lootBag.DeserializeFromSlots(itemNames);
 		}
 
 		public void Save(Inventory inv)
 		{
 			position = inv.GetPosition();
-			itemNames = inv.GetItemNames();
+			itemNames = inv.SerializeToSlots();
 		}
 
 		public SavedLoot(Inventory inv = null)

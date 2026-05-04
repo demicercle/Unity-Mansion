@@ -16,12 +16,14 @@ MonoBehaviour:
     lineIndex: 3
     text: Ammo Box
   icon: {fileID: 2800000, guid: d8fbd4233da0ada458e4c5f0db712d48, type: 3}
+  itemTags: Pistol
+  equipOnHand: 0
+  weaponData: {fileID: 0}
   targetType: 0
   usableOnDead: 0
   useRange: 0
-  onUseScript: {fileID: 11400000, guid: 90fe40b23bddf1c4f9bbfc8c0174fd43, type: 2}
-  itemTags: Ammo
   useGroundRadius: 0
   isProjectile: 0
+  onUseScript: {fileID: 0}
   isAmmo: 1
   maxQuantity: 12

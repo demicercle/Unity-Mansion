@@ -5,7 +5,19 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WeaponData", menuName = "WeaponData", order = 0)]
 public class WeaponData : ScriptableObject
 {
+	public WeaponData Duplicate()
+	{
+		var duplicated = Instantiate(this);
+		duplicated.name = name;
+		return duplicated;
+	}
+	
+	[Header("General")]
 	[SerializeField] private bool noAttack = false;
+	[Range(1, 20)] [SerializeField] private int hitChance = 10;
+	public float GetHitChance() => DicePool.DiceToFloat(20, hitChance);
+	
+	[Header("Damage")]
 	[Range(1, 12)] [SerializeField] private int minDamage = 1;
 	[Range(1, 12)] [SerializeField] private int maxDamage = 1;
 	[SerializeField] private AnimationCurve damageCurve = AnimationCurve.Linear(0, 0, 1, 1);
@@ -15,9 +27,7 @@ public class WeaponData : ScriptableObject
 		return (int)Mathf.Lerp(minDamage, maxDamage, damageCurve.Evaluate(result));
 	}
 	
-	[Range(1, 20)] [SerializeField] private int hitChance = 10;
-	public float GetHitChance() => DicePool.DiceToFloat(20, hitChance);
-	
+	[Header("Range")]
 	[SerializeField] private bool isRanged = false;
 	public bool IsRanged() => isRanged;
 	[Range(0f, 32f)] [SerializeField] private float attackRange = 0f;
@@ -27,9 +37,10 @@ public class WeaponData : ScriptableObject
 	[SerializeField] private AnimationCurve heightHitBonus = AnimationCurve.Linear(-1f, -0.25f, 1f, 0.25f);
 	public float EvaluateHeight(float height) => heightHitBonus.Evaluate(height);
 
+	[Header("Ammunition")]
 	[SerializeField] private string ammoTags;
 	[SerializeField] [Min(0)] private int maxAmmo;
-
+	
 	private int currentAmmo;
 
 	public bool IsFullAmmo() => maxAmmo > 0 && currentAmmo >= maxAmmo;
@@ -38,6 +49,22 @@ public class WeaponData : ScriptableObject
 	
 	public bool IsReloadable() => maxAmmo > 0;
 
+	public int GetMaxAmmo() => maxAmmo;
+	public int GetCurrentAmmo() => currentAmmo;
+
+	public void AddAmmo(int qty)
+	{
+		currentAmmo = Mathf.Clamp(currentAmmo + qty, 0, maxAmmo);
+	}
+
+	public void SetCurrentAmmo(int current)
+	{
+		currentAmmo = Mathf.Clamp(current, 0, maxAmmo);
+	}
+	
+	public string GetAmmoTags() => ammoTags;
+	
+	[Header("Other")]
 	[SerializeField] private DecalData[] decals;
 
 	public bool TrySpawnDecal(RaycastHit lastShootHitResult)

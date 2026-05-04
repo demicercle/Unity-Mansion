@@ -17,22 +17,70 @@ public class ItemData : ScriptableObject
 		return Resources.Load<ItemData>(Consts.ResPath_Items + itemName);
 	}
 
+	public static string Serialize(ItemData item) => !item ? "null" : item.name + ":" + item.currentQuantity + (item.isEquipped ? "_" : "");
+
+	public static bool TryDeserialize(string str, out ItemData newItem)
+	{
+		var split = str.Split(':');
+		if (split.Length > 1)
+		{
+			newItem = GetItemFromName(split[0]);
+			if (newItem)
+			{
+				newItem = newItem.Duplicate();
+
+				if (split[1].EndsWith("_"))
+					newItem.SetEquipped(true);
+				if (int.TryParse(split[1].Trim('_'), out var qty))
+					newItem.SetQuantity(qty);
+				
+				return true;
+			}
+		}
+
+		newItem = null;
+		return false;
+	}
+
 	public ItemData Duplicate()
 	{
 		var duplicated = Instantiate(this);
 		duplicated.name = name;
+		if (duplicated.weaponData) duplicated.weaponData = duplicated.weaponData.Duplicate();
 		return duplicated;
 	}
 	
+	[Header("General")]
 	[SerializeField] private LocalizedText displayName;
 	[SerializeField] private Texture2D icon;
+	[SerializeField] private string itemTags;
+
+	[Header("Equipable")] 
+	[SerializeField] private bool equipOnHand;
+	[SerializeField] private WeaponData weaponData;
+
+	private bool isEquipped;
+
+	public bool IsWeapon(out WeaponData outWeapon)
+	{
+		outWeapon = weaponData;
+		return outWeapon;
+	}
+
+	public void SetEquipped(bool value)
+	{
+		isEquipped = value;
+	}
+	
+	[Header("Usable")]
 	[SerializeField] private TargetType targetType;
 	[SerializeField] private bool usableOnDead;
 	[SerializeField] [Range(0f, 12f)] private float useRange;
-	[SerializeField] private GameScriptGraph onUseScript;
-	[SerializeField] private string itemTags;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
 	[SerializeField] private bool isProjectile;
+	[SerializeField] private GameScriptGraph onUseScript;
+	
+	[Header("Consommable")]
 	[SerializeField] private bool isAmmo;
 	[SerializeField] [Min(1)] private int maxQuantity = 1;
 
@@ -40,20 +88,34 @@ public class ItemData : ScriptableObject
 
 	public bool IsUsable() => targetType != TargetType.None;
 
-	public int GetQuantity() => currentQuantity;
-	
-	public int GetMaxQuantity() => maxQuantity;
+	public void SetQuantity(int newValue)
+	{
+		if (weaponData) 
+			weaponData.SetCurrentAmmo(newValue);
+		else 
+			currentQuantity = newValue;
+	}
 
-	public bool ShowQuantity() => maxQuantity > 1;
+	public int GetQuantity() => weaponData ? weaponData.GetCurrentAmmo() : currentQuantity;
+	
+	public int GetMaxQuantity() => weaponData ? weaponData.GetMaxAmmo() : maxQuantity;
+	
+	public bool ShowQuantity() => GetMaxQuantity() > 1;
 
 	public void SetMaxQuantity()
 	{
-		currentQuantity = maxQuantity;
+		if(weaponData)
+			weaponData.SetCurrentAmmo(weaponData.GetMaxAmmo());
+		else 
+			currentQuantity = maxQuantity;
 	}
 
 	public void AddQuantity(int qty)
 	{
-		currentQuantity = Mathf.Clamp(currentQuantity + qty, 0, maxQuantity);
+		if (weaponData)
+			weaponData.AddAmmo(qty);
+		else
+			currentQuantity = Mathf.Clamp(currentQuantity + qty, 0, maxQuantity);
 	}
 
 	public bool IsFull() => currentQuantity >= maxQuantity;

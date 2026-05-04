@@ -42,28 +42,48 @@ public class Inventory : MonoBehaviour
 	
 	private bool isLootBag;
 	
-	public string[] GetItemNames()
+	public string[] SerializeToSlots()
 	{
-		return items.ConvertAll(i => !i ? "null" : i.name + ":" + i.GetQuantity()).ToArray();
+		return items.ConvertAll(item => ItemData.Serialize(item)).ToArray();
 	}
 
-	public void SetItemNames(string[] slots)
+	public void DeserializeFromSlots(string[] slots)
 	{
 		if(slots == null) return;
+		
+		ClearInventory();
+		
 		for (int i = 0; i < slots.Length; i++)
 		{
-			var split = slots[i].Split(':');
-			if (split.Length <= 1 || !int.TryParse(split[1], out var qty))
-			{
-				ClearItem(i); // "null"
-				continue;
-			}
-			
-			SetItemName(i, split[0], qty);
+			var serializedItem = slots[i];
+			if (ItemData.TryDeserialize(serializedItem, out var newItem))
+				items[i] = newItem;
+		}
+		
+		onAnyInventoryChanged?.Invoke(this);
+	}
+
+	public bool FindWeapon(out WeaponData weapon)
+	{
+		for (int i = 0; i < items.Count; i++)
+		{
+			if (items[i] && items[i].IsWeapon(out weapon))
+				return true;
+		}
+
+		weapon = default;
+		return false;
+	}
+
+	public void ClearInventory()
+	{
+		for (int i = 0; i < items.Count; i++)
+		{
+			ClearItem(i);
 		}
 	}
 
-	public void ClearItem(int index)
+	private void ClearItem(int index)
 	{
 		if (index < 0 || index >= items.Count)
 			return;
@@ -74,7 +94,7 @@ public class Inventory : MonoBehaviour
 		items[index] = null;
 	}
 	
-	public void SetItemName(int index, string itemName, int qty)
+	private void SetItemName(int index, string itemName, int qty)
 	{
 		if (index < 0 || index >= items.Count)
 		{
@@ -125,7 +145,7 @@ public class Inventory : MonoBehaviour
 		return true;
 	}
 
-	public bool IsEmpty() => items.All(it => !it);
+	private bool IsEmpty() => items.All(it => !it);
 
 	public bool DropOnGround(out Inventory bag)
 	{
