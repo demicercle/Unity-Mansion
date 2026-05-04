@@ -14,7 +14,6 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	[SerializeField] private TMP_Text itemLabel;
 	[SerializeField] private RawImage iconImage;
 	[SerializeField] private Image holdFill;
-	[SerializeField] private RectTransform tooltip;
 	[SerializeField] private TMP_Text qtyLabel;
 	
 	public void SetItem(ItemData newItem, Inventory inventory)
@@ -59,12 +58,11 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		if(tooltip) tooltip.gameObject.SetActive(true);
+		
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
-		if(tooltip) tooltip.gameObject.SetActive(false);
 		hold = false;
 	}
 
