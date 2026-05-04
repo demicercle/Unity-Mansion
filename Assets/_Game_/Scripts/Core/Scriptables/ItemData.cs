@@ -18,7 +18,7 @@ public class ItemData : ScriptableObject
 		return Resources.Load<ItemData>(Consts.ResPath_Items + itemName);
 	}
 
-	public static string Serialize(ItemData item) => !item ? "null" : item.name + ":" + item.currentQuantity + (item.isEquipped ? "_" : "");
+	public static string Serialize(ItemData item) => !item ? "null" : item.name + ":" + item.GetQuantity();
 
 	public static bool TryDeserialize(string str, out ItemData newItem)
 	{
@@ -29,9 +29,7 @@ public class ItemData : ScriptableObject
 			if (newItem)
 			{
 				newItem = newItem.Duplicate();
-
-				if (split[1].EndsWith("_"))
-					newItem.SetEquipped(true);
+				
 				if (int.TryParse(split[1].Trim('_'), out var qty))
 					newItem.SetQuantity(qty);
 				
@@ -60,17 +58,10 @@ public class ItemData : ScriptableObject
 	[SerializeField] private bool equipOnHand;
 	[SerializeField] private WeaponData weaponData;
 
-	private bool isEquipped;
-
 	public bool IsWeapon(out WeaponData outWeapon)
 	{
 		outWeapon = weaponData;
 		return outWeapon;
-	}
-
-	public void SetEquipped(bool value)
-	{
-		isEquipped = value;
 	}
 	
 	[Header("Usable")]
