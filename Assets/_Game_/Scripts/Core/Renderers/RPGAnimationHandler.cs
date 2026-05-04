@@ -138,9 +138,9 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 
     public void RelaxOnStart()
     {
-	    animator.SetInteger(AnimationParameters.Weapon, -1);
-	    animator.SetTrigger(AnimationParameters.Trigger);
-	    animator.SetInteger(AnimationParameters.TriggerNumber, (int)AnimatorTrigger.InstantSwitchTrigger);
+		if(CharacterAnimation.debugMode > 0) Debug.Log(this + " RelaxOnStart");
+	    rightWeapon = Weapon.Relax;
+	    InstantWeaponSwitch();
     }
 
     public void InstantWeaponSwitch() => InstantWeaponSwitch(rightWeapon);
