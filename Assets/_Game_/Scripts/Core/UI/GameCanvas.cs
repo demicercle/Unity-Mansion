@@ -104,7 +104,7 @@ public class GameCanvas : MonoBehaviour
 
 	private CharacterEntity[] partyCharacters;
 	private MouseOverHandler viewportMouseHandler;
-	private ItemData currentItemToUse;
+	private ItemData currentDraggedItem;
 	private CanvasScaler canvasScaler;
 	private float calculatedHitChance;
 	private bool willHit;
@@ -209,11 +209,11 @@ public class GameCanvas : MonoBehaviour
 	{
 		UpdateSelectables(); // TODO with events
 
-		currentItemToUse = gameInput.GetItemToUse();
-		itemCursorImage.gameObject.SetActive(currentItemToUse);
+		currentDraggedItem = gameInput.GetDraggedItem();
+		itemCursorImage.gameObject.SetActive(currentDraggedItem);
 		if (itemCursorImage.gameObject.activeSelf)
 		{
-			itemCursorImage.texture = currentItemToUse.GetIcon();
+			itemCursorImage.texture = currentDraggedItem.GetIcon();
 			itemCursorImage.color = Utils.ColorAlpha(Color.white, gameInput.IsBlocked() ? 0.30f : 0.90f);
 			itemCursorImage.transform.position = gameInput.GetMousePosition();
 			itemCursorImage.transform.SetAsLastSibling();

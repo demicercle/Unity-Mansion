@@ -27,14 +27,7 @@ public class InventoryPanel : MonoBehaviour
 			gameObject.SetActive(true);
 			for (int i = 0; i < buttons.Length; i++)
 			{
-				if (selfInventory.TryGetItem(i, out var itemData))
-				{
-					buttons[i].SetItem(itemData, selfInventory);
-				}
-				else
-				{
-					buttons[i].SetItem(null, selfInventory);
-				}
+				buttons[i].SetInventory(selfInventory, i);
 			}
 		}
 	}

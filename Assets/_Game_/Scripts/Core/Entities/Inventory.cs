@@ -63,16 +63,14 @@ public class Inventory : MonoBehaviour
 		onAnyInventoryChanged?.Invoke(this);
 	}
 
-	public bool FindWeapon(out WeaponData weapon)
+	public void SwapIndex(int index1, int index2)
 	{
-		for (int i = 0; i < items.Count; i++)
-		{
-			if (items[i] && items[i].IsWeapon(out weapon))
-				return true;
-		}
-
-		weapon = default;
-		return false;
+		var item1 = items[index1];
+		var item2 = items[index2];
+		items[index1] = item2;
+		items[index2] = item1;
+		
+		onAnyInventoryChanged?.Invoke(this);
 	}
 
 	public void ClearInventory()

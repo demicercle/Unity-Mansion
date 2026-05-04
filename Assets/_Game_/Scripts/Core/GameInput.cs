@@ -628,6 +628,16 @@ public class GameInput : MonoBehaviour
 			}
 		}
 
+		if (mouseOverItem)
+		{
+			SetCurrentCursorType(CursorType.Select);
+		}
+
+		if (draggedItem)
+		{
+			SetCurrentCursorType(CursorType.Drag);
+		}
+
 		if (isLoading)
 		{
 			SetCurrentCursorType(CursorType.Loading);
@@ -1155,6 +1165,15 @@ public class GameInput : MonoBehaviour
 	#endregion
 
 	private ItemData itemToUse;
+	private ItemData draggedItem;
+	private ItemData mouseOverItem;
+
+	public bool IsDragged(ItemData itemData) => draggedItem == itemData;
+
+	public void SetDraggedItem(ItemData itemData)
+	{
+		draggedItem = itemData;
+	}
 	
 	public void SetItemToUse(ItemData itemData, bool updateSelected)
 	{
@@ -1166,7 +1185,14 @@ public class GameInput : MonoBehaviour
 		}
 	}
 
+	public void SetMouseOverItem(ItemData itemData)
+	{
+		mouseOverItem = itemData;
+	}
+
 	public ItemData GetItemToUse() => itemToUse;
+
+	public ItemData GetDraggedItem() => draggedItem;
 
 	public bool IsBlocked() => currentCursor == CursorType.Blocked;
 

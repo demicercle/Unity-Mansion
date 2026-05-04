@@ -23,7 +23,9 @@ public enum CursorType
 	Loot,
 	UseItem,
 	
-	Aim
+	Aim,
+	
+	Drag
 }
 
 [CreateAssetMenu(fileName = "CursorData", menuName = "CursorData", order = 0)]

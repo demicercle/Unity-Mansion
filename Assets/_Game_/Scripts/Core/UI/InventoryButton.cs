@@ -15,25 +15,14 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	[SerializeField] private RawImage iconImage;
 	[SerializeField] private Image holdFill;
 	[SerializeField] private TMP_Text qtyLabel;
-	
-	public void SetItem(ItemData newItem, Inventory inventory)
+
+	public void SetInventory() => SetInventory(selfInventory, selfIndex);
+	public void SetInventory(Inventory inventory, int index)
 	{
-		itemData = newItem;
+		selfInventory = inventory;
+		selfIndex = index;
 		
-		if (itemData)
-		{
-			toggle.interactable = true;
-			
-			iconImage.texture = itemData.GetIcon();
-			iconImage.enabled = iconImage.texture;
-
-			itemLabel.enabled = true;
-			itemLabel.text = itemData.GetDisplayName();
-
-			qtyLabel.enabled = itemData.ShowQuantity();
-			qtyLabel.text = itemData.GetQuantity().ToString();
-		}
-		else
+		if (selfInventory && !selfInventory.TryGetItem(index, out itemData))
 		{
 			toggle.interactable = false;
 			
@@ -46,8 +35,19 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			qtyLabel.enabled = false;
 			qtyLabel.text = string.Empty;
 		}
+		else
+		{
+			toggle.interactable = true;
+			
+			iconImage.texture = itemData.GetIcon();
+			iconImage.enabled = iconImage.texture;
 
-		selfInventory = inventory;
+			itemLabel.enabled = true;
+			itemLabel.text = itemData.GetDisplayName();
+
+			qtyLabel.enabled = itemData.ShowQuantity();
+			qtyLabel.text = itemData.GetQuantity().ToString();
+		}
 	}
 
 	public void SetToggleGroup(ToggleGroup toggleGroup)
@@ -58,36 +58,65 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		
+		//Debug.Log(this + " OnPointerEnter");
+		GameInput.Instance.SetMouseOverItem(itemData);
+		mouseOverIndex = selfIndex;
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
+		//Debug.Log(this + " OnPointerExit");
+		GameInput.Instance.SetMouseOverItem(null);
 		hold = false;
+		mouseOverIndex = -1;
 	}
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		if (eventData.button == PointerEventData.InputButton.Right)
-			hold = true;
-		else
-			hold = false;
+		//Debug.Log(this + " OnPointerDown");
+		hold = true;
+		dropOnGround = eventData.button == PointerEventData.InputButton.Right;
 	}
 
 	public void OnPointerUp(PointerEventData eventData)
 	{
+		Debug.Log(this + " OnPointerUp");
 		hold = false;
+		
+		if (mouseOverIndex >= 0 && draggedIndex >= 0)
+		{
+			// try drop here
+			selfInventory.SwapIndex(mouseOverIndex, draggedIndex);
+		}
+		
+		GameInput.Instance.SetDraggedItem(null);
+		draggedIndex = -1;
+		mouseOverIndex = -1;
 	}
 
+	public bool Dragged()
+	{
+		return hold;
+	}
+
+	public bool Empty()
+	{
+		return itemData == null;
+	}
+
+	private static int draggedIndex = -1;
+	private static int mouseOverIndex = -1;
 	private bool hold;
+	private bool dropOnGround;
 	private float pressTime;
 	private Inventory selfInventory;
+	private int selfIndex;
 	
 	private void Awake()
 	{
 		toggle.isOn = false;
 		toggle.onValueChanged.AddListener(OnToggleChanged);
-		SetItem(null, null);
+		SetInventory();
 	}
 
 	private void OnDestroy()
@@ -110,6 +139,8 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		toggle.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn();
 		toggle.isOn = itemData && toggle.interactable && GameInput.Instance.GetItemToUse() == itemData;
 
+		iconImage.color = Utils.ColorAlpha(iconImage.color, GameInput.Instance.IsDragged(itemData) ? 0.5f : 1.0f);
+		
 		if (hold && itemData)
 			pressTime += Time.deltaTime;
 		else
@@ -121,22 +152,31 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		if (pressTime / HoldDuration >= 1f)
 		{
 			pressTime = 0;
-			if (itemData && selfInventory 
-			             && selfInventory.TryCreateLootBag(itemData, out var bag))
+			hold = false;
+			toggle.isOn = false;
+
+			if (itemData && selfInventory)
 			{
-				if (selfInventory.TryRemoveItem(itemData))
+				if (dropOnGround)
 				{
-					SetItem(null, selfInventory);
-					if (Inventory.debugMode > 0) Debug.Log(this + " Created Loot Bag " + bag);
+					if (selfInventory.TryCreateLootBag(itemData, out var bag))
+					{
+						if (selfInventory.TryRemoveItem(itemData))
+						{
+							if (Inventory.debugMode > 0) Debug.Log(this + " Created Loot Bag " + bag);
+						}
+						else
+						{
+							Debug.LogWarning(this + " !TryRemoveItem "  + itemData + " from inventory " + selfInventory);
+						}
+					}
 				}
 				else
 				{
-					Debug.LogWarning(this + " !TryRemoveItem "  + itemData + " from inventory " + selfInventory);
+					// start drag
+					draggedIndex = selfIndex;
+					GameInput.Instance.SetDraggedItem(itemData);
 				}
-			}
-			else
-			{
-				Debug.LogWarning(this + " CreateLootBag not possible");
 			}
 		}
 	}
