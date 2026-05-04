@@ -34,8 +34,6 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     public bool hasRightWeapon => rightWeapon.ToString().StartsWith("Right");
     public bool hasDualWeapons => hasLeftWeapon && hasRightWeapon;
     public bool isRelaxed => rightWeapon == Weapon.Relax;
-    
-    public bool IsWeaponSwitchable(Weapon rpgWeapon) => rpgWeapon != Weapon.Relax;
 
 	// Weapon Parameters.
 	//public List<Weapon> switchableWeapons = new List<Weapon>();

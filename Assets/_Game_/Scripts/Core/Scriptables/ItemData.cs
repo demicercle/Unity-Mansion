@@ -26,6 +26,7 @@ public class ItemData : ScriptableObject
 	[SerializeField] private string itemTags;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
 	[SerializeField] private bool isProjectile;
+	public Weapon GetWeaponInHand() => Weapon.RightItem;
 
 	public bool RaycastAnyCharacter() => targetType == TargetType.AnyCharacter;
 	
