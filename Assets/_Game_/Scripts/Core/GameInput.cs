@@ -1179,10 +1179,12 @@ public class GameInput : MonoBehaviour
 			    && partyChar.InParty())
 			{
 				Debug.Log(this + " Assign Drop Item " + selectedCharacter + " To " + partyChar);
+				selectedCharacter.Routines.AssignGiveItem(draggedItem, partyChar);
 			}
 			else if (hitNavigation)
 			{
 				Debug.Log(this + " Assign Drop Item " + selectedCharacter + " At " + lastNavPosition);
+				selectedCharacter.Routines.AssignDropItem(draggedItem, lastNavPosition);
 				DebugDrawer.WireDisc(lastNavPosition, 0.5f, Color.yellow, 1.0f);
 			}
 		}

@@ -14,6 +14,7 @@ public class CharacterRoutines : MonoBehaviour
 	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
 	private const float MinDeltaToMove = 0.1f;
 	private const float HeightPenalty = 1.0f;
+	private const float MinGiveDistance = 0.1f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -127,6 +128,23 @@ public class CharacterRoutines : MonoBehaviour
 		StartCoroutine(WaitCharacterUseItemAt(itemToUse, position));
 	}
 
+
+	public void AssignGiveItem(ItemData draggedItem, CharacterEntity partyChar)
+	{
+		LastTimeAssignedTarget = Time.time;
+		assignedTarget = partyChar;
+		if(debugMode > 0) Debug.Log(this + " AssignGiveItem " + draggedItem + " " + partyChar);
+		StartNewRoutine(WaitCharacterGiveItem(draggedItem, partyChar));
+	}
+
+	public void AssignDropItem(ItemData draggedItem,  Vector3 worldPosition)
+	{
+		LastTimeAssignedTarget = Time.time;
+		assignedTarget = null;
+		if(debugMode > 0) Debug.Log(this + " AssignDropItem " + draggedItem + " " + worldPosition);
+		StartNewRoutine(WaitCharacterDropItem(draggedItem, worldPosition));
+	}
+	
 	// leader assign
 	public void Leader_AssignMoveToDestination(Vector3 navPosition)
 	{
@@ -594,7 +612,7 @@ public class CharacterRoutines : MonoBehaviour
 		var dir = (firstPoint - _selfCharacter.GetPosition()).normalized;
 		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
 		{
-			if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath LookDirection");
+//			if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath LookDirection");
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}
@@ -799,6 +817,69 @@ public class CharacterRoutines : MonoBehaviour
 		if (debugMode > 0)
 		{
 			Utils.DrawWorldGUI(transform.position, activeInstances.IndexOf(this).ToString() + "\n" + Utils.SplitCamelCase(debugString) + "\n" + debugTimeout.ToString("N2"));
+		}
+	}
+
+	private IEnumerator WaitCharacterGiveItem(ItemData draggedItem, CharacterEntity partyChar)
+	{
+		debugString = "WaitCharacterGiveItem";
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterGiveItem " + draggedItem + " to " + partyChar);
+
+		var reachDistance = partyChar.GetRadius() + _selfCharacter.GetRadius() + MinGiveDistance;
+		if (_selfCharacter.GetDistanceTo(partyChar.GetPosition()) > reachDistance)
+		{
+			yield return StartCoroutine(WaitCharacterMoved(partyChar.GetPosition(), reachDistance, false));
+		}
+
+		if (_selfCharacter.GetDistanceTo(partyChar.GetPosition()) <= reachDistance)
+		{
+			while (!_selfCharacter.IsFacingPosition(partyChar.GetPosition()))
+			{
+				_selfCharacter.LookWorldPosition(partyChar.GetPosition(), Time.deltaTime);
+				yield return null;
+			}
+
+			_selfCharacter.UseAction(CharacterAction.GiveItem, true);
+			if (_selfCharacter.TryGetAnimation(out var anim))
+				yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
+
+			_selfCharacter.TryGetComponent(out Inventory selfInventory);
+			partyChar.TryGetComponent(out Inventory partyInventory);
+			if (selfInventory && partyInventory)
+			{
+				if (!partyInventory.TryAddItem(draggedItem) || !selfInventory.TryRemoveItem(draggedItem))
+				{
+					_selfCharacter.FloatingText_Cant();
+				}
+			}
+		}
+	}
+	
+	private IEnumerator WaitCharacterDropItem(ItemData draggedItem, Vector3 worldPosition)
+	{
+		debugString = "WaitCharacterDropItem";
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterDropItem " + draggedItem + " to " + worldPosition);
+
+		var reachDistance =_selfCharacter.GetRadius() + MinGiveDistance;
+		if (_selfCharacter.GetDistanceTo(worldPosition) > reachDistance)
+		{
+			yield return StartCoroutine(WaitCharacterMoved(worldPosition, reachDistance, false));
+		}
+
+		if (_selfCharacter.GetDistanceTo(worldPosition) <= reachDistance)
+		{
+			_selfCharacter.UseAction(CharacterAction.DropItem, true);
+			if (_selfCharacter.TryGetAnimation(out var anim))
+				yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
+
+			_selfCharacter.TryGetComponent(out Inventory selfInventory);
+			if (selfInventory)
+			{
+				if (!selfInventory.TryCreateLootBag(draggedItem, out var lootBag) || selfInventory.TryRemoveItem(draggedItem))
+				{
+					_selfCharacter.FloatingText_Cant();
+				}
+			}
 		}
 	}
 }

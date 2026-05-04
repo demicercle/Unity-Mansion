@@ -35,7 +35,9 @@ public enum CharacterAction
 	UseItem,
 	Defend,
 	Riposte,
-	Reload
+	Reload,
+	GiveItem,
+	DropItem
 }
 
 public struct DamageInfo

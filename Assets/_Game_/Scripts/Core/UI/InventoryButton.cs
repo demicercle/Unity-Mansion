@@ -145,7 +145,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	{
 		toggleSelected.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn();
 		toggleSelected.isOn = itemData && toggleSelected.interactable && GameInput.Instance.GetItemToUse() == itemData;
-
+	
 		toggleDrop.isOn = mouseOverIndex == selfIndex && draggedIndex >= 0;
 
 		iconImage.color = Utils.ColorAlpha(iconImage.color, GameInput.Instance.IsDragged(itemData) ? 0.5f : 1.0f);
