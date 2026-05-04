@@ -4343,6 +4343,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8749777410917923964, guid: 3b9ac8f46ede0734da0344be5532c0b6, type: 3}
+      propertyPath: isWeapon
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8749777410917923964, guid: 3b9ac8f46ede0734da0344be5532c0b6, type: 3}
       propertyPath: toggleSelected
       value: 
       objectReference: {fileID: 0}

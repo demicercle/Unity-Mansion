@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
+	public const int InventorySlot_Weapon = 6;
+	
 	private static List<Inventory> allInventories = new List<Inventory>();
 
 	public static Inventory[] GetSavedInventories() => allInventories.Where(i => i.saveInventory && !i.IsPartyInventory()).ToArray();

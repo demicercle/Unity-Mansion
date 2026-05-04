@@ -15,6 +15,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	[SerializeField] private RawImage iconImage;
 	[SerializeField] private Image holdFill;
 	[SerializeField] private TMP_Text qtyLabel;
+	[SerializeField] private bool isWeapon;
 
 	public void SetInventory() => SetInventory(selfInventory, selfIndex);
 	public void SetInventory(Inventory inventory, int index)
@@ -95,7 +96,13 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			if (mouseOverIndex >= 0)
 			{
 				// try drop here
-				selfInventory.SwapIndex(mouseOverIndex, draggedIndex);
+				var draggedItem = GameInput.Instance.GetDraggedItem();
+				Debug.Log(this + " try swap " + mouseOverIndex + " to " + draggedIndex + " draggedItem=" + draggedItem + " isWeapon=" + draggedItem.IsWeapon(out var _));
+				if (mouseOverIndex != Inventory.InventorySlot_Weapon || draggedItem.IsWeapon(out var _))
+				{
+					selfInventory.SwapIndex(mouseOverIndex, draggedIndex);
+				}
+				
 				GameInput.Instance.SetDraggedItem(null);
 			}
 			else
