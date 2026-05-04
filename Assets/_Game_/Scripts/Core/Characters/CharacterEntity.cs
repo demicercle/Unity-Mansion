@@ -34,7 +34,8 @@ public enum CharacterAction
 	Talk,
 	UseItem,
 	Defend,
-	Riposte
+	Riposte,
+	Reload
 }
 
 public struct DamageInfo
@@ -1064,5 +1065,10 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		StopAgent();
 		Routines.StopAllRoutines();
+	}
+
+	public bool HasWeaponToReload()
+	{
+		return currentWeapon.IsReloadable();
 	}
 }

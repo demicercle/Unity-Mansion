@@ -5,6 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WeaponData", menuName = "WeaponData", order = 0)]
 public class WeaponData : ScriptableObject
 {
+	[SerializeField] private bool noAttack = false;
 	[Range(1, 12)] [SerializeField] private int minDamage = 1;
 	[Range(1, 12)] [SerializeField] private int maxDamage = 1;
 	[SerializeField] private AnimationCurve damageCurve = AnimationCurve.Linear(0, 0, 1, 1);
@@ -25,7 +26,26 @@ public class WeaponData : ScriptableObject
 	public float EvaluateRange(float range, float radius) => range <= radius ? 1.0f : Mathf.Clamp01(rangeHitCurve.Evaluate(range / attackRange));
 	[SerializeField] private AnimationCurve heightHitBonus = AnimationCurve.Linear(-1f, -0.25f, 1f, 0.25f);
 	public float EvaluateHeight(float height) => heightHitBonus.Evaluate(height);
-	[SerializeField] private bool noAttack = false;
+
+	[SerializeField] private string ammoTags;
+	[SerializeField] [Min(0)] private int maxAmmo;
+
+	private int currentAmmo;
+
+	public int GetCurrentAmmo() => currentAmmo;
+
+	public bool AddAmmo()
+	{
+		if (currentAmmo < maxAmmo)
+		{
+			currentAmmo++;
+			return true;
+		}
+
+		return false;
+	}
+	
+	public bool IsReloadable() => maxAmmo > 0;
 
 	[SerializeField] private DecalData[] decals;
 

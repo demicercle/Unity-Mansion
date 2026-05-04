@@ -20,8 +20,9 @@ public class LanguageSettings : ScriptableObject
 		}
 	}
 
-	public static DialogLines GetDialogLines(DialogFiles dialogFile)
+	public static DialogLines GetDialogLines(DialogFiles dialogFile, bool parse = false)
 	{
+		if(parse) CurrentSettings.Parse();
 		return CurrentSettings.dialogLines[(int)dialogFile];
 	}
 	
@@ -84,9 +85,18 @@ public class DialogLines
 		}
 
 		dialogText = dialogFiles[(int)dialogFile];
+
+		if (!dialogText)
+		{
+			Debug.LogWarning(this + " no dialog text: " + dialogFile);
+			return;
+		}
 		
-		if(dialogText)
-			lines = dialogText.text.Split('\n');
+		lines = dialogText.text.Split('\n');
+		for (int i = 0; i < lines.Length; i++)
+		{
+			lines[i] = lines[i].Trim('\n', '\r', ' ');
+		}
 	}
 
 	[SerializeField][ReadOnly] private TextAsset dialogText;
@@ -109,7 +119,7 @@ public class LocalizedText
 	
 	public void Parse(DialogFiles fileType)
 	{
-		text = LanguageSettings.GetDialogLines(fileType).GetLine(lineIndex, text);
+		text = LanguageSettings.GetDialogLines(fileType, true).GetLine(lineIndex, text);
 	}
 
 	public string GetValue(DialogFiles fileType)

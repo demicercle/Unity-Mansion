@@ -7,17 +7,13 @@ REFACTO
 - dialog line reference bug in editor
 - door nav obstacle
 - items can be weapons
-- weapons have "random curve"
-- no "take this" if target is not a character
 - toggle reload
 - training mannequin (invicible life)
-- quick refacto "language settings"
 - floating text uses "world canvas" and connect to events in inspector
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - add a "drop on ground" and "pickup loot bag" Animation
-- damage VFX (blood)
 - display setItemToUse with others than grenades
 
 SAVE

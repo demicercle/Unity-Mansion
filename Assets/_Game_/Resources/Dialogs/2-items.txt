@@ -1,5 +1,6 @@
 ﻿Bandage
 Grenade
+Ammo Box
 
 
 

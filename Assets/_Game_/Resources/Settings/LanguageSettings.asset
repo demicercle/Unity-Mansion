@@ -15,66 +15,67 @@ MonoBehaviour:
   dialogLines:
   - dialogText: {fileID: 4900000, guid: f8b7614a6ece465e8cebad733ea7e507, type: 3}
     lines:
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "no actions!\r"
-    - "miss!\r"
-    - "dodge!\r"
-    - "hit!\r"
-    - "can't!\r"
-    - "take this!\r"
-    - "run!\r"
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - no actions!
+    - miss!
+    - dodge!
+    - hit!
+    - can't!
+    - take this!
+    - run!
     - heal!
   - dialogText: {fileID: 4900000, guid: 5ba3278974654674b5e0dc16313e6548, type: 3}
     lines:
-    - "\r"
-    - "Dice launched by <CHARACTER>! Result: <RESULT>\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "Turn Started\r"
-    - "Turn Ended\r"
-    - "<CHARACTER> uses action <ACTION>\r"
-    - "<CHARACTER> receives item <ITEM>\r"
-    - "<CHARACTER> looses item <ITEM>\r"
-    - "<CHARACTER> receives <DAMAGE> damage(s)\r"
-    - "<CHARACTER> uses action <ACTION>\r"
-    - "<CHARACTER> healed: <AMOUNT>\r"
+    - 
+    - 'Dice launched by <CHARACTER>! Result: <RESULT>'
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - Turn Started
+    - Turn Ended
+    - <CHARACTER> uses action <ACTION>
+    - <CHARACTER> receives item <ITEM>
+    - <CHARACTER> looses item <ITEM>
+    - <CHARACTER> receives <DAMAGE> damage(s)
+    - <CHARACTER> uses action <ACTION>
+    - '<CHARACTER> healed: <AMOUNT>'
     - '<CHARACTER> attacks <TARGET>: <RESULT>'
   - dialogText: {fileID: 4900000, guid: a14e384b1e634d7087fffef88e95089b, type: 3}
     lines:
-    - "Bandage\r"
-    - "Grenade\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
+    - Bandage
+    - Grenade
+    - Ammo Box
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
     - 
   - dialogText: {fileID: 4900000, guid: 6dd0485b4f8d476bb2411e78dc23c9ba, type: 3}
     lines:
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "\r"
-    - "Hello\r"
-    - "I don't want to speak\r"
-    - "Let me alone\r"
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - Hello
+    - I don't want to speak
+    - Let me alone
     - Stop that

@@ -222,6 +222,15 @@ public class Inventory : MonoBehaviour
 		allInventories.Add(this);
 		
 		selfCharacter = GetComponent<CharacterEntity>();
+
+		for (int i = 0; i < items.Count; i++)
+		{
+			if(items[i])
+			{
+				items[i] = items[i].Duplicate();
+				items[i].SetMaxQuantity();
+			}
+		}
 	}
 
 	private void OnDestroy()

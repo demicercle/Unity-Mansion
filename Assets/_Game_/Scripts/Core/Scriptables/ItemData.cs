@@ -16,6 +16,8 @@ public class ItemData : ScriptableObject
 	{
 		return Resources.Load<ItemData>(Consts.ResPath_Items + itemName);
 	}
+
+	public ItemData Duplicate() => Instantiate(this);
 	
 	[SerializeField] private LocalizedText displayName;
 	[SerializeField] private Texture2D icon;
@@ -26,6 +28,28 @@ public class ItemData : ScriptableObject
 	[SerializeField] private string itemTags;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
 	[SerializeField] private bool isProjectile;
+	[SerializeField] private bool isAmmo;
+	[SerializeField] [Min(0)] private int maxQuantity;
+
+	private int currentQuantity;
+
+	public int GetQuantity() => currentQuantity;
+	public int GetMaxQuantity() => maxQuantity;
+
+	public void SetMaxQuantity()
+	{
+		currentQuantity = maxQuantity;
+	}
+
+	public void AddQuantity(int qty)
+	{
+		currentQuantity = Mathf.Clamp(currentQuantity + qty, 0, maxQuantity);
+	}
+
+	public bool IsFull() => maxQuantity > 0 && currentQuantity >= maxQuantity;
+
+	public bool IsEmpty() => maxQuantity > 0 && currentQuantity == 0;
+	
 	public Weapon GetWeaponInHand() => Weapon.RightItem;
 
 	public bool RaycastAnyCharacter() => targetType == TargetType.AnyCharacter;
