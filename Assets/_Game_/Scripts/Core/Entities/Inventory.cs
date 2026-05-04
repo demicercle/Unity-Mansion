@@ -29,6 +29,8 @@ public class Inventory : MonoBehaviour
 	public string GetName() => name;
 	public bool IsName(string s) => s == name;
 	
+	public bool Locked { get; set; }
+	
 	public static int debugMode { get; set; }
 	public static event System.Action<Inventory> onAnyInventoryChanged;
 	public static event System.Action<Inventory, ItemData> onAnyItemAdded, onAnyItemRemoved;
@@ -301,6 +303,8 @@ public class Inventory : MonoBehaviour
 
 	private void LateUpdate()
 	{
+		Locked = selfCharacter && (selfCharacter.IsActing() || selfCharacter.IsAiming());
+		
 		if (destroyIfEmpty)
 		{
 			for (int i = 0; i < items.Count; i++)

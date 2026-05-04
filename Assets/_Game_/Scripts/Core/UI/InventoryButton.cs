@@ -7,9 +7,9 @@ using UnityEngine.UI;
 
 public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
-	private const float HoldDuration = 1.5f;
-	
 	[SerializeField] private ItemData itemData;
+	[SerializeField] private float minTimeToHold = 0.5f;
+	[SerializeField] private float holdDuration = 0.5f;
 	[SerializeField] private Toggle toggleSelected, toggleDrop;
 	[SerializeField] private TMP_Text itemLabel;
 	[SerializeField] private RawImage iconImage;
@@ -58,6 +58,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	
 	public void OnPointerEnter(PointerEventData eventData)
 	{
+		if (Locked()) return;
 		//Debug.Log(this + " OnPointerEnter");
 		GameInput.Instance.SetMouseOverItem(itemData);
 		mouseOverIndex = selfIndex;
@@ -65,6 +66,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
+		if (Locked()) return;
 		//Debug.Log(this + " OnPointerExit");
 		GameInput.Instance.SetMouseOverItem(null);
 		hold = false;
@@ -73,6 +75,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
+		if (Locked()) return;
 		//Debug.Log(this + " OnPointerDown");
 		hold = true;
 		dropOnGround = eventData.button == PointerEventData.InputButton.Right;
@@ -80,6 +83,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	public void OnPointerUp(PointerEventData eventData)
 	{
+		if (Locked()) return;
 		Debug.Log(this + " OnPointerUp");
 		hold = false;
 		
@@ -110,6 +114,8 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	{
 		return itemData == null;
 	}
+
+	public bool Locked() => selfInventory && selfInventory.Locked;
 
 	private static int draggedIndex = -1;
 	private static int mouseOverIndex = -1;
@@ -145,22 +151,28 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	private void LateUpdate()
 	{
-		toggleSelected.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn();
+		toggleSelected.interactable = itemData && GameTurnManager.Instance.IsPlayerTurn() && selfInventory && !selfInventory.Locked;
 		toggleSelected.isOn = itemData && toggleSelected.interactable && GameInput.Instance.GetItemToUse() == itemData;
 	
-		toggleDrop.isOn = mouseOverIndex == selfIndex && draggedIndex >= 0;
+		toggleDrop.isOn = mouseOverIndex >= 0 && mouseOverIndex == selfIndex && (itemData || draggedIndex >= 0);
 
 		iconImage.color = Utils.ColorAlpha(iconImage.color, GameInput.Instance.IsDragged(itemData) ? 0.5f : 1.0f);
-		
+
 		if (hold && itemData)
 			pressTime += Time.deltaTime;
 		else
 			pressTime = 0;
 		
-		holdFill.fillAmount = Mathf.Clamp01(pressTime / HoldDuration);
-		holdFill.enabled = pressTime > 0;
+		holdFill.fillAmount = Mathf.Clamp01( (pressTime - minTimeToHold) / (holdDuration - minTimeToHold));
+		holdFill.enabled = pressTime > minTimeToHold;
+
+		if (holdFill.enabled)
+		{
+			toggleSelected.isOn = false;
+			toggleSelected.interactable = false;
+		}
 		
-		if (pressTime / HoldDuration >= 1f)
+		if (pressTime >= holdDuration)
 		{
 			pressTime = 0;
 			hold = false;

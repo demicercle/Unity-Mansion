@@ -461,7 +461,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActionToggles
   toggleStop: {fileID: 8394037963692025209}
   toggleAim: {fileID: 3294119194781044372}
-  toggleReload: {fileID: 0}
+  toggleReload: {fileID: 2627797580109405149}
 --- !u!1 &2377602088871013546
 GameObject:
   m_ObjectHideFlags: 0
@@ -3700,6 +3700,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 144901552739189799, guid: da49b22b45524674c9e0fa13cc8d4e13, type: 3}
   m_PrefabInstance: {fileID: 2189820659564923538}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2627797580109405149 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4184971810755875151, guid: da49b22b45524674c9e0fa13cc8d4e13, type: 3}
+  m_PrefabInstance: {fileID: 2189820659564923538}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Toggle
 --- !u!1001 &2387581338527066357
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4615,6 +4626,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7176093754057201028, guid: 1787897467bee4f469ce50f232c29591, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8277831857379915215, guid: 1787897467bee4f469ce50f232c29591, type: 3}
+      propertyPath: startDelay
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8277831857379915215, guid: 1787897467bee4f469ce50f232c29591, type: 3}

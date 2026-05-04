@@ -210,6 +210,7 @@ public class GameCanvas : MonoBehaviour
 		UpdateSelectables(); // TODO with events
 
 		currentDraggedItem = gameInput.GetDraggedItem();
+		if (!currentDraggedItem) currentDraggedItem = gameInput.GetItemToUse();
 		itemCursorImage.gameObject.SetActive(currentDraggedItem);
 		if (itemCursorImage.gameObject.activeSelf)
 		{

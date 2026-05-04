@@ -431,7 +431,7 @@ public class CharacterAnimation : MonoBehaviour
 		{
 			yield return null;
 			
-			if (_selfCharacter.IsActing() || _selfCharacter.IsAiming())
+			if (_selfCharacter.IsActing() || _selfCharacter.IsAiming() || _selfCharacter.HasItemToUse(out var _))
 				lastTimeWeaponSwitched = Time.time;
 			
 			if (Time.time - lastTimeWeaponSwitched > waitToRelaxTime)

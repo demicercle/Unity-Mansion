@@ -536,6 +536,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryButton
   itemData: {fileID: 0}
+  minTimeToHold: 0.5
+  holdDuration: 1
   toggleSelected: {fileID: 3981047210284820846}
   toggleDrop: {fileID: 5284668274425077722}
   itemLabel: {fileID: 3117735697471311823}

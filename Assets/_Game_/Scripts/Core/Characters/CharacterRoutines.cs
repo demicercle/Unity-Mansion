@@ -14,7 +14,7 @@ public class CharacterRoutines : MonoBehaviour
 	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
 	private const float MinDeltaToMove = 0.1f;
 	private const float HeightPenalty = 1.0f;
-	private const float MinGiveDistance = 0.1f;
+	private const float MinGiveDistance = 0.25f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -814,7 +814,11 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitCharacterGiveItem";
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterGiveItem " + draggedItem + " to " + partyChar);
 
+		_selfCharacter.StopFollow();
+		partyChar.StopFollow();
+
 		var reachDistance = partyChar.GetRadius() + _selfCharacter.GetRadius() + MinGiveDistance;
+		
 		if (_selfCharacter.GetDistanceTo(partyChar.GetPosition()) > reachDistance)
 		{
 			yield return StartCoroutine(WaitCharacterMoved(partyChar.GetPosition(), reachDistance, false));
@@ -822,6 +826,8 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (_selfCharacter.GetDistanceTo(partyChar.GetPosition()) <= reachDistance)
 		{
+			if(debugMode > 0) Debug.Log(this + " WaitCharacterGiveItem reachDistance=" + reachDistance);
+			
 			while (!_selfCharacter.IsFacingPosition(partyChar.GetPosition()))
 			{
 				_selfCharacter.LookWorldPosition(partyChar.GetPosition(), Time.deltaTime);
@@ -834,10 +840,12 @@ public class CharacterRoutines : MonoBehaviour
 			{
 				if (!partyInventory.TryAddItem(draggedItem) || !selfInventory.TryRemoveItem(draggedItem))
 				{
+					if(debugMode > 0) Debug.Log(this + " WaitCharacterGiveItem FloatingText_Cant");
 					_selfCharacter.FloatingText_Cant();
 				}
 				else
 				{
+					if(debugMode > 0) Debug.Log(this + " WaitCharacterGiveItem NotifyTransfered");
 					Inventory.NotifyTransfered(selfInventory, partyInventory, draggedItem);
 					
 					_selfCharacter.UseAction(CharacterAction.GiveItem, true);
@@ -854,6 +862,8 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitCharacterDropItem";
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterDropItem " + draggedItem + " to " + worldPosition);
 
+		_selfCharacter.StopFollow();
+		
 		var reachDistance =_selfCharacter.GetRadius() + MinGiveDistance;
 		if (_selfCharacter.GetDistanceTo(worldPosition) > reachDistance)
 		{
