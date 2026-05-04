@@ -130,7 +130,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public void FloatingText_Cant() // TODO: in character animation
 	{
 		Debug.Log(this + " Cant!");
-		if(IsCurrentTurn()) FloatingText(!HasActions() ? "No actions!" : "Can't");
+		if (IsCurrentTurn()) FloatingText(!HasActions() ? LanguageSettings.Main.NoActions : LanguageSettings.Main.Cant);
 	}
 	
 	public void FloatingText(string canT) // TODO: in character animation

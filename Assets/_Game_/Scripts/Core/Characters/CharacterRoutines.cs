@@ -457,7 +457,6 @@ public class CharacterRoutines : MonoBehaviour
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
 
-		_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
 		if (target != null)
 		{
 			var atkResult = _selfCharacter.TryHit(target, atkRoll);
@@ -481,11 +480,9 @@ public class CharacterRoutines : MonoBehaviour
 						isRanged = _selfCharacter.IsUsingRangeWeapon()
 					};
 					target.TakeDamage(damageInfo, _selfCharacter);
+					_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
 					break;
 			}
-		
-			if(atkResult == CharacterEntity.AttackResult.Hit)
-				_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
 
 			if (target is CharacterEntity)
 			{
@@ -502,6 +499,10 @@ public class CharacterRoutines : MonoBehaviour
 					while (defender.Routines.AnyActive());
 				}
 			}
+		}
+		else
+		{
+			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
 		}
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
@@ -674,7 +675,6 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(">> WaitAction: " + this + " " + action);
 		yield return new WaitForSeconds(DefaultWaitSeconds*0.25f);
 		_selfCharacter.UseAction(action);
-		_selfCharacter.FloatingText(action.ToString());
 		yield return new WaitForSeconds(DefaultWaitSeconds*0.75f);
 	}
 

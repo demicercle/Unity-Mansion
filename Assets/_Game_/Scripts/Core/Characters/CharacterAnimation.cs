@@ -258,7 +258,7 @@ public class CharacterAnimation : MonoBehaviour
 	//public UnityEvent onHealed;
 	private void OnHealed(float amount)
 	{
-		_selfCharacter.FloatingText("Heal!");
+		_selfCharacter.FloatingText(LanguageSettings.Main.Heal);
 		//onHealed?.Invoke();
 	}
 
@@ -299,7 +299,7 @@ public class CharacterAnimation : MonoBehaviour
 			//TrySetTrigger(parameters.trigger);
 			//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
 			TrySetTrigger(parameters.runTrigger);
-			_selfCharacter.FloatingText("Run!");
+			_selfCharacter.FloatingText(LanguageSettings.Main.Run);
 		}
 		
 		else if (actionType == CharacterAction.Attack)
@@ -312,8 +312,11 @@ public class CharacterAnimation : MonoBehaviour
 					rpgAnimationHandler.Attack_Right(); // TODO
 				}
 			}
-			
-			_selfCharacter.FloatingText("Take this!");
+
+			if (args is CharacterEntity)
+			{
+				_selfCharacter.FloatingText(LanguageSettings.Main.TakeThis);
+			}
 		}
 	}
 
