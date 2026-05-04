@@ -38,6 +38,8 @@ public class ItemData : ScriptableObject
 
 	private int currentQuantity;
 
+	public bool IsUsable() => targetType != TargetType.None;
+
 	public int GetQuantity() => currentQuantity;
 	
 	public int GetMaxQuantity() => maxQuantity;

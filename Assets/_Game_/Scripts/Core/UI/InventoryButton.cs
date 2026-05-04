@@ -101,7 +101,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	{
 		//Debug.LogWarning(this + " " + itemData + " ToggleChanged " + isOn + " TODO");
 		//toggle.isOn = false;
-		if (isOn && itemData)
+		if (isOn && itemData && itemData.IsUsable())
 		{
 			GameInput.Instance.SetItemToUse(itemData, true);
 		}
