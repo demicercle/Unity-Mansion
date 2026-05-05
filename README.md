@@ -10,6 +10,8 @@ REFACTO
 - floating text uses "world canvas" and connect to events in inspector
 
 - attracted by noise
+- defend small icon below portrait
+- drink animation do not fire in battle
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

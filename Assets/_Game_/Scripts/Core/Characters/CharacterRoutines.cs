@@ -738,6 +738,13 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterUseItemOn( ItemData itemToUse, object objectTo)
 	{
+		if (!_selfCharacter.HasActions())
+		{
+			_selfCharacter.FloatingText_Cant();
+			_selfCharacter.SetItemToUse(null);
+			yield break;
+		}
+		
 		var useRange = itemToUse.GetUseRange();
 		if (objectTo is CharacterEntity)
 		{
@@ -762,6 +769,7 @@ public class CharacterRoutines : MonoBehaviour
 				if (!_selfCharacter.TryGetComponent(out Inventory inventory))
 				{
 					Debug.LogWarning(this + " has no inventory");
+					_selfCharacter.SetItemToUse(null);
 					yield break;
 				}
 				
@@ -776,6 +784,7 @@ public class CharacterRoutines : MonoBehaviour
 				if (!inventory.TryRemoveItem(itemToUse))
 				{
 					Debug.LogWarning(this + " item cannot be removed from inventory");
+					_selfCharacter.SetItemToUse(null);
 					yield break;
 				}
 				
@@ -790,11 +799,21 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterUseItemAt(ItemData itemToUse, Vector3 position)
 	{
+		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItemAt " + itemToUse);
 		debugString = "WaitCharacterUseItemAt " + itemToUse;
+		
+		if (!_selfCharacter.HasActions())
+		{
+			_selfCharacter.FloatingText_Cant();
+			_selfCharacter.SetItemToUse(null);
+			yield break;
+		}
+		
 		if (!_selfCharacter.TryGetComponent(out Inventory inventory))
 		{
 			Debug.LogWarning(_selfCharacter + " has no inventory");
+			_selfCharacter.SetItemToUse(null);
 			yield break;
 		}
 				
@@ -813,6 +832,7 @@ public class CharacterRoutines : MonoBehaviour
 		if (!inventory.TryRemoveItem(itemToUse))
 		{
 			Debug.LogWarning("item cannot be removed from inventory");
+			_selfCharacter.SetItemToUse(null);
 			yield break;
 		}
 
@@ -820,7 +840,7 @@ public class CharacterRoutines : MonoBehaviour
 		itemToUse.LaunchProjectile(_selfCharacter.gameObject, position);
 		inventory.NotifyUsed(itemToUse, position);
 		yield return new WaitForSeconds(DefaultWaitSeconds); // to end anim?
-		_selfCharacter.SetItemToUse(null, debugMode > 0);
+		_selfCharacter.SetItemToUse(null);
 	}
 
 	private IEnumerator WaitCharacterGiveItem(ItemData draggedItem, CharacterEntity partyChar)

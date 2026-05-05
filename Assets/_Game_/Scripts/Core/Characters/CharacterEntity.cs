@@ -213,10 +213,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		usedMovePoints = 0;
 		dodgeCount = 0;
 		riposteCount = 0;
+		extraActions = 0;
 		onStatsChanged?.Invoke();
 	}
 	
-	public bool HasActions() => usedActions.Count < characterData.GetMaxActions();
+	public bool HasActions() => usedActions.Count < characterData.GetMaxActions() + extraActions;
 
 	public bool HasUsedAction(CharacterAction action) => usedActions.Contains(action);
 
@@ -1153,5 +1154,12 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool HasWeaponToReload()
 	{
 		return currentWeapon.IsReloadable();
+	}
+
+	private int extraActions;
+
+	public void GiveExtraActions(int amount)
+	{
+		extraActions += amount;
 	}
 }
