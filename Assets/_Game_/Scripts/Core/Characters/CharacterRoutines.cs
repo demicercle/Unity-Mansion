@@ -456,6 +456,8 @@ public class CharacterRoutines : MonoBehaviour
 		_selfCharacter.SetAimingPosition(target.GetCenterPosition());
 
 		yield return StartCoroutine(WaitCharacterHitOrShoot(target, useAction, default));
+		
+		_selfCharacter.SetAiming(false);
 	}
 
 	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit shootHit)
