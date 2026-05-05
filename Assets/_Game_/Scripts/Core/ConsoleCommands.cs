@@ -255,6 +255,13 @@ public class ConsoleCommands : MonoBehaviour
 	}*/
 	
 
+	[ConsoleMethod("debug_noise", "")]
+	public static void _DebugNoise(int value)
+	{
+		Debug.Log("debug_noise=" + (NoiseTrigger.debugMode = value));
+	}
+	
+
 	[ConsoleMethod("debug_save", "")]
 	public static void _DebugSave(int value)
 	{
