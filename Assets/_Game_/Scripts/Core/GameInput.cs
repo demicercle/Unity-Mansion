@@ -1218,8 +1218,22 @@ public class GameInput : MonoBehaviour
 		if (itemToUse != itemData)
 		{
 			if(debugMode >0 ) Debug.Log(this + " SetItemToUse " + itemData + " " + updateSelected);
+			
 			itemToUse = itemData;
-			if(updateSelected) selectedCharacter?.SetItemToUse(itemToUse, debugMode > 0);
+
+			if (updateSelected)
+			{
+				if (selectedCharacter)
+				{
+					selectedCharacter.SetItemToUse(itemToUse, debugMode > 0);
+				
+					if (itemToUse && itemToUse.IsUsableOnSelf())
+					{
+						selectedCharacter.SetAiming(false);
+						selectedCharacter.Routines.AssignUseItemOn(itemToUse, selectedCharacter);
+					}
+				}
+			}
 		}
 	}
 

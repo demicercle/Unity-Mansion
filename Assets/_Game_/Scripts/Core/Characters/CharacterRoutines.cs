@@ -765,6 +765,7 @@ public class CharacterRoutines : MonoBehaviour
 					yield break;
 				}
 				
+				_selfCharacter.SetItemToUse(itemToUse);
 				_selfCharacter.UseAction(CharacterAction.UseItem, otherCharacter);
 				
 				if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
@@ -780,6 +781,7 @@ public class CharacterRoutines : MonoBehaviour
 				
 				itemToUse.UseOn(otherCharacter.gameObject, _selfCharacter.gameObject);
 				inventory.NotifyUsed(itemToUse, otherCharacter);
+				_selfCharacter.SetItemToUse(null);
 			}
 		}
 	}

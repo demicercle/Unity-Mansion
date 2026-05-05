@@ -37,7 +37,7 @@ public enum CharacterAction
 	Riposte,
 	Reload,
 	GiveItem,
-	DropItem
+	DropItem,
 }
 
 public struct DamageInfo
@@ -871,12 +871,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 				if (itemInHand.EquipOnHand())
 				{
 					characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
-					SetAiming(false);
-				}
-
-				if (itemInHand.IsUsableOnSelf())
-				{
-					Routines.AssignUseItemOn(itemInHand, this);
 					SetAiming(false);
 				}
 			}

@@ -143,7 +143,7 @@ public class ItemData : ScriptableObject
 			}
 		}
 
-		return string.IsNullOrEmpty(tags+itemTags);
+		return string.IsNullOrEmpty(tags) && string.IsNullOrEmpty(itemTags);
 	}
 	
 	public float GetUseRange() => useRange;
