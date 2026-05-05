@@ -12,7 +12,6 @@ public class CharacterEventTrigger : MonoBehaviour
 	public class ActionEvent
 	{
 		public CharacterAction actionType;
-		public string filters;
 		public UnityEvent onActionUsed;
 		public void Invoke() => onActionUsed?.Invoke();
 	}
@@ -116,9 +115,9 @@ public class CharacterEventTrigger : MonoBehaviour
 	{
 		foreach (var actionEvt in actionEvents)
 		{
-			if (action == actionEvt.actionType && TagCheck(actionEvt.filters, target))
+			if (action == actionEvt.actionType)
 			{
-				if(debugMode) Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " filters=" + actionEvt.filters + " onActionUsed.Invoke " + action);
+				if(debugMode) Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " onActionUsed.Invoke " + action);
 				actionEvt.Invoke();
 				break;
 			};

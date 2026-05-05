@@ -761,27 +761,29 @@ public class CharacterRoutines : MonoBehaviour
 				
 				if (!_selfCharacter.TryGetComponent(out Inventory inventory))
 				{
-					Debug.LogWarning(_selfCharacter + " has no inventory");
+					Debug.LogWarning(this + " has no inventory");
 					yield break;
 				}
 				
 				_selfCharacter.SetItemToUse(itemToUse);
-				_selfCharacter.UseAction(CharacterAction.UseItem, otherCharacter);
+				_selfCharacter.UseAction(itemToUse.GetCharacterAction(), otherCharacter);
 				
 				if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
 				{
-					yield return anim.WaitEvent(EventType.Hit);
+					yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
 				}
 
 				if (!inventory.TryRemoveItem(itemToUse))
 				{
-					Debug.LogWarning("item cannot be removed from inventory");
+					Debug.LogWarning(this + " item cannot be removed from inventory");
 					yield break;
 				}
 				
 				itemToUse.UseOn(otherCharacter.gameObject, _selfCharacter.gameObject);
 				inventory.NotifyUsed(itemToUse, otherCharacter);
 				_selfCharacter.SetItemToUse(null);
+				
+				if (debugMode > 0) Debug.Log(this + " WaitCharacterUseItem NotifyUsed");
 			}
 		}
 	}
@@ -796,7 +798,7 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 				
-		_selfCharacter.UseAction(CharacterAction.UseItem, itemToUse);
+		_selfCharacter.UseAction(itemToUse.GetCharacterAction(), itemToUse);
 		if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
 		{
 			anim.WaitEvents(EventType.Hit, EventType.Shoot);

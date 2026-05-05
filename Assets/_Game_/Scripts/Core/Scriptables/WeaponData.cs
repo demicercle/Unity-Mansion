@@ -107,8 +107,9 @@ public class WeaponData : ScriptableObject
 	public Weapon rpgWeaponR = Weapon.Relax;
 	public Weapon rpgWeaponL = Weapon.Relax;
 
-	public bool CanUseAmmo(ItemData draggedItem)
+	public bool CanBeReloadedWithAmmo(ItemData draggedItem)
 	{
-		return draggedItem.CompareTags(ammoTags);
+		return draggedItem.GetCharacterAction() == CharacterAction.Reload
+			&& draggedItem.CompareTags(ammoTags);
 	}
 }

@@ -20,6 +20,7 @@ MonoBehaviour:
   equipOnHand: 1
   weaponData: {fileID: 0}
   targetType: 4
+  actionType: 13
   usableOnDead: 0
   useRange: 0
   useGroundRadius: 0

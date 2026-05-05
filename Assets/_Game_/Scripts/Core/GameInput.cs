@@ -838,7 +838,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter && itemToUse)
 				{
-					if (itemToUse.CanBeUsedAt(hit.point) && selectedCharacter.CanUseAction(CharacterAction.UseItem))
+					if (itemToUse.CanBeUsedAt(hit.point) && selectedCharacter.CanUseItem(itemToUse))
 					{
 						selectedCharacter.Routines.AssignUseItemAt(itemToUse, hit.point);
 					}
@@ -927,7 +927,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (itemToUse)
 				{
-					if (itemToUse.CanBeUsedOn(clickedCharacter) && selectedCharacter.CanUseAction(CharacterAction.UseItem))
+					if (itemToUse.CanBeUsedOn(clickedCharacter) && selectedCharacter.CanUseItem(itemToUse))
 					{
 						selectedCharacter.Routines.AssignUseItemOn(itemToUse, clickedCharacter); // use item on character
 					}
@@ -1031,7 +1031,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (itemToUse)
 				{
-					if (itemToUse.CanBeUsedOn(clickedProp) && selectedCharacter.CanUseAction(CharacterAction.UseItem))
+					if (itemToUse.CanBeUsedOn(clickedProp) && selectedCharacter.CanUseItem(itemToUse))
 					{
 						selectedCharacter.Routines.AssignUseItemOn(itemToUse, clickedProp); // use item on prop
 					}
@@ -1077,7 +1077,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (itemToUse)
 				{
-					if (itemToUse.CanBeUsedOn(attackable) && selectedCharacter.CanUseAction(CharacterAction.UseItem))
+					if (itemToUse.CanBeUsedOn(attackable) && selectedCharacter.CanUseItem(itemToUse))
 					{
 						selectedCharacter.Routines.AssignUseItemOn(itemToUse, attackable); // use item on attackable
 						SetItemToUse(null, false);
@@ -1231,6 +1231,7 @@ public class GameInput : MonoBehaviour
 					{
 						selectedCharacter.SetAiming(false);
 						selectedCharacter.Routines.AssignUseItemOn(itemToUse, selectedCharacter);
+						SetItemToUse(null, false);
 					}
 				}
 			}

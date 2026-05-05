@@ -66,18 +66,21 @@ public class ItemData : ScriptableObject
 	}
 	
 	[Header("Usable")]
-	[SerializeField] private TargetType targetType;
-	[SerializeField] private bool usableOnDead;
-	[SerializeField] [Range(0f, 12f)] private float useRange;
+	[SerializeField] private TargetType targetType = TargetType.None;
+	[SerializeField] private CharacterAction actionType = CharacterAction.UseItem;
+	[SerializeField] private bool usableOnDead = false;
+	[SerializeField] [Range(0f, 12f)] private float useRange = 0.0f;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
-	[SerializeField] private bool isProjectile;
-	[SerializeField] private GameScriptGraph onUseScript;
+	[SerializeField] private bool isProjectile = false;
+	[SerializeField] private GameScriptGraph onUseScript = null;
 	
 	[Header("Consommable")]
 	[SerializeField] private bool isAmmo;
 	[SerializeField] [Min(1)] private int maxQuantity = 1;
 
 	private int currentQuantity;
+
+	public CharacterAction GetCharacterAction() => actionType;
 
 	public bool IsUsable() => targetType != TargetType.None;
 

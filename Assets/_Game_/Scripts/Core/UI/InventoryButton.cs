@@ -96,7 +96,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		{
 			if (mouseOverIndex == Inventory.InventorySlot_Weapon && itemData
 			                                                     && itemData.IsWeapon(out var reloadWeapon) 
-			                                                     && reloadWeapon.CanUseAmmo(useItem))
+			                                                     && reloadWeapon.CanBeReloadedWithAmmo(useItem))
 			{
 				if (selfInventory.TryGetComponent(out CharacterEntity selfCharacter))
 				{

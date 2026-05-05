@@ -2044,8 +2044,7 @@ MonoBehaviour:
   character: {fileID: 5745611760749173238}
   revealedOnly: 0
   actionEvents:
-  - actionType: 5
-    filters: Grenade
+  - actionType: 12
     onActionUsed:
       m_PersistentCalls:
         m_Calls:
@@ -2061,8 +2060,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - actionType: 5
-    filters: Drinks
+  - actionType: 13
     onActionUsed:
       m_PersistentCalls:
         m_Calls:
@@ -2078,8 +2076,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - actionType: 5
-    filters: 
+  - actionType: 8
     onActionUsed:
       m_PersistentCalls:
         m_Calls:
@@ -2096,7 +2093,6 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
   - actionType: 3
-    filters: 
     onActionUsed:
       m_PersistentCalls:
         m_Calls:
@@ -2113,7 +2109,6 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
   - actionType: 9
-    filters: 
     onActionUsed:
       m_PersistentCalls:
         m_Calls:
@@ -2130,7 +2125,6 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
   - actionType: 10
-    filters: 
     onActionUsed:
       m_PersistentCalls:
         m_Calls:
@@ -2146,8 +2140,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - actionType: 8
-    filters: 
+  - actionType: 7
     onActionUsed:
       m_PersistentCalls:
         m_Calls:

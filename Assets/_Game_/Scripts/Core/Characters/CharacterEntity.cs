@@ -32,12 +32,15 @@ public enum CharacterAction
 	Attack,
 	Interact,
 	Talk,
-	UseItem,
 	Defend,
 	Riposte,
 	Reload,
+	UseItem,
 	GiveItem,
 	DropItem,
+	PickupItem,
+	LaunchItem,
+	DrinkItem,
 }
 
 public struct DamageInfo
@@ -221,6 +224,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		return HasActions();
 	}
+
+	public bool CanUseItem(ItemData item) => CanUseAction(item.GetCharacterAction());
 
 	private IAttackable lastAttackTarget;
 	public IAttackable GetLastAttackTarget() => lastAttackTarget;
@@ -870,8 +875,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			{
 				if (itemInHand.EquipOnHand())
 				{
-					characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
 					SetAiming(false);
+					characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
 				}
 			}
 		}
