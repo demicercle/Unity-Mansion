@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5406387169269342562}
   - component: {fileID: 660342643291241981}
   m_Layer: 17
-  m_Name: LOOT_Baseball_Bat
+  m_Name: LOOT_Item_WP_Baseball_Bat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

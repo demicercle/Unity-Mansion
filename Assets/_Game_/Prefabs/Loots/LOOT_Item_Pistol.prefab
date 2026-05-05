@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4527553313390660025}
   - component: {fileID: 874894045392881510}
   m_Layer: 17
-  m_Name: LOOT_Pistol
+  m_Name: LOOT_Item_Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

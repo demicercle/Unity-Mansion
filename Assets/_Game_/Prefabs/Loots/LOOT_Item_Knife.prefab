@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 6244608082194911126}
   - component: {fileID: 492149771188957763}
   m_Layer: 17
-  m_Name: LOOT_Knife
+  m_Name: LOOT_Item_Knife
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

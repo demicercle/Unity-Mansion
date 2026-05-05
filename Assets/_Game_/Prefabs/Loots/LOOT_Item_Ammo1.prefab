@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8165236702269945911}
   - component: {fileID: 8177799864498759025}
   m_Layer: 17
-  m_Name: LOOT_Ammo1
+  m_Name: LOOT_Item_Ammo1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

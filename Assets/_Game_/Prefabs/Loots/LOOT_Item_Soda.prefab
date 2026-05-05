@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2660499000136135874}
   - component: {fileID: 2367914867963160724}
   m_Layer: 17
-  m_Name: LOOT_Soda
+  m_Name: LOOT_Item_Soda
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
