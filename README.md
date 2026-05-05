@@ -54,6 +54,13 @@ ITEMS
 	> replace "Bandage" by "First aid kit" (to revive characters)
 	> "Grigri" (roll the dice for free, but cost 1 action, unlimited uses)
 	
+	
+	ItemData
+	
+	> WeaponData
+	
+	> UsableItemData
+	
 URLs
 	https://opengameart.org/content/medieval-props-textured
 	https://kaylousberg.itch.io/halloween-bits

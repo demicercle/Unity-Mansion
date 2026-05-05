@@ -243,8 +243,10 @@ public class GameSave : ScriptableObject
 	[ReadOnly] public List<SavedPC> savedPCs = new List<SavedPC>();
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
-	
-	public bool ShouldLoad { get; set; }
+
+	private bool shouldLoad;
+	public bool ShouldLoad() => shouldLoad;
+	public void MarkAsLoad() => shouldLoad = true;
 	
 	public bool IsEmpty() => version == 0;
 
@@ -289,6 +291,7 @@ public class GameSave : ScriptableObject
 		savedValues.Clear();
 		selectedCharacter = 0;
 		version = 0;
+		shouldLoad = false;
 		if(newSeed) gameSeed = DicePool.GetRandomSeed();
 		DicePool.SetSeed(gameSeed);
 		if(!Application.isPlaying) Utils.SetDirty(this);
@@ -509,5 +512,11 @@ public class GameSave : ScriptableObject
 	public void OpenFile()
 	{
 		Application.OpenURL("file://" + filePath);
+	}
+
+	private void OnEnable()
+	{
+		if (Application.isPlaying)
+			Clear();
 	}
 }

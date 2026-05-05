@@ -34,7 +34,6 @@ public class StartScene : MonoBehaviour
 	private void ClickNewGame()
 	{
 		GameSave.Current.Clear(true);
-		GameSave.Current.ShouldLoad = false;
 		sceneLoader.LoadNow();
 	}
 
@@ -42,7 +41,7 @@ public class StartScene : MonoBehaviour
 	{
 		if (GameSave.Current.LoadFromFile())
 		{
-			GameSave.Current.ShouldLoad = true;
+			GameSave.Current.MarkAsLoad();
 			sceneLoader.LoadNow();
 		}
 		else

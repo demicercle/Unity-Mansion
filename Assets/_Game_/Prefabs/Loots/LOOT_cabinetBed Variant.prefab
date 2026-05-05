@@ -188,6 +188,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3389105139656902158, guid: 264853542daf33e4db808205627aa152, type: 3}
+      propertyPath: m_Icon
+      value: 
+      objectReference: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
+    - target: {fileID: 3389105139656902158, guid: 264853542daf33e4db808205627aa152, type: 3}
       propertyPath: m_Name
       value: LOOT_cabinetBed Variant
       objectReference: {fileID: 0}
@@ -262,8 +266,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.5
-  ignorePresets: 0
 --- !u!95 &1728355533101895401
 Animator:
   serializedVersion: 7
@@ -334,12 +336,12 @@ MonoBehaviour:
   consumeAction: 3
   saveProp: 0
   onlyOnce: 0
-  rebuildNavigation: 0
   autoTriggerDelay: 0
   animatorTrigger: 
   triggerDelay: 0
   animDuration: 1
   animationEvent: 0
+  linkedProp: {fileID: 0}
   _interacted:
     m_PersistentCalls:
       m_Calls:
@@ -384,11 +386,6 @@ MonoBehaviour:
   lootBagPrefab: {fileID: 0}
   saveInventory: 1
   items:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   - {fileID: 0}
 --- !u!4 &5219020209089030542 stripped
 Transform:

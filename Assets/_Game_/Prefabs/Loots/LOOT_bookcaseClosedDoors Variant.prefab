@@ -111,6 +111,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6802973022508620504, guid: e73ecd2fe46c36a48bcdea7cc0b39d4a, type: 3}
+      propertyPath: m_Icon
+      value: 
+      objectReference: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
+    - target: {fileID: 6802973022508620504, guid: e73ecd2fe46c36a48bcdea7cc0b39d4a, type: 3}
       propertyPath: m_Name
       value: LOOT_bookcaseClosedDoors Variant
       objectReference: {fileID: 0}
@@ -169,8 +173,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.2
-  ignorePresets: 0
 --- !u!114 &4933105353145142888
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -241,12 +243,12 @@ MonoBehaviour:
   consumeAction: 3
   saveProp: 0
   onlyOnce: 0
-  rebuildNavigation: 0
   autoTriggerDelay: 0
   animatorTrigger: 
   triggerDelay: 0
   animDuration: 1
   animationEvent: 0
+  linkedProp: {fileID: 0}
   _interacted:
     m_PersistentCalls:
       m_Calls:
@@ -291,11 +293,6 @@ MonoBehaviour:
   lootBagPrefab: {fileID: 0}
   saveInventory: 1
   items:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   - {fileID: 0}
 --- !u!1001 &8742607109340248822
 PrefabInstance:

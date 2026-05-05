@@ -294,6 +294,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
 		
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtWaypoint " + clickedProp + " " + foundWaypoint + " check reach destination");
 		if (agent.ReachedDestination(destination))
 		{
 			// waypoint reach
@@ -322,8 +323,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else if(debugMode > 0) 
 		{
-			var dist = NavUtils.NavDistance(_selfCharacter.GetPosition(), destination);
-			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + destination);
+			Debug.Log(this + " not at reach: ");
 		}
 	}
 
@@ -336,7 +336,9 @@ public class CharacterRoutines : MonoBehaviour
 		agent.SetReachDistance(reachRadius);
 
 		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
+		yield return null;
 		
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtPosition " + clickedProp + " check reach destination");
 		if (agent.ReachedDestination(destination))
 		{
 			// waypoint reach
@@ -365,8 +367,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else if(debugMode > 0) 
 		{
-			var dist = NavUtils.NavDistance(_selfCharacter.GetPosition(), destination);
-			Debug.Log(this + " not at reach: " + dist + " / " + agent.GetMinReachDistance() + " to " + destination);
+			Debug.Log(this + " not at reach") ;
 		}
 	}
 	

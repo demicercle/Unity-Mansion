@@ -191,7 +191,7 @@ public class GameTurnManager : MonoBehaviour
 				character.SetPartyIndex(partyIndex++);
 		}
 
-		if (GameSave.Current.ShouldLoad)
+		if (GameSave.Current.ShouldLoad())
 		{
 			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
 			GameSave.Current.LoadGame();
