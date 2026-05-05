@@ -10,8 +10,6 @@ using Unity.VisualScripting;
 
 public class CharacterAnimation : MonoBehaviour
 {
-	public static int debugMode { get; set; }
-	
 	public enum EventType
 	{
 		Undefined,
@@ -20,15 +18,6 @@ public class CharacterAnimation : MonoBehaviour
 		WeaponSwitch,
 		Scream
 	}
-	
-	//public const string EventHit = "Hit";
-	
-	static public List<CharacterAnimation> activeInstances  = new List<CharacterAnimation>();
-	
-	[SerializeField] private Animator animator;
-	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
-	[SerializeField] [Min(0)] private float switchWeaponExtraTime;
-	[SerializeField] [Min(0)] private float waitToRelaxTime = 6.0f;
 	
 	[System.Serializable]
 	public struct Parameters
@@ -51,14 +40,13 @@ public class CharacterAnimation : MonoBehaviour
 		//public string weapon;
 		//public string triggerNumber;
 		//public string trigger;
-	}
+	} // TODO: get rid of this
 	
-	[SerializeField] private Parameters parameters;
-	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
+	public static int debugMode { get; set; }
 
 #if UNITY_EDITOR
 	[ContextMenu("ClearParameters")]
-	void ClearParameters()
+	private void ClearParameters()
 	{
 		UnityEditor.Undo.RecordObject(this, "ClearParameters");
 		parameters = new Parameters();
@@ -66,42 +54,33 @@ public class CharacterAnimation : MonoBehaviour
 	}
 #endif
 	
+	private static List<CharacterAnimation> activeInstances  = new List<CharacterAnimation>();
+	
+	[SerializeField] private Animator animator;
+	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
+	[SerializeField] [Min(0)] private float switchWeaponExtraTime;
+	[SerializeField] [Min(0)] private float waitToRelaxTime = 6.0f;
+	[Space]
+	[SerializeField] private Parameters parameters;
+	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
 	[Space]
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	[SerializeField] private float roomsReveleadSeconds = 1.0f;
 	[SerializeField] private bool shouldSwitchWeaponWhenDamaged = true;
 	[SerializeField] private float reloadAnimDuration = 2.0f;
-
-	public float GetReloadAnimDuration() => reloadAnimDuration;
 	
 	public bool IsSwitchingWeapons => isSwitchingWeapons;
-
-	public bool HasAnimationEvent(EventType eventType) => eventTypes.Contains(eventType);
+	
 	public bool IsWaitingEvents => waitForEvents.Count > 0;
 
+	public bool HasAnimationEvent(EventType eventType) => eventTypes.Contains(eventType);
+
+	public float GetReloadAnimDuration() => reloadAnimDuration;
+
 	public Coroutine WaitEvent(EventType eventType, float timeout = 6.0f) => StartCoroutine(DoWaitEvents(timeout, eventType));
-	public Coroutine WaitEvents(params EventType[] eventTypes) => StartCoroutine(DoWaitEvents(6.0f, eventTypes));
 	
-	private IEnumerator DoWaitEvents(float timeout, params EventType[] eventTypes)
-	{
-		var startTime = Time.time;
-		if (debugMode > 0) Debug.Log(this + " DoWaitEvent " + Utils.ArrayStr(eventTypes));
-		waitForEvents.AddRange(eventTypes);
-		while(waitForEvents.Count > 0)
-		{
-			if(_selfCharacter.IsDead())
-				yield break;
-			
-			if (timeout > 0f && Time.time - startTime > timeout)
-			{
-				Debug.LogWarning(this + " timeout! ");
-				yield break;
-			}
-			
-			yield return null;
-		} 
-	}
+	public Coroutine WaitEvents(params EventType[] eventTypes) => StartCoroutine(DoWaitEvents(6.0f, eventTypes));
 
 	public void InstantSwitchWeapons(bool value) =>
 		InstantSwitchWeapons(value ? _selfCharacter.GetCurrentWeapon().rpgWeaponR : Weapon.Relax);
@@ -151,6 +130,7 @@ public class CharacterAnimation : MonoBehaviour
 	private bool hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
 	private float lastTimeWeaponSwitched;
 	private WeaponRenderer[] weaponRenderers;
+	private float timeAiming;
 	
 	private void Awake()
 	{
@@ -235,6 +215,20 @@ public class CharacterAnimation : MonoBehaviour
 		}
 		
 		UpdateWeaponRenderers();
+	}
+
+	private void LateUpdate()
+	{
+		var localVelocity = _selfCharacter.GetVelocity();
+		var isMoving = _selfCharacter.IsMoving();
+		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
+		{
+			isMoving = true; // force running
+			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
+		}
+		TrySetFloat(parameters.velocityX, 0);      
+		TrySetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
+		TrySetBool(parameters.moving, isMoving);
 	}
 
 	private void OnCharacterAnimationEvent(EventType eventType)
@@ -329,8 +323,6 @@ public class CharacterAnimation : MonoBehaviour
 			InstantSwitchWeapons(true);
 	}
 
-	private float timeAiming;
-
 	private void OnAiming(bool value, Vector3 position)
 	{
 		if (!value) 
@@ -347,7 +339,10 @@ public class CharacterAnimation : MonoBehaviour
 			timeAiming += Time.deltaTime;
 	}
 
-	//private bool itemSwitched;
+	private void OnCharacterMoved()
+	{
+	}
+
 	private void UpdateWeaponRenderers()
 	{
 		_selfCharacter.HasItemToUse(out var itemToUse);
@@ -460,27 +455,29 @@ public class CharacterAnimation : MonoBehaviour
 			}
 		}
 	}
-
-	private void OnCharacterMoved()
+	
+	private IEnumerator DoWaitEvents(float timeout, params EventType[] eventTypes)
 	{
-	}
-
-	private void LateUpdate()
-	{
-		var localVelocity = _selfCharacter.GetVelocity();
-		var isMoving = _selfCharacter.IsMoving();
-		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
+		var startTime = Time.time;
+		if (debugMode > 0) Debug.Log(this + " DoWaitEvent " + Utils.ArrayStr(eventTypes));
+		waitForEvents.AddRange(eventTypes);
+		while(waitForEvents.Count > 0)
 		{
-			isMoving = true; // force running
-			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
-		}
-		TrySetFloat(parameters.velocityX, 0);      
-		TrySetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
-		TrySetBool(parameters.moving, isMoving);
+			if(_selfCharacter.IsDead())
+				yield break;
+			
+			if (timeout > 0f && Time.time - startTime > timeout)
+			{
+				Debug.LogWarning(this + " timeout! ");
+				yield break;
+			}
+			
+			yield return null;
+		} 
 	}
 
 	// TODO keep for later?
-	bool TrySetFloat(string param, float value)
+	private bool TrySetFloat(string param, float value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.enabled = true;
@@ -488,7 +485,7 @@ public class CharacterAnimation : MonoBehaviour
 		return true;
 	}
 
-	bool TrySetBool(string param, bool value)
+	private bool TrySetBool(string param, bool value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.enabled = true;
@@ -496,7 +493,7 @@ public class CharacterAnimation : MonoBehaviour
 		return true;
 	}
 
-	bool TrySetInteger(string param, int value)
+	private bool TrySetInteger(string param, int value)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.enabled = true;
@@ -504,7 +501,7 @@ public class CharacterAnimation : MonoBehaviour
 		return true;
 	}
 
-	bool TrySetTrigger(string param)
+	private bool TrySetTrigger(string param)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.enabled = true;
@@ -512,17 +509,12 @@ public class CharacterAnimation : MonoBehaviour
 		return true;
 	}
 
-	bool TryResetTrigger(string param)
+	private bool TryResetTrigger(string param)
 	{
 		if (string.IsNullOrWhiteSpace(param)) return false;
 		animator.ResetTrigger(param);
 		return true;
 	}
-
-	//void SetFloat(int param, float value) => AnimatorUtils.TrySetFloat(param, value, animators);
-	//void SetBool(int param, bool value) => AnimatorUtils.TrySetBool(param, value, animators);
-	//void SetInteger(int param, int value) => AnimatorUtils.TrySetInteger(param, value, animators);
-	//void SetTrigger(int param) => AnimatorUtils.TrySetTrigger(param, animators);
 	#endregion
 }
 
