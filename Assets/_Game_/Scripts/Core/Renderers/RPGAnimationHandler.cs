@@ -143,6 +143,10 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 
     public void InstantWeaponSwitch() => InstantWeaponSwitch(rightWeapon);
 
+    public List<Weapon> sideWeapons = new List<Weapon>();
+    
+    public void SetSheathLocation(Weapon weapon) => SetSheathLocation(sideWeapons.Contains(weapon));
+
     public void SetSheathLocation(bool back)
     {
 	    animator.SetInteger(AnimationParameters.SheathLocation, back ? 0 : 1);

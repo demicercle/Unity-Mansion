@@ -408,7 +408,7 @@ public class CharacterAnimation : MonoBehaviour
 				else
 				{
 					rpgAnimationHandler.UnsheathWeapon(weaponInHand, false);
-					rpgAnimationHandler.SetSheathLocation(weaponInHand.ToString().Contains("TwoHand"));
+					rpgAnimationHandler.SetSheathLocation(weaponInHand);
 				}
 			}
 			else
@@ -420,7 +420,7 @@ public class CharacterAnimation : MonoBehaviour
 				else
 				{
 					rpgAnimationHandler.SheathWeapon(weaponInHand, Weapon.Relax, false);
-					rpgAnimationHandler.SetSheathLocation(sheathedWeapon.ToString().Contains("TwoHand"));
+					rpgAnimationHandler.SetSheathLocation(sheathedWeapon);
 				}
 			}
 		
@@ -437,7 +437,7 @@ public class CharacterAnimation : MonoBehaviour
 			} while (rpgAnimationHandler.IsSwitchingWeapons());
 			
 			rpgAnimationHandler.rightWeapon = weaponInHand;
-			rpgAnimationHandler.SetSheathLocation(true);
+			rpgAnimationHandler.SetSheathLocation(true); // force to avoid bug with animator
 		}
 
 		UpdateWeaponRenderers();

@@ -12,6 +12,10 @@ REFACTO
 - floating text uses "world canvas" and connect to events in inspector
 
 - reload should consume action
+- when attacking normally, should not stay in aiming after
+- tweak "follow"
+- 8+ HIT but dice is 7
+- floating text "reload"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

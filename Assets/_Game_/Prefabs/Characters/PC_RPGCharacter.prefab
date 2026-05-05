@@ -2026,6 +2026,7 @@ MonoBehaviour:
   rightWeapon: 0
   ikHands: {fileID: 8073295698513471931}
   attackNumber: 1
+  sideWeapons: 0d00000011000000
 --- !u!114 &7960912902921319732
 MonoBehaviour:
   m_ObjectHideFlags: 0
