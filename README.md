@@ -67,3 +67,8 @@ URLs
 	https://kaylousberg.itch.io/halloween-bits
 	https://kenney.nl/assets/retro-urban-kit
 	https://pigeon-gang.itch.io/3d-fences
+	
+	
+<b>First Aid Kit</b>
+<color=gray>Usable on any character</color>
+Give +5HP to the target. Can be used on dying people.

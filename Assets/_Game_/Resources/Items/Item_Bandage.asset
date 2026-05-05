@@ -13,14 +13,19 @@ MonoBehaviour:
   m_Name: Item_Bandage
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
-    lineIndex: 1
+    lineIndex: 10
     text: Bandage
+  description:
+    lineIndex: 11
+    text: Give back +5 HP. Can be used on dead people.
   icon: {fileID: 2800000, guid: 1b310b4f2926ae14280a4e0543f9607a, type: 3}
   itemTags: 
   equipOnHand: 0
   weaponData: {fileID: 0}
   targetType: 1
+  actionType: 8
   usableOnDead: 1
+  turnBasedOnly: 0
   useRange: 2
   useGroundRadius: 0.2
   isProjectile: 0

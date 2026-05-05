@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: Item_WP_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
-    lineIndex: 4
+    lineIndex: 16
     text: Pistol
+  description:
+    lineIndex: 17
+    text: Deals 1-6 damages, up to 12 meters.
   icon: {fileID: 2800000, guid: c1b2124051e69c54e88fc2582713def4, type: 3}
   itemTags: Pistol
   equipOnHand: 0
@@ -22,6 +25,7 @@ MonoBehaviour:
   targetType: 0
   actionType: 0
   usableOnDead: 0
+  turnBasedOnly: 0
   useRange: 0
   useGroundRadius: 0
   isProjectile: 0

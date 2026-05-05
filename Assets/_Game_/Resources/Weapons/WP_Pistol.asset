@@ -15,7 +15,7 @@ MonoBehaviour:
   noAttack: 0
   hitChance: 10
   minDamage: 1
-  maxDamage: 3
+  maxDamage: 6
   damageCurve:
     serializedVersion: 2
     m_Curve:

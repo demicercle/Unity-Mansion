@@ -52,8 +52,31 @@ public class ItemData : ScriptableObject
 	
 	[Header("General")]
 	[SerializeField] private LocalizedText displayName;
+	[SerializeField] private LocalizedText description;
 	[SerializeField] private Texture2D icon;
 	[SerializeField] private string itemTags;
+
+	public string GetDisplayName() => displayName.GetValue(DialogFiles.items);
+	
+	public Texture2D GetIcon() => icon;
+	
+	[ContextMenu("Parse")]
+	public void Parse()
+	{
+		displayName.Parse(DialogFiles.items);
+		description.Parse(DialogFiles.items);
+		Utils.SetDirty(this);
+	}
+
+	public string GetTooltipDescription()
+	{
+		return $"<b><size=22>{GetDisplayName()}</size></b>\n{GetUsabilityDescription()}\n{GetUserDescription()}";
+	}
+
+	public string GetUsabilityDescription() => targetType == TargetType.None ? "" :
+		"<color=grey>" + LanguageSettings.GetDialogLines(DialogFiles.items).GetLine((int)targetType, Utils.SplitCamelCase(targetType.ToString())) + "</color>";
+
+	public string GetUserDescription() => description.GetValue(DialogFiles.items);
 
 	[Header("Equipable")] 
 	[SerializeField] private bool equipOnHand;
@@ -202,16 +225,5 @@ public class ItemData : ScriptableObject
 		var script = target.AddComponent<GameScript>();
 		script.SetInstigator(instigator);
 		script.SetGraph(onUseScript);
-	}
-
-	public string GetDisplayName() => displayName.GetValue(DialogFiles.items);
-	
-	public Texture2D GetIcon() => icon;
-	
-	[ContextMenu("Parse")]
-	public void Parse()
-	{
-		displayName.Parse(DialogFiles.items);
-		Utils.SetDirty(this);
 	}
 }

@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26b91483504440d7b3e2d5878f8dde34, type: 3}
   m_Name: WP_BaseballBat
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  noAttack: 0
+  hitChance: 12
   minDamage: 2
-  maxDamage: 4
+  maxDamage: 6
   damageCurve:
     serializedVersion: 2
     m_Curve:
@@ -38,7 +40,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  hitChance: 12
   isRanged: 0
   attackRange: 0
   rangeHitCurve:
@@ -89,7 +90,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  noAttack: 0
+  ammoTags: 
+  maxAmmo: 0
   decals:
   - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
   rpgWeaponR: 3

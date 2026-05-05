@@ -264,4 +264,10 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			draggedIndex = -1;
 		}
 	}
+
+	public string GetTooltipDescription()
+	{
+		return !itemData ? string.Empty : itemData.GetTooltipDescription();
+	}
+
 }

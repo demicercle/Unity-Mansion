@@ -544,6 +544,7 @@ MonoBehaviour:
   iconImage: {fileID: 3986217848104099053}
   holdFill: {fileID: 3649427033721222565}
   qtyLabel: {fileID: 6447428031384595545}
+  isWeapon: 0
 --- !u!114 &6520578669999554227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,6 +600,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tooltip
   tooltipObject: {fileID: 5935890389235415371}
+  tooltipLabel: {fileID: 3117735697471311823}
 --- !u!1 &7031260514191730589
 GameObject:
   m_ObjectHideFlags: 0
@@ -806,6 +808,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2932495399147788203}
     m_Modifications:
+    - target: {fileID: 4457141447465627500, guid: 16021ee68c5469e4f8c2079cc11336bb, type: 3}
+      propertyPath: m_text
+      value: '<b><color=yellow><size=22>First Aid Kit</size></color></b>
+
+        <color=grey>Usable
+        on any character</color>
+
+        Give +5 HP to the target. Can be used
+        on dying people.'
+      objectReference: {fileID: 0}
+    - target: {fileID: 4457141447465627500, guid: 16021ee68c5469e4f8c2079cc11336bb, type: 3}
+      propertyPath: m_fontStyle
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4971439947057125864, guid: 16021ee68c5469e4f8c2079cc11336bb, type: 3}
       propertyPath: m_Name
       value: Tooltip

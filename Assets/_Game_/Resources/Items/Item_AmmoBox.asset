@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: Item_AmmoBox
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
-    lineIndex: 3
+    lineIndex: 14
     text: Ammo Box
+  description:
+    lineIndex: 15
+    text: Used to reload Pistol weapons.
   icon: {fileID: 2800000, guid: d8fbd4233da0ada458e4c5f0db712d48, type: 3}
   itemTags: Pistol
   equipOnHand: 0
@@ -22,6 +25,7 @@ MonoBehaviour:
   targetType: 3
   actionType: 7
   usableOnDead: 0
+  turnBasedOnly: 0
   useRange: 0
   useGroundRadius: 0
   isProjectile: 0

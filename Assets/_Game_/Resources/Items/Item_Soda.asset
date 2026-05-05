@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: Item_Soda
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
-    lineIndex: 7
+    lineIndex: 22
     text: Energy Drink
+  description:
+    lineIndex: 23
+    text: Give 2 extra actions for this turn, only usable in combat.
   icon: {fileID: 2800000, guid: 438811adc772f1841bf87afd8628e079, type: 3}
   itemTags: Drinks
   equipOnHand: 0

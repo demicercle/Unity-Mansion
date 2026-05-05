@@ -57,13 +57,29 @@ MonoBehaviour:
     - '<CHARACTER> attacks <TARGET>: <RESULT>'
   - dialogText: {fileID: 4900000, guid: a14e384b1e634d7087fffef88e95089b, type: 3}
     lines:
+    - Usable on any character
+    - Usable on ground
+    - Usable on other item
+    - Usable on self only
+    - "\t"
+    - "\t"
+    - "\t"
+    - "\t"
+    - "\t"
     - Bandage
+    - Give back +5 HP. Can be used on dead people.
     - Grenade
+    - When thrown, explodes after a few seconds, dealing 3-18 damages all round.
     - Ammo Box
+    - Used to reload Pistol weapons.
     - Pistol
+    - Deals 1-6 damages, up to 12 meters.
     - Knife
+    - Deals 1-3 damages, melee only.
     - Baseball Bat
+    - Deals 2-6 damages, melee only.
     - Energy Drink
+    - Give 2 extra actions for this turn, only usable in combat.
     - 
     - 
     - 
