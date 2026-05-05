@@ -6,7 +6,8 @@ public enum TargetType
 	None,
 	AnyCharacter,
 	GroundPosition,
-	OtherItem
+	OtherItem,
+	SelfCharacter
 }
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "ItemData", order = 0)]
@@ -79,6 +80,8 @@ public class ItemData : ScriptableObject
 	private int currentQuantity;
 
 	public bool IsUsable() => targetType != TargetType.None;
+
+	public bool IsUsableOnSelf() => targetType == TargetType.SelfCharacter;
 
 	public void SetQuantity(int newValue)
 	{

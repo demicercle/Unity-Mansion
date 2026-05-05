@@ -203,7 +203,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return closestEnemy;
 	}
 
-	public void Rest(bool verbose = true)
+	public void Rest(bool verbose = false)
 	{
 		if(verbose) Debug.Log(this + " Rest");
 		usedActions.Clear();
@@ -865,11 +865,18 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
 			itemInHand = itemToUse;
+			
 			if (itemInHand)
 			{
 				if (itemInHand.EquipOnHand())
 				{
 					characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
+					SetAiming(false);
+				}
+
+				if (itemInHand.IsUsableOnSelf())
+				{
+					Routines.AssignUseItemOn(itemInHand, this);
 					SetAiming(false);
 				}
 			}

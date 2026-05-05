@@ -1458,6 +1458,7 @@ MonoBehaviour:
   dotRange: {x: 0.01, y: 0.2, z: 0.6}
   tickTime: 0.5
   lerpSpeed: 1.5
+  maxDistanceToLookAt: 5
 --- !u!4 &7155099250292984196 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2451085307745320104, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
@@ -2039,44 +2040,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8bf315116540e8aace59c6f3be0352, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEventHandler
-  debugMode: 0
+  debugMode: 1
   character: {fileID: 5745611760749173238}
   revealedOnly: 0
   actionEvents:
-  - actionType: 3
-    filters: 
-    onActionUsed:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 6536868086427863390}
-          m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
-          m_MethodName: Activate
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  - actionType: 5
-    filters: 
-    onActionUsed:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 6536868086427863390}
-          m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
-          m_MethodName: Activate
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
   - actionType: 5
     filters: Grenade
     onActionUsed:
@@ -2085,6 +2052,57 @@ MonoBehaviour:
         - m_Target: {fileID: 6536868086427863390}
           m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
           m_MethodName: Attack_Right
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - actionType: 5
+    filters: Drinks
+    onActionUsed:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6536868086427863390}
+          m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
+          m_MethodName: Drink
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - actionType: 5
+    filters: 
+    onActionUsed:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6536868086427863390}
+          m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
+          m_MethodName: Activate
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - actionType: 3
+    filters: 
+    onActionUsed:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6536868086427863390}
+          m_TargetAssemblyTypeName: RPGAnimationHandler, Assembly-CSharp
+          m_MethodName: Activate
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}

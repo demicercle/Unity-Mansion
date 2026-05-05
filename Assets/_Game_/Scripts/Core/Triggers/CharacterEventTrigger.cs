@@ -118,7 +118,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		{
 			if (action == actionEvt.actionType && TagCheck(actionEvt.filters, target))
 			{
-				if(debugMode) Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " filters=" + actionEvt.filters + "onActionUsed.Invoke " + action);
+				if(debugMode) Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " filters=" + actionEvt.filters + " onActionUsed.Invoke " + action);
 				actionEvt.Invoke();
 				break;
 			};
@@ -177,7 +177,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		if (obj is ItemData)
 			return (obj as ItemData).CompareTags(filters);
 		
-		return obj == null || string.IsNullOrWhiteSpace(filters) ||
+		return (obj == null && string.IsNullOrWhiteSpace(filters)) ||
 		       filters.Split(',').ToList().Any(tag =>
 		       {
 			       if (obj is Component)

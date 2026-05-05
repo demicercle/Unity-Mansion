@@ -6,12 +6,8 @@ REFACTO
 - retake "door breaks trigger" with enemy tag (zombi will destroy, others will open...)
 - dialog line reference bug in editor
 - door nav obstacle
-- items can be weapons
-- toggle reload
 - training mannequin (invicible life)
 - floating text uses "world canvas" and connect to events in inspector
-- 8+ HIT but dice is 7
-- floating text "reload"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
@@ -38,17 +34,13 @@ INPUT
 - aim button and IK hands with pistol (lookAt)
 
 GAMEPLAY
-- pistol ammo / Reload Action
 - run should also roll dices?
 - randomize enemies hp on game seed 
 - is dying state (-1 HP / turn or 6 seconds
-- check can fire pistol through walls
-- check clicks on "IsWaiting" while real time
 - assign attack : should update destination if target moves
 
 ITEMS
 - equip, drop and equip weapons
-- pistol ammo
 - create new items:
 	> a "key" to use on a "locked" door
 	> "Soda" (give 1 extra action next turn)
