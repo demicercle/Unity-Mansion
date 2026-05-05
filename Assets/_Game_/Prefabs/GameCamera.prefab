@@ -113,7 +113,6 @@ MonoBehaviour:
   worldY: 0
   worldHeight: 3
   awakeZoom: 1
-  rotationInputScale: 90
   animator: {fileID: 8422079425768255504}
   zoomParameter: Blend
   rotationPivot: {fileID: 1017557397532967885}
@@ -125,7 +124,6 @@ MonoBehaviour:
   rotationSpeed: {x: 1, y: 16}
   orbitSpeed: {x: 0.18, y: 0}
   orbitMaxSpeed: {x: -1, y: -1}
-  orbitDrag: 0
 --- !u!1 &8751710906931499399
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,9 +164,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8501545024436134705}
     m_Modifications:
+    - target: {fileID: 1514907420173620370, guid: 66e129205ffba454faeaff9671672371, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 244727
+      objectReference: {fileID: 0}
     - target: {fileID: 1765798649070289966, guid: 66e129205ffba454faeaff9671672371, type: 3}
       propertyPath: m_Name
       value: MainCamera
+      objectReference: {fileID: 0}
+    - target: {fileID: 2690053237178016358, guid: 66e129205ffba454faeaff9671672371, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 139522
       objectReference: {fileID: 0}
     - target: {fileID: 6946973228343768614, guid: 66e129205ffba454faeaff9671672371, type: 3}
       propertyPath: m_LocalPosition.x

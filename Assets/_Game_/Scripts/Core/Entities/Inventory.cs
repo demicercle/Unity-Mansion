@@ -42,9 +42,10 @@ public class Inventory : MonoBehaviour
 	public static void NotifyTransfered(Inventory from, Inventory to, ItemData item) =>
 		onAnyItemTransfered?.Invoke(from, to, item);
 	
-	[SerializeField] [Range(1, 32)] private int maxSize = 6;
+	[SerializeField] [Range(1, 32)] private int maxSize = 1;
 	[SerializeField] private Inventory lootBagPrefab = null;
 	[SerializeField] private bool saveInventory;
+	[SerializeField] private bool destroyIfEmpty;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
 	
 	private bool isLootBag;
@@ -268,7 +269,7 @@ public class Inventory : MonoBehaviour
 	}
 	
 	#region PRIVATE
-	private bool destroyIfEmpty;
+	
 	private CharacterEntity selfCharacter;
 	
 	private void Awake()
