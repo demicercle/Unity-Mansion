@@ -922,6 +922,12 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		debugString = "WaitCharacterReloadWeapon";
 		if (debugMode > 0) Debug.Log(this + " WaitCharacterReloadWeapon " + weapon + " ammo=" + ammoItem);
+
+		if (!_selfCharacter.HasActions())
+		{
+			_selfCharacter.FloatingText_Cant();
+			yield break;
+		}
 		
 		_selfCharacter.SetCurrentWeapon(weapon);
 		_selfCharacter.TryGetAnimation(out var anim);
