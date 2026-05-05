@@ -9,6 +9,8 @@ REFACTO
 - training mannequin (invicible life)
 - floating text uses "world canvas" and connect to events in inspector
 
+- attracted by noise
+
 DEBUG
 - zombi "cant" and "timeout" while patrolling
 

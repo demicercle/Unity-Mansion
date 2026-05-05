@@ -869,6 +869,15 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (itemInHand != itemToUse)
 		{
 			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
+
+			if (itemInHand)
+			{
+				if (itemInHand.EquipOnHand())
+				{
+					characterAnimation?.SwitchWeapon(InBattle() ? GetCurrentWeapon().rpgWeaponR : Weapon.Relax);
+				}
+			}
+			
 			itemInHand = itemToUse;
 			
 			if (itemInHand)
