@@ -238,16 +238,9 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			{
 				if (dropOnGround)
 				{
-					if (selfInventory.TryCreateLootBag(itemData, out var bag))
+					if (!selfInventory.TryCreateLootBag(itemData, out var bag) || !selfInventory.TryRemoveItem(itemData))
 					{
-						if (selfInventory.TryRemoveItem(itemData))
-						{
-							if (Inventory.debugMode > 0) Debug.Log(this + " Created Loot Bag " + bag);
-						}
-						else
-						{
-							Debug.LogWarning(this + " !TryRemoveItem "  + itemData + " from inventory " + selfInventory);
-						}
+						Debug.LogWarning(this + " unable to drop item correctly");
 					}
 				}
 				else

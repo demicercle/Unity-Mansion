@@ -792,16 +792,18 @@ public class CharacterRoutines : MonoBehaviour
 				{
 					yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
 				}
-
-				if (!inventory.TryRemoveItem(itemToUse))
-				{
-					Debug.LogWarning(this + " item cannot be removed from inventory");
-					_selfCharacter.SetItemToUse(null);
-					yield break;
-				}
 				
 				itemToUse.UseOn(otherCharacter.gameObject, _selfCharacter.gameObject);
+				itemToUse.AddQuantity(-1);
+
+				if (itemToUse.IsEmpty() && !inventory.TryRemoveItem(itemToUse))
+				{
+					Debug.LogWarning(this + " item cannot be removed from inventory");
+				}
+				
 				inventory.NotifyUsed(itemToUse, otherCharacter);
+				inventory.NotifyChanged();
+				
 				_selfCharacter.SetItemToUse(null);
 				
 				if (debugMode > 0) Debug.Log(this + " WaitCharacterUseItem NotifyUsed");
@@ -848,16 +850,18 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 0) Debug.Log(this + " item Shoot or Hit");
 		}
 
-		if (!inventory.TryRemoveItem(itemToUse))
-		{
-			Debug.LogWarning("item cannot be removed from inventory");
-			_selfCharacter.SetItemToUse(null);
-			yield break;
-		}
-
+		
 		if (debugMode > 0) Debug.Log(this + " launch projectile");
 		itemToUse.LaunchProjectile(_selfCharacter.gameObject, position);
+		itemToUse.AddQuantity(-1);
+		if (itemToUse.IsEmpty() && !inventory.TryRemoveItem(itemToUse))
+		{
+			Debug.LogWarning("item cannot be removed from inventory");
+		}
+
 		inventory.NotifyUsed(itemToUse, position);
+		inventory.NotifyChanged();
+		
 		yield return new WaitForSeconds(DefaultWaitSeconds); // to end anim?
 		_selfCharacter.SetItemToUse(null);
 	}
@@ -891,7 +895,7 @@ public class CharacterRoutines : MonoBehaviour
 			partyChar.TryGetComponent(out Inventory partyInventory);
 			if (selfInventory && partyInventory)
 			{
-				if (!partyInventory.TryAddItem(draggedItem) || !selfInventory.TryRemoveItem(draggedItem))
+				if (!selfInventory.TryTransfertItemTo(draggedItem, partyInventory))
 				{
 					if(debugMode > 0) Debug.Log(this + " WaitCharacterGiveItem FloatingText_Cant");
 					_selfCharacter.FloatingText_Cant();
@@ -929,7 +933,7 @@ public class CharacterRoutines : MonoBehaviour
 			
 			if (selfInventory)
 			{
-				if (!selfInventory.TryCreateLootBag(draggedItem, worldPosition, out var lootBag) || !selfInventory.TryRemoveItem(draggedItem))
+				if (!selfInventory.TryCreateLootBag(draggedItem, worldPosition, out var lootBag))
 				{
 					_selfCharacter.FloatingText_Cant();
 				}

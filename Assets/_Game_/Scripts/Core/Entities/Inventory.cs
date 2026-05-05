@@ -26,7 +26,7 @@ public class Inventory : MonoBehaviour
 		return bag;
 	}
 	
-	private const float CreateLootNavDistance = 1.0f;
+	private const float CreateLootNavDistance = 1.5f;
 	
 	public string GetName() => name;
 	public bool IsName(string s) => s == name;
@@ -95,48 +95,37 @@ public class Inventory : MonoBehaviour
 	{
 		if (index < 0 || index >= items.Count)
 			return;
-		
-		if(items[index])
-			Destroy(items[index]);
 
+		if (!items[index])
+			return;
+		
+		
+		if(debugMode > 0) Debug.Log(this + " onAnyItemRemoved " + items[index]);
+		onAnyItemRemoved?.Invoke(this, items[index]);
+
+		Destroy(items[index]);
 		items[index] = null;
 		
-		if (notifyChanged)NotifyChanged();
-	}
-	
-	private void SetItemName(int index, string itemName, int qty)
-	{
-		if (index < 0 || index >= items.Count)
+		
+		if (notifyChanged)
 		{
-			Debug.LogWarning(this + " invalid SetItemName index: " + index + " items=" + items.Count);
-			return;
+			NotifyChanged();
 		}
-		
-		var newItem = ItemData.GetItemFromName(itemName);
-		
-		var lastItem = items[index];
-		if (lastItem)
-		{
-			onAnyItemRemoved?.Invoke(this, lastItem);
-		}
-		
-		items[index] = newItem;
-
-		if (items[index])
-		{
-			items[index] = items[index].Duplicate();
-			items[index].AddQuantity(qty);
-			
-			onAnyItemAdded?.Invoke(this, items[index]);
-		}
-		
-		NotifyChanged();
 	}
 
 	public bool TryCreateLootBag(ItemData itemData, out Inventory bag) =>
 		TryCreateLootBag(itemData, GetPosition(), out bag);
+	
 	public bool TryCreateLootBag(ItemData itemData, Vector3 position, out Inventory bag)
 	{
+		int itemIndex = items.IndexOf(itemData);
+		if (itemIndex < 0)
+		{
+			Debug.LogWarning(this +  " cannot create loot bag: item not in inventory ");
+			bag = null;
+			return false;
+		}
+		
 		if(!itemData.TryGetLootBagPrefab(out var lootPrefab))
 			lootPrefab = lootBagPrefab;
 		
@@ -155,9 +144,16 @@ public class Inventory : MonoBehaviour
 		}
 
 		bag = CreateLootBag(lootPrefab, navPosition);
-		bag.TryAddItem(itemData);
+		bag.ClearInventory(false);
+		if (!bag.TryAddItem(itemData))
+		{
+			Debug.LogWarning(this + " error while adding item to loot bag: " + bag);
+			return false;
+		}
 		bag.transform.position = position;
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+		items[itemIndex] = null;
+		NotifyChanged();
 		return true;
 	}
 
@@ -230,6 +226,26 @@ public class Inventory : MonoBehaviour
 	
 	public int GetMaxSize() => maxSize;
 
+	public bool TryTransfertItemTo(ItemData itemToTransfer, Inventory otherInventory)
+	{
+		for (int i = 0; i < items.Count; i++)
+		{
+			if (items[i] == itemToTransfer)
+			{
+				if (otherInventory.TryAddItem(itemToTransfer))
+				{
+					items[i] = null;
+					NotifyChanged();
+					return true;
+				}
+				
+				break;
+			}
+		}
+
+		return false;
+	}
+	
 	public void TransfertTo(Inventory otherInventory)
 	{
 		for (int i = 0; i < items.Count; i++)
@@ -277,10 +293,9 @@ public class Inventory : MonoBehaviour
 		{
 			if (items[i] == itemToUse)
 			{
-				if(debugMode > 0) Debug.Log(this + " onAnyItemRemoved " + items[i]);
-				onAnyItemRemoved?.Invoke(this, items[i]);
-				items[i] = null;
+				ClearItem(i, false);
 				NotifyChanged();
+				
 				return true;
 			}
 		}
