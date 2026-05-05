@@ -238,9 +238,9 @@ public class GameCanvas : MonoBehaviour
 				cursorText.transform.position = gameInput.GetMousePosition();
 				cursorText.raycastTarget = false;
 				calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
-				willHit = DicePool.LastResult > 1f - calculatedHitChance;
+				willHit = selectedCharacter.WillHit(DicePool.LastResult, targetCharacter);
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
-				cursorText.text = (21-DicePool.FloatToDice(20, calculatedHitChance)) + "+";
+				cursorText.text = Mathf.Clamp(20-DicePool.FloatToDice(20, calculatedHitChance), 1, 20) + "+";
 				if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
 				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
 				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
