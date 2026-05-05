@@ -11,6 +11,8 @@ REFACTO
 - training mannequin (invicible life)
 - floating text uses "world canvas" and connect to events in inspector
 
+- reload should consume action
+
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - add a "drop on ground" and "pickup loot bag" Animation

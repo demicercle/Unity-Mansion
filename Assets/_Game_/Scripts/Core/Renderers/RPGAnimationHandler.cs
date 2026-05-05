@@ -15,10 +15,8 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     private bool isHipShooting;
 
     public bool IsSwitchingWeapons() => isWeaponSwitching && (int)rightWeapon > 0; // unarmed
-    
-    public bool Switched() => weaponsSwitched;
-    public void ToggleSwitched() => weaponsSwitched = !weaponsSwitched;
 
+    public List<Weapon> instantSwitchWeapons = new List<Weapon>();
     public Weapon leftWeapon, rightWeapon;
 
     public System.Action<Weapon, bool> weaponVisibilityChanged;
@@ -144,6 +142,11 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     }
 
     public void InstantWeaponSwitch() => InstantWeaponSwitch(rightWeapon);
+
+    public void SetSheathLocation(bool back)
+    {
+	    animator.SetInteger(AnimationParameters.SheathLocation, back ? 0 : 1);
+    }
 
     
     /// <summary>
@@ -448,7 +451,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 
 				// Wait for WeaponSwitch() to happen then update Animator.
 				yield return new WaitForSeconds(0.55f);
-				StartCoroutine(_HideAllWeapons(false, false));
+				//StartCoroutine(_HideAllWeapons(false, false));
 				SetWeaponWithDebug(AnimatorWeapon.UNARMED, -2, Weapon.Unarmed, Weapon.Unarmed, Side.None);
 			}
 			// Switching to other 1Handed weapons.
@@ -458,7 +461,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 
 				// Wait for WeaponSwitch() to happen then update Animator.
 				yield return new WaitForSeconds(0.55f);
-				StartCoroutine(_HideAllWeapons(false, false));
+				//StartCoroutine(_HideAllWeapons(false, false));
 				SetWeaponWithDebug(AnimatorWeapon.UNARMED, ( int )AnimatorWeapon.UNARMED, Weapon.Unarmed, Weapon.Unarmed, Side.Dual);
 			}
 			// Switching to Unarmed/Relax.
@@ -468,7 +471,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 
 				// Wait for WeaponSwitch() to happen then update Animator.
 				yield return new WaitForSeconds(0.55f);
-				StartCoroutine(_HideAllWeapons(false, false));
+				//StartCoroutine(_HideAllWeapons(false, false));
 				SetWeaponWithDebug(weaponToUnsheath.ToAnimatorWeapon(), -2, Weapon.Unarmed, Weapon.Unarmed, Side.None);
 			}
 		}
@@ -550,7 +553,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 		if (debugWalkthrough) { Debug.Log($"_InstantWeaponSwitch:{weapon}"); }
 		animator.SetAnimatorTrigger(AnimatorTrigger.InstantSwitchTrigger);
 		//TODO SetIKOff();
-		StartCoroutine(_HideAllWeapons(false, false));
+		//StartCoroutine(_HideAllWeapons(false, false));
 
 		// 1Handed.
 		if (weapon.Is1HandedWeapon()) {
@@ -600,7 +603,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 			leftWeapon = Weapon.Unarmed;
 			animator.SetInteger(AnimationParameters.LeftWeapon, 0);
 			animator.SetInteger(AnimationParameters.RightWeapon, ( int )weapon);
-			StartCoroutine(_HideAllWeapons(false, false));
+			//StartCoroutine(_HideAllWeapons(false, false));
 			StartCoroutine(_WeaponVisibility(weapon, true, false));
 
 			//if (weapon.IsIKWeapon())
@@ -691,208 +694,6 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     {
         if (isWeaponSwitching) { isWeaponSwitching = false; }
     }
-
-    /// <summary>
-    /// Helper method used by other weapon visibility methods to safely set a weapon object's visibility.
-    /// This will work even if the object is not set in the component parameters.
-    /// </summary>
-    /// <param name="weaponObject">Weapon to update.</param>
-    /// <param name="visibility">Visibility status.</param>
-    public void SafeSetVisibility(GameObject weaponObject, bool visibility)
-    {
-        if (weaponObject != null) { weaponObject.SetActive(visibility); }
-    }
-
-    /// <summary>
-    /// Hide all weapon objects and set the animator and the character controller to the unarmed state.
-    /// </summary>
-    public void HideAllWeapons()
-    { StartCoroutine(_HideAllWeapons(false, true)); }
-
-    /// <summary>
-    /// Async method to all weapon objects and set the animator and the character controller to the unarmed state.
-    /// </summary>
-    /// <param name="timed">Whether to wait until a period of time to hide the weapon.</param>
-    /// <param name="resetToUnarmed">Whether to reset the animator and the character controller to the unarmed state.</param>
-    /// <returns>IEnumerator for use with StartCoroutine.</returns>
-    public IEnumerator _HideAllWeapons(bool timed, bool resetToUnarmed)
-    {
-        if (timed) { while (!isWeaponSwitching) { yield return null; } }
-
-        // Reset to Unarmed if not in Relax.
-        if (resetToUnarmed && !isRelaxed) {
-            animator.SetInteger(AnimationParameters.Weapon, 0);
-            rightWeapon = Weapon.Unarmed;
-            leftWeapon = Weapon.Unarmed;
-            StartCoroutine(_WeaponVisibility(leftWeapon, false, true));
-            animator.SetInteger(AnimationParameters.RightWeapon, 0);
-            animator.SetInteger(AnimationParameters.LeftWeapon, 0);
-            animator.SetSide(Side.None);
-        }
-        /*SafeSetVisibility(twoHandAxe, false);
-        SafeSetVisibility(twoHandBow, false);
-        SafeSetVisibility(twoHandCrossbow, false);
-        SafeSetVisibility(twoHandSpear, false);
-        SafeSetVisibility(twoHandSword, false);
-        SafeSetVisibility(staff, false);
-        SafeSetVisibility(swordL, false);
-        SafeSetVisibility(swordR, false);
-        SafeSetVisibility(maceL, false);
-        SafeSetVisibility(maceR, false);
-        SafeSetVisibility(daggerL, false);
-        SafeSetVisibility(daggerR, false);
-        SafeSetVisibility(itemL, false);
-        SafeSetVisibility(itemR, false);
-        SafeSetVisibility(shield, false);
-        SafeSetVisibility(pistolL, false);
-        SafeSetVisibility(pistolR, false);
-        SafeSetVisibility(rifle, false);
-        SafeSetVisibility(spear, false);*/
-    }
-
-    /// <summary>
-    /// Set a single weapon's visibility.
-    /// </summary>
-    /// <param name="weaponNumber">Weapon object to set.</param>
-    /// <param name="visible">Whether to set it visible or not.</param>
-    /// <param name="dual">Whether to update the same weapon in the other hand as well.</param>
-    /*public IEnumerator _WeaponVisibility(Weapon weaponNumber, bool visible, bool dual)
-    {
-		if (debugWeaponVisibility) { Debug.Log($"WeaponVisibility:{weaponNumber}   Visible:{visible}   Dual:{dual}"); }
-
-		while (isWeaponSwitching) { yield return null; }
-        var weaponType = (Weapon)weaponNumber;
-		switch (weaponType) {
-			case Weapon.TwoHandSword: SafeSetVisibility(twoHandSword, visible); break;
-			case Weapon.TwoHandSpear: SafeSetVisibility(twoHandSpear, visible); break;
-			case Weapon.TwoHandAxe: SafeSetVisibility(twoHandAxe, visible); break;
-			case Weapon.TwoHandBow: SafeSetVisibility(twoHandBow, visible); break;
-			case Weapon.TwoHandCrossbow: SafeSetVisibility(twoHandCrossbow, visible); break;
-			case Weapon.TwoHandStaff: SafeSetVisibility(staff, visible); break;
-			case Weapon.Shield: SafeSetVisibility(shield, visible); break;
-			case Weapon.Rifle: SafeSetVisibility(rifle, visible); break;
-			case Weapon.RightSpear: SafeSetVisibility(spear, visible); break;
-			case Weapon.LeftSword: {
-				SafeSetVisibility(swordL, visible);
-				if (dual) { SafeSetVisibility(swordR, visible); }
-				break;
-			}
-			case Weapon.RightSword: {
-				SafeSetVisibility(swordR, visible);
-				if (dual) { SafeSetVisibility(swordL, visible); }
-				break;
-			}
-			case Weapon.LeftMace: {
-				SafeSetVisibility(maceL, visible);
-				if (dual) { SafeSetVisibility(maceR, visible); }
-				break;
-			}
-			case Weapon.RightMace: {
-				SafeSetVisibility(maceR, visible);
-				if (dual) { SafeSetVisibility(maceL, visible); }
-				break;
-			}
-			case Weapon.LeftDagger: {
-				SafeSetVisibility(daggerL, visible);
-				if (dual) { SafeSetVisibility(daggerR, visible); }
-				break;
-			}
-			case Weapon.RightDagger: {
-				SafeSetVisibility(daggerR, visible);
-				if (dual) { SafeSetVisibility(daggerL, visible); }
-				break;
-			}
-			case Weapon.LeftItem: {
-				SafeSetVisibility(itemL, visible);
-				if (dual) { SafeSetVisibility(itemR, visible); }
-				break;
-			}
-			case Weapon.RightItem: {
-				SafeSetVisibility(itemR, visible);
-				if (dual) { SafeSetVisibility(itemL, visible); }
-				break;
-			}
-			case Weapon.LeftPistol: {
-				SafeSetVisibility(pistolL, visible);
-				if (dual) { SafeSetVisibility(pistolR, visible); }
-				break;
-			}
-			case Weapon.RightPistol: {
-				SafeSetVisibility(pistolR, visible);
-				if (dual) { SafeSetVisibility(pistolL, visible); }
-				break;
-			}
-		}
-        yield return null;
-    }*/
-
-    /// <summary>
-    /// Sync weapon object visibility to the current weapons in the RPGCharacterController.
-    /// </summary>
-    /*public void SyncWeaponVisibility()
-    { coroQueue.Run(_SyncWeaponVisibility()); }*/
-
-    /// <summary>
-    /// Async method to sync weapon object visiblity to the current weapons in RPGCharacterController.
-    /// This will wait for weapon switching to finish. If your aim is to force this update, call WeaponSwitch
-    /// first. This will stop the _HideAllWeapons and _WeaponVisibility coroutines.
-    /// </summary>
-    /// <returns>IEnumerator for use with.</returns>
-    /*private IEnumerator _SyncWeaponVisibility()
-    {
-        while (isWeaponSwitching && !(canAction && canMove))
-		{ yield return null; }
-
-        StopCoroutine(nameof(_HideAllWeapons));
-        StopCoroutine(nameof(_WeaponVisibility));
-
-        SafeSetVisibility(twoHandAxe, false);
-        SafeSetVisibility(twoHandBow, false);
-        SafeSetVisibility(twoHandCrossbow, false);
-        SafeSetVisibility(twoHandSpear, false);
-        SafeSetVisibility(twoHandSword, false);
-        SafeSetVisibility(staff, false);
-        SafeSetVisibility(swordL, false);
-        SafeSetVisibility(swordR, false);
-        SafeSetVisibility(maceL, false);
-        SafeSetVisibility(maceR, false);
-        SafeSetVisibility(daggerL, false);
-        SafeSetVisibility(daggerR, false);
-        SafeSetVisibility(itemL, false);
-        SafeSetVisibility(itemR, false);
-        SafeSetVisibility(shield, false);
-        SafeSetVisibility(pistolL, false);
-        SafeSetVisibility(pistolR, false);
-        SafeSetVisibility(rifle, false);
-        SafeSetVisibility(spear, false);
-
-        var leftWeaponType = (Weapon)leftWeapon;
-        switch (leftWeaponType) {
-            case Weapon.Shield: SafeSetVisibility(shield, true); break;
-            case Weapon.LeftSword: SafeSetVisibility(swordL, true); break;
-            case Weapon.LeftMace: SafeSetVisibility(maceL, true); break;
-            case Weapon.LeftDagger: SafeSetVisibility(daggerL, true); break;
-            case Weapon.LeftItem: SafeSetVisibility(itemL, true); break;
-            case Weapon.LeftPistol: SafeSetVisibility(pistolL, true); break;
-        }
-
-        var rightWeaponType = (Weapon)rpgCharacterController.rightWeapon;
-        switch (rightWeaponType) {
-            case Weapon.TwoHandSword: SafeSetVisibility(twoHandSword, true); break;
-            case Weapon.TwoHandSpear: SafeSetVisibility(twoHandSpear, true); break;
-            case Weapon.TwoHandAxe: SafeSetVisibility(twoHandAxe, true); break;
-            case Weapon.TwoHandBow: SafeSetVisibility(twoHandBow, true); break;
-            case Weapon.TwoHandCrossbow: SafeSetVisibility(twoHandCrossbow, true); break;
-            case Weapon.TwoHandStaff: SafeSetVisibility(staff, true); break;
-            case Weapon.RightSword: SafeSetVisibility(swordR, true); break;
-            case Weapon.RightMace: SafeSetVisibility(maceR, true); break;
-            case Weapon.RightDagger: SafeSetVisibility(daggerR, true); break;
-            case Weapon.RightItem: SafeSetVisibility(itemR, true); break;
-            case Weapon.RightPistol: SafeSetVisibility(pistolR, true); break;
-            case Weapon.Rifle: SafeSetVisibility(rifle, true); break;
-            case Weapon.RightSpear: SafeSetVisibility(spear, true); break;
-        }
-    }*/
 
     #endregion
 

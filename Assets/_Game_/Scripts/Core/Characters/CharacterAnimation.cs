@@ -398,15 +398,30 @@ public class CharacterAnimation : MonoBehaviour
 			while(rpgAnimationHandler.IsSwitchingWeapons())
 				yield return null;
 			
+			//var isDual = weaponInHand.ToString().StartsWith("Left") || weaponInHand.ToString().StartsWith("Right");
+			
 			if (weaponInHand != Weapon.Relax)
 			{
 				if(debugMode > 0) Debug.Log(this + " rpg UnsheathWeapon " + weaponInHand);
-				rpgAnimationHandler.UnsheathWeapon(weaponInHand, false);
+				if(rpgAnimationHandler.instantSwitchWeapons.Contains(weaponInHand))
+					rpgAnimationHandler.InstantWeaponSwitch(weaponInHand);
+				else
+				{
+					rpgAnimationHandler.UnsheathWeapon(weaponInHand, false);
+					rpgAnimationHandler.SetSheathLocation(weaponInHand.ToString().Contains("TwoHand"));
+				}
 			}
 			else
 			{
+				var sheathedWeapon = _selfCharacter.GetCurrentWeapon().rpgWeaponR;
 				if(debugMode > 0) Debug.Log(this +  "rpg SheathWeapon " + weaponInHand);
-				rpgAnimationHandler.SheathWeapon(weaponInHand, Weapon.Relax, false);
+				if(rpgAnimationHandler.instantSwitchWeapons.Contains(weaponInHand))
+					rpgAnimationHandler.InstantWeaponSwitch(Weapon.Relax);
+				else
+				{
+					rpgAnimationHandler.SheathWeapon(weaponInHand, Weapon.Relax, false);
+					rpgAnimationHandler.SetSheathLocation(sheathedWeapon.ToString().Contains("TwoHand"));
+				}
 			}
 		
 			var startedTime = Time.time;
@@ -422,6 +437,7 @@ public class CharacterAnimation : MonoBehaviour
 			} while (rpgAnimationHandler.IsSwitchingWeapons());
 			
 			rpgAnimationHandler.rightWeapon = weaponInHand;
+			rpgAnimationHandler.SetSheathLocation(true);
 		}
 
 		UpdateWeaponRenderers();
