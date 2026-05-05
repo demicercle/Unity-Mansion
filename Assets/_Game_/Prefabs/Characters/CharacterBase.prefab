@@ -398,6 +398,7 @@ MonoBehaviour:
   defaultAttackHitTime: 1
   factionOverride: -1
   defaultWeapon: {fileID: 0}
+  noRevive: 0
 --- !u!114 &7088883598136014318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -488,6 +489,7 @@ MonoBehaviour:
     runTrigger: 
     attackTrigger: 
     deathTrigger: 
+    reviveTrigger: 
     getHitTrigger: 
     switchOffTrigger: 
     switchOnTrigger: 
@@ -496,8 +498,8 @@ MonoBehaviour:
   velocityScale: 1
   minMovePointsToRun: 0.1
   roomsReveleadSeconds: 1
-  startsWeaponsReady: 0
   shouldSwitchWeaponWhenDamaged: 1
+  reloadAnimDuration: 2
 --- !u!114 &3789455635990092813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -542,6 +544,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterDetection
   awarenessScaleUp: 3
   awarenessScaleDown: 0.66
+  awarenessHoldUpTime: 1
   hearingDistance: 3.09
   seeingDistance: 9.7
   maxAngle: 86
@@ -1664,7 +1667,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7944228977815162686, guid: 2075a8715591258439c8e622238c822f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
