@@ -11,7 +11,7 @@ REFACTO
 
 - attracted by noise
 - defend small icon below portrait
-- drink animation do not fire in battle
+- add item description and usability
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

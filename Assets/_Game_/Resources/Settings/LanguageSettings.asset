@@ -34,6 +34,7 @@ MonoBehaviour:
     - empty!
     - full!
     - loaded!
+    - not now!
   - dialogText: {fileID: 4900000, guid: 5ba3278974654674b5e0dc16313e6548, type: 3}
     lines:
     - 

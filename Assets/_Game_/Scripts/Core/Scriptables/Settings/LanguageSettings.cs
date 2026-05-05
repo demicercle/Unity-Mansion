@@ -43,6 +43,7 @@ public class LanguageSettings : ScriptableObject
 		public static string Empty => GetLine(17, "empty!");
 		public static string Full => GetLine(18, "full!");
 		public static string Reload => GetLine(19, "loaded!");
+		public static string NotNow => GetLine(20, "not now!");
 
 		public static string AttackResult(CharacterEntity.AttackResult ar) => ar == CharacterEntity.AttackResult.Miss ? Miss : ar == CharacterEntity.AttackResult.Dodge ? Dodge : Hit;
 	}

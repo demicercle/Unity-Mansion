@@ -1225,7 +1225,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter)
 				{
-					selectedCharacter.SetItemToUse(itemToUse, debugMode > 0);
+					selectedCharacter.SetItemToUse(itemToUse);
 				
 					if (itemToUse && itemToUse.IsUsableOnSelf())
 					{

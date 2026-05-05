@@ -69,6 +69,7 @@ public class ItemData : ScriptableObject
 	[SerializeField] private TargetType targetType = TargetType.None;
 	[SerializeField] private CharacterAction actionType = CharacterAction.UseItem;
 	[SerializeField] private bool usableOnDead = false;
+	[SerializeField] private bool turnBasedOnly = false;
 	[SerializeField] [Range(0f, 12f)] private float useRange = 0.0f;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
 	[SerializeField] private bool isProjectile = false;
@@ -82,6 +83,8 @@ public class ItemData : ScriptableObject
 
 	public CharacterAction GetCharacterAction() => actionType;
 
+	public bool TurnBasedOnly() => turnBasedOnly;
+	
 	public bool IsUsable() => targetType != TargetType.None;
 
 	public bool IsUsableOnSelf() => targetType == TargetType.SelfCharacter;

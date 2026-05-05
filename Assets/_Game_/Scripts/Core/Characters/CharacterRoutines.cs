@@ -744,6 +744,13 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.SetItemToUse(null);
 			yield break;
 		}
+
+		if (itemToUse.TurnBasedOnly() && !GameTurnManager.Instance.IsTurnBasedMode())
+		{
+			_selfCharacter.FloatingText(LanguageSettings.Main.NotNow);
+			_selfCharacter.SetItemToUse(null);
+			yield break;
+		}
 		
 		var useRange = itemToUse.GetUseRange();
 		if (objectTo is CharacterEntity)
@@ -809,6 +816,13 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.SetItemToUse(null);
 			yield break;
 		}
+
+		if (itemToUse.TurnBasedOnly() && !GameTurnManager.Instance.IsTurnBasedMode())
+		{
+			_selfCharacter.FloatingText(LanguageSettings.Main.NotNow);
+			_selfCharacter.SetItemToUse(null);
+			yield break;
+		}
 		
 		if (!_selfCharacter.TryGetComponent(out Inventory inventory))
 		{
@@ -823,7 +837,7 @@ public class CharacterRoutines : MonoBehaviour
 			anim.WaitEvents(EventType.Hit, EventType.Shoot);
 			do
 			{
-				_selfCharacter.SetItemToUse(itemToUse, debugMode > 0);
+				_selfCharacter.SetItemToUse(itemToUse);
 				yield return null;
 			} while (anim.IsWaitingEvents);
 			if(debugMode > 0) Debug.Log(this + " item Shoot or Hit");

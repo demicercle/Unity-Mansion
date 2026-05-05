@@ -865,19 +865,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			yield return characterAnimation.WaitEvent(eventType);
 		}
 	}
-	public void SetItemToUse(ItemData itemToUse, bool verbose = false)
+	public void SetItemToUse(ItemData itemToUse)
 	{
 		if (itemInHand != itemToUse)
 		{
-			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
-
-			if (itemInHand)
-			{
-				if (itemInHand.EquipOnHand())
-				{
-					characterAnimation?.SwitchWeapon(InBattle() ? GetCurrentWeapon().rpgWeaponR : Weapon.Relax);
-				}
-			}
+			if(CharacterAnimation.debugMode > 0) Debug.Log(this + " SetItemToUse " + itemToUse);
 			
 			itemInHand = itemToUse;
 			
@@ -886,8 +878,19 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 				if (itemInHand.EquipOnHand())
 				{
 					SetAiming(false);
-					characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
+					characterAnimation?.SwitchWeapon(itemInHand.GetWeaponInHand());
 				}
+				else
+				{
+					characterAnimation?.SwitchWeapon(Weapon.Relax);
+				}
+			}
+			else
+			{
+				if(InBattle()) 
+					characterAnimation?.InstantSwitchWeapons(true);
+				else
+					characterAnimation?.SwitchWeapon(Weapon.Relax);
 			}
 		}
 	}
@@ -1161,5 +1164,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public void GiveExtraActions(int amount)
 	{
 		extraActions += amount;
+		onStatsChanged?.Invoke();
+	}
+
+	public int GetRemainingActions()
+	{
+		return characterData.GetMaxActions() + extraActions - usedActions.Count;
 	}
 }
