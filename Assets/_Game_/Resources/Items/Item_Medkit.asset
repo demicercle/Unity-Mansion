@@ -18,6 +18,7 @@ MonoBehaviour:
   description:
     lineIndex: 11
     text: Give back +5 HP. Can be used on dead people.
+  lootBagPrefab: {fileID: 5524402215279628812, guid: acb0f982c31d653479d68c1323f5d207, type: 3}
   icon: {fileID: 2800000, guid: 1b310b4f2926ae14280a4e0543f9607a, type: 3}
   itemTags: 
   equipOnHand: 0

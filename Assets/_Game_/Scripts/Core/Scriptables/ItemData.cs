@@ -53,9 +53,16 @@ public class ItemData : ScriptableObject
 	[Header("General")]
 	[SerializeField] private LocalizedText displayName;
 	[SerializeField] private LocalizedText description;
+	[SerializeField] private Inventory lootBagPrefab;
 	[SerializeField] private Texture2D icon;
 	[SerializeField] private string itemTags;
 
+	public bool TryGetLootBagPrefab(out Inventory prefab)
+	{
+		prefab = lootBagPrefab;
+		return prefab;
+	}
+	
 	public string GetDisplayName() => displayName.GetValue(DialogFiles.items);
 	
 	public Texture2D GetIcon() => icon;

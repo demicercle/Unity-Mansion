@@ -59,7 +59,7 @@ public class Inventory : MonoBehaviour
 	{
 		if(slots == null) return;
 		
-		ClearInventory();
+		ClearInventory(false);
 		
 		for (int i = 0; i < slots.Length; i++)
 		{
@@ -81,15 +81,17 @@ public class Inventory : MonoBehaviour
 		NotifyChanged();
 	}
 
-	public void ClearInventory()
+	public void ClearInventory(bool notifyChanged)
 	{
 		for (int i = 0; i < items.Count; i++)
 		{
-			ClearItem(i);
+			ClearItem(i, false);
 		}
+		
+		if(notifyChanged) NotifyChanged();
 	}
 
-	private void ClearItem(int index)
+	private void ClearItem(int index, bool notifyChanged)
 	{
 		if (index < 0 || index >= items.Count)
 			return;
@@ -98,6 +100,8 @@ public class Inventory : MonoBehaviour
 			Destroy(items[index]);
 
 		items[index] = null;
+		
+		if (notifyChanged)NotifyChanged();
 	}
 	
 	private void SetItemName(int index, string itemName, int qty)
@@ -133,7 +137,10 @@ public class Inventory : MonoBehaviour
 		TryCreateLootBag(itemData, GetPosition(), out bag);
 	public bool TryCreateLootBag(ItemData itemData, Vector3 position, out Inventory bag)
 	{
-		if (!lootBagPrefab)
+		if(!itemData.TryGetLootBagPrefab(out var lootPrefab))
+			lootPrefab = lootBagPrefab;
+		
+		if (!lootPrefab)
 		{
 			Debug.LogWarning(this + " cannot CreateLootBag because no prefab set!");
 			bag = null;
@@ -147,7 +154,7 @@ public class Inventory : MonoBehaviour
 			return false;
 		}
 
-		bag = CreateLootBag(lootBagPrefab, navPosition);
+		bag = CreateLootBag(lootPrefab, navPosition);
 		bag.TryAddItem(itemData);
 		bag.transform.position = position;
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
@@ -156,33 +163,53 @@ public class Inventory : MonoBehaviour
 
 	private bool IsEmpty() => items.All(it => !it);
 
-	public bool DropOnGround(out Inventory bag)
+	public bool DropAllOnGround()
 	{
+		var bag = default(Inventory);
+
+		var changed = false;
+		for (int i = 0; i < items.Count; i++)
+		{
+			var itemData = items[i];
+
+			if (itemData && TryCreateLootBag(itemData, out bag))
+			{
+				changed = true;
+				ClearItem(i, false);
+			}
+		}
+
+		if (changed)
+		{
+			NotifyChanged();
+		}
+
+		if (IsEmpty())
+		{
+			return true;
+		}
+		
 		if (!lootBagPrefab)
 		{
 			Debug.LogWarning(this + " cannot CreateLootBag because no prefab set!");
-			bag = null;
 			return false;
 		}
 
 		if (IsEmpty())
 		{
-			bag = null;
 			return false;
 		}
 
 		if (!NavUtils.TryGetNearestNavPosition(transform.position, CreateLootNavDistance, out var navPosition))
 		{
 			Debug.LogWarning(this + " cannot CreateLootBag: no nav position found");
-			bag = null;
 			return false;
 		}
 		
 		bag = CreateLootBag(lootBagPrefab, navPosition);
 		bag.items.AddRange(items);
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-		items.Clear();
-		foreach(var it in bag.items) items.Add(null);
+		ClearInventory(false);
 		NotifyChanged();
 		return true;
 	}

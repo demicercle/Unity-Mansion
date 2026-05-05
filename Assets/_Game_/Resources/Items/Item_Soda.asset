@@ -18,6 +18,7 @@ MonoBehaviour:
   description:
     lineIndex: 23
     text: Give 2 extra actions for this turn, only usable in combat.
+  lootBagPrefab: {fileID: 2367914867963160724, guid: 0236049eb8d6aac42b515c8fe64c990b, type: 3}
   icon: {fileID: 2800000, guid: 438811adc772f1841bf87afd8628e079, type: 3}
   itemTags: Drinks
   equipOnHand: 0

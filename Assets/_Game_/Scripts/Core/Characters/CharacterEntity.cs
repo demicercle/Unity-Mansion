@@ -742,8 +742,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
 			gameObject.layer = Layers.LayerDead;
+			
 			if (TryGetComponent(out Inventory inv)) 
-				inv.DropOnGround(out var loot);
+				inv.DropAllOnGround();
 			
 			onDead?.Invoke();
 			onAnyCharacterDead?.Invoke(this);
