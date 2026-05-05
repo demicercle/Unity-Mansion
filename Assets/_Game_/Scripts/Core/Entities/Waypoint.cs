@@ -20,7 +20,8 @@ public class Waypoint : MonoBehaviour
 
 	public static Waypoint[] GetOrderedWaypointsFromTo(Vector3 from, Vector3 to)
 	{
-		return waypoints.OrderBy(wp => NavUtils.NavDistance(wp.GetPosition(), from) + NavUtils.NavDistance(wp.GetPosition(), to)).ToArray();
+		return waypoints
+			.OrderBy(wp => NavUtils.NavDistance(wp.GetPosition(), from) + NavUtils.NavDistance(wp.GetPosition(), to)).ToArray();
 	}
 		
 	[Range(0.1f, 10.0f)] public float radius = 0.4f;

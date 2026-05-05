@@ -9,7 +9,6 @@ using EventType = CharacterAnimation.EventType;
 public class CharacterRoutines : MonoBehaviour
 {
 	private const float SearchPathTimeout = 6.0f;
-	private const float UnfreezeAgentTimeout = 0.0f;
 	private const float DefaultWaitSeconds = 1.0f;
 	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
 	private const float MinDeltaToMove = 0.1f;
@@ -335,6 +334,13 @@ public class CharacterRoutines : MonoBehaviour
 		var agent = _selfCharacter.GetAgent();
 		agent.SetReachDistance(reachRadius);
 
+		if (!_selfCharacter.TryGetClosestNavigablePosition(destination, out destination))
+		{
+			Debug.LogWarning(this + " cannot find navigable position");
+			_selfCharacter.FloatingText_Cant();
+			yield break;
+		}
+
 		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
 		yield return null;
 		
@@ -590,6 +596,8 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(_selfCharacter.GetPosition(), dest))
 			{
+				if (wp.ignoreNavigation) continue;
+				
 				dest = wp.GetPosition();
 				
 				if(debugMode > 0) Debug.Log(this + " Assign Waypoint dest=" + wp);

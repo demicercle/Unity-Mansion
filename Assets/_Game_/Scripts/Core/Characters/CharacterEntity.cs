@@ -765,6 +765,30 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public WeaponData GetCurrentWeapon() => currentWeapon;
 
+	private const float MaxInteractHeight = 2.0f;
+	private const float MaxInteractNavDistance = 1.5f;
+	public bool TryGetClosestNavigablePosition(Vector3 world, out Vector3 navPos)
+	{
+		navPos = world;
+
+		if (NavUtils.TryGetNearestNavPosition(navPos, MaxInteractNavDistance * 2, out var navPosY))
+		{
+			navPos.y = navPosY.y;
+		}
+		
+		//DebugDrawer.Line(navPos, world, Color.yellow, 1.0f);
+
+		if (Utils.VDistance(navPos, world) > MaxInteractHeight)
+		{
+			//Debug.Log(this + " TryGetClosestNavigablePosition invalid height");
+			return false;
+		}
+
+		var hDist = Utils.HDistance(navPos, world);
+//		Debug.Log(this + " TryGetClosestNavigablePosition hDist=" + hDist);
+		return hDist <= MaxInteractNavDistance;
+	}
+
 	public float GetDistanceTo(Vector3 world) => NavUtils.NavDistance(GetPosition(), world);
 	
 	public bool WaypointReached(Waypoint wp)

@@ -315,17 +315,17 @@ public static class Utils
 		return t;
 	}
 	
-	public static float VDistance(Vector3 aiPathPosition, Vector3 dest)
+	public static float VDistance(Vector3 v1, Vector3 v2)
 	{
-		aiPathPosition.x = dest.x;
-		aiPathPosition.z = dest.z;
-		return Vector3.Distance(aiPathPosition, dest);
+		v1.x = v2.x;
+		v1.z = v2.z;
+		return Vector3.Distance(v1, v2);
 	}
 	
-	public static float HDistance(Vector3 aiPathPosition, Vector3 dest)
+	public static float HDistance(Vector3 v1, Vector3 v2)
 	{
-		aiPathPosition.y = dest.y;
-		return Vector3.Distance(aiPathPosition, dest);
+		v1.y = v2.y;
+		return Vector3.Distance(v1, v2);
 	}
 
 	public static float FlatDot(Vector3 dir1, Vector3 dir2)
