@@ -212,6 +212,7 @@ public class ItemData : ScriptableObject
 					if (projectile.Launch(startPosition, destination, out var clone))
 					{
 						UseOn(clone.gameObject, target.gameObject);
+						weapon.gameObject.SetActive(false);
 						return;
 					}
 				}

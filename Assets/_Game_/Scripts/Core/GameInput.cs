@@ -490,7 +490,7 @@ public class GameInput : MonoBehaviour
 					if (itemToUse.IsProjectile())
 					{
 						selectedCharacter.LookWorldPosition(lastNavPosition, Time.deltaTime);
-						foreach (var projectileInHand in selectedCharacter.GetComponentsInChildren<Projectile>())
+						foreach (var projectileInHand in selectedCharacter.GetComponentsInChildren<Projectile>()) // TODO Optim
 						{
 							projectileInHand.Simulate(selectedCharacter.GetCenterPosition(), lastNavPosition);
 						}

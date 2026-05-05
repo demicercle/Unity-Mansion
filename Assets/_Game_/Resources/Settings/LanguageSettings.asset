@@ -66,7 +66,7 @@ MonoBehaviour:
     - "\t"
     - "\t"
     - "\t"
-    - Bandage
+    - First aid kit
     - Give back +5 HP. Can be used on dead people.
     - Grenade
     - When thrown, explodes after a few seconds, dealing 3-18 damages all round.
