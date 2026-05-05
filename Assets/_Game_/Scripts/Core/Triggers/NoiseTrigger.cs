@@ -6,19 +6,19 @@ public class NoiseTrigger : MonoBehaviour
 {
 	public static int debugMode { get; set; }
 	
-	[SerializeField] private float drawDuration;
+	public float drawDuration = 1.5f;
 	[Space]
-	[SerializeField] private int rayCount;
-	[SerializeField] private float rayLength;
-	[SerializeField] private float radius;
-	[SerializeField] private bool emitOnEnable;
-	[SerializeField] private bool lookUpParentCharacter;
-	[SerializeField] private CharacterEntity selfCharacter;
+	public int rayCount = 16;
+	public float rayLength = 6.0f;
+	public float radius = 0.1f;
+	public bool emitOnEnable = false;
+	public bool lookUpParentCharacter = false;
+	public CharacterEntity characterInstigator = null;
 
 	private void Awake()
 	{
 		if(lookUpParentCharacter)
-			selfCharacter = GetComponentInParent<CharacterEntity>();
+			characterInstigator = GetComponentInParent<CharacterEntity>();
 	}
 
 	private void OnEnable()
@@ -28,7 +28,7 @@ public class NoiseTrigger : MonoBehaviour
 	}
 
 	[ContextMenu("Emit")]
-	private void Emit()
+	public void Emit()
 	{
 		if (rayCount <= 0)
 			return;
@@ -61,17 +61,17 @@ public class NoiseTrigger : MonoBehaviour
 
 	private void OnHit(RaycastHit wallHit)
 	{
-		if (!selfCharacter)
+		if (!characterInstigator)
 			return;
 		
 		if(debugMode >0) Debug.Log(this + " wallHit: " + wallHit.collider);
-		if (wallHit.collider.TryGetComponent(out CharacterEntity other) && other != selfCharacter)
+		if (wallHit.collider.TryGetComponent(out CharacterEntity other) && other != characterInstigator)
 		{
-			if (!other.IsDead() && selfCharacter.IsEnemyTo(other) && other.IsCharacterRevealed())
+			if (!other.IsDead() && characterInstigator.IsEnemyTo(other) && other.IsCharacterRevealed())
 			{
 				if (other.TryGetComponent(out CharacterDetection otherDetection))
 				{
-					otherDetection.SetCharacterDetected(selfCharacter, true);
+					otherDetection.SetCharacterDetected(characterInstigator, true);
 				}
 			}
 		}
