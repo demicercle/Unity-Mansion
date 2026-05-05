@@ -211,6 +211,7 @@ public class CharacterAgent : MonoBehaviour
 			if (!RoomTrigger.IsPositionVisible(endPoint)) // ignore not revealed waypoint
 				continue;
 
+			SetReachDistance(wp.radius);
 			yield return StartCoroutine(DoAssignDestination(endPoint));
 			
 			if (hasDestination)
@@ -314,15 +315,13 @@ public class CharacterAgent : MonoBehaviour
 
 	public bool ReachedDestination() => ReachedDestination(aiPath.destination);
 	
-	public bool ReachedDestination(Vector3 dest)
+	public bool ReachedDestination(Vector3 dest) // TODO move this in Self Character
 	{
-		if (aiPath.hasPath && aiPath.reachedDestination)
-			return true;
-		
-		var dist = NavUtils.NavDistance(aiPath.position, dest);
-		var reach = Mathf.Max(GetMinReachDistance(), aiPath.endReachedDistance);
-		dist = float.Parse(dist.ToString("N2"));
-		reach = float.Parse(reach.ToString("N2"));
+		//if (!aiPath.hasPath || aiPath.pathPending)
+		//	return false;
+		var dist = Vector3.Distance(_selfCharacter.GetPosition(), dest);
+		var reach = aiPath.endReachedDistance;
+		if(debugMode > 1)Debug.Log(this + " ReachedDestination " + dist +" <= " + reach);
 		return dist <= reach;
 	}
 	
@@ -549,7 +548,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private bool ShowMoveTarget()
 	{
-		if (IsFollowing() || !_selfCharacter.IsPlayer())
+		if (IsFollowing() || !_selfCharacter.IsPlayer() || _selfCharacter.IsAiming())
 			return false;
 
 		if (bestWaypoint)

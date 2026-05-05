@@ -49,7 +49,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2808435162377885028}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -103,7 +103,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a52513df46e79ea41b451d0270508999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isLeft: 1
-  rpgWeapon: -1
+  isLeft: 0
+  rpgWeapon: 13
+  itemTags: 
   inHand: 1
   offHand: 1
+  renderers:
+  - {fileID: 8714403132098142914}
+  shootLine: {fileID: 0}
+  aimLine: {fileID: 0}
+  maxShootDistance: 5
+  shootFromEyesPosition: 0
+  aimFromEyesPosition: 0
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []

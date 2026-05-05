@@ -107,10 +107,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: 3
+  itemTags: 
   inHand: 1
   offHand: 0
   renderers:
   - {fileID: 2987136313415566105}
+  shootLine: {fileID: 0}
+  aimLine: {fileID: 0}
+  maxShootDistance: 5
+  shootFromEyesPosition: 0
+  aimFromEyesPosition: 0
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6251882892558636568
 GameObject:
   m_ObjectHideFlags: 0
@@ -152,15 +164,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: c62376b09e3a75948b63506c4a539daa, type: 3}
       propertyPath: m_LocalScale.x
-      value: 16.098856
+      value: 11.829923
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c62376b09e3a75948b63506c4a539daa, type: 3}
       propertyPath: m_LocalScale.y
-      value: 16.098856
+      value: 11.829923
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c62376b09e3a75948b63506c4a539daa, type: 3}
       propertyPath: m_LocalScale.z
-      value: 16.098856
+      value: 11.829923
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c62376b09e3a75948b63506c4a539daa, type: 3}
       propertyPath: m_LocalPosition.x
@@ -204,8 +216,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: c62376b09e3a75948b63506c4a539daa, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: c62376b09e3a75948b63506c4a539daa, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 46d277084fc7d2647b228715458f1c76, type: 2}
+    - target: {fileID: -7511558181221131132, guid: c62376b09e3a75948b63506c4a539daa, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 912a6e7e0c472b54f93c52fa42c04365, type: 2}
     - target: {fileID: 919132149155446097, guid: c62376b09e3a75948b63506c4a539daa, type: 3}
       propertyPath: m_Name
       value: Low Poly Baseball Bat 1.fbx

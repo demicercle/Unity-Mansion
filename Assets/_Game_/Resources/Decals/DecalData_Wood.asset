@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8975cbf35ae6483da2785a4519c6daf5, type: 3}
+  m_Name: DecalData_Wood
+  m_EditorClassIdentifier: Assembly-CSharp::DecalData
+  renderedMaterials:
+  - {fileID: 2100000, guid: 41830f1ca7871ee49bfa263ac0922527, type: 2}
+  - {fileID: 2100000, guid: 050a683dac85ff048a2ce8708220e976, type: 2}
+  - {fileID: 2100000, guid: 48004934687a08d488f241795e3f9025, type: 2}
+  - {fileID: 2100000, guid: a6e2280faa6c7204582cef09a765d55b, type: 2}
+  decalPrefab: {fileID: 100002, guid: 33eec706dfcaa3146b43f2b99b1e59a0, type: 3}

@@ -12,9 +12,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26b91483504440d7b3e2d5878f8dde34, type: 3}
   m_Name: WP_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  noAttack: 0
+  hitChance: 10
   minDamage: 1
   maxDamage: 3
-  hitChance: 10
+  damageCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   isRanged: 1
   attackRange: 12
   rangeHitCurve:
@@ -92,6 +117,12 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  noAttack: 0
+  ammoTags: Pistol
+  maxAmmo: 6
+  decals:
+  - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
+  - {fileID: 11400000, guid: 3d1d45a1c8055ba4f8809c776eadb01b, type: 2}
+  - {fileID: 11400000, guid: 00939702632abb748ba593557a634682, type: 2}
+  - {fileID: 11400000, guid: 2bde35fa989f9c241a8ce26b5d7156d1, type: 2}
   rpgWeaponR: 17
   rpgWeaponL: -1

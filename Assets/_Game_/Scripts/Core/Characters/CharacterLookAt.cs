@@ -5,7 +5,7 @@ using UnityEngine;
 public class CharacterLookAt : MonoBehaviour
 {
 	[SerializeField] private Transform lookTarget;
-	[SerializeField] private Vector2 dotRange = new Vector2(0f, 0.5f);
+	[SerializeField] private Vector3 dotRange = new Vector3(0.01f, 0.2f, 0.5f);
 	[SerializeField] [Range(0.1f, 1f)] private float tickTime = 0.5f;
 	[SerializeField] [Min(0f)] private float lerpSpeed = 1.5f;
 	
@@ -16,6 +16,7 @@ public class CharacterLookAt : MonoBehaviour
 	private float worldDot;
 	private float minDotToRotate;
 	private bool _isRotating;
+	private bool _isAiming;
 
 	private void Awake()
 	{
@@ -88,28 +89,31 @@ public class CharacterLookAt : MonoBehaviour
 		{
 			_followTarget = null;
 		}
-		
-		var f = Time.deltaTime;
-		if (_followTarget)
-		{ 
+
+		_isAiming = _selfCharacter.TryGetAimingPosition(out var aimingPosition);
+		if (_isAiming) 
+			worldPosition = aimingPosition;
+		else if (_followTarget)
 			worldPosition = _followTarget.position + Vector3.up * _selfCharacter.GetHeight();
-			lookTarget.parent = null;
-			lookTarget.position = lerpSpeed <= 0 ? worldPosition : Vector3.Lerp(lookTarget.position, worldPosition, f * lerpSpeed);
-			
-			 worldDir = _selfCharacter.GetDirectionTo(lookTarget.position);
-			 worldDot = Utils.FlatDot(transform.forward, worldDir);
-			 minDotToRotate = _isRotating ? dotRange.y : dotRange.x;
-			if (worldDot < minDotToRotate && !_selfCharacter.Routines.AnyActive() && !_selfCharacter.GetAgent().IsMoving())
-			{
-				_isRotating = true;
-				_selfCharacter.LookWorldPosition(lookTarget.position, f);
-			}
-			else _isRotating = false;
-		}
 		else
 		{
-			lookTarget.parent = _selfCharacter.transform;
+			lookTarget.parent = _selfCharacter.transform; // no target, back to default pos
 			lookTarget.localPosition = Vector3.forward * (_selfCharacter.GetRadius() * 2) + Vector3.up * _selfCharacter.GetHeight();
+			return;
 		}
+		
+		var f = Time.deltaTime;
+		lookTarget.parent = null;
+		lookTarget.position = lerpSpeed <= 0 ? worldPosition : Vector3.Lerp(lookTarget.position, worldPosition, f * lerpSpeed);
+			
+		worldDir = _selfCharacter.GetDirectionTo(lookTarget.position);
+		worldDot = Mathf.Abs(1f - Utils.FlatDot(transform.forward, worldDir));
+		minDotToRotate = _isAiming ? dotRange.x : _isRotating ? dotRange.y : dotRange.z;
+		if (worldDot > minDotToRotate && !_selfCharacter.Routines.AnyActive() && !_selfCharacter.GetAgent().IsMoving())
+		{
+			_isRotating = true;
+			_selfCharacter.LookWorldPosition(lookTarget.position, f);
+		}
+		else _isRotating = false;
 	}
 }

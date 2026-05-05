@@ -21,6 +21,7 @@ public class GameInput : MonoBehaviour
 	public const int CursorRaycastResult_None = 0;
 	public const int CursorRaycastResult_Navigation = 1;
 	public const int CursorRaycastResult_Interaction = 2;
+	public const int CursorRaycastResult_Aim = 3;
 	
 	public static bool IsConsoleVisible() => DebugLogManager.Instance.IsLogWindowVisible;
 	public static void Focus(bool value) => instance.OnApplicationFocus(value);
@@ -40,6 +41,8 @@ public class GameInput : MonoBehaviour
 	[Min(0f)] public float nodeSize = 0.25f;
 
 	public UnityEvent onClick, onSelect;
+
+	private LayerMask raycastLayers;
 	
 	// Raycast result 0=None, 1=Navigation, 2=Character (or Prop)
 	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null)
@@ -55,9 +58,22 @@ public class GameInput : MonoBehaviour
 		}
 		
 		raycastRay = cam.ScreenPointToRay(mousePosition);
+
+		if (selectedCharacter && selectedCharacter.IsAiming())
+		{
+			raycastLayers = Layers.MaskAiming;
+			hitAim = Physics.Raycast(raycastRay, out aimHit, 100f, raycastLayers);
+			if(hitAim && RoomTrigger.IsPositionVisible(aimHit.point))
+				return CursorRaycastResult_Aim;
+		}
+
+		hitAim = false;
 		
-		hitInteractions = Physics.Raycast(raycastRay, out interactionHit, 100f, Layers.MaskInteraction(itemToUse && itemToUse.CanBeUsedOnDead()));
-		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point) && (!itemToUse || itemToUse.RaycastInteraction()))
+		raycastLayers = itemToUse ? Layers.MaskItem(itemToUse, true, false) : Layers.MaskInteraction;
+		hitInteractions = (!selectedCharacter || !selectedCharacter.IsAiming())
+						&& Physics.Raycast(raycastRay, out interactionHit, 100f, raycastLayers);
+		
+		if (hitInteractions && RoomTrigger.IsPositionVisible(interactionHit.point))
 		{ 
 			outRaycast = interactionHit;
 			
@@ -70,8 +86,11 @@ public class GameInput : MonoBehaviour
 			return CursorRaycastResult_Interaction;
 		}
 		
-		hitNavigation = Physics.Raycast(raycastRay, out navigationHit, 100f, Layers.MaskNavigation);
-		if (hitNavigation && RoomTrigger.IsPositionVisible(navigationHit.point) && (!itemToUse || itemToUse.RaycastNavigation()))
+		raycastLayers = itemToUse ? Layers.MaskItem(itemToUse, false, true) : Layers.MaskNavigation;
+		hitNavigation = (!itemToUse || itemToUse.RaycastNavigation())
+					&& Physics.Raycast(raycastRay, out navigationHit, 100f, raycastLayers);
+		
+		if (hitNavigation && RoomTrigger.IsPositionVisible(navigationHit.point))
 		{
 			if (itemToUse)
 			{
@@ -148,8 +167,8 @@ public class GameInput : MonoBehaviour
 	private bool inputEnabled;
 	private CursorType currentCursor;
 	private Ray raycastRay;
-	private RaycastHit navigationHit, wallsHit, interactionHit;
-	private bool hitNavigation, hitWalls, hitInteractions;
+	private RaycastHit navigationHit, wallsHit, interactionHit, aimHit;
+	private bool hitNavigation, hitWalls, hitInteractions, hitAim;
 	private int lastCursorResult;
 	private string debugString;
 	private bool ungroupMode;
@@ -267,6 +286,8 @@ public class GameInput : MonoBehaviour
 	{
 		if (isLoading)
 			return;
+
+		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 		
 		if (Application.isEditor)
 		{
@@ -301,10 +322,15 @@ public class GameInput : MonoBehaviour
 				gameTurnManager.TryEndPlayerTurn(true);
 			}
 			
-			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.
-				SelectCharacterAt(0);
+			if (inputSystem.Player.SelectParty1.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(0);
 			if (inputSystem.Player.SelectParty2.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(1);
 			if (inputSystem.Player.SelectParty3.WasPressedThisFrame()) CharacterSelection.SelectCharacterAt(2);
+
+			if (selectedCharacter)
+			{
+				if (inputSystem.Player.ToggleAim.WasPressedThisFrame()) selectedCharacter.SetAiming(true);
+				if (inputSystem.Player.ToggleAim.WasReleasedThisFrame()) selectedCharacter.SetAiming(false);
+			}
 		
 			if (inputSystem.Player.Move.IsPressed())
 			{
@@ -394,8 +420,6 @@ public class GameInput : MonoBehaviour
 			Cursor.visible = true;
 			Cursor.SetCursor(null,default,default);
 		}
-
-		CharacterSelection.TryGetSelectedCharacter(out selectedCharacter);
 		
 		debugString = mousePosition.ToString() + " " + (int)leftClickValue + (int)(holdMiddleClick?1:0) + (int)rightClickValue;
 
@@ -415,8 +439,39 @@ public class GameInput : MonoBehaviour
 		}
 		
 		debugString += "\nresult==" + lastCursorResult + " " + (lastMouseOverObject ? lastMouseOverObject.name : "no hit");
-			
-		if (lastCursorResult == CursorRaycastResult_Navigation)
+
+		if (lastCursorResult == CursorRaycastResult_Aim)
+		{
+			if (selectedCharacter)
+			{
+				SetCurrentCursorType(CursorType.Aim);
+				SetMouseOverItem(null);
+				SetDraggedItem(null);
+				debugString += "\n>Aim";
+				
+				if (CanAssignOnMouseOver(selectedCharacter))
+				{
+					selectedCharacter.SetAimingPosition(aimHit.point);
+					
+					if (mouseHasMoved || mouseOverChanged)
+					{
+						selectedCharacter.RaycastShoot(out var lastHit); // mouse over aiming
+						if(debugMode > 0) Debug.Log(this + " RaycastShoot " + lastHit.collider);
+					}
+
+					if (selectedCharacter.TryGetLastShootHit(out var hitResult))
+					{
+						debugString += "\n>hit:" + hitResult.collider;
+						if (hitResult.collider.TryGetComponent(out IAttackable hitAttackable))
+						{
+							hitAttackable.AimedBy(selectedCharacter);
+						}
+					}
+				}
+				
+			}
+		}
+		else if (lastCursorResult == CursorRaycastResult_Navigation)
 		{
 			if (selectedCharacter)
 			{
@@ -527,7 +582,7 @@ public class GameInput : MonoBehaviour
 					
 					else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) 
 					{
-						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition()); // mouse over prop attackable
+						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetReachPosition()); // mouse over prop attackable
 					}
 					debugString += "\n>" + currentCursor;
 				}
@@ -554,15 +609,6 @@ public class GameInput : MonoBehaviour
 			}
 		}
 
-		if (mouseOverViewport)
-		{
-			if (gameTurnManager.IsWaiting())
-			{
-				SetCurrentCursorType(CursorType.Waiting);
-				SetItemToUse(null, false);
-			}
-		}
-
 		if (CharacterEntity.TryGetPartyCharacter(mouseOverPortrait, out CharacterEntity portraitChar))
 		{
 			if (itemToUse && itemToUse.CanBeUsedOn(portraitChar))
@@ -572,6 +618,27 @@ public class GameInput : MonoBehaviour
 			else
 			{
 				SetCurrentCursorType(CursorType.Select);
+			}
+		}
+
+		if (mouseOverItem)
+		{
+			SetCurrentCursorType(CursorType.Select);
+		}
+
+		if (draggedItem)
+		{
+			SetCurrentCursorType(CursorType.Drag);
+		}
+
+		if (mouseOverViewport)
+		{
+			if (gameTurnManager.IsWaiting())
+			{
+				SetCurrentCursorType(CursorType.Waiting);
+				SetItemToUse(null, false);
+				SetDraggedItem(null);
+				SetMouseOverItem(null);
 			}
 		}
 
@@ -600,7 +667,8 @@ public class GameInput : MonoBehaviour
 	
 	private void LateUpdate()
 	{
-		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading && !gameTurnManager.IsWaiting());
+		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading && !gameTurnManager.IsWaiting() 
+		                                      && (!selectedCharacter || !selectedCharacter.IsAiming()));
 		
 		if (navigationTarget.gameObject.activeSelf)
 		{
@@ -693,14 +761,29 @@ public class GameInput : MonoBehaviour
 		
 		if (ctxValue <= 0 && rightClickValue > 0) // right click RELEASED
 		{
+			SetMouseOverItem(null);
+			SetDraggedItem(null);
+			
 			if (itemToUse)
 			{
-				SetItemToUse(null, true); // right click RELEASED
+				SetItemToUse(null, true);
 			}
 			
-			else if (gameTurnManager.IsPlayerTurn())
+			else if (gameTurnManager.IsPlayerTurn() || !gameTurnManager.IsTurnBasedMode())
 			{
-				CharacterSelection.SelectCharacter(null); // deselect all
+				if (selectedCharacter && selectedCharacter.IsControllableByPlayer())
+				{
+					if (selectedCharacter.IsAiming()) 
+						selectedCharacter.SetAiming(false);
+					else if (selectedCharacter.IsActing())
+						selectedCharacter.Stop();
+					else
+						CharacterSelection.SelectCharacter(null);
+				}
+				else
+				{
+					CharacterSelection.SelectCharacter(null);
+				}
 			}
 		}
 		
@@ -727,7 +810,14 @@ public class GameInput : MonoBehaviour
 			if (!mouseOverViewport) return;
 			
 			var raycastResult = CursorRaycast(out var hit);
-			if (raycastResult == CursorRaycastResult_Interaction)
+			if (raycastResult == CursorRaycastResult_Aim)
+			{
+				if (selectedCharacter && CanAssignOnClick(selectedCharacter))
+				{
+					selectedCharacter.Routines.AssignShootAt(aimHit.point, true);
+				}
+			}
+			else if (raycastResult == CursorRaycastResult_Interaction)
 			{
 				if (hit.collider.TryGetComponent(out CharacterEntity clickedCharacter)) // click character
 				{
@@ -779,6 +869,8 @@ public class GameInput : MonoBehaviour
 	private void SelectionChanged()
 	{
 		SetItemToUse(null, true);//selection changed
+		SetDraggedItem(null);
+		SetMouseOverItem(null);
 		
 		if (CharacterSelection.TryGetSelectedCharacter(out var newSelected) && newSelected != selectedCharacter)
 		{
@@ -1082,6 +1174,44 @@ public class GameInput : MonoBehaviour
 	#endregion
 
 	private ItemData itemToUse;
+	private ItemData draggedItem;
+	private ItemData mouseOverItem;
+
+	public void AssignDropItem()
+	{
+		CharacterEntity partyChar;
+		
+		if (draggedItem && selectedCharacter)
+		{
+			if ( (CharacterEntity.TryGetPartyCharacter(mouseOverPortrait, out partyChar) || (lastMouseOverObject && lastMouseOverObject.TryGetComponent(out partyChar)))
+			    && partyChar != selectedCharacter 
+			    && partyChar.InParty())
+			{
+				Debug.Log(this + " Assign Drop Item " + selectedCharacter + " To " + partyChar);
+				selectedCharacter.Routines.AssignGiveItem(draggedItem, partyChar);
+			}
+			else if (hitNavigation)
+			{
+				Debug.Log(this + " Assign Drop Item " + selectedCharacter + " At " + lastNavPosition);
+				selectedCharacter.Routines.AssignDropItem(draggedItem, lastNavPosition);
+				DebugDrawer.WireDisc(lastNavPosition, 0.5f, Color.yellow, 1.0f);
+			}
+		}
+		
+		SetDraggedItem(null);
+	}
+
+	public bool IsDragged(ItemData itemData) => draggedItem == itemData;
+
+	public void SetDraggedItem(ItemData itemData)
+	{
+		draggedItem = itemData;
+		if (draggedItem)
+		{
+			SetItemToUse(null, true);
+			if(selectedCharacter) selectedCharacter.SetAiming(false);
+		}
+	}
 	
 	public void SetItemToUse(ItemData itemData, bool updateSelected)
 	{
@@ -1093,7 +1223,14 @@ public class GameInput : MonoBehaviour
 		}
 	}
 
+	public void SetMouseOverItem(ItemData itemData)
+	{
+		mouseOverItem = itemData;
+	}
+
 	public ItemData GetItemToUse() => itemToUse;
+
+	public ItemData GetDraggedItem() => draggedItem;
 
 	public bool IsBlocked() => currentCursor == CursorType.Blocked;
 

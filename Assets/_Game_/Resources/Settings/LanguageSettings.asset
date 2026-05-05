@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42322bc7f6054969a8e19d46e46bbde4, type: 3}
+  m_Name: LanguageSettings
+  m_EditorClassIdentifier: Assembly-CSharp::LanguageSettings
+  dialogLines:
+  - dialogText: {fileID: 4900000, guid: f8b7614a6ece465e8cebad733ea7e507, type: 3}
+    lines:
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - no actions!
+    - miss!
+    - dodge!
+    - hit!
+    - can't!
+    - take this!
+    - run!
+    - heal!
+    - empty!
+    - full!
+  - dialogText: {fileID: 4900000, guid: 5ba3278974654674b5e0dc16313e6548, type: 3}
+    lines:
+    - 
+    - 'Dice launched by <CHARACTER>! Result: <RESULT>'
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - Turn Started
+    - Turn Ended
+    - <CHARACTER> uses action <ACTION>
+    - <CHARACTER> receives item <ITEM>
+    - <CHARACTER> looses item <ITEM>
+    - <CHARACTER> receives <DAMAGE> damage(s)
+    - <CHARACTER> uses action <ACTION>
+    - '<CHARACTER> healed: <AMOUNT>'
+    - '<CHARACTER> attacks <TARGET>: <RESULT>'
+  - dialogText: {fileID: 4900000, guid: a14e384b1e634d7087fffef88e95089b, type: 3}
+    lines:
+    - Bandage
+    - Grenade
+    - Ammo Box
+    - Pistol
+    - Knife
+    - Baseball Bat
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+  - dialogText: {fileID: 4900000, guid: 6dd0485b4f8d476bb2411e78dc23c9ba, type: 3}
+    lines:
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - Hello
+    - I don't want to speak
+    - Let me alone
+    - Stop that

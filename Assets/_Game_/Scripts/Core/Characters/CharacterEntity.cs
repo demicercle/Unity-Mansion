@@ -3,14 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using RPGCharacterAnims.Actions;
+using RPGCharacterAnims.Lookups;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public interface IAttackable
 {
-	Vector3 GetPosition();
+	Vector3 GetCenterPosition();
+	Vector3 GetReachPosition();
 	float GetHeight();
 	float GetRadius();
 	void TakeDamage(DamageInfo damageInfo, object instigator);
+	void AimedBy(CharacterEntity other);
 }
 
 public enum CharacterFaction
@@ -30,7 +34,10 @@ public enum CharacterAction
 	Talk,
 	UseItem,
 	Defend,
-	Riposte
+	Riposte,
+	Reload,
+	GiveItem,
+	DropItem
 }
 
 public struct DamageInfo
@@ -47,12 +54,15 @@ public struct DamageInfo
 public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
-	private const float MinAttackRange = 0.25f;
+	private const float MinAttackRange = 0.05f;
 	//private const float DodgeCountToChance = 2f / 20f;
 	private const float MovePointsToDodge = 0.02f;
 	private const float MovePointsToHit = 0.00f;
+
+	public Vector3 GetReachPosition() => GetPosition();
 	
 	public static int debugStats { get; set; }
+	public static int debugAim { get; set; }
 	
 	public static List<CharacterEntity> AllCharacters => _allCharacters;
 
@@ -123,7 +133,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public void FloatingText_Cant() // TODO: in character animation
 	{
 		Debug.Log(this + " Cant!");
-		if(IsCurrentTurn()) FloatingText(!HasActions() ? "No actions!" : "Can't");
+		if (IsCurrentTurn()) FloatingText(!HasActions() ? LanguageSettings.Main.NoActions : LanguageSettings.Main.Cant);
 	}
 	
 	public void FloatingText(string canT) // TODO: in character animation
@@ -138,7 +148,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
 		agent.SetObstacle(true);
-		SetCurrentWeapon(defaultWeapon);
+		if (TryGetComponent(out Inventory inventory) && inventory.TryGetItem(Inventory.InventorySlot_Weapon, out var weaponItem) && weaponItem.IsWeapon(out var weaponData))
+		{
+			SetCurrentWeapon(weaponData);
+		}
+		else
+		{
+			SetCurrentWeapon(defaultWeapon);
+		}
 		characterCanvas.gameObject.SetActive(true);
 		onSpawned?.Invoke();
 		Rest();
@@ -161,6 +178,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		//agent.SetObstacle(!value);//todo not in selection
 		if (value) StopFollow();
+		if (!value) SetAiming(false);
 		onSelectionChanged?.Invoke(value);
 	}
 
@@ -226,10 +244,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool TryRiposte(CharacterEntity attacker)
 	{
-		Debug.Log(this + " TryRiposte: " + attacker);
-		
 		if (IsAtAttackRange(attacker) && riposteCount > 0)
 		{
+			Debug.Log(this + " TryRiposte: " + attacker + " " + riposteCount);
 			riposteCount--; // riposte
 			Routines.AssignPerformAttack(attacker, false);
 			return true;
@@ -275,7 +292,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		if (IsUsingRangeWeapon())
 		{
-			targetRange = Vector3.Distance(GetCenterPosition(), targetPosition);
+			targetRange = Vector3.Distance(GetReachPosition(), targetPosition);
 			targetHeight = GetPosition().y - targetPosition.y;
 			return Mathf.Clamp01(GetHitChance() 
 				* currentWeapon.EvaluateRange(targetRange, GetRadius() + targetRadius)
@@ -289,7 +306,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public float CalculateHitChance(CharacterEntity target)
 	{
-		calculatedHitChance = CalculateHitChance(target.GetCenterPosition(), target.GetRadius());
+		calculatedHitChance = CalculateHitChance(target.GetReachPosition(), target.GetRadius());
 		if (!IsUsingRangeWeapon())
 		{
 			if (target.CanDodge())
@@ -302,7 +319,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public AttackResult TryHit(CharacterEntity target, float atkRoll)
 	{
-		var hitChance = CalculateHitChance(target.GetCenterPosition(), target.GetRadius());
+		var hitChance = CalculateHitChance(target.GetReachPosition(), target.GetRadius());
 		if(DicePool.debugMode>0) Debug.Log(this + " TryHit " + target + " roll=" + atkRoll + " hitChance=" + hitChance);
 		if (1f - atkRoll > hitChance) // miss
 		{
@@ -327,20 +344,27 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return AttackResult.Hit;
 	}
 	
-	public void AttackAction(IAttackable target, bool stopAgent = true)
+	public void UseAction(CharacterAction actionType, bool useAction = true, object param = null)
 	{
-		lastAttackTarget = target;
-		UseAction(CharacterAction.Attack, target);
-	}
-	
-	public void UseAction(CharacterAction actionType, object param = null)
-	{
-		usedActions.Add(actionType);
-		Debug.Log(this + " usedAction=" + usedActions.Last() + " param=" + param);
+		if (useAction)
+		{
+			usedActions.Add(actionType);
+		}
+		
+		if(debugStats > 0) Debug.Log(this + " UseAction " + actionType + " param=" + param + " usedActions=" + usedActions.LastOrDefault());
+		
 		if (actionType == CharacterAction.Run)
 		{
 			if (rollDiceOnRun) RollDice();
 			usedMovePoints -= characterData.GetRunActionExtraMovePoints();
+		}
+		else if (actionType == CharacterAction.Attack)
+		{
+			lastAttackTarget = param as CharacterEntity;
+			if (currentWeapon.IsReloadable())
+			{
+				currentWeapon.AddAmmo(-1);
+			}
 		}
 		else if (actionType == CharacterAction.Talk)
 		{
@@ -356,6 +380,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			if (rollDiceOnRiposte) RollDice();
 			riposteCount++;
 		}
+		
 		onUseAction?.Invoke(actionType, param);
 		onAnyCharacterUsesAction?.Invoke(this, actionType);
 		onStatsChanged?.Invoke();
@@ -527,8 +552,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		Mathf.Round(transform.position.y * VectorDecimals) / VectorDecimals, Mathf.Round(transform.position.z * VectorDecimals) / VectorDecimals);
 	
 	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * GetAgent().GetHeight() * 0.9f; // TODO "GetAgent()"
-	
-	public Vector3 GetCenterPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.5f;  // TODO "GetAgent()"
+
+	public Vector3 GetCenterPosition() => GetCenterPosition(false);
+	public Vector3 GetCenterPosition(bool local) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.5f;  // TODO "GetAgent()"
 	
 	public float GetRadius() => GetAgent().GetRadius();
 	public float GetHeight() => GetAgent().GetHeight();
@@ -634,6 +660,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		
 		onStatsChanged?.Invoke();
 	}
+
+	public void AimedBy(CharacterEntity otherCharacter)
+	{
+		foreach (var outline in GetComponentsInChildren<OutlineRenderer>())
+		{
+			outline.CursorOver();
+		}
+	}
 	
 	public void TakeDamage(DamageInfo damageInfo, object objectFrom)
 	{
@@ -682,12 +716,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			agent.SetAgentActive(false);
 			if (IsSelected()) CharacterSelection.SelectCharacter(null);
 			Routines.StopAllRoutines();
-			onDead?.Invoke();
-			onAnyCharacterDead?.Invoke(this);
-			onStatsChanged?.Invoke();
 			gameObject.layer = Layers.LayerDead;
 			if (TryGetComponent(out Inventory inv)) 
 				inv.DropOnGround(out var loot);
+			
+			onDead?.Invoke();
+			onAnyCharacterDead?.Invoke(this);
+			onStatsChanged?.Invoke();
 			return true;
 		}
 
@@ -727,13 +762,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		var atkRange = GetAttackReachDistance(target) + MinAttackRange;
 		if (IsUsingRangeWeapon())
 		{
-			var dist = GetDistanceTo(target.GetPosition());
+			var dist = GetDistanceTo(target.GetReachPosition());
 			return dist <= atkRange;
 		}
 		else
 		{
-			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetPosition());
-			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetPosition());
+			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetReachPosition());
+			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetReachPosition());
 			return vDist <= GetHeight() && hDist <= atkRange;
 		}
 	}
@@ -741,8 +776,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool LOSCheck(IAttackable other)
 	{
 		var start = GetEyesPosition();
-		return LOSCheck(start, other.GetPosition())
-		       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight());
+		return LOSCheck(start, other.GetReachPosition())
+		       || LOSCheck(start, other.GetReachPosition() + Vector3.up * other.GetHeight());
 	}
 
 	public bool LOSCheck(Vector3 start, Vector3 end)
@@ -811,13 +846,30 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if(verbose) Debug.Log(this + " SetItemToUse " + itemToUse);
 			itemInHand = itemToUse;
-			characterAnimation?.WeaponChanged();
+			if (itemInHand)
+			{
+				if (itemInHand.EquipOnHand())
+				{
+					characterAnimation?.SwitchWeapon(itemInHand ? itemInHand.GetWeaponInHand() : Weapon.Relax);
+					SetAiming(false);
+				}
+			}
 		}
 	}
 
 	public bool HasItemToUse(out ItemData itemToUse)
 	{
 		return (itemToUse = itemInHand) != null;
+	}
+	
+
+	public void SetCurrentWeapon(WeaponData newWeapon)
+	{
+		if (currentWeapon != newWeapon)
+		{
+			currentWeapon = newWeapon;
+			characterAnimation?.SwitchWeapon(newWeapon.rpgWeaponR);
+		}
 	}
 	
 	#region PRIVATE
@@ -881,18 +933,47 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 
 		characterCanvas.gameObject.SetActive(false);
+	}
+
+	private void Start()
+	{
 		gameObject.SetActive(false); // wait for "Spawn"
-		
-		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
-		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
 	}
 
 	private void OnDestroy()
 	{
 		_allCharacters.Remove(this);
-		
+	}
+
+	private void OnEnable()
+	{
+		GameTurnManager.Instance.onTurnStarted += OnTurnStarted;
+		GameTurnManager.Instance.onTurnEnded += OnTurnEnded;
+
+		Inventory.onAnyInventoryChanged += OnAnyInventoryChanged;
+	}
+
+	private void OnDisable()
+	{
 		GameTurnManager.Instance.onTurnStarted -= OnTurnStarted;
 		GameTurnManager.Instance.onTurnEnded -= OnTurnEnded;
+		
+		Inventory.onAnyInventoryChanged -= OnAnyInventoryChanged;
+	}
+
+	private void OnAnyInventoryChanged(Inventory inventory)
+	{
+		if (GetComponent<Inventory>() == inventory)
+		{
+			if (inventory.TryGetItem(Inventory.InventorySlot_Weapon, out var weaponItem) && weaponItem.IsWeapon(out var weaponData))
+			{
+				SetCurrentWeapon(weaponData);
+			}
+			else
+			{
+				SetCurrentWeapon(defaultWeapon);
+			}
+		}
 	}
 
 	private void OnTurnStarted()
@@ -910,16 +991,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if(GameTurnManager.debugMode > 0) Debug.Log(this + " OnTurnEnded");
 			turnEnded?.Invoke();
-		}
-	}
-
-	private void SetCurrentWeapon(WeaponData newWeapon)
-	{
-		currentWeapon = newWeapon;
-
-		if (characterAnimation)
-		{
-			characterAnimation.WeaponChanged();
 		}
 	}
 	
@@ -974,5 +1045,79 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			actionType == CharacterAction.Riposte ? rollDiceOnRiposte :
 			actionType == CharacterAction.Run ? rollDiceOnRun :
 			false;
+	}
+
+	public bool InBattle() =>
+		GameTurnManager.Instance.IsTurnBasedMode() && (InParty() || HasDetectedAnyPartyCharacter());
+
+	private bool isAiming;
+	private Vector3 aimingPosition;
+	private RaycastHit lastShootHitResult;
+
+	public event System.Action<bool, Vector3> onAiming;
+
+	public bool IsAiming() => isAiming;
+	
+	public bool TryGetLastShootHit(out RaycastHit hit)
+	{
+		hit = lastShootHitResult;
+		return hit.collider;
+	}
+	
+	public bool RaycastShoot(out RaycastHit hit)
+	{
+		var shootStart = GetEyesPosition() + transform.forward * (GetRadius() + 0.01f);
+		var shootEnd = aimingPosition;
+		var shootDir = (shootEnd - shootStart).normalized;
+		if (!IsUsingRangeWeapon())
+			shootEnd = GetCenterPosition() + shootDir * MinAttackRange;
+		if (debugAim > 0) DebugDrawer.Line(shootStart, shootEnd, Color.red, 0.5f);
+		if (isAiming && Physics.Linecast(shootStart, shootEnd + shootDir, out hit, Layers.MaskAiming) && hit.collider.gameObject != gameObject)
+		{
+			lastShootHitResult = hit;
+			return true;
+		}
+		else
+		{
+			lastShootHitResult = hit = default;
+			return false;
+		}
+	}
+
+	public bool TryGetAimingPosition(out Vector3 world)
+	{
+		world = aimingPosition;
+		
+		return isAiming;
+	}
+
+	public void SetAimingPosition(Vector3 world)
+	{
+		SetAiming(true);
+		aimingPosition = world;
+		if(debugAim > 0) DebugDrawer.Line(GetEyesPosition(), world, Color.red, 0f);
+		onAiming?.Invoke(isAiming, world);
+	}
+	
+	public void SetAiming(bool value)
+	{
+		isAiming = value;
+		//if(debugAim > 0) Debug.Log(this + " ToggleAim " + value);
+			
+		if (characterAnimation && !characterAnimation.IsSwitchingWeapons)
+			characterAnimation.SwitchWeapons(isAiming || InBattle());
+	}
+
+	public bool IsActing() => IsMoving() || Routines.AnyActive();
+
+	public void Stop()
+	{
+		StopAgent();
+		Routines.StopAllRoutines();
+	}
+
+	public bool HasWeaponToReload()
+	{
+		return currentWeapon.IsReloadable();
 	}
 }

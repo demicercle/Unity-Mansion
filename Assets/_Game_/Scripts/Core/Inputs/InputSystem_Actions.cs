@@ -298,6 +298,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleAim"",
+                    ""type"": ""Button"",
+                    ""id"": ""e808b77e-2138-45b9-9858-4e0b6b06c1ed"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -903,6 +912,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""SelectParty3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3f8c155d-9554-4f13-a0f2-d0cf9c16c617"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleAim"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""709d5aeb-1a01-4c29-9a6d-2eb5818e2421"",
+                    ""path"": ""<Keyboard>/rightCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleAim"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1513,6 +1544,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_SelectParty1 = m_Player.FindAction("SelectParty1", throwIfNotFound: true);
         m_Player_SelectParty2 = m_Player.FindAction("SelectParty2", throwIfNotFound: true);
         m_Player_SelectParty3 = m_Player.FindAction("SelectParty3", throwIfNotFound: true);
+        m_Player_ToggleAim = m_Player.FindAction("ToggleAim", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1629,6 +1661,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_SelectParty1;
     private readonly InputAction m_Player_SelectParty2;
     private readonly InputAction m_Player_SelectParty3;
+    private readonly InputAction m_Player_ToggleAim;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1733,6 +1766,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @SelectParty3 => m_Wrapper.m_Player_SelectParty3;
         /// <summary>
+        /// Provides access to the underlying input action "Player/ToggleAim".
+        /// </summary>
+        public InputAction @ToggleAim => m_Wrapper.m_Player_ToggleAim;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1827,6 +1864,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @SelectParty3.started += instance.OnSelectParty3;
             @SelectParty3.performed += instance.OnSelectParty3;
             @SelectParty3.canceled += instance.OnSelectParty3;
+            @ToggleAim.started += instance.OnToggleAim;
+            @ToggleAim.performed += instance.OnToggleAim;
+            @ToggleAim.canceled += instance.OnToggleAim;
         }
 
         /// <summary>
@@ -1907,6 +1947,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @SelectParty3.started -= instance.OnSelectParty3;
             @SelectParty3.performed -= instance.OnSelectParty3;
             @SelectParty3.canceled -= instance.OnSelectParty3;
+            @ToggleAim.started -= instance.OnToggleAim;
+            @ToggleAim.performed -= instance.OnToggleAim;
+            @ToggleAim.canceled -= instance.OnToggleAim;
         }
 
         /// <summary>
@@ -2368,6 +2411,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSelectParty3(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleAim" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleAim(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

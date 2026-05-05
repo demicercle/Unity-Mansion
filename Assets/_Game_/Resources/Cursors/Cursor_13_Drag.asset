@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05aa0dffbdc9400ca36fafd9c0ceb4f2, type: 3}
+  m_Name: Cursor_13_Drag
+  m_EditorClassIdentifier: Assembly-CSharp::CursorData
+  cursorType: 13
+  textures:
+  - {fileID: 2800000, guid: ad7df9e775790f54aad802780555b0a2, type: 3}
+  - {fileID: 2800000, guid: 4fcbc5c06980606458430e3f2ce0ed1f, type: 3}
+  hotspot: {x: 16, y: 16}
+  animationSpeed: 0
+  loopAnimation: 0

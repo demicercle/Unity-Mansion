@@ -30,6 +30,7 @@ public class PropComponent : MonoBehaviour
 	[SerializeField] private float triggerDelay = 0.0f; // TODO use anim events
 	[SerializeField] private float animDuration = 1.0f;
 	[SerializeField] private CharacterAnimation.EventType animationEvent = default;
+	[SerializeField] private PropComponent linkedProp;
 	
 	[Header("Unity Events")]
 	[SerializeField] private UnityEvent _interacted;
@@ -160,11 +161,15 @@ public class PropComponent : MonoBehaviour
 		
 		foreach (var wp in GetComponentsInChildren<Waypoint>())
 			wp.ignoreNavigation = true;
+
+		if (linkedProp) linkedProp.onInteractedBy += InteractedBy;
 	}
 
 	private void OnDestroy()
 	{
 		allInstances.Remove(this);
+		
+		if (linkedProp) linkedProp.onInteractedBy -= InteractedBy;
 	}
 
 	private IEnumerator Start()

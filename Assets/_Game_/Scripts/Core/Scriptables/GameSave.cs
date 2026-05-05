@@ -69,7 +69,7 @@ public class GameSave : ScriptableObject
 			damages = character.GetTotalDamages();
 
 			if (character.TryGetComponent(out Inventory inv))
-				slots = inv.GetItemNames();
+				slots = inv.SerializeToSlots();
 		}
 
 		public void Load(CharacterEntity character)
@@ -83,7 +83,7 @@ public class GameSave : ScriptableObject
 			character.SetDamages(damages);
 
 			if (character.TryGetComponent(out Inventory inv))
-				inv.SetItemNames(slots);
+				inv.DeserializeFromSlots(slots);
 		}
 
 		public SavedPC(CharacterEntity character = null)
@@ -171,7 +171,7 @@ public class GameSave : ScriptableObject
 		{
 			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			name = inventory.GetName();
-			slots = inventory.GetItemNames();
+			slots = inventory.SerializeToSlots();
 		}
 
 		public void Load(Inventory inventory)
@@ -179,10 +179,7 @@ public class GameSave : ScriptableObject
 			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			if (inventory.IsName(name))
 			{
-				for (int i = 0; i < slots.Length; i++)
-				{
-					inventory.SetItemName(i, slots[i]);
-				}
+				inventory.DeserializeFromSlots(slots);
 			}
 		}
 
@@ -204,13 +201,13 @@ public class GameSave : ScriptableObject
 		public void Load(Inventory lootBagPrefab)
 		{
 			var lootBag = Inventory.CreateLootBag(lootBagPrefab, position);
-			lootBag.SetItemNames(itemNames);
+			lootBag.DeserializeFromSlots(itemNames);
 		}
 
 		public void Save(Inventory inv)
 		{
 			position = inv.GetPosition();
-			itemNames = inv.GetItemNames();
+			itemNames = inv.SerializeToSlots();
 		}
 
 		public SavedLoot(Inventory inv = null)
@@ -246,8 +243,10 @@ public class GameSave : ScriptableObject
 	[ReadOnly] public List<SavedPC> savedPCs = new List<SavedPC>();
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
-	
-	public bool ShouldLoad { get; set; }
+
+	private bool shouldLoad;
+	public bool ShouldLoad() => shouldLoad;
+	public void MarkAsLoad() => shouldLoad = true;
 	
 	public bool IsEmpty() => version == 0;
 
@@ -289,8 +288,10 @@ public class GameSave : ScriptableObject
 #endif
 		savedLevels.Clear();
 		savedPCs.Clear();
+		savedValues.Clear();
 		selectedCharacter = 0;
 		version = 0;
+		shouldLoad = false;
 		if(newSeed) gameSeed = DicePool.GetRandomSeed();
 		DicePool.SetSeed(gameSeed);
 		if(!Application.isPlaying) Utils.SetDirty(this);
@@ -312,7 +313,7 @@ public class GameSave : ScriptableObject
 		if(gameSeed > 0)
 			DicePool.SetSeed(gameSeed);
 		else Debug.LogWarning(this + " invalid game seed: " + gameSeed);
-
+		
 		foreach (var savedValue in savedValues)
 		{
 			if (savedValue.name == SavedValue.Karma) DiceLauncher.AllowedDiceRolls = savedValue.value;
@@ -511,5 +512,11 @@ public class GameSave : ScriptableObject
 	public void OpenFile()
 	{
 		Application.OpenURL("file://" + filePath);
+	}
+
+	private void OnEnable()
+	{
+		if (Application.isPlaying)
+			Clear();
 	}
 }

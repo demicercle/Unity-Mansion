@@ -237,7 +237,7 @@ public class ConsoleCommands : MonoBehaviour
 	
 	#region DEBUG
 
-	[ConsoleMethod("debug_all", "")]
+	/*[ConsoleMethod("debug_all", "")]
 	public static void Debug_All(int value)
 	{
 		_DebugAgent(value);
@@ -252,7 +252,7 @@ public class ConsoleCommands : MonoBehaviour
 		_DebugRoutines(value);
 		_DebugTriggers(value);
 		_DebugGtm(value);
-	}
+	}*/
 	
 
 	[ConsoleMethod("debug_save", "")]
@@ -289,6 +289,12 @@ public class ConsoleCommands : MonoBehaviour
 	public static void _DebugStats(int value)
 	{
 		Debug.Log("debug_stats=" + (CharacterEntity.debugStats= value));
+	}
+
+	[ConsoleMethod("debug_aim", "")]
+	public static void _DebugAim(int value)
+	{
+		Debug.Log("debug_aim=" + (CharacterEntity.debugAim= value));
 	}
 
 	[ConsoleMethod("debug_dices", "")]

@@ -23,12 +23,12 @@ public abstract class GameNode : Node
 	
 	protected virtual void OnScriptStart()
 	{
-		DebugLog("OnScriptStart", 1);
+		DebugLog("OnScriptStart " + _script, 1);
 	}
 
 	protected virtual void OnScriptDestroy()
 	{
-		DebugLog("OnScriptDestroy", 1);
+		DebugLog("OnScriptDestroy " + _script, 1);
 	}
 
 	private void Reset()
@@ -106,14 +106,16 @@ public class SceneReference
 
 	public void SetGameObject(GameObject newObject)
 	{
-		_gameObject = newObject;
+		_go = newObject;
+		if(GameScript.debugMode > 1) Debug.Log(this + " SetGameObject _go=" + newObject);
 	}
 
 	public GameObject GetGameObject(GameNode node)
 	{
-		if (!_gameObject)
-			_gameObject = node.Script.gameObject;
-		return _gameObject;
+		if (!_go)
+			SetGameObject(node.Script.gameObject);
+		if(GameScript.debugMode > 1) Debug.Log(this + " GetGameObject node=" + node + " _go=" + _go + " node.Script=" + node.Script);
+		return _go;
 	}
 
 	public T GetComponent<T>(GameNode node) where T : Component
@@ -126,5 +128,11 @@ public class SceneReference
 		return GetGameObject(node).TryGetComponent<T>(out component);
 	}
 
-	private GameObject _gameObject;
+	public SceneReference()
+	{
+		_go = null;
+		//Debug.Log(this + " constructor _go=" + _go);
+	}
+
+	private GameObject _go;
 }

@@ -5,7 +5,8 @@ public enum TargetType
 {
 	None,
 	AnyCharacter,
-	GroundPosition
+	GroundPosition,
+	OtherItem
 }
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "ItemData", order = 0)]
@@ -16,18 +17,109 @@ public class ItemData : ScriptableObject
 	{
 		return Resources.Load<ItemData>(Consts.ResPath_Items + itemName);
 	}
+
+	public static string Serialize(ItemData item) => !item ? "null" : item.name + ":" + item.GetQuantity();
+
+	public static bool TryDeserialize(string str, out ItemData newItem)
+	{
+		var split = str.Split(':');
+		if (split.Length > 1)
+		{
+			newItem = GetItemFromName(split[0]);
+			if (newItem)
+			{
+				newItem = newItem.Duplicate();
+				
+				if (int.TryParse(split[1].Trim('_'), out var qty))
+					newItem.SetQuantity(qty);
+				
+				return true;
+			}
+		}
+
+		newItem = null;
+		return false;
+	}
+
+	public ItemData Duplicate()
+	{
+		var duplicated = Instantiate(this);
+		duplicated.name = name;
+		if (duplicated.weaponData) duplicated.weaponData = duplicated.weaponData.Duplicate();
+		return duplicated;
+	}
 	
+	[Header("General")]
 	[SerializeField] private LocalizedText displayName;
 	[SerializeField] private Texture2D icon;
+	[SerializeField] private string itemTags;
+
+	[Header("Equipable")] 
+	[SerializeField] private bool equipOnHand;
+	[SerializeField] private WeaponData weaponData;
+
+	public bool IsWeapon(out WeaponData outWeapon)
+	{
+		outWeapon = weaponData;
+		return outWeapon;
+	}
+	
+	[Header("Usable")]
 	[SerializeField] private TargetType targetType;
 	[SerializeField] private bool usableOnDead;
 	[SerializeField] [Range(0f, 12f)] private float useRange;
-	[SerializeField] private GameScriptGraph onUseScript;
-	[SerializeField] private string itemTags;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
 	[SerializeField] private bool isProjectile;
+	[SerializeField] private GameScriptGraph onUseScript;
+	
+	[Header("Consommable")]
+	[SerializeField] private bool isAmmo;
+	[SerializeField] [Min(1)] private int maxQuantity = 1;
 
-	public bool RaycastInteraction() => targetType == TargetType.AnyCharacter;
+	private int currentQuantity;
+
+	public bool IsUsable() => targetType != TargetType.None;
+
+	public void SetQuantity(int newValue)
+	{
+		if (weaponData) 
+			weaponData.SetCurrentAmmo(newValue);
+		else 
+			currentQuantity = newValue;
+	}
+
+	public int GetQuantity() => weaponData ? weaponData.GetCurrentAmmo() : currentQuantity;
+	
+	public int GetMaxQuantity() => weaponData ? weaponData.GetMaxAmmo() : maxQuantity;
+	
+	public bool ShowQuantity() => GetMaxQuantity() > 1;
+
+	public void SetMaxQuantity()
+	{
+		if(weaponData)
+			weaponData.SetCurrentAmmo(weaponData.GetMaxAmmo());
+		else 
+			currentQuantity = maxQuantity;
+	}
+
+	public void AddQuantity(int qty)
+	{
+		if (weaponData)
+			weaponData.AddAmmo(qty);
+		else
+			currentQuantity = Mathf.Clamp(currentQuantity + qty, 0, maxQuantity);
+	}
+
+	public bool IsFull() => currentQuantity >= maxQuantity;
+
+	public bool IsEmpty() => currentQuantity == 0;
+	
+	public bool EquipOnHand() => equipOnHand;
+
+	public Weapon GetWeaponInHand() => equipOnHand ? Weapon.RightItem : Weapon.Relax;
+
+	public bool RaycastAnyCharacter() => targetType == TargetType.AnyCharacter;
+	
 	public bool RaycastNavigation() => targetType == TargetType.GroundPosition;
 
 	public bool CanBeUsedOnDead()

@@ -73,7 +73,7 @@ public class GameCanvas : MonoBehaviour
 		if (obj is IAttackable)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetWorldPosition((obj as IAttackable).GetPosition(), referenceResolution);
+				.SetWorldPosition((obj as IAttackable).GetCenterPosition(), referenceResolution);
 		}
 		
 		if (obj is Component)
@@ -104,11 +104,13 @@ public class GameCanvas : MonoBehaviour
 
 	private CharacterEntity[] partyCharacters;
 	private MouseOverHandler viewportMouseHandler;
-	private ItemData currentItemToUse;
+	private ItemData currentDraggedItem;
 	private CanvasScaler canvasScaler;
 	private float calculatedHitChance;
 	private bool willHit;
 	private bool hitBlocked;
+	private CharacterEntity selectedCharacter;
+	private CharacterEntity targetCharacter;
 	
 	private void Awake()
 	{
@@ -207,33 +209,49 @@ public class GameCanvas : MonoBehaviour
 	{
 		UpdateSelectables(); // TODO with events
 
-		currentItemToUse = gameInput.GetItemToUse();
-		itemCursorImage.gameObject.SetActive(currentItemToUse);
+		currentDraggedItem = gameInput.GetDraggedItem();
+		if (!currentDraggedItem) currentDraggedItem = gameInput.GetItemToUse();
+		itemCursorImage.gameObject.SetActive(currentDraggedItem);
 		if (itemCursorImage.gameObject.activeSelf)
 		{
-			itemCursorImage.texture = currentItemToUse.GetIcon();
+			itemCursorImage.texture = currentDraggedItem.GetIcon();
 			itemCursorImage.color = Utils.ColorAlpha(Color.white, gameInput.IsBlocked() ? 0.30f : 0.90f);
 			itemCursorImage.transform.position = gameInput.GetMousePosition();
 			itemCursorImage.transform.SetAsLastSibling();
 		}
 
-		cursorText.gameObject.SetActive(gameInput.WantsToAttack(out var targetCharacter));
-		if (targetCharacter && CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+		targetCharacter = null;
+		
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
-			cursorText.transform.position = gameInput.GetMousePosition();
-			cursorText.raycastTarget = false;
-			calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
-			willHit = DicePool.LastResult > 1f - calculatedHitChance;
-			hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
-			cursorText.text = (21-DicePool.FloatToDice(20, calculatedHitChance)) + "+";
-			if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
-			cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
-			if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
-			/*cursorText.text =
-				Mathf.RoundToInt(
-					selectedCharacter.CalculateHitChance(targetCharacter) *
-					100) + "%";*/
+			gameInput.WantsToAttack(out targetCharacter);
+
+			if (selectedCharacter.IsAiming()
+			    && selectedCharacter.TryGetLastShootHit(out var lastHit)
+			    && lastHit.collider.TryGetComponent(out CharacterEntity hitTarget))
+			{
+				targetCharacter = hitTarget; // over target, display attack stats
+			}
+			
+			if (targetCharacter)
+			{
+				cursorText.transform.position = gameInput.GetMousePosition();
+				cursorText.raycastTarget = false;
+				calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
+				willHit = DicePool.LastResult > 1f - calculatedHitChance;
+				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
+				cursorText.text = (21-DicePool.FloatToDice(20, calculatedHitChance)) + "+";
+				if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
+				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
+				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
+				/*cursorText.text =
+					Mathf.RoundToInt(
+						selectedCharacter.CalculateHitChance(targetCharacter) *
+						100) + "%";*/
+			}
 		}
+		
+		cursorText.gameObject.SetActive(targetCharacter != null);
 	}
 
 	private void OnPlayerChanged(bool isPlayerTurn)

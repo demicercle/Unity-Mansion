@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CursorData
   cursorType: 11
   textures:
-  - {fileID: 2800000, guid: 23ddba9ae1c30de4d8ea7c5d054394cb, type: 3}
-  hotspot: {x: 0, y: 0}
+  - {fileID: 2800000, guid: 27352485e9915f946bdd85825df715c8, type: 3}
+  - {fileID: 2800000, guid: dd504c2911043794bae0081a5484ddbe, type: 3}
+  hotspot: {x: 16, y: 16}
   animationSpeed: 0
-  loopAnimation: 0
+  loopAnimation: 1

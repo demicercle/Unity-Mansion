@@ -6,7 +6,12 @@ using UnityEngine.Events;
 public class Destructible : MonoBehaviour, IAttackable
 {
 	public static List<Destructible> allInstances = new List<Destructible>();
-	
+
+	public Vector3 GetReachPosition()
+	{
+		return GetCenterPosition();
+	}
+
 	public bool IsName(string s) => name == s;
 	public string GetName() => name;
 	public static int debugMode => CharacterEntity.debugStats;
@@ -17,8 +22,9 @@ public class Destructible : MonoBehaviour, IAttackable
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
 	[SerializeField] private Rigidbody[] rigidbodies;
 	[SerializeField] private GameObject[] deactivateObjects;
+	[SerializeField] private Destructible linkedDestructible;
 
-	public Vector3 GetPosition() => transform.position;
+	public Vector3 GetCenterPosition() => transform.position;
 	public float GetRadius() => radius;
 	public float GetHeight() => radius;
 
@@ -27,6 +33,15 @@ public class Destructible : MonoBehaviour, IAttackable
 	public UnityEvent breaks;
 
 	public bool IsBroken() => isBroken;
+	
+
+	public void AimedBy(CharacterEntity otherCharacter)
+	{
+		foreach (var outline in GetComponentsInChildren<OutlineRenderer>())
+		{
+			outline.CursorOver();
+		}
+	}
 
 	public void TakeDamage(DamageInfo dmgInfo, object instigator)
 	{
@@ -37,8 +52,14 @@ public class Destructible : MonoBehaviour, IAttackable
 		
 		damageAmount += dmgInfo.amount;
 		if(debugMode > 0) Debug.Log(this + " take damage " + dmgInfo + " total=" + damageAmount + "/" + maxHealth);
+		
+		if (linkedDestructible)
+		{
+			linkedDestructible.TakeDamage(dmgInfo, instigator);
+		}
 
 		onAnyDestructibleHit?.Invoke(this, dmgInfo, instigator);
+		
 		takeDamage?.Invoke();
 		
 		if (damageAmount >= maxHealth)
@@ -109,7 +130,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.yellow;
-		Utils.DrawGizmosCircle(GetPosition(), transform.up, radius);
+		Utils.DrawGizmosCircle(GetCenterPosition(), transform.up, radius);
 		foreach (var rb in rigidbodies)
 		{
 			if (!rb) continue;

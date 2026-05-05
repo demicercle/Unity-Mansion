@@ -10,12 +10,16 @@ public class DelayedTrigger : MonoBehaviour
 
 	private void OnEnable()
 	{
-		Invoke("Trigger", delay);
+		if(delay <= 0) 
+			Trigger();
+		else
+			Invoke("Trigger", delay);
 	}
 
 	private void OnDisable()
 	{ 
-		CancelInvoke("Trigger");;
+		if(delay > 0)
+			CancelInvoke("Trigger");;
 	}
 
 	private void Trigger()

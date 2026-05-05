@@ -29,11 +29,17 @@ public class ColorSettings : ScriptableObject
 	[Range(0f, 1f)] [SerializeField]private float disabledToFaction = 0.5f;
 	[SerializeField]private Color disabledColor = Color.gray;
 	[SerializeField]private Color deadColor = Color.black;
+	[SerializeField] private float defaultOutlineSize = 2.0f;
+	[SerializeField]private Color defaultOutlineColor = Color.yellow;
 		
 	public static Color GetDeadColor() => DefaultSettings.deadColor;
 	public static Color GetCharacterColor(CharacterEntity character, bool disabledIfNoActions = false, bool disabledIfNoMovePoints = false) => DefaultSettings.GetCurrentColor(character, disabledIfNoActions, disabledIfNoMovePoints);
 	public static Color GetDisabledColor(CharacterFaction faction) => Color.Lerp(DefaultSettings.disabledColor, DefaultSettings.GetFactionColor(faction), DefaultSettings.disabledToFaction);
 	public static Color GetDisabledColor() => DefaultSettings.disabledColor;
+	
+	public static float GetCharacterOutlineSize(CharacterEntity parentCharacter) => DefaultSettings.defaultOutlineSize;
+	public static float GetDefaultOutlineSize() => DefaultSettings.defaultOutlineSize;
+	public static Color GetDefaultOutlineColor() => DefaultSettings.defaultOutlineColor;
 	
 	//#region PRIVATE
 	private Color GetCurrentColor(CharacterEntity character, bool disabledIfNoActions, bool disabledIfNoMovePoints)

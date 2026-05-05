@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 95382248871835717, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: 'items.Array.data[6]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 37062cc4f33ecc84a9d8c47332463568, type: 2}
     - target: {fileID: 252388480579689254, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -76,10 +80,6 @@ PrefabInstance:
       propertyPath: characterData
       value: 
       objectReference: {fileID: 11400000, guid: 99cf44f11d897744489efec6ea4fe616, type: 2}
-    - target: {fileID: 5745611760749173238, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
-      propertyPath: defaultWeapon
-      value: 
-      objectReference: {fileID: 11400000, guid: 07e5ef61a7d1ca64382aab7bef9b37ff, type: 2}
     - target: {fileID: 5757940252895373513, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

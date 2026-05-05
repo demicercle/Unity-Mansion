@@ -2,121 +2,115 @@
 using System.Linq;
 using UnityEngine;
 
-public enum DialogFiles
-{
-	main,
-	gamelog,
-	items,
-	script
-}
-
 [CreateAssetMenu(fileName = "LanguageSettings", menuName = "LanguageSettings", order = 0)]
 public class LanguageSettings : ScriptableObject
 {
-	private static LanguageSettings[] allSettings;
-	private static LanguageSettings fallbackSettings;
+	private static LanguageSettings currentSettings;
 
+	public static LanguageSettings CurrentSettings
+	{
+		get
+		{
+			if (!currentSettings)
+			{
+				currentSettings = Resources.LoadAll<LanguageSettings>(Consts.ResPath_Settings).FirstOrDefault();
+			}
+			
+			return currentSettings;
+		}
+	}
+
+	public static DialogLines GetDialogLines(DialogFiles dialogFile, bool parse = false)
+	{
+		if(parse) CurrentSettings.Parse();
+		return CurrentSettings.dialogLines[(int)dialogFile];
+	}
+	
 	public class Main
 	{
-		public static string Miss => GetSettings(DialogFiles.main).GetLine(10, "miss!");
-		public static string WillMiss => GetSettings(DialogFiles.main).GetLine(10, "miss!");
-		public static string Dodge => GetSettings(DialogFiles.main).GetLine(11, "dodge!");
-		public static string Hit => GetSettings(DialogFiles.main).GetLine(12, "hit!");
-		public static string WillHit => GetSettings(DialogFiles.main).GetLine(12, "hit!");
-		public static string Cant => GetSettings(DialogFiles.main).GetLine(13, "can't!");
-		public static string HitBlocked => GetSettings(DialogFiles.main).GetLine(13, "can't!");
+		public static string GetLine(int index, string fallback) => GetDialogLines(DialogFiles.main).GetLine(index, fallback);
+		public static string NoActions => GetLine(9, "no actions!");
+		public static string Miss => GetLine(10, "miss!");
+		public static string WillMiss => GetLine(10, "miss!");
+		public static string Dodge => GetLine(11, "dodge!");
+		public static string Hit => GetLine(12, "hit!");
+		public static string WillHit => GetLine(12, "hit!");
+		public static string Cant => GetLine(13, "can't!");
+		public static string HitBlocked => GetLine(13, "can't!");
+		public static string TakeThis => GetLine(14, "take this!");
+		public static string Run => GetLine(15, "run!");
+		public static string Heal => GetLine(16, "heal!");
+		public static string Empty => GetLine(17, "empty!");
+		public static string Full => GetLine(18, "full!");
 
-		public static string AttackResult(CharacterEntity.AttackResult ar) => ar == CharacterEntity.AttackResult.Miss ? Miss : ar == CharacterEntity.AttackResult.Dodge ? Dodge : Hit; 
+		public static string AttackResult(CharacterEntity.AttackResult ar) => ar == CharacterEntity.AttackResult.Miss ? Miss : ar == CharacterEntity.AttackResult.Dodge ? Dodge : Hit;
 	}
 
-	public static LanguageSettings GetSettings(DialogFiles fileType)
-	{
-		if (allSettings == null)
-		{
-			allSettings = Resources.LoadAll<LanguageSettings>(Consts.ResPath_Settings)
-				.OrderBy(s => s.name)
-				.ToArray();
-
-			foreach (var s in allSettings)
-			{
-				s.Parse();
-			}
-		}
-
-		if ((int)fileType >= allSettings.Length)
-		{
-			Debug.LogWarning("invalid language dialog file: " + fileType);
-			
-			if (!fallbackSettings)
-				fallbackSettings = ScriptableObject.CreateInstance<LanguageSettings>();
-			
-			return fallbackSettings;
-		}
-		
-		return allSettings[(int)fileType];
-	}
-	
-	
-	public TextAsset dialogText;
-
-	[SerializeField] [ReadOnly] private string[] lines;
+	[SerializeField][ReadOnly] private DialogLines[] dialogLines;
 
 	[ContextMenu("Parse")]
 	public void Parse()
 	{
-		if (!dialogText)
+		var enumNames = System.Enum.GetNames(typeof(DialogFiles));
+		Debug.Log(this + " Parse " + Utils.ArrayStr(enumNames));
+		dialogLines = new DialogLines[enumNames.Length];
+		for (int i = 0; i < enumNames.Length; i++)
 		{
-			Debug.LogWarning(this + " has no dialogText");
-			return;
+			dialogLines[i] = new DialogLines();
+			dialogLines[i].Parse((DialogFiles)i);
 		}
-		
-		lines = dialogText.text.Split('\n');
-		lines = new string[]{string.Empty}.Concat(lines).ToArray();
-#if UNITY_EDITOR
-		if (Application.isPlaying) return;
-		/*var names = System.Enum.GetNames(typeof(DialogFiles));
-		for (int i = 0; i < names.Length; i++)
-		{
-			var sett = GetSettings((DialogFiles)i);
-			sett.name = typeof(LanguageSettings) + " (" + i + ")";
-			Debug.Log("rename " + sett + " " + i + " " + names[i]);
-			UnityEditor.AssetDatabase.RenameAsset(UnityEditor.AssetDatabase.GetAssetPath(sett), name);
-		}*/
-		UnityEditor.EditorUtility.SetDirty(this);
-		//UnityEditor.AssetDatabase.SaveAssets();
-#endif
-	}
-
-	private void TryParse()
-	{
-		if (lines == null || lines.Length == 0)
-			Parse();
-	}
-	
-	public string GetLine(int index, string fallback)
-	{
-		if (!dialogText)
-		{
-			Debug.LogWarning(this + " has no dialogText");
-			return fallback;
-		}
-		
-		TryParse();
-		
-		if (index < 0 || index >= lines.Length)
-		{
-			//Debug.Log(this + " GetLine " + index + " fallbacks " + fallback);
-			return fallback;
-		}
-		
-		//Debug.Log(this + " GetLine " + index + " => " + lines[index]);
-		return lines[index].Trim('\n');
+		Utils.SetDirty(this);
 	}
 
 	private void OnEnable()
 	{
 		Parse();
 	}
+}
+
+[System.Serializable]
+public class DialogLines
+{
+	private static TextAsset[] dialogFiles;
+
+	public string GetLine(int index, string defaultValue)
+	{
+		index -= 1;
+		return index >= 0 && index < lines.Length && !string.IsNullOrEmpty(lines[index]) ? lines[index] : defaultValue;
+	}
+
+	public void Parse(DialogFiles dialogFile)
+	{
+		if (dialogFiles == null)
+		{
+			dialogFiles = Resources.LoadAll<TextAsset>(Consts.ResPath_Dialogs);
+		}
+
+		dialogText = dialogFiles[(int)dialogFile];
+
+		if (!dialogText)
+		{
+			Debug.LogWarning(this + " no dialog text: " + dialogFile);
+			return;
+		}
+		
+		lines = dialogText.text.Split('\n');
+		for (int i = 0; i < lines.Length; i++)
+		{
+			lines[i] = lines[i].Trim('\n', '\r', ' ');
+		}
+	}
+
+	[SerializeField][ReadOnly] private TextAsset dialogText;
+	[SerializeField][ReadOnly] private string[] lines =  Array.Empty<string>();
+}
+
+public enum DialogFiles
+{
+	main,
+	gamelog,
+	items,
+	script
 }
 
 [System.Serializable]
@@ -127,34 +121,11 @@ public class LocalizedText
 	
 	public void Parse(DialogFiles fileType)
 	{
-		text = LanguageSettings.GetSettings(fileType).GetLine(lineIndex, text);
+		text = LanguageSettings.GetDialogLines(fileType, true).GetLine(lineIndex, text);
 	}
 
 	public string GetValue(DialogFiles fileType)
 	{
-		return lineIndex <= 0 ? text : LanguageSettings.GetSettings(fileType).GetLine(lineIndex, text);
+		return lineIndex <= 0 ? text : LanguageSettings.GetDialogLines(fileType).GetLine(lineIndex, text);
 	}
 }
-
-/*#if UNITY_EDITOR
-[UnityEditor.CustomPropertyDrawer(typeof(LocalizedText))]
-public class LocalizedTextDrawer : UnityEditor.PropertyDrawer
-{
-	private const float Width = 28f;
-	
-	public override void OnGUI(Rect rect, UnityEditor.SerializedProperty property, GUIContent label)
-	{
-		var lineProp = property.FindPropertyRelative("lineIndex");
-		var lineRect = new Rect(rect.position, new Vector2(Width, rect.height));
-		lineProp.intValue = UnityEditor.EditorGUI.IntField(lineRect, lineProp.intValue);
-		var textProp = property.FindPropertyRelative("text");
-		var textRect = new Rect(rect.position + new Vector2(Width, 0), new Vector2(rect.width - Width, rect.height));
-		textProp.stringValue = UnityEditor.EditorGUI.TextField(textRect, textProp.stringValue);
-		if (GUI.changed)
-		{
-			textProp.stringValue = lineProp.intValue <= 0 ? textProp.stringValue : LanguageSettings.CurrentSettings.GetLine(lineProp.intValue, textProp.stringValue);
-			property.serializedObject.ApplyModifiedProperties();
-		}
-	}
-}
-#endif*/

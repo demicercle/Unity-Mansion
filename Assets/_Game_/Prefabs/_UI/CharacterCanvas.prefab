@@ -239,6 +239,7 @@ GameObject:
   - component: {fileID: 927311393624596697}
   - component: {fileID: 3776022068617880954}
   - component: {fileID: 2664158097149689473}
+  - component: {fileID: 5487085319218975302}
   m_Layer: 5
   m_Name: CharacterCanvas
   m_TagString: Untagged
@@ -344,3 +345,16 @@ MonoBehaviour:
   selfCharacter: {fileID: 0}
   detectionFill: {fileID: 4950966310004793074}
   toggleDetection: {fileID: 3273743221968847579}
+--- !u!114 &5487085319218975302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7944228977815162686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac833e03d0cc4d119c8ca2a07f2e3a83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PrefabStageVisibility
+  hideEditor: 1

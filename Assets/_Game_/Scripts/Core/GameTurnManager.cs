@@ -191,7 +191,7 @@ public class GameTurnManager : MonoBehaviour
 				character.SetPartyIndex(partyIndex++);
 		}
 
-		if (GameSave.Current.ShouldLoad)
+		if (GameSave.Current.ShouldLoad())
 		{
 			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
 			GameSave.Current.LoadGame();
@@ -352,7 +352,7 @@ public class GameTurnManager : MonoBehaviour
 		foreach (var partyChar in partyCharacters)
 		{
 			if (partyChar.TryGetAnimation(out var anim))
-				anim.TrySwitchWeapons(false); // relax after fight
+				anim.SwitchWeapons(false);
 		}
 		
 		PartyRest();
@@ -485,7 +485,7 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (character.TryGetAnimation(out var anim))
 				{
-					anim.TrySwitchWeapons(true);
+					anim.SwitchWeapons(true);
 				}
 			}
 		}

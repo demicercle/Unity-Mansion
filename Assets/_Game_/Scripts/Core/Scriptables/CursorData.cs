@@ -22,6 +22,10 @@ public enum CursorType
 	
 	Loot,
 	UseItem,
+	
+	Aim,
+	
+	Drag
 }
 
 [CreateAssetMenu(fileName = "CursorData", menuName = "CursorData", order = 0)]
@@ -68,12 +72,27 @@ public class CursorData : ScriptableObject
 	public CursorType cursorType = default;
 	public Texture2D[] textures = new Texture2D[1];
 	public Vector2 hotspot = Vector2.zero;
-	public float animationSpeed = 1;
+	public int animationSpeed = 0;
 	public bool loopAnimation = false;
 
 	public void Apply(bool animate, RawImage rawImage = null, RectTransform cursorTransform = null)
 	{
-		var tex = textures[animate ? loopAnimation ? (int)(frame/30 * animationSpeed) % textures.Length : (int)Mathf.Clamp(frame, 0, textures.Length - 1) : 0];
+		if (animationSpeed > 0)
+		{
+			if (loopAnimation) frame = (frame + animationSpeed) % textures.Length;
+			else frame = Mathf.Min(frame + animationSpeed, textures.Length - 1);
+		}
+		else if (animate)
+		{
+			if (loopAnimation) frame = (frame + 1) % textures.Length;
+			else frame = Mathf.Min(frame + 1, textures.Length - 1);
+		}
+		else
+		{
+			frame = 0;
+		}
+		
+		var tex = textures[frame];
 		if (rawImage != null && cursorTransform != null)
 		{
 			rawImage.texture = tex;
@@ -83,18 +102,6 @@ public class CursorData : ScriptableObject
 		else
 		{
 			Cursor.SetCursor(tex, hotspot, CursorMode.Auto);
-		}
-
-		if (animate)
-		{
-			if (frame == 0) 
-				frame = textures.Length - 1;
-			else 
-				frame += 1;
-		}
-		else
-		{
-			frame = 0;
 		}
 	}
 }

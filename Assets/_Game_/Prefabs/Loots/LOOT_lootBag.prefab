@@ -9,6 +9,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 100000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
+      propertyPath: m_Icon
+      value: 
+      objectReference: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
+    - target: {fileID: 100000, guid: d37e7ea0f0469484fabfed2bfac28701, type: 3}
       propertyPath: m_Name
       value: LOOT_lootBag
       objectReference: {fileID: 0}
@@ -127,12 +131,12 @@ MonoBehaviour:
   consumeAction: 3
   saveProp: 0
   onlyOnce: 0
-  rebuildNavigation: 0
   autoTriggerDelay: 0
   animatorTrigger: 
   triggerDelay: 0
   animDuration: 1
   animationEvent: 0
+  linkedProp: {fileID: 0}
   _interacted:
     m_PersistentCalls:
       m_Calls: []
@@ -184,5 +188,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.2
-  ignorePresets: 0

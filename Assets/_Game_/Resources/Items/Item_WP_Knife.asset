@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdc478c8643c45d6a47c13b529165a46, type: 3}
+  m_Name: Item_WP_Knife
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  displayName:
+    lineIndex: 5
+    text: Knife
+  icon: {fileID: 2800000, guid: 6f059b1525fb82c4e94d0dfa4fb6e3cd, type: 3}
+  itemTags: 
+  equipOnHand: 0
+  weaponData: {fileID: 11400000, guid: 07e5ef61a7d1ca64382aab7bef9b37ff, type: 2}
+  targetType: 0
+  usableOnDead: 0
+  useRange: 0
+  useGroundRadius: 0
+  isProjectile: 0
+  onUseScript: {fileID: 0}
+  isAmmo: 0
+  maxQuantity: 1

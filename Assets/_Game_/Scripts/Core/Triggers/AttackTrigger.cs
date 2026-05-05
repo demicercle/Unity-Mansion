@@ -107,7 +107,7 @@ public class AttackTrigger : MonoBehaviour
 				if (isInstantAttack) 
 					selfCharacter.Routines.AssignPerformAttack(otherCharacter, useAttackAction);
 				else 
-					selfCharacter.Routines.AssignMoveAndAttack(otherCharacter, otherCharacter.IsUsingRangeWeapon());
+					selfCharacter.Routines.AssignMoveAndAttack(otherCharacter, otherCharacter.IsUsingRangeWeapon(), useAttackAction);
 				
 				triggerCount++;
 				
@@ -139,7 +139,7 @@ public class AttackTrigger : MonoBehaviour
 	#if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
-		if (selfCharacter)
+		if (selfCharacter && Application.isPlaying)
 		{
 			Gizmos.color = Color.red;
 			Utils.DrawGizmosCircle(selfCharacter.GetPosition(), Vector3.up, selfCharacter.GetAttackRange() + triggerRangeOffset);

@@ -6,8 +6,13 @@
 
 
 
-
+no actions!
 miss!
 dodge!
 hit!
 can't!
+take this!
+run!
+heal!
+empty!
+full!

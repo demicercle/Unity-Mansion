@@ -12,9 +12,11 @@ public class NodeHeal : GameNode
 		_in.InitInput(this, "_in", () =>
 		{
 			_amount = GetInputValue<float>("_amount", _amount);
+			_character = GetInputValue("_character", _character);
 			
 			if (_character.TryGetComponent(this, out CharacterEntity character))
 			{
+				DebugLog("healed: " + character + " by " + _amount);
 				character.Heal(_amount);
 			}
 		});

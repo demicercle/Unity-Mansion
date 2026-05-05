@@ -86,6 +86,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 95382248871835717, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: 'items.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 418bf9726b131b44992391ba3c8bb77c, type: 2}
+    - target: {fileID: 95382248871835717, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: 'items.Array.data[6]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 05eedffbe9991bb4fae8b74655a90a71, type: 2}
     - target: {fileID: 634233576569663719, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Name
       value: L_Dagger
@@ -154,10 +162,6 @@ PrefabInstance:
       propertyPath: characterData
       value: 
       objectReference: {fileID: 11400000, guid: 4b33ba831b49b484594e40ec1584662c, type: 2}
-    - target: {fileID: 5745611760749173238, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
-      propertyPath: defaultWeapon
-      value: 
-      objectReference: {fileID: 11400000, guid: ae09845b446b806478324b0d8d7f8fcb, type: 2}
     - target: {fileID: 5757940252895373513, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

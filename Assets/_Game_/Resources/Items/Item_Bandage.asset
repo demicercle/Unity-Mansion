@@ -14,12 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
     lineIndex: 1
-    text: "Bandage\r"
+    text: Bandage
   icon: {fileID: 2800000, guid: 1b310b4f2926ae14280a4e0543f9607a, type: 3}
+  itemTags: 
+  equipOnHand: 0
+  weaponData: {fileID: 0}
   targetType: 1
   usableOnDead: 1
   useRange: 2
-  onUseScript: {fileID: 11400000, guid: 5468590fc2e38c848a62a25eaced5191, type: 2}
-  itemTags: 
   useGroundRadius: 0.2
   isProjectile: 0
+  onUseScript: {fileID: 11400000, guid: 5468590fc2e38c848a62a25eaced5191, type: 2}
+  isAmmo: 0
+  maxQuantity: 1

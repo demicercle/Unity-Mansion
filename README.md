@@ -7,11 +7,19 @@ REFACTO
 - dialog line reference bug in editor
 - door nav obstacle
 - items can be weapons
+- toggle reload
+- training mannequin (invicible life)
+- floating text uses "world canvas" and connect to events in inspector
+
+- reload should consume action
+- when attacking normally, should not stay in aiming after
+- tweak "follow"
+- 8+ HIT but dice is 7
+- floating text "reload"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - add a "drop on ground" and "pickup loot bag" Animation
-- damage VFX (blood)
 - display setItemToUse with others than grenades
 
 SAVE
@@ -51,6 +59,13 @@ ITEMS
 	> "Chicken" (heal HP)
 	> replace "Bandage" by "First aid kit" (to revive characters)
 	> "Grigri" (roll the dice for free, but cost 1 action, unlimited uses)
+	
+	
+	ItemData
+	
+	> WeaponData
+	
+	> UsableItemData
 	
 URLs
 	https://opengameart.org/content/medieval-props-textured
