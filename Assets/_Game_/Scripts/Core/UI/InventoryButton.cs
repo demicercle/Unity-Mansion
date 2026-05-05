@@ -119,7 +119,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 				
 				 if (mouseOverIndex != Inventory.InventorySlot_Weapon || draggedItem.IsWeapon(out var _))
 				{
-					selfInventory.SwapIndex(mouseOverIndex, draggedIndex);
+					selfInventory.SwapIndex(mouseOverIndex, draggedIndex, true);
 					GameInput.Instance.SetDraggedItem(null);
 				}
 			}
@@ -185,9 +185,29 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	{
 		//Debug.LogWarning(this + " " + itemData + " ToggleChanged " + isOn + " TODO");
 		//toggle.isOn = false;
-		if (isOn && itemData && itemData.IsUsable())
+		if (isOn && itemData)
 		{
-			GameInput.Instance.SetItemToUse(itemData, true);
+			if (itemData.IsUsable())
+			{
+				GameInput.Instance.SetItemToUse(itemData, true);
+			}
+			else if (itemData.IsWeapon(out var weaponData))
+			{
+				if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+				{
+					if (selectedCharacter.GetCurrentWeapon() != weaponData)
+					{
+						if (selectedCharacter.TryGetComponent(out Inventory selectedInventory))
+						{
+							selectedInventory.SwapIndex(Inventory.InventorySlot_Weapon, selfIndex, true);
+							if (selectedCharacter.TryGetAnimation(out var anim))
+							{
+								anim.WeaponsChanged();
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 

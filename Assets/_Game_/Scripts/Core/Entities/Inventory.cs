@@ -71,14 +71,14 @@ public class Inventory : MonoBehaviour
 		NotifyChanged();
 	}
 
-	public void SwapIndex(int index1, int index2)
+	public void SwapIndex(int index1, int index2, bool notifyChanged)
 	{
 		var item1 = items[index1];
 		var item2 = items[index2];
 		items[index1] = item2;
 		items[index2] = item1;
 		
-		NotifyChanged();
+		if(notifyChanged) NotifyChanged();
 	}
 
 	public void ClearInventory(bool notifyChanged)

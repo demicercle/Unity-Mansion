@@ -120,6 +120,12 @@ public class CharacterAnimation : MonoBehaviour
 		}
 	}
 
+	public void WeaponsChanged()
+	{
+		StopCoroutine("DoWeaponSwitch");
+		StartCoroutine("DoWeaponSwitch");
+	}
+
 	public bool WeaponsSwitched() => weaponInHand != Weapon.Relax;
 	
 	#region PRIVATE
