@@ -500,6 +500,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		LookDirection(worldPosition - GetPosition(), f);
 	} // TODO not in use
 
+	private Quaternion tempRotation;
 	public void LookDirection(Vector3 getDirection, float f = -1f)
 	{
 //		Debug.Log(this + " LookDirection " + f + " " + getDirection);
@@ -514,19 +515,21 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			return;
 		}
 
-		var radius = agent.GetRadius();
+		tempRotation = transform.rotation;
+		
 		if (f < 0f)
 		{
 			//DebugDrawer.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 1.0f);
-			transform.rotation = Quaternion.LookRotation(getDirection);
+			tempRotation = Quaternion.LookRotation(getDirection);
 		}
 		else
 		{
 			//DebugDrawer.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
+			tempRotation = Quaternion.RotateTowards(tempRotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
 		}
 
-		agent.SetRotationY(transform.rotation.eulerAngles.y);
+		agent.SetRotationY(tempRotation.eulerAngles.y);
+		transform.rotation = tempRotation;
 	}
 
 	public bool IsFacingPosition(Vector3 pos) => IsFacingDirection(pos - GetPosition());
@@ -1108,7 +1111,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			characterAnimation.SwitchWeapons(isAiming || InBattle());
 	}
 
-	public bool IsActing() => IsMoving() || Routines.AnyActive();
+	public bool IsActing() => Routines.AnyActive();
 
 	public void Stop()
 	{

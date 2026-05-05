@@ -12,11 +12,8 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterEntity))]
 public class CharacterAgent : MonoBehaviour
 {
-	private const float ReachDestinationScale = 100.0f;
-	private const float TimeOut = 3f;
-	private const float WaypointMaxEndPointDistance = 0.2f;
-	private const int WaypointRoundDecimals = 1000;
 	private const float WaypointMaxSearchDistance = 28.0f;
+	private const float MinMagnitudeToMove = 0.1f;
 	
 	public static int debugMode { get; set; }
 
@@ -349,7 +346,7 @@ public class CharacterAgent : MonoBehaviour
 	
 	public Vector3 velocity => aiPath.velocity;
 
-	public bool IsMoving() => !aiPath.isStopped /*&& !aiPath.pathPending && velocity.magnitude > Consts.MinMagnitude)*/;
+	public bool IsMoving() => !aiPath.isStopped;
 	   
 	public float GetMinReachDistance() => minReachDistance;
 

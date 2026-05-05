@@ -57,6 +57,7 @@ public class DebugDrawer : MonoBehaviour
 			Line(path.Last(), path.First(), color, duration);
 	}
 	
+	public static void Sphere(Vector3 position, float radius, Color color, float duration =0f) => Sphere(position, Vector3.up, Vector3.one * radius, color, duration);
 	public static void Sphere(Vector3 position, Vector3 direction, Vector3 scale, Color color, float duration = 0f)
 	{
 		if (!shouldDraw) return;

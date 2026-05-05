@@ -29,8 +29,12 @@ public class CharacterFollows : MonoBehaviour
 
 	private void Awake()
 	{
-		enabled = false;
 		dummy = new GameObject("Follow Dummy (" + name + ")").transform;
+	}
+
+	private void Start()
+	{
+		enabled = false;
 	}
 
 	private void OnDestroy()
