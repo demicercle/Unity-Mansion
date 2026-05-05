@@ -547,7 +547,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		else
 		{
 			//DebugDrawer.WireArrow(GetEyesPosition(), getDirection, new Vector3(radius + 1.0f, 1, 1), Color.cyan, 0.0f);
-			tempRotation = Quaternion.RotateTowards(tempRotation, Quaternion.LookRotation(getDirection), f * agent.rotationSpeed); //TODO property "rotationSpeed" separated from agent
+			tempRotation = Quaternion.RotateTowards(tempRotation, Quaternion.LookRotation(getDirection), f * agent.GetRotationSpeed()); //TODO property "rotationSpeed" separated from agent
 		}
 
 		agent.SetRotationY(tempRotation.eulerAngles.y);
