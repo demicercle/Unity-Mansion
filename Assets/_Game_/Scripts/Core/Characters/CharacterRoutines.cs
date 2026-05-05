@@ -592,7 +592,7 @@ public class CharacterRoutines : MonoBehaviour
 		
 		yield return agent.AssignDestination(dest);
 		
-		if (!agent.hasDestination)
+		/*if (!agent.hasDestination)
 		{
 			foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(_selfCharacter.GetPosition(), dest))
 			{
@@ -605,7 +605,7 @@ public class CharacterRoutines : MonoBehaviour
 				if (agent.hasDestination)
 					break;
 			}
-		}
+		}*/
 
 		if (!agent.hasDestination)
 		{
