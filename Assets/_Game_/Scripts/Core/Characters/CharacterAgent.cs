@@ -13,11 +13,9 @@ using UnityEngine;
 public class CharacterAgent : MonoBehaviour
 {
 	private const float WaypointMaxSearchDistance = 28.0f;
-	private const float MinMagnitudeToMove = 0.1f;
 	
 	public static int debugMode { get; set; }
 
-	//[Header("Movement")] [SerializeField] private bool forceNoObstacle = false;
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
@@ -32,14 +30,6 @@ public class CharacterAgent : MonoBehaviour
 	
 	[Header("Circles")]
 	[SerializeField] private CircleRenderer moveTarget;
-	
-	//public bool PositionChanged(Vector3 p1, Vector3 p2) => p1.ToString() != p2.ToString();
-
-	public bool updateRotation
-	{
-		get => aiPath.updateRotation;
-		set => aiPath.updateRotation = value;
-	}
 	
 	public float GetMaxSpeed() => moveSpeed;
 
@@ -290,15 +280,10 @@ public class CharacterAgent : MonoBehaviour
 		if (aiDestinationSetter.target == followTarget) return;
 		if (debugMode > 0) Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
 		hasDestination = false;
-		if (IsMoving())
-		{
-			StopMovement();
-		}
 		aiDestinationSetter.enabled = followTarget;
 		aiDestinationSetter.target = followTarget;
 		aiPath.canSearch = followTarget != null;
 		aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
-		if (followTarget && !IsMoving()) StartMove();
 	}
 
 	public void ClearDestination()
@@ -458,10 +443,13 @@ public class CharacterAgent : MonoBehaviour
 		if (debugMode > 0)
 		{
 			debugString = "";
+			
+			if (IsMoving()) debugString += "IsMoving" + "\n";
 
 			if (lastVectorPath.Count > 0)
 			{
 				debugString += "path:" + lastVectorPath.Count + "\n";
+
 				
 				if(hasDestination)
 					debugString += NavUtils.NavDistance(aiPath.position, aiPath.destination).ToString("N2") 

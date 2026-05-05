@@ -63,7 +63,6 @@ public class CharacterFollows : MonoBehaviour
 			selfCharacter.Routines.onStarted -= OnNewRoutineStarted;
 			StopAllCoroutines();
 			agent.AssignFollowTransform(null);
-			agent.updateRotation = true;
 		}
 	}
 
@@ -83,8 +82,17 @@ public class CharacterFollows : MonoBehaviour
 		{
 			headingPos = leaderCharacter.GetPosition();
 			headingPos += leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()) * headingDistance;
+
+			if (selfCharacter.GetDistanceTo(dummy.position) <= followDistance)
+			{
+				agent.StopMovement();
+			}
+			else
+			{
+				agent.AssignFollowTransform(dummy, followDistance);
+				agent.StartMove();
+			}
 			
-			agent.AssignFollowTransform(dummy, followDistance);
 			agent.SetObstacle(!agent.IsMoving());
 			
 			if (debugMode > 0)
@@ -111,16 +119,6 @@ public class CharacterFollows : MonoBehaviour
 			
 			dummy.position = headingSpeed <= 0 ? headingPos :
 				Vector3.Lerp(dummy.position, headingPos, Time.deltaTime * headingSpeed);
-
-			if (leaderCharacter && agent.velocity.magnitude <= MinVelocityToLook)
-			{
-				agent.updateRotation = false;
-				//selfCharacter.HeadLookAt(leaderCharacter.GetEyesPosition(), Time.deltaTime);
-			}
-			else
-			{
-				agent.updateRotation = true;
-			}
 		
 			if (debugMode > 0)
 			{
