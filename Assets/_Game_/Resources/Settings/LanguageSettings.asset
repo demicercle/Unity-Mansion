@@ -30,9 +30,10 @@ MonoBehaviour:
     - can't!
     - take this!
     - run!
-    - heal!
+    - healed!
     - empty!
     - full!
+    - loaded!
   - dialogText: {fileID: 4900000, guid: 5ba3278974654674b5e0dc16313e6548, type: 3}
     lines:
     - 

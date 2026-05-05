@@ -969,6 +969,8 @@ public class CharacterRoutines : MonoBehaviour
 				Debug.LogWarning(this + " unable to remove item " + ammoItem);
 			}
 		}
+		
+		_selfCharacter.FloatingText(LanguageSettings.Main.Reload);
 
 		selfInventory.NotifyChanged();
 

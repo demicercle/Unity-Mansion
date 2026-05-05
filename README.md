@@ -10,10 +10,6 @@ REFACTO
 - toggle reload
 - training mannequin (invicible life)
 - floating text uses "world canvas" and connect to events in inspector
-
-- reload should consume action
-- when attacking normally, should not stay in aiming after
-- tweak "follow"
 - 8+ HIT but dice is 7
 - floating text "reload"
 
