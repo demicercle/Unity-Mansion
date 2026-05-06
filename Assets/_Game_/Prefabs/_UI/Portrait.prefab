@@ -163,11 +163,23 @@ MonoBehaviour:
   m_Interactable: 0
   m_TargetGraphic: {fileID: 0}
   toggleTransition: 1
-  graphic: {fileID: 5470017883367229370}
+  graphic: {fileID: 0}
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 631830735785488586}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 1
 --- !u!1 &1000918229248116476
 GameObject:
@@ -1434,9 +1446,10 @@ MonoBehaviour:
   toggleHasActions: {fileID: 7129461005193406498}
   toggleTurnBased: {fileID: 4091117547423225140}
   toggleDodge: {fileID: 8841845189889243067}
-  togglePrepare: {fileID: 6163281083766293050}
+  toggleRiposte: {fileID: 6163281083766293050}
   healthSprite: {fileID: 7741850551411540515}
   healthLabel: {fileID: 3746229692758425950}
+  actionsLabel: {fileID: 0}
   dodgeLabel1: {fileID: 0}
   dodgeLabel2: {fileID: 0}
 --- !u!1 &6253668678183353034
@@ -1531,7 +1544,19 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6253668678183353034}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 1
 --- !u!1 &6613174326557136626
 GameObject:
