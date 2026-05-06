@@ -804,6 +804,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     public void Attack(int attackNumber, Side attackSide, float duration)
     {
 	   if(CharacterAnimation.debugMode > 0) Debug.Log(this + " Attack attackNumber=" + attackNumber + " attackSide=" + attackSide + " duration=" + duration + " rightWeapon=" + rightWeapon + " leftWeapon=" + leftWeapon);
+	   animator.SetInteger(AnimationParameters.SheathLocation, 0);
 	   animator.SetInteger(AnimationParameters.LeftWeapon, (int)leftWeapon);
 	   animator.SetInteger(AnimationParameters.RightWeapon, (int)rightWeapon); // force
 	    animator.SetSide(attackSide);

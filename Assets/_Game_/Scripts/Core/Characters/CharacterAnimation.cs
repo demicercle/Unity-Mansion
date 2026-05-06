@@ -317,11 +317,12 @@ public class CharacterAnimation : MonoBehaviour
 		{
 			if (!TrySetTrigger(parameters.attackTrigger))
 			{
-				if (rpgAnimationHandler)
-				{
-					InstantSwitchWeapons(true);
-					rpgAnimationHandler.Attack(weaponInHand); // TODO
-				}
+			}
+			
+			if (rpgAnimationHandler)
+			{
+				InstantSwitchWeapons(true);
+				rpgAnimationHandler.Attack(weaponInHand); // TODO
 			}
 
 			if (args is CharacterEntity)
@@ -342,7 +343,7 @@ public class CharacterAnimation : MonoBehaviour
 		if (!value) 
 			timeAiming = 0f;
 		
-		if(CharacterEntity.debugAim > 1) Debug.Log(this + " OnAiming " + value + " " + position + " " + timeAiming.ToString("N2"));
+		if(CharacterEntity.debugAim > 2) Debug.Log(this + " OnAiming " + value + " " + position + " " + timeAiming.ToString("N2"));
 		
 		if (rpgAnimationHandler)
 		{

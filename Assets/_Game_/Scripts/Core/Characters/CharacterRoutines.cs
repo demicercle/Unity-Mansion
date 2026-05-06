@@ -432,15 +432,17 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 
-		IAttackable other = null;
-		RaycastHit hit = default;
+		while (!_selfCharacter.IsFacingPosition(worldPosition))
+		{
+			_selfCharacter.LookWorldPosition(worldPosition, Time.deltaTime);
+			yield return null;
+		}
+		
+		_selfCharacter.UseAction(CharacterAction.Attack, useAction, null);
 
-		_selfCharacter.RaycastShoot(out hit);
+		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 		
-		hit.collider?.TryGetComponent(out other);
-		
-		if(debugMode > 0) Debug.Log(this + " WaitCharacterShootAt touch " + other);
-		yield return StartCoroutine(WaitCharacterHitOrShoot(other, useAction, hit));
+		ShootAtAimingPosition(-1);
 	}
 
 	private IEnumerator WaitCharacterPerformAttack(IAttackable target, bool useAction)
@@ -460,15 +462,6 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 		
-		_selfCharacter.SetAimingPosition(target.GetCenterPosition());
-
-		yield return StartCoroutine(WaitCharacterHitOrShoot(target, useAction, default));
-		
-		_selfCharacter.SetAiming(false);
-	}
-
-	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit shootHit)
-	{
 		var currentWeapon = _selfCharacter.GetCurrentWeapon();
 		if (currentWeapon.IsReloadable() && currentWeapon.IsEmptyAmmo())
 		{
@@ -487,59 +480,52 @@ public class CharacterRoutines : MonoBehaviour
 		if(useAction) 
 			_selfCharacter.UseAction(CharacterAction.Attack, useAction, target);
 		
-		var atkRoll = _selfCharacter.RollDice();
+		yield return null;
 		
+		var atkRoll = _selfCharacter.RollDice();
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 
-		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
-		//TODO DamageInfo, hit check (GD)
-
-		var from = _selfCharacter.GetEyesPosition();
-		
-		var dir = target != null ? (target.GetCenterPosition() - from).normalized 
-			: shootHit.collider ? (shootHit.point - from).normalized 
-			: _selfCharacter.GetDirection();
-		
-		var range = currentWeapon.GetAttackRange();
-		
-		if (currentWeapon.GetShootInfos(out var shoots))
-		{
-			var closest = range;
-			for (int i = 0; i < shoots.Length; i++)
-			{
-				var maxDist = shoots[i].clampDistance ? closest : range;
-				foreach (var hit in shoots[i].Raycast(from, dir, maxDist, 1.0f))
-				{
-					ProcessHit(hit.collider?.GetComponent<IAttackable>(), hit, atkRoll + shoots[i].RollAtkMod(), from, dir, maxDist);
-					closest = Mathf.Min(closest, hit.distance);
-				}
-				
-				if(shoots[i].delay > 0)
-					yield return new WaitForSeconds(shoots[i].delay);
-			}
-		}
-		else
-		{
-			ProcessHit(target, shootHit, atkRoll, from, dir, range);
-		}
+		_selfCharacter.SetAimingPosition(target.GetCenterPosition(), 1.0f);
+		yield return null;
+		ShootAtAimingPosition(atkRoll);
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
 
-	private void ProcessHit(IAttackable target, RaycastHit shootHit, float atkRoll, Vector3 from, Vector3 dir, float maxDist)
+	private void ShootAtAimingPosition(float atkRoll)
 	{
-		if(debugMode > 0) Debug.Log(this + " ProcessHit " + " atkRoll=" + atkRoll + " hit=" + shootHit + " target=" + target);
+		if(debugMode > 0) Debug.Log(this + " ShootAtAimingPosition atkRoll=" + atkRoll);
 		
-		foreach (var wp in _selfCharacter.GetComponentsInChildren<WeaponRenderer>())
+		var weapon = _selfCharacter.GetCurrentWeapon();
+		var fromPosition = _selfCharacter.GetEyesPosition();
+		if (_selfCharacter.RaycastShoot(fromPosition, out var shoots, 1.0f))
 		{
-			wp.OnShoot(from, shootHit.collider ? shootHit.point : from + dir * maxDist);
+			foreach (var shootHit in shoots)
+			{
+				if(debugMode > 0) Debug.Log(this + " shootHit=" + shootHit.collider);
+				if (shootHit.collider && shootHit.collider.TryGetComponent(out IAttackable target))
+				{
+					if (atkRoll < 0f)
+						atkRoll = _selfCharacter.RollDice();
+					
+					ProcessHit(target, atkRoll);
+				}
+				else
+				{
+					weapon.TrySpawnDecal(shootHit);
+				}
+				
+				foreach (var wp in _selfCharacter.GetComponentsInChildren<WeaponRenderer>())
+				{
+					wp.OnShoot(fromPosition, shootHit.point);
+				}
+			}
 		}
-		
-		if (target == null)
-		{
-			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
-			return;
-		}
+	}
+
+	private void ProcessHit(IAttackable target, float atkRoll)
+	{
+		if (debugMode > 0) Debug.Log(this + " ProcessHit " + " atkRoll=" + atkRoll + " target=" + target);
 		
 		var atkResult = _selfCharacter.TryHit(target, atkRoll);
 		switch (atkResult)
@@ -562,7 +548,6 @@ public class CharacterRoutines : MonoBehaviour
 				};
 				Debug.Log(this + " AttackResult.Hit " + target + " " + damageInfo);
 				target.TakeDamage(damageInfo, _selfCharacter);
-				_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
 				break;
 		}
 
@@ -626,23 +611,9 @@ public class CharacterRoutines : MonoBehaviour
 			
 		var agent = _selfCharacter.GetAgent();
 		agent.StopMovement(); // stop any movement
+		agent.SetReachDistance(reachDistance);
 		
 		yield return agent.AssignDestination(dest);
-		
-		/*if (!agent.hasDestination)
-		{
-			foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(_selfCharacter.GetPosition(), dest))
-			{
-				if (wp.ignoreNavigation) continue;
-				
-				dest = wp.GetPosition();
-				
-				if(debugMode > 0) Debug.Log(this + " Assign Waypoint dest=" + wp);
-				yield return agent.AssignDestination(dest);
-				if (agent.hasDestination)
-					break;
-			}
-		}*/
 
 		if (!agent.hasDestination)
 		{

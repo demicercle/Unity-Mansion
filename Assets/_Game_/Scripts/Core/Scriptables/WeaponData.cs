@@ -16,30 +16,22 @@ public class WeaponData : ScriptableObject
 		public float angle;
 		public float delay;
 		public Vector2 atkMod;
-		public bool raycastAll;
 		public bool clampDistance;
 		
 		public float RollAtkMod() => Random.Range(atkMod.x, atkMod.y);
 
-		public RaycastHit[] Raycast(Vector3 from, Vector3 dir, float distance, float drawDuration)
+		public RaycastHit Raycast(Vector3 from, Vector3 dir, float range)
 		{
-			dir = Quaternion.Euler(0, angle, 0) * dir;
+			dir = Quaternion.Euler(0, angle, 0) * Vector3.Scale(new Vector3(1,0,1), dir).normalized;
 
-			if (debugMode > 0)
+			if (!Physics.Raycast(from, dir, out var hit, range, Layers.MaskAiming))
 			{
-				DebugDrawer.Line(from, from + dir * distance, Color.magenta, drawDuration);
+				hit.point = from + dir * range;
 			}
 
-			if (raycastAll)
-			{
-				return Physics.RaycastAll(from, dir, distance, Layers.MaskAiming);
-			}
-			else
-			{
-				return Physics.Raycast(from, dir, out var hit, distance, Layers.MaskAiming)
-					? new RaycastHit[] { hit }
-					: Array.Empty<RaycastHit>();
-			}
+			//Debug.Log("hit=" + hit.point + " " + hit.collider);
+			
+			return hit;
 		}
 	}
 	

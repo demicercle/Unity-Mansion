@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using IngameDebugConsole;
@@ -63,8 +64,11 @@ public class GameInput : MonoBehaviour
 		{
 			raycastLayers = Layers.MaskAiming;
 			hitAim = Physics.Raycast(raycastRay, out aimHit, 100f, raycastLayers);
-			if(hitAim && RoomTrigger.IsPositionVisible(aimHit.point))
+			if (hitAim && RoomTrigger.IsPositionVisible(aimHit.point))
+			{
+				outRaycast = aimHit;
 				return CursorRaycastResult_Aim;
+			}
 		}
 
 		hitAim = false;
@@ -150,6 +154,7 @@ public class GameInput : MonoBehaviour
 	private CharacterEntity selectedCharacter;
 	private CharacterAgent selectedAgent;
 	private Collider lastMouseOverObject;
+	private Collider lastAimedObject;
 	private Vector3 lastNavPosition;
 	private bool mouseOverChanged;
 	private bool mouseDown, orbitWithInputs;
@@ -428,6 +433,8 @@ public class GameInput : MonoBehaviour
 			lastCursorResult = CursorRaycast(out var hit);
 			mouseOverChanged = lastMouseOverObject != hit.collider;
 			lastMouseOverObject = hit.collider;
+			lastAimedObject = hit.collider;
+//			if(CharacterEntity.debugAim > 1) Debug.Log(this +"  lastAimedObject=" + lastAimedObject);
 			mouseHasMoved = mouseHasMoved || mouseOverChanged || NavUtils.NavDistance(hit.point, lastNavPosition) >= nodeSize;
 			lastNavPosition = hit.point;
 		}
@@ -436,6 +443,7 @@ public class GameInput : MonoBehaviour
 			lastCursorResult = CursorRaycastResult_None;
 			mouseOverChanged = lastMouseOverObject != null;
 			lastMouseOverObject = null;
+			lastAimedObject = null;
 		}
 		
 		debugString += "\nresult==" + lastCursorResult + " " + (lastMouseOverObject ? lastMouseOverObject.name : "no hit");
@@ -451,20 +459,24 @@ public class GameInput : MonoBehaviour
 				
 				if (CanAssignOnMouseOver(selectedCharacter))
 				{
+					if (aimHit.collider)
+					{
+						if (aimHit.collider.gameObject.layer == Layers.LayerGround)
+						{
+							aimHit.point += selectedCharacter.GetEyesPosition(true);
+						}
+					}
+					
 					selectedCharacter.SetAimingPosition(aimHit.point);
 					
-					if (mouseHasMoved || mouseOverChanged)
+					if (selectedCharacter.RaycastShoot(selectedCharacter.GetEyesPosition(), out var shoots))
 					{
-						selectedCharacter.RaycastShoot(out var lastHit); // mouse over aiming
-						if(debugMode > 0) Debug.Log(this + " RaycastShoot " + lastHit.collider);
-					}
-
-					if (selectedCharacter.TryGetLastShootHit(out var hitResult))
-					{
-						debugString += "\n>hit:" + hitResult.collider;
-						if (hitResult.collider.TryGetComponent(out IAttackable hitAttackable))
+						foreach (var shoot in shoots)
 						{
-							hitAttackable.AimedBy(selectedCharacter);
+							if (shoot.collider && shoot.collider.TryGetComponent(out IAttackable attackable))
+							{
+								attackable.AimedBy(selectedCharacter);
+							}
 						}
 					}
 				}
@@ -664,7 +676,7 @@ public class GameInput : MonoBehaviour
 	{
 		
 	}
-	
+
 	private void LateUpdate()
 	{
 		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading && !gameTurnManager.IsWaiting() 
@@ -1249,16 +1261,10 @@ public class GameInput : MonoBehaviour
 
 	public bool IsBlocked() => currentCursor == CursorType.Blocked;
 
-	public bool WantsToAttack(out CharacterEntity target)
+	public bool GetAimedObject(out GameObject target)
 	{
-		if (currentCursor == CursorType.Attack)
-		{
-			if (lastMouseOverObject)
-				return lastMouseOverObject.TryGetComponent(out target);
-		}
-
-		target = null;
-		return false;
+		target = lastAimedObject?.gameObject;
+		return target;
 	}
 
 	public CharacterEntity GetSelectedCharacter() => selectedCharacter;

@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26b91483504440d7b3e2d5878f8dde34, type: 3}
   m_Name: WP_Unarmed
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  noAttack: 0
+  hitChance: 8
   minDamage: 1
   maxDamage: 1
   damageCurve:
@@ -38,9 +40,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  hitChance: 8
   isRanged: 0
-  attackRange: 0
+  attackRange: 0.5
   rangeHitCurve:
     serializedVersion: 2
     m_Curve:
@@ -89,8 +90,12 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  noAttack: 0
+  consumeAmmo: 0
+  ammoTags: 
+  maxAmmo: 0
+  shootInfos: []
   decals:
   - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
   rpgWeaponR: 0
   rpgWeaponL: -1
+  noAim: 0

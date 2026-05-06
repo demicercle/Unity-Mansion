@@ -222,18 +222,11 @@ public class GameCanvas : MonoBehaviour
 
 		targetCharacter = null;
 		
-		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter)
 		{
-			gameInput.WantsToAttack(out targetCharacter);
-
 			if (selectedCharacter.IsAiming()
-			    && selectedCharacter.TryGetLastShootHit(out var lastHit)
-			    && lastHit.collider.TryGetComponent(out CharacterEntity hitTarget))
-			{
-				targetCharacter = hitTarget; // over target, display attack stats
-			}
-			
-			if (targetCharacter)
+			    && gameInput.GetAimedObject(out var mouseOverObject) && mouseOverObject.TryGetComponent(out targetCharacter) 
+			    && selectedCharacter.WillHit(targetCharacter.gameObject))
 			{
 				cursorText.transform.position = gameInput.GetMousePosition();
 				cursorText.raycastTarget = false;
@@ -244,14 +237,10 @@ public class GameCanvas : MonoBehaviour
 				if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
 				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
 				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
-				/*cursorText.text =
-					Mathf.RoundToInt(
-						selectedCharacter.CalculateHitChance(targetCharacter) *
-						100) + "%";*/
 			}
 		}
 		
-		cursorText.gameObject.SetActive(targetCharacter != null);
+		cursorText.gameObject.SetActive(targetCharacter);
 	}
 
 	private void OnPlayerChanged(bool isPlayerTurn)

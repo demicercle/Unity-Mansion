@@ -7,7 +7,7 @@ using UnityEngine.TextCore.Text;
 
 public class WeaponRenderer : MonoBehaviour
 {
-    public static int debugMode => CharacterAnimation.debugMode;
+    public static int debugAim => CharacterEntity.debugAim;
     
     public bool isLeft;
     public Weapon rpgWeapon = Weapon.Relax;
@@ -62,19 +62,21 @@ public class WeaponRenderer : MonoBehaviour
     private void DisplayAimLine(Vector3 from, params Vector3[] aimingPositions)
     {
         if (!aimLine) return;
+        if(debugAim > 1) Debug.Log(this + " DisplayAimLine " + aimingPositions.Length);
         aimLine.gameObject.SetActive(true);
         aimLine.loop = false;
         aimLine.useWorldSpace = true;
         aimLine.positionCount = aimingPositions.Length * 3;
-        for (int i = 0; i < aimingPositions.Length; i++)
+        aimLine.transform.position = from;
+        int i = 0;
+        int a = 0;
+        while (i < aimLine.positionCount && a < aimingPositions.Length)
         {
-            aimLine.SetPosition(i, from);
-            aimLine.SetPosition(i + 1, aimingPositions[i]);
-            aimLine.SetPosition(i + 2, from);
+            if (debugAim > 2) Debug.Log(this + " DisplayAimLine " + i + "/" + aimLine.positionCount + " " + a + "/" + aimingPositions.Length);
+            aimLine.SetPosition(i++, from);
+            aimLine.SetPosition(i++, aimingPositions[a++]);
+            aimLine.SetPosition(i++, from);
         }
-        /*aimLine.SetPosition(0, aimFromEyesPosition && parentCharacter ? aimLine.transform.InverseTransformPoint(parentCharacter.GetEyesPosition()) : Vector3.zero);
-        aimLine.SetPosition(1, aimLine.transform.InverseTransformPoint(aimingPosition));
-        if(CharacterEntity.debugAim > 1) Debug.Log("DisplayAimLine: " + aimingPosition );*/
     }
     
     private void OnEnable()
@@ -98,7 +100,7 @@ public class WeaponRenderer : MonoBehaviour
             aimFrom = transform.position;
             if (shootFromEyesPosition) aimFrom = parentCharacter.GetEyesPosition();
             
-            if (!parentCharacter.IsActing() && parentCharacter.RaycastAllAimingPositions(aimFrom, out var positionsTo))
+            if (!parentCharacter.IsActing() && parentCharacter.GetShootLines(out var positionsTo))
             {
                 wasAiming = true;
                 DisplayAimLine(aimFrom, positionsTo);
@@ -109,18 +111,6 @@ public class WeaponRenderer : MonoBehaviour
                 HideAimLine();
             }
         }
-
-       /* if (shootLine && shootLine.gameObject.activeSelf)
-        {
-            shootLine.loop = false;
-            shootLine.useWorldSpace = false;
-            shootLine.positionCount = 2;
-            shootLine.SetPosition(0, shootLine.transform.InverseTransformPoint(muzzlePosition));
-            shootLine.SetPosition(1, shootLine.transform.InverseTransformPoint(shootPosition));
-            if(CharacterEntity.debugAim > 1) Debug.Log("DisplayShootLine: " + shootPosition );
-            
-            HideAimLine();
-        }*/
     }
 
     private void Awake()

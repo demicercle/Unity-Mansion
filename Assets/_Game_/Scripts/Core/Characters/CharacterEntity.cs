@@ -576,7 +576,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public Vector3 GetSavedPosition() => new Vector3(Mathf.Round(transform.position.x * VectorDecimals) / VectorDecimals,
 		Mathf.Round(transform.position.y * VectorDecimals) / VectorDecimals, Mathf.Round(transform.position.z * VectorDecimals) / VectorDecimals);
 	
-	public Vector3 GetEyesPosition() => GetPosition() + Vector3.up * GetAgent().GetHeight() * 0.9f; // TODO "GetAgent()"
+	public Vector3 GetEyesPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.9f; // TODO "GetAgent()"
 
 	public Vector3 GetCenterPosition() => GetCenterPosition(false);
 	public Vector3 GetCenterPosition(bool local) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.5f;  // TODO "GetAgent()"
@@ -799,7 +799,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public float GetAttackRange()
 	{
-		return Mathf.Max( currentWeapon ? currentWeapon.GetAttackRange() : defaultWeapon ? defaultWeapon.GetAttackRange() : 0f, agent.GetRadius() + MinAttackRange);
+		if (IsUsingRangeWeapon())
+		{
+			return currentWeapon.GetAttackRange();
+		}
+		else
+		{
+			return agent.GetRadius() + Mathf.Max(MinAttackRange, currentWeapon.GetAttackRange());
+		}
 	}
 	
 	public float GetAttackReachDistance(IAttackable target)
@@ -994,6 +1001,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			defaultWeapon = WeaponData.CreateInstance<WeaponData>();
 		}
 
+		currentWeapon = defaultWeapon;
+		
 		characterCanvas.gameObject.SetActive(false);
 	}
 
@@ -1119,72 +1128,83 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public event System.Action<bool, Vector3> onAiming;
 
 	public bool IsAiming() => isAiming;
-	
-	public bool TryGetLastShootHit(out RaycastHit hit)
-	{
-		hit = lastShootHitResult;
-		return hit.collider;
-	}
-	
-	public bool RaycastShoot(out RaycastHit hit)
-	{
-		var shootStart = GetEyesPosition() + transform.forward * (GetRadius() + 0.01f);
-		var shootEnd = aimingPosition;
-		var shootDir = (shootEnd - shootStart).normalized;
-		if (!IsUsingRangeWeapon())
-			shootEnd = GetCenterPosition() + shootDir * MinAttackRange;
-		if (debugAim > 0) DebugDrawer.Line(shootStart, shootEnd, Color.red, debugAim * 0.5f);
-		if (isAiming && Physics.Linecast(shootStart, shootEnd + shootDir, out hit, Layers.MaskAiming) && hit.collider.gameObject != gameObject)
-		{
-			lastShootHitResult = hit;
-			return true;
-		}
-		else
-		{
-			lastShootHitResult = hit = default;
-			return false;
-		}
-	}
 
 	public bool TryGetAimingPosition(out Vector3 world)
 	{
 		world = aimingPosition;
-		
 		return isAiming;
 	}
 
-	public bool RaycastAllAimingPositions(Vector3 from, out Vector3[] world)
+	public bool WillHit(GameObject target)
 	{
-		world = Array.Empty<Vector3>();
+		return lastShootHits.Any(hit => hit.collider?.gameObject == target);
+	}
 
+	public bool GetShootLines(out Vector3[] hitPoints)
+	{
+		hitPoints = new Vector3[lastShootHits.Length];
+		for (int i = 0; i < hitPoints.Length; i++)
+		{
+			hitPoints[i] = lastShootHits[i].point;
+		}
+		return isAiming && hitPoints.Length > 0;
+	}
+
+	private RaycastHit[] lastShootHits = Array.Empty<RaycastHit>();
+	public bool RaycastShoot(Vector3 from, out RaycastHit[] hits, float draw = 0f)
+	{
+		hits = Array.Empty<RaycastHit>();
+
+		var dir = (aimingPosition - from).normalized;
+		var range = GetAttackRange();
+		
 		if (isAiming)
 		{
 			if (currentWeapon.GetShootInfos(out var shoots))
 			{
-				var dir = (aimingPosition - from).normalized;
-				var range = currentWeapon.GetAttackRange();
-				foreach (var shoot in shoots)
+				hits = new RaycastHit[shoots.Length];
+				for(int i = 0; i < shoots.Length; i++)
 				{
-					world = world
-						.Concat(shoot.Raycast(from, dir, range, 0f)
-							.ToList().ConvertAll(hit => hit.collider ? hit.point : from + dir * range))
-						.ToArray();
+					hits[i] = shoots[i].Raycast(from, dir, range);
+					if (!hits[i].collider)
+						hits[i].point = from + dir * range;
 				}
 			}
 			else
 			{
-				world = new[]{aimingPosition};
+				hits = new RaycastHit[1];
+				hits[0] = new WeaponData.ShootInfo()
+				{
+					angle = 0,
+					delay = 0,
+					atkMod = Vector2.zero,
+					clampDistance = false,
+				}.Raycast(from, dir, range);
 			}
 		}
 
-		return world.Length > 0;
+		if (debugAim > 0)
+		{
+			//DebugDrawer.Line(from, from + dir * range, Color.yellow, 0.2f);
+			
+			for (int i = 0; i < hits.Length; i++)
+			{
+				DebugDrawer.Line(from, hits[i].point, hits[i].collider ? Color.red : Color.green, draw);
+				if (debugAim > 1) Debug.Log(this + " range=" + range + " hits " + i + " " + hits[i].collider);
+			}
+		}
+
+		lastShootHits = hits;
+//		if (debugAim > 1) Debug.Log(this + " lastShootHits=" + lastShootHits.Length + "\n>" + Utils.ArrayStr(lastShootHits.ToList().ConvertAll(h => h.collider?.ToString())));
+		
+		return hits.Length > 0;
 	}
 
-	public void SetAimingPosition(Vector3 world)
+	public void SetAimingPosition(Vector3 world, float draw = 0)
 	{
 		SetAiming(true);
 		aimingPosition = world;
-		if(debugAim > 0) DebugDrawer.Line(GetEyesPosition(), world, Color.red, 0f);
+		if(debugAim > 0) DebugDrawer.Sphere(world, 0.1f, Color.red, draw);
 		onAiming?.Invoke(isAiming, world);
 	}
 	
