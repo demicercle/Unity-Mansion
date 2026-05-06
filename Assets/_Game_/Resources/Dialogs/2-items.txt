@@ -11,8 +11,8 @@ First aid kit
 Give back +5 HP. Can be used on dead people.
 Grenade
 When thrown, explodes after a few seconds, dealing 3-18 damages all round.
-Ammo Box
-Used to reload Pistol weapons.
+Pistol Ammo
+Used to reload Pistols
 Pistol
 Deals 1-6 damages, up to 12 meters.
 Knife
@@ -23,6 +23,8 @@ Energy Drink
 Give 2 extra actions for this turn, only usable in combat.
 Salt & Pepper Chips
 Give +1 HP. 
+Rifle
+Deals 4-8 damages, up to 6 meters.
 
 
 

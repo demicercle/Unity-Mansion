@@ -77,7 +77,7 @@ public class WeaponRenderer : MonoBehaviour
     
     private void OnEnable()
     {
-        if(debugMode > 0) Debug.Log(this + " OnEnable() parentCharacter=" + parentCharacter);
+//        if(debugMode > 0) Debug.Log(this + " OnEnable() parentCharacter=" + parentCharacter);
         
         foreach (var rd in renderers)
         {
@@ -91,7 +91,7 @@ public class WeaponRenderer : MonoBehaviour
 
     private void OnDisable()
     {
-        if(debugMode > 0) Debug.Log(this + " OnDisable() parentCharacter=" + parentCharacter);
+ //       if(debugMode > 0) Debug.Log(this + " OnDisable() parentCharacter=" + parentCharacter);
     }
 
     private void LateUpdate()

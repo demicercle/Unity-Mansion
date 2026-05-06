@@ -158,7 +158,9 @@ namespace RPGCharacterAnims
 		/// <returns>Attack animation number.</returns>
 		public static int RandomAttackNumber(Side sideType, Weapon weapon)
 		{
-			if (weapon.ToString().StartsWith("TwoHand")) sideType = Side.None;
+			if (weapon != Weapon.Unarmed && !weapon.ToString().StartsWith("Left") && !weapon.ToString().StartsWith("Right")) 
+				sideType = Side.None;
+			
 			switch (sideType) {
 				case Side.None:
 					switch (weapon) {

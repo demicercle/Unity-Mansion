@@ -476,6 +476,14 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.FloatingText(LanguageSettings.Main.Empty);
 			yield break;
 		}
+
+		if (_selfCharacter.TryGetAnimation(out var anim))
+		{
+			anim.SwitchWeapons(true);
+			
+			do yield return null;
+			while (anim.IsSwitchingWeapons);
+		}
 		
 		if(useAction) 
 			_selfCharacter.UseAction(CharacterAction.Attack, useAction, target);

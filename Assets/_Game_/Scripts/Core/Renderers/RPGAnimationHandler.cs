@@ -787,10 +787,11 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     #region ATTACKS
 
     public void Attack_Right() => Attack(Side.Right);
-    public void Attack(Side attackSide) => Attack(AnimationData.RandomAttackNumber(attackSide, attackSide == Side.Right ? rightWeapon : leftWeapon), attackSide, 1.0f);
+    public void Attack(Weapon weapon) => Attack(sideWeapons.Contains(weapon) ? Side.Right : Side.None);
+    public void Attack(Side attackSide) => Attack(AnimationData.RandomAttackNumber(attackSide, attackSide == Side.Left ? leftWeapon : rightWeapon), attackSide, 1.0f);
     public void Attack(int attackNumber, Side attackSide, float duration)
     {
-	   if(CharacterAnimation.debugMode > 0) Debug.Log(this + " " + attackNumber + " " + attackSide + " " + duration + " " + rightWeapon + " " + leftWeapon);
+	   if(CharacterAnimation.debugMode > 0) Debug.Log(this + " Attack attackNumber=" + attackNumber + " attackSide=" + attackSide + " duration=" + duration + " rightWeapon=" + rightWeapon + " leftWeapon=" + leftWeapon);
 	   animator.SetInteger(AnimationParameters.LeftWeapon, (int)leftWeapon);
 	   animator.SetInteger(AnimationParameters.RightWeapon, (int)rightWeapon); // force
 	    animator.SetSide(attackSide);

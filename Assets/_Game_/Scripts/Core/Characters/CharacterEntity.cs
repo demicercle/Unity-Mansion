@@ -1164,8 +1164,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public void SetAiming(bool value)
 	{
+		if (isAiming && !value)
+			onAiming?.Invoke(false, aimingPosition);
+		
 		isAiming = value;
-		//if(debugAim > 0) Debug.Log(this + " ToggleAim " + value);
+		if(debugAim > 1) Debug.Log(this + " ToggleAim " + value);
 			
 		if (characterAnimation && !characterAnimation.IsSwitchingWeapons)
 			characterAnimation.SwitchWeapons(isAiming || InBattle());

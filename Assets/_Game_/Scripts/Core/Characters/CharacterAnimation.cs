@@ -243,9 +243,12 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		if (waitForEvents.Contains(eventType))
 		{
-			if(debugMode > 0) Debug.Log(this + " OnCharacterAnimationEvent " + eventType + ", clear waitForEvents");
+			if (debugMode > 0) Debug.Log(this + " OnCharacterAnimationEvent " + eventType + " Contains");
 			waitForEvents.Clear();
+			return;
 		}
+		
+		if (debugMode > 0) Debug.Log(this + " OnCharacterAnimationEvent " + eventType);
 	}
 	
 	private void OnTurnStarted()
@@ -314,7 +317,7 @@ public class CharacterAnimation : MonoBehaviour
 				if (rpgAnimationHandler)
 				{
 					InstantSwitchWeapons(true);
-					rpgAnimationHandler.Attack_Right(); // TODO
+					rpgAnimationHandler.Attack(weaponInHand); // TODO
 				}
 			}
 

@@ -9,9 +9,11 @@ REFACTO
 - training mannequin (invicible life)
 - floating text uses "world canvas" and connect to events in inspector
 
-- attracted by noise
-- defend small icon below portrait
-- add item description and usability
+- bug anim if you one shot a "relax" character (force death trigger after a short delay)
+- add "defend" small icon below portrait
+- rifle ammos != pistol ammos
+- shotgun != rifle
+- PC Neutral "turns hostile" when damaged + give him a rifle to defend
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling
