@@ -93,18 +93,13 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		hold = false;
 
 		var useItem = GameInput.Instance.GetItemToUse();
-		if (useItem && mouseOverIndex == selfIndex)
+		if (useItem && mouseOverIndex == selfIndex && selfInventory.TryGetComponent(out CharacterEntity selfCharacter))
 		{
 			if (mouseOverIndex == Inventory.InventorySlot_Weapon && itemData
-			                                                     && itemData.IsWeapon(out var reloadWeapon) 
-			                                                     && reloadWeapon.CanBeReloadedWithAmmo(useItem))
+			                                                     && itemData.IsWeapon(out var reloadWeapon) )
 			{
-				if (selfInventory.TryGetComponent(out CharacterEntity selfCharacter))
-				{
-					GameInput.Instance.SetItemToUse(null, true); // assign reload
-					selfCharacter.Routines.AssignReloadWeapon(reloadWeapon, useItem);
-					return;
-				}
+				selfCharacter.Routines.AssignReloadWeapon(reloadWeapon, useItem);
+				GameInput.Instance.SetItemToUse(null, true); // assign reload
 			}
 		}
 		

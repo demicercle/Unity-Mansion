@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdc478c8643c45d6a47c13b529165a46, type: 3}
-  m_Name: Item_AmmoBox
+  m_Name: Item_Ammo_Rifle
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
-    lineIndex: 14
-    text: Ammo Box
+    lineIndex: 28
+    text: Rifle Ammo
   description:
-    lineIndex: 15
-    text: Used to reload Pistol weapons.
-  lootBagPrefab: {fileID: 8177799864498759025, guid: 5f2b6bef4d7607d4f9f9115de64bce43, type: 3}
+    lineIndex: 29
+    text: Used to reload Rifles
+  lootBagPrefab: {fileID: 6770463586130494684, guid: 92c4700ba0b4506419666d3d6007a4cf, type: 3}
   icon: {fileID: 2800000, guid: d8fbd4233da0ada458e4c5f0db712d48, type: 3}
-  itemTags: Pistol
+  itemTags: Rifle
   equipOnHand: 0
   weaponData: {fileID: 0}
   targetType: 3

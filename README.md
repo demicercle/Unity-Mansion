@@ -9,8 +9,6 @@ REFACTO
 - training mannequin (invicible life)
 - floating text uses "world canvas" and connect to events in inspector
 
-- bug anim if you one shot a "relax" character (force death trigger after a short delay)
-- add "defend" small icon below portrait
 - rifle ammos != pistol ammos
 - shotgun != rifle
 - PC Neutral "turns hostile" when damaged + give him a rifle to defend

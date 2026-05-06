@@ -980,12 +980,25 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitCharacterReloadWeapon";
 		if (debugMode > 0) Debug.Log(this + " WaitCharacterReloadWeapon " + weapon + " ammo=" + ammoItem);
 
+		if (!_selfCharacter.TryGetComponent(out Inventory selfInventory))
+		{
+			Debug.LogWarning(this + " has no inventory to reload weapon");
+			yield break;
+		}
+
+		if (!weapon.CanBeReloadedWithAmmo(ammoItem))
+		{
+			_selfCharacter.FloatingText_Cant(); // wrong ammo
+			yield break;
+		}
+
 		if (!_selfCharacter.HasActions())
 		{
-			_selfCharacter.FloatingText_Cant();
+			_selfCharacter.FloatingText_Cant(); // no action to reload
 			yield break;
 		}
 		
+		_selfCharacter.SetAiming(false);
 		_selfCharacter.SetCurrentWeapon(weapon);
 		_selfCharacter.TryGetAnimation(out var anim);
 		
@@ -994,12 +1007,6 @@ public class CharacterRoutines : MonoBehaviour
 			anim.SwitchWeapons(true);
 			do yield return null;
 			while (anim.IsSwitchingWeapons);
-		}
-
-		if (!_selfCharacter.TryGetComponent(out Inventory selfInventory))
-		{
-			Debug.LogWarning(this + " has no inventory to reload weapon");
-			yield break;
 		}
 
 		if (weapon.IsFullAmmo())

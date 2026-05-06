@@ -895,6 +895,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (itemInHand != itemToUse)
 		{
 			if(CharacterAnimation.debugMode > 0) Debug.Log(this + " SetItemToUse " + itemToUse);
+
+			if (itemInHand && itemInHand.EquipOnHand())
+			{
+				characterAnimation?.SwitchWeapons(false);
+			}
 			
 			itemInHand = itemToUse;
 			
@@ -905,17 +910,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 					SetAiming(false);
 					characterAnimation?.SwitchWeapon(itemInHand.GetWeaponInHand());
 				}
-				else
-				{
-					characterAnimation?.SwitchWeapon(Weapon.Relax);
-				}
 			}
 			else
 			{
 				if(InBattle()) 
-					characterAnimation?.InstantSwitchWeapons(true);
-				else
-					characterAnimation?.SwitchWeapon(Weapon.Relax);
+					characterAnimation?.SwitchWeapons(true);
 			}
 		}
 	}
