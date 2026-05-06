@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WP_Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   noAttack: 0
-  hitChance: 13
-  minDamage: 4
-  maxDamage: 8
+  hitChance: 10
+  minDamage: 1
+  maxDamage: 4
   damageCurve:
     serializedVersion: 2
     m_Curve:
@@ -41,7 +41,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   isRanged: 1
-  attackRange: 12
+  attackRange: 8
   rangeHitCurve:
     serializedVersion: 2
     m_Curve:
