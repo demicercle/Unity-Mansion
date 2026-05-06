@@ -202,6 +202,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 						if (selectedCharacter.TryGetComponent(out Inventory selectedInventory))
 						{
 							selectedInventory.SwapIndex(Inventory.InventorySlot_Weapon, selfIndex, true); // weapon slotted to aim button
+							if(selfIndex == Inventory.InventorySlot_Weapon) onSwapped?.Invoke();
 						}
 					}
 				}
