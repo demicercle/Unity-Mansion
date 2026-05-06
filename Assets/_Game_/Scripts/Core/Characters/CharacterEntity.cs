@@ -1153,6 +1153,33 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return isAiming;
 	}
 
+	public bool RaycastAllAimingPositions(Vector3 from, out Vector3[] world)
+	{
+		world = Array.Empty<Vector3>();
+
+		if (isAiming)
+		{
+			if (currentWeapon.GetShootInfos(out var shoots))
+			{
+				var dir = (aimingPosition - from).normalized;
+				var range = currentWeapon.GetAttackRange();
+				foreach (var shoot in shoots)
+				{
+					world = world
+						.Concat(shoot.Raycast(from, dir, range, 0f)
+							.ToList().ConvertAll(hit => hit.collider ? hit.point : from + dir * range))
+						.ToArray();
+				}
+			}
+			else
+			{
+				world = new[]{aimingPosition};
+			}
+		}
+
+		return world.Length > 0;
+	}
+
 	public void SetAimingPosition(Vector3 world)
 	{
 		SetAiming(true);

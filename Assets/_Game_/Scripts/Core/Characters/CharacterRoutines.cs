@@ -508,7 +508,7 @@ public class CharacterRoutines : MonoBehaviour
 			for (int i = 0; i < shoots.Length; i++)
 			{
 				var maxDist = shoots[i].clampDistance ? closest : range;
-				foreach (var hit in shoots[i].Raycast(from, dir, maxDist))
+				foreach (var hit in shoots[i].Raycast(from, dir, maxDist, 1.0f))
 				{
 					ProcessHit(hit.collider?.GetComponent<IAttackable>(), hit, atkRoll + shoots[i].RollAtkMod(), from, dir, maxDist);
 					closest = Mathf.Min(closest, hit.distance);

@@ -21,15 +21,15 @@ public class WeaponData : ScriptableObject
 		
 		public float RollAtkMod() => Random.Range(atkMod.x, atkMod.y);
 
-		public RaycastHit[] Raycast(Vector3 from, Vector3 dir, float distance)
+		public RaycastHit[] Raycast(Vector3 from, Vector3 dir, float distance, float drawDuration)
 		{
 			dir = Quaternion.Euler(0, angle, 0) * dir;
-			
+
 			if (debugMode > 0)
 			{
-				DebugDrawer.Line(from, from + dir * distance, Color.magenta, 1.0f);
+				DebugDrawer.Line(from, from + dir * distance, Color.magenta, drawDuration);
 			}
-			
+
 			if (raycastAll)
 			{
 				return Physics.RaycastAll(from, dir, distance, Layers.MaskAiming);
@@ -37,7 +37,7 @@ public class WeaponData : ScriptableObject
 			else
 			{
 				return Physics.Raycast(from, dir, out var hit, distance, Layers.MaskAiming)
-					? new RaycastHit[]{hit}
+					? new RaycastHit[] { hit }
 					: Array.Empty<RaycastHit>();
 			}
 		}
