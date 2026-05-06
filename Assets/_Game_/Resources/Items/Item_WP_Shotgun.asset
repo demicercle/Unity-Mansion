@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdc478c8643c45d6a47c13b529165a46, type: 3}
+  m_Name: Item_WP_Shotgun
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  displayName:
+    lineIndex: 30
+    text: Shotgun
+  description:
+    lineIndex: 31
+    text: Deals 4-8 damages, up to 6 meters.
+  lootBagPrefab: {fileID: 1191785249257757624, guid: 3c80714c5a0458e49b151126c4c3c357, type: 3}
+  icon: {fileID: 2800000, guid: 63a3f85aead137c4a969bd5146c0972a, type: 3}
+  itemTags: Shotgun
+  equipOnHand: 0
+  weaponData: {fileID: 11400000, guid: 08dd72af4d1a0ec449fa3b0be98ae915, type: 2}
+  targetType: 0
+  actionType: 0
+  usableOnDead: 0
+  turnBasedOnly: 0
+  useRange: 0
+  useGroundRadius: 0
+  isProjectile: 0
+  onUseScript: {fileID: 0}
+  isAmmo: 0
+  maxQuantity: 1

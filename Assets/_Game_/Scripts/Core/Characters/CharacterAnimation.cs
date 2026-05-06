@@ -346,7 +346,8 @@ public class CharacterAnimation : MonoBehaviour
 		
 		if (rpgAnimationHandler)
 		{
-			rpgAnimationHandler.Aim(value, position, rpgAnimationHandler.GetRightWeapon() == Weapon.TwoHandBow ? Mathf.Clamp01(timeAiming) : 0f);
+			if(!_selfCharacter.GetCurrentWeapon().noAim)
+				rpgAnimationHandler.Aim(value, position, rpgAnimationHandler.GetRightWeapon() == Weapon.TwoHandBow ? Mathf.Clamp01(timeAiming) : 0f);
 		}
 		
 		if (value) 

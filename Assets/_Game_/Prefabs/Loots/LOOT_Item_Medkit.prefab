@@ -146,7 +146,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 091c9620b0cd6a241954824dc269e7d9, type: 3}
       propertyPath: m_Name
-      value: LOOT_medkit
+      value: LOOT_Item_Medkit
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 091c9620b0cd6a241954824dc269e7d9, type: 3}
       propertyPath: m_Layer
@@ -242,6 +242,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 091c9620b0cd6a241954824dc269e7d9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5524402215279628812}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 091c9620b0cd6a241954824dc269e7d9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4744265888371716228}
     - targetCorrespondingSourceObject: {fileID: 3672548509089925874, guid: 091c9620b0cd6a241954824dc269e7d9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8258877802556712516}
@@ -319,6 +322,19 @@ MonoBehaviour:
   destroyIfEmpty: 1
   items:
   - {fileID: 11400000, guid: 6d5af36f0a37b3949b620d21115b4da5, type: 2}
+--- !u!114 &4744265888371716228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 334607647094823755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1 &4220481263104453864 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3672548509089925874, guid: 091c9620b0cd6a241954824dc269e7d9, type: 3}

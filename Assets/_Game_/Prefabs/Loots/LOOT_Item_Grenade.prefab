@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1373978787456969441}
   - component: {fileID: 8737831075284120319}
   - component: {fileID: 8968371192725667608}
+  - component: {fileID: 8728686411970682254}
   m_Layer: 17
   m_Name: LOOT_Item_Grenade
   m_TagString: Untagged
@@ -100,6 +101,19 @@ MonoBehaviour:
   destroyIfEmpty: 1
   items:
   - {fileID: 11400000, guid: fd737c67f6f611f4a86d19e12200b73e, type: 2}
+--- !u!114 &8728686411970682254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3623138668198832246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1001 &4809436485949521211
 PrefabInstance:
   m_ObjectHideFlags: 0

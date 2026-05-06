@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2444266230031805606}
   - component: {fileID: 5406387169269342562}
   - component: {fileID: 660342643291241981}
+  - component: {fileID: 7111571916512840108}
   m_Layer: 17
   m_Name: LOOT_Item_WP_Baseball_Bat
   m_TagString: Untagged
@@ -102,6 +103,19 @@ MonoBehaviour:
   destroyIfEmpty: 1
   items:
   - {fileID: 11400000, guid: 812022e7a942b5345ad8c4de50ec20a2, type: 2}
+--- !u!114 &7111571916512840108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1361163289916736463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1001 &3487741917126993395
 PrefabInstance:
   m_ObjectHideFlags: 0

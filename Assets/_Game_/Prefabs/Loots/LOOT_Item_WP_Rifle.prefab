@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 4527553313390660025}
   - component: {fileID: 874894045392881510}
   - component: {fileID: 4965924690257249777}
+  - component: {fileID: 7192743959015180090}
   m_Layer: 17
-  m_Name: LOOT_Item_Rifle
+  m_Name: LOOT_Item_WP_Rifle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -102,6 +103,19 @@ CapsuleCollider:
   m_Height: 1.3861632
   m_Direction: 0
   m_Center: {x: -0.05051636, y: 0, z: 0.061830457}
+--- !u!114 &7192743959015180090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7426308499551769392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1001 &2228877446440756116
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -106,6 +106,7 @@ public class WeaponData : ScriptableObject
 	
 	public Weapon rpgWeaponR = Weapon.Relax;
 	public Weapon rpgWeaponL = Weapon.Relax;
+	public bool noAim;
 
 	public bool CanBeReloadedWithAmmo(ItemData draggedItem)
 	{

@@ -86,6 +86,10 @@ MonoBehaviour:
     - Deals 4-8 damages, up to 6 meters.
     - Rifle Ammo
     - Used to reload Rifles
+    - Shotgun
+    - Deals 4-8 damages, up to 6 meters.
+    - Shotgun Ammo
+    - Used to reload Shotgun
     - 
     - 
     - 

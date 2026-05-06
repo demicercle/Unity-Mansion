@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1018169291413950979}
   - component: {fileID: 2660499000136135874}
   - component: {fileID: 2367914867963160724}
+  - component: {fileID: 5958079416636487190}
   m_Layer: 17
   m_Name: LOOT_Item_Soda
   m_TagString: Untagged
@@ -100,6 +101,19 @@ MonoBehaviour:
   destroyIfEmpty: 1
   items:
   - {fileID: 11400000, guid: 2214d69fab82e46408963776ef05f45d, type: 2}
+--- !u!114 &5958079416636487190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8479965358439860412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1001 &3813527799263683248
 PrefabInstance:
   m_ObjectHideFlags: 0

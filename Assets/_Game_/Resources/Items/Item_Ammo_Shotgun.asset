@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdc478c8643c45d6a47c13b529165a46, type: 3}
+  m_Name: Item_Ammo_Shotgun
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  displayName:
+    lineIndex: 32
+    text: Shotgun Ammo
+  description:
+    lineIndex: 33
+    text: Used to reload Shotgun
+  lootBagPrefab: {fileID: 5472572659074280742, guid: 78216a57d16e17c4d9915c820dcab5f4, type: 3}
+  icon: {fileID: 2800000, guid: a92230bc644f37847aeace791eefac71, type: 3}
+  itemTags: Shotgun
+  equipOnHand: 0
+  weaponData: {fileID: 0}
+  targetType: 3
+  actionType: 7
+  usableOnDead: 0
+  turnBasedOnly: 0
+  useRange: 0
+  useGroundRadius: 0
+  isProjectile: 0
+  onUseScript: {fileID: 0}
+  isAmmo: 1
+  maxQuantity: 12

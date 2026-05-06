@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 6098273458437902463}
   - component: {fileID: 3654141685012039891}
   - component: {fileID: 6463432015113939917}
+  - component: {fileID: 3115995261099354242}
   m_Layer: 17
-  m_Name: LOOT_Item_Knife
+  m_Name: LOOT_Item_WP_Knife
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -100,6 +101,19 @@ MonoBehaviour:
   destroyIfEmpty: 1
   items:
   - {fileID: 11400000, guid: 37062cc4f33ecc84a9d8c47332463568, type: 2}
+--- !u!114 &3115995261099354242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020466772378819593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1 &7721492342749043806
 GameObject:
   m_ObjectHideFlags: 0

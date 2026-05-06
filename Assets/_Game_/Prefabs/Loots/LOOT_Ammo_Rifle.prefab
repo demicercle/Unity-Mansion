@@ -113,7 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
-  setHidden: 0
+  setHidden: 1
 --- !u!1001 &770555725692640753
 PrefabInstance:
   m_ObjectHideFlags: 0

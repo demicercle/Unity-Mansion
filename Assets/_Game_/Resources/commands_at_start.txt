@@ -1,7 +1,7 @@
 ﻿#no_detection 1
 #debug_detection 1
 #debug_agent 1
-debug_anim 1
+#debug_anim 1
 #debug_stats 1
 #debug_dices 1
 #debug_gtm 1
@@ -12,7 +12,7 @@ debug_anim 1
 #debug_rooms 1
 #debug_save 1
 #debug_triggers 1
-debug_aim 1
+#debug_aim 1
 #debug_input 1
 #debug_follows 2
 #debug_noise 1

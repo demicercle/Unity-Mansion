@@ -83,6 +83,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100000, guid: 8c506e381e613d2448c02962957e574a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8859418050793821268}
+    - targetCorrespondingSourceObject: {fileID: 100000, guid: 8c506e381e613d2448c02962957e574a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4792242876343574478}
   m_SourcePrefab: {fileID: 100100000, guid: 8c506e381e613d2448c02962957e574a, type: 3}
 --- !u!4 &5409373734523598299 stripped
 Transform:
@@ -159,6 +162,19 @@ MonoBehaviour:
   destroyIfEmpty: 1
   items:
   - {fileID: 11400000, guid: 56bde5a86dcb15549a2e61ffe56e0521, type: 2}
+--- !u!114 &4792242876343574478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5409373734523693563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1001 &7281320295549550811
 PrefabInstance:
   m_ObjectHideFlags: 0

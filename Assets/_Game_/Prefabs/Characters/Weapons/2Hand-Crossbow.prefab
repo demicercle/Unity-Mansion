@@ -106,8 +106,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isLeft: 0
   rpgWeapon: 5
+  itemTags: 
   inHand: 1
   offHand: 0
+  renderers: []
+  shootLine: {fileID: 0}
+  aimLine: {fileID: 0}
+  maxShootDistance: 5
+  shootFromEyesPosition: 0
+  aimFromEyesPosition: 0
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &4346426404241280986
 GameObject:
   m_ObjectHideFlags: 0

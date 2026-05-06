@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 9104611021739944276}
   - component: {fileID: 4527553313390660025}
   - component: {fileID: 874894045392881510}
+  - component: {fileID: 1328048190231584767}
   m_Layer: 17
-  m_Name: LOOT_Item_Pistol
+  m_Name: LOOT_Item_WP_Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -100,6 +101,19 @@ MonoBehaviour:
   destroyIfEmpty: 1
   items:
   - {fileID: 11400000, guid: 05eedffbe9991bb4fae8b74655a90a71, type: 2}
+--- !u!114 &1328048190231584767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7426308499551769392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 1
 --- !u!1001 &4101498352254130779
 PrefabInstance:
   m_ObjectHideFlags: 0
