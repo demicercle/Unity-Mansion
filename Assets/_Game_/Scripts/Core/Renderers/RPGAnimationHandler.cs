@@ -5,6 +5,7 @@ using RPGCharacterAnims;
 using RPGCharacterAnims.Lookups;
 using RPGCharacterAnims.Extensions;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 // TODO: interface "IAnimationHandler"
 public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Character Mechanim Pack" 
@@ -14,11 +15,14 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     private bool weaponsSwitched;
     private bool isHipShooting;
 
-    public bool IsSwitchingWeapons() => isWeaponSwitching && (int)rightWeapon > 0; // unarmed
+    public bool IsSwitchingWeapons() => isWeaponSwitching && weaponsSwitched; // unarmed
 
     public List<Weapon> instantSwitchWeapons = new List<Weapon>();
-    public Weapon leftWeapon, rightWeapon;
+    [ReadOnly] [SerializeField] private Weapon leftWeapon;
+    [ReadOnly] [SerializeField] private Weapon rightWeapon;
 
+	public Weapon GetRightWeapon() => rightWeapon;
+	
     public System.Action<Weapon, bool> weaponVisibilityChanged;
 
     private IEnumerator _WeaponVisibility(Weapon weapon, bool isVisible, bool isDual)
@@ -82,6 +86,74 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
         animatorEvents.onWeaponSwitch.AddListener(WeaponSwitch); // TODO dispose it
 	}
 
+    private void OnEnable()
+    {
+	    StartCoroutine("WeaponSwitchCoroutine");
+    }
+
+    private void OnDisable()
+    {
+	    StopCoroutine("WeaponSwitchCoroutine");
+    }
+
+    [SerializeField] private bool forceSheathLocation = true;
+    [SerializeField] private float weaponSwitchExtraTime = 0.5f;
+    [SerializeField] private bool instantSwitchWeaponToWeapon = true;
+    private IEnumerator WeaponSwitchCoroutine()
+    {
+	    //var parentCharacter = GetComponentInParent<CharacterEntity>();
+	    var parentAnim = GetComponentInParent<CharacterAnimation>();
+	    
+	    while (true)
+	    {
+		    yield return null;
+
+		    var weaponInHand = parentAnim.GetWeaponInHand();
+		    if (weaponInHand != rightWeapon)
+		    {
+			    weaponsSwitched = false;
+			    
+			    if(debugWalkthrough)
+				    Debug.Log(this + " WeaponSwitchCoroutine starts, rightWeapon=" + rightWeapon + " > weaponInHand=" + weaponInHand);
+			    
+			    if (instantSwitchWeaponToWeapon && weaponInHand != Weapon.Relax && rightWeapon != Weapon.Relax)
+			    {
+				    InstantWeaponSwitch(Weapon.Relax);
+				    yield return null;
+			    }
+			    
+			    if (rightWeapon != Weapon.Relax)
+			    {
+				    SheathWeapon(rightWeapon, weaponInHand, false);
+			    }
+
+			    if (weaponInHand != Weapon.Relax)
+			    {
+				    if (instantSwitchWeapons.Contains(weaponInHand))
+				    {
+					    InstantWeaponSwitch(weaponInHand);
+				    }
+				    else
+				    {
+					    UnsheathWeapon(weaponInHand, false);
+				    }
+			    }
+
+			    if (forceSheathLocation)
+			    {
+				    animator.SetInteger( AnimationParameters.SheathLocation, sideWeapons.Contains(weaponInHand) || sideWeapons.Contains(rightWeapon) ? 1 : 0);
+			    }
+			    
+			    do yield return null;
+			    while (isWeaponSwitching);
+			    yield return new WaitForSeconds(weaponSwitchExtraTime);
+			    rightWeapon = weaponInHand;
+			    if (debugWalkthrough) Debug.Log(this + " WeaponSwitchCoroutine ends, rightWeapon=" + rightWeapon);
+			    weaponsSwitched = true;
+		    }
+	    }
+    }
+
    /* private void OnDestroy()
     {
 	    Debug.Log(this + " OnDestroy");
@@ -144,12 +216,17 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     public void InstantWeaponSwitch() => InstantWeaponSwitch(rightWeapon);
 
     public List<Weapon> sideWeapons = new List<Weapon>();
-    
-    public void SetSheathLocation(Weapon weapon) => SetSheathLocation(sideWeapons.Contains(weapon));
 
-    public void SetSheathLocation(bool back)
+    [ContextMenu("Force Unsheath")]
+    private void _ForceUnsheath()
     {
-	    animator.SetInteger(AnimationParameters.SheathLocation, back ? 0 : 1);
+	    UnsheathWeapon(rightWeapon, false);
+    }
+    
+    [ContextMenu("Force Sheath")]
+    private void _ForceSheath()
+    {
+	    SheathWeapon(rightWeapon, Weapon.Relax, false);
     }
 
     
@@ -371,7 +448,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 
 				// Wait for WeaponSwitch() to happen then update Animator.
 				yield return new WaitForSeconds(0.1f);
-				SetWeaponWithDebug(AnimatorWeapon.RELAX, -2, Weapon.Relax, Weapon.Relax, Side.None);
+				SetWeaponWithDebug(AnimatorWeapon.RELAX, -1, Weapon.Relax, Weapon.Relax, Side.None);
 			}
 		}
         // Switching to 2Handed Weapon.
@@ -539,12 +616,15 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 		{ SetWeaponWithDebug(AnimatorWeapon.ARMED, ( int )AnimatorWeapon.ARMED, weaponTo, weaponTo + 1, side); }
 	}
 
-    /// <summary>
-    /// Switch to the weapon number instantly.
-    /// </summary>
-    /// <param name="weapon">Weapon to switch to.</param>
-    public void InstantWeaponSwitch(Weapon weapon)
-    { coroQueue.Run(_InstantWeaponSwitch(weapon)); }
+	/// <summary>
+	/// Switch to the weapon number instantly.
+	/// </summary>
+	/// <param name="weapon">Weapon to switch to.</param>
+	public void InstantWeaponSwitch(Weapon weapon)
+	{
+		weaponsSwitched = true;
+		coroQueue.Run(_InstantWeaponSwitch(weapon));
+	}
 
 	/// <summary>
 	/// Async method to instant weapon switch.
@@ -645,6 +725,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 		if (debugDoWeaponSwitch)
 		{ Debug.Log($"DO WEAPON SWITCH - weaponSwitch:{weaponSwitch}  weapon:{weapon}  animatorWeapon:{animatorWeapon}  side:{side}  sheath:{sheath}"); }
 
+
 		// Lock character movement for switch unless has moving sheath/unsheath anims.
 		//TODO Lock(!isMoving, true, true, 0f, 1f);
 
@@ -676,6 +757,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 		}
 	}
 
+
 	/// <summary>
 	/// Sets the animation state for weapons with debug option.
 	/// </summary>
@@ -686,6 +768,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	/// <param name="weaponSide">Weapon side: 0-None, 1-Left, 2-Right, 3-Dual.</param>
 	private void SetWeaponWithDebug(AnimatorWeapon animatorWeapon, int weaponSwitch, Weapon leftWeapon, Weapon rightWeapon, Side weaponSide)
 	{
+		
 		if (debugSetAnimator) { Debug.Log($"SET ANIMATOR - Weapon:{animatorWeapon}  WeaponSwitch:{weaponSwitch}  Lweapon:{leftWeapon}  Rweapon:{rightWeapon}  Weaponside:{weaponSide}"); }
 
 		animator.SetWeapons(animatorWeapon, weaponSwitch, leftWeapon, rightWeapon, weaponSide);
@@ -696,7 +779,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	/// </summary>
 	public void WeaponSwitch()
     {
-        if (isWeaponSwitching) { isWeaponSwitching = false; }
+        isWeaponSwitching = false;
     }
 
     #endregion

@@ -7,6 +7,9 @@ public class ActionToggles : MonoBehaviour
 {
 	[SerializeField] private Toggle toggleStop;
 	[SerializeField] private Toggle toggleAim;
+
+	private bool forceAim;
+	public void ForceAim() => forceAim = true;
 	
 	private void OnEnable()
 	{
@@ -20,6 +23,11 @@ public class ActionToggles : MonoBehaviour
 		if(toggleAim) toggleAim.onValueChanged.RemoveListener(OnToggleAim);
 		if(toggleStop) toggleStop.onValueChanged.RemoveListener(OnToggleStop);
 		//if(toggleReload) toggleReload.onValueChanged.RemoveListener(OnToggleReload);
+	}
+
+	private void Start()
+	{
+		forceAim = false;
 	}
 
 	private void OnToggleReload(bool wantsReload)
@@ -61,6 +69,13 @@ public class ActionToggles : MonoBehaviour
 				toggleAim.interactable = !toggleStop.interactable 
 				                         && !GameInput.Instance.GetDraggedItem() 
 				                         && !GameInput.Instance.GetItemToUse();
+
+				if (forceAim)
+				{
+					Debug.Log(this + " forceAim");
+					toggleAim.isOn = true;
+					forceAim = false;
+				}
 			}
 
 		/*	if (toggleReload)

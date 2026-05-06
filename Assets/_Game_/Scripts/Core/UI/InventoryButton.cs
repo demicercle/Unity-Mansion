@@ -1,6 +1,7 @@
 ﻿using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -181,6 +182,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		WeaponData.onWeaponChanged -= OnWeaponChanged;
 	}
 
+	public UnityEvent onSwapped;
 	private void OnToggleChanged(bool isOn)
 	{
 		//Debug.LogWarning(this + " " + itemData + " ToggleChanged " + isOn + " TODO");
@@ -195,15 +197,11 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			{
 				if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 				{
-					if (selectedCharacter.GetCurrentWeapon() != weaponData)
+					if (selectedCharacter.GetCurrentWeapon() != weaponData && selectedCharacter.CanSwitchWeapons())
 					{
 						if (selectedCharacter.TryGetComponent(out Inventory selectedInventory))
 						{
-							selectedInventory.SwapIndex(Inventory.InventorySlot_Weapon, selfIndex, true);
-							if (selectedCharacter.TryGetAnimation(out var anim))
-							{
-								anim.WeaponsChanged();
-							}
+							selectedInventory.SwapIndex(Inventory.InventorySlot_Weapon, selfIndex, true); // weapon slotted to aim button
 						}
 					}
 				}

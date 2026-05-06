@@ -1196,4 +1196,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		return characterData.GetMaxActions() + extraActions - usedActions.Count;
 	}
+
+	public bool CanSwitchWeapons()
+	{
+		return !IsDead() && !IsActing() && !(characterAnimation && characterAnimation.IsSwitchingWeapons);
+	}
 }
