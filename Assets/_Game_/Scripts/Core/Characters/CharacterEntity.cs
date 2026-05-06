@@ -492,10 +492,10 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			onRemovedFromParty?.Invoke(_partyCharacters[index]);
 	}
 
-	private void SetCurrentFaction(CharacterFaction faction)
+	public void SetCurrentFaction(CharacterFaction faction)
 	{
-		if (currentFaction == previousFaction) return;
-		Debug.Log(this  + " SetCurrentFaction " + faction + " from " + previousFaction);
+		if (currentFaction == faction) return;
+		if(debugStats > 0) Debug.Log(this  + " SetCurrentFaction " + currentFaction + " to " + faction);
 		previousFaction = currentFaction;
 		currentFaction = faction;
 		onFactionChanged?.Invoke();
@@ -730,8 +730,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			onDamagedBy?.Invoke(objectFrom as CharacterEntity, damageInfo.amount);
 		}
-
 	}
+	
 	public bool TryKill()
 	{
 		if (!IsDead())

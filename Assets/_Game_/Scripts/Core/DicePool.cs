@@ -15,6 +15,12 @@ public static class DicePool
 		while(count--> 0)
 			RollNewDice();
 	}
+
+	public static void SetNextDiceResult(float diceToFloat)
+	{
+		lastResult = diceToFloat;
+		onDiceRolled?.Invoke();
+	}
 	
 	public static void RollNewDice()
 	{

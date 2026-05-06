@@ -546,12 +546,12 @@ public class CharacterRoutines : MonoBehaviour
 				break;
 			
 			case CharacterEntity.AttackResult.Hit:
-				Debug.Log(this + " AttackResult.Hit " + target);
 				var damageInfo = new DamageInfo()
 				{
 					amount = _selfCharacter.GetLastAttackDamage(atkRoll),
 					isRanged = _selfCharacter.IsUsingRangeWeapon()
 				};
+				Debug.Log(this + " AttackResult.Hit " + target + " " + damageInfo);
 				target.TakeDamage(damageInfo, _selfCharacter);
 				_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
 				break;

@@ -22,9 +22,8 @@ public class CharacterBrain : MonoBehaviour
 	
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
-	//[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
+	[SerializeField] private bool turnHostileWhenDamaged = false;
 	[SerializeField] private Waypoint wanderingPoint;
-	//private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 
 	public UnityEvent onStartThink;
 	
@@ -422,6 +421,13 @@ public class CharacterBrain : MonoBehaviour
 
 	private void OnDamagedBy(CharacterEntity other, float amount)
 	{
+		if(debugMode > 0) Debug.Log(this + " OnDamagedBy " + other + " amount="  + amount);
+
+		if (turnHostileWhenDamaged && amount > 0)
+		{
+			_selfCharacter.SetCurrentFaction(CharacterFaction.Enemy);
+		}
+		
 		AddAggro(other, amount);
 	}
 

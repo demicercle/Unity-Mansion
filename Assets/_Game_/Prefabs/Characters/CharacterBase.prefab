@@ -456,16 +456,16 @@ MonoBehaviour:
   radius: 0.5
   height: 1.5
   minReachDistance: 0.1
+  endPointDistance: 0.25
+  endPointYTolerance: 0.5
+  heightTolerance: 0.5
   priorityLeader: 0.7
   priorityFollower: 0.5
   priorityOther: 0.3
-  heightTolerance: 0.5
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
   moveTarget: {fileID: 6868811281604459853}
-  endPointDistance: 0.25
-  endPointYTolerance: 0.5
 --- !u!114 &6410703130520739872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -514,6 +514,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
   canChase: 1
   canPatrol: 1
+  turnHostileWhenDamaged: 0
   wanderingPoint: {fileID: 0}
   onStartThink:
     m_PersistentCalls:
@@ -903,9 +904,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a609e5ba6eb248d9a921da0a8cfb9add, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  maxSize: 6
+  maxSize: 7
   lootBagPrefab: {fileID: 3870844094002656079, guid: e06b8a3ef8b241e4290237da71253253, type: 3}
   saveInventory: 0
+  destroyIfEmpty: 0
   items:
   - {fileID: 0}
   - {fileID: 0}

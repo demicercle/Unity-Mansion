@@ -146,6 +146,14 @@ public class ConsoleCommands : MonoBehaviour
 	{
 		DiceLauncher.AllowedDiceRolls += count;
 	}
+	
+	
+
+	[ConsoleMethod("set_next_dice", "")]
+	public static void SetNextDiceResult(int value)
+	{
+		DicePool.SetNextDiceResult(DicePool.DiceToFloat(20, Mathf.Clamp(value, 1, 20)));
+	}
 
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()
