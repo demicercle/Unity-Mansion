@@ -525,7 +525,9 @@ MonoBehaviour:
   itemTags: 
   inHand: 1
   offHand: 0
-  renderers: []
+  renderers:
+  - {fileID: 6420030631829996466}
+  - {fileID: 7917791577505142417}
   shootLine: {fileID: 5712149407079061320}
   aimLine: {fileID: 6073237519129228868}
   maxShootDistance: 5
@@ -914,6 +916,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
+--- !u!23 &6420030631829996466 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3384330620667419338, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
+  m_PrefabInstance: {fileID: 8642136229938289016}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7917791577505142417 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1877627630371950569, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
+  m_PrefabInstance: {fileID: 8642136229938289016}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8566225880625035076 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 76086280045784636, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}

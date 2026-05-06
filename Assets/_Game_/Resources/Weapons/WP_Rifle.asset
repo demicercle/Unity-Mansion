@@ -117,8 +117,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  consumeAmmo: 3
   ammoTags: Rifle
-  maxAmmo: 2
+  maxAmmo: 15
   shootInfos:
   - angle: 0
     delay: 0

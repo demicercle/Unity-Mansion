@@ -117,19 +117,35 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  consumeAmmo: 1
   ammoTags: Shotgun
   maxAmmo: 2
   shootInfos:
   - angle: -10
+    delay: 0
+    atkMod: {x: -0.2, y: 0}
     raycastAll: 0
+    clampDistance: 0
   - angle: -5
+    delay: 0
+    atkMod: {x: -0.1, y: 0}
     raycastAll: 0
+    clampDistance: 0
   - angle: 0
+    delay: 0
+    atkMod: {x: 0, y: 0}
     raycastAll: 0
+    clampDistance: 0
   - angle: 5
+    delay: 0
+    atkMod: {x: -0.1, y: 0}
     raycastAll: 0
+    clampDistance: 0
   - angle: 10
+    delay: 0
+    atkMod: {x: -0.2, y: 0}
     raycastAll: 0
+    clampDistance: 0
   decals:
   - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
   - {fileID: 11400000, guid: 3d1d45a1c8055ba4f8809c776eadb01b, type: 2}

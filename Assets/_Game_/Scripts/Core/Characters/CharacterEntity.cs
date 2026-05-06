@@ -385,7 +385,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			lastAttackTarget = param as CharacterEntity;
 			if (currentWeapon.IsReloadable())
 			{
-				currentWeapon.AddAmmo(-1);
+				currentWeapon.ConsumeAmmo();
 			}
 		}
 		else if (actionType == CharacterAction.Talk)

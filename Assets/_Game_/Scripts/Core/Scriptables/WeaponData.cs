@@ -77,11 +77,11 @@ public class WeaponData : ScriptableObject
 	[SerializeField] private AnimationCurve heightHitBonus = AnimationCurve.Linear(-1f, -0.25f, 1f, 0.25f);
 	public float EvaluateHeight(float height) => heightHitBonus.Evaluate(height);
 
-	[Header("Ammunition")]
+	[Header("Ammunition")] 
+	[SerializeField] [Min(0)] private int consumeAmmo = 0;
 	[SerializeField] private string ammoTags;
 	[SerializeField] [Min(0)] private int maxAmmo;
-
-	[Header("Special")] [SerializeField] private ShootInfo[] shootInfos = Array.Empty<ShootInfo>();
+	[SerializeField] private ShootInfo[] shootInfos = Array.Empty<ShootInfo>();
 
 	public bool GetShootInfos(out ShootInfo[] shoots)
 	{
@@ -99,6 +99,8 @@ public class WeaponData : ScriptableObject
 
 	public int GetMaxAmmo() => maxAmmo;
 	public int GetCurrentAmmo() => currentAmmo;
+	
+	public void ConsumeAmmo() => AddAmmo(-consumeAmmo);
 
 	public void AddAmmo(int qty)
 	{
@@ -111,8 +113,6 @@ public class WeaponData : ScriptableObject
 		currentAmmo = Mathf.Clamp(current, 0, maxAmmo);
 		onWeaponChanged?.Invoke(this);
 	}
-	
-	public string GetAmmoTags() => ammoTags;
 	
 	[Header("Other")]
 	[SerializeField] private DecalData[] decals;
@@ -157,6 +157,7 @@ public class WeaponData : ScriptableObject
 	public bool CanBeReloadedWithAmmo(ItemData draggedItem)
 	{
 		return draggedItem.GetCharacterAction() == CharacterAction.Reload
-			&& draggedItem.CompareTags(ammoTags);
+		       && draggedItem.CompareTags(ammoTags)
+		       && draggedItem.GetQuantity() >= consumeAmmo;
 	}
 }

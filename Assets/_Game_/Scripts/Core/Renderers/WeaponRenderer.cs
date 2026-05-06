@@ -131,15 +131,11 @@ public class WeaponRenderer : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-
-    [ContextMenu("Collect Renderers/Include Inactive")]
-    private void CollectRenderers_On() => CollectRenderers(true);
-    [ContextMenu("Collect Renderers/Active Only")]
-    private void CollectRenderers_Off() => CollectRenderers(false);
-    private void CollectRenderers(bool includeInactive)
+    [ContextMenu("Collect Renderers")]
+    private void CollectRenderers()
     {
         UnityEditor.Undo.RecordObject(this, "CollectRenderers");
-        renderers = GetComponentsInChildren<Renderer>(includeInactive).Concat(GetComponents<Renderer>()).ToArray();
+        renderers = GetComponentsInChildren<Renderer>().Concat(GetComponents<Renderer>()).ToArray();
         Utils.SetDirty(this);
     }
     [ContextMenu("SHOW Renderers")]

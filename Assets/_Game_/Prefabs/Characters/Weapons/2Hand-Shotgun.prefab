@@ -576,7 +576,10 @@ MonoBehaviour:
   itemTags: 
   inHand: 1
   offHand: 0
-  renderers: []
+  renderers:
+  - {fileID: 2127265976782275385}
+  - {fileID: 1112543245047442698}
+  - {fileID: 5190683651656924543}
   shootLine: {fileID: 6475947788398053069}
   aimLine: {fileID: 734366910622036703}
   maxShootDistance: 5
@@ -657,9 +660,24 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc5a05b4ad27ae3478e0f9e16f738eb6, type: 3}
+--- !u!23 &1112543245047442698 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -5319074527169724331, guid: dc5a05b4ad27ae3478e0f9e16f738eb6, type: 3}
+  m_PrefabInstance: {fileID: 4133835833581530463}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2127265976782275385 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2655932920950795878, guid: dc5a05b4ad27ae3478e0f9e16f738eb6, type: 3}
+  m_PrefabInstance: {fileID: 4133835833581530463}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4527503785850112692 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: dc5a05b4ad27ae3478e0f9e16f738eb6, type: 3}
+  m_PrefabInstance: {fileID: 4133835833581530463}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &5190683651656924543 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8167091619193442336, guid: dc5a05b4ad27ae3478e0f9e16f738eb6, type: 3}
   m_PrefabInstance: {fileID: 4133835833581530463}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5033397372584836667

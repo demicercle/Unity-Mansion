@@ -6,13 +6,13 @@
 #debug_dices 1
 #debug_gtm 1
 #debug_camera 1
-debug_routines 1
+#debug_routines 1
 #debug_brains 1
 #debug_script 2
 #debug_rooms 1
 #debug_save 1
 #debug_triggers 1
-debug_aim 1
+#debug_aim 1
 #debug_input 1
 #debug_follows 2
 #debug_noise 1

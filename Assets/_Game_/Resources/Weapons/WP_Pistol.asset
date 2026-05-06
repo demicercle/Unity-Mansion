@@ -117,8 +117,10 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  consumeAmmo: 1
   ammoTags: Pistol
   maxAmmo: 6
+  shootInfos: []
   decals:
   - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
   - {fileID: 11400000, guid: 3d1d45a1c8055ba4f8809c776eadb01b, type: 2}
@@ -126,3 +128,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2bde35fa989f9c241a8ce26b5d7156d1, type: 2}
   rpgWeaponR: 17
   rpgWeaponL: -1
+  noAim: 0
