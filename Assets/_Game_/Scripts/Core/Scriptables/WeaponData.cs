@@ -134,7 +134,7 @@ public class WeaponData : ScriptableObject
 
 	public bool CanBeReloadedWithAmmo(ItemData draggedItem)
 	{
-		return draggedItem.GetCharacterAction() == CharacterAction.Reload
+		return draggedItem && draggedItem.GetCharacterAction() == CharacterAction.Reload
 		       && draggedItem.CompareTags(ammoTags)
 		       && draggedItem.GetQuantity() >= consumeAmmo;
 	}

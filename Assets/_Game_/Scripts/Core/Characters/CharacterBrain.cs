@@ -143,6 +143,31 @@ public class CharacterBrain : MonoBehaviour
 			if (!_selfCharacter.Routines.AnyActive())
 			{
 				SaveTargetPosition();
+
+				if (_selfCharacter.WeaponNeedsReload())
+				{
+					if (debugMode > 0) Debug.Log(this + " weapon needs reload");
+					if (_selfCharacter.TryFindAmmo(out var ammoItem))
+					{
+						_selfCharacter.Routines.AssignReloadWeapon(_selfCharacter.GetCurrentWeapon(), ammoItem);
+					}
+					else
+					{
+						if(debugMode > 0) Debug.Log(this + " can't reload weapon, switching default weapon");
+						_selfCharacter.FloatingText_Cant();
+						yield return new WaitForSeconds(0.5f);
+						_selfCharacter.SwitchDefaultWeapon();
+
+						if (_selfCharacter.TryGetAnimation(out var anim))
+						{
+							do yield return null;
+							while (anim.IsSwitchingWeapons);
+						}
+					}
+					
+					do yield return null;
+					while (_selfCharacter.Routines.AnyActive());
+				}
 				
 				if (_selfCharacter.IsAtAttackRange(_chaseCharacter))
 				{

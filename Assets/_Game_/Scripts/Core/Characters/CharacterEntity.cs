@@ -964,6 +964,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private WeaponData currentWeapon;
 	private CharacterDetection detection;
 	private ItemData itemInHand;
+
+	private Inventory selfInventory;
 //	private CharacterLookAt characterLookAt;
 	
 	private void Awake()
@@ -972,6 +974,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			Debug.LogError(this + " has no character data");
 		
 		_allCharacters.Add(this);
+		
+		selfInventory = GetComponent<Inventory>();
+		if(!selfInventory) selfInventory = gameObject.AddComponent<Inventory>();
 		
 		agent = GetComponent<CharacterAgent>();
 		if(!agent) agent = gameObject.AddComponent<CharacterAgent>();
@@ -1034,7 +1039,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	private void OnAnyInventoryChanged(Inventory inventory)
 	{
-		if (GetComponent<Inventory>() == inventory)
+		if (selfInventory == inventory)
 		{
 			if (inventory.TryGetItem(Inventory.InventorySlot_Weapon, out var weaponItem) && weaponItem.IsWeapon(out var weaponData))
 			{
@@ -1247,5 +1252,30 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool CanSwitchWeapons()
 	{
 		return !IsDead() && !IsActing() && !(characterAnimation && characterAnimation.IsSwitchingWeapons);
+	}
+
+	public bool WeaponNeedsReload()
+	{
+		return currentWeapon.IsReloadable() && currentWeapon.IsEmptyAmmo();
+	}
+
+	public bool TryFindAmmo(out ItemData ammoItem)
+	{
+		foreach (var item in selfInventory.GetItems())
+		{
+			if (currentWeapon.CanBeReloadedWithAmmo(item))
+			{
+				ammoItem = item;
+				return true;
+			}
+		}
+
+		ammoItem = null;
+		return false;
+	}
+
+	public void SwitchDefaultWeapon()
+	{
+		SetCurrentWeapon(defaultWeapon);
 	}
 }

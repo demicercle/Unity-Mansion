@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -50,6 +51,7 @@ public class Inventory : MonoBehaviour
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
 	
 	private bool isLootBag;
+	public ItemData[] GetItems() => items.Where(it => it).ToArray();
 	
 	public string[] SerializeToSlots()
 	{
