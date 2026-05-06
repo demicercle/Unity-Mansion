@@ -101,12 +101,15 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     [SerializeField] private bool instantSwitchWeaponToWeapon = true;
     private IEnumerator WeaponSwitchCoroutine()
     {
-	    //var parentCharacter = GetComponentInParent<CharacterEntity>();
+	    var parentCharacter = GetComponentInParent<CharacterEntity>();
 	    var parentAnim = GetComponentInParent<CharacterAnimation>();
 	    
 	    while (true)
 	    {
 		    yield return null;
+
+		    if (parentCharacter.IsDead())
+			    continue;
 
 		    var weaponInHand = parentAnim.GetWeaponInHand();
 		    if (weaponInHand != rightWeapon)
@@ -172,6 +175,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     public void Death()
     {
 	   // EndAction(HandlerTypes.Block);
+	   if(debugWalkthrough) Debug.Log(this + " Death");
 	    animator.SetAnimatorTrigger(AnimatorTrigger.DeathTrigger);
 	    Lock(true, true, false, 0.1f, 0f);
 	    SetIKOff();
@@ -179,6 +183,7 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     
     public void GetHit(int hitNumber = -1)
     {
+	    if(debugWalkthrough) Debug.Log(this + " GetHit");
 	    if (hitNumber < 0) hitNumber = (int)AnimationVariations.Hits.TakeRandom();
 	    //GetAngry();
 	    animator.TriggerGettingHit(hitNumber);

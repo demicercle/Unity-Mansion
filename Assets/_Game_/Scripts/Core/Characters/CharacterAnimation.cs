@@ -285,7 +285,10 @@ public class CharacterAnimation : MonoBehaviour
 		//TrySetTrigger(parameters.trigger);
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
-		if (rpgAnimationHandler) rpgAnimationHandler.Death();
+		if (rpgAnimationHandler)
+		{
+			rpgAnimationHandler.Death();
+		}
 	}
 
 	private void OnRevive()
@@ -330,7 +333,7 @@ public class CharacterAnimation : MonoBehaviour
 
 	private void OnDamagedBy(CharacterEntity other, float amount)
 	{
-		if(shouldSwitchWeaponWhenDamaged)
+		if(shouldSwitchWeaponWhenDamaged && !_selfCharacter.IsDead())
 			InstantSwitchWeapons(true);
 	}
 

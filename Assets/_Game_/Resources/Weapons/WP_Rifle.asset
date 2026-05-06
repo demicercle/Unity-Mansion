@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   noAttack: 0
   hitChance: 12
-  minDamage: 4
+  minDamage: 8
   maxDamage: 8
   damageCurve:
     serializedVersion: 2
