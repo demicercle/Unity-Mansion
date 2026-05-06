@@ -494,19 +494,23 @@ public class CharacterRoutines : MonoBehaviour
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
 
+		var from = _selfCharacter.GetEyesPosition();
+		
+		var dir = target != null ? (target.GetCenterPosition() - from).normalized 
+			: shootHit.collider ? (shootHit.point - from).normalized 
+			: _selfCharacter.GetDirection();
+		
+		var range = currentWeapon.GetAttackRange();
+		
 		if (currentWeapon.GetShootInfos(out var shoots))
 		{
-			var from = _selfCharacter.GetEyesPosition();
-			var dir = target != null ? (target.GetCenterPosition() - from).normalized 
-				: shootHit.collider ? (shootHit.point - from).normalized 
-				: _selfCharacter.GetDirection();
-			var range = currentWeapon.GetAttackRange();
 			var closest = range;
 			for (int i = 0; i < shoots.Length; i++)
 			{
-				foreach (var hit in shoots[i].Raycast(from, dir, shoots[i].clampDistance ? closest : range))
+				var maxDist = shoots[i].clampDistance ? closest : range;
+				foreach (var hit in shoots[i].Raycast(from, dir, maxDist))
 				{
-					ProcessHit(hit.collider?.GetComponent<IAttackable>(), hit, atkRoll + shoots[i].RollAtkMod());
+					ProcessHit(hit.collider?.GetComponent<IAttackable>(), hit, atkRoll + shoots[i].RollAtkMod(), from, dir, maxDist);
 					closest = Mathf.Min(closest, hit.distance);
 				}
 				
@@ -516,15 +520,20 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		else
 		{
-			ProcessHit(target, shootHit, atkRoll);
+			ProcessHit(target, shootHit, atkRoll, from, dir, range);
 		}
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
 
-	private void ProcessHit(IAttackable target, RaycastHit shootHit, float atkRoll)
+	private void ProcessHit(IAttackable target, RaycastHit shootHit, float atkRoll, Vector3 from, Vector3 dir, float maxDist)
 	{
 		if(debugMode > 0) Debug.Log(this + " ProcessHit " + " atkRoll=" + atkRoll + " hit=" + shootHit + " target=" + target);
+		
+		foreach (var wp in _selfCharacter.GetComponentsInChildren<WeaponRenderer>())
+		{
+			wp.OnShoot(from, shootHit.collider ? shootHit.point : from + dir * maxDist);
+		}
 		
 		if (target == null)
 		{

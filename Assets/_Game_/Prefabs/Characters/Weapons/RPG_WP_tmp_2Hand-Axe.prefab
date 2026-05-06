@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6879256697379273068}
   - component: {fileID: 9126432563058043738}
   m_Layer: 0
-  m_Name: 2Hand-Axe
+  m_Name: RPG_WP_tmp_2Hand-Axe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

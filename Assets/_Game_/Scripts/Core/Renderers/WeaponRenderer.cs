@@ -26,23 +26,18 @@ public class WeaponRenderer : MonoBehaviour
     private Vector3 muzzlePosition;
     private Vector3 shootPosition;
 
-    public void OnShoot()
+    public void OnShoot(Vector3 from, Vector3 to)
     {
         if (shootLine)
         {
-            var selfCharacter = GetComponentInParent<CharacterEntity>();
-            if (selfCharacter)
-            {
-                var lastAttackTarget = selfCharacter.GetLastAttackTarget();
-
-                muzzlePosition = shootFromEyesPosition ? selfCharacter.GetEyesPosition() : shootLine.transform.position;
-                
-                shootPosition = selfCharacter.TryGetLastShootHit(out var hit) ? hit.point :
-                    selfCharacter.TryGetAimingPosition(out var aimingPos) ? aimingPos :
-                    lastAttackTarget?.GetCenterPosition() ?? shootLine.transform.TransformPoint(Vector3.forward * maxShootDistance);
-                
-                shootLine.gameObject.SetActive(true);
-            }
+            var clone = Instantiate(shootLine.gameObject).GetComponent<LineRenderer>();
+            clone.transform.position = from;
+            clone.useWorldSpace = true;
+            clone.positionCount = 2;
+            clone.SetPosition(0, from);
+            clone.SetPosition(1, to);
+            Utils.GetOrAddComponent<AutoDestroy>(clone.gameObject).delay = 1.0f;
+            clone.gameObject.SetActive(true);
         }
         
         onShoot?.Invoke();
@@ -87,11 +82,6 @@ public class WeaponRenderer : MonoBehaviour
         
         if(shootLine)shootLine.gameObject.SetActive(false);
         if(aimLine)aimLine.gameObject.SetActive(false);
-    }
-
-    private void OnDisable()
-    {
- //       if(debugMode > 0) Debug.Log(this + " OnDisable() parentCharacter=" + parentCharacter);
     }
 
     private void LateUpdate()

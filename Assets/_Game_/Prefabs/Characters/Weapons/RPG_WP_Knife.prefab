@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8049270907949946932
+--- !u!1 &2808435162377885028
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,48 +8,48 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2707078740921254536}
-  - component: {fileID: 482842668224792235}
-  - component: {fileID: 8347899288943596085}
-  - component: {fileID: 7203603437093648202}
+  - component: {fileID: 4622096164741246568}
+  - component: {fileID: 8014570583407089070}
+  - component: {fileID: 8714403132098142914}
+  - component: {fileID: 9124842217136180634}
   m_Layer: 0
-  m_Name: Sword
+  m_Name: RPG_WP_Knife
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2707078740921254536
+--- !u!4 &4622096164741246568
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8049270907949946932}
+  m_GameObject: {fileID: 2808435162377885028}
   serializedVersion: 2
   m_LocalRotation: {x: 0.000000059604616, y: -0.000000029569478, z: -0.00000010407525, w: 1}
-  m_LocalPosition: {x: 0, y: 0.04, z: -0}
+  m_LocalPosition: {x: -0.186, y: 0.04, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &482842668224792235
+--- !u!33 &8014570583407089070
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8049270907949946932}
-  m_Mesh: {fileID: 4300022, guid: 9d8cbe7d7c34ac442baea6cd0ea39cd0, type: 3}
---- !u!23 &8347899288943596085
+  m_GameObject: {fileID: 2808435162377885028}
+  m_Mesh: {fileID: 4300022, guid: 0913bdf8341dc1f499b50ec1ad76aff0, type: 3}
+--- !u!23 &8714403132098142914
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8049270907949946932}
-  m_Enabled: 0
+  m_GameObject: {fileID: 2808435162377885028}
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -91,19 +91,33 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &7203603437093648202
+--- !u!114 &9124842217136180634
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8049270907949946932}
+  m_GameObject: {fileID: 2808435162377885028}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a52513df46e79ea41b451d0270508999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isLeft: 0
-  rpgWeapon: 9
+  rpgWeapon: 13
+  itemTags: 
   inHand: 1
   offHand: 1
+  renderers:
+  - {fileID: 8714403132098142914}
+  shootLine: {fileID: 0}
+  aimLine: {fileID: 0}
+  maxShootDistance: 5
+  shootFromEyesPosition: 0
+  aimFromEyesPosition: 0
+  onShoot:
+    m_PersistentCalls:
+      m_Calls: []
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []

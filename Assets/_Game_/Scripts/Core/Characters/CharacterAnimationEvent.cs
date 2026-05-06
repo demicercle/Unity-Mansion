@@ -38,10 +38,6 @@ public class CharacterAnimationEvent : MonoBehaviour
 	{
 		onCharacterAnimationEvent?.Invoke(EventType.Shoot);
 		onShoot.Invoke();
-		foreach (var wp in GetComponentsInChildren<WeaponRenderer>())
-		{
-			wp.OnShoot();
-		}
 	}
 	
 	public UnityEvent onScream = new();
