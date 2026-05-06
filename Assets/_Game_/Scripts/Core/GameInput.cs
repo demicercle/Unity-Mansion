@@ -469,7 +469,7 @@ public class GameInput : MonoBehaviour
 					
 					selectedCharacter.SetAimingPosition(aimHit.point);
 					
-					if (selectedCharacter.RaycastShoot(selectedCharacter.GetEyesPosition(), out var shoots))
+					if (selectedCharacter.GetLastShootHits(out var shoots))
 					{
 						foreach (var shoot in shoots)
 						{

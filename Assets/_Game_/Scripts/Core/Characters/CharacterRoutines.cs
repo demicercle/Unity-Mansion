@@ -486,8 +486,10 @@ public class CharacterRoutines : MonoBehaviour
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 
 		_selfCharacter.SetAimingPosition(target.GetCenterPosition(), 1.0f);
-		yield return null;
+		yield return new WaitForFixedUpdate();
 		ShootAtAimingPosition(atkRoll);
+		yield return null;
+		_selfCharacter.SetAiming(false);
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
@@ -498,7 +500,7 @@ public class CharacterRoutines : MonoBehaviour
 		
 		var weapon = _selfCharacter.GetCurrentWeapon();
 		var fromPosition = _selfCharacter.GetEyesPosition();
-		if (_selfCharacter.RaycastShoot(fromPosition, out var shoots, 1.0f))
+		if (_selfCharacter.GetLastShootHits(out var shoots))
 		{
 			foreach (var shootHit in shoots)
 			{

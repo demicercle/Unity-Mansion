@@ -1150,53 +1150,51 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return isAiming && hitPoints.Length > 0;
 	}
 
-	private RaycastHit[] lastShootHits = Array.Empty<RaycastHit>();
-	public bool RaycastShoot(Vector3 from, out RaycastHit[] hits, float draw = 0f)
+	private void FixedUpdate()
 	{
-		hits = Array.Empty<RaycastHit>();
-
-		var dir = (aimingPosition - from).normalized;
-		var range = GetAttackRange();
-		
 		if (isAiming)
 		{
+			var from = GetEyesPosition();
+			var dir = (aimingPosition - from).normalized;
+			var range = GetAttackRange();
+			
 			if (currentWeapon.GetShootInfos(out var shoots))
 			{
-				hits = new RaycastHit[shoots.Length];
+				lastShootHits = new RaycastHit[shoots.Length];
 				for(int i = 0; i < shoots.Length; i++)
 				{
-					hits[i] = shoots[i].Raycast(from, dir, range);
-					if (!hits[i].collider)
-						hits[i].point = from + dir * range;
+					lastShootHits[i].point = from + dir * range;
+
+					var angle = shoots[i].angle * i - shoots[i].angle * 0.5f;
+					if (Physics.Raycast(from, Quaternion.Euler(0, angle, 0) * dir, out var hit, range, Layers.MaskAiming))
+						lastShootHits[i] = hit;
 				}
 			}
 			else
 			{
-				hits = new RaycastHit[1];
-				hits[0] = new WeaponData.ShootInfo()
-				{
-					angle = 0,
-					delay = 0,
-					atkMod = Vector2.zero,
-					clampDistance = false,
-				}.Raycast(from, dir, range);
+				lastShootHits = new RaycastHit[1];
+				lastShootHits[0].point = from + dir * range;
+				if (Physics.Raycast(from, dir, out var hit, range, Layers.MaskAiming))
+					lastShootHits[0] = hit;
 			}
-		}
-
-		if (debugAim > 0)
-		{
-			//DebugDrawer.Line(from, from + dir * range, Color.yellow, 0.2f);
 			
-			for (int i = 0; i < hits.Length; i++)
+			if (debugAim > 0)
 			{
-				DebugDrawer.Line(from, hits[i].point, hits[i].collider ? Color.red : Color.green, draw);
-				if (debugAim > 1) Debug.Log(this + " range=" + range + " hits " + i + " " + hits[i].collider);
+				//DebugDrawer.Line(from, from + dir * range, Color.yellow, 0.2f);
+			
+				for (int i = 0; i < lastShootHits.Length; i++)
+				{
+					DebugDrawer.Line(from, lastShootHits[i].point, lastShootHits[i].collider ? Color.red : Color.green, Routines.AnyActive() ? 1.0f : 0.0f);
+					if (debugAim > 1) Debug.Log(this + " range=" + range + " hits " + i + " " + lastShootHits[i].collider);
+				}
 			}
 		}
+	}
 
-		lastShootHits = hits;
-//		if (debugAim > 1) Debug.Log(this + " lastShootHits=" + lastShootHits.Length + "\n>" + Utils.ArrayStr(lastShootHits.ToList().ConvertAll(h => h.collider?.ToString())));
-		
+	private RaycastHit[] lastShootHits = Array.Empty<RaycastHit>();
+	public bool GetLastShootHits( out RaycastHit[] hits)
+	{
+		hits = lastShootHits;
 		return hits.Length > 0;
 	}
 

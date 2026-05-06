@@ -19,20 +19,6 @@ public class WeaponData : ScriptableObject
 		public bool clampDistance;
 		
 		public float RollAtkMod() => Random.Range(atkMod.x, atkMod.y);
-
-		public RaycastHit Raycast(Vector3 from, Vector3 dir, float range)
-		{
-			dir = Quaternion.Euler(0, angle, 0) * Vector3.Scale(new Vector3(1,0,1), dir).normalized;
-
-			if (!Physics.Raycast(from, dir, out var hit, range, Layers.MaskAiming))
-			{
-				hit.point = from + dir * range;
-			}
-
-			//Debug.Log("hit=" + hit.point + " " + hit.collider);
-			
-			return hit;
-		}
 	}
 	
 	public WeaponData Duplicate()
