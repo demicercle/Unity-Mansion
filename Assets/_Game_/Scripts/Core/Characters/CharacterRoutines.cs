@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using UnityEngine.UI;
 using EventType = CharacterAnimation.EventType;
 
 public class CharacterRoutines : MonoBehaviour
@@ -499,55 +500,77 @@ public class CharacterRoutines : MonoBehaviour
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
 
-		if (target != null)
+		if (currentWeapon.Raycast(_selfCharacter.GetEyesPosition(), _selfCharacter.GetDirection(), out var hits))
 		{
-			var atkResult = _selfCharacter.TryHit(target, atkRoll);
-			switch (atkResult)
+			var ignoreColliders = new List<Collider>();
+			foreach (var hit in hits)
 			{
-				case CharacterEntity.AttackResult.Miss:
-					Debug.Log(this + " AttackResult.Miss " + target);
-					//GameCanvas.Instance.FloatingText(_selfCharacter, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
-					break;
-			
-				case CharacterEntity.AttackResult.Dodge:
-					Debug.Log(this + " AttackResult.Dodge by " + target);
-					//GameCanvas.Instance.FloatingText(target, LanguageSettings.GetSettings(DialogFiles.main).GetLine(11, "dodge!"));
-					break;
-			
-				case CharacterEntity.AttackResult.Hit:
-					Debug.Log(this + " AttackResult.Hit " + target);
-					var damageInfo = new DamageInfo()
-					{
-						amount = _selfCharacter.GetLastAttackDamage(atkRoll),
-						isRanged = _selfCharacter.IsUsingRangeWeapon()
-					};
-					target.TakeDamage(damageInfo, _selfCharacter);
-					_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
-					break;
-			}
-
-			if (target is CharacterEntity)
-			{
-				var defender = target as CharacterEntity;
-			
-				if (!defender.IsDead() && defender.TryGetComponent(out CharacterDetection detection))
+				if (hit.collider)
 				{
-					detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+					if (ignoreColliders.Contains(hit.collider)) 
+						continue;
+					
+					ProcessHit(shootHit.collider.GetComponent<IAttackable>(), hit, atkRoll);
+					ignoreColliders.Add(hit.collider);
 				}
-
-				if (defender.TryRiposte(_selfCharacter))
+				else
 				{
-					do yield return null;
-					while (defender.Routines.AnyActive());
+					ProcessHit(null, hit, atkRoll);
 				}
 			}
 		}
 		else
 		{
-			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
+			ProcessHit(target, shootHit, atkRoll);
 		}
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
+	}
+
+	private void ProcessHit(IAttackable target, RaycastHit shootHit, float atkRoll)
+	{
+		if (target == null)
+		{
+			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
+			return;
+		}
+		
+		var atkResult = _selfCharacter.TryHit(target, atkRoll);
+		switch (atkResult)
+		{
+			case CharacterEntity.AttackResult.Miss:
+				Debug.Log(this + " AttackResult.Miss " + target);
+				//GameCanvas.Instance.FloatingText(_selfCharacter, LanguageSettings.GetSettings(DialogFiles.main).GetLine(10, "miss!"));
+				break;
+			
+			case CharacterEntity.AttackResult.Dodge:
+				Debug.Log(this + " AttackResult.Dodge by " + target);
+				//GameCanvas.Instance.FloatingText(target, LanguageSettings.GetSettings(DialogFiles.main).GetLine(11, "dodge!"));
+				break;
+			
+			case CharacterEntity.AttackResult.Hit:
+				Debug.Log(this + " AttackResult.Hit " + target);
+				var damageInfo = new DamageInfo()
+				{
+					amount = _selfCharacter.GetLastAttackDamage(atkRoll),
+					isRanged = _selfCharacter.IsUsingRangeWeapon()
+				};
+				target.TakeDamage(damageInfo, _selfCharacter);
+				_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);
+				break;
+		}
+
+		if (target is CharacterEntity)
+		{
+			var defender = target as CharacterEntity;
+			
+			if (!defender.IsDead() && defender.TryGetComponent(out CharacterDetection detection))
+			{
+				detection.SetCharacterDetected(_selfCharacter, true); // warn target if attack missed
+			}
+
+			defender.TryRiposte(_selfCharacter);
+		}
 	}
 
 	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection((pos - _selfCharacter.GetPosition()).normalized);

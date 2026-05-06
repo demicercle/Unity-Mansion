@@ -119,6 +119,17 @@ MonoBehaviour:
     m_RotationOrder: 4
   ammoTags: Shotgun
   maxAmmo: 2
+  shootInfos:
+  - angle: -10
+    raycastAll: 0
+  - angle: -5
+    raycastAll: 0
+  - angle: 0
+    raycastAll: 0
+  - angle: 5
+    raycastAll: 0
+  - angle: 10
+    raycastAll: 0
   decals:
   - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
   - {fileID: 11400000, guid: 3d1d45a1c8055ba4f8809c776eadb01b, type: 2}

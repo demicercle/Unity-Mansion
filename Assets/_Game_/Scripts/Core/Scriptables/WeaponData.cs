@@ -1,10 +1,40 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "WeaponData", order = 0)]
 public class WeaponData : ScriptableObject
 {
+	public static int debugMode => CharacterEntity.debugAim;
+	
+	[System.Serializable]
+	public struct ShootInfo
+	{
+		public float angle;
+		public bool raycastAll;
+
+		public RaycastHit[] Raycast(Vector3 from, Vector3 dir, float distance)
+		{
+			dir = Quaternion.Euler(0, angle, 0) * dir;
+			
+			if (debugMode > 0)
+			{
+				DebugDrawer.Line(from, from + dir * distance, Color.magenta, 1.0f);
+			}
+			
+			if (raycastAll)
+			{
+				return Physics.RaycastAll(from, dir, distance, Layers.MaskAiming);
+			}
+			else
+			{
+				return Physics.Raycast(from, dir, out var hit, distance, Layers.MaskAiming) ? new RaycastHit[]{hit} : Array.Empty<RaycastHit>();
+			}
+		}
+	}
+	
 	public WeaponData Duplicate()
 	{
 		var duplicated = Instantiate(this);
@@ -42,6 +72,21 @@ public class WeaponData : ScriptableObject
 	[Header("Ammunition")]
 	[SerializeField] private string ammoTags;
 	[SerializeField] [Min(0)] private int maxAmmo;
+
+	[Header("Special")] [SerializeField] private ShootInfo[] shootInfos = Array.Empty<ShootInfo>();
+
+	public bool Raycast(Vector3 from, Vector3 dir, out RaycastHit[] hits)
+	{
+		hits = Array.Empty<RaycastHit>();
+		
+		if (shootInfos.Length > 0)
+		{
+			for (int i = 0; i < shootInfos.Length; i++)
+				hits = hits.Concat(shootInfos[i].Raycast(from, dir, attackRange)).ToArray();
+		}
+
+		return hits.Length > 0;
+	}
 	
 	private int currentAmmo;
 

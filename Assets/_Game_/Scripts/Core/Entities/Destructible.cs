@@ -28,7 +28,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	public float GetRadius() => radius;
 	public float GetHeight() => radius;
 
-	public bool damagedWithRangeWeapons;
+	public bool ignoreRangedWeapons;
 	public UnityEvent takeDamage;
 	public UnityEvent breaks;
 
@@ -45,7 +45,7 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	public void TakeDamage(DamageInfo dmgInfo, object instigator)
 	{
-		if (!damagedWithRangeWeapons && dmgInfo.isRanged)
+		if (ignoreRangedWeapons && dmgInfo.isRanged)
 		{
 			dmgInfo.amount = 0;
 		}
