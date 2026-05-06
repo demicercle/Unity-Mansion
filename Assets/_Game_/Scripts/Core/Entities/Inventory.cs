@@ -19,6 +19,7 @@ public class Inventory : MonoBehaviour
 		var bag = Instantiate(lootBagPrefab.gameObject).GetComponent<Inventory>();
 		bag.isLootBag = true;
 		bag.maxSize = 1;
+		bag.saveInventory = false;
 		bag.destroyIfEmpty = true;
 		NavUtils.TryGetNearestNavPosition(navPosition, CreateLootNavDistance, out navPosition);
 		bag.transform.position = navPosition;

@@ -423,7 +423,7 @@ public class CharacterBrain : MonoBehaviour
 	{
 		if(debugMode > 0) Debug.Log(this + " OnDamagedBy " + other + " amount="  + amount);
 
-		if (turnHostileWhenDamaged && amount > 0)
+		if (turnHostileWhenDamaged && amount > 0 && other.IsPlayer())
 		{
 			_selfCharacter.SetCurrentFaction(CharacterFaction.Enemy);
 		}

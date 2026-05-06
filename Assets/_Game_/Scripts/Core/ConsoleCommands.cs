@@ -178,6 +178,12 @@ public class ConsoleCommands : MonoBehaviour
 		ResetGame();
 	}
 
+	[ConsoleMethod("open_save_folder", "")]
+	public static void OpenSaveFolder()
+	{
+		Application.OpenURL("file://" + GameSave.folderPath);
+	}
+ 
 	[ConsoleMethod("dtset", "")]
 	public static void DtSet(float value)
 	{

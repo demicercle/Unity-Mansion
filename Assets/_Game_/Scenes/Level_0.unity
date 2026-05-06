@@ -2999,19 +2999,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -7.121671
+      value: 16.566402
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.5500011
+      value: 0.19999886
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -14.009186
+      value: -11.180742
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9238797
+      value: 0.793353
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalRotation.x
@@ -3019,7 +3019,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.3826831
+      value: -0.60876185
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalRotation.z
@@ -3031,7 +3031,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 45
+      value: -75
       objectReference: {fileID: 0}
     - target: {fileID: 3315906621845529838, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -3040,6 +3040,10 @@ PrefabInstance:
     - target: {fileID: 5329482081261473288, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: m_Enabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5414571319098223979, guid: 895190acdc97e2342864d089b4eca750, type: 3}
+      propertyPath: saveInventory
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5414571319098223979, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       propertyPath: 'items.Array.data[6]'
