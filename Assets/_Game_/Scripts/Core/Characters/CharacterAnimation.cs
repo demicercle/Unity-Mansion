@@ -342,7 +342,7 @@ public class CharacterAnimation : MonoBehaviour
 		if (!value) 
 			timeAiming = 0f;
 		
-		if(CharacterEntity.debugAim > 0) Debug.Log(this + " OnAiming " + value + " " + position + " " + timeAiming.ToString("N2"));
+		if(CharacterEntity.debugAim > 1) Debug.Log(this + " OnAiming " + value + " " + position + " " + timeAiming.ToString("N2"));
 		
 		if (rpgAnimationHandler)
 		{

@@ -469,8 +469,6 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterHitOrShoot(IAttackable target, bool useAction, RaycastHit shootHit)
 	{
-		var atkRoll = 0.0f;
-
 		var currentWeapon = _selfCharacter.GetCurrentWeapon();
 		if (currentWeapon.IsReloadable() && currentWeapon.IsEmptyAmmo())
 		{
@@ -489,34 +487,31 @@ public class CharacterRoutines : MonoBehaviour
 		if(useAction) 
 			_selfCharacter.UseAction(CharacterAction.Attack, useAction, target);
 		
-		if (target != null)
-		{
-			atkRoll = _selfCharacter.RollDice(); // we roll the dice before for the animation
-			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), target.GetCenterPosition(), Color.red, 2.0f);
-		}
+		var atkRoll = _selfCharacter.RollDice();
 		
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 
 		//yield return new WaitForSeconds(character.GetDefaultAttackHitTime());//TODO wait attack duration
 		//TODO DamageInfo, hit check (GD)
 
-		if (currentWeapon.Raycast(_selfCharacter.GetEyesPosition(), _selfCharacter.GetDirection(), out var hits))
+		if (currentWeapon.GetShootInfos(out var shoots))
 		{
-			var ignoreColliders = new List<Collider>();
-			foreach (var hit in hits)
+			var from = _selfCharacter.GetEyesPosition();
+			var dir = target != null ? (target.GetCenterPosition() - from).normalized 
+				: shootHit.collider ? (shootHit.point - from).normalized 
+				: _selfCharacter.GetDirection();
+			var range = currentWeapon.GetAttackRange();
+			var closest = range;
+			for (int i = 0; i < shoots.Length; i++)
 			{
-				if (hit.collider)
+				foreach (var hit in shoots[i].Raycast(from, dir, shoots[i].clampDistance ? closest : range))
 				{
-					if (ignoreColliders.Contains(hit.collider)) 
-						continue;
-					
-					ProcessHit(shootHit.collider.GetComponent<IAttackable>(), hit, atkRoll);
-					ignoreColliders.Add(hit.collider);
+					ProcessHit(hit.collider?.GetComponent<IAttackable>(), hit, atkRoll + shoots[i].RollAtkMod());
+					closest = Mathf.Min(closest, hit.distance);
 				}
-				else
-				{
-					ProcessHit(null, hit, atkRoll);
-				}
+				
+				if(shoots[i].delay > 0)
+					yield return new WaitForSeconds(shoots[i].delay);
 			}
 		}
 		else
@@ -529,6 +524,8 @@ public class CharacterRoutines : MonoBehaviour
 
 	private void ProcessHit(IAttackable target, RaycastHit shootHit, float atkRoll)
 	{
+		if(debugMode > 0) Debug.Log(this + " ProcessHit " + " atkRoll=" + atkRoll + " hit=" + shootHit + " target=" + target);
+		
 		if (target == null)
 		{
 			_selfCharacter.GetCurrentWeapon().TrySpawnDecal(shootHit);

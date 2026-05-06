@@ -1133,7 +1133,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		var shootDir = (shootEnd - shootStart).normalized;
 		if (!IsUsingRangeWeapon())
 			shootEnd = GetCenterPosition() + shootDir * MinAttackRange;
-		if (debugAim > 0) DebugDrawer.Line(shootStart, shootEnd, Color.red, 0.5f);
+		if (debugAim > 0) DebugDrawer.Line(shootStart, shootEnd, Color.red, debugAim * 0.5f);
 		if (isAiming && Physics.Linecast(shootStart, shootEnd + shootDir, out hit, Layers.MaskAiming) && hit.collider.gameObject != gameObject)
 		{
 			lastShootHitResult = hit;

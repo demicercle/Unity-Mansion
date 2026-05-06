@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RPGCharacterAnims.Lookups;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "WeaponData", order = 0)]
 public class WeaponData : ScriptableObject
@@ -13,7 +14,12 @@ public class WeaponData : ScriptableObject
 	public struct ShootInfo
 	{
 		public float angle;
+		public float delay;
+		public Vector2 atkMod;
 		public bool raycastAll;
+		public bool clampDistance;
+		
+		public float RollAtkMod() => Random.Range(atkMod.x, atkMod.y);
 
 		public RaycastHit[] Raycast(Vector3 from, Vector3 dir, float distance)
 		{
@@ -30,7 +36,9 @@ public class WeaponData : ScriptableObject
 			}
 			else
 			{
-				return Physics.Raycast(from, dir, out var hit, distance, Layers.MaskAiming) ? new RaycastHit[]{hit} : Array.Empty<RaycastHit>();
+				return Physics.Raycast(from, dir, out var hit, distance, Layers.MaskAiming)
+					? new RaycastHit[]{hit}
+					: Array.Empty<RaycastHit>();
 			}
 		}
 	}
@@ -75,17 +83,10 @@ public class WeaponData : ScriptableObject
 
 	[Header("Special")] [SerializeField] private ShootInfo[] shootInfos = Array.Empty<ShootInfo>();
 
-	public bool Raycast(Vector3 from, Vector3 dir, out RaycastHit[] hits)
+	public bool GetShootInfos(out ShootInfo[] shoots)
 	{
-		hits = Array.Empty<RaycastHit>();
-		
-		if (shootInfos.Length > 0)
-		{
-			for (int i = 0; i < shootInfos.Length; i++)
-				hits = hits.Concat(shootInfos[i].Raycast(from, dir, attackRange)).ToArray();
-		}
-
-		return hits.Length > 0;
+		shoots = shootInfos;
+		return shoots.Length > 0;
 	}
 	
 	private int currentAmmo;
