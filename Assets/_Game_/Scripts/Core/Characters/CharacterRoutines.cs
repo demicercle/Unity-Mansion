@@ -425,11 +425,20 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitCharacterShootAt";
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterShootAt " + worldPosition );
 		
+		_selfCharacter.StopAgent();
+		
 		if (useAction && !_selfCharacter.HasActions())
 		{
 			if(debugMode > 0) Debug.Log(this + " cannot attack (no actions)");
 			_selfCharacter.FloatingText_Cant();
 			yield break;
+		}
+
+		if (_selfCharacter.TryGetAnimation(out var anim))
+		{
+			anim.SwitchWeapons(true);
+			do yield return null;
+			while (anim.IsSwitchingWeapons);
 		}
 
 		while (!_selfCharacter.IsFacingPosition(worldPosition))
@@ -451,9 +460,13 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterPerformAttack " + target + " useAction=" + useAction );
 
 		yield return null;
-		
-		if(!_selfCharacter.IsFacingPosition(target.GetReachPosition()))
-			yield return StartCoroutine(WaitCharacterLookPosition(target.GetReachPosition()));
+
+		var targetPos = target.GetCenterPosition();
+		if (!_selfCharacter.IsFacingPosition(targetPos))
+		{
+			_selfCharacter.LookWorldPosition(targetPos, Time.deltaTime);
+			yield return null;
+		}
 
 		if (useAction && !_selfCharacter.HasActions())
 		{
@@ -498,6 +511,7 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		if(debugMode > 0) Debug.Log(this + " ShootAtAimingPosition atkRoll=" + atkRoll);
 		
+		var ignoredColliders = new List<Collider>();
 		var weapon = _selfCharacter.GetCurrentWeapon();
 		var fromPosition = _selfCharacter.GetEyesPosition();
 		if (_selfCharacter.GetLastShootHits(out var shoots))
@@ -505,22 +519,28 @@ public class CharacterRoutines : MonoBehaviour
 			foreach (var shootHit in shoots)
 			{
 				if(debugMode > 0) Debug.Log(this + " shootHit=" + shootHit.collider);
-				if (shootHit.collider && shootHit.collider.TryGetComponent(out IAttackable target))
-				{
-					if (atkRoll < 0f)
-						atkRoll = _selfCharacter.RollDice();
-					
-					ProcessHit(target, atkRoll);
-				}
-				else
-				{
-					weapon.TrySpawnDecal(shootHit);
-				}
 				
 				foreach (var wp in _selfCharacter.GetComponentsInChildren<WeaponRenderer>())
 				{
 					wp.OnShoot(fromPosition, shootHit.point);
 				}
+				
+				if (shootHit.collider)
+				{
+					if (ignoredColliders.Contains(shootHit.collider)) continue; // to prevent hitting twice the same target
+					ignoredColliders.Add(shootHit.collider);
+					
+					if (shootHit.collider.TryGetComponent(out IAttackable target))
+					{
+						if (atkRoll < 0f)
+							atkRoll = _selfCharacter.RollDice();
+					
+						ProcessHit(target, atkRoll);
+						continue;
+					}
+				}
+				
+				weapon.TrySpawnDecal(shootHit);
 			}
 		}
 	}
@@ -648,6 +668,12 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			debugTimeout = (Time.time - startTime);
 
+			if (_selfCharacter.TryGetAnimation(out var anim))
+			{
+				do yield return null;
+				while (anim.IsSwitchingWeapons);
+			}
+			
 			if (!agent.IsMoving())
 			{
 				if(debugMode > 0) Debug.Log(this + " agent.StartMove and SetReachDistance");

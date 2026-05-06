@@ -162,6 +162,9 @@ namespace RPGCharacterAnims
 				sideType = Side.Right;
 			else if (!weapon.ToString().StartsWith("Left") && !weapon.ToString().StartsWith("Right")) 
 				sideType = Side.None;
+
+			if (weapon == Weapon.Relax)
+				return 0;
 			
 			switch (sideType) {
 				case Side.None:
