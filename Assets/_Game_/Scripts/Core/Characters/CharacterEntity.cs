@@ -847,14 +847,18 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (IsUsingRangeWeapon())
 		{
 			var dist = GetDistanceTo(target.GetPosition());
-			return dist <= atkRange;
+			if (dist > atkRange)
+				return false;
 		}
 		else
 		{
 			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetPosition());
 			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetPosition());
-			return vDist <= GetHeight() && hDist <= atkRange;
+			if (vDist <= GetHeight() && hDist <= atkRange)
+				return false;
 		}
+
+		return LOSCheck(target);
 	}
 	
 	public bool LOSCheck(IAttackable other)
