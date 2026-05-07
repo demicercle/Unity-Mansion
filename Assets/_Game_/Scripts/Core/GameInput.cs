@@ -333,8 +333,15 @@ public class GameInput : MonoBehaviour
 
 			if (selectedCharacter)
 			{
-				if (inputSystem.Player.ToggleAim.WasPressedThisFrame()) selectedCharacter.SetAiming(true);
-				if (inputSystem.Player.ToggleAim.WasReleasedThisFrame()) selectedCharacter.SetAiming(false);
+				if (inputSystem.Player.ToggleAim.IsPressed() && !selectedCharacter.IsAiming() && !selectedCharacter.IsActing())
+				{
+					selectedCharacter.SetAiming(true);
+				}
+
+				if (inputSystem.Player.ToggleAim.WasReleasedThisFrame())
+				{
+					selectedCharacter.SetAiming(false);
+				}
 			}
 		
 			if (inputSystem.Player.Move.IsPressed())

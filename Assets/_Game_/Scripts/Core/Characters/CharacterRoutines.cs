@@ -519,7 +519,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			foreach (var shootHit in shoots)
 			{
-				if(debugMode > 0) Debug.Log(this + " shootHit=" + shootHit.collider);
+				if(debugMode > 0) Debug.Log(this + " " + shootIndex + " shootHit=" + shootHit.collider);
 
 				var delay = weapon.GetShootDelay(shootIndex);
 				

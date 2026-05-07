@@ -12,8 +12,9 @@ x default aim position not center so npc will shoot straight forward
 x npc have trouble turning around
 - retake "roll dice end turn"
 - "no actions" floating text is boring
-- if attacking while aiming in real time with melee weapon, assign attack ("move at destination")
 - when toggle aiming, stop the character, or wait the character to stop before activating aiming
+- check shoot delay with rifle
+- check how NPC reacts to a fight with "Enemy" (zombies)
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling
@@ -40,7 +41,6 @@ NODES
 
 INPUT
 - min time between assigns
-- aim button and IK hands with pistol (lookAt)
 
 GAMEPLAY
 - run should also roll dices?
