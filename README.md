@@ -10,6 +10,7 @@ REFACTO
 - NPC should try to flee if no ammo, no health (even triggering opportunity attacks)
 - grenade should spawn decal
 - save camera rotation
+- do "CursorRaycast" only in FixedUpdate
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

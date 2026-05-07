@@ -16,3 +16,4 @@
 #debug_input 1
 #debug_follows 2
 #debug_noise 1
+#debug_triggers 1
