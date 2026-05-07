@@ -423,6 +423,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public bool IsPlayer() => GetCurrentFaction() == CharacterFaction.Player;
 	
+	public CharacterEntity[] GetLivingEnemyCharacters() => AllCharacters.Where(c => !c.IsDead() && IsEnemyTo(c)).ToArray();
+	
 	public bool IsEnemyToPlayer(CharacterEntity other = null) => currentFaction == CharacterFaction.Enemy;
 
 	public bool ShouldTalk(CharacterEntity other) => other.GetCurrentFaction() == CharacterFaction.Neutral &&
