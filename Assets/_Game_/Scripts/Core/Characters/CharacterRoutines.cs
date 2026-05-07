@@ -80,11 +80,11 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " AssignInteractAtWaypoint " + clickedProp + " " + waypoint);
 		StartNewRoutine(WaitCharacterInteractAtWaypoint(clickedProp, waypoint));
 	}
-	public void AssignMoveToDestination(Vector3 navPosition, bool raycastForDestructible = false)
+	public void AssignMoveToDestination(Vector3 navPosition, float reachDistance, bool raycastForDestructible = false)
 	{
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToDestination " + navPosition);
-		StartNewRoutine(WaitCharacterMoved(navPosition, 0f, raycastForDestructible));
+		StartNewRoutine(WaitCharacterMoved(navPosition, reachDistance, raycastForDestructible));
 	}
 	public void AssignMoveToWaypoint(Waypoint waypoint, System.Action onComplete = null)
 	{
@@ -149,7 +149,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignMoveToDestination(Vector3 navPosition)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignMoveToDestination ");
-		_selfCharacter.Routines.AssignMoveToDestination(navPosition, false);
+		_selfCharacter.Routines.AssignMoveToDestination(navPosition, _selfCharacter.GetAgent().GetMinReachDistance(), false);
 		Leader_AssignFollows();
 	}
 	public void Leader_AssignInteract(PropComponent clickedProp)
@@ -500,16 +500,16 @@ public class CharacterRoutines : MonoBehaviour
 
 		_selfCharacter.SetAimingPosition(_selfCharacter.GetAimingPosition(target));
 		yield return new WaitForFixedUpdate();
-		yield return StartCoroutine(ProcessLastShootResults(atkRoll));
+		yield return StartCoroutine(ProcessLastShootResults(atkRoll, target));
 		_selfCharacter.SetAiming(false);
 		yield return null;
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
 	
-	private IEnumerator ProcessLastShootResults(int atkRoll)
+	private IEnumerator ProcessLastShootResults(int atkRoll, IAttackable forceHitTarget = null)
 	{
-		if(debugMode > 0) Debug.Log(this + " ShootAtAimingPosition atkRoll=" + atkRoll);
+		if(debugMode > 0) Debug.Log(this + " ShootAtAimingPosition atkRoll=" + atkRoll + " forceHitTarget=" + forceHitTarget);
 		
 		var ignoredColliders = new List<Collider>();
 		var weapon = _selfCharacter.GetCurrentWeapon();
@@ -548,6 +548,10 @@ public class CharacterRoutines : MonoBehaviour
 							atkRoll = _selfCharacter.RollDice();
 					
 						ProcessHit(target, atkRoll);
+						
+						if (target == forceHitTarget)
+							forceHitTarget = null;
+						
 						continue;
 					}
 				}
@@ -555,6 +559,9 @@ public class CharacterRoutines : MonoBehaviour
 				weapon.TrySpawnDecal(shootHit);
 			}
 		}
+		
+		if(forceHitTarget != null)
+			ProcessHit(forceHitTarget, atkRoll); 
 	}
 
 	private void ProcessHit(IAttackable target, int atkRoll)

@@ -1154,7 +1154,7 @@ public class GameInput : MonoBehaviour
 			if (CanAssignOnClick(selectedCharacter)) // move to dest
 			{
 				if (!IsLeaderMode())
-					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+					selectedCharacter.Routines.AssignMoveToDestination(navPosition, selectedCharacter.GetAgent().GetMinReachDistance());
 				else
 					selectedCharacter.Routines.Leader_AssignMoveToDestination(navPosition);
 			}

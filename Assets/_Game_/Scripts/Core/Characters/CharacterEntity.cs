@@ -425,6 +425,24 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public CharacterEntity[] GetLivingEnemyCharacters() => AllCharacters.Where(c => !c.IsDead() && IsEnemyTo(c)).ToArray();
 	
+	public float GetClosestDistanceToAnyPartyCharacter(out CharacterEntity closestChar)
+	{
+		closestChar = null;
+		
+		var closestDistance = -1f;
+		foreach (var partyChar in _partyCharacters)
+		{
+			var dist = GetDistanceTo(partyChar.GetPosition());
+			if (closestChar == null || closestDistance > dist)
+			{
+				closestChar = partyChar;
+				closestDistance = dist;
+			}
+		}
+		
+		return closestDistance;
+	}
+	
 	public bool IsEnemyToPlayer(CharacterEntity other = null) => currentFaction == CharacterFaction.Enemy;
 
 	public bool ShouldTalk(CharacterEntity other) => other.GetCurrentFaction() == CharacterFaction.Neutral &&
@@ -445,6 +463,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			return faction != CharacterFaction.Enemy;
 		else
 			return faction == CharacterFaction.Enemy;
+	}
+
+	
+	public bool IsAllyTo(CharacterEntity other) => IsAllyTo(other.GetCurrentFaction());
+	public bool IsAllyTo(CharacterFaction faction)
+	{
+		if (currentFaction == CharacterFaction.Enemy)
+			return faction == CharacterFaction.Enemy;
+		else
+			return faction != CharacterFaction.Enemy;
 	}
 
 	public bool IsLeaderOf(CharacterEntity other) => GameInput.Instance.IsLeaderMode() &&

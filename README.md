@@ -19,6 +19,7 @@ REFACTO
 - cursor text et floating text misplaced when interacting with the destructible
 - zombi stuck near the stairs (no destination): need fallback patrol / wander
 - zombi_7 should arrive after first player turn
+- if using a melee attack, always hit target (no raycast)
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

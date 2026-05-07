@@ -175,7 +175,33 @@ public class CharacterBrain : MonoBehaviour
 				}
 				else if (_selfCharacter.HasMovePoints())
 				{
-					_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
+					_agent.SetReachDistance(_selfCharacter.GetAttackRange());
+					yield return _agent.AssignDestination(_chaseCharacter.GetPosition());
+					if (!_agent.hasDestination)
+					{
+						var allyCharacter = CharacterEntity.AllCharacters
+							.Where(c => !c.IsDead()
+							            && c.IsAllyTo(_selfCharacter)
+							            && c.HasDetectedAnyPartyCharacter())
+							.OrderBy(c => c.GetClosestDistanceToAnyPartyCharacter(out var _))
+							.FirstOrDefault();
+						
+						if(debugMode > 0) Debug.Log(this + " no destination to chase " + _chaseCharacter + ", trying to reach ally: "  + allyCharacter);
+						
+						if (allyCharacter)
+						{
+							_selfCharacter.Routines.AssignMoveToDestination(allyCharacter.GetPosition(), allyCharacter.GetRadius() + _selfCharacter.GetRadius() + _agent.GetMinReachDistance());
+						}
+						else
+						{
+							ForgetTarget();
+							yield break;
+						}
+					}
+					else
+					{
+						_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
+					}
 				}
 				else if (_selfCharacter.CanUseAction(CharacterAction.Run))
 				{
@@ -292,7 +318,7 @@ public class CharacterBrain : MonoBehaviour
 		}
 
 		_lastWanderingPos = _wanderingPos;
-		_selfCharacter.Routines.AssignMoveToDestination(_wanderingPos);
+		_selfCharacter.Routines.AssignMoveToDestination(_wanderingPos, _selfCharacter.GetAgent().GetMinReachDistance());
 		do
 		{
 			if (_chaseCharacter && canChase)
@@ -362,6 +388,7 @@ public class CharacterBrain : MonoBehaviour
 	private Dictionary<CharacterEntity, float> _aggroMap = new Dictionary<CharacterEntity, float>();
 	private float _startedThinkingTime;
 	private Vector3 _lastPosition;
+	private CharacterAgent _agent;
 	
 	private void Awake()
 	{
@@ -378,6 +405,7 @@ public class CharacterBrain : MonoBehaviour
 		_selfCharacter.onDamagedBy += OnDamagedBy;
 		
 		_waypointList = new List<Waypoint>();
+		_agent = GetComponent<CharacterAgent>();
 	}
 
 	private void OnDestroy()
