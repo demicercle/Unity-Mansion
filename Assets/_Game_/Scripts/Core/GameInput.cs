@@ -927,7 +927,7 @@ public class GameInput : MonoBehaviour
 			if (hit.collider && hit.collider.TryGetComponent(out IAttackable attackable) &&
 			    !selectedCharacter.IsAtAttackRange(attackable))
 			{
-				selectedCharacter.Routines.AssignMoveAndAttack(attackable, false, true);
+				selectedCharacter.Routines.AssignMoveAndAttack(attackable);
 				return;
 			}
 		}
@@ -978,7 +978,7 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter, selectedCharacter.IsUsingRangeWeapon());
+							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter);
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter);
 					}
@@ -1019,7 +1019,7 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter, selectedCharacter.IsUsingRangeWeapon());
+							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter);
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter);
 					}
@@ -1129,7 +1129,7 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + attackable);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(attackable, selectedCharacter.IsUsingRangeWeapon());
+							selectedCharacter.Routines.AssignMoveAndAttack(attackable);
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(attackable);
 						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);

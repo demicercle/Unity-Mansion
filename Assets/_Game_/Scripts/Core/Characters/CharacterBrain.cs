@@ -200,7 +200,7 @@ public class CharacterBrain : MonoBehaviour
 					}
 					else
 					{
-						_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
+						_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter);
 					}
 				}
 				else if (_selfCharacter.CanUseAction(CharacterAction.Run))

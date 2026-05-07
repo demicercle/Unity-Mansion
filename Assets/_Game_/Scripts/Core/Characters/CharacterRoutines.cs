@@ -43,7 +43,7 @@ public class CharacterRoutines : MonoBehaviour
 		return activeInstances.Contains(this);
 	}
 	
-	public void AssignMoveAndAttack(IAttackable target, bool losCheck, bool useAction = true)
+	public void AssignMoveAndAttack(IAttackable target, bool losCheck = true, bool useAction = true)
 	{
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
@@ -161,7 +161,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignAttack(IAttackable other)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
-		_selfCharacter.Routines.AssignMoveAndAttack(other, _selfCharacter.IsUsingRangeWeapon());
+		_selfCharacter.Routines.AssignMoveAndAttack(other);
 		Leader_AssignFollows();
 	}
 	public void Leader_AssignTalk(CharacterEntity npc)
