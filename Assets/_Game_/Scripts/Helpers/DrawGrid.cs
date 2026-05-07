@@ -4,7 +4,7 @@ using Pathfinding;
 using UnityEngine;
 
 [RequireComponent(typeof(Grid))]
-public class LevelGrid : MonoBehaviour
+public class DrawGrid : MonoBehaviour
 {
 	[SerializeField] private Color cellFillColor;
 	[SerializeField] private Color cellLineColor;
