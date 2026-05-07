@@ -7,15 +7,9 @@ REFACTO
 - dialog line reference bug in editor
 - door nav obstacle
 - training mannequin (invicible life)
-- floating text uses "world canvas" and connect to events in inspector
-- "no actions" floating text is boring
-- check shoot delay with rifle
-- check how NPC reacts to a fight with "Enemy" (zombies)
 - NPC should try to flee if no ammo, no health (even triggering opportunity attacks)
-- get rid of "get component in children weapon renderer"
 - grenade should spawn decal
-- noise emitter do not work
-- zombi_7 should arrive after first player turn
+- save camera rotation
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

@@ -529,10 +529,13 @@ public class CharacterRoutines : MonoBehaviour
 					yield return null;
 				
 				shootIndex++;
-					
-				foreach (var wp in _selfCharacter.GetComponentsInChildren<WeaponRenderer>())
+
+				if (_selfCharacter.TryGetAnimation(out var anim))
 				{
-					wp.OnShoot(fromPosition, shootHit.point);
+					foreach (var wp in anim.GetWeaponRenderers())
+					{
+						wp.OnShoot(fromPosition, shootHit.point);
+					}
 				}
 				
 				if (shootHit.collider)
@@ -907,7 +910,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		
 		if (debugMode > 0) Debug.Log(this + " launch projectile");
-		itemToUse.LaunchProjectile(_selfCharacter.gameObject, position);
+		itemToUse.LaunchProjectile(_selfCharacter, position);
 		itemToUse.AddQuantity(-1);
 		if (itemToUse.IsEmpty() && !inventory.TryRemoveItem(itemToUse))
 		{

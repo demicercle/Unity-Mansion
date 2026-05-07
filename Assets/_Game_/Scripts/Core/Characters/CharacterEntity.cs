@@ -967,6 +967,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			characterAnimation?.SwitchWeapon(newWeapon.rpgWeaponR);
 		}
 	}
+
 	
 	#region PRIVATE
 	private static List<CharacterEntity> _allCharacters = new List<CharacterEntity>();
@@ -992,7 +993,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private WeaponData currentWeapon;
 	private CharacterDetection detection;
 	private ItemData itemInHand;
-
 	private Inventory selfInventory;
 //	private CharacterLookAt characterLookAt;
 	

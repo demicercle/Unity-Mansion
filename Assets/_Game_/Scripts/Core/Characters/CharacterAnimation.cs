@@ -130,6 +130,8 @@ public class CharacterAnimation : MonoBehaviour
 
 	public bool WeaponsSwitched() => weaponInHand != Weapon.Relax;
 	
+	public WeaponRenderer[] GetWeaponRenderers() => weaponRenderers;
+	
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
 	private CharacterEntity _selfCharacter;

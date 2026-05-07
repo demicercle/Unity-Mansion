@@ -203,9 +203,15 @@ public class ItemData : ScriptableObject
 		return false;
 	}
 
-	public void LaunchProjectile(GameObject target, Vector3 destination)
+	public void LaunchProjectile(CharacterEntity target, Vector3 destination)
 	{
-		foreach (var weapon in target.GetComponentsInChildren<WeaponRenderer>())
+		if (!target.TryGetAnimation(out var anim))
+		{
+			Debug.LogWarning(this + " cannot launch projectile: no anim with weapon renderer");
+			return;
+		}
+		
+		foreach (var weapon in anim.GetWeaponRenderers())
 		{
 			if (weapon.rpgWeapon == Weapon.RightItem && CompareTags(weapon.itemTags))
 			{

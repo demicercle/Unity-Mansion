@@ -27,7 +27,7 @@ public class CharacterAnimationEvent : MonoBehaviour
 	{
 		onCharacterAnimationEvent?.Invoke(EventType.Hit);
 		onHit.Invoke();
-		foreach (var wp in GetComponentsInChildren<WeaponRenderer>())
+		foreach (var wp in GetComponentsInChildren<WeaponRenderer>()) // OnHit
 		{
 			wp.OnHit();
 		}
