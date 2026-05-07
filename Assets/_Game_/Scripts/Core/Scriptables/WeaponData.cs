@@ -44,9 +44,12 @@ public class WeaponData : ScriptableObject
 	{
 		return (int)Mathf.Lerp(minDamage, maxDamage, damageCurve.Evaluate(result));
 	}
+
+	public bool ShootFromEyesPosition() => shootFromEyesPosition;
 	
 	[Header("Range")]
 	[SerializeField] private bool isRanged = false;
+	[SerializeField] private bool shootFromEyesPosition = false;
 	public bool IsRanged() => isRanged;
 	[Range(0f, 32f)] [SerializeField] private float attackRange = 0f;
 	public float GetAttackRange() => attackRange;

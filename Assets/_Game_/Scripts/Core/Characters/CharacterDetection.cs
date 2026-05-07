@@ -344,7 +344,7 @@ public class CharacterDetection : MonoBehaviour
 #if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
-		if (!drawGizmos) return;
+		if (!drawGizmos || Application.isPlaying) return;
 		selfCharacter = GetComponent<CharacterEntity>();
 		if (selfCharacter)
 		{

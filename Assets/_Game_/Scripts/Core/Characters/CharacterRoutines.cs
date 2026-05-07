@@ -393,7 +393,7 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			var reachDistance = _selfCharacter.GetAttackReachDistance(target);
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
-			yield return StartCoroutine(WaitCharacterMoved(target.GetReachPosition(), reachDistance, raycastForDestructible));
+			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
 			atAttackRange = _selfCharacter.IsAtAttackRange(target);
 		}
 		
@@ -461,7 +461,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		yield return null;
 
-		var targetPos = target.GetCenterPosition();
+		var targetPos = target.GetPosition();
 		if (!_selfCharacter.IsFacingPosition(targetPos))
 		{
 			_selfCharacter.LookWorldPosition(targetPos, Time.deltaTime);
@@ -498,22 +498,22 @@ public class CharacterRoutines : MonoBehaviour
 		var atkRoll = _selfCharacter.RollDice();
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 
-		_selfCharacter.SetAimingPosition(target.GetCenterPosition(), 1.0f);
+		_selfCharacter.SetAimingPosition(_selfCharacter.GetAimingPosition(target));
 		yield return new WaitForFixedUpdate();
 		ShootAtAimingPosition(atkRoll);
-		yield return null;
 		_selfCharacter.SetAiming(false);
+		yield return null;
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
-
+	
 	private void ShootAtAimingPosition(float atkRoll)
 	{
 		if(debugMode > 0) Debug.Log(this + " ShootAtAimingPosition atkRoll=" + atkRoll);
 		
 		var ignoredColliders = new List<Collider>();
 		var weapon = _selfCharacter.GetCurrentWeapon();
-		var fromPosition = _selfCharacter.GetEyesPosition();
+		var fromPosition = _selfCharacter.GetShootFromPosition();
 		if (_selfCharacter.GetLastShootHits(out var shoots))
 		{
 			foreach (var shootHit in shoots)
@@ -527,7 +527,9 @@ public class CharacterRoutines : MonoBehaviour
 				
 				if (shootHit.collider)
 				{
-					if (ignoredColliders.Contains(shootHit.collider)) continue; // to prevent hitting twice the same target
+					if (ignoredColliders.Contains(shootHit.collider)) 
+						continue; // to prevent hitting twice the same target
+					
 					ignoredColliders.Add(shootHit.collider);
 					
 					if (shootHit.collider.TryGetComponent(out IAttackable target))

@@ -594,7 +594,7 @@ public class GameInput : MonoBehaviour
 					
 					else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) 
 					{
-						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetReachPosition()); // mouse over prop attackable
+						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition()); // mouse over prop attackable
 					}
 					debugString += "\n>" + currentCursor;
 				}

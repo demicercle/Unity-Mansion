@@ -208,6 +208,7 @@ public class PropComponent : MonoBehaviour
 	#if UNITY_EDITOR
 	public void DrawGizmoBox() // public used by RoomTrigger
 	{
+		if (Application.isPlaying) return;
 		var boxCollider = GetComponent<BoxCollider>();
 		if (boxCollider != null)
 		{

@@ -8,8 +8,10 @@ REFACTO
 - door nav obstacle
 - training mannequin (invicible life)
 - floating text uses "world canvas" and connect to events in inspector
-- default aim position not center so npc will shoot straight forward
-- npc have trouble turning around
+x default aim position not center so npc will shoot straight forward
+x npc have trouble turning around
+- retake "roll dice end turn"
+- "no actions" floating text is boring
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

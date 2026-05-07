@@ -73,7 +73,7 @@ public class GameCanvas : MonoBehaviour
 		if (obj is IAttackable)
 		{
 			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetWorldPosition((obj as IAttackable).GetCenterPosition(), referenceResolution);
+				.SetWorldPosition((obj as IAttackable).GetPosition(), referenceResolution);
 		}
 		
 		if (obj is Component)

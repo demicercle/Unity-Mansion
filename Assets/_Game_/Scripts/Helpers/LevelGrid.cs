@@ -51,6 +51,7 @@ public class LevelGrid : MonoBehaviour
 
 	private void OnDrawGizmos()
 	{
+		if (Application.isPlaying) return;
 		if (!enabled) return;
 		if (!grid) grid = GetComponent<Grid>();
 		grid.cellSize = new Vector3(cellSize,0,cellSize);

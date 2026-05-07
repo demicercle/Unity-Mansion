@@ -9,8 +9,7 @@ using UnityEngine.UIElements;
 
 public interface IAttackable
 {
-	Vector3 GetCenterPosition();
-	Vector3 GetReachPosition();
+	Vector3 GetPosition();
 	float GetHeight();
 	float GetRadius();
 	void TakeDamage(DamageInfo damageInfo, object instigator);
@@ -281,7 +280,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (DicePool.FloatToDice(20, result) >= 20) return true;
 		return result > 1f - (target is CharacterEntity
 			? CalculateHitChance(target as CharacterEntity)
-			: CalculateHitChance(target.GetCenterPosition(), target.GetRadius()));
+			: CalculateHitChance(GetAimingPosition(target), target.GetRadius()));
 	}
 	
 	public AttackResult TryHit(IAttackable target, float diceResult)
@@ -578,6 +577,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public Vector3 GetEyesPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.9f; // TODO "GetAgent()"
 
+	public Vector3 GetShootFromPosition() =>
+		currentWeapon.ShootFromEyesPosition() ? GetEyesPosition() : GetCenterPosition();
+	
 	public Vector3 GetCenterPosition() => GetCenterPosition(false);
 	public Vector3 GetCenterPosition(bool local) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.5f;  // TODO "GetAgent()"
 	
@@ -819,13 +821,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		var atkRange = GetAttackReachDistance(target) + MinAttackRange;
 		if (IsUsingRangeWeapon())
 		{
-			var dist = GetDistanceTo(target.GetReachPosition());
+			var dist = GetDistanceTo(target.GetPosition());
 			return dist <= atkRange;
 		}
 		else
 		{
-			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetReachPosition());
-			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetReachPosition());
+			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetPosition());
+			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetPosition());
 			return vDist <= GetHeight() && hDist <= atkRange;
 		}
 	}
@@ -833,8 +835,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool LOSCheck(IAttackable other)
 	{
 		var start = GetEyesPosition();
-		return LOSCheck(start, other.GetReachPosition())
-		       || LOSCheck(start, other.GetReachPosition() + Vector3.up * other.GetHeight());
+		return LOSCheck(start, other.GetPosition())
+		       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight());
 	}
 
 	public bool LOSCheck(Vector3 start, Vector3 end)
@@ -1159,7 +1161,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		if (isAiming)
 		{
-			var from = GetEyesPosition();
+			var from = GetShootFromPosition();
 			var dir = (aimingPosition - from).normalized;
 			var range = GetAttackRange();
 			
@@ -1203,11 +1205,12 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return hits.Length > 0;
 	}
 
-	public void SetAimingPosition(Vector3 world, float draw = 0)
+	public void SetAimingPosition(Vector3 world)
 	{
 		SetAiming(true);
 		aimingPosition = world;
-		if(debugAim > 0) DebugDrawer.Sphere(world, 0.1f, Color.red, draw);
+		if(debugAim > 0) DebugDrawer.Sphere(aimingPosition, 0.1f, Color.darkRed, Routines.AnyActive() ? 1.0f : 0.0f);
+		if(debugAim > 0) DebugDrawer.Line(aimingPosition, GetShootFromPosition(), Utils.ColorAlpha(Color.darkRed, 0.5f), Routines.AnyActive() ? 1.0f : 0.0f);
 		onAiming?.Invoke(isAiming, world);
 	}
 	
@@ -1277,5 +1280,15 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public void SwitchDefaultWeapon()
 	{
 		SetCurrentWeapon(defaultWeapon);
+	}
+
+	public Vector3 GetAimingPosition(IAttackable target)
+	{
+		if (target is CharacterEntity)
+			return currentWeapon.ShootFromEyesPosition() ? (target as CharacterEntity).GetEyesPosition() : (target as CharacterEntity).GetCenterPosition();
+		if (target is Destructible)
+			return (target as Destructible).GetCenterPosition();
+		else
+			return target.GetPosition();
 	}
 }

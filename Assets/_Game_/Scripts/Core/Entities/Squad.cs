@@ -78,6 +78,7 @@ public class Squad : MonoBehaviour
 
 		private void OnDrawGizmos()
 		{
+			if (Application.isPlaying) return;
 			Gizmos.color = Color.indianRed;
 			Gizmos.DrawSphere(transform.position, 0.2f);
 			for (int i = 0; i < characters.Count; i++)

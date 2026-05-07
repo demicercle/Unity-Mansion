@@ -41,6 +41,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   isRanged: 1
+  shootFromEyesPosition: 1
   attackRange: 12
   rangeHitCurve:
     serializedVersion: 2

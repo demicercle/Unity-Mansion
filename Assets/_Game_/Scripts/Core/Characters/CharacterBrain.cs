@@ -533,7 +533,7 @@ public class CharacterBrain : MonoBehaviour
 
 	private void OnDrawGizmos()
 	{
-		if (wanderingPoint)
+		if (wanderingPoint && !Application.isPlaying)
 		{
 			float wanderingDistance = wanderingPoint.radius;
 			Gizmos.color = Color.blue;
