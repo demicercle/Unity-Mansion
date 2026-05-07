@@ -12,6 +12,13 @@ REFACTO
 - check shoot delay with rifle
 - check how NPC reacts to a fight with "Enemy" (zombies)
 - NPC should try to flee if no ammo, no health (even triggering opportunity attacks)
+- get rid of "get component in children weapon renderer"
+- grenade should spawn decal
+- noise emitter do not work
+- character sheath weapon just after hit a destructible, should wait a bit
+- cursor text et floating text misplaced when interacting with the destructible
+- zombi stuck near the stairs (no destination): need fallback patrol / wander
+- zombi_7 should arrive after first player turn
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

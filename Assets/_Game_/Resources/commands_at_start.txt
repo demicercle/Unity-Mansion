@@ -1,5 +1,5 @@
 ﻿#no_detection 1
-debug_detection 1
+#debug_detection 1
 #debug_agent 1
 #debug_anim 1
 #debug_stats 2
