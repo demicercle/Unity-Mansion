@@ -62,11 +62,12 @@ public class WeaponData : ScriptableObject
 	[SerializeField] [Min(0)] private int maxAmmo;
 
 	[Header("Raycast")] 
+	[SerializeField] private bool allowMultipleHit = false;
 	[SerializeField] private bool shootFlat = false;
 	[SerializeField] private Vector3 shootOffset = default;
 	[SerializeField] private ShootInfo[] shootInfos = Array.Empty<ShootInfo>();
 	public Vector3 GetShootOffset() => shootOffset;
-
+	public bool AllowMultipleHit() => allowMultipleHit;
 	public bool ShootsFlat() => shootFlat;
 
 	public bool GetShootInfos(out ShootInfo[] shoots)

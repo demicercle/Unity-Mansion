@@ -122,6 +122,7 @@ MonoBehaviour:
   maxAmmo: 15
   shootFlat: 1
   shootOffset: {x: 0, y: 0, z: 0}
+  allowMultipleHit: 1
   shootInfos:
   - angle: 0
     delay: 0

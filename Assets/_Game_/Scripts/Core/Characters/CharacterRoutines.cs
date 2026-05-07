@@ -537,7 +537,7 @@ public class CharacterRoutines : MonoBehaviour
 				
 				if (shootHit.collider)
 				{
-					if (ignoredColliders.Contains(shootHit.collider)) 
+					if (!weapon.AllowMultipleHit() && ignoredColliders.Contains(shootHit.collider)) 
 						continue; // to prevent hitting twice the same target
 					
 					ignoredColliders.Add(shootHit.collider);

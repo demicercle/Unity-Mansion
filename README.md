@@ -8,14 +8,9 @@ REFACTO
 - door nav obstacle
 - training mannequin (invicible life)
 - floating text uses "world canvas" and connect to events in inspector
-x default aim position not center so npc will shoot straight forward
-x npc have trouble turning around
-- retake "roll dice end turn"
 - "no actions" floating text is boring
 - check shoot delay with rifle
 - check how NPC reacts to a fight with "Enemy" (zombies)
-- roll dice end turn
-- cursorText not displayed anymore
 - NPC should try to flee if no ammo, no health (even triggering opportunity attacks)
 
 DEBUG
