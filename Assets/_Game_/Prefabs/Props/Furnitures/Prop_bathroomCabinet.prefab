@@ -50,11 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 43317063641dfea4b9c7453c836de244, type: 3}
       propertyPath: m_Name
-      value: LD_bathroomCabinet
+      value: Prop_bathroomCabinet
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 43317063641dfea4b9c7453c836de244, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 43317063641dfea4b9c7453c836de244, type: 3}
       propertyPath: m_StaticEditorFlags
