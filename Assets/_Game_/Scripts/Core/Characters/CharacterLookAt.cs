@@ -26,21 +26,29 @@ public class CharacterLookAt : MonoBehaviour
 		_selfFollows = GetComponent<CharacterFollows>();
 	}
 
-	private void UpdateFollows()
+	private void OnEnable()
 	{
-		_followTarget = null;
-		
-		if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
+		StartCoroutine("UpdateFollows");
+	}
+
+	private void OnDisable()
+	{
+		StopAllCoroutines();
+	}
+
+	private IEnumerator UpdateFollows()
+	{
+		while (true)
 		{
-			return;
-		}
-		
-		if (_selfCharacter.IsSelected())
-		{
-			GameInput.Instance.TryGetNavigationTarget(out _followTarget);
-		}
-		else
-		{
+			yield return new WaitForSeconds(1.0f);
+			
+			_followTarget = null;
+			
+			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
+			{
+				continue;
+			}
+			
 			if (GameTurnManager.Instance.IsTurnBasedMode())
 			{
 				if (_selfCharacter.TryGetClosestEnemy(out CharacterEntity enemy))
@@ -50,7 +58,12 @@ public class CharacterLookAt : MonoBehaviour
 			}
 			else
 			{
-				if (_selfCharacter.IsControllableByPlayer())
+				if (_selfCharacter.IsSelected())
+				{
+					GameInput.Instance.TryGetNavigationTarget(out _followTarget);
+				}
+					
+				else if (_selfCharacter.IsControllableByPlayer())
 				{
 					if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity leader) && leader != _selfCharacter)
 					{
@@ -63,8 +76,6 @@ public class CharacterLookAt : MonoBehaviour
 
 	private void LateUpdate ()
 	{
-		UpdateFollows();
-		
 		if (!lookTarget)
 		{
 			if (_selfCharacter.TryGetComponent(out PerfectLookAt pla))
@@ -74,7 +85,7 @@ public class CharacterLookAt : MonoBehaviour
 			
 			if (!lookTarget)
 			{
-				Debug.LogWarning(this + " has no look target!");
+				//Debug.LogWarning(this + " has no look target!");
 				enabled = false;
 				return;
 			}

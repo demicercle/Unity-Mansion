@@ -387,7 +387,7 @@ public class CharacterRoutines : MonoBehaviour
 			yield return characterAnim.SwitchWeapons(true);
 		}
 
-		var atAttackRange = _selfCharacter.IsAtAttackRange(target);
+		var atAttackRange = _selfCharacter.IsAtAttackRange(target, losCheck);
 
 		if (!atAttackRange)
 		{
@@ -395,7 +395,7 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
 			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
 			
-			atAttackRange = _selfCharacter.IsAtAttackRange(target);
+			atAttackRange = _selfCharacter.IsAtAttackRange(target, losCheck);
 			if (debugMode > 0) Debug.Log(this + " ends move, atAttackRange=" + atAttackRange);
 		}
 		
@@ -741,6 +741,7 @@ public class CharacterRoutines : MonoBehaviour
 			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(out var destructible))
 			{
 				if(debugMode > 0) Debug.Log(this + " RaycastForDestructible " + destructible);
+				agent.StopMovement();
 				yield return StartCoroutine(WaitCharacterAttack(destructible, false, false));
 				yield break;
 			}

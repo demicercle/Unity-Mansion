@@ -307,60 +307,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3888702922991893279, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6305080332400717654}
-    - targetCorrespondingSourceObject: {fileID: 3888702922991893279, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8074655197468124606}
-    - targetCorrespondingSourceObject: {fileID: 76086280045784636, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4514494586967399733}
-    - targetCorrespondingSourceObject: {fileID: 76086280045784636, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8328314290520154849}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
 --- !u!4 &891442361369244124 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8912626987695564964, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
   m_PrefabInstance: {fileID: 8642136229938289016}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &4762692569575793255 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3888702922991893279, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
-  m_PrefabInstance: {fileID: 8642136229938289016}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6305080332400717654
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4762692569575793255}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::QuickOutline
-  outlineMode: 0
-  outlineColor: {r: 1, g: 1, b: 1, a: 1}
-  outlineWidth: 2
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
---- !u!114 &8074655197468124606
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4762692569575793255}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
 --- !u!23 &6420030631829996466 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3384330620667419338, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
@@ -371,38 +324,3 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 1877627630371950569, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
   m_PrefabInstance: {fileID: 8642136229938289016}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &8566225880625035076 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 76086280045784636, guid: eee0caa6b8c04a149bb91215f06e5d24, type: 3}
-  m_PrefabInstance: {fileID: 8642136229938289016}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4514494586967399733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8566225880625035076}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::QuickOutline
-  outlineMode: 0
-  outlineColor: {r: 1, g: 1, b: 1, a: 1}
-  outlineWidth: 2
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
---- !u!114 &8328314290520154849
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8566225880625035076}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer

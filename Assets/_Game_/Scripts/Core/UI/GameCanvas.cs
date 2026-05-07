@@ -202,7 +202,7 @@ public class GameCanvas : MonoBehaviour
 		targetCharacter = null;
 		cursorText.gameObject.SetActive(false);
 		
-		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter)
+		if (GameTurnManager.Instance.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter)
 		{
 			if ( gameInput.GetAimedObject(out var mouseOverObject)	&& mouseOverObject.TryGetComponent(out targetCharacter) 
 																	&& selectedCharacter != targetCharacter

@@ -13,18 +13,12 @@ public class OutlineRenderer : MonoBehaviour, ICursorHandler
 	{
 		activeInstances.ForEach(o =>
 		{
-			foreach (var corner in new Vector3[]
-			         {
-				         Vector3.forward * HitBoxSize, Vector3.right * HitBoxSize, Vector3.up * HitBoxSize,
-				         -Vector3.forward * HitBoxSize, -Vector3.right * HitBoxSize, -Vector3.up * HitBoxSize,
-			         })
+			if (!RoomTrigger.IsPositionVisible(o.transform.position))
 			{
-				if (RoomTrigger.IsPositionVisible(o.transform.position + corner))
-				{
-					o.CursorOver();
-					return;
-				}
+				return;
 			}
+			
+			o.CursorOver();
 		});
 	}
 	

@@ -189,7 +189,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		closestEnemy = null;
 		
 		var closestDistance = 0f;
-		foreach (var enemy in CharacterEntity.AllCharacters)
+		foreach (var enemy in AllCharacters)
 		{
 			if (IsEnemyTo(enemy) && !enemy.IsDead() && enemy.IsCharacterRevealed())
 			{
@@ -249,7 +249,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool TryRiposte(CharacterEntity attacker)
 	{
-		if (IsAtAttackRange(attacker) && riposteCount > 0)
+		if (IsAtAttackRange(attacker, true) && riposteCount > 0)
 		{
 			Debug.Log(this + " TryRiposte: " + attacker + " " + riposteCount);
 			riposteCount--; // riposte
@@ -451,9 +451,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public float GetTalkDistance(CharacterEntity other) =>
 		other.GetRadius() + GetRadius() + agent.GetMinReachDistance() + other.agent.GetMinReachDistance();
-
-	public bool ShouldAttack(IAttackable other) =>
-		other is CharacterEntity ? ShouldAttack(other as CharacterEntity) : IsAtAttackRange(other);
 	
 	public bool ShouldAttack(CharacterEntity other) => !other.IsDead() && IsEnemyTo(other);
 	public bool IsEnemyTo(CharacterEntity other) => IsEnemyTo(other.GetCurrentFaction());
@@ -841,7 +838,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return Mathf.Max(MinAttackRange, currentWeapon.GetAttackRange(), agent.GetRadius() + target.GetRadius() + agent.GetMinReachDistance());
 	}
 
-	public bool IsAtAttackRange(IAttackable target)
+	public bool IsAtAttackRange(IAttackable target, bool losCheck)
 	{
 		var atkRange = GetAttackReachDistance(target) + MinAttackRange;
 		if (IsUsingRangeWeapon())
@@ -858,19 +855,19 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 				return false;
 		}
 
-		return LOSCheck(target);
+		return !losCheck || LOSCheck(target);
 	}
 	
 	public bool LOSCheck(IAttackable other)
 	{
 		var start = GetEyesPosition();
 		return LOSCheck(start, other.GetPosition())
-		       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight());
+		       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight(), other is Component ? (other as Component).GetComponent<Collider>() : null);
 	}
 
-	public bool LOSCheck(Vector3 start, Vector3 end)
+	public bool LOSCheck(Vector3 start, Vector3 end, Collider other = null)
 	{
-		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction))
+		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction) && hit.collider != other)
 		{
 			if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
 			if(CharacterRoutines.debugMode > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
@@ -1143,7 +1140,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool RaycastForDestructible(out Destructible o)
 	{
-		if (Physics.SphereCast(new Ray(GetCenterPosition(), transform.forward), GetRadius() / 2f, out var hit, Mathf.Max(GetRadius(), GetAttackRange()), Layers.MaskDestructible))
+		if (Physics.SphereCast(new Ray(GetCenterPosition(), transform.forward), GetRadius() / 2f, out var hit, GetRadius() + GetAttackRange(), Layers.MaskDestructible))
 		{
 			if (hit.collider.TryGetComponent(out Destructible destructible))
 			{

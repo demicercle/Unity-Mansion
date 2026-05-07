@@ -925,7 +925,7 @@ public class GameInput : MonoBehaviour
 		if (!selectedCharacter.IsUsingRangeWeapon())
 		{
 			if (hit.collider && hit.collider.TryGetComponent(out IAttackable attackable) &&
-			    !selectedCharacter.IsAtAttackRange(attackable))
+			    !selectedCharacter.IsAtAttackRange(attackable, true))
 			{
 				selectedCharacter.Routines.AssignMoveAndAttack(attackable);
 				return;

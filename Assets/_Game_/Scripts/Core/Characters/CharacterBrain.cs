@@ -138,78 +138,49 @@ public class CharacterBrain : MonoBehaviour
 
 		if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
 		
+		yield return StartCoroutine(YieldTryFindNewTarget());
+		
 		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
 		{
-			if (!_selfCharacter.Routines.AnyActive())
+			SaveTargetPosition();
+
+			if (_selfCharacter.WeaponNeedsReload())
 			{
-				SaveTargetPosition();
+				if (debugMode > 0) Debug.Log(this + " weapon needs reload");
+				if (_selfCharacter.TryFindAmmo(out var ammoItem))
+				{
+					_selfCharacter.Routines.AssignReloadWeapon(_selfCharacter.GetCurrentWeapon(), ammoItem);
+				}
+				else
+				{
+					if(debugMode > 0) Debug.Log(this + " can't reload weapon, switching default weapon");
+					_selfCharacter.FloatingText_Cant();
+					yield return new WaitForSeconds(0.5f);
+					_selfCharacter.SwitchDefaultWeapon();
 
-				if (_selfCharacter.WeaponNeedsReload())
-				{
-					if (debugMode > 0) Debug.Log(this + " weapon needs reload");
-					if (_selfCharacter.TryFindAmmo(out var ammoItem))
+					if (_selfCharacter.TryGetAnimation(out var anim))
 					{
-						_selfCharacter.Routines.AssignReloadWeapon(_selfCharacter.GetCurrentWeapon(), ammoItem);
+						do yield return null;
+						while (anim.IsSwitchingWeapons);
 					}
-					else
-					{
-						if(debugMode > 0) Debug.Log(this + " can't reload weapon, switching default weapon");
-						_selfCharacter.FloatingText_Cant();
-						yield return new WaitForSeconds(0.5f);
-						_selfCharacter.SwitchDefaultWeapon();
-
-						if (_selfCharacter.TryGetAnimation(out var anim))
-						{
-							do yield return null;
-							while (anim.IsSwitchingWeapons);
-						}
-					}
-					
-					do yield return null;
-					while (_selfCharacter.Routines.AnyActive());
-				}
-				
-				if (_selfCharacter.IsAtAttackRange(_chaseCharacter))
-				{
-					_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter);
-				}
-				else if (_selfCharacter.HasMovePoints())
-				{
-					_agent.SetReachDistance(_selfCharacter.GetAttackRange());
-					yield return _agent.AssignDestination(_chaseCharacter.GetPosition());
-					if (!_agent.hasDestination)
-					{
-						var allyCharacter = CharacterEntity.AllCharacters
-							.Where(c => !c.IsDead()
-							            && c.IsAllyTo(_selfCharacter)
-							            && c.HasDetectedAnyPartyCharacter())
-							.OrderBy(c => c.GetClosestDistanceToAnyPartyCharacter(out var _))
-							.FirstOrDefault();
-						
-						if(debugMode > 0) Debug.Log(this + " no destination to chase " + _chaseCharacter + ", trying to reach ally: "  + allyCharacter);
-						
-						if (allyCharacter)
-						{
-							_selfCharacter.Routines.AssignMoveToDestination(allyCharacter.GetPosition(), allyCharacter.GetRadius() + _selfCharacter.GetRadius() + _agent.GetMinReachDistance());
-						}
-						else
-						{
-							ForgetTarget();
-							yield break;
-						}
-					}
-					else
-					{
-						_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter);
-					}
-				}
-				else if (_selfCharacter.CanUseAction(CharacterAction.Run))
-				{
-					_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
 				}
 			}
+				
+			if (_selfCharacter.IsAtAttackRange(_chaseCharacter, true))
+			{
+				_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter);
+			}
+			else if (_selfCharacter.HasMovePoints())
+			{
+				_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter);
+			}
+			else if (_selfCharacter.CanUseAction(CharacterAction.Run))
+			{
+				_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+			}
 			
-			yield return StartCoroutine(YieldTryFindNewTarget());
+			do yield return null;
+			while (_selfCharacter.Routines.AnyActive());
 		}
 
 		if (debugMode > 0) Debug.Log(this + " end chase");

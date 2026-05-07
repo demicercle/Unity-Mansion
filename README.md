@@ -11,6 +11,7 @@ REFACTO
 - grenade should spawn decal
 - save camera rotation
 - do "CursorRaycast" only in FixedUpdate
+- add tooltip for action buttons
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling
