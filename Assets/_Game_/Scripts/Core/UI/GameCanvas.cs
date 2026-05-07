@@ -106,7 +106,7 @@ public class GameCanvas : MonoBehaviour
 	private MouseOverHandler viewportMouseHandler;
 	private ItemData currentDraggedItem;
 	private CanvasScaler canvasScaler;
-	private float calculatedHitChance;
+	private int calculatedHitChance;
 	private bool willHit;
 	private bool hitBlocked;
 	private CharacterEntity selectedCharacter;
@@ -229,11 +229,12 @@ public class GameCanvas : MonoBehaviour
 			{
 				cursorText.transform.position = gameInput.GetMousePosition();
 				cursorText.raycastTarget = false;
-				calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
-				willHit = selectedCharacter.WillHit(DicePool.LastResult, calculatedHitChance, targetCharacter);
+				calculatedHitChance = 20 - Mathf.Clamp(selectedCharacter.CalculateHitChance(targetCharacter), 1, 20);
+				if(CharacterEntity.debugStats > 1) Debug.Log(this + " calculated hit chance " + calculatedHitChance);
+				willHit = (DicePool.LastResult > 1 && calculatedHitChance < DicePool.LastResult) || DicePool.LastResult >= 20;
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
-				cursorText.text = Mathf.Clamp(20-DicePool.FloatToDice(20, calculatedHitChance), 1, 20) + "+";
-				if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
+				cursorText.text = calculatedHitChance + "+";
+				if (displayLastResultDice) cursorText.text += " (" + DicePool.LastResult + ")";
 				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
 				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
 			}

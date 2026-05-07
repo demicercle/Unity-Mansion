@@ -507,7 +507,7 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
 	
-	private IEnumerator ProcessLastShootResults(float atkRoll)
+	private IEnumerator ProcessLastShootResults(int atkRoll)
 	{
 		if(debugMode > 0) Debug.Log(this + " ShootAtAimingPosition atkRoll=" + atkRoll);
 		
@@ -557,7 +557,7 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 
-	private void ProcessHit(IAttackable target, float atkRoll)
+	private void ProcessHit(IAttackable target, int atkRoll)
 	{
 		if (debugMode > 0) Debug.Log(this + " ProcessHit " + " atkRoll=" + atkRoll + " target=" + target);
 		

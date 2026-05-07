@@ -236,7 +236,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return (instigator = lastAttackTarget as CharacterEntity) != null;
 	}
 	
-	public float RollDice()
+	public int RollDice()
 	{
 		var rolled = DicePool.LastResult;
 		if(DicePool.debugMode>0) Debug.Log(this + " RollDice takes last result: " + rolled);
@@ -262,9 +262,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool CanDodge() => characterData.GetDodgeChance() > 0 && dodgeCount > 0;
 	
-	public float GetDodgeChance() => Mathf.Clamp01(characterData.GetDodgeChance() + GetRemainingMovePoints() * MovePointsToDodge);
+	public int GetDodgeChance() => Mathf.Clamp(characterData.GetDodgeChance() + Mathf.RoundToInt(GetRemainingMovePoints() * MovePointsToDodge), 1, 20);
 
-	public float GetHitChance() => Mathf.Clamp01(currentWeapon.GetHitChance() + GetRemainingMovePoints() * MovePointsToHit);
+	public int GetHitChance() => Mathf.Clamp(currentWeapon.GetHitChance() + Mathf.RoundToInt(GetRemainingMovePoints() * MovePointsToHit), 1, 20);
 
 	public enum AttackResult
 	{
@@ -273,17 +273,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		Miss,
 		Dodge,
 	}
-
-	public bool WillHit(float result, float hitChance, IAttackable target)
-	{
-		var dR = DicePool.FloatToDice(20, result);
-		if (dR <= 1) return false;
-		if (dR >= 20) return true;
-		var dHit = DicePool.FloatToDice(20, 1f - Mathf.Clamp01(hitChance));
-		return result > dHit;
-	}
 	
-	public AttackResult TryHit(IAttackable target, float diceResult)
+	public AttackResult TryHit(IAttackable target, int diceResult)
 	{
 		if (target is CharacterEntity)
 		{
@@ -299,18 +290,17 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return AttackResult.Undefined;
 	}
 
-	private float calculatedHitChance;
+	private int calculatedHitChance;
 	private float targetRange, targetHeight;
 
-	public float CalculateHitChance(Vector3 targetPosition, float targetRadius)
+	public int CalculateHitChance(Vector3 targetPosition, float targetRadius)
 	{
 		if (IsUsingRangeWeapon())
 		{
 			targetRange = Vector3.Distance(GetReachPosition(), targetPosition);
 			targetHeight = GetPosition().y - targetPosition.y;
-			return Mathf.Clamp01(GetHitChance() 
-				* currentWeapon.EvaluateRange(targetRange, GetRadius() + targetRadius)
-				+ currentWeapon.EvaluateHeight(targetHeight));
+			return (int)Mathf.Clamp(GetHitChance() * Mathf.Clamp01(currentWeapon.EvaluateRange(targetRange, GetRadius() + targetRadius))
+			                        + currentWeapon.EvaluateHeight(targetHeight) * 20, 1f, 20f);
 		}
 		else
 		{
@@ -318,28 +308,28 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 	}
 	
-	public float CalculateHitChance(CharacterEntity target)
+	public int CalculateHitChance(CharacterEntity target)
 	{
 		calculatedHitChance = CalculateHitChance(target.GetReachPosition(), target.GetRadius());
+		
 		if (!IsUsingRangeWeapon())
 		{
 			if (target.CanDodge())
 			{
-				calculatedHitChance *= (1f - target.GetDodgeChance());
+				calculatedHitChance = Mathf.RoundToInt(calculatedHitChance * (1f - target.GetDodgeChance() / 20f));
 			}
 		}
-		return Mathf.Clamp01(calculatedHitChance);
+		
+		return Mathf.Clamp(calculatedHitChance, 1, 20);
 	}
 	
-	public AttackResult TryHit(CharacterEntity target, float atkRoll)
+	public AttackResult TryHit(CharacterEntity target, int d20)
 	{
-		var d20 = DicePool.FloatToDice(20, atkRoll);
-		
 		var hitChance = CalculateHitChance(target.GetReachPosition(), target.GetRadius());
 		
-		if(DicePool.debugMode>0) Debug.Log(this + " TryHit " + target + " roll=" + atkRoll + " hitChance=" + hitChance);
+		if(DicePool.debugMode>0) Debug.Log(this + " TryHit " + target + " d20=" + d20 + " hitChance=" + hitChance);
 		
-		if (d20 <= 1 ||1f - atkRoll > hitChance) // miss
+		if (d20 <= 1 || 20-d20 > hitChance)
 		{
 			onAttackResult?.Invoke(this, target, AttackResult.Miss);
 			return AttackResult.Miss;
@@ -352,7 +342,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 				if (target.CanDodge())
 				{
 					target.dodgeCount = Mathf.Max(0, target.dodgeCount - 1);
-					if (rollDiceToDodge ? 1f - target.RollDice() > target.GetDodgeChance() : target.GetDodgeChance() > atkRoll)
+					if (rollDiceToDodge ? target.RollDice() < target.GetDodgeChance() : target.GetDodgeChance() > d20)
 					{
 						onAttackResult?.Invoke(this, target, AttackResult.Dodge);
 						return AttackResult.Dodge;
@@ -851,9 +841,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return true;
 	}
 	
-	public float GetLastAttackDamage(float atkResult)
+	public float GetLastAttackDamage(int atkResult)
 	{
-		return currentWeapon.RollDamage(atkResult);
+		return currentWeapon.RollDamage(Mathf.Clamp(atkResult, 1, 20) / 20f);
 	}
 
 	public bool IsUsingRangeWeapon() => currentWeapon.IsRanged();

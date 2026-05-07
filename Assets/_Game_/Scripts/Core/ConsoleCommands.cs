@@ -152,7 +152,7 @@ public class ConsoleCommands : MonoBehaviour
 	[ConsoleMethod("set_next_dice", "")]
 	public static void SetNextDiceResult(int value)
 	{
-		DicePool.SetNextDiceResult(DicePool.DiceToFloat(20, Mathf.Clamp(value, 1, 20)));
+		DicePool.SetNextDiceResult(value);
 	}
 
 	[ConsoleMethod("quit_game", "")]

@@ -21,7 +21,7 @@ public class CharacterData : ScriptableObject
 	[SerializeField] private float runActionExtraMovePoints = 3.0f;
 	public float GetRunActionExtraMovePoints() => runActionExtraMovePoints;
 	[Range(1, 20)] [SerializeField] private int dodgeChance = 10;
-	public float GetDodgeChance() => DicePool.DiceToFloat(20, dodgeChance);
+	public int GetDodgeChance() => dodgeChance;
 	
 	[Range(0f, 1f)] [SerializeField] private float stealthValue = 0.33f;
 	public float GetStealthValue() => stealthValue;
