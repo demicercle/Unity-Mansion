@@ -29,7 +29,6 @@ public class LanguageSettings : ScriptableObject
 	public class Main
 	{
 		public static string GetLine(int index, string fallback) => GetDialogLines(DialogFiles.main).GetLine(index, fallback);
-		public static string NoActions => GetLine(9, "no actions!");
 		public static string Miss => GetLine(10, "miss!");
 		public static string WillMiss => GetLine(10, "miss!");
 		public static string Dodge => GetLine(11, "dodge!");
