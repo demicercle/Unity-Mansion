@@ -31,11 +31,14 @@ public class WeaponRenderer : MonoBehaviour
         if (shootLine)
         {
             var clone = Instantiate(shootLine.gameObject).GetComponent<LineRenderer>();
+            clone.transform.SetParent(transform);
             clone.transform.position = from;
+            // setup line
             clone.useWorldSpace = true;
             clone.positionCount = 2;
             clone.SetPosition(0, from);
             clone.SetPosition(1, to);
+            // setup components
             Utils.GetOrAddComponent<AutoDestroy>(clone.gameObject).delay = 1.0f;
             clone.gameObject.SetActive(true);
         }
