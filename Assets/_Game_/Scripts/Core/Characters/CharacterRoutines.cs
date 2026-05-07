@@ -450,8 +450,8 @@ public class CharacterRoutines : MonoBehaviour
 		_selfCharacter.UseAction(CharacterAction.Attack, useAction, null);
 
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
-		
-		ShootAtAimingPosition(-1);
+
+		yield return StartCoroutine(ProcessLastShootResults(-1));
 	}
 
 	private IEnumerator WaitCharacterPerformAttack(IAttackable target, bool useAction)
@@ -500,26 +500,36 @@ public class CharacterRoutines : MonoBehaviour
 
 		_selfCharacter.SetAimingPosition(_selfCharacter.GetAimingPosition(target));
 		yield return new WaitForFixedUpdate();
-		ShootAtAimingPosition(atkRoll);
+		yield return StartCoroutine(ProcessLastShootResults(atkRoll));
 		_selfCharacter.SetAiming(false);
 		yield return null;
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
 	}
 	
-	private void ShootAtAimingPosition(float atkRoll)
+	private IEnumerator ProcessLastShootResults(float atkRoll)
 	{
 		if(debugMode > 0) Debug.Log(this + " ShootAtAimingPosition atkRoll=" + atkRoll);
 		
 		var ignoredColliders = new List<Collider>();
 		var weapon = _selfCharacter.GetCurrentWeapon();
+		var shootIndex = 0;
 		var fromPosition = _selfCharacter.GetShootFromPosition();
 		if (_selfCharacter.GetLastShootHits(out var shoots))
 		{
 			foreach (var shootHit in shoots)
 			{
 				if(debugMode > 0) Debug.Log(this + " shootHit=" + shootHit.collider);
+
+				var delay = weapon.GetShootDelay(shootIndex);
 				
+				if (delay > 0) 
+					yield return new WaitForSeconds(delay);
+				else 
+					yield return null;
+				
+				shootIndex++;
+					
 				foreach (var wp in _selfCharacter.GetComponentsInChildren<WeaponRenderer>())
 				{
 					wp.OnShoot(fromPosition, shootHit.point);

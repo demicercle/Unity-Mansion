@@ -45,11 +45,9 @@ public class WeaponData : ScriptableObject
 		return (int)Mathf.Lerp(minDamage, maxDamage, damageCurve.Evaluate(result));
 	}
 
-	public bool ShootFromEyesPosition() => shootFromEyesPosition;
 	
 	[Header("Range")]
 	[SerializeField] private bool isRanged = false;
-	[SerializeField] private bool shootFromEyesPosition = false;
 	public bool IsRanged() => isRanged;
 	[Range(0f, 32f)] [SerializeField] private float attackRange = 0f;
 	public float GetAttackRange() => attackRange;
@@ -62,13 +60,22 @@ public class WeaponData : ScriptableObject
 	[SerializeField] [Min(0)] private int consumeAmmo = 0;
 	[SerializeField] private string ammoTags;
 	[SerializeField] [Min(0)] private int maxAmmo;
+
+	[Header("Raycast")] 
+	[SerializeField] private bool shootFlat = false;
+	[SerializeField] private Vector3 shootOffset = default;
 	[SerializeField] private ShootInfo[] shootInfos = Array.Empty<ShootInfo>();
+	public Vector3 GetShootOffset() => shootOffset;
+
+	public bool ShootsFlat() => shootFlat;
 
 	public bool GetShootInfos(out ShootInfo[] shoots)
 	{
 		shoots = shootInfos;
 		return shoots.Length > 0;
 	}
+	
+	public float GetShootDelay(int index) => index >= 0 && index < shootInfos.Length ? shootInfos[index].delay : 0;
 	
 	private int currentAmmo;
 

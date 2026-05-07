@@ -12,6 +12,8 @@ x default aim position not center so npc will shoot straight forward
 x npc have trouble turning around
 - retake "roll dice end turn"
 - "no actions" floating text is boring
+- if attacking while aiming in real time with melee weapon, assign attack ("move at destination")
+- when toggle aiming, stop the character, or wait the character to stop before activating aiming
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

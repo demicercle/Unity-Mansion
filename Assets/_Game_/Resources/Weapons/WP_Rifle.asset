@@ -41,7 +41,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   isRanged: 1
-  shootFromEyesPosition: 1
   attackRange: 20
   rangeHitCurve:
     serializedVersion: 2
@@ -121,6 +120,8 @@ MonoBehaviour:
   consumeAmmo: 3
   ammoTags: Rifle
   maxAmmo: 15
+  shootFlat: 1
+  shootOffset: {x: 0, y: 0, z: 0}
   shootInfos:
   - angle: 0
     delay: 0

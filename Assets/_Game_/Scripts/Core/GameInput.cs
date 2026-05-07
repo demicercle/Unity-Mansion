@@ -38,6 +38,7 @@ public class GameInput : MonoBehaviour
 	private float OrbitInertia => CameraSettings.DefaultSettings.orbitInertia;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
 	[SerializeField] private bool orbitCameraY = false;
+	[SerializeField] private bool flattenShootOnGround = false;
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
 	[Min(0f)] public float nodeSize = 0.25f;
 
@@ -154,7 +155,6 @@ public class GameInput : MonoBehaviour
 	private CharacterEntity selectedCharacter;
 	private CharacterAgent selectedAgent;
 	private Collider lastMouseOverObject;
-	private Collider lastAimedObject;
 	private Vector3 lastNavPosition;
 	private bool mouseOverChanged;
 	private bool mouseDown, orbitWithInputs;
@@ -433,7 +433,6 @@ public class GameInput : MonoBehaviour
 			lastCursorResult = CursorRaycast(out var hit);
 			mouseOverChanged = lastMouseOverObject != hit.collider;
 			lastMouseOverObject = hit.collider;
-			lastAimedObject = hit.collider;
 //			if(CharacterEntity.debugAim > 1) Debug.Log(this +"  lastAimedObject=" + lastAimedObject);
 			mouseHasMoved = mouseHasMoved || mouseOverChanged || NavUtils.NavDistance(hit.point, lastNavPosition) >= nodeSize;
 			lastNavPosition = hit.point;
@@ -443,7 +442,6 @@ public class GameInput : MonoBehaviour
 			lastCursorResult = CursorRaycastResult_None;
 			mouseOverChanged = lastMouseOverObject != null;
 			lastMouseOverObject = null;
-			lastAimedObject = null;
 		}
 		
 		debugString += "\nresult==" + lastCursorResult + " " + (lastMouseOverObject ? lastMouseOverObject.name : "no hit");
@@ -459,7 +457,7 @@ public class GameInput : MonoBehaviour
 				
 				if (CanAssignOnMouseOver(selectedCharacter))
 				{
-					if (aimHit.collider)
+					if (flattenShootOnGround && aimHit.collider)
 					{
 						if (aimHit.collider.gameObject.layer == Layers.LayerGround)
 						{
@@ -826,7 +824,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter && CanAssignOnClick(selectedCharacter))
 				{
-					selectedCharacter.Routines.AssignShootAt(aimHit.point, true);
+					ClickAiming(aimHit);
 				}
 			}
 			else if (raycastResult == CursorRaycastResult_Interaction)
@@ -913,6 +911,21 @@ public class GameInput : MonoBehaviour
 				inputSystem.UI.Disable();
 			}
 		}
+	}
+
+	private void ClickAiming(RaycastHit hit)
+	{
+		if (!selectedCharacter.IsUsingRangeWeapon())
+		{
+			if (hit.collider && hit.collider.TryGetComponent(out IAttackable attackable) &&
+			    !selectedCharacter.IsAtAttackRange(attackable))
+			{
+				selectedCharacter.Routines.AssignMoveAndAttack(attackable, false, true);
+				return;
+			}
+		}
+		
+		selectedCharacter.Routines.AssignShootAt(hit.point, true);
 	}
 
 	private void ClickCharacter(CharacterEntity clickedCharacter)
@@ -1263,7 +1276,7 @@ public class GameInput : MonoBehaviour
 
 	public bool GetAimedObject(out GameObject target)
 	{
-		target = lastAimedObject?.gameObject;
+		target = lastMouseOverObject?.gameObject;
 		return target;
 	}
 

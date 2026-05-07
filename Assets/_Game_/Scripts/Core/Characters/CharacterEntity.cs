@@ -577,8 +577,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public Vector3 GetEyesPosition(bool local = false) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.9f; // TODO "GetAgent()"
 
-	public Vector3 GetShootFromPosition() =>
-		currentWeapon.ShootFromEyesPosition() ? GetEyesPosition() : GetCenterPosition();
+	public Vector3 GetShootFromPosition() => GetEyesPosition() + currentWeapon.GetShootOffset();
 	
 	public Vector3 GetCenterPosition() => GetCenterPosition(false);
 	public Vector3 GetCenterPosition(bool local) => (!local ? GetPosition() : Vector3.zero) + Vector3.up * GetAgent().GetHeight() * 0.5f;  // TODO "GetAgent()"
@@ -1162,7 +1161,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (isAiming)
 		{
 			var from = GetShootFromPosition();
+			
 			var dir = (aimingPosition - from).normalized;
+			if (currentWeapon.ShootsFlat() && Mathf.Abs(from.y - aimingPosition.y) <= GetHeight())
+			{
+				dir.y = 0;
+				dir.Normalize();
+			}
+			
+			//if(debugAim > 1) Debug.Log(this + " isAiming FixedUpdate dir=" + dir);
+			
 			var range = GetAttackRange();
 			
 			if (currentWeapon.GetShootInfos(out var shoots))
@@ -1170,10 +1178,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 				lastShootHits = new RaycastHit[shoots.Length];
 				for(int i = 0; i < shoots.Length; i++)
 				{
-					lastShootHits[i].point = from + dir * range;
-
-					var angle = shoots[i].angle * i - shoots[i].angle * 0.5f;
-					if (Physics.Raycast(from, Quaternion.Euler(0, angle, 0) * dir, out var hit, range, Layers.MaskAiming))
+					var rotatedDir = Quaternion.Euler(0, shoots[i].angle, 0) * dir;
+					
+					lastShootHits[i].point = from + rotatedDir * range;
+					
+					if (Physics.Raycast(from, rotatedDir, out var hit, range, Layers.MaskAiming))
 						lastShootHits[i] = hit;
 				}
 			}
@@ -1284,11 +1293,20 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public Vector3 GetAimingPosition(IAttackable target)
 	{
+		var result = target.GetPosition();
 		if (target is CharacterEntity)
-			return currentWeapon.ShootFromEyesPosition() ? (target as CharacterEntity).GetEyesPosition() : (target as CharacterEntity).GetCenterPosition();
+			result = (target as CharacterEntity).GetEyesPosition();
 		if (target is Destructible)
-			return (target as Destructible).GetCenterPosition();
-		else
-			return target.GetPosition();
+			result = (target as Destructible).GetCenterPosition();
+
+		if (currentWeapon.ShootsFlat())
+		{
+			var shootFrom = GetShootFromPosition();
+			var height = GetHeight();
+			if (Mathf.Abs(result.y - shootFrom.y) <= height)
+				result.y = shootFrom.y;
+		}
+
+		return result;
 	}
 }

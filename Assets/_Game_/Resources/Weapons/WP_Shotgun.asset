@@ -120,6 +120,8 @@ MonoBehaviour:
   consumeAmmo: 1
   ammoTags: Shotgun
   maxAmmo: 2
+  shootFlat: 1
+  shootOffset: {x: 0, y: -0.1, z: 0}
   shootInfos:
   - angle: -20
     delay: 0

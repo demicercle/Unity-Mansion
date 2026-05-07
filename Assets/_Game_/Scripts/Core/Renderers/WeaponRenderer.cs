@@ -73,6 +73,7 @@ public class WeaponRenderer : MonoBehaviour
         while (i < aimLine.positionCount && a < aimingPositions.Length)
         {
             if (debugAim > 2) Debug.Log(this + " DisplayAimLine " + i + "/" + aimLine.positionCount + " " + a + "/" + aimingPositions.Length);
+            if (debugAim > 0) DebugDrawer.Line(from, aimingPositions[a], Color.magenta, 0f);
             aimLine.SetPosition(i++, from);
             aimLine.SetPosition(i++, aimingPositions[a++]);
             aimLine.SetPosition(i++, from);
