@@ -224,14 +224,13 @@ public class GameCanvas : MonoBehaviour
 		
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter)
 		{
-			if (selectedCharacter.IsAiming()
-			    && gameInput.GetAimedObject(out var mouseOverObject) && mouseOverObject.TryGetComponent(out targetCharacter) 
-			    && selectedCharacter.WillHit(targetCharacter.gameObject))
+			if ( gameInput.GetAimedObject(out var mouseOverObject) && mouseOverObject.TryGetComponent(out targetCharacter) 
+			    && (selectedCharacter.IsEnemyTo(targetCharacter) || (selectedCharacter.IsAiming() && selectedCharacter.WillHit(targetCharacter.gameObject))))
 			{
 				cursorText.transform.position = gameInput.GetMousePosition();
 				cursorText.raycastTarget = false;
 				calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
-				willHit = selectedCharacter.WillHit(DicePool.LastResult, targetCharacter);
+				willHit = selectedCharacter.WillHit(DicePool.LastResult, calculatedHitChance, targetCharacter);
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
 				cursorText.text = Mathf.Clamp(20-DicePool.FloatToDice(20, calculatedHitChance), 1, 20) + "+";
 				if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);

@@ -391,9 +391,9 @@ MonoBehaviour:
   characterCanvas: {fileID: 437776869319342895}
   clearActionsDelay: 3
   rollDiceToDodge: 0
-  rollDiceOnDefense: 1
+  rollDiceOnDefense: 0
   rollDiceOnRun: 0
-  rollDiceOnRiposte: 1
+  rollDiceOnRiposte: 0
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1

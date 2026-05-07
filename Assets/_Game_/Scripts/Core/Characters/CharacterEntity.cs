@@ -274,13 +274,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		Dodge,
 	}
 
-	public bool WillHit(float result, IAttackable target)
+	public bool WillHit(float result, float hitChance, IAttackable target)
 	{
-		if (DicePool.FloatToDice(20, result) <= 1) return false;
-		if (DicePool.FloatToDice(20, result) >= 20) return true;
-		return result > 1f - (target is CharacterEntity
-			? CalculateHitChance(target as CharacterEntity)
-			: CalculateHitChance(GetAimingPosition(target), target.GetRadius()));
+		var dR = DicePool.FloatToDice(20, result);
+		if (dR <= 1) return false;
+		if (dR >= 20) return true;
+		var dHit = DicePool.FloatToDice(20, 1f - Mathf.Clamp01(hitChance));
+		return result > dHit;
 	}
 	
 	public AttackResult TryHit(IAttackable target, float diceResult)
