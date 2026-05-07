@@ -664,11 +664,17 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public float GetTotalDamages() => totalDamages;
 	
-	public int GetMaxHealth() => characterData.GetMaxHealth();
+	public int GetMaxHealth() => characterData.GetMaxHealth() + extraHP;
 	public int GetCurrentHealth() => GetMaxHealth() - Mathf.CeilToInt(GetTotalDamages());
 	public float GetDamageProgress() => Mathf.Clamp01(GetCurrentHealth() / (float)GetMaxHealth());
 	public bool IsDead() => isDead;
 
+
+	public void AddMaxHealth(int i)
+	{
+		extraHP += i;
+	}
+	
 	public Texture2D GetPortraitTexture() => characterData.GetPortrait();
 	public string GetDisplayName() => characterData.GetDisplayName();
 	
@@ -966,6 +972,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private static List<CharacterEntity> _allCharacters = new List<CharacterEntity>();
 	private static List<CharacterEntity> _partyCharacters = new List<CharacterEntity>();
 
+	private int extraHP = 0;
 	private int partyIndex = -1;
 	private int dodgeCount = 0;
 	private int riposteCount = 0;
@@ -1105,13 +1112,22 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		if (debugStats > 0)
 		{
-			Utils.DrawWorldGUI(GetEyesPosition(), name  + (IsDead() ? "\nDEAD" : ""
-			                                      + "\n" + GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2")
-			                                      + "\n" + "Actions: " + usedActions.Count + "/" + characterData.GetMaxActions()
-			                                      + "\n" + "MovePoints: " + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2")
-			                                      + "\n" + "HitChance: " + GetHitChance().ToString("N2")
-			                                      + "\n" + "Dodge: " + GetDodgeChance().ToString("N2") + " (x" + dodgeCount + ")"
-				), "label");
+			var debugString = name;
+			
+			if (IsDead())
+				debugString += "\nDEAD";
+			
+			debugString += "\n" + GetCurrentHealth().ToString("N2") + "/" + GetMaxHealth().ToString("N2");
+				
+			if (debugStats > 1)
+			{
+				debugString += "\n" + "Actions: " + usedActions.Count + "/" + characterData.GetMaxActions();
+				debugString += "\n" + "MovePoints: " + usedMovePoints.ToString("N2") + "/" + GetMaxMovePoints().ToString("N2");
+				debugString += "\n" + "HitChance: " + GetHitChance().ToString("N2");
+				debugString += "\n" + "Dodge: " + GetDodgeChance().ToString("N2") + " (x" + dodgeCount + ")";
+			}
+
+			Utils.DrawWorldGUI(GetEyesPosition(), debugString, "label");
 		}
 	}
 

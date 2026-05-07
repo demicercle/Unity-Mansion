@@ -15,11 +15,7 @@ REFACTO
 - get rid of "get component in children weapon renderer"
 - grenade should spawn decal
 - noise emitter do not work
-- character sheath weapon just after hit a destructible, should wait a bit
-- cursor text et floating text misplaced when interacting with the destructible
-- zombi stuck near the stairs (no destination): need fallback patrol / wander
 - zombi_7 should arrive after first player turn
-- if using a melee attack, always hit target (no raycast)
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

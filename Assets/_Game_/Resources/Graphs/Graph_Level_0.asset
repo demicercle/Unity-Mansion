@@ -1028,7 +1028,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   _A: 1
-  _B: 1
+  _B: 0
   _Equals: 0
   _Greater: 1
   _Lower: 0

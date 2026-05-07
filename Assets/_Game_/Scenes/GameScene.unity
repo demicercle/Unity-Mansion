@@ -271,6 +271,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2856407218528173990, guid: c78a54a135ba7194fb51451948575f9c, type: 3}
+      propertyPath: enemySpreadHP
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 3046778136213016739, guid: c78a54a135ba7194fb51451948575f9c, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

@@ -178,9 +178,7 @@ public class GameTurnManager : MonoBehaviour
 		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
 		yield return null; // for triggers
 
-		levelCharacters = CharacterEntity.AllCharacters
-			.OrderBy(c => c.transform.GetSiblingIndex())
-			.ToArray();
+		InitCharacters();
 		
 		Debug.Log(this + " found levelCharacters=" + levelCharacters.Length);
 		
@@ -228,6 +226,30 @@ public class GameTurnManager : MonoBehaviour
 			yield return null;
 			yield return StartCoroutine(TurnBasedCoroutine());
 			yield return null; // safety for loop
+		}
+	}
+
+	[SerializeField] private int enemySpreadHP;
+	private void InitCharacters()
+	{
+		levelCharacters = CharacterEntity.AllCharacters
+			.OrderBy(c => c.transform.GetSiblingIndex())
+			.ToArray();
+
+		if (enemySpreadHP > 0)
+		{
+			var rng = new System.Random(GameSave.Current.gameSeed);
+			var randomList = levelCharacters
+				.Where(c => c.IsEnemyToPlayer())
+				.OrderBy(c => rng.Next()).ToArray();
+			
+			var index = 0;
+			while (enemySpreadHP > 0)
+			{
+				randomList[index].AddMaxHealth(1);
+				enemySpreadHP--;
+				index = (index + 1) % randomList.Length;
+			}
 		}
 	}
 
