@@ -394,17 +394,27 @@ public class CharacterRoutines : MonoBehaviour
 			var reachDistance = _selfCharacter.GetAttackReachDistance(target);
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
 			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
+			
 			atAttackRange = _selfCharacter.IsAtAttackRange(target);
+			if (debugMode > 0) Debug.Log(this + " ends move, atAttackRange=" + atAttackRange);
 		}
 		
 		if (atAttackRange)
 		{
-			if (losCheck && !LOSCheck(target))
-				yield break;
-			
-			if(debugMode > 0) Debug.Log(_selfCharacter + " atAttackRange of " + target + ", StopAgent");
 			_selfCharacter.StopAgent();
+			
+			if (losCheck && !LOSCheck(target))
+			{
+				if (debugMode > 0) Debug.Log(_selfCharacter + " cannot attack " + target);
+				yield break;
+			}
+			
+			if(debugMode > 0) Debug.Log(_selfCharacter + " atAttackRange of " + target + "");
 			yield return StartCoroutine(WaitCharacterPerformAttack(target, true));
+		}
+		else
+		{
+			if(debugMode > 0) Debug.Log(_selfCharacter + " no at attack range");
 		}
 	}
 
@@ -461,18 +471,27 @@ public class CharacterRoutines : MonoBehaviour
 
 		yield return null;
 
-		var targetPos = target.GetPosition();
-		if (!_selfCharacter.IsFacingPosition(targetPos))
-		{
-			_selfCharacter.LookWorldPosition(targetPos, Time.deltaTime);
-			yield return null;
-		}
-
 		if (useAction && !_selfCharacter.HasActions())
 		{
 			if(debugMode > 0) Debug.Log(this + " cannot attack (no actions)");
 			_selfCharacter.FloatingText_Cant();
 			yield break;
+		}
+		
+		if (_selfCharacter.TryGetAnimation(out var anim))
+		{
+			anim.SwitchWeapons(true);
+			
+			do yield return null;
+			while (anim.IsSwitchingWeapons);
+		}
+
+		yield return null;
+		var targetPos = target.GetPosition();
+		if (!_selfCharacter.IsFacingPosition(targetPos))
+		{
+			_selfCharacter.LookWorldPosition(targetPos, Time.deltaTime);
+			yield return null;
 		}
 		
 		var currentWeapon = _selfCharacter.GetCurrentWeapon();
@@ -481,17 +500,8 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.FloatingText(LanguageSettings.Main.Empty);
 			yield break;
 		}
-
-		if (_selfCharacter.TryGetAnimation(out var anim))
-		{
-			anim.SwitchWeapons(true);
-			
-			do yield return null;
-			while (anim.IsSwitchingWeapons);
-		}
 		
-		if(useAction) 
-			_selfCharacter.UseAction(CharacterAction.Attack, useAction, target);
+		_selfCharacter.UseAction(CharacterAction.Attack, useAction, target);
 		
 		yield return null;
 		

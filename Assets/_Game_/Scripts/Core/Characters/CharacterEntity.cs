@@ -854,7 +854,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			var hDist = NavUtils.NavHDistance(GetPosition(), target.GetPosition());
 			var vDist = NavUtils.NavVDistance(GetPosition(), target.GetPosition());
-			if (vDist <= GetHeight() && hDist <= atkRange)
+			if (vDist > GetHeight() || hDist > atkRange)
 				return false;
 		}
 

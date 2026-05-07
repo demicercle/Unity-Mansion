@@ -14,8 +14,8 @@ public class AttackTrigger : MonoBehaviour
 	[SerializeField] private bool enemyCharacterOnly = true;
 	[SerializeField] private bool meleeWeaponOnly = true;
 	[SerializeField] private bool isInstantAttack = true;
-	[SerializeField] private bool stopAgent = true;
 	[SerializeField] private bool useAttackAction = false;
+	[SerializeField] private bool noLOS = false;
 	[SerializeField] private bool requiresWeaponReady = true;
 	[SerializeField] [Min(-1)] private int maxTriggerCount = -1;
 	[SerializeField] private string filters = default;
@@ -88,19 +88,15 @@ public class AttackTrigger : MonoBehaviour
 					return;
 				}
 
-				if (selfCharacter.IsUsingRangeWeapon())
+				if (!noLOS && !selfCharacter.LOSCheck(otherCharacter))
 				{
-					if (!selfCharacter.LOSCheck(otherCharacter))
-					{
-						if(debugMode > 0) Debug.Log(this + " !LOSCheck on " + otherCharacter);
-						return;
-					}
+					if(debugMode > 0) Debug.Log(this + " !LOSCheck on " + otherCharacter);
+					return;
 				}
 				
 				// trigger opportunity attack
 				
-				if (stopAgent) 
-					otherCharacter.StopAgent();
+				otherCharacter.StopAgent();
 
 				if (debugMode > 0) Debug.Log(this + " triggers instant:" + isInstantAttack + " on " + otherCharacter);
 				
@@ -111,7 +107,7 @@ public class AttackTrigger : MonoBehaviour
 				
 				triggerCount++;
 				
-				Debug.Log(this + " in " + selfCharacter + " triggers opportunity attack on " + otherCharacter);
+				if (debugMode > 0) Debug.Log(this + " in " + selfCharacter + " triggers opportunity attack on " + otherCharacter);
 			}
 		}
 	}
