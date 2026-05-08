@@ -500,7 +500,7 @@ public class GameInput : MonoBehaviour
 					selectedCharacter.GetAgent().AssignDestination(lastNavPosition); // mouse over navigation
 				}
 
-				if (itemToUse)
+				if (CanAssignOnMouseOver(selectedCharacter) && itemToUse)
 				{
 					SetCurrentCursorType(CursorType.UseItem);
 
@@ -1177,7 +1177,7 @@ public class GameInput : MonoBehaviour
 
 	private bool CanAssignOnMouseOver(CharacterEntity character)
 	{
-		return CanAssignOnClick(character) && !character.Routines.AnyActive() && !character.IsMoving();
+		return CanAssignOnClick(character) && !character.IsActing();
 	}
 	
 	private void SetCurrentCursorType(CursorType cursorType)

@@ -643,14 +643,14 @@ public class CharacterRoutines : MonoBehaviour
 		}
 	}
 
-	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection((pos - _selfCharacter.GetPosition()).normalized);
+	private IEnumerator WaitCharacterLookPosition(Vector3 pos) => WaitCharacterLookDirection(pos - _selfCharacter.GetPosition());
 	
 	private IEnumerator WaitCharacterLookDirection(Vector3 dir)
 	{
 		debugString = "WaitCharacterLookDirection";
 		_selfCharacter.StopAgent();
-	
-		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
+		
+		while (!_selfCharacter.IsFacingDirection(dir))
 		{
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
@@ -907,7 +907,6 @@ public class CharacterRoutines : MonoBehaviour
 
 	private IEnumerator WaitCharacterUseItemAt(ItemData itemToUse, Vector3 position)
 	{
-		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItemAt " + itemToUse);
 		debugString = "WaitCharacterUseItemAt " + itemToUse;
 		
@@ -931,9 +930,22 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.SetItemToUse(null);
 			yield break;
 		}
+
+		while (!_selfCharacter.IsFacingPosition(position))
+		{
+			_selfCharacter.LookWorldPosition(position, Time.deltaTime);
+			yield return null;
+		}
+		
+		if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
+		{
+			do yield return null;
+			while (anim.IsSwitchingWeapons);
+		}
 				
 		_selfCharacter.UseAction(itemToUse.GetCharacterAction(), itemToUse);
-		if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
+
+		if (anim)
 		{
 			anim.WaitEvents(EventType.Hit, EventType.Shoot);
 			do
