@@ -17,7 +17,6 @@ public class CharacterAgent : MonoBehaviour
 	public static int debugMode { get; set; }
 
 	[Header("Agent Settings")] 
-	[SerializeField] [Range(0f, 1f)] private float obstacleScale = 0.8f;
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
@@ -29,6 +28,8 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0f, 1f)] private float priorityFollower = 0.5f;
 	[SerializeField] [Range(0f, 1f)] private float priorityOther = 0.3f;
 	[SerializeField] private bool noObstacleIfNotRevealed = true;
+	[SerializeField] [Range(0f, 1f)] private float obstacleRadiusScale = 1.0f;
+	[SerializeField] private float turnBasedVelocityScale = 1.5f;
 	
 	[Header("Rendering")]
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -74,10 +75,10 @@ public class CharacterAgent : MonoBehaviour
 			{
 				graphUpdate.points = new[]
 				{
-					Vector3.forward * aiPath.radius * obstacleScale,
-					Vector3.right * aiPath.radius * obstacleScale,
-					-Vector3.forward * aiPath.radius * obstacleScale,
-					-Vector3.right * aiPath.radius * obstacleScale,
+					Vector3.forward * aiPath.radius * obstacleRadiusScale,
+					Vector3.right * aiPath.radius * obstacleRadiusScale,
+					-Vector3.forward * aiPath.radius * obstacleRadiusScale,
+					-Vector3.right * aiPath.radius * obstacleRadiusScale,
 				};
 			}
 
@@ -117,6 +118,7 @@ public class CharacterAgent : MonoBehaviour
 		SetObstacle(false);
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.simulateMovement = true;
+		aiPath.maxSpeed = moveSpeed * (GameTurnManager.Instance.IsTurnBasedMode() ? turnBasedVelocityScale : 1.0f);
 		aiPath.isStopped = false;
 		aiPath.canSearch = true;
 	}
@@ -304,7 +306,6 @@ public class CharacterAgent : MonoBehaviour
 		aiPath = GetComponent<AIPath>();
 		aiPath.radius = radius;
 		aiPath.height = height;
-		aiPath.maxSpeed = moveSpeed;
 		if(minReachDistance > 0f) aiPath.endReachedDistance = minReachDistance;
 		if(Application.isPlaying) aiPath.gravity = Physics.gravity; // force gravity
 		rvoController = GetComponent<RVOController>();

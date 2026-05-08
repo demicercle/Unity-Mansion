@@ -54,7 +54,7 @@ public class CharacterRoutines : MonoBehaviour
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
 		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " useAction=" + useAction  + " losCheck=" + losCheck + " reachDistance=" + reachDistance + " time=" + LastTimeAssignedTarget);
-		StartNewRoutine(WaitCharacterAttack(target, reachDistance, losCheck, true));
+		StartNewRoutine(WaitCharacterAttack(target, reachDistance, losCheck, !_selfCharacter.InParty()));
 	}
 
 	public void AssignShootAt(Vector3 position, bool useAction = true)
@@ -680,7 +680,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		var currentDistance = NavUtils.NavDistance(dest,  _selfCharacter.GetPosition());
 		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
-		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " reachDistance=" + reachDistance + " currentDistance=" + currentDistance);
+		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " reachDistance=" + reachDistance + " currentDistance=" + currentDistance + " raycastForDestructible=" + raycastForDestructible);
 		
 		if (currentDistance <= reachDistance)
 		{
@@ -696,11 +696,11 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (!agent.hasDestination)
 		{
-			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0f, 2f, out var destructible))
+			if (raycastForDestructible && debugMode > 0) Debug.Log(this + " !agent.hasDestination RaycastForDestructible");
+			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0f, 2.0f, out var destructible))
 			{
-				if(debugMode > 0) Debug.Log(this + " !agent.hasDestination RaycastForDestructible " + destructible);
 				agent.StopMovement();
-				yield return StartCoroutine(WaitCharacterAttack(destructible, false, false));
+				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
 				yield break;
 			}
 			
@@ -775,7 +775,7 @@ public class CharacterRoutines : MonoBehaviour
 			{
 				if(debugMode > 0) Debug.Log(this + " RaycastForDestructible " + destructible);
 				agent.StopMovement();
-				yield return StartCoroutine(WaitCharacterAttack(destructible, false, false));
+				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
 				yield break;
 			}
 
