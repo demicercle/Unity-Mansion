@@ -1140,9 +1140,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool RaycastForDestructible(out Destructible o)
 	{
-		if (Physics.SphereCast(new Ray(GetCenterPosition(), transform.forward), GetRadius() / 2f, out var hit, GetRadius() + GetAttackRange(), Layers.MaskDestructible))
+		foreach(var coll in Physics.OverlapSphere(GetPosition(), GetRadius() + MinAttackRange, Layers.MaskDestructible))
 		{
-			if (hit.collider.TryGetComponent(out Destructible destructible))
+			if (coll.TryGetComponent(out Destructible destructible))
 			{
 				o = destructible;
 				return true;

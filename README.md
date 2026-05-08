@@ -3,7 +3,7 @@
 REFACTO
 - add namespaces
 - clean "CharacterController"
-- retake "door breaks trigger" with enemy tag (zombi will destroy, others will open...)
+- retake "raycast for destructible" (zombi will destroy, others will open...)
 - dialog line reference bug in editor
 - door nav obstacle
 - training mannequin (invicible life)

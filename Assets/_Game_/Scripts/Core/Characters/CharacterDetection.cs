@@ -184,8 +184,8 @@ public class CharacterDetection : MonoBehaviour
 			foreach (var anyCharacter in CharacterEntity.AllCharacters)
 			{
 				if (anyCharacter == selfCharacter) continue;
-				if (anyCharacter.IsDead()) continue;
-				//if (!selfCharacter.IsEnemyTo(anyCharacter)) continue;
+				if (anyCharacter.IsDead()) continue; // ignore deads
+				if (selfCharacter.IsAllyTo(anyCharacter)) continue; // ignore allies
 				if (IsCharacterDetected(anyCharacter)) continue;
 
 				if (debugMode > 1) Debug.Log(this + " UpdateDetection " + anyCharacter);
@@ -234,17 +234,11 @@ public class CharacterDetection : MonoBehaviour
 			       && otherCharacter.IsCharacterRevealed(); // characters player can see through walls and behind
 		}
 		
+		if (distance <= hearingDistance)
+			return ObstructionCheck(otherCharacter);
+		
 		if (distance <= seeingDistance)
-		{
-			if (ObstructionCheck(otherCharacter))
-			{
-				if (distance <= hearingDistance)
-					return true;
-
-				if (AngleCheck(otherCharacter))
-					return true;
-			}
-		}
+			return AngleCheck(otherCharacter) && ObstructionCheck(otherCharacter);
 
 		return false;
 	}

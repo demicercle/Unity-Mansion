@@ -135,13 +135,12 @@ public class CharacterBrain : MonoBehaviour
 				yield break;
 			}
 		}
-
-		if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
 		
 		yield return StartCoroutine(YieldTryFindNewTarget());
 		
 		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
 		{
+			if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
 			SaveTargetPosition();
 
 			if (_selfCharacter.WeaponNeedsReload())
@@ -322,17 +321,42 @@ public class CharacterBrain : MonoBehaviour
 
 	private IEnumerator YieldTryFindNewTarget()
 	{
-		if (TryFindTarget(out var newTarget))
+		var bestTarget = default(CharacterEntity);
+		var bestPath = 0f;
+		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
+		while(allTargets.Count > 0)
 		{
-			_chaseCharacter = newTarget;
+			var newTarget = allTargets.LastOrDefault();
+			allTargets.Remove(newTarget);
+			if (!newTarget || newTarget.IsDead()) continue;
+			
+			_agent.ClearDestination();
+			_agent.SetReachDistance(_selfCharacter.GetAttackRange());
+			if (debugMode > 0) Debug.Log(this + " search path to possible target " + newTarget);
+			yield return _agent.AssignDestination(newTarget.GetPosition());
+			if (_agent.hasDestination)
+			{
+				var pathLength = Utils.PathLength(_agent.GetCurrentPath());
+				if (debugMode > 0) Debug.Log(this + " found path length=" + pathLength);
+				if (bestTarget == null || pathLength < bestPath)
+				{
+					bestTarget = newTarget;
+					bestPath = pathLength;
+				}
+			}
+			else
+			{
+				if(debugMode > 0) Debug.Log(this + " cannot find destination to " + newTarget + ", pick next one: " + allTargets.Count);
+			}
+		}
+
+		if (bestTarget && bestTarget != _chaseCharacter)
+		{
+			_chaseCharacter = bestTarget;
 			if(debugMode > 0) Debug.Log(this + " gets new target: " + _chaseCharacter);
 			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red, 1.0f);
 			_selfCharacter.Routines.StopAllRoutines();
-			yield return CharacterRoutines.DoLookPositionOn(_selfCharacter, newTarget.GetPosition());
-		}
-		else
-		{
-			yield return null;
+			yield return CharacterRoutines.DoLookPositionOn(_selfCharacter, bestTarget.GetPosition());
 		}
 	}
 
