@@ -43,6 +43,14 @@ public class CharacterAgent : MonoBehaviour
 
 	public float GetHeight() => height;
 
+	
+	public void Teleport(Vector3 newPos, bool stopMovement = true)
+	{
+		if(stopMovement) StopMovement();
+		aiPath.updatePosition = aiPath.updateRotation = true;
+		aiPath.Teleport(newPos, true);
+	}
+	
 	public void Teleport(Vector3 newPos, int newRot, bool stopMovement = true)
 	{
 		if(stopMovement) StopMovement();
@@ -85,6 +93,14 @@ public class CharacterAgent : MonoBehaviour
 			NavmeshRebuilder.SetNavigationDirty();
 		}
 		else Debug.LogWarning(this + " SetObstacle not possible: no GraphUpdateScene component");
+
+		if (value)
+		{
+			if (GameTurnManager.Instance.IsTurnBasedMode())
+			{
+				ClampOnNavmesh();
+			}
+		}
 	}
 
 	public Vector3[] GetCurrentPath()
@@ -208,6 +224,14 @@ public class CharacterAgent : MonoBehaviour
 		var dist = Vector3.Distance(_selfCharacter.GetPosition(), dest);
 		if(debugMode > 1)Debug.Log(this + " ReachedDestination? " + dist +" <= " + reach);
 		return dist <= reach;
+	}
+
+	public void ClampOnNavmesh()
+	{
+		if (NavUtils.TryGetNearestNavPosition(aiPath.position, aiPath.radius, out var navPos))
+		{
+			Teleport(navPos);
+		}
 	}
 	
 	public void SetAgentActive(bool value)
