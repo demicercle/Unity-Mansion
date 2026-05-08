@@ -36,11 +36,11 @@ MonoBehaviour:
     - loaded!
     - not now!
     - 
-    - 
-    - 
-    - 
-    - 
-    - 
+    - Uninjured
+    - Lightly wounded
+    - Wounded
+    - Badly wounded
+    - At death's doors
     - 
     - 
     - 

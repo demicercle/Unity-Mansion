@@ -215,10 +215,13 @@ public class GameCanvas : MonoBehaviour
 				if(CharacterEntity.debugStats > 1) Debug.Log(this + " calculated hit chance " + calculatedHitChance);
 				willHit = (DicePool.LastResult > 1 && calculatedHitChance < DicePool.LastResult) || DicePool.LastResult >= 20;
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
-				cursorText.text = calculatedHitChance + "+";
-				if (displayLastResultDice) cursorText.text += " (" + DicePool.LastResult + ")";
+				cursorText.text = "<size=14><b>" + targetCharacter.GetDisplayName() + "</b></size>\n";
+				cursorText.text += "<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n";
+				cursorText.text += "<size=11>Hit on: <b>" + calculatedHitChance + "+</b>";
+				if (displayLastResultDice) cursorText.text += " / " + DicePool.LastResult;
 				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
 				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
+				cursorText.text += "</size>";
 				cursorText.gameObject.SetActive(true);
 			}
 		}
