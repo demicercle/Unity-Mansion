@@ -1142,7 +1142,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		foreach(var coll in Physics.OverlapSphere(GetPosition() + GetDirection() * GetRadius(), GetRadius(), Layers.MaskDestructible))
 		{
-			if (coll.TryGetComponent(out Destructible destructible))
+			if (coll.TryGetComponent(out Destructible destructible) && destructible.IsDoor())
 			{
 				o = destructible;
 				return true;

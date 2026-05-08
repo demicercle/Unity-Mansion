@@ -12,6 +12,7 @@ public class Destructible : MonoBehaviour, IAttackable
 		return transform.position;
 	}
 
+	public bool IsDoor() => isDoor || CompareTag(Tags.TagDoor);
 	public bool IsName(string s) => name == s;
 	public string GetName() => name;
 	public static int debugMode => CharacterEntity.debugStats;
@@ -20,6 +21,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	
 	[SerializeField] [Range(0.1f, 5.0f)] private float radius = 1.0f;
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
+	[SerializeField] private bool isDoor;
 	[SerializeField] private Rigidbody[] rigidbodies;
 	[SerializeField] private GameObject[] deactivateObjects;
 

@@ -18,7 +18,9 @@ public class GameTurnManager : MonoBehaviour
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
+	[Header("Camera")]
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
+	[SerializeField] private bool focusWhenCharacterUseAction = true;
 	[Space]
 	[Header("Game Rules")]
 	[SerializeField] private bool rollDiceWhenTurnStarts = true;
@@ -132,6 +134,7 @@ public class GameTurnManager : MonoBehaviour
 
 		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
+		CharacterEntity.onAnyCharacterUsesAction += OnAnyActionUsed;
 		RoomTrigger.onChanged += OnRoomChanged;
 	}
 
@@ -139,6 +142,7 @@ public class GameTurnManager : MonoBehaviour
 	{
 		CharacterDetection.onAnyCharacterDetectionChanged -= OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+		CharacterEntity.onAnyCharacterUsesAction -= OnAnyActionUsed;
 		RoomTrigger.onChanged -= OnRoomChanged;
 	}
 
@@ -576,6 +580,14 @@ public class GameTurnManager : MonoBehaviour
 		}
 
 		return false;
+	}
+
+	private void OnAnyActionUsed(CharacterEntity character, CharacterAction action)
+	{
+		if (IsTurnBasedMode() && focusWhenCharacterUseAction)
+		{
+			cameraPivot.Focus(character);
+		}
 	}
 
 	private void OnAnyCharacterDamaged(CharacterEntity damaged, DamageInfo dmgInfo, object objectFrom)
