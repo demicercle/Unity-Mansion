@@ -42,13 +42,19 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		return activeInstances.Contains(this);
 	}
-	
-	public void AssignMoveAndAttack(IAttackable target, bool losCheck = true, bool useAction = true)
+
+	public void AssignMoveAndAttack(IAttackable target, float reachDistance) =>
+		AssignMoveAndAttack(target, reachDistance, true, true);
+	public void AssignMoveAndAttack(IAttackable target, bool useAction) =>
+		AssignMoveAndAttack(target, _selfCharacter.GetAttackReachDistance(target), true, useAction);
+	public void AssignMoveAndAttack(IAttackable target) =>
+		AssignMoveAndAttack(target, _selfCharacter.GetAttackReachDistance(target), true, true);
+	public void AssignMoveAndAttack(IAttackable target, float reachDistance, bool losCheck, bool useAction)
 	{
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
-		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " useAction=" + useAction  + " losCheck=" + losCheck + " time=" + LastTimeAssignedTarget);
-		StartNewRoutine(WaitCharacterAttack(target, losCheck, true));
+		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " useAction=" + useAction  + " losCheck=" + losCheck + " reachDistance=" + reachDistance + " time=" + LastTimeAssignedTarget);
+		StartNewRoutine(WaitCharacterAttack(target, reachDistance, losCheck, true));
 	}
 
 	public void AssignShootAt(Vector3 position, bool useAction = true)
@@ -377,8 +383,11 @@ public class CharacterRoutines : MonoBehaviour
 			Debug.Log(this + " not at reach") ;
 		}
 	}
+
+	private IEnumerator WaitCharacterAttack(IAttackable target, bool losCheck, bool raycastForDestructible) =>
+		WaitCharacterAttack(target, _selfCharacter.GetAttackReachDistance(target), losCheck, raycastForDestructible);
 	
-	private IEnumerator WaitCharacterAttack(IAttackable target, bool losCheck, bool raycastForDestructible)
+	private IEnumerator WaitCharacterAttack(IAttackable target, float reachDistance, bool losCheck, bool raycastForDestructible)
 	{
 		if(debugMode > 0) Debug.Log("WaitCharacterAttackCharacter " + _selfCharacter + " " + target + " losCheck=" + losCheck);
 
@@ -391,7 +400,6 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (!atAttackRange)
 		{
-			var reachDistance = _selfCharacter.GetAttackReachDistance(target);
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
 			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
 			
@@ -515,6 +523,7 @@ public class CharacterRoutines : MonoBehaviour
 		yield return null;
 		
 		if(debugMode > 0) Debug.Log(this + " attack ends");
+		yield return StartCoroutine(WaitForNavigation());
 	}
 	
 	private IEnumerator ProcessLastShootResults(int atkRoll, IAttackable forceHitTarget = null)
@@ -1017,6 +1026,12 @@ public class CharacterRoutines : MonoBehaviour
 				}
 			}
 		}
+	}
+	
+	private IEnumerator WaitForNavigation()
+	{
+		do yield return null;
+		while (NavmeshRebuilder.IsNavigationDirty());
 	}
 	#endregion
 

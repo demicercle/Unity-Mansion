@@ -122,6 +122,7 @@ public class CharacterBrain : MonoBehaviour
 			yield break;
 		}
 		
+		ResetTimeout();
 		while (_selfCharacter.HasActions())
 		{
 			if (_selfCharacter.WeaponNeedsReload())
@@ -151,6 +152,7 @@ public class CharacterBrain : MonoBehaviour
 				if(!_selfCharacter.HasActions())
 				{
 					if (debugMode > 0) Debug.Log(this + " no actions after reload, abort");
+					StopThink();
 					yield break;
 				}
 			}
@@ -166,27 +168,38 @@ public class CharacterBrain : MonoBehaviour
 			if (!_chaseCharacter)
 			{
 				if (debugMode > 0) Debug.Log(this + " has no target to chase");
+				StopThink();
 				yield break;
 			}
 			
 			if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
 			SaveTargetPosition();
+			
+			if (!_selfCharacter.HasMovePoints())
+			{
+				if (_selfCharacter.CanUseAction(CharacterAction.Run))
+				{
+					_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+				
+					do yield return null;
+					while (_selfCharacter.Routines.AnyActive());
+				}
+			}
 				
 			if (_selfCharacter.IsAtAttackRange(_chaseCharacter, true))
 			{
 				_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter);
+				
+				do yield return null;
+				while (_selfCharacter.Routines.AnyActive());
 			}
 			else if (_selfCharacter.HasMovePoints())
 			{
-				_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter);
+				_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter, _chaseDistance);
+				
+				do yield return null;
+				while (_selfCharacter.Routines.AnyActive());
 			}
-			else if (_selfCharacter.CanUseAction(CharacterAction.Run))
-			{
-				_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
-			}
-			
-			do yield return null;
-			while (_selfCharacter.Routines.AnyActive());
 		}
 
 		if (debugMode > 0) Debug.Log(this + " end chase");
@@ -323,8 +336,8 @@ public class CharacterBrain : MonoBehaviour
 			yield break;
 		}
 
-		if(attempt == 0)
-			ResetTimeout();
+		//if(attempt == 0)
+		//	ResetTimeout();
 		
 		var bestTarget = default(CharacterEntity);
 		var bestPath = 0f;
@@ -334,6 +347,13 @@ public class CharacterBrain : MonoBehaviour
 			var newTarget = allTargets.LastOrDefault();
 			allTargets.Remove(newTarget);
 			if (!newTarget || newTarget.IsDead()) continue;
+
+			if (_selfCharacter.IsAtAttackRange(newTarget, true))
+			{
+				if (debugMode > 0) Debug.Log(this + " at attack range of " + newTarget + ", chase this");
+				bestTarget = newTarget;
+				break;
+			}
 			
 			_agent.StopMovement();
 			_agent.ClearDestination();
@@ -372,6 +392,7 @@ public class CharacterBrain : MonoBehaviour
 		else
 		{
 			_chaseCharacter = bestTarget;
+			_chaseDistance = _agent.GetReachDistance();
 			if(debugMode > 0) Debug.Log(this + " gets new target: " + _chaseCharacter);
 			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red, 1.0f);
 			while (!_selfCharacter.IsFacingPosition(_chaseCharacter.GetPosition()))
@@ -397,6 +418,7 @@ public class CharacterBrain : MonoBehaviour
 	private CharacterEntity _selfCharacter;
 	private CharacterDetection _characterDetection;
 	private CharacterEntity _chaseCharacter;
+	private float _chaseDistance;
 	private PatrolRoute _patrolRoute;
 	private List<Waypoint> _waypointList;
 	private Waypoint _currentWaypoint;

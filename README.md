@@ -12,6 +12,7 @@ REFACTO
 - save camera rotation
 - do "CursorRaycast" only in FixedUpdate
 - add tooltip for action buttons
+- fog should cut navmesh during battles
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

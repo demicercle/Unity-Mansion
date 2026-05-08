@@ -412,6 +412,9 @@ public class CharacterAgent : MonoBehaviour
 	{
 		hasDestination = false;
 		
+		while (NavmeshRebuilder.IsNavigationDirty())
+			yield return null;
+		
 		lastVectorPath.Clear();
 
 		aiPath.destination = dest;
