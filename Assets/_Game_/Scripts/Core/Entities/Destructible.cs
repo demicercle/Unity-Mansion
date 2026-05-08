@@ -7,28 +7,30 @@ public class Destructible : MonoBehaviour, IAttackable
 {
 	public static List<Destructible> allInstances = new List<Destructible>();
 
-	public Vector3 GetPosition()
-	{
-		return transform.position;
-	}
-
 	public bool IsDoor() => isDoor || CompareTag(Tags.TagDoor);
 	public bool IsName(string s) => name == s;
 	public string GetName() => name;
 	public static int debugMode => CharacterEntity.debugStats;
 
 	public static event System.Action<Destructible, DamageInfo, object> onAnyDestructibleHit;
-	
+
+	[SerializeField] private Transform pivot;
 	[SerializeField] [Range(0.1f, 5.0f)] private float radius = 1.0f;
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
 	[SerializeField] private bool isDoor;
 	[SerializeField] private Rigidbody[] rigidbodies;
 	[SerializeField] private GameObject[] deactivateObjects;
 
+	public Vector3 GetPosition()
+	{
+		return pivot ? pivot.position : GetCenterPosition();
+	}
+
 	public Vector3 GetCenterPosition() => collider ? collider.bounds.center : transform.position;
 	
-	public float GetRadius() => radius;
-	public float GetHeight() => radius;
+	public float GetRadius() => collider ? Mathf.Max(collider.bounds.size.x, collider.bounds.size.z) / 2f : radius;
+	
+	public float GetHeight() => collider ? collider.bounds.size.y : radius;
 
 	public bool ignoreRangedWeapons;
 	public UnityEvent takeDamage;
@@ -129,14 +131,22 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	private void OnDrawGizmosSelected()
 	{
-		if (Application.isPlaying) return;
 		Gizmos.color = Color.yellow;
-		Utils.DrawGizmosCircle(GetCenterPosition(), transform.up, radius);
+		Utils.DrawGizmosCircle(GetPosition(), transform.up, radius);
 		foreach (var rb in rigidbodies)
 		{
 			if (!rb) continue;
 			var coll = rb.GetComponent<Collider>();
 			Gizmos.DrawWireCube(coll.bounds.center, coll.bounds.size);
+		}
+	}
+
+	private void OnDrawGizmos()
+	{
+		if (Application.isPlaying && !IsBroken())
+		{
+			Gizmos.color = Utils.ColorAlpha(Color.lightYellow, .25f);
+			Gizmos.DrawWireCube(GetCenterPosition(), new Vector3(GetRadius()*2f, GetHeight(), GetRadius()*2f));
 		}
 	}
 }

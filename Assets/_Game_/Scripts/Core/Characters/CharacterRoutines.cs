@@ -389,17 +389,21 @@ public class CharacterRoutines : MonoBehaviour
 	
 	private IEnumerator WaitCharacterAttack(IAttackable target, float reachDistance, bool losCheck, bool raycastForDestructible)
 	{
-		if(debugMode > 0) Debug.Log("WaitCharacterAttackCharacter " + _selfCharacter + " " + target + " losCheck=" + losCheck);
+		if(debugMode > 0) Debug.Log("WaitCharacterAttack " + _selfCharacter + " " + target + " losCheck=" + losCheck + " reachDistance=" + reachDistance);
 
 		if (_selfCharacter.TryGetAnimation(out var characterAnim))
 		{
-			yield return characterAnim.SwitchWeapons(true);
+			characterAnim.SwitchWeapons(true);
+			do yield return null;
+			while (characterAnim.IsSwitchingWeapons);
 		}
 
 		var atAttackRange = _selfCharacter.IsAtAttackRange(target, losCheck);
 
 		if (!atAttackRange)
 		{
+			reachDistance = Mathf.Min(reachDistance, _selfCharacter.GetAttackReachDistance(target));
+			
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
 			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
 			
@@ -465,6 +469,8 @@ public class CharacterRoutines : MonoBehaviour
 			yield return null;
 		}
 		
+		yield return StartCoroutine(YieldWeaponSwitch());
+		
 		_selfCharacter.UseAction(CharacterAction.Attack, useAction, null);
 
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
@@ -485,18 +491,11 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.FloatingText_Cant();
 			yield break;
 		}
-		
-		if (_selfCharacter.TryGetAnimation(out var anim))
-		{
-			anim.SwitchWeapons(true);
-			
-			do yield return null;
-			while (anim.IsSwitchingWeapons);
-		}
 
-		yield return null;
+		yield return StartCoroutine(YieldWeaponSwitch());
+		
 		var targetPos = target.GetPosition();
-		if (!_selfCharacter.IsFacingPosition(targetPos))
+		while (!_selfCharacter.IsFacingPosition(targetPos))
 		{
 			_selfCharacter.LookWorldPosition(targetPos, Time.deltaTime);
 			yield return null;
@@ -508,6 +507,8 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.FloatingText(LanguageSettings.Main.Empty);
 			yield break;
 		}
+
+		yield return StartCoroutine(YieldWeaponSwitch());
 		
 		_selfCharacter.UseAction(CharacterAction.Attack, useAction, target);
 		
@@ -525,10 +526,25 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " attack ends");
 		yield return StartCoroutine(WaitForNavigation());
 	}
+
+	private IEnumerator YieldWeaponSwitch()
+	{
+		if (_selfCharacter.TryGetAnimation(out var anim))
+		{
+			if (!anim.WeaponsSwitched())
+			{
+				if(debugMode > 0) Debug.Log(this + " YieldWeaponSwitch");
+				anim.SwitchWeapons(true);
+
+				do yield return null;
+				while (anim.IsSwitchingWeapons);
+			}
+		}
+	}
 	
 	private IEnumerator ProcessLastShootResults(int atkRoll, IAttackable forceHitTarget = null)
 	{
-		if(debugMode > 0) Debug.Log(this + " ShootAtAimingPosition atkRoll=" + atkRoll + " forceHitTarget=" + forceHitTarget);
+		if(debugMode > 0) Debug.Log(this + " ProcessLastShootResults atkRoll=" + atkRoll + " forceHitTarget=" + forceHitTarget);
 		
 		var ignoredColliders = new List<Collider>();
 		var weapon = _selfCharacter.GetCurrentWeapon();
@@ -566,9 +582,6 @@ public class CharacterRoutines : MonoBehaviour
 					
 					if (shootHit.collider.TryGetComponent(out IAttackable target))
 					{
-						if (atkRoll < 0f)
-							atkRoll = _selfCharacter.RollDice();
-					
 						ProcessHit(target, atkRoll);
 						
 						if (target == forceHitTarget)
@@ -588,6 +601,9 @@ public class CharacterRoutines : MonoBehaviour
 
 	private void ProcessHit(IAttackable target, int atkRoll)
 	{
+		if (atkRoll < 0f && target is CharacterEntity)
+			atkRoll = _selfCharacter.RollDice();
+		
 		if (debugMode > 0) Debug.Log(this + " ProcessHit " + " atkRoll=" + atkRoll + " target=" + target);
 		
 		var atkResult = _selfCharacter.TryHit(target, atkRoll);

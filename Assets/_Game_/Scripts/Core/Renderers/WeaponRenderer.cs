@@ -28,6 +28,7 @@ public class WeaponRenderer : MonoBehaviour
 
     public void OnShoot(Vector3 from, Vector3 to)
     {
+        if(debugAim > 0) Debug.Log(this + " OnShoot");
         if (shootLine)
         {
             var clone = Instantiate(shootLine.gameObject).GetComponent<LineRenderer>();
@@ -121,7 +122,11 @@ public class WeaponRenderer : MonoBehaviour
     {
         parentCharacter = GetComponentInParent<CharacterEntity>();
         if (shootLine)
+        {
             shootLine.gameObject.SetActive(false);
+            if(offHand)
+                Destroy(shootLine.gameObject);
+        }
     }
 
 #if UNITY_EDITOR

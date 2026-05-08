@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7405375126431743375}
   - component: {fileID: 1010799942976485908}
   - component: {fileID: 4456915094659138568}
+  - component: {fileID: 5305063871247910006}
   m_Layer: 0
   m_Name: VFX_Grenade
   m_TagString: Untagged
@@ -62,6 +63,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DrawGizmoCircle
   color: {r: 0, g: 1, b: 1, a: 1}
   radius: 4
+--- !u!114 &5305063871247910006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1257399411437645990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a3977de2cc24f9ca8bca26ca18b1586, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LockRotation
+  angleScale: {x: 1, y: 0, z: 1}
 --- !u!1001 &6035767482121144055
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -227,10 +241,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 100006, guid: 9e95c7b2183a4f345aaf86846f8f1918, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1423258301114134730}
   m_SourcePrefab: {fileID: 100100000, guid: 9e95c7b2183a4f345aaf86846f8f1918, type: 3}
 --- !u!4 &6648764139466032036 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400006, guid: 9e95c7b2183a4f345aaf86846f8f1918, type: 3}
   m_PrefabInstance: {fileID: 6648764139466168610}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6648764139466203012 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100006, guid: 9e95c7b2183a4f345aaf86846f8f1918, type: 3}
+  m_PrefabInstance: {fileID: 6648764139466168610}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1423258301114134730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6648764139466203012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 290056c7b8fe4a6f97de630060b988dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SetParent
+  newParent: {fileID: 0}
+  findTag: 
+  worldPositionStays: 1

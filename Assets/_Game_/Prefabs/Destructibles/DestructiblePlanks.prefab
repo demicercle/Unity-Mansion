@@ -37,6 +37,37 @@ Transform:
   - {fileID: 8315623293675200662}
   m_Father: {fileID: 4466470785513590464}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1353201281639195834
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6115088157343139255}
+  m_Layer: 11
+  m_Name: Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6115088157343139255
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353201281639195834}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4466470785513590464}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5589913917461611403
 GameObject:
   m_ObjectHideFlags: 0
@@ -73,6 +104,7 @@ Transform:
   - {fileID: 4895015061984580202}
   - {fileID: 2836335071789281876}
   - {fileID: 5165983472715637963}
+  - {fileID: 6115088157343139255}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &8174465185851595942
@@ -108,8 +140,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eae0f3fda0e349679e464538b74d05a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destructible
+  pivot: {fileID: 6115088157343139255}
   radius: 0.75
   maxHealth: 6
+  isDoor: 0
   rigidbodies:
   - {fileID: 1477095819221511414}
   - {fileID: 3450869584335852929}

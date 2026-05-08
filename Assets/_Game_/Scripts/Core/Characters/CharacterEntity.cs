@@ -10,6 +10,7 @@ using UnityEngine.UIElements;
 public interface IAttackable
 {
 	Vector3 GetPosition();
+	Vector3 GetCenterPosition();
 	float GetHeight();
 	float GetRadius();
 	void TakeDamage(DamageInfo damageInfo, object instigator);
@@ -862,19 +863,32 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		var start = GetEyesPosition();
 		return LOSCheck(start, other.GetPosition())
+		       || LOSCheck(start, other.GetCenterPosition())
 		       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight(), other is Component ? (other as Component).GetComponent<Collider>() : null);
 	}
 
 	public bool LOSCheck(Vector3 start, Vector3 end, Collider other = null)
 	{
-		if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction) && hit.collider != other)
+		if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, end, Color.green, 1.0f);
+		
+		/*if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction) && hit.collider != other)
 		{
 			if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
 			if(CharacterRoutines.debugMode > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
 			return false;
-		}
+		}*/
 
-		if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, end, Color.green, 1.0f);
+		foreach (var hit in Physics.RaycastAll(new Ray(start, (end - start).normalized), Vector3.Distance(start, end),
+			         Layers.MaskObstruction).OrderBy(hit => hit.distance))
+		{
+			if (hit.collider != other)
+			{
+				if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
+				if(CharacterRoutines.debugMode > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
+				return false;
+			}
+		}
+		
 		return true;
 	}
 	
@@ -958,14 +972,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		return (itemToUse = itemInHand) != null;
 	}
-	
+
 
 	public void SetCurrentWeapon(WeaponData newWeapon)
 	{
 		if (currentWeapon != newWeapon)
 		{
 			currentWeapon = newWeapon;
-			characterAnimation?.SwitchWeapon(newWeapon.rpgWeaponR);
+			characterAnimation?.WeaponChanged();
 		}
 	}
 

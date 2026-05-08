@@ -11,8 +11,7 @@ REFACTO
 - grenade should spawn decal
 - save camera rotation
 - do "CursorRaycast" only in FixedUpdate
-- add tooltip for action buttons
-- fog should cut navmesh during battles
+- cannot launch grenade nor attack destructible because aiming
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

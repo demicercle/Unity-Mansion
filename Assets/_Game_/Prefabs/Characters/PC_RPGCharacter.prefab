@@ -465,72 +465,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8093823886771994201, guid: ace0b95e48ae26d4d9fd67ae548dc56c, type: 3}
   m_PrefabInstance: {fileID: 1492673928091997512}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &2058678800469328388
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 5757940252884302273}
-    m_Modifications:
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.0479999
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: -0.000000089793254
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.00000017764974
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0.0000010827787
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7203603437093648202, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: isLeft
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8049270907949946932, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-      propertyPath: m_Name
-      value: SwordL
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
---- !u!4 &4107455155375800460 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2707078740921254536, guid: 2f2ed8d3a40411a4db7961bb2cf38ab3, type: 3}
-  m_PrefabInstance: {fileID: 2058678800469328388}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2266054692352695841
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1413,6 +1347,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: waitToRelaxTime
+      value: 3.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: weaponsAnimation
       value: 
       objectReference: {fileID: 6536868086427863390}
@@ -1450,7 +1388,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: switchWeaponExtraTime
-      value: 1
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: 'animators.Array.data[0]'
@@ -1924,9 +1862,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 400044, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3501161510146424183}
-    - targetCorrespondingSourceObject: {fileID: 400044, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4107455155375800460}
     - targetCorrespondingSourceObject: {fileID: 400032, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5847370265380967024}
@@ -2140,7 +2075,7 @@ MonoBehaviour:
   ikHands: {fileID: 8073295698513471931}
   attackNumber: 1
   forceSheathLocation: 1
-  weaponSwitchExtraTime: 0.5
+  weaponSwitchExtraTime: 0.1
   instantSwitchWeaponToWeapon: 1
   sideWeapons: 0d00000011000000
 --- !u!114 &7960912902921319732

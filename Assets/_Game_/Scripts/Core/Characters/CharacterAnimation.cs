@@ -58,7 +58,7 @@ public class CharacterAnimation : MonoBehaviour
 	
 	[SerializeField] private Animator animator;
 	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
-	[SerializeField] [Min(0)] private float switchWeaponExtraTime;
+	[SerializeField] [Min(0)] private float switchWeaponExtraTime = 0.5f;
 	[SerializeField] [Min(0)] private float waitToRelaxTime = 3.0f;
 	[Space]
 	[SerializeField] private Parameters parameters;
@@ -91,6 +91,9 @@ public class CharacterAnimation : MonoBehaviour
 		if (weaponInHand != newWeapon)
 		{
 			if(debugMode >0 )Debug.Log(this + " InstantSwitchWeapons " + newWeapon);
+			
+			StopCoroutine("DoWeaponSwitch");
+			
 			if (rpgAnimationHandler)
 			{
 				rpgAnimationHandler.InstantWeaponSwitch();
@@ -121,15 +124,14 @@ public class CharacterAnimation : MonoBehaviour
 		}
 	}
 
-	public void WeaponsChanged()
-	{
-		StopCoroutine("DoWeaponSwitch");
-		StartCoroutine("DoWeaponSwitch");
-	}
-
 	public Weapon GetWeaponInHand() => weaponInHand;
 
 	public bool WeaponsSwitched() => weaponInHand != Weapon.Relax;
+
+	public void WeaponChanged()
+	{
+		SwitchWeapons(true);
+	}
 	
 	public WeaponRenderer[] GetWeaponRenderers() => weaponRenderers;
 	
@@ -142,6 +144,7 @@ public class CharacterAnimation : MonoBehaviour
 	private float lastTimeWeaponSwitched;
 	private WeaponRenderer[] weaponRenderers;
 	private float timeAiming;
+	private bool started;
 	
 	private void Awake()
 	{
@@ -165,6 +168,7 @@ public class CharacterAnimation : MonoBehaviour
 		
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponent<RPGAnimationHandler>();
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponentInChildren<RPGAnimationHandler>();
+		if (rpgAnimationHandler) rpgAnimationHandler.name = rpgAnimationHandler.name + " (" + name + ")";
 
 		weaponRenderers = GetComponentsInChildren<WeaponRenderer>();
 	}
@@ -187,6 +191,8 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.onDamagedBy += OnDamagedBy;
 		_selfCharacter.onAiming += OnAiming;
 
+		Init();
+		
 		StartCoroutine("WeaponSwitchCoroutine");
 	}
 
@@ -211,7 +217,7 @@ public class CharacterAnimation : MonoBehaviour
 		StopAllCoroutines();
 	}
 
-	private void Start()
+	private void Init()
 	{
 		hasSwitchOnTrigger = !string.IsNullOrWhiteSpace(parameters.switchOnTrigger);
 		hasSwitchOffTrigger = !string.IsNullOrWhiteSpace(parameters.switchOffTrigger);
@@ -232,23 +238,36 @@ public class CharacterAnimation : MonoBehaviour
 
 	private IEnumerator WeaponSwitchCoroutine()
 	{
+		yield return new WaitForSeconds(switchWeaponExtraTime);
+		
 		while (true)
 		{
 			yield return null;
 			
 			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
 				continue;
-			
-			if (_selfCharacter.IsAiming() || _selfCharacter.InBattle())
+
+			if (isSwitchingWeapons || _selfCharacter.IsActing() || _selfCharacter.InBattle() || _selfCharacter.IsAiming())
 			{
 				lastTimeWeaponSwitched = waitToRelaxTime;
-				SwitchWeapons(true);
 			}
-			else if (!isSwitchingWeapons && !_selfCharacter.IsActing())
+			else if(lastTimeWeaponSwitched > 0)
 			{
 				lastTimeWeaponSwitched -= Time.deltaTime;
-				if(lastTimeWeaponSwitched <= 0)
-					SwitchWeapons(false);
+				if(debugMode > 1) Debug.Log(this + " lastTimeWeaponSwitched=" + lastTimeWeaponSwitched);
+			}
+
+			if (!isSwitchingWeapons)
+			{
+				if (_selfCharacter.IsAiming() || _selfCharacter.InBattle())
+				{
+					SwitchWeapons(true);
+				}
+				else if (!isSwitchingWeapons && !_selfCharacter.IsActing())
+				{
+					if(lastTimeWeaponSwitched <= 0)
+						SwitchWeapons(false);
+				}
 			}
 		}
 	}
@@ -430,57 +449,10 @@ public class CharacterAnimation : MonoBehaviour
 			yield return WaitEvent(EventType.WeaponSwitch);
 		}
 
-		/*if (rpgAnimationHandler)
-		{
-			// RPG Character stuff
-			
-			while(rpgAnimationHandler.IsSwitchingWeapons())
-				yield return null;
-			
-			//var isDual = weaponInHand.ToString().StartsWith("Left") || weaponInHand.ToString().StartsWith("Right");
-
-			var oldWeapon = rpgAnimationHandler.GetRightWeapon();
-			
-			if (weaponInHand != Weapon.Relax)
-			{
-				if(debugMode > 0) Debug.Log(this + " rpg UnsheathWeapon " + oldWeapon + " > " + weaponInHand);
-				if (rpgAnimationHandler.instantSwitchWeapons.Contains(weaponInHand))
-				{
-					rpgAnimationHandler.InstantWeaponSwitch(weaponInHand);
-				}
-				else
-				{
-					rpgAnimationHandler.UnsheathWeapon(weaponInHand, false);
-				}
-			}
-			else
-			{
-				if(debugMode > 0) Debug.Log(this +  "rpg SheathWeapon " + oldWeapon + " > " + weaponInHand);
-				if (rpgAnimationHandler.instantSwitchWeapons.Contains(weaponInHand))
-				{
-					rpgAnimationHandler.InstantWeaponSwitch(Weapon.Relax);
-				}
-				else
-				{
-					rpgAnimationHandler.SheathWeapon(oldWeapon, weaponInHand, false);
-				}
-			}
-			
-			var startedTime = Time.time;
-			do
-			{
-				yield return null;
-				if (Time.time - startedTime > Consts.CharacterAnimTimeout)
-				{
-					Debug.LogWarning(this + " DoWaitSwitchWeapons timedout!");
-					isSwitchingWeapons = false;
-					yield break;
-				}
-			} while (rpgAnimationHandler.IsSwitchingWeapons());
-		}*/
-
 		if (rpgAnimationHandler)
 		{
+			yield return rpgAnimationHandler.StartWeaponSwitch(weaponInHand);
+			
 			var startedTime = Time.time;
 			do
 			{
@@ -496,7 +468,9 @@ public class CharacterAnimation : MonoBehaviour
 		UpdateWeaponRenderers();
 
 		yield return new WaitForSeconds(switchWeaponExtraTime);
+		yield return null;
 		
+		if (debugMode > 0) Debug.Log(this + " weapon switched" );
 		isSwitchingWeapons = false;
 	}
 	
