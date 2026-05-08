@@ -11,11 +11,6 @@ REFACTO
 - save camera rotation
 - do "CursorRaycast" only in FixedUpdate
 - if you miss while triggering turn based, should add 1 miss to the gauge
-- no opportunity attack trigger
-- bug launching grenade in battle
-
-DEBUG
-- zombi "cant" and "timeout" while patrolling
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
@@ -28,7 +23,6 @@ SAVE
 UI
 - popup "are you sure you want to reroll dices?"
 - popup "you have no karma points!"
-- display zombies hp to the player?
 - retake gamelog : should warn about dice launch
 
 ENV ART
@@ -42,7 +36,6 @@ INPUT
 
 GAMEPLAY
 - run should also roll dices?
-- randomize enemies hp on game seed 
 - is dying state (-1 HP / turn or 6 seconds
 - assign attack : should update destination if target moves
 
@@ -50,17 +43,9 @@ ITEMS
 - equip, drop and equip weapons
 - create new items:
 	> a "key" to use on a "locked" door
-	> "Soda" (give 1 extra action next turn)
 	> "Chicken" (heal HP)
-	> replace "Bandage" by "First aid kit" (to revive characters)
-	> "Grigri" (roll the dice for free, but cost 1 action, unlimited uses)
+	> "Bag of chips" starts with 1d20 chips inside
 	
-	
-	ItemData
-	
-	> WeaponData
-	
-	> UsableItemData
 	
 URLs
 	https://opengameart.org/content/medieval-props-textured
