@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 8422079425768255504}
   - component: {fileID: 6476284808873527906}
   m_Layer: 0
-  m_Name: GameCamera
+  m_Name: CameraPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -113,6 +113,7 @@ MonoBehaviour:
   worldY: 0
   worldHeight: 3
   awakeZoom: 1
+  audioListener: {fileID: 4745929886136582025}
   animator: {fileID: 8422079425768255504}
   zoomParameter: Blend
   rotationPivot: {fileID: 1017557397532967885}
@@ -224,5 +225,10 @@ PrefabInstance:
 --- !u!4 &552574874110869700 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6946973228343768614, guid: 66e129205ffba454faeaff9671672371, type: 3}
+  m_PrefabInstance: {fileID: 7477022888134670050}
+  m_PrefabAsset: {fileID: 0}
+--- !u!81 &4745929886136582025 stripped
+AudioListener:
+  m_CorrespondingSourceObject: {fileID: 2747009566682106219, guid: 66e129205ffba454faeaff9671672371, type: 3}
   m_PrefabInstance: {fileID: 7477022888134670050}
   m_PrefabAsset: {fileID: 0}

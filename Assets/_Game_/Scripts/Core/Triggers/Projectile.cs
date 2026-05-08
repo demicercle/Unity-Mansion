@@ -92,6 +92,7 @@ public class Projectile : MonoBehaviour
 		}
 
 		clone = Instantiate(gameObject).GetComponent<Projectile>();
+		if (!clone.rb) clone.rb = clone.GetComponent<Rigidbody>();
 		clone.rb.position = startPoint;
 		clone.rb.rotation = Quaternion.LookRotation(initialVelocity.normalized);
 		clone.rb.isKinematic = false;
