@@ -696,6 +696,14 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (!agent.hasDestination)
 		{
+			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0f, 2f, out var destructible))
+			{
+				if(debugMode > 0) Debug.Log(this + " !agent.hasDestination RaycastForDestructible " + destructible);
+				agent.StopMovement();
+				yield return StartCoroutine(WaitCharacterAttack(destructible, false, false));
+				yield break;
+			}
+			
 			Debug.LogWarning(this + " WaitCharacterMoved !agent.hasDestination");
 			yield break;
 		}
@@ -710,14 +718,14 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " move to path: " + path.Length);
 		if(debugMode > 0) DebugDrawer.Path(path, false, Color.blue, 1.0f);
 
-		var firstPoint = path[1];
+		/*var firstPoint = path.Take(3).OrderBy(p => Utils.FlatDot(_selfCharacter.GetPosition(), p)).LastOrDefault();
 		var dir = (firstPoint - _selfCharacter.GetPosition()).normalized;
 		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
 		{
 //			if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath LookDirection");
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
-		}
+		}*/
 		
 		var startTime = Time.time;
 		var hasMoved = false;
@@ -763,7 +771,7 @@ public class CharacterRoutines : MonoBehaviour
 				yield break;
 			}
 
-			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(out var destructible))
+			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0.5f, 1.5f, out var destructible))
 			{
 				if(debugMode > 0) Debug.Log(this + " RaycastForDestructible " + destructible);
 				agent.StopMovement();

@@ -16,7 +16,8 @@ public class CharacterAgent : MonoBehaviour
 	
 	public static int debugMode { get; set; }
 
-	[Header("Agent Settings")]
+	[Header("Agent Settings")] 
+	[SerializeField] [Range(0f, 1f)] private float obstacleScale = 0.8f;
 	[SerializeField] [Range(0.0f, 10.0f)] private float moveSpeed = 4.5f;
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
@@ -73,10 +74,10 @@ public class CharacterAgent : MonoBehaviour
 			{
 				graphUpdate.points = new[]
 				{
-					Vector3.forward * aiPath.radius,
-					Vector3.right * aiPath.radius,
-					-Vector3.forward * aiPath.radius,
-					-Vector3.right * aiPath.radius,
+					Vector3.forward * aiPath.radius * obstacleScale,
+					Vector3.right * aiPath.radius * obstacleScale,
+					-Vector3.forward * aiPath.radius * obstacleScale,
+					-Vector3.right * aiPath.radius * obstacleScale,
 				};
 			}
 

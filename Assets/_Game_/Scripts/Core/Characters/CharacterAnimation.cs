@@ -278,7 +278,7 @@ public class CharacterAnimation : MonoBehaviour
 		var isMoving = _selfCharacter.IsMoving();
 		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
 		{
-			isMoving = forceRunning; // force running
+			isMoving = isMoving || forceRunning; // force running
 			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
 		}
 		TrySetFloat(parameters.velocityX, 0);      

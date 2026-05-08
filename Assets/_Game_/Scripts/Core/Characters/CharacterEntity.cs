@@ -453,7 +453,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		dir.Normalize();
 		
 		var dest = GetPosition() - dir * avoidDistance;
-		NavUtils.TryGetNearestNavPosition(dest, GetRadius() * 2, out dest);
+		if (!NavUtils.TryGetNearestNavPosition(dest, GetRadius() * 2, out dest) || !RoomTrigger.IsPositionVisible(dest))
+		{
+			dest = GetPosition() + dir * avoidDistance;
+			if (!NavUtils.TryGetNearestNavPosition(dest, GetRadius() * 2, out dest))
+			{
+				return dummyPosition;
+			}
+		}
 
 		return dest;
 	}
@@ -1166,9 +1173,9 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return characterData.GetStealthValue();
 	}
 
-	public bool RaycastForDestructible(out Destructible o)
+	public bool RaycastForDestructible(float forwardOffset, float radiusScale, out Destructible o)
 	{
-		foreach(var coll in Physics.OverlapSphere(GetPosition() + GetDirection() * GetRadius(), GetRadius(), Layers.MaskDestructible))
+		foreach(var coll in Physics.OverlapSphere(GetPosition() + GetDirection() * GetRadius() * forwardOffset, GetRadius() * radiusScale, Layers.MaskDestructible))
 		{
 			if (coll.TryGetComponent(out Destructible destructible) && destructible.IsDoor())
 			{
