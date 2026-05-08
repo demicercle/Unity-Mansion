@@ -496,6 +496,7 @@ MonoBehaviour:
     switchOnTrigger: 
     instantSwitchTrigger: 
   eventTypes: 
+  forceRunning: 0
   velocityScale: 1
   minMovePointsToRun: 0.1
   roomsReveleadSeconds: 1
@@ -862,7 +863,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b516620e7a5f4087a2b020d253b0edb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
-  followDistance: 1.2
+  followDistance: 1.5
+  avoidDistance: 2
   tickTime: 0.5
   headingDistance: 1.2
   headingSpeed: 3

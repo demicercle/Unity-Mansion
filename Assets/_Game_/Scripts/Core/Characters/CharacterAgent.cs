@@ -54,12 +54,16 @@ public class CharacterAgent : MonoBehaviour
 		if (isObstacle == value)
 			return;
 
-		if (noObstacleIfNotRevealed && value && !_selfCharacter.IsCharacterRevealed())
+		if (value && noObstacleIfNotRevealed && !_selfCharacter.IsCharacterRevealed())
+		{
+			SetObstacle(false);
 			return;
-
-		rvoController.enabled = !value;
+		}
+		
 		isObstacle = value;
+		rvoController.enabled = !isObstacle;
 		if (debugMode > 0) Debug.Log(this + " SetObstacle " + isObstacle);
+		
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
 		{
 			if (graphUpdate.enabled == value) return;
@@ -407,7 +411,7 @@ public class CharacterAgent : MonoBehaviour
 	}
 	
 	private bool IsFollowing() => aiDestinationSetter && aiDestinationSetter.target;
-
+	
 	private IEnumerator DoAssignDestination(Vector3 dest)
 	{
 		hasDestination = false;
@@ -514,7 +518,10 @@ public class CharacterAgent : MonoBehaviour
 		{
 			debugString = "";
 			
+			if (isObstacle) debugString += "OBSTACLE";
 			if (IsMoving()) debugString += "IsMoving" + "\n";
+			if (rvoController.enabled) debugString += "RVO:" + rvoController.priority + "\n";
+			if (IsFollowing()) debugString += "Following: " + aiDestinationSetter.target;
 
 			if (lastVectorPath.Count > 0)
 			{

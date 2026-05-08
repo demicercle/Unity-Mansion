@@ -9,6 +9,7 @@ public class CharacterFollows : MonoBehaviour
 	public static int debugMode { get; set; }
 	
 	[SerializeField] [Range(0.5f, 12.0f)] private float followDistance = 3.0f;
+	[SerializeField] [Range(0.5f, 12.0f)] private float avoidDistance = 1.0f;
 	[SerializeField] [Range(0.1f, 10f)] private float tickTime = 1.0f;
 	[SerializeField] private float headingDistance = 0.5f;
 	[SerializeField] [Min(0)] private float headingSpeed = 1.5f;
@@ -26,6 +27,8 @@ public class CharacterFollows : MonoBehaviour
 	private Transform dummy;
 	private Vector3 headingPos;
 	private Vector3 leaderWorldVelocity;
+	private float distanceToDummy;
+	private float distanceToLeader;
 
 	private void Awake()
 	{
@@ -90,8 +93,16 @@ public class CharacterFollows : MonoBehaviour
 			headingPos += leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()) * headingDistance;
 			
 			agent.SetObstacle(false);
+
+			distanceToDummy = selfCharacter.GetDistanceTo(dummy.position);
+			distanceToLeader = selfCharacter.GetDistanceTo(leaderCharacter.GetPosition());
+
+			if (distanceToLeader <= avoidDistance)
+			{
+				headingPos = selfCharacter.GetAvoidPosition(leaderCharacter.GetPosition(), avoidDistance);
+			}
 			
-			if (selfCharacter.GetDistanceTo(dummy.position) <= followDistance)
+			if (distanceToDummy <= followDistance)
 			{
 				agent.StopMovement();
 			}

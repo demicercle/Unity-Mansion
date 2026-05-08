@@ -444,6 +444,20 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return closestDistance;
 	}
 	
+	
+
+	public Vector3 GetAvoidPosition(Vector3 dummyPosition, float avoidDistance)
+	{
+		var dir = dummyPosition - GetPosition();
+		dir.y = 0;
+		dir.Normalize();
+		
+		var dest = GetPosition() - dir * avoidDistance;
+		NavUtils.TryGetNearestNavPosition(dest, GetRadius() * 2, out dest);
+
+		return dest;
+	}
+	
 	public bool IsEnemyToPlayer(CharacterEntity other = null) => currentFaction == CharacterFaction.Enemy;
 
 	public bool ShouldTalk(CharacterEntity other) => other.GetCurrentFaction() == CharacterFaction.Neutral &&
