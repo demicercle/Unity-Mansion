@@ -463,6 +463,8 @@ MonoBehaviour:
   priorityFollower: 0.5
   priorityOther: 0.3
   noObstacleIfNotRevealed: 1
+  obstacleRadiusScale: 1
+  turnBasedVelocityScale: 1.5
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
@@ -1185,7 +1187,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackTrigger
   selfCharacter: {fileID: 1077634328985660634}
-  triggerRangeOffset: 0.592
+  triggerRange: 1
   triggerOnExit: 1
   triggerOnEnter: 0
   movingCharacterOnly: 1
@@ -1193,8 +1195,8 @@ MonoBehaviour:
   meleeWeaponOnly: 1
   isInstantAttack: 1
   useAttackAction: 0
-  noLOS: 0
-  requiresWeaponReady: 1
+  noLOS: 1
+  requiresWeaponReady: 0
   maxTriggerCount: -1
   filters: 
 --- !u!1 &5631688854807395945

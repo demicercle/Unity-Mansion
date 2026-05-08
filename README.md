@@ -8,10 +8,11 @@ REFACTO
 - door nav obstacle
 - training mannequin (invicible life)
 - NPC should try to flee if no ammo, no health (even triggering opportunity attacks)
-- grenade should spawn decal
 - save camera rotation
 - do "CursorRaycast" only in FixedUpdate
-- cannot launch grenade nor attack destructible because aiming
+- if you miss while triggering turn based, should add 1 miss to the gauge
+- no opportunity attack trigger
+- bug launching grenade in battle
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling

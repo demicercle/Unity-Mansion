@@ -726,9 +726,12 @@ public class CharacterRoutines : MonoBehaviour
 			_selfCharacter.LookDirection(dir, Time.deltaTime);
 			yield return null;
 		}*/
+			
+		if(debugMode > 0) Debug.Log(this + " agent.StartMove and SetReachDistance");
+		agent.SetReachDistance(reachDistance);
+		agent.StartMove();
 		
 		var startTime = Time.time;
-		var hasMoved = false;
 		while (!agent.ReachedDestination(dest, reachDistance))
 		{
 			debugTimeout = (Time.time - startTime);
@@ -737,13 +740,6 @@ public class CharacterRoutines : MonoBehaviour
 			{
 				do yield return null;
 				while (anim.IsSwitchingWeapons);
-			}
-			
-			if (!agent.IsMoving())
-			{
-				if(debugMode > 0) Debug.Log(this + " agent.StartMove and SetReachDistance");
-				agent.SetReachDistance(reachDistance);
-				agent.StartMove();
 			}
 			
 			if (Time.time - startTime > SearchPathTimeout)
@@ -756,11 +752,8 @@ public class CharacterRoutines : MonoBehaviour
 
 			if (!_selfCharacter.IsMoving())
 			{
-				if (hasMoved)
-				{
-					if(debugMode > 0) Debug.Log(this + " something stopped movement");
-					yield break;
-				}
+				if(debugMode > 0) Debug.Log(this + " something stopped movement");
+				yield break;
 			}
 			
 			if (!_selfCharacter.HasMovePoints())
@@ -791,7 +784,6 @@ public class CharacterRoutines : MonoBehaviour
 			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
 			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
-				hasMoved = true;
 				//agent.DropOnGround(); // to avoid overlapping obstacles
 				if(debugMode > 1) Debug.Log(this + " moving " + deltaPos);
 				startTime = Time.time; // reset timeout

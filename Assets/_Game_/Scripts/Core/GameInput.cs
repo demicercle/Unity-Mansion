@@ -495,7 +495,7 @@ public class GameInput : MonoBehaviour
 				SetCurrentCursorType(CursorType.Navigate);
 				debugString += "\n>Navigate";
 				
-				if (CanAssignOnMouseOver(selectedCharacter) && (mouseOverChanged || mouseHasMoved))
+				if (CanAssignOnMouseOver(selectedCharacter) && !itemToUse && (mouseOverChanged || mouseHasMoved))
 				{
 					selectedCharacter.GetAgent().AssignDestination(lastNavPosition); // mouse over navigation
 				}
@@ -1147,7 +1147,7 @@ public class GameInput : MonoBehaviour
 	{
 		Debug.Log(this + " ClickNavigation " + navPosition);
 
-		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
+		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && !itemToUse)
 		{
 			onClick?.Invoke();
 			

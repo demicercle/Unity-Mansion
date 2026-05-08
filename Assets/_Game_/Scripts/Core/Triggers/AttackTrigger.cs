@@ -7,7 +7,7 @@ public class AttackTrigger : MonoBehaviour
 	public static int debugMode => CharacterTrigger.debugMode;
 	
 	[SerializeField] private CharacterEntity selfCharacter;
-	[SerializeField] private float triggerRangeOffset = 0.1f;
+	[SerializeField] private float triggerRange = 1.0f;
 	[SerializeField] private bool triggerOnExit = true;
 	[SerializeField] private bool triggerOnEnter = false;
 	[SerializeField] private bool movingCharacterOnly = true;
@@ -36,7 +36,7 @@ public class AttackTrigger : MonoBehaviour
 			return;
 		}
 
-		sphereCollider.radius = selfCharacter.GetAttackRange() + triggerRangeOffset;
+		sphereCollider.radius = triggerRange;
 		sphereCollider.isTrigger = true;
 	}
 
@@ -95,10 +95,10 @@ public class AttackTrigger : MonoBehaviour
 				}
 				
 				// trigger opportunity attack
-				
-				otherCharacter.StopAgent();
 
 				if (debugMode > 0) Debug.Log(this + " triggers instant:" + isInstantAttack + " on " + otherCharacter);
+				
+				otherCharacter.StopAgent();
 				
 				if (isInstantAttack) 
 					selfCharacter.Routines.AssignPerformAttack(otherCharacter, useAttackAction);
@@ -114,7 +114,7 @@ public class AttackTrigger : MonoBehaviour
 
 	private void OnCharacterStatsChanged()
 	{
-		sphereCollider.radius = selfCharacter.GetRadius() + triggerRangeOffset;
+		sphereCollider.radius = triggerRange;
 	}
 	
 	private bool TagCheck(string filters, object obj)
@@ -135,12 +135,8 @@ public class AttackTrigger : MonoBehaviour
 	#if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
-		if (selfCharacter && Application.isPlaying)
-		{
-			Gizmos.color = Color.red;
-			Utils.DrawGizmosCircle(selfCharacter.GetPosition(), Vector3.up, selfCharacter.GetAttackRange() + triggerRangeOffset);
-			//Gizmos.DrawWireSphere(selfCharacter.GetPosition(), selfCharacter.GetRadius() + triggerRangeOffset);
-		}
+		Gizmos.color = Color.red;
+		Utils.DrawGizmosCircle(selfCharacter.GetPosition(), Vector3.up, triggerRange);
 	}
 #endif
 }

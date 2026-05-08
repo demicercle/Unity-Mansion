@@ -149,13 +149,14 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Starts");
-
+		
 		foreach (var go in startupObjects)
 		{
 			Debug.Log(this + " Instantiate startupObjects " + go);
 			Instantiate(go);
 		}
 		
+		cameraPivot.DisableAudio(true);
 		FadeScreen.FadeIn(true);
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
@@ -220,6 +221,7 @@ public class GameTurnManager : MonoBehaviour
 		
 		onLoadingGame?.Invoke(false);
 		onSceneLoaded?.Invoke();
+		cameraPivot.DisableAudio(false);
 		
 		FadeScreen.FadeOut();
 		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);

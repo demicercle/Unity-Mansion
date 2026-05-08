@@ -87,6 +87,11 @@ public class CameraPivot : MonoBehaviour
         orbitSpeed = _cameraSettings.orbitSpeed;
         orbitMaxSpeed = _cameraSettings.orbitMaxSpeed;
     }
+
+    public void DisableAudio(bool disabled)
+    {
+        audioListener.enabled = !disabled;
+    }
     
     public static CameraPivot Instance => instance;
     public static int debugMode { get; set; }
@@ -276,7 +281,6 @@ public class CameraPivot : MonoBehaviour
 
     private void LateUpdate()
     {
-        audioListener.enabled = !GameTurnManager.Instance.IsLoading();
         UpdateBounds();
         UpdatePosition();
         UpdateAnimator();
