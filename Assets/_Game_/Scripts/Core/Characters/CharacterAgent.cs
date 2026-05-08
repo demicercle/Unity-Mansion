@@ -201,13 +201,12 @@ public class CharacterAgent : MonoBehaviour
 		StopAllCoroutines();
 	}
 
-	public bool ReachedDestination() => ReachedDestination(aiPath.destination);
+	public bool ReachedDestination() => ReachedDestination(aiPath.destination, aiPath.endReachedDistance);
 	
-	public bool ReachedDestination(Vector3 dest) // TODO move this in Self Character
+	public bool ReachedDestination(Vector3 dest, float reach) // TODO move this in Self Character
 	{
 		var dist = Vector3.Distance(_selfCharacter.GetPosition(), dest);
-		var reach = aiPath.endReachedDistance;
-		if(debugMode > 1)Debug.Log(this + " ReachedDestination " + dist +" <= " + reach);
+		if(debugMode > 1)Debug.Log(this + " ReachedDestination? " + dist +" <= " + reach);
 		return dist <= reach;
 	}
 	

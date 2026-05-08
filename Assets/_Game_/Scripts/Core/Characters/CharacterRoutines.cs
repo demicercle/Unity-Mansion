@@ -301,7 +301,7 @@ public class CharacterRoutines : MonoBehaviour
 		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
 		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtWaypoint " + clickedProp + " " + foundWaypoint + " check reach destination");
-		if (agent.ReachedDestination(destination))
+		if (agent.ReachedDestination(destination, reachRadius))
 		{
 			// waypoint reach
 			if (_selfCharacter.CanInteract())
@@ -352,7 +352,7 @@ public class CharacterRoutines : MonoBehaviour
 		yield return null;
 		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtPosition " + clickedProp + " check reach destination");
-		if (agent.ReachedDestination(destination))
+		if (agent.ReachedDestination(destination, reachRadius))
 		{
 			// waypoint reach
 			if (_selfCharacter.CanInteract())
@@ -729,7 +729,7 @@ public class CharacterRoutines : MonoBehaviour
 		
 		var startTime = Time.time;
 		var hasMoved = false;
-		while (!agent.ReachedDestination(dest))
+		while (!agent.ReachedDestination(dest, reachDistance))
 		{
 			debugTimeout = (Time.time - startTime);
 

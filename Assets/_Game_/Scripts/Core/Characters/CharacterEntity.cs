@@ -839,7 +839,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public bool WaypointReached(Waypoint wp)
 	{
-		return agent.ReachedDestination(wp.GetPosition());
+		return agent.ReachedDestination(wp.GetPosition(), wp.radius);
 		//return Vector3.Distance(GetPosition(), wp.GetPosition()) <= agent.reachDistance;
 	}
 
