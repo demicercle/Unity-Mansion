@@ -21,6 +21,8 @@ public static class DicePool
 		lastResult = Mathf.Clamp(dice, 1, 20);
 		onDiceRolled?.Invoke();
 	}
+
+	public static int RollDice() => UnityEngine.Random.Range(0, 20) + 1;
 	
 	public static void RollNewDice()
 	{
@@ -30,7 +32,7 @@ public static class DicePool
 			SetSeed(GetRandomSeed());
 		}
 
-		lastResult = rng.Next(0, 20) + 1;
+		lastResult =rng.Next(0, 20) + 1;
 		if(debugMode >0) Debug.Log("DicePool>> Last Result: " + lastResult);
 		
 		onDiceRolled?.Invoke();

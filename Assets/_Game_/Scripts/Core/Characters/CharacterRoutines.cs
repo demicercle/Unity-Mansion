@@ -514,7 +514,7 @@ public class CharacterRoutines : MonoBehaviour
 		
 		yield return null;
 		
-		var atkRoll = _selfCharacter.RollDice();
+		var atkRoll = target is CharacterEntity ? _selfCharacter.RollDice() : -1;
 		yield return _selfCharacter.WaitAnimationEvent(_selfCharacter.IsUsingRangeWeapon() ? CharacterAnimation.EventType.Shoot : CharacterAnimation.EventType.Hit);
 
 		_selfCharacter.SetAimingPosition(_selfCharacter.GetAimingPosition(target));
@@ -601,8 +601,8 @@ public class CharacterRoutines : MonoBehaviour
 
 	private void ProcessHit(IAttackable target, int atkRoll)
 	{
-		if (atkRoll < 0f && target is CharacterEntity)
-			atkRoll = _selfCharacter.RollDice();
+		if (atkRoll < 0f)
+			atkRoll = target is CharacterEntity ? _selfCharacter.RollDice() : DicePool.RollDice();
 		
 		if (debugMode > 0) Debug.Log(this + " ProcessHit " + " atkRoll=" + atkRoll + " target=" + target);
 		

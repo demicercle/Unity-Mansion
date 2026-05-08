@@ -7,6 +7,7 @@ public class NodeInstantiate : GameNode
 	[Input] public SceneReference _position;
 
 	public GameObject prefab;
+	public bool ignoreRotation;
 
 	protected override void OnScriptStart()
 	{
@@ -29,7 +30,7 @@ public class NodeInstantiate : GameNode
 			
 			var instance = Instantiate(prefab);
 			instance.transform.position = transform.position;
-			instance.transform.rotation = transform.rotation;
+			if(!ignoreRotation) instance.transform.rotation = transform.rotation;
 		});
 	}
 

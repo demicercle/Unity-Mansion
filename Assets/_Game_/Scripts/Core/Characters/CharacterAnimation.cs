@@ -247,7 +247,7 @@ public class CharacterAnimation : MonoBehaviour
 			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
 				continue;
 
-			if (isSwitchingWeapons || _selfCharacter.IsActing() || _selfCharacter.InBattle() || _selfCharacter.IsAiming())
+			if (isSwitchingWeapons || _selfCharacter.IsActing() || _selfCharacter.InBattle() || _selfCharacter.IsAiming() || _selfCharacter.HasItemToUse(out var _))
 			{
 				lastTimeWeaponSwitched = waitToRelaxTime;
 			}

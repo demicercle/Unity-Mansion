@@ -276,6 +276,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   prefab: {fileID: 1257399411437645990, guid: e6cd9fa2f288a30469925fe17f654d5a, type: 3}
+  ignoreRotation: 1
 --- !u!114 &2846710604673029695
 MonoBehaviour:
   m_ObjectHideFlags: 0
