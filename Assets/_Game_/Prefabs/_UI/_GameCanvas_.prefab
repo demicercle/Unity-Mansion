@@ -491,7 +491,7 @@ GameObject:
   - component: {fileID: 1968609212288854495}
   - component: {fileID: 5044894175710066659}
   m_Layer: 5
-  m_Name: HBox
+  m_Name: HBox_Buttons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -35,6 +35,29 @@ MonoBehaviour:
     - full!
     - loaded!
     - not now!
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - //None,
+    - Increase your max movement distance for this turn.
+    - //Attack,
+    - //Interact,
+    - //Talk,
+    - Get an extra chance to dodge the next attack on you.
+    - The next attack on you will trigger a counter-attack.
+    - //Reload,
+    - //UseItem,
+    - //GiveItem,
+    - //DropItem,
+    - //PickupItem,
+    - //LaunchItem,
+    - //DrinkItem,
   - dialogText: {fileID: 4900000, guid: 5ba3278974654674b5e0dc16313e6548, type: 3}
     lines:
     - 

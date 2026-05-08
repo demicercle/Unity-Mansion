@@ -63,7 +63,8 @@ public class CharacterAnimation : MonoBehaviour
 	[Space]
 	[SerializeField] private Parameters parameters;
 	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
-	[Space]
+	[Space] 
+	[SerializeField] private bool forceRunning = false;
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
 	[SerializeField] private float roomsReveleadSeconds = 1.0f;
@@ -258,7 +259,7 @@ public class CharacterAnimation : MonoBehaviour
 		var isMoving = _selfCharacter.IsMoving();
 		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
 		{
-			isMoving = true; // force running
+			isMoving = forceRunning; // force running
 			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
 		}
 		TrySetFloat(parameters.velocityX, 0);      

@@ -7,6 +7,10 @@ public class ActionButton : MonoBehaviour
 {
 	[SerializeField] private CharacterAction actionType;
 	[SerializeField] private Toggle toggleUseDice;
+
+	public string GetTooltipDescription() =>
+		LanguageSettings.GetDialogLines(DialogFiles.main)
+			.GetLine(30 + (int)actionType, "MISSING DESCRIPTION: " + actionType);
 	
 	private Button button;
 	

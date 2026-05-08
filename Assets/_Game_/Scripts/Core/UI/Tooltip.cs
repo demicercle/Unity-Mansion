@@ -5,16 +5,9 @@ using UnityEngine.UI;
 
 public class Tooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+	[SerializeField] private bool followMousePosition = true;
 	[SerializeField] private GameObject tooltipObject;
 	[SerializeField] private TMPro.TMP_Text tooltipLabel;
-
-	private string GetLabel()
-	{
-		if (inventoryButton)
-			return "";
-
-		else return "";
-	}
 	
 	public void OnPointerEnter(PointerEventData eventData)
 	{
@@ -24,6 +17,9 @@ public class Tooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		{
 			if (inventoryButton)
 				tooltipLabel.text = inventoryButton.GetTooltipDescription();
+
+			if (actionButton)
+				tooltipLabel.text = actionButton.GetTooltipDescription(); // TODO Interface "ITooltipDescription"
 		}
 
 		if (tooltipObject)
@@ -48,12 +44,14 @@ public class Tooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 	private Canvas parentCanvas;
 	private Transform tooltipParent;
 	private InventoryButton inventoryButton;
+	private ActionButton actionButton;
 	private bool pointerOver;
 
 	private void Awake()
 	{
 		parentCanvas = GetComponentInParent<Canvas>();
 		inventoryButton = GetComponent<InventoryButton>();
+		actionButton = GetComponent<ActionButton>();
 
 		if (tooltipObject)
 		{
@@ -64,7 +62,7 @@ public class Tooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	private void LateUpdate()
 	{
-		if (pointerOver)
+		if (pointerOver && followMousePosition)
 			tooltipObject.transform.position = GameInput.Instance.GetMousePosition();
 	}
 }

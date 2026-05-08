@@ -390,7 +390,7 @@ MonoBehaviour:
   characterData: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
   characterCanvas: {fileID: 437776869319342895}
   clearActionsDelay: 3
-  rollDiceToDodge: 0
+  rollDiceToDodge: 1
   rollDiceOnDefense: 0
   rollDiceOnRun: 0
   rollDiceOnRiposte: 0
@@ -501,7 +501,6 @@ MonoBehaviour:
   roomsReveleadSeconds: 1
   shouldSwitchWeaponWhenDamaged: 1
   reloadAnimDuration: 2
-  switchWeaponsTickTime: 0.5
 --- !u!114 &3789455635990092813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1191,8 +1190,8 @@ MonoBehaviour:
   enemyCharacterOnly: 1
   meleeWeaponOnly: 1
   isInstantAttack: 1
-  stopAgent: 1
   useAttackAction: 0
+  noLOS: 0
   requiresWeaponReady: 1
   maxTriggerCount: -1
   filters: 
