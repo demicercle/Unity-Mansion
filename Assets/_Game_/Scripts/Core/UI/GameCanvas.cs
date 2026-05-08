@@ -40,8 +40,9 @@ public class GameCanvas : MonoBehaviour
 	[Header("Cursor")] 
 	[SerializeField] private TMP_Text cursorText;
 	[SerializeField] private bool displayLastResultDice;
-	[Header("References")]
-	[SerializeField] private TextReference floatingText;
+
+	[Header("References")] 
+	[SerializeField] private FloatingText floatingText;
 	[Header("UnityEvents")]
 	public UnityEvent<bool> onPlayerTurnChanged;
 	
@@ -62,34 +63,9 @@ public class GameCanvas : MonoBehaviour
 		}
 	}
 
-	public TextReference FloatingText(object obj, string label)
-	{
-		if (obj is CharacterEntity)
-		{
-			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetFollows((obj as CharacterEntity).transform, (obj as CharacterEntity).GetCenterPosition(true), referenceResolution);
-		}
-
-		if (obj is IAttackable)
-		{
-			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetWorldPosition((obj as IAttackable).GetCenterPosition(), referenceResolution);
-		}
-		
-		if (obj is Component)
-		{
-			return floatingText.Duplicate().SetParent(transform).SetText(label).SetActive()
-				.SetFollows((obj as Component).transform, default, referenceResolution);
-		}
-		
-		Debug.LogWarning(this + " invalid floating text object: " + obj + " label=" + label);
-		return default;
-	}
-	
-	public TextReference FloatingText(Vector3 worldPosition, string label)
-	{
-		return floatingText.Duplicate().SetParent(transform).SetWorldPosition(worldPosition, referenceResolution).SetText(label).SetActive();
-	}
+	public void FloatingText(Component obj, string label) => floatingText.Clone(obj.transform, label);
+	public void FloatingText(GameObject obj, string label) => floatingText.Clone(obj.transform, label);
+	public void FloatingText(Vector3 pos, string label) => floatingText.Clone(pos, label);
 
 	public void SetOverlayRenderTexture(RenderTexture rt)
 	{
@@ -106,7 +82,7 @@ public class GameCanvas : MonoBehaviour
 	private MouseOverHandler viewportMouseHandler;
 	private ItemData currentDraggedItem;
 	private CanvasScaler canvasScaler;
-	private float calculatedHitChance;
+	private int calculatedHitChance;
 	private bool willHit;
 	private bool hitBlocked;
 	private CharacterEntity selectedCharacter;
@@ -119,6 +95,8 @@ public class GameCanvas : MonoBehaviour
 		
 		canvasScaler = GetComponent<CanvasScaler>();
 		
+		floatingText.gameObject.SetActive(false);
+		
 		buttonEndTurn.onClick.AddListener(ClickEndTurn);
 		buttonNextCharacter.onClick.AddListener(ClickNextCharacter);
 		//buttonActionRun.onClick.AddListener(ClickRunAction);
@@ -128,8 +106,6 @@ public class GameCanvas : MonoBehaviour
 		if(!viewportMouseHandler) viewportMouseHandler = viewportRect.gameObject.AddComponent<MouseOverHandler>();
 		viewportMouseHandler.onMouseOverChanged += OnViewportRectMouseOver;
 		viewportMouseHandler.onClicked += OnViewportRectClicked;
-		
-		floatingText.SetActive(false);
 
 		CharacterEntity.onPartyChanged += UpdatePortraits;
 		CharacterEntity.onAttackResult += OnAttackResult;
@@ -177,12 +153,15 @@ public class GameCanvas : MonoBehaviour
 
 	private void OnAttackResult(CharacterEntity arg1, IAttackable arg2, CharacterEntity.AttackResult arg3)
 	{
-		if (arg3 == CharacterEntity.AttackResult.Undefined)
-			FloatingText(arg2, LanguageSettings.Main.Cant);
-		else if (arg3 == CharacterEntity.AttackResult.Dodge)
-			FloatingText(arg2, LanguageSettings.Main.Dodge);
-		else if (arg3 == CharacterEntity.AttackResult.Miss)
-			FloatingText(arg2, LanguageSettings.Main.Miss);
+		if (arg2 is Component)
+		{
+			if (arg3 == CharacterEntity.AttackResult.Undefined)
+				FloatingText(arg2 as Component, LanguageSettings.Main.Cant);
+			else if (arg3 == CharacterEntity.AttackResult.Dodge)
+				FloatingText(arg2 as Component, LanguageSettings.Main.Dodge);
+			else if (arg3 == CharacterEntity.AttackResult.Miss)
+				FloatingText(arg2 as Component, LanguageSettings.Main.Miss);
+		}
 	}
 
 	private void Start()
@@ -221,37 +200,28 @@ public class GameCanvas : MonoBehaviour
 		}
 
 		targetCharacter = null;
+		cursorText.gameObject.SetActive(false);
 		
-		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
+		if (GameTurnManager.Instance.IsPlayerTurn() && CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter)
 		{
-			gameInput.WantsToAttack(out targetCharacter);
-
-			if (selectedCharacter.IsAiming()
-			    && selectedCharacter.TryGetLastShootHit(out var lastHit)
-			    && lastHit.collider.TryGetComponent(out CharacterEntity hitTarget))
-			{
-				targetCharacter = hitTarget; // over target, display attack stats
-			}
-			
-			if (targetCharacter)
+			if ( gameInput.GetAimedObject(out var mouseOverObject)	&& mouseOverObject.TryGetComponent(out targetCharacter) 
+																	&& selectedCharacter != targetCharacter
+																	&& (selectedCharacter.IsEnemyTo(targetCharacter) 
+																	    || (selectedCharacter.IsAiming() && selectedCharacter.WillHit(targetCharacter.gameObject))))
 			{
 				cursorText.transform.position = gameInput.GetMousePosition();
 				cursorText.raycastTarget = false;
-				calculatedHitChance = selectedCharacter.CalculateHitChance(targetCharacter);
-				willHit = selectedCharacter.WillHit(DicePool.LastResult, targetCharacter);
+				calculatedHitChance = 20 - Mathf.Clamp(selectedCharacter.CalculateHitChance(targetCharacter), 1, 20);
+				if(CharacterEntity.debugStats > 1) Debug.Log(this + " calculated hit chance " + calculatedHitChance);
+				willHit = (DicePool.LastResult > 1 && calculatedHitChance < DicePool.LastResult) || DicePool.LastResult >= 20;
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
-				cursorText.text = Mathf.Clamp(20-DicePool.FloatToDice(20, calculatedHitChance), 1, 20) + "+";
-				if (displayLastResultDice) cursorText.text += " / " + DicePool.FloatToDice(20, DicePool.LastResult);
+				cursorText.text = calculatedHitChance + "+";
+				if (displayLastResultDice) cursorText.text += " (" + DicePool.LastResult + ")";
 				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
 				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
-				/*cursorText.text =
-					Mathf.RoundToInt(
-						selectedCharacter.CalculateHitChance(targetCharacter) *
-						100) + "%";*/
+				cursorText.gameObject.SetActive(true);
 			}
 		}
-		
-		cursorText.gameObject.SetActive(targetCharacter != null);
 	}
 
 	private void OnPlayerChanged(bool isPlayerTurn)

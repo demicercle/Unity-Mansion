@@ -7,9 +7,9 @@ public class Destructible : MonoBehaviour, IAttackable
 {
 	public static List<Destructible> allInstances = new List<Destructible>();
 
-	public Vector3 GetReachPosition()
+	public Vector3 GetPosition()
 	{
-		return GetCenterPosition();
+		return transform.position;
 	}
 
 	public bool IsName(string s) => name == s;
@@ -22,13 +22,13 @@ public class Destructible : MonoBehaviour, IAttackable
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
 	[SerializeField] private Rigidbody[] rigidbodies;
 	[SerializeField] private GameObject[] deactivateObjects;
-	[SerializeField] private Destructible linkedDestructible;
 
-	public Vector3 GetCenterPosition() => transform.position;
+	public Vector3 GetCenterPosition() => collider ? collider.bounds.center : transform.position;
+	
 	public float GetRadius() => radius;
 	public float GetHeight() => radius;
 
-	public bool damagedWithRangeWeapons;
+	public bool ignoreRangedWeapons;
 	public UnityEvent takeDamage;
 	public UnityEvent breaks;
 
@@ -45,18 +45,13 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	public void TakeDamage(DamageInfo dmgInfo, object instigator)
 	{
-		if (!damagedWithRangeWeapons && dmgInfo.isRanged)
+		if (ignoreRangedWeapons && dmgInfo.isRanged)
 		{
 			dmgInfo.amount = 0;
 		}
 		
 		damageAmount += dmgInfo.amount;
 		if(debugMode > 0) Debug.Log(this + " take damage " + dmgInfo + " total=" + damageAmount + "/" + maxHealth);
-		
-		if (linkedDestructible)
-		{
-			linkedDestructible.TakeDamage(dmgInfo, instigator);
-		}
 
 		onAnyDestructibleHit?.Invoke(this, dmgInfo, instigator);
 		
@@ -98,6 +93,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	
 	private bool isBroken;
 	private float damageAmount;
+	private Collider collider;
 
 	[ContextMenu("Collect Rigidbodies")]
 	private void CollectRigidbodies()
@@ -109,6 +105,8 @@ public class Destructible : MonoBehaviour, IAttackable
 	private void Awake()
 	{
 		allInstances.Add(this);
+		
+		collider = GetComponent<Collider>();
 			
 		foreach (var obj in deactivateObjects)
 		{
@@ -129,6 +127,7 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	private void OnDrawGizmosSelected()
 	{
+		if (Application.isPlaying) return;
 		Gizmos.color = Color.yellow;
 		Utils.DrawGizmosCircle(GetCenterPosition(), transform.up, radius);
 		foreach (var rb in rigidbodies)

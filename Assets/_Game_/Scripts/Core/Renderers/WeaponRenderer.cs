@@ -7,7 +7,7 @@ using UnityEngine.TextCore.Text;
 
 public class WeaponRenderer : MonoBehaviour
 {
-    public static int debugMode => CharacterAnimation.debugMode;
+    public static int debugAim => CharacterEntity.debugAim;
     
     public bool isLeft;
     public Weapon rpgWeapon = Weapon.Relax;
@@ -26,23 +26,21 @@ public class WeaponRenderer : MonoBehaviour
     private Vector3 muzzlePosition;
     private Vector3 shootPosition;
 
-    public void OnShoot()
+    public void OnShoot(Vector3 from, Vector3 to)
     {
         if (shootLine)
         {
-            var selfCharacter = GetComponentInParent<CharacterEntity>();
-            if (selfCharacter)
-            {
-                var lastAttackTarget = selfCharacter.GetLastAttackTarget();
-
-                muzzlePosition = shootFromEyesPosition ? selfCharacter.GetEyesPosition() : shootLine.transform.position;
-                
-                shootPosition = selfCharacter.TryGetLastShootHit(out var hit) ? hit.point :
-                    selfCharacter.TryGetAimingPosition(out var aimingPos) ? aimingPos :
-                    lastAttackTarget?.GetCenterPosition() ?? shootLine.transform.TransformPoint(Vector3.forward * maxShootDistance);
-                
-                shootLine.gameObject.SetActive(true);
-            }
+            var clone = Instantiate(shootLine.gameObject).GetComponent<LineRenderer>();
+            clone.transform.SetParent(transform);
+            clone.transform.position = from;
+            // setup line
+            clone.useWorldSpace = true;
+            clone.positionCount = 2;
+            clone.SetPosition(0, from);
+            clone.SetPosition(1, to);
+            // setup components
+            Utils.GetOrAddComponent<AutoDestroy>(clone.gameObject).delay = 1.0f;
+            clone.gameObject.SetActive(true);
         }
         
         onShoot?.Invoke();
@@ -55,24 +53,34 @@ public class WeaponRenderer : MonoBehaviour
 
     private CharacterEntity parentCharacter;
     private bool wasAiming;
+    private Vector3 aimFrom;
 
     private void HideAimLine()
     {
         if (!aimLine) return;
         aimLine.gameObject.SetActive(false);
-        if(CharacterEntity.debugAim > 0) Debug.Log("HideAimLine");
+        if(CharacterEntity.debugAim > 1) Debug.Log("HideAimLine");
     }
 
-    private void DisplayAimLine(Vector3 aimingPosition)
+    private void DisplayAimLine(Vector3 from, params Vector3[] aimingPositions)
     {
         if (!aimLine) return;
+        if(debugAim > 1) Debug.Log(this + " DisplayAimLine " + aimingPositions.Length);
         aimLine.gameObject.SetActive(true);
         aimLine.loop = false;
-        aimLine.useWorldSpace = false;
-        aimLine.positionCount = 2;
-        aimLine.SetPosition(0, aimFromEyesPosition && parentCharacter ? aimLine.transform.InverseTransformPoint(parentCharacter.GetEyesPosition()) : Vector3.zero);
-        aimLine.SetPosition(1, aimLine.transform.InverseTransformPoint(aimingPosition));
-        if(CharacterEntity.debugAim > 0) Debug.Log("DisplayAimLine: " + aimingPosition );
+        aimLine.useWorldSpace = true;
+        aimLine.positionCount = aimingPositions.Length * 3;
+        aimLine.transform.position = from;
+        int i = 0;
+        int a = 0;
+        while (i < aimLine.positionCount && a < aimingPositions.Length)
+        {
+            if (debugAim > 2) Debug.Log(this + " DisplayAimLine " + i + "/" + aimLine.positionCount + " " + a + "/" + aimingPositions.Length);
+            if (debugAim > 0) DebugDrawer.Line(from, aimingPositions[a], Color.magenta, 0f);
+            aimLine.SetPosition(i++, from);
+            aimLine.SetPosition(i++, aimingPositions[a++]);
+            aimLine.SetPosition(i++, from);
+        }
     }
     
     private void OnEnable()
@@ -89,37 +97,23 @@ public class WeaponRenderer : MonoBehaviour
         if(aimLine)aimLine.gameObject.SetActive(false);
     }
 
-    private void OnDisable()
-    {
- //       if(debugMode > 0) Debug.Log(this + " OnDisable() parentCharacter=" + parentCharacter);
-    }
-
     private void LateUpdate()
     {
         if (parentCharacter)
         {
-            if (!parentCharacter.IsActing() && parentCharacter.TryGetAimingPosition(out var aimingPos))
+            aimFrom = transform.position;
+            if (shootFromEyesPosition) aimFrom = parentCharacter.GetEyesPosition();
+            
+            if (!parentCharacter.IsActing() && parentCharacter.GetShootLines(out var positionsTo))
             {
                 wasAiming = true;
-                DisplayAimLine(aimingPos);
+                DisplayAimLine(aimFrom, positionsTo);
             }
             else if (wasAiming)
             {
                 wasAiming = false;
                 HideAimLine();
             }
-        }
-
-        if (shootLine && shootLine.gameObject.activeSelf)
-        {
-            shootLine.loop = false;
-            shootLine.useWorldSpace = false;
-            shootLine.positionCount = 2;
-            shootLine.SetPosition(0, shootLine.transform.InverseTransformPoint(muzzlePosition));
-            shootLine.SetPosition(1, shootLine.transform.InverseTransformPoint(shootPosition));
-            if(CharacterEntity.debugAim > 0) Debug.Log("DisplayShootLine: " + shootPosition );
-            
-            HideAimLine();
         }
     }
 
@@ -131,15 +125,11 @@ public class WeaponRenderer : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-
-    [ContextMenu("Collect Renderers/Include Inactive")]
-    private void CollectRenderers_On() => CollectRenderers(true);
-    [ContextMenu("Collect Renderers/Active Only")]
-    private void CollectRenderers_Off() => CollectRenderers(false);
-    private void CollectRenderers(bool includeInactive)
+    [ContextMenu("Collect Renderers")]
+    private void CollectRenderers()
     {
         UnityEditor.Undo.RecordObject(this, "CollectRenderers");
-        renderers = GetComponentsInChildren<Renderer>(includeInactive).Concat(GetComponents<Renderer>()).ToArray();
+        renderers = GetComponentsInChildren<Renderer>().Concat(GetComponents<Renderer>()).ToArray();
         Utils.SetDirty(this);
     }
     [ContextMenu("SHOW Renderers")]

@@ -164,7 +164,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		yield return new WaitForSeconds(0.5f);
 		if (other && other.IsDead())
 		{
-			Debug.Log(this + " in " + character + " CheckDead " + other + " lastKill!");
+//			Debug.Log(this + " in " + character + " CheckDead " + other + " lastKill!");
 			onLastKill?.Invoke();
 		}
 	}

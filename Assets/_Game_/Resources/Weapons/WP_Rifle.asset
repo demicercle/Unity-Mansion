@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WP_Rifle
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   noAttack: 0
-  hitChance: 13
-  minDamage: 4
-  maxDamage: 8
+  hitChance: 14
+  minDamage: 1
+  maxDamage: 3
   damageCurve:
     serializedVersion: 2
     m_Curve:
@@ -41,7 +41,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   isRanged: 1
-  attackRange: 12
+  attackRange: 20
   rangeHitCurve:
     serializedVersion: 2
     m_Curve:
@@ -117,8 +117,25 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  consumeAmmo: 3
   ammoTags: Rifle
-  maxAmmo: 2
+  maxAmmo: 15
+  shootFlat: 1
+  shootOffset: {x: 0, y: 0, z: 0}
+  allowMultipleHit: 1
+  shootInfos:
+  - angle: 0
+    delay: 0
+    atkMod: {x: 0, y: 0}
+    clampDistance: 1
+  - angle: 0
+    delay: 0.1
+    atkMod: {x: -0.1, y: 0}
+    clampDistance: 1
+  - angle: 0
+    delay: 0.2
+    atkMod: {x: -0.2, y: 0}
+    clampDistance: 1
   decals:
   - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
   - {fileID: 11400000, guid: 3d1d45a1c8055ba4f8809c776eadb01b, type: 2}
@@ -126,3 +143,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2bde35fa989f9c241a8ce26b5d7156d1, type: 2}
   rpgWeaponR: 18
   rpgWeaponL: -1
+  noAim: 0

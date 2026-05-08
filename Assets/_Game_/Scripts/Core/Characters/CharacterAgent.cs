@@ -27,6 +27,7 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0f, 1f)] private float priorityLeader = 0.7f;
 	[SerializeField] [Range(0f, 1f)] private float priorityFollower = 0.5f;
 	[SerializeField] [Range(0f, 1f)] private float priorityOther = 0.3f;
+	[SerializeField] private bool noObstacleIfNotRevealed = true;
 	
 	[Header("Rendering")]
 	[SerializeField] private List<LineRenderer> pathRenderers;
@@ -51,6 +52,9 @@ public class CharacterAgent : MonoBehaviour
 	public void SetObstacle(bool value)
 	{
 		if (isObstacle == value)
+			return;
+
+		if (noObstacleIfNotRevealed && value && !_selfCharacter.IsCharacterRevealed())
 			return;
 
 		rvoController.enabled = !value;

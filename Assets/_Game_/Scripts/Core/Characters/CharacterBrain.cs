@@ -22,9 +22,8 @@ public class CharacterBrain : MonoBehaviour
 	
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
-	//[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
+	[SerializeField] private bool turnHostileWhenDamaged = false;
 	[SerializeField] private Waypoint wanderingPoint;
-	//private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 
 	public UnityEvent onStartThink;
 	
@@ -139,27 +138,49 @@ public class CharacterBrain : MonoBehaviour
 
 		if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
 		
+		yield return StartCoroutine(YieldTryFindNewTarget());
+		
 		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
 		{
-			if (!_selfCharacter.Routines.AnyActive())
+			SaveTargetPosition();
+
+			if (_selfCharacter.WeaponNeedsReload())
 			{
-				SaveTargetPosition();
-				
-				if (_selfCharacter.IsAtAttackRange(_chaseCharacter))
+				if (debugMode > 0) Debug.Log(this + " weapon needs reload");
+				if (_selfCharacter.TryFindAmmo(out var ammoItem))
 				{
-					_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter);
+					_selfCharacter.Routines.AssignReloadWeapon(_selfCharacter.GetCurrentWeapon(), ammoItem);
 				}
-				else if (_selfCharacter.HasMovePoints())
+				else
 				{
-					_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
-				}
-				else if (_selfCharacter.CanUseAction(CharacterAction.Run))
-				{
-					_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+					if(debugMode > 0) Debug.Log(this + " can't reload weapon, switching default weapon");
+					_selfCharacter.FloatingText_Cant();
+					yield return new WaitForSeconds(0.5f);
+					_selfCharacter.SwitchDefaultWeapon();
+
+					if (_selfCharacter.TryGetAnimation(out var anim))
+					{
+						do yield return null;
+						while (anim.IsSwitchingWeapons);
+					}
 				}
 			}
+				
+			if (_selfCharacter.IsAtAttackRange(_chaseCharacter, true))
+			{
+				_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter);
+			}
+			else if (_selfCharacter.HasMovePoints())
+			{
+				_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter);
+			}
+			else if (_selfCharacter.CanUseAction(CharacterAction.Run))
+			{
+				_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+			}
 			
-			yield return StartCoroutine(YieldTryFindNewTarget());
+			do yield return null;
+			while (_selfCharacter.Routines.AnyActive());
 		}
 
 		if (debugMode > 0) Debug.Log(this + " end chase");
@@ -268,7 +289,7 @@ public class CharacterBrain : MonoBehaviour
 		}
 
 		_lastWanderingPos = _wanderingPos;
-		_selfCharacter.Routines.AssignMoveToDestination(_wanderingPos);
+		_selfCharacter.Routines.AssignMoveToDestination(_wanderingPos, _selfCharacter.GetAgent().GetMinReachDistance());
 		do
 		{
 			if (_chaseCharacter && canChase)
@@ -338,6 +359,7 @@ public class CharacterBrain : MonoBehaviour
 	private Dictionary<CharacterEntity, float> _aggroMap = new Dictionary<CharacterEntity, float>();
 	private float _startedThinkingTime;
 	private Vector3 _lastPosition;
+	private CharacterAgent _agent;
 	
 	private void Awake()
 	{
@@ -354,6 +376,7 @@ public class CharacterBrain : MonoBehaviour
 		_selfCharacter.onDamagedBy += OnDamagedBy;
 		
 		_waypointList = new List<Waypoint>();
+		_agent = GetComponent<CharacterAgent>();
 	}
 
 	private void OnDestroy()
@@ -422,6 +445,13 @@ public class CharacterBrain : MonoBehaviour
 
 	private void OnDamagedBy(CharacterEntity other, float amount)
 	{
+		if(debugMode > 0) Debug.Log(this + " OnDamagedBy " + other + " amount="  + amount);
+
+		if (turnHostileWhenDamaged && amount > 0 && other.IsPlayer())
+		{
+			_selfCharacter.SetCurrentFaction(CharacterFaction.Enemy);
+		}
+		
 		AddAggro(other, amount);
 	}
 
@@ -502,7 +532,7 @@ public class CharacterBrain : MonoBehaviour
 
 	private void OnDrawGizmos()
 	{
-		if (wanderingPoint)
+		if (wanderingPoint && !Application.isPlaying)
 		{
 			float wanderingDistance = wanderingPoint.radius;
 			Gizmos.color = Color.blue;

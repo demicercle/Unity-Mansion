@@ -50,11 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b14c68f0b3c5ef748b8df36fa9f92aae, type: 3}
       propertyPath: m_Name
-      value: LD_bathroomSink
+      value: Prop_bathroomSink
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b14c68f0b3c5ef748b8df36fa9f92aae, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b14c68f0b3c5ef748b8df36fa9f92aae, type: 3}
       propertyPath: m_StaticEditorFlags

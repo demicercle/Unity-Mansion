@@ -112,10 +112,9 @@ public class DiceLauncher : MonoBehaviour
 				yield return null;
 			}
 
-			var result = DicePool.LastResult;
-			var index = (int)Mathf.Lerp(0, 19, result);
+			var index = DicePool.LastResult - 1;
+			if(DicePool.debugMode>0) Debug.Log(this + " #" + animCount + " animated, index=" + index);
 			spriteImage.sprite = numberSprites[index];
-			if(DicePool.debugMode>0) Debug.Log(this + " #" + animCount + " animated, index=" + index + " for result=" + result);
 			animCount--;
 			yield return null;
 		}

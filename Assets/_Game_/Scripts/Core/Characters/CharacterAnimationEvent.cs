@@ -27,7 +27,7 @@ public class CharacterAnimationEvent : MonoBehaviour
 	{
 		onCharacterAnimationEvent?.Invoke(EventType.Hit);
 		onHit.Invoke();
-		foreach (var wp in GetComponentsInChildren<WeaponRenderer>())
+		foreach (var wp in GetComponentsInChildren<WeaponRenderer>()) // OnHit
 		{
 			wp.OnHit();
 		}
@@ -38,10 +38,6 @@ public class CharacterAnimationEvent : MonoBehaviour
 	{
 		onCharacterAnimationEvent?.Invoke(EventType.Shoot);
 		onShoot.Invoke();
-		foreach (var wp in GetComponentsInChildren<WeaponRenderer>())
-		{
-			wp.OnShoot();
-		}
 	}
 	
 	public UnityEvent onScream = new();

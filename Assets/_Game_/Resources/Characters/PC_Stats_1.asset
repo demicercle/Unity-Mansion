@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PC_Stats_1
   m_EditorClassIdentifier: 
   displayName: Sarah
-  portraitTexture: {fileID: 2800000, guid: 08e943a402f07f34aacd1f93940543fc, type: 3}
+  portraitTexture: {fileID: 2800000, guid: f6cae2d24782a764eb27d311282a79a4, type: 3}
   faction: 1
   maxActions: 1
   maxMovePoints: 9

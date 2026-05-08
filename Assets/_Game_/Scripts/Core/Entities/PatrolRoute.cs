@@ -73,6 +73,7 @@ public class PatrolRoute : MonoBehaviour
 
 		private void OnDrawGizmos()
 		{
+			if (Application.isPlaying) return;
 			Gizmos.color = color;
 			Utils.DrawGizmosPath(GetPath(), closedLoop);
 			if (assignedCharacter)

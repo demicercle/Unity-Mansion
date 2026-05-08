@@ -24,6 +24,7 @@ public class GameTurnManager : MonoBehaviour
 	[SerializeField] private bool rollDiceWhenTurnStarts = true;
 	[SerializeField] private bool rollDiceWhenTurnEnds = true;
 	[SerializeField] private bool forceEnemyDetectParty = true;
+	[SerializeField] private bool forceNeutralDetectEnemies = true;
 	[Space]
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
@@ -177,9 +178,7 @@ public class GameTurnManager : MonoBehaviour
 		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
 		yield return null; // for triggers
 
-		levelCharacters = CharacterEntity.AllCharacters
-			.OrderBy(c => c.transform.GetSiblingIndex())
-			.ToArray();
+		InitLevel();
 		
 		Debug.Log(this + " found levelCharacters=" + levelCharacters.Length);
 		
@@ -228,6 +227,15 @@ public class GameTurnManager : MonoBehaviour
 			yield return StartCoroutine(TurnBasedCoroutine());
 			yield return null; // safety for loop
 		}
+	}
+
+	private void InitLevel()
+	{
+		levelCharacters = CharacterEntity.AllCharacters
+			.OrderBy(c => c.transform.GetSiblingIndex())
+			.ToArray();
+
+		Utils.FindFirstObject<LevelComponent>().Init(levelCharacters);
 	}
 
 	private IEnumerator TurnBasedCoroutine()
@@ -455,35 +463,60 @@ public class GameTurnManager : MonoBehaviour
 		                                                         + "_" + character.name)
 			.ToArray();
 		
-		foreach (var character in levelCharacters)
+		foreach (var anyCharacter in levelCharacters)
 		{
-			if (character.IsDead() || !character.IsCharacterRevealed())
+			if (anyCharacter.IsDead() || !anyCharacter.IsCharacterRevealed())
 				continue;
 			
-			character.Routines.StopAllRoutines();
-			character.StopAgent();
-			character.GetAgent().UpdateObstacle();
+			anyCharacter.Routines.StopAllRoutines();
+			anyCharacter.StopAgent();
+			anyCharacter.GetAgent().UpdateObstacle();
 			
-			if (!character.InParty())
+			if (!anyCharacter.InParty())
 			{
-				if (character.TryGetComponent(out CharacterBrain otherBrain))
+				if (anyCharacter.TryGetComponent(out CharacterBrain otherBrain))
 					otherBrain.StopThink();
 
-				if (forceEnemyDetectParty && character.IsEnemyToPlayer())
+				if (anyCharacter.IsEnemyToPlayer())
 				{
-					if (character.TryGetComponent(out CharacterDetection otherDetection))
+					if (forceEnemyDetectParty)
 					{
-						foreach (var partyChar in partyCharacters)
+						if (anyCharacter.TryGetComponent(out CharacterDetection enemyDetection))
 						{
-							otherDetection.SetCharacterDetected(partyChar, true);
+							foreach (var partyChar in partyCharacters)
+							{
+								enemyDetection.SetCharacterDetected(partyChar, true);
+							}
+						}
+					}
+				}
+				else
+				{
+					if (forceNeutralDetectEnemies)
+					{
+						if (anyCharacter.TryGetComponent(out CharacterDetection neutralDetection))
+						{
+							foreach (var partyChar in partyCharacters)
+							{
+								if (neutralDetection.IsCharacterDetected(partyChar))
+								{
+									foreach (var enemyChar in partyChar.GetLivingEnemyCharacters())
+									{
+										if(enemyChar.TryGetComponent(out CharacterDetection enemyDetection) && enemyDetection.IsCharacterDetected(partyChar))
+											neutralDetection.SetCharacterDetected(enemyChar, true);
+									}
+
+									break;
+								}
+							}
 						}
 					}
 				}
 			}
 
-			if (character.InParty() || character.HasDetectedAnyPartyCharacter())
+			if (anyCharacter.InParty() || anyCharacter.HasDetectedAnyPartyCharacter())
 			{
-				if (character.TryGetAnimation(out var anim))
+				if (anyCharacter.TryGetAnimation(out var anim))
 				{
 					anim.SwitchWeapons(true);
 				}

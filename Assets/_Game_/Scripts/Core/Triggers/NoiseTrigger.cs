@@ -10,7 +10,7 @@ public class NoiseTrigger : MonoBehaviour
 	[Space]
 	public int rayCount = 16;
 	public float rayLength = 6.0f;
-	public float radius = 0.1f;
+	public float radius = 0.25f;
 	public bool emitOnEnable = false;
 	public bool lookUpParentCharacter = false;
 	public CharacterEntity characterInstigator = null;

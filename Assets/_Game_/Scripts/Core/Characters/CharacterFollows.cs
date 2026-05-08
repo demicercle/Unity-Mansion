@@ -130,7 +130,7 @@ public class CharacterFollows : MonoBehaviour
 
 	private void OnDrawGizmosSelected()
 	{
-		if (!Utils.IsEditorPrefabStage()) 
+		if (!Utils.IsEditorPrefabStage() || Application.isPlaying) 
 			return;
 		
 		Gizmos.color = Color.softBlue;

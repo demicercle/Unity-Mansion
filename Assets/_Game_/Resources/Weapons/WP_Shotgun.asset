@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WP_Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   noAttack: 0
-  hitChance: 13
-  minDamage: 4
-  maxDamage: 8
+  hitChance: 10
+  minDamage: 1
+  maxDamage: 6
   damageCurve:
     serializedVersion: 2
     m_Curve:
@@ -41,7 +41,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   isRanged: 1
-  attackRange: 12
+  attackRange: 8
   rangeHitCurve:
     serializedVersion: 2
     m_Curve:
@@ -55,7 +55,7 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.16403873
     - serializedVersion: 3
-      time: 0.2
+      time: 0.5
       value: 1
       inSlope: 0
       outSlope: 0
@@ -117,8 +117,32 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  consumeAmmo: 1
   ammoTags: Shotgun
   maxAmmo: 2
+  shootFlat: 1
+  shootOffset: {x: 0, y: -0.2, z: 0}
+  shootInfos:
+  - angle: -20
+    delay: 0
+    atkMod: {x: -0.2, y: 0}
+    clampDistance: 0
+  - angle: -10
+    delay: 0
+    atkMod: {x: -0.1, y: 0}
+    clampDistance: 0
+  - angle: 0
+    delay: 0
+    atkMod: {x: 0, y: 0}
+    clampDistance: 0
+  - angle: 10
+    delay: 0
+    atkMod: {x: -0.1, y: 0}
+    clampDistance: 0
+  - angle: 20
+    delay: 0
+    atkMod: {x: -0.2, y: 0}
+    clampDistance: 0
   decals:
   - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
   - {fileID: 11400000, guid: 3d1d45a1c8055ba4f8809c776eadb01b, type: 2}

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using IngameDebugConsole;
@@ -37,6 +38,7 @@ public class GameInput : MonoBehaviour
 	private float OrbitInertia => CameraSettings.DefaultSettings.orbitInertia;
 	[SerializeField] private bool orbitCameraFromCenterScreen = false;
 	[SerializeField] private bool orbitCameraY = false;
+	[SerializeField] private bool flattenShootOnGround = false;
 	[Range(0.01f, 0.99f)] public float maxNavDistance = 0.50f;
 	[Min(0f)] public float nodeSize = 0.25f;
 
@@ -63,8 +65,11 @@ public class GameInput : MonoBehaviour
 		{
 			raycastLayers = Layers.MaskAiming;
 			hitAim = Physics.Raycast(raycastRay, out aimHit, 100f, raycastLayers);
-			if(hitAim && RoomTrigger.IsPositionVisible(aimHit.point))
+			if (hitAim && RoomTrigger.IsPositionVisible(aimHit.point))
+			{
+				outRaycast = aimHit;
 				return CursorRaycastResult_Aim;
+			}
 		}
 
 		hitAim = false;
@@ -328,8 +333,15 @@ public class GameInput : MonoBehaviour
 
 			if (selectedCharacter)
 			{
-				if (inputSystem.Player.ToggleAim.WasPressedThisFrame()) selectedCharacter.SetAiming(true);
-				if (inputSystem.Player.ToggleAim.WasReleasedThisFrame()) selectedCharacter.SetAiming(false);
+				if (inputSystem.Player.ToggleAim.IsPressed() && !selectedCharacter.IsAiming() && !selectedCharacter.IsActing())
+				{
+					selectedCharacter.SetAiming(true);
+				}
+
+				if (inputSystem.Player.ToggleAim.WasReleasedThisFrame())
+				{
+					selectedCharacter.SetAiming(false);
+				}
 			}
 		
 			if (inputSystem.Player.Move.IsPressed())
@@ -428,6 +440,7 @@ public class GameInput : MonoBehaviour
 			lastCursorResult = CursorRaycast(out var hit);
 			mouseOverChanged = lastMouseOverObject != hit.collider;
 			lastMouseOverObject = hit.collider;
+//			if(CharacterEntity.debugAim > 1) Debug.Log(this +"  lastAimedObject=" + lastAimedObject);
 			mouseHasMoved = mouseHasMoved || mouseOverChanged || NavUtils.NavDistance(hit.point, lastNavPosition) >= nodeSize;
 			lastNavPosition = hit.point;
 		}
@@ -451,20 +464,24 @@ public class GameInput : MonoBehaviour
 				
 				if (CanAssignOnMouseOver(selectedCharacter))
 				{
+					if (flattenShootOnGround && aimHit.collider)
+					{
+						if (aimHit.collider.gameObject.layer == Layers.LayerGround)
+						{
+							aimHit.point += selectedCharacter.GetEyesPosition(true);
+						}
+					}
+					
 					selectedCharacter.SetAimingPosition(aimHit.point);
 					
-					if (mouseHasMoved || mouseOverChanged)
+					if (selectedCharacter.GetLastShootHits(out var shoots))
 					{
-						selectedCharacter.RaycastShoot(out var lastHit); // mouse over aiming
-						if(debugMode > 0) Debug.Log(this + " RaycastShoot " + lastHit.collider);
-					}
-
-					if (selectedCharacter.TryGetLastShootHit(out var hitResult))
-					{
-						debugString += "\n>hit:" + hitResult.collider;
-						if (hitResult.collider.TryGetComponent(out IAttackable hitAttackable))
+						foreach (var shoot in shoots)
 						{
-							hitAttackable.AimedBy(selectedCharacter);
+							if (shoot.collider && shoot.collider.TryGetComponent(out IAttackable attackable))
+							{
+								attackable.AimedBy(selectedCharacter);
+							}
 						}
 					}
 				}
@@ -582,7 +599,7 @@ public class GameInput : MonoBehaviour
 					
 					else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) 
 					{
-						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetReachPosition()); // mouse over prop attackable
+						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition()); // mouse over prop attackable
 					}
 					debugString += "\n>" + currentCursor;
 				}
@@ -664,7 +681,7 @@ public class GameInput : MonoBehaviour
 	{
 		
 	}
-	
+
 	private void LateUpdate()
 	{
 		navigationTarget.gameObject.SetActive(lastCursorResult == CursorRaycastResult_Navigation && mouseOverViewport && !isLoading && !gameTurnManager.IsWaiting() 
@@ -814,7 +831,7 @@ public class GameInput : MonoBehaviour
 			{
 				if (selectedCharacter && CanAssignOnClick(selectedCharacter))
 				{
-					selectedCharacter.Routines.AssignShootAt(aimHit.point, true);
+					ClickAiming(aimHit);
 				}
 			}
 			else if (raycastResult == CursorRaycastResult_Interaction)
@@ -903,6 +920,21 @@ public class GameInput : MonoBehaviour
 		}
 	}
 
+	private void ClickAiming(RaycastHit hit)
+	{
+		if (!selectedCharacter.IsUsingRangeWeapon())
+		{
+			if (hit.collider && hit.collider.TryGetComponent(out IAttackable attackable) &&
+			    !selectedCharacter.IsAtAttackRange(attackable, true))
+			{
+				selectedCharacter.Routines.AssignMoveAndAttack(attackable);
+				return;
+			}
+		}
+		
+		selectedCharacter.Routines.AssignShootAt(hit.point, true);
+	}
+
 	private void ClickCharacter(CharacterEntity clickedCharacter)
 	{
 		Debug.Log(this + " ClickCharacter " + clickedCharacter);
@@ -946,7 +978,7 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter, selectedCharacter.IsUsingRangeWeapon());
+							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter);
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter);
 					}
@@ -987,7 +1019,7 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter, selectedCharacter.IsUsingRangeWeapon());
+							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter);
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter);
 					}
@@ -1097,7 +1129,7 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + attackable);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(attackable, selectedCharacter.IsUsingRangeWeapon());
+							selectedCharacter.Routines.AssignMoveAndAttack(attackable);
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(attackable);
 						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
@@ -1122,7 +1154,7 @@ public class GameInput : MonoBehaviour
 			if (CanAssignOnClick(selectedCharacter)) // move to dest
 			{
 				if (!IsLeaderMode())
-					selectedCharacter.Routines.AssignMoveToDestination(navPosition);
+					selectedCharacter.Routines.AssignMoveToDestination(navPosition, selectedCharacter.GetAgent().GetMinReachDistance());
 				else
 					selectedCharacter.Routines.Leader_AssignMoveToDestination(navPosition);
 			}
@@ -1249,16 +1281,10 @@ public class GameInput : MonoBehaviour
 
 	public bool IsBlocked() => currentCursor == CursorType.Blocked;
 
-	public bool WantsToAttack(out CharacterEntity target)
+	public bool GetAimedObject(out GameObject target)
 	{
-		if (currentCursor == CursorType.Attack)
-		{
-			if (lastMouseOverObject)
-				return lastMouseOverObject.TryGetComponent(out target);
-		}
-
-		target = null;
-		return false;
+		target = lastMouseOverObject?.gameObject;
+		return target;
 	}
 
 	public CharacterEntity GetSelectedCharacter() => selectedCharacter;

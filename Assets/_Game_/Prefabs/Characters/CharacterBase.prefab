@@ -391,9 +391,9 @@ MonoBehaviour:
   characterCanvas: {fileID: 437776869319342895}
   clearActionsDelay: 3
   rollDiceToDodge: 0
-  rollDiceOnDefense: 1
+  rollDiceOnDefense: 0
   rollDiceOnRun: 0
-  rollDiceOnRiposte: 1
+  rollDiceOnRiposte: 0
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
@@ -456,16 +456,17 @@ MonoBehaviour:
   radius: 0.5
   height: 1.5
   minReachDistance: 0.1
+  endPointDistance: 0.25
+  endPointYTolerance: 0.5
+  heightTolerance: 0.5
   priorityLeader: 0.7
   priorityFollower: 0.5
   priorityOther: 0.3
-  heightTolerance: 0.5
+  noObstacleIfNotRevealed: 1
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
   moveTarget: {fileID: 6868811281604459853}
-  endPointDistance: 0.25
-  endPointYTolerance: 0.5
 --- !u!114 &6410703130520739872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -480,8 +481,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
   rpgAnimationHandler: {fileID: 0}
-  switchWeaponExtraTime: 0
-  waitToRelaxTime: 6
+  switchWeaponExtraTime: 0.5
+  waitToRelaxTime: 3
   parameters:
     moving: 
     velocityX: 
@@ -500,6 +501,7 @@ MonoBehaviour:
   roomsReveleadSeconds: 1
   shouldSwitchWeaponWhenDamaged: 1
   reloadAnimDuration: 2
+  switchWeaponsTickTime: 0.5
 --- !u!114 &3789455635990092813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -514,6 +516,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
   canChase: 1
   canPatrol: 1
+  turnHostileWhenDamaged: 0
   wanderingPoint: {fileID: 0}
   onStartThink:
     m_PersistentCalls:
@@ -903,9 +906,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a609e5ba6eb248d9a921da0a8cfb9add, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  maxSize: 6
+  maxSize: 7
   lootBagPrefab: {fileID: 3870844094002656079, guid: e06b8a3ef8b241e4290237da71253253, type: 3}
   saveInventory: 0
+  destroyIfEmpty: 0
   items:
   - {fileID: 0}
   - {fileID: 0}

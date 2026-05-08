@@ -50,11 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: de187c63499fd794bb9bfb0a4f66ef0c, type: 3}
       propertyPath: m_Name
-      value: LD_bedBunk
+      value: Prop_bedBunk
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: de187c63499fd794bb9bfb0a4f66ef0c, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: de187c63499fd794bb9bfb0a4f66ef0c, type: 3}
       propertyPath: m_StaticEditorFlags

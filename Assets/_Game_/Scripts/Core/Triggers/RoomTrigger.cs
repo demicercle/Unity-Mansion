@@ -155,6 +155,7 @@ public class RoomTrigger : MonoBehaviour
 	
 	private void OnDrawGizmosSelected()
 	{
+		if (Application.isPlaying) return;
 		foreach (var door in doors)
 		{
 			if (!door) continue;

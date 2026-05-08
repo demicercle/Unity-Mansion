@@ -13,6 +13,7 @@ public class PropTrigger : MonoBehaviour // Used for rooms and "FogCube"
     #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
+        if (Application.isPlaying) return;
         props.ForEach(prop =>
         {
             Gizmos.color = Color.yellow;

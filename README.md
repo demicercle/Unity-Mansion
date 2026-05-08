@@ -7,11 +7,11 @@ REFACTO
 - dialog line reference bug in editor
 - door nav obstacle
 - training mannequin (invicible life)
-- floating text uses "world canvas" and connect to events in inspector
-
-- rifle ammos != pistol ammos
-- shotgun != rifle
-- PC Neutral "turns hostile" when damaged + give him a rifle to defend
+- NPC should try to flee if no ammo, no health (even triggering opportunity attacks)
+- grenade should spawn decal
+- save camera rotation
+- do "CursorRaycast" only in FixedUpdate
+- add tooltip for action buttons
 
 DEBUG
 - zombi "cant" and "timeout" while patrolling
@@ -38,7 +38,6 @@ NODES
 
 INPUT
 - min time between assigns
-- aim button and IK hands with pistol (lookAt)
 
 GAMEPLAY
 - run should also roll dices?

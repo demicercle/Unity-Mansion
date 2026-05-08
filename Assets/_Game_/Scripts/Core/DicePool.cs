@@ -5,8 +5,8 @@ using Random = System.Random;
 public static class DicePool
 {
 	public static int debugMode { get; set; }
-	public static float DiceToFloat(int faces, int value) => Mathf.InverseLerp(1, Mathf.Max(1, faces), value);
-	public static int FloatToDice(int faces, float value) => (int)Mathf.Lerp(1, faces, Mathf.Clamp01(value));
+	//public static float DiceToFloat(int faces, int value) => Mathf.InverseLerp(1, Mathf.Max(1, faces), value);
+	//public static int FloatToDice(int faces, float value) => (int)Mathf.Lerp(1, faces, Mathf.Clamp01(value));
 	
 	public static event System.Action onDiceRolled;
 
@@ -14,6 +14,12 @@ public static class DicePool
 	{
 		while(count--> 0)
 			RollNewDice();
+	}
+
+	public static void SetNextDiceResult(int dice)
+	{
+		lastResult = Mathf.Clamp(dice, 1, 20);
+		onDiceRolled?.Invoke();
 	}
 	
 	public static void RollNewDice()
@@ -24,8 +30,8 @@ public static class DicePool
 			SetSeed(GetRandomSeed());
 		}
 
-		lastResult = (float)rng.NextDouble();
-		if(debugMode >0) Debug.Log("DicePool>> Last Result: " + lastResult.ToString("N4"));
+		lastResult = rng.Next(0, 20) + 1;
+		if(debugMode >0) Debug.Log("DicePool>> Last Result: " + lastResult);
 		
 		onDiceRolled?.Invoke();
 	}
@@ -34,7 +40,7 @@ public static class DicePool
 	                                               System.DateTime.Now.Second.ToString() +
 	                                               System.DateTime.Now.Millisecond.ToString());
 	
-	public static float LastResult => lastResult;
+	public static int LastResult => lastResult;
 	public static int Seed => seed;
 
 	public static void SetSeed(int newSeed)
@@ -45,7 +51,6 @@ public static class DicePool
 	}
 	
 	private static int seed;
-	private static float lastResult;
-	private static float nextResult;
+	private static int lastResult;
 	private static Random rng;
 }

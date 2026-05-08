@@ -32,4 +32,4 @@ MonoBehaviour:
   isProjectile: 0
   onUseScript: {fileID: 0}
   isAmmo: 1
-  maxQuantity: 12
+  maxQuantity: 30

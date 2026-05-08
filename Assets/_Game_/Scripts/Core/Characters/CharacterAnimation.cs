@@ -59,7 +59,7 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private Animator animator;
 	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
 	[SerializeField] [Min(0)] private float switchWeaponExtraTime;
-	[SerializeField] [Min(0)] private float waitToRelaxTime = 6.0f;
+	[SerializeField] [Min(0)] private float waitToRelaxTime = 3.0f;
 	[Space]
 	[SerializeField] private Parameters parameters;
 	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
@@ -130,6 +130,8 @@ public class CharacterAnimation : MonoBehaviour
 
 	public bool WeaponsSwitched() => weaponInHand != Weapon.Relax;
 	
+	public WeaponRenderer[] GetWeaponRenderers() => weaponRenderers;
+	
 	#region PRIVATE
 	private CharacterAnimationEvent _characterAnimationEvent;
 	private CharacterEntity _selfCharacter;
@@ -183,6 +185,8 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.turnEnded += OnTurnEnded;
 		_selfCharacter.onDamagedBy += OnDamagedBy;
 		_selfCharacter.onAiming += OnAiming;
+
+		StartCoroutine("WeaponSwitchCoroutine");
 	}
 
 	private void OnDisable()
@@ -223,6 +227,29 @@ public class CharacterAnimation : MonoBehaviour
 		}
 		
 		UpdateWeaponRenderers();
+	}
+
+	private IEnumerator WeaponSwitchCoroutine()
+	{
+		while (true)
+		{
+			yield return null;
+			
+			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
+				continue;
+			
+			if (_selfCharacter.IsAiming() || _selfCharacter.InBattle())
+			{
+				lastTimeWeaponSwitched = waitToRelaxTime;
+				SwitchWeapons(true);
+			}
+			else if (!isSwitchingWeapons && !_selfCharacter.IsActing())
+			{
+				lastTimeWeaponSwitched -= Time.deltaTime;
+				if(lastTimeWeaponSwitched <= 0)
+					SwitchWeapons(false);
+			}
+		}
 	}
 
 	private void LateUpdate()
@@ -317,11 +344,12 @@ public class CharacterAnimation : MonoBehaviour
 		{
 			if (!TrySetTrigger(parameters.attackTrigger))
 			{
-				if (rpgAnimationHandler)
-				{
-					InstantSwitchWeapons(true);
-					rpgAnimationHandler.Attack(weaponInHand); // TODO
-				}
+			}
+			
+			if (rpgAnimationHandler)
+			{
+				InstantSwitchWeapons(true);
+				rpgAnimationHandler.Attack(weaponInHand); // TODO
 			}
 
 			if (args is CharacterEntity)
@@ -342,7 +370,7 @@ public class CharacterAnimation : MonoBehaviour
 		if (!value) 
 			timeAiming = 0f;
 		
-		if(CharacterEntity.debugAim > 0) Debug.Log(this + " OnAiming " + value + " " + position + " " + timeAiming.ToString("N2"));
+		if(CharacterEntity.debugAim > 2) Debug.Log(this + " OnAiming " + value + " " + position + " " + timeAiming.ToString("N2"));
 		
 		if (rpgAnimationHandler)
 		{
@@ -469,20 +497,6 @@ public class CharacterAnimation : MonoBehaviour
 		yield return new WaitForSeconds(switchWeaponExtraTime);
 		
 		isSwitchingWeapons = false;
-		lastTimeWeaponSwitched = Time.time;
-
-		while (waitToRelaxTime > 0 && !_selfCharacter.InBattle() && !_selfCharacter.IsDead())
-		{
-			yield return null;
-			
-			if (_selfCharacter.IsActing() || _selfCharacter.IsAiming() || _selfCharacter.HasItemToUse(out var _))
-				lastTimeWeaponSwitched = Time.time;
-			
-			if (Time.time - lastTimeWeaponSwitched > waitToRelaxTime)
-			{
-				yield return SwitchWeapons(false);
-			}
-		}
 	}
 	
 	private IEnumerator DoWaitEvents(float timeout, params EventType[] eventTypes)
@@ -544,6 +558,16 @@ public class CharacterAnimation : MonoBehaviour
 		animator.ResetTrigger(param);
 		return true;
 	}
+
+	private void OnGUI()
+	{
+		if (debugMode > 0)
+		{
+			if(lastTimeWeaponSwitched > 0)
+				Utils.DrawWorldGUI(transform.position, lastTimeWeaponSwitched.ToString("N2"));
+		}
+	}
+
 	#endregion
 }
 

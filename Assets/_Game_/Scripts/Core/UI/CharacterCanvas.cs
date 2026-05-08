@@ -42,7 +42,6 @@ public class CharacterCanvas : MonoBehaviour
 		detectionAmount = selfDetection ? selfDetection.GetAwarenessValueMax() : 0f;
 		
 		toggleDetection.isOn = selfCharacter.IsCharacterRevealed() && !selfCharacter.IsDead()
-		                                                           && !selfCharacter.InParty()
 		                                                           && !selfCharacter.HasDetectedAnyPartyCharacter()
 		                                                           && selfCharacter.IsEnemyToPlayer()
 		                                                           && detectionAmount > 0f;

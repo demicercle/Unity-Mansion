@@ -146,6 +146,14 @@ public class ConsoleCommands : MonoBehaviour
 	{
 		DiceLauncher.AllowedDiceRolls += count;
 	}
+	
+	
+
+	[ConsoleMethod("set_next_dice", "")]
+	public static void SetNextDiceResult(int value)
+	{
+		DicePool.SetNextDiceResult(value);
+	}
 
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()
@@ -170,6 +178,12 @@ public class ConsoleCommands : MonoBehaviour
 		ResetGame();
 	}
 
+	[ConsoleMethod("open_save_folder", "")]
+	public static void OpenSaveFolder()
+	{
+		Application.OpenURL("file://" + GameSave.folderPath);
+	}
+ 
 	[ConsoleMethod("dtset", "")]
 	public static void DtSet(float value)
 	{

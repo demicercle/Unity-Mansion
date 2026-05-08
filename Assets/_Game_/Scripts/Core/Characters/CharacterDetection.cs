@@ -15,7 +15,7 @@ public class CharacterDetection : MonoBehaviour
 	public System.Action<CharacterEntity> onCharacterLost;
 
 	public System.Action<float> onAwarenessChanged;
-
+	
 	[SerializeField] [Min(0f)] private float awarenessScaleUp = 1.0f;
 	[SerializeField] [Min(0f)] private float awarenessScaleDown = 1.0f;
 	[SerializeField] [Min(0f)] private float awarenessHoldUpTime = 1.0f; 
@@ -36,18 +36,6 @@ public class CharacterDetection : MonoBehaviour
 
 	public float GetMaxSeeingDistance() => Mathf.Max(hearingDistance, seeingDistance);
 	public CharacterEntity[] GetDetectedCharacters() => detectedCharacters.Keys.ToArray();
-	
-	public bool GetLastTimeDetectedInterval(CharacterEntity other, out float interval)
-	{
-		if (detectedCharacters.ContainsKey(other))
-		{
-			interval = currentTime - detectedCharacters[other];
-			return true;
-		}
-
-		interval = 0;
-		return false;
-	}
 	
 	public void SetCharacterDetected(CharacterEntity otherCharacter, bool value)
 	{
@@ -197,7 +185,7 @@ public class CharacterDetection : MonoBehaviour
 			{
 				if (anyCharacter == selfCharacter) continue;
 				if (anyCharacter.IsDead()) continue;
-				if (!selfCharacter.IsEnemyTo(anyCharacter)) continue;
+				//if (!selfCharacter.IsEnemyTo(anyCharacter)) continue;
 				if (IsCharacterDetected(anyCharacter)) continue;
 
 				if (debugMode > 1) Debug.Log(this + " UpdateDetection " + anyCharacter);
@@ -282,15 +270,23 @@ public class CharacterDetection : MonoBehaviour
 	private bool ObstructionCheck(CharacterEntity otherCharacter)
 	{
 		Vector3 eyesPos = selfCharacter.GetEyesPosition();
-		Vector3 otherPos =  otherCharacter.GetCenterPosition();
-		if(Physics.Linecast(eyesPos, otherPos, out var hit,Layers.MaskDetection))
+		Vector3[] otherPositions = new Vector3[]
 		{
-			if (debugMode > 0) DebugDrawer.Line(eyesPos, hit.point, Color.red);
-			return false;
+			otherCharacter.GetPosition(),
+			otherCharacter.GetPosition() + otherCharacter.GetHeight() * Vector3.up
+		};
+		foreach (var otherPos in otherPositions)
+		{
+			if(!Physics.Linecast(eyesPos, otherPos, out var hit,Layers.MaskDetection))
+			{
+				if (debugMode > 0) DebugDrawer.Line(eyesPos, otherPos, Utils.ColorAlpha(Color.yellow, 0.9f));
+				return true;
+			}
+			
+			if (debugMode > 0) DebugDrawer.Line(eyesPos, hit.point, Utils.ColorAlpha(Color.gray, 0.8f));
 		}
 		
-		if (debugMode > 0) DebugDrawer.Line(eyesPos, otherPos, Utils.ColorAlpha(Color.green, Mathf.PI * 0.1f));
-		return true;
+		return false;
 	}
 	
 	private void LateUpdate()
@@ -344,7 +340,7 @@ public class CharacterDetection : MonoBehaviour
 #if UNITY_EDITOR
 	private void OnDrawGizmosSelected()
 	{
-		if (!drawGizmos) return;
+		if (!drawGizmos || Application.isPlaying) return;
 		selfCharacter = GetComponent<CharacterEntity>();
 		if (selfCharacter)
 		{

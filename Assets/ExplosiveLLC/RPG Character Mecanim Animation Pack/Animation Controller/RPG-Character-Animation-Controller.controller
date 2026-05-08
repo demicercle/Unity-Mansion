@@ -29475,9 +29475,6 @@ AnimatorStateTransition:
     m_ConditionEvent: Moving
     m_EventTreshold: 0
   - m_ConditionMode: 6
-    m_ConditionEvent: LeftWeapon
-    m_EventTreshold: 7
-  - m_ConditionMode: 6
     m_ConditionEvent: Weapon
     m_EventTreshold: 7
   - m_ConditionMode: 6
@@ -79053,12 +79050,6 @@ AnimatorStateMachine:
   m_StateMachineTransitions:
   - first: {fileID: 0}
     second: []
-  - first: {fileID: 110782256}
-    second: []
-  - first: {fileID: 110764908}
-    second: []
-  - first: {fileID: 110767804}
-    second: []
   - first: {fileID: 110790042}
     second:
     - {fileID: -598529992391292319}
@@ -79116,6 +79107,12 @@ AnimatorStateMachine:
     - {fileID: 2224801162672073179}
     - {fileID: 2753387225469405853}
   - first: {fileID: 110761122}
+    second: []
+  - first: {fileID: 110782256}
+    second: []
+  - first: {fileID: 110764908}
+    second: []
+  - first: {fileID: 110767804}
     second: []
   - first: {fileID: 110701064}
     second: []
@@ -120951,10 +120948,6 @@ AnimatorStateMachine:
     second:
     - {fileID: 110959028}
     - {fileID: -2473075785371199649}
-  - first: {fileID: 1107067740433922060}
-    second:
-    - {fileID: -6925746495424725396}
-    - {fileID: 7104302724305456362}
   - first: {fileID: 110718908}
     second:
     - {fileID: -4496771826126717940}
@@ -120992,6 +120985,10 @@ AnimatorStateMachine:
     - {fileID: 110973192}
     - {fileID: 8296522807890243291}
     - {fileID: -817429436264802715}
+  - first: {fileID: 1107067740433922060}
+    second:
+    - {fileID: -6925746495424725396}
+    - {fileID: 7104302724305456362}
   - first: {fileID: 1107724468847741228}
     second: []
   m_StateMachineBehaviours: []
@@ -194479,22 +194476,22 @@ AnimatorStateMachine:
     - {fileID: 1109078305430399454}
     - {fileID: 1109458980951136936}
     - {fileID: -2384963535133860954}
-  - first: {fileID: 1107496356844171356}
-    second:
-    - {fileID: 6881578375836881214}
-    - {fileID: -8120914401662218533}
   - first: {fileID: 1107691513255265106}
     second:
     - {fileID: 1109322643802999142}
     - {fileID: 5948024876950054070}
-  - first: {fileID: 1107060890864984482}
-    second:
-    - {fileID: -929509838958697332}
-    - {fileID: 4253889891864360428}
   - first: {fileID: 1107962691476702186}
     second:
     - {fileID: 1109765586631807614}
     - {fileID: 1109841862344466596}
+  - first: {fileID: 1107060890864984482}
+    second:
+    - {fileID: -929509838958697332}
+    - {fileID: 4253889891864360428}
+  - first: {fileID: 1107496356844171356}
+    second:
+    - {fileID: 6881578375836881214}
+    - {fileID: -8120914401662218533}
   - first: {fileID: -3013168652144186745}
     second:
     - {fileID: 4025773594242315308}
@@ -238077,9 +238074,6 @@ AnimatorStateTransition:
     m_ConditionEvent: Moving
     m_EventTreshold: 0
   - m_ConditionMode: 6
-    m_ConditionEvent: LeftWeapon
-    m_EventTreshold: 7
-  - m_ConditionMode: 6
     m_ConditionEvent: Weapon
     m_EventTreshold: 7
   - m_ConditionMode: 6
@@ -246973,9 +246967,6 @@ AnimatorStateTransition:
   - m_ConditionMode: 2
     m_ConditionEvent: Moving
     m_EventTreshold: 0
-  - m_ConditionMode: 6
-    m_ConditionEvent: LeftWeapon
-    m_EventTreshold: 7
   - m_ConditionMode: 6
     m_ConditionEvent: Weapon
     m_EventTreshold: 7
