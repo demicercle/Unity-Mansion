@@ -84,6 +84,11 @@ public class CharacterBrain : MonoBehaviour
 		IsThinking = false;
 	}
 
+	private void ResetTimeout()
+	{
+		_startedThinkingTime = Time.time;
+	}
+
 	private IEnumerator ThinkTimeoutCoroutine()
 	{
 		_startedThinkingTime = Time.time;
@@ -117,32 +122,8 @@ public class CharacterBrain : MonoBehaviour
 			yield break;
 		}
 		
-		if (_chaseCharacter)
+		while (_selfCharacter.HasActions())
 		{
-			if (_chaseCharacter.IsDead())
-			{
-				ForgetTarget();
-			}
-		}
-
-		if (!_chaseCharacter)
-		{
-			yield return StartCoroutine(YieldTryFindNewTarget());
-
-			if (!_chaseCharacter)
-			{
-				if (debugMode > 0) Debug.Log(this + " has no target to chase");
-				yield break;
-			}
-		}
-		
-		yield return StartCoroutine(YieldTryFindNewTarget());
-		
-		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
-		{
-			if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
-			SaveTargetPosition();
-
 			if (_selfCharacter.WeaponNeedsReload())
 			{
 				if (debugMode > 0) Debug.Log(this + " weapon needs reload");
@@ -163,7 +144,33 @@ public class CharacterBrain : MonoBehaviour
 						while (anim.IsSwitchingWeapons);
 					}
 				}
+				
+				do yield return null;
+				while (_selfCharacter.Routines.AnyActive());
+				
+				if(!_selfCharacter.HasActions())
+				{
+					if (debugMode > 0) Debug.Log(this + " no actions after reload, abort");
+					yield break;
+				}
 			}
+			
+			if (_chaseCharacter && _chaseCharacter.IsDead())
+			{
+				if (debugMode > 0) Debug.Log(this + " forget dead target:" + _chaseCharacter);
+				ForgetTarget();
+			}
+			
+			yield return StartCoroutine(YieldTryFindNewTarget());
+
+			if (!_chaseCharacter)
+			{
+				if (debugMode > 0) Debug.Log(this + " has no target to chase");
+				yield break;
+			}
+			
+			if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
+			SaveTargetPosition();
 				
 			if (_selfCharacter.IsAtAttackRange(_chaseCharacter, true))
 			{
@@ -306,21 +313,19 @@ public class CharacterBrain : MonoBehaviour
 		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 
-	private IEnumerator YieldCantAttack()
+	private const int MaxAttemptToFindTarget = 6;
+	private IEnumerator YieldTryFindNewTarget(int attempt = 0)
 	{
-		if(debugMode > 0) Debug.Log(this + " Yield CantAttack");
-		yield return new WaitForSeconds(DefaultWaitSeconds);
-	}
+		if (attempt >= MaxAttemptToFindTarget)
+		{
+			if(debugMode > 0) Debug.Log(this + " cannot find any target");
+			ForgetTarget();
+			yield break;
+		}
 
-	private bool TryFindTarget(out CharacterEntity newTarget)
-	{
-		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
-		newTarget = allTargets.LastOrDefault();
-		return newTarget && newTarget != _chaseCharacter;
-	}
-
-	private IEnumerator YieldTryFindNewTarget()
-	{
+		if(attempt == 0)
+			ResetTimeout();
+		
 		var bestTarget = default(CharacterEntity);
 		var bestPath = 0f;
 		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
@@ -330,15 +335,24 @@ public class CharacterBrain : MonoBehaviour
 			allTargets.Remove(newTarget);
 			if (!newTarget || newTarget.IsDead()) continue;
 			
+			_agent.StopMovement();
 			_agent.ClearDestination();
-			_agent.SetReachDistance(_selfCharacter.GetAttackRange());
-			if (debugMode > 0) Debug.Log(this + " search path to possible target " + newTarget);
+			_agent.SetReachDistance(_selfCharacter.GetAttackRange() + attempt * _selfCharacter.GetRadius() * 2f);
+			if (debugMode > 0) Debug.Log(this + " search path to possible target " + newTarget + " attempt=" + attempt + " reachDistance=" + _agent.GetReachDistance());
 			yield return _agent.AssignDestination(newTarget.GetPosition());
 			if (_agent.hasDestination)
 			{
-				var pathLength = Utils.PathLength(_agent.GetCurrentPath());
+				var currentPath = _agent.GetCurrentPath();
+				if (currentPath.Length > 0 &&
+				    Mathf.Abs(currentPath.Last().y - newTarget.GetPosition().y) > _agent.GetHeight())
+				{
+					if (debugMode > 0) Debug.Log(this + " path height is invalid to " + newTarget);
+					continue;
+				}
+				
+				var pathLength = Utils.PathLength(currentPath);
 				if (debugMode > 0) Debug.Log(this + " found path length=" + pathLength);
-				if (bestTarget == null || pathLength < bestPath)
+				if (!bestTarget || pathLength < bestPath)
 				{
 					bestTarget = newTarget;
 					bestPath = pathLength;
@@ -350,13 +364,21 @@ public class CharacterBrain : MonoBehaviour
 			}
 		}
 
-		if (bestTarget && bestTarget != _chaseCharacter)
+		if (!bestTarget)
+		{
+			if (debugMode > 0) Debug.Log(this + " cannot find destination best target, next attempt");
+			yield return StartCoroutine(YieldTryFindNewTarget(attempt + 1));
+		}
+		else
 		{
 			_chaseCharacter = bestTarget;
 			if(debugMode > 0) Debug.Log(this + " gets new target: " + _chaseCharacter);
 			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red, 1.0f);
-			_selfCharacter.Routines.StopAllRoutines();
-			yield return CharacterRoutines.DoLookPositionOn(_selfCharacter, bestTarget.GetPosition());
+			while (!_selfCharacter.IsFacingPosition(_chaseCharacter.GetPosition()))
+			{
+				_selfCharacter.LookWorldPosition(_chaseCharacter.GetPosition(), Time.deltaTime);
+				yield return null;
+			}
 		}
 	}
 

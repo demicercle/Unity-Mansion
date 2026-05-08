@@ -232,6 +232,7 @@ public class CharacterAgent : MonoBehaviour
 	   
 	public float GetMinReachDistance() => minReachDistance;
 
+	public float GetReachDistance() => aiPath.endReachedDistance;
 	public void SetReachDistance(float value) => aiPath.endReachedDistance = value;
 
 	public float GetRotationSpeed() => aiPath.rotationSpeed;

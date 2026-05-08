@@ -268,6 +268,11 @@ public class ConsoleCommands : MonoBehaviour
 		_DebugGtm(value);
 	}*/
 	
+	[ConsoleMethod("debug_props", "")]
+	public static void _DebugProps(int value)
+	{
+		Debug.Log("debug_props=" + (PropComponent.debugMode = value));
+	}
 
 	[ConsoleMethod("debug_noise", "")]
 	public static void _DebugNoise(int value)

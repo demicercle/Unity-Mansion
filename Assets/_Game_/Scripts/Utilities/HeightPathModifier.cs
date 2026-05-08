@@ -20,7 +20,7 @@ public class HeightPathModifier : MonoModifier
 			var heightOffset = Mathf.Abs(endPoint.y - aiPath.destination.y);
 			if (heightOffset > heightTolerance)
 			{
-				if(debugMode > 0) Debug.Log(this + " Apply heightTolerance Error: " + heightOffset);
+				if(debugMode > 0) Debug.Log(this + " <color=orange>Apply heightTolerance Error: " + heightOffset + " </color>");
 				if(debugMode > 0) DebugDrawer.Path(path.vectorPath.ToArray(), false, Color.orange, 1.0f);
 				if(debugMode > 0) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, Color.orange, 1.0f);
 				path.Error();
@@ -30,7 +30,7 @@ public class HeightPathModifier : MonoModifier
 			var dist = Vector3.Distance(endPoint, aiPath.destination);
 			if (dist > aiPath.endReachedDistance)
 			{
-				if(debugMode > 0) Debug.Log(this + " Apply endReachedDistance Error: " + dist + " / " + aiPath.endReachedDistance);
+				if(debugMode > 0) Debug.Log(this + " <color=red>Apply endReachedDistance Error: " + dist + " / " + aiPath.endReachedDistance + " </color>");
 				if(debugMode > 0) DebugDrawer.Path(path.vectorPath.ToArray(), false, Color.red, 1.0f);
 				if(debugMode > 0) DebugDrawer.WireDisc(aiPath.destination, aiPath.endReachedDistance, Color.red, 1.0f);
 				path.Error();

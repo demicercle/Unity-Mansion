@@ -80,9 +80,17 @@ public class CharacterFollows : MonoBehaviour
 		
 		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead() && GameInput.Instance.IsLeaderMode())
 		{
+			if (GameTurnManager.Instance.IsTurnBasedMode())
+			{
+				yield return null;
+				continue;
+			}
+			
 			headingPos = leaderCharacter.GetPosition();
 			headingPos += leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()) * headingDistance;
-
+			
+			agent.SetObstacle(false);
+			
 			if (selfCharacter.GetDistanceTo(dummy.position) <= followDistance)
 			{
 				agent.StopMovement();
@@ -92,8 +100,6 @@ public class CharacterFollows : MonoBehaviour
 				agent.AssignFollowTransform(dummy, followDistance);
 				agent.StartMove();
 			}
-			
-			agent.SetObstacle(!agent.IsMoving());
 			
 			if (debugMode > 0)
 			{
