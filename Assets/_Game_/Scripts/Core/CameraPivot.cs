@@ -87,11 +87,6 @@ public class CameraPivot : MonoBehaviour
         orbitSpeed = _cameraSettings.orbitSpeed;
         orbitMaxSpeed = _cameraSettings.orbitMaxSpeed;
     }
-
-    public void DisableAudio(bool disabled)
-    {
-        audioListener.enabled = !disabled;
-    }
     
     public static CameraPivot Instance => instance;
     public static int debugMode { get; set; }
@@ -117,7 +112,6 @@ public class CameraPivot : MonoBehaviour
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
     [Space]
     [Header("References")]
-    [SerializeField] private AudioListener audioListener;
     [SerializeField] private Animator animator;
     [SerializeField] private string zoomParameter;
     [SerializeField] private Transform rotationPivot;

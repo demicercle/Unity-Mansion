@@ -14,6 +14,11 @@ public class GameTurnManager : MonoBehaviour
 	
 	public static int debugMode { get; set; }
 
+	private static void DisableAudio(bool disabled)
+	{
+		AudioListener.volume = disabled ? 0 : 1;
+	}
+
 	public event System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
@@ -156,7 +161,7 @@ public class GameTurnManager : MonoBehaviour
 			Instantiate(go);
 		}
 		
-		cameraPivot.DisableAudio(true);
+		DisableAudio(true);
 		FadeScreen.FadeIn(true);
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
@@ -221,7 +226,7 @@ public class GameTurnManager : MonoBehaviour
 		
 		onLoadingGame?.Invoke(false);
 		onSceneLoaded?.Invoke();
-		cameraPivot.DisableAudio(false);
+		DisableAudio(false);
 		
 		FadeScreen.FadeOut();
 		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);
