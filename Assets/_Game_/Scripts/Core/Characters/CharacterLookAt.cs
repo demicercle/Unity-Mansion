@@ -6,7 +6,6 @@ public class CharacterLookAt : MonoBehaviour
 {
 	[SerializeField] private Transform lookTarget;
 	[SerializeField] private Vector3 dotRange = new Vector3(0.01f, 0.2f, 0.5f);
-	[SerializeField] [Range(0.1f, 1f)] private float tickTime = 0.5f;
 	[SerializeField] [Min(0f)] private float lerpSpeed = 1.5f;
 	[SerializeField] private float maxDistanceToLookAt = 5.0f;
 	

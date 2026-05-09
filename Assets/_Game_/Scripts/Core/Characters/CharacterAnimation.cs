@@ -67,7 +67,6 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private bool forceRunning = false;
 	[SerializeField] private float velocityScale = 1.0f;
 	[SerializeField] private float minMovePointsToRun = 0.1f;
-	[SerializeField] private float roomsReveleadSeconds = 1.0f;
 	[SerializeField] private bool shouldSwitchWeaponWhenDamaged = true;
 	[SerializeField] private float reloadAnimDuration = 2.0f;
 	

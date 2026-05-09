@@ -97,7 +97,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	
 	private bool isBroken;
 	private float damageAmount;
-	private Collider collider;
+	private new Collider collider;
 
 	[ContextMenu("Collect Rigidbodies")]
 	private void CollectRigidbodies()

@@ -17,7 +17,6 @@ public class WeaponRenderer : MonoBehaviour
 
     [SerializeField] private Renderer[] renderers = Array.Empty<Renderer>();
     [SerializeField] private LineRenderer shootLine, aimLine;
-    [SerializeField] private float maxShootDistance = 5f;
     [SerializeField] private bool shootFromEyesPosition;
     [SerializeField] private bool aimFromEyesPosition;
     

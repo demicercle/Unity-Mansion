@@ -21,9 +21,6 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0.1f, 2.0f)] private float radius = 0.5f;
 	[SerializeField] [Range(0.1f, 3.0f)] private float height = 1.5f;
 	[SerializeField] [Min(0f)] private float minReachDistance = 0.1f;
-	[SerializeField] [Min(0f)] private float endPointDistance = 0.25f;
-	[SerializeField] [Min(0f)] private float endPointYTolerance = 0.5f;
-	[SerializeField] [Min(0f)] private float heightTolerance = 0.5f;
 	[SerializeField] [Range(0f, 1f)] private float priorityLeader = 0.7f;
 	[SerializeField] [Range(0f, 1f)] private float priorityFollower = 0.5f;
 	[SerializeField] [Range(0f, 1f)] private float priorityOther = 0.3f;

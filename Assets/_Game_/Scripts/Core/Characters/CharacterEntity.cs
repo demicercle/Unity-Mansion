@@ -108,7 +108,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public event System.Action onDead;
 	public event System.Action onRevive;
 	public event System.Action onMoved;
-	public event System.Action onRotate;
+	//public event System.Action onRotate;
 	public event System.Action<CharacterAction, object> onUseAction;
 	public event System.Action<CharacterEntity> onTalkedBy;
 	public event System.Action turnStarted;

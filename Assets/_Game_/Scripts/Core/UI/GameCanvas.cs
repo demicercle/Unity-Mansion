@@ -218,7 +218,7 @@ public class GameCanvas : MonoBehaviour
 				cursorText.text = "<size=14><b>" + targetCharacter.GetDisplayName() + "</b></size>\n";
 				cursorText.text += "<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n";
 				cursorText.text += "<size=11>Hit on: <b>" + calculatedHitChance + "+</b>";
-				if (displayLastResultDice) cursorText.text += " / " + DicePool.LastResult;
+				if (displayLastResultDice) cursorText.text += " / " + DicePool.LastResult; 
 				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
 				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
 				cursorText.text += "</size>";

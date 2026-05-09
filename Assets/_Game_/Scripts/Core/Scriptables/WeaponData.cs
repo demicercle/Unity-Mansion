@@ -30,12 +30,10 @@ public class WeaponData : ScriptableObject
 
 	public static event System.Action<WeaponData> onWeaponChanged; 
 	
-	[Header("General")]
-	[SerializeField] private bool noAttack = false;
-	[Range(1, 20)] [SerializeField] private int hitChance = 10;
 	public int GetHitChance() => hitChance;
 	
-	[Header("Damage")]
+	[Header("Combat")]
+	[Range(1, 20)] [SerializeField] private int hitChance = 10;
 	[Range(1, 12)] [SerializeField] private int minDamage = 1;
 	[Range(1, 12)] [SerializeField] private int maxDamage = 1;
 	[SerializeField] private AnimationCurve damageCurve = AnimationCurve.Linear(0, 0, 1, 1);

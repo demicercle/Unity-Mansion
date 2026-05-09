@@ -11,7 +11,6 @@ public class CharacterRoutines : MonoBehaviour
 {
 	private const float SearchPathTimeout = 6.0f;
 	private const float DefaultWaitSeconds = 1.0f;
-	private  float MinDistanceFromPathLastPoint = 0.0f; // TODO?
 	private const float MinDeltaToMove = 0.1f;
 	private const float HeightPenalty = 1.0f;
 	private const float MinGiveDistance = 0.25f;
