@@ -156,6 +156,12 @@ public class CharacterAgent : MonoBehaviour
 		            && _selfCharacter.IsCharacterRevealed() 
 		            && GameTurnManager.Instance.IsTurnBasedMode());
 	}
+
+	public Coroutine AssignDestination(CharacterEntity character)
+	{
+		SetReachDistance(GetRadius() + character.GetRadius() + GetMinReachDistance());
+		return AssignDestination(character.GetPosition());
+	}
 	
 	public Coroutine AssignDestination(Vector3 hitPoint)
 	{
@@ -201,8 +207,8 @@ public class CharacterAgent : MonoBehaviour
 		hasDestination = false;
 		aiDestinationSetter.enabled = followTarget;
 		aiDestinationSetter.target = followTarget;
-		aiPath.canSearch = followTarget != null;
-		aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
+		aiPath.canSearch = followTarget;
+		if(followTarget) aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
 	}
 
 	public void ClearDestination()
@@ -451,10 +457,10 @@ public class CharacterAgent : MonoBehaviour
 		{
 			yield return null;
 			aiPath.GetRemainingPath(lastVectorPath, out var _);
-			//if (debugMode > 0) DebugDrawer.Path(lastVectorPath.ToArray(), false, Color.yellow, 0f);
+			if (debugMode > 0) DebugDrawer.Path(lastVectorPath.ToArray(), false, Color.yellow, 0f);
 		}
 		while (aiPath.pathPending);
-
+		
 		hasDestination = aiPath.hasPath;
 		//if (debugMode > 0) DebugDrawer.WireDisc(dest, aiPath.endReachedDistance, hasDestination ? Color.green : Color.yellow, 1.0f);
 	}
@@ -478,7 +484,7 @@ public class CharacterAgent : MonoBehaviour
 			pathRenderers[0].positionCount = drawPath.Length;
 			pathRenderers[0].useWorldSpace = true;
 			pathRenderers[0].SetPositions(drawPath);
-//			Debug.Log(this + " draw path " + drawPath.Length);
+			if(debugMode > 1) Debug.Log(this + " draw path " + drawPath.Length);
 		}
 		
 		drawPath = lastVectorPath.ToArray();

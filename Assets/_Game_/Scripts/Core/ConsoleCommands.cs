@@ -213,10 +213,13 @@ public class ConsoleCommands : MonoBehaviour
 			Debug.LogWarning("Selected character " + selectedCharacter + " has no inventory");
 			return;
 		}
+		
+		itemData = itemData.Duplicate();
 
 		if (!inventory.TryAddItem(itemData))
 		{
 			Debug.LogWarning("Selected character " + selectedCharacter + " inventory full");
+			Destroy(itemData);
 			return;
 		}
 		

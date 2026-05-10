@@ -25,7 +25,7 @@ public enum CursorType
 	
 	Aim,
 	
-	Drag
+	Drag,
 }
 
 [CreateAssetMenu(fileName = "CursorData", menuName = "CursorData", order = 0)]

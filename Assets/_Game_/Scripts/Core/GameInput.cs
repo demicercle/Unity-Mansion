@@ -178,6 +178,7 @@ public class GameInput : MonoBehaviour
 	private string debugString;
 	private bool ungroupMode;
 	private bool hasConsoleEvents;
+	private bool canUseItem;
 
 	private void Awake()
 	{
@@ -531,7 +532,7 @@ public class GameInput : MonoBehaviour
 						SetCurrentCursorType(CursorType.Select);
 
 						if (itemToUse)
-							SetCurrentCursorType(itemToUse.CanBeUsedOn(overCharacter) ? CursorType.UseItem : CursorType.Blocked);
+							canUseItem = itemToUse.CanBeUsedOn(overCharacter);
 						
 						else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
 							agent.ClearDestination();// mouse over another party member
@@ -542,19 +543,19 @@ public class GameInput : MonoBehaviour
 						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
 						
 						if (itemToUse)
-							SetCurrentCursorType(itemToUse.CanBeUsedOn(overCharacter) ? CursorType.UseItem : CursorType.Blocked);
+							canUseItem = itemToUse.CanBeUsedOn(overCharacter);
 						
 						else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
-							agent.AssignDestination(overCharacter.GetPosition()); // mouse over enemy
+							agent.AssignDestination(overCharacter); // mouse over enemy
 					}
 					else
 					{
 						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
 						
 						if (itemToUse)
-							SetCurrentCursorType(itemToUse.CanBeUsedOn(overCharacter) ? CursorType.UseItem : CursorType.Blocked);
+							canUseItem = itemToUse.CanBeUsedOn(overCharacter);
 						else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
-							agent.AssignDestination(overCharacter.GetPosition()); // mouse over character
+							agent.AssignDestination(overCharacter); // mouse over character
 					}
 					debugString += "\n>" + currentCursor;
 				}
@@ -570,7 +571,7 @@ public class GameInput : MonoBehaviour
 						: overProp.GetCursorType());
 						
 					if (itemToUse)
-						SetCurrentCursorType(itemToUse.CanBeUsedOn(overCharacter) ? CursorType.UseItem : CursorType.Blocked);
+						canUseItem = itemToUse.CanBeUsedOn(overCharacter);
 					
 					else if (CanAssignOnMouseOver(selectedCharacter)) 
 					{
@@ -595,7 +596,7 @@ public class GameInput : MonoBehaviour
 					
 					
 					if (itemToUse)
-						SetCurrentCursorType(itemToUse.CanBeUsedOn(overCharacter) ? CursorType.UseItem : CursorType.Blocked);
+						canUseItem = itemToUse.CanBeUsedOn(overCharacter);
 					
 					else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) 
 					{
@@ -611,9 +612,6 @@ public class GameInput : MonoBehaviour
 			if (selectedCharacter)
 			{
 				debugString += "\n>ClearDestination()";
-
-				if (itemToUse)
-					SetCurrentCursorType(CursorType.Blocked);
 				
 				if (CanAssignOnMouseOver(selectedCharacter))
 				{
@@ -643,6 +641,11 @@ public class GameInput : MonoBehaviour
 			SetCurrentCursorType(CursorType.Select);
 		}
 
+		if (itemToUse)
+		{
+			SetCurrentCursorType(CursorType.UseItem);
+		}
+
 		if (draggedItem)
 		{
 			SetCurrentCursorType(CursorType.Drag);
@@ -666,7 +669,7 @@ public class GameInput : MonoBehaviour
 
 		if (Cursor.lockState != CursorLockMode.None)
 		{
-			CursorData.GetCursorData(currentCursor).Apply(mouseDown);
+			CursorData.GetCursorData(currentCursor).Apply(mouseDown || canUseItem);
 		}
 		
 		if (debugMode > 1) Debug.Log(debugString);
@@ -707,6 +710,7 @@ public class GameInput : MonoBehaviour
 		lastMousePosition = mousePosition;
 		mouseHasMoved = false;
 		mouseDown = false;
+		canUseItem = false;
 	}
 
 	// KEY INPUT

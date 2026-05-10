@@ -27,32 +27,27 @@ public class HideInFog : MonoBehaviour
 	private void OnEnable()
 	{
 		if (!character) return;
-		character.onSpawned += OnSpawned;
+		character.onSpawned += RoomChanged;
+		GameTurnManager.Instance.onSceneLoaded += RoomChanged;
 		RoomTrigger.onChanged += RoomChanged;
 	}
 
 	private void OnDisable()
 	{
 		if (!character) return;
-		character.onSpawned -= OnSpawned;
+		character.onSpawned -= RoomChanged;
+		GameTurnManager.Instance.onSceneLoaded -= RoomChanged;
 		RoomTrigger.onChanged -= RoomChanged;
-	}
-
-	private void OnSpawned()
-	{
-		StopAllCoroutines();
-		StartCoroutine(UpdateVisibility());
 	}
 
 	private void RoomChanged()
 	{
-		StopAllCoroutines();
-		StartCoroutine(UpdateVisibility());
+		CancelInvoke("UpdateVisibility");
+		Invoke("UpdateVisibility", .1f);
 	}
 
-	private IEnumerator UpdateVisibility()
+	private void UpdateVisibility()
 	{
-		yield return null;
 		isHidden = !character.IsCharacterRevealed();
 		transparentFX.ForEach(r => r.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerTransparentFX);
 		renderers.ForEach(r => r.gameObject.layer = isHidden ? Layers.LayerHidden : Layers.LayerCharacter);
