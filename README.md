@@ -11,6 +11,11 @@ REFACTO
 - save camera rotation
 - do "CursorRaycast" only in FixedUpdate
 - if you miss while triggering turn based, should add 1 miss to the gauge
+x real time "can't" is boring
+x audio sliders not save
+x changing binding ("Space" for "End Turn")
+x "uninjured" 9 HP / 12
+- when zombi about to attack, should display if "dice will hit"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

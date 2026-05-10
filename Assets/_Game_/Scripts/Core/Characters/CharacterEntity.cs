@@ -217,7 +217,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onStatsChanged?.Invoke();
 	}
 	
-	public bool HasActions() => usedActions.Count < characterData.GetMaxActions() + extraActions;
+	public bool HasActions() => !GameTurnManager.Instance.IsTurnBasedMode() || usedActions.Count < characterData.GetMaxActions() + extraActions;
 
 	public bool HasUsedAction(CharacterAction action) => usedActions.Contains(action);
 
@@ -1385,7 +1385,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (health01 <= 1f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(26, "HP 20%");
 		if (health01 <= 2f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(25, "HP 40%");
 		if (health01 <= 3f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(24, "HP 60%");
-		if (health01 <= 4f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(23, "HP 80%");
+		if (health01 < 1f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(23, "HP 80%");
 		return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(22, "HP 100%");
 	}
 }

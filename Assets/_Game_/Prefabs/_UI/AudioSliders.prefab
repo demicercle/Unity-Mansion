@@ -190,6 +190,10 @@ PrefabInstance:
       propertyPath: audioMixer
       value: 
       objectReference: {fileID: 24100000, guid: 0a2a906a1b81d94478f7e520166799f4, type: 2}
+    - target: {fileID: 4718527639575089285, guid: 0150cbf0c029c964faaccce6578c3ca4, type: 3}
+      propertyPath: parameterName
+      value: Volume
+      objectReference: {fileID: 0}
     - target: {fileID: 5506885147967800899, guid: 0150cbf0c029c964faaccce6578c3ca4, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -316,6 +320,10 @@ PrefabInstance:
       propertyPath: audioMixer
       value: 
       objectReference: {fileID: 24100000, guid: 2cb187995ddc99f4abf03b986f17dac1, type: 2}
+    - target: {fileID: 4718527639575089285, guid: 0150cbf0c029c964faaccce6578c3ca4, type: 3}
+      propertyPath: parameterName
+      value: Volume
+      objectReference: {fileID: 0}
     - target: {fileID: 5506885147967800899, guid: 0150cbf0c029c964faaccce6578c3ca4, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -470,6 +478,10 @@ PrefabInstance:
       propertyPath: audioMixer
       value: 
       objectReference: {fileID: 24100000, guid: f85353248eb494e4f974f18bd5e953b3, type: 2}
+    - target: {fileID: 4718527639575089285, guid: 0150cbf0c029c964faaccce6578c3ca4, type: 3}
+      propertyPath: parameterName
+      value: Volume
+      objectReference: {fileID: 0}
     - target: {fileID: 5506885147967800899, guid: 0150cbf0c029c964faaccce6578c3ca4, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
