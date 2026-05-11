@@ -11,11 +11,9 @@ REFACTO
 - save camera rotation
 - do "CursorRaycast" only in FixedUpdate
 - if you miss while triggering turn based, should add 1 miss to the gauge
-x real time "can't" is boring
-x audio sliders not save
-x changing binding ("Space" for "End Turn")
-x "uninjured" 9 HP / 12
 - when zombi about to attack, should display if "dice will hit"
+- assign attack : should update destination if target moves: "assign follow transform"
+- check "min time between assigns"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
@@ -36,13 +34,8 @@ ENV ART
 NODES
 - retakes "scene reference" with a list of references in GameScript
 
-INPUT
-- min time between assigns
-
 GAMEPLAY
-- run should also roll dices?
 - is dying state (-1 HP / turn or 6 seconds
-- assign attack : should update destination if target moves
 
 ITEMS
 - equip, drop and equip weapons

@@ -44,6 +44,7 @@ public class CharacterAgent : MonoBehaviour
 	public void Teleport(Vector3 newPos, bool stopMovement = true)
 	{
 		if(stopMovement) StopMovement();
+		SetObstacle(false);
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.Teleport(newPos, true);
 	}
@@ -51,6 +52,7 @@ public class CharacterAgent : MonoBehaviour
 	public void Teleport(Vector3 newPos, int newRot, bool stopMovement = true)
 	{
 		if(stopMovement) StopMovement();
+		SetObstacle(false);
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.Teleport(newPos, true);
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
@@ -254,9 +256,6 @@ public class CharacterAgent : MonoBehaviour
 			aiPath.updatePosition = aiPath.updateRotation = false;
 			SetObstacle(false);
 		}
-
-		rvoController.enabled = value;
-		rvoController.layer = rvoController.enabled ? RVOLayer.DefaultAgent : RVOLayer.Layer2;
 	}
 	
 	public Vector3 velocity => aiPath.velocity;
@@ -539,6 +538,9 @@ public class CharacterAgent : MonoBehaviour
 	private void LateUpdate()
 	{
 		//rvoController.enabled = !_selfCharacter.IsCurrentTurn() || !_selfCharacter.IsSelected();
+		
+		rvoController.enabled = aiPath.enabled && _selfCharacter.IsControllableByPlayer();
+		rvoController.layer = rvoController.enabled ? RVOLayer.DefaultAgent : RVOLayer.Layer2;
 		
 		UpdateMoveTarget(_selfCharacter.IsMoving());
 		

@@ -383,9 +383,9 @@ public class GameTurnManager : MonoBehaviour
 		onPlayerChanged?.Invoke(true);
 		playerTurn = false;
 		
-		foreach (var partyChar in partyCharacters)
+		foreach (var anyChar in levelCharacters)
 		{
-			if (partyChar.TryGetAnimation(out var anim))
+			if (anyChar.TryGetAnimation(out var anim))
 				anim.SwitchWeapons(false);
 		}
 		

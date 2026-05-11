@@ -438,14 +438,14 @@ public class CharacterAnimation : MonoBehaviour
 		{
 			if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOffTrigger " + parameters.switchOffTrigger);
 			animator.SetTrigger(parameters.switchOffTrigger);
-			yield return WaitEvent(EventType.WeaponSwitch);
+			if(HasAnimationEvent(EventType.WeaponSwitch)) yield return WaitEvent(EventType.WeaponSwitch);
 		}
 
 		else if (weaponInHand != Weapon.Relax && hasSwitchOnTrigger)
 		{
 			if (debugMode > 0) Debug.Log(this + " DoWaitSwitchWeapons hasSwitchOnTrigger " + parameters.switchOnTrigger);
 			animator.SetTrigger(parameters.switchOnTrigger);
-			yield return WaitEvent(EventType.WeaponSwitch);
+			if(HasAnimationEvent(EventType.WeaponSwitch)) yield return WaitEvent(EventType.WeaponSwitch);
 		}
 
 		if (rpgAnimationHandler)

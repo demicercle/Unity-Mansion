@@ -150,7 +150,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		transform.SetParent(null, true);
 		gameObject.SetActive(true);
 		agent.SetAgentActive(true);
-		agent.SetObstacle(true);
 		if (TryGetComponent(out Inventory inventory) && inventory.TryGetItem(Inventory.InventorySlot_Weapon, out var weaponItem) && weaponItem.IsWeapon(out var weaponData))
 		{
 			SetCurrentWeapon(weaponData);

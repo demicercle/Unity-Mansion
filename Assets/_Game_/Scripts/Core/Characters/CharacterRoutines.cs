@@ -695,6 +695,7 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // stop any movement
 		agent.SetReachDistance(reachDistance);
 		
+		if (debugMode > 0) Debug.Log(this + " assign destination: " + dest);
 		yield return agent.AssignDestination(dest);
 
 		if (!agent.hasDestination)
@@ -718,19 +719,9 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " move to path: " + path.Length);
 		if(debugMode > 0) DebugDrawer.Path(path, false, Color.blue, 1.0f);
-
-		/*var firstPoint = path.Take(3).OrderBy(p => Utils.FlatDot(_selfCharacter.GetPosition(), p)).LastOrDefault();
-		var dir = (firstPoint - _selfCharacter.GetPosition()).normalized;
-		while (dir.sqrMagnitude > Consts.MinMagnitude && !_selfCharacter.IsFacingDirection(dir))
-		{
-//			if (debugMode > 0) Debug.Log(this + " WaitMoveLastPath LookDirection");
-			_selfCharacter.LookDirection(dir, Time.deltaTime);
-			yield return null;
-		}*/
 			
-		if(debugMode > 0) Debug.Log(this + " agent.StartMove and SetReachDistance");
+		if(debugMode > 0) Debug.Log(this + " agent.StartMove and SetReachDistance=" + reachDistance);
 		agent.SetReachDistance(reachDistance);
 		agent.StartMove();
 		
@@ -739,8 +730,15 @@ public class CharacterRoutines : MonoBehaviour
 		{
 			debugTimeout = (Time.time - startTime);
 
-			if (_selfCharacter.TryGetAnimation(out var anim))
+			if (debugTimeout < 0.01f && !agent.IsMoving())
 			{
+				if(debugMode > 0) Debug.Log(this + " force start move");
+				agent.StartMove();
+			}
+
+			while (_selfCharacter.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons)
+			{
+				if(debugMode > 1) Debug.Log(this + " wait switch weapons");
 				do yield return null;
 				while (anim.IsSwitchingWeapons);
 			}
@@ -785,14 +783,17 @@ public class CharacterRoutines : MonoBehaviour
 
 			var newPosition = _selfCharacter.GetPosition();
 			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
+			if(debugMode > 1) Debug.Log(this + " moving " + deltaPos);
 			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
 				//agent.DropOnGround(); // to avoid overlapping obstacles
-				if(debugMode > 1) Debug.Log(this + " moving " + deltaPos);
 				startTime = Time.time; // reset timeout
 			}
-			
-			_selfCharacter.ConsumeMovePoints(GameTurnManager.Instance.IsTurnBasedMode() ? deltaPos : 0f, true);
+
+			if (GameTurnManager.Instance.IsTurnBasedMode())
+				_selfCharacter.ConsumeMovePoints(deltaPos, true);
+			else
+				_selfCharacter.ConsumeMovePoints(0, true);
 		}
 		
 		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination reachDistance=" + reachDistance + " current navDistance=" + NavUtils.NavDistance(dest, _selfCharacter.GetPosition()));

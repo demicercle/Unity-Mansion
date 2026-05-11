@@ -112,7 +112,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -233,7 +232,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -353,7 +351,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -505,7 +502,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -625,7 +621,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -777,7 +772,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -897,7 +891,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1017,7 +1010,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1137,7 +1129,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1258,7 +1249,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1378,7 +1368,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1498,7 +1487,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1618,7 +1606,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1738,7 +1725,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1858,7 +1844,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1978,7 +1963,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -2098,7 +2082,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -2311,7 +2294,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -2431,7 +2413,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -2781,6 +2762,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: eventTypes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.runTrigger
       value: 
       objectReference: {fileID: 0}
@@ -2795,6 +2780,14 @@ PrefabInstance:
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.deathTrigger
       value: Death
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: 'eventTypes.Array.data[0]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: 'eventTypes.Array.data[1]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.attackTrigger
