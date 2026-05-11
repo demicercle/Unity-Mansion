@@ -70,7 +70,6 @@ public class CharacterAgent : MonoBehaviour
 		}
 		
 		isObstacle = value;
-		rvoController.enabled = !isObstacle;
 		if (debugMode > 0) Debug.Log(this + " SetObstacle " + isObstacle);
 		
 		if (aiPath.TryGetComponent(out GraphUpdateScene graphUpdate) )
@@ -210,6 +209,8 @@ public class CharacterAgent : MonoBehaviour
 		aiDestinationSetter.enabled = followTarget;
 		aiDestinationSetter.target = followTarget;
 		aiPath.canSearch = followTarget;
+		if (TryGetComponent(out CharacterFollows follows))
+			follows.enabled = aiDestinationSetter.enabled;
 		if(followTarget) aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
 	}
 
@@ -414,10 +415,17 @@ public class CharacterAgent : MonoBehaviour
 
 	private void UpdateRVO()
 	{
-		rvoController.lockWhenNotMoving = _selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer() 
-		                                                              && (GameTurnManager.Instance.IsPlayerTurn() || !GameTurnManager.Instance.IsTurnBasedMode());
+		rvoController.enabled = aiPath.enabled && _selfCharacter.IsControllableByPlayer();
 		
-		rvoController.priority = rvoController.lockWhenNotMoving ? priorityLeader 
+		//rvoController.layer = rvoController.enabled ? RVOLayer.DefaultAgent : RVOLayer.Layer2;
+		
+		//rvoController.lockWhenNotMoving = _selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer() 
+		//                                                              && (GameTurnManager.Instance.IsPlayerTurn() || !GameTurnManager.Instance.IsTurnBasedMode());
+
+		rvoController.locked = false;
+		rvoController.lockWhenNotMoving = _selfCharacter.IsSelected();
+		
+		rvoController.priority = _selfCharacter.IsSelected()? priorityLeader 
 								: _selfCharacter.InParty() ? priorityFollower 
 								: priorityOther;
 	}
@@ -538,9 +546,6 @@ public class CharacterAgent : MonoBehaviour
 	private void LateUpdate()
 	{
 		//rvoController.enabled = !_selfCharacter.IsCurrentTurn() || !_selfCharacter.IsSelected();
-		
-		rvoController.enabled = aiPath.enabled && _selfCharacter.IsControllableByPlayer();
-		rvoController.layer = rvoController.enabled ? RVOLayer.DefaultAgent : RVOLayer.Layer2;
 		
 		UpdateMoveTarget(_selfCharacter.IsMoving());
 		

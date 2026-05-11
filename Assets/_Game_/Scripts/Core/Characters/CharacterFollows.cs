@@ -9,8 +9,8 @@ public class CharacterFollows : MonoBehaviour
 	public static int debugMode { get; set; }
 	
 	[SerializeField] [Range(0.5f, 12.0f)] private float followDistance = 3.0f;
-	[SerializeField] [Range(0.5f, 12.0f)] private float avoidDistance = 1.0f;
-	[SerializeField] [Range(0.1f, 10f)] private float tickTime = 1.0f;
+	[SerializeField] [Range(0.0f, 12.0f)] private float avoidDistance = 1.0f;
+	[SerializeField] [Range(0.0f, 10f)] private float tickTime = 1.0f;
 	[SerializeField] private float headingDistance = 0.5f;
 	[SerializeField] [Min(0)] private float headingSpeed = 1.5f;
 
@@ -81,16 +81,26 @@ public class CharacterFollows : MonoBehaviour
 
 		dummy.position = transform.position;
 		
-		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead() && GameInput.Instance.IsLeaderMode())
+		while (true)
 		{
+			if (tickTime > 0) 
+				yield return new WaitForSeconds(tickTime);
+			else 
+				yield return null;
+
+			if (!leaderCharacter || leaderCharacter.IsDead() || selfCharacter.IsDead() ||
+			    !GameInput.Instance.IsLeaderMode())
+			{
+				yield break;
+			}
+			
 			if (GameTurnManager.Instance.IsTurnBasedMode())
 			{
-				yield return null;
-				continue;
+				yield break;
 			}
 			
 			headingPos = leaderCharacter.GetPosition();
-			headingPos += leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()) * headingDistance;
+			headingPos -= leaderCharacter.GetDirection() * headingDistance;
 			
 			agent.SetObstacle(false);
 
@@ -102,7 +112,7 @@ public class CharacterFollows : MonoBehaviour
 				headingPos = selfCharacter.GetAvoidPosition(leaderCharacter.GetPosition(), avoidDistance);
 			}
 			
-			if (distanceToDummy <= followDistance)
+			if (distanceToDummy <= Mathf.Min(headingDistance, followDistance))
 			{
 				agent.StopMovement();
 			}
@@ -118,14 +128,7 @@ public class CharacterFollows : MonoBehaviour
 				DebugDrawer.Line(selfCharacter.GetCenterPosition(), headingPos, Color.softBlue, tickTime);
 				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, tickTime);
 			}
-
-			if (tickTime > 0) 
-				yield return new WaitForSeconds(tickTime);
-			else 
-				yield return null;
 		}
-
-		enabled = false;
 	}
 
 	private void LateUpdate()
@@ -135,7 +138,7 @@ public class CharacterFollows : MonoBehaviour
 			dummy.SetParent(null, true);
 			
 			dummy.position = headingSpeed <= 0 ? headingPos :
-				Vector3.Lerp(dummy.position, headingPos, Time.deltaTime * headingSpeed);
+				Vector3.MoveTowards(dummy.position, headingPos, Time.deltaTime * headingSpeed * selfCharacter.GetAgent().GetMaxSpeed());
 		
 			if (debugMode > 0)
 			{

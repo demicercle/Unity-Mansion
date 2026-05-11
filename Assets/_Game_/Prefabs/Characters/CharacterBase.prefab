@@ -456,10 +456,7 @@ MonoBehaviour:
   radius: 0.5
   height: 1.5
   minReachDistance: 0.1
-  endPointDistance: 0.25
-  endPointYTolerance: 0.5
-  heightTolerance: 0.5
-  priorityLeader: 0.7
+  priorityLeader: 0.96
   priorityFollower: 0.5
   priorityOther: 0.3
   noObstacleIfNotRevealed: 1
@@ -501,7 +498,6 @@ MonoBehaviour:
   forceRunning: 0
   velocityScale: 1
   minMovePointsToRun: 0.1
-  roomsReveleadSeconds: 1
   shouldSwitchWeaponWhenDamaged: 1
   reloadAnimDuration: 2
 --- !u!114 &3789455635990092813
@@ -519,6 +515,7 @@ MonoBehaviour:
   canChase: 1
   canPatrol: 1
   turnHostileWhenDamaged: 0
+  aggroAlliesModifier: 0.5
   wanderingPoint: {fileID: 0}
   onStartThink:
     m_PersistentCalls:
@@ -787,10 +784,10 @@ MonoBehaviour:
     visualizeSensitivity: 0
   maxAcceleration: -2.5
   rotationSpeed: 360
-  slowdownDistance: 1.5
-  pickNextWaypointDist: 0.4
+  slowdownDistance: 0.75
+  pickNextWaypointDist: 0.25
   alwaysDrawGizmos: 0
-  slowWhenNotFacingTarget: 1
+  slowWhenNotFacingTarget: 0
   preventMovingBackwards: 1
   constrainInsideGraph: 1
 --- !u!114 &8722277412283640718
@@ -866,10 +863,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
   followDistance: 1.5
-  avoidDistance: 2
-  tickTime: 0.5
-  headingDistance: 1.2
-  headingSpeed: 3
+  avoidDistance: 0
+  tickTime: 0
+  headingDistance: 1.7
+  headingSpeed: 0.9
 --- !u!114 &-9001009375405151572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -887,9 +884,9 @@ MonoBehaviour:
   heightBackingField: 2
   centerBackingField: 1
   locked: 0
-  lockWhenNotMoving: 1
-  agentTimeHorizon: 2
-  obstacleTimeHorizon: 2
+  lockWhenNotMoving: 0
+  agentTimeHorizon: 1
+  obstacleTimeHorizon: 1
   maxNeighbours: 10
   layer: 1
   collidesWith: 3
