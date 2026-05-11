@@ -87,24 +87,28 @@ public class CharacterRoutines : MonoBehaviour
 	}
 	public void AssignMoveToDestination(Vector3 navPosition, float reachDistance, bool raycastForDestructible = false)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToDestination " + navPosition);
 		StartNewRoutine(WaitCharacterMoved(navPosition, reachDistance, raycastForDestructible));
 	}
 	public void AssignMoveToWaypoint(Waypoint waypoint, System.Action onComplete = null)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = waypoint;
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToWaypoint " + waypoint );
 		StartNewRoutine(WaitMoveCharacterToWaypoint(waypoint, onComplete));
 	}
 	public void AssignUseAction(CharacterAction waitAction)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignWaitAction " + waitAction);
 		StartNewRoutine(WaitAction(waitAction));
 	}
 	public void AssignLookPosition(Vector3 lookPosition)
 	{
+		LastTimeAssignedTarget = Time.time;
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignLookPosition ");
 		if (debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), lookPosition, Color.magenta, 1.0f);//TODO defaultDrawDuration
@@ -260,7 +264,7 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(this + " routine started " + activeInstances.Count);
 		yield return StartCoroutine(routine);
 		activeInstances.Remove(this);
-		if(debugMode > 0) Debug.Log(" routine ends, next to play: " + activeInstances.FirstOrDefault());
+		if(debugMode > 0) Debug.Log(this + " routine ends " + activeInstances.Count);
 		debugString = "";
 		Stopped();
 	}
@@ -299,7 +303,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
 		
-		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtWaypoint " + clickedProp + " " + foundWaypoint + " check reach destination");
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtWaypoint prop=" + clickedProp + " waypoint=" + foundWaypoint + " reachRadius=" + reachRadius);
 		if (agent.ReachedDestination(destination, reachRadius))
 		{
 			// waypoint reach

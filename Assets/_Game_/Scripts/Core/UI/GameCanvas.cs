@@ -39,7 +39,10 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private RawImage itemCursorImage;
 	[Header("Cursor")] 
 	[SerializeField] private TMP_Text cursorText;
+	[SerializeField] private bool displayHitChance;
 	[SerializeField] private bool displayLastResultDice;
+	[SerializeField] private bool displayHitBlocked;
+	[SerializeField] private bool displayHeightMod, displayRangeMod, displayOtherMod;
 
 	[Header("References")] 
 	[SerializeField] private FloatingText floatingText;
@@ -85,6 +88,7 @@ public class GameCanvas : MonoBehaviour
 	private int calculatedHitChance;
 	private bool willHit;
 	private bool hitBlocked;
+	private int heightMod, rangeMod, otherMod;
 	private CharacterEntity selectedCharacter;
 	private CharacterEntity targetCharacter;
 	
@@ -212,15 +216,36 @@ public class GameCanvas : MonoBehaviour
 				cursorText.transform.position = gameInput.GetMousePosition();
 				cursorText.raycastTarget = false;
 				calculatedHitChance = 20 - Mathf.Clamp(selectedCharacter.CalculateHitChance(targetCharacter), 1, 20);
-				if(CharacterEntity.debugStats > 1) Debug.Log(this + " calculated hit chance " + calculatedHitChance);
 				willHit = (DicePool.LastResult > 1 && calculatedHitChance < DicePool.LastResult) || DicePool.LastResult >= 20;
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
+				
 				cursorText.text = "<size=14><b>" + targetCharacter.GetDisplayName() + "</b></size>\n";
 				cursorText.text += "<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n";
-				cursorText.text += "<size=11>Hit on: <b>" + calculatedHitChance + "+</b>";
-				if (displayLastResultDice) cursorText.text += " / " + DicePool.LastResult; 
-				cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
-				if (hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
+				
+				if (displayHitChance)
+				{
+					cursorText.text += "<size=11>Hit on: <b>" + calculatedHitChance + "+</b>";
+					if (displayLastResultDice) cursorText.text += " / " + DicePool.LastResult; 
+					cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
+				}
+
+				if (selectedCharacter.IsUsingRangeWeapon())
+				{
+					if (!hitBlocked && displayRangeMod)
+					{
+						rangeMod = selectedCharacter.GetHitChanceModifiedByRange(selectedCharacter.GetDistanceTo(targetCharacter.GetPosition()), targetCharacter.GetRadius());
+						if(rangeMod > selectedCharacter.GetHitChance()) cursorText.text += "\nRange +" + Mathf.Abs(rangeMod - selectedCharacter.GetHitChance());
+						if(rangeMod < selectedCharacter.GetHitChance()) cursorText.text += "\nRange -" + Mathf.Abs(rangeMod - selectedCharacter.GetHitChance());
+					}
+					
+					if (!hitBlocked && displayHeightMod)
+					{
+						heightMod = selectedCharacter.GetHitChanceHeightModifier(targetCharacter.GetPosition().y - selectedCharacter.GetPosition().y);
+						if (heightMod != 0) cursorText.text += "\nHeight " + (heightMod > 0 ? "+" : "-") + Mathf.Abs(heightMod);
+					}
+				}
+				
+				if (displayHitBlocked && hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
 				cursorText.text += "</size>";
 				cursorText.gameObject.SetActive(true);
 			}

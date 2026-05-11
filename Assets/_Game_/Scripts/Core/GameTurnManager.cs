@@ -14,11 +14,6 @@ public class GameTurnManager : MonoBehaviour
 	
 	public static int debugMode { get; set; }
 
-	private static void DisableAudio(bool disabled)
-	{
-		AudioListener.volume = disabled ? 0 : 1;
-	}
-
 	public event System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
 	
@@ -215,9 +210,9 @@ public class GameTurnManager : MonoBehaviour
 				
 				CharacterSelection.SelectCharacter(previouslySelected);
 			}
+			
+			yield return new WaitForSeconds(postLoadSaveDuration);
 		}
-		
-		yield return new WaitForSeconds(postLoadSaveDuration);
 		
 		Debug.Log("loading complete");
 		isLoading = false;
@@ -226,8 +221,8 @@ public class GameTurnManager : MonoBehaviour
 		
 		onLoadingGame?.Invoke(false);
 		onSceneLoaded?.Invoke();
-		DisableAudio(false);
 		
+		DisableAudio(false);
 		FadeScreen.FadeOut();
 		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);
 		
@@ -237,6 +232,26 @@ public class GameTurnManager : MonoBehaviour
 			yield return null;
 			yield return StartCoroutine(TurnBasedCoroutine());
 			yield return null; // safety for loop
+		}
+	}
+
+	private Coroutine DisableAudio(bool disabled)
+	{
+		return StartCoroutine(DoAudioTween(disabled ? 0f : 1f));
+	}
+
+	private IEnumerator DoAudioTween(float targetValue)
+	{
+		if (targetValue <= 0f)
+		{
+			AudioListener.volume = 0f;
+			yield break;
+		}
+
+		while (AudioListener.volume < targetValue)
+		{
+			AudioListener.volume = Mathf.MoveTowards(AudioListener.volume, targetValue, Time.deltaTime);
+			yield return null;
 		}
 	}
 

@@ -267,6 +267,17 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public int GetHitChance() => Mathf.Clamp(currentWeapon.GetHitChance() + Mathf.RoundToInt(GetRemainingMovePoints() * MovePointsToHit), 1, 20);
 
+	public int GetHitChanceModifiedByRange(float range, float radius)
+	{
+		return (int)(GetHitChance() *
+		             Mathf.Clamp01(currentWeapon.EvaluateRange(range, GetRadius() + radius)));
+	}
+
+	public int GetHitChanceHeightModifier(float height)
+	{
+		return (int)(currentWeapon.EvaluateHeight(Mathf.Abs(height)) * 20f);
+	}
+	
 	public enum AttackResult
 	{
 		Undefined,
@@ -300,8 +311,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			targetRange = Vector3.Distance(GetReachPosition(), targetPosition);
 			targetHeight = GetPosition().y - targetPosition.y;
-			return (int)Mathf.Clamp(GetHitChance() * Mathf.Clamp01(currentWeapon.EvaluateRange(targetRange, GetRadius() + targetRadius))
-			                        + currentWeapon.EvaluateHeight(targetHeight) * 20, 1f, 20f);
+			return GetHitChanceModifiedByRange(targetRange, targetRadius) + GetHitChanceHeightModifier(targetHeight);
 		}
 		else
 		{

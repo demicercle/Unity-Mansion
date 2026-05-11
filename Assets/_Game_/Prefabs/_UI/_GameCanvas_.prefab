@@ -1373,7 +1373,12 @@ MonoBehaviour:
   inventoryPanel: {fileID: 2398437629576074096}
   itemCursorImage: {fileID: 6692672816484174597}
   cursorText: {fileID: 4676958143716694364}
+  displayHitChance: 0
   displayLastResultDice: 0
+  displayHitBlocked: 1
+  displayHeightMod: 1
+  displayRangeMod: 1
+  displayOtherMod: 0
   floatingText: {fileID: 7895516998989122225}
   onPlayerTurnChanged:
     m_PersistentCalls:
