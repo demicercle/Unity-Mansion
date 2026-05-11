@@ -208,8 +208,6 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
 	//	rightWeapon = Weapon.Relax;
     }
 
-    public void InstantWeaponSwitch() => InstantWeaponSwitch(rightWeapon);
-
     public List<Weapon> sideWeapons = new List<Weapon>();
 
     [ContextMenu("Force Unsheath")]

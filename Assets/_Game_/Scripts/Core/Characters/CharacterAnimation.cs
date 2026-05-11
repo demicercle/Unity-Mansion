@@ -82,23 +82,24 @@ public class CharacterAnimation : MonoBehaviour
 	
 	public Coroutine WaitEvents(params EventType[] eventTypes) => StartCoroutine(DoWaitEvents(6.0f, eventTypes));
 
-	public void InstantSwitchWeapons(bool value) =>
-		InstantSwitchWeapons(value ? _selfCharacter.GetCurrentWeapon().rpgWeaponR : Weapon.Relax);
+	public void InstantSwitchWeapons(bool value, bool force = false) =>
+		InstantSwitchWeapons(value ? _selfCharacter.GetCurrentWeapon().rpgWeaponR : Weapon.Relax, force);
 
-	public void InstantSwitchWeapons(Weapon newWeapon)
+	public void InstantSwitchWeapons(Weapon newWeapon, bool force = false)
 	{
-		if (weaponInHand != newWeapon)
+		if (weaponInHand != newWeapon || force)
 		{
 			if(debugMode >0 )Debug.Log(this + " InstantSwitchWeapons " + newWeapon);
 			
 			StopCoroutine("DoWeaponSwitch");
 			
+			TrySetTrigger(parameters.instantSwitchTrigger);
+			
 			if (rpgAnimationHandler)
 			{
-				rpgAnimationHandler.InstantWeaponSwitch();
+				rpgAnimationHandler.InstantWeaponSwitch(newWeapon);
 			}
 			
-			TrySetTrigger(parameters.instantSwitchTrigger);
 			weaponInHand = newWeapon;
 			UpdateWeaponRenderers();
 		}
@@ -129,6 +130,7 @@ public class CharacterAnimation : MonoBehaviour
 
 	public void WeaponChanged()
 	{
+		if (!started) return;
 		SwitchWeapons(true);
 	}
 	
@@ -179,6 +181,8 @@ public class CharacterAnimation : MonoBehaviour
 		_characterAnimationEvent.onCharacterAnimationEvent += OnCharacterAnimationEvent;
 		RoomTrigger.onChanged += OnRoomsChanged;
 
+		GameTurnManager.Instance.onSceneLoaded += OnSceneLoaded;
+
 		_selfCharacter.onMoved += OnCharacterMoved;
 		_selfCharacter.onHealed += OnHealed;
 		_selfCharacter.onDamaged += OnDamaged;
@@ -189,10 +193,6 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.turnEnded += OnTurnEnded;
 		_selfCharacter.onDamagedBy += OnDamagedBy;
 		_selfCharacter.onAiming += OnAiming;
-
-		Init();
-		
-		StartCoroutine("WeaponSwitchCoroutine");
 	}
 
 	private void OnDisable()
@@ -201,6 +201,8 @@ public class CharacterAnimation : MonoBehaviour
 		
 		RoomTrigger.onChanged -= OnRoomsChanged;
 		_characterAnimationEvent.onCharacterAnimationEvent -= OnCharacterAnimationEvent;
+
+		GameTurnManager.Instance.onSceneLoaded -= OnSceneLoaded;
 		
 		_selfCharacter.onMoved -= OnCharacterMoved;
 		_selfCharacter.onHealed -= OnHealed;
@@ -216,7 +218,7 @@ public class CharacterAnimation : MonoBehaviour
 		StopAllCoroutines();
 	}
 
-	private void Init()
+	private void OnSceneLoaded()
 	{
 		hasSwitchOnTrigger = !string.IsNullOrWhiteSpace(parameters.switchOnTrigger);
 		hasSwitchOffTrigger = !string.IsNullOrWhiteSpace(parameters.switchOffTrigger);
@@ -226,18 +228,17 @@ public class CharacterAnimation : MonoBehaviour
 		TrySetFloat(parameters.velocityX, 0.0f);      
 		TrySetFloat(parameters.velocityZ, 0.0f);        
 		TrySetBool(parameters.moving, false);
-
-		if (rpgAnimationHandler)
-		{
-			rpgAnimationHandler.RelaxOnStart();
-		}
 		
-		UpdateWeaponRenderers();
+		StartCoroutine("WeaponSwitchCoroutine");
 	}
 
 	private IEnumerator WeaponSwitchCoroutine()
 	{
+		InstantSwitchWeapons(false, true);
+		
 		yield return new WaitForSeconds(switchWeaponExtraTime);
+
+		started = true;
 		
 		while (true)
 		{
