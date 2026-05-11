@@ -23,6 +23,7 @@ public class CharacterBrain : MonoBehaviour
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
 	[SerializeField] private bool turnHostileWhenDamaged = false;
+	[SerializeField] private float aggroAlliesModifier = 0.5f;
 	[SerializeField] private Waypoint wanderingPoint;
 
 	public UnityEvent onStartThink;
@@ -55,6 +56,65 @@ public class CharacterBrain : MonoBehaviour
 	}
 
 	public bool HasWanderingPoint(Waypoint wp) => wanderingPoint == wp;
+	
+	#region PRIVATE
+	private CharacterEntity _selfCharacter;
+	private CharacterDetection _characterDetection;
+	private CharacterEntity _chaseCharacter;
+	private float _chaseDistance;
+	private PatrolRoute _patrolRoute;
+	private List<Waypoint> _waypointList;
+	private Waypoint _currentWaypoint;
+	private Vector3 _lastTargetKnownPosition;
+	private Vector3 _wanderingPos, _lastWanderingPos;
+	private Dictionary<CharacterEntity, float> _aggroMap = new Dictionary<CharacterEntity, float>();
+	private float _startedThinkingTime;
+	private Vector3 _lastPosition;
+	private CharacterAgent _agent;
+	
+	private void Awake()
+	{
+		_selfCharacter = GetComponent<CharacterEntity>();
+		if (!_selfCharacter)
+		{
+			Debug.LogWarning(this + " has no character controller!");
+			enabled = false;
+			return;
+		}
+
+		_selfCharacter.onPartyIndexChanged += OnPartyIndexChanged;
+		_selfCharacter.onDead += OnCharacterDead;
+		_selfCharacter.onDamagedBy += OnDamagedBy;
+		
+		_waypointList = new List<Waypoint>();
+		_agent = GetComponent<CharacterAgent>();
+	}
+
+	private void OnDestroy()
+	{
+		_selfCharacter.onPartyIndexChanged -= OnPartyIndexChanged;
+		_selfCharacter.onDead -= OnCharacterDead;
+		_selfCharacter.onDamagedBy -= OnDamagedBy;
+	}
+
+	private void OnEnable()
+	{
+		if (!_characterDetection) _characterDetection = GetComponent<CharacterDetection>();
+		if (_characterDetection)
+		{
+			_characterDetection.onCharacterDetected += OnCharacterDetected;
+			_characterDetection.onCharacterLost += OnCharacterLost;
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (_characterDetection)
+		{
+			_characterDetection.onCharacterDetected -= OnCharacterDetected;
+			_characterDetection.onCharacterLost -= OnCharacterLost;
+		}
+	}
 
 	private IEnumerator Think()
 	{
@@ -410,67 +470,26 @@ public class CharacterBrain : MonoBehaviour
 		var vDist = Utils.VDistance(_selfCharacter.GetPosition(), other.GetPosition());
 		if (hDist + vDist > maxDist * 2)
 			return -Mathf.Infinity;
+
+		hDist *= CountAlliesChasing(other) * aggroAlliesModifier + 1;
 			
 		var aggro = _aggroMap[other];
 		return aggro - hDist * AggroHDistanceScale - vDist * AggroVDistanceScale;
 	}
-	
-	private CharacterEntity _selfCharacter;
-	private CharacterDetection _characterDetection;
-	private CharacterEntity _chaseCharacter;
-	private float _chaseDistance;
-	private PatrolRoute _patrolRoute;
-	private List<Waypoint> _waypointList;
-	private Waypoint _currentWaypoint;
-	private Vector3 _lastTargetKnownPosition;
-	private Vector3 _wanderingPos, _lastWanderingPos;
-	private Dictionary<CharacterEntity, float> _aggroMap = new Dictionary<CharacterEntity, float>();
-	private float _startedThinkingTime;
-	private Vector3 _lastPosition;
-	private CharacterAgent _agent;
-	
-	private void Awake()
+
+	private int CountAlliesChasing(CharacterEntity otherChar)
 	{
-		_selfCharacter = GetComponent<CharacterEntity>();
-		if (!_selfCharacter)
+		return CharacterEntity.AllCharacters.Count(allyChar =>
 		{
-			Debug.LogWarning(this + " has no character controller!");
-			enabled = false;
-			return;
-		}
-
-		_selfCharacter.onPartyIndexChanged += OnPartyIndexChanged;
-		_selfCharacter.onDead += OnCharacterDead;
-		_selfCharacter.onDamagedBy += OnDamagedBy;
-		
-		_waypointList = new List<Waypoint>();
-		_agent = GetComponent<CharacterAgent>();
-	}
-
-	private void OnDestroy()
-	{
-		_selfCharacter.onPartyIndexChanged -= OnPartyIndexChanged;
-		_selfCharacter.onDead -= OnCharacterDead;
-		_selfCharacter.onDamagedBy -= OnDamagedBy;
-	}
-
-	private void OnEnable()
-	{
-		if (!_characterDetection) _characterDetection = GetComponent<CharacterDetection>();
-		if (_characterDetection)
-		{
-			_characterDetection.onCharacterDetected += OnCharacterDetected;
-			_characterDetection.onCharacterLost += OnCharacterLost;
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (_characterDetection)
-		{
-			_characterDetection.onCharacterDetected -= OnCharacterDetected;
-			_characterDetection.onCharacterLost -= OnCharacterLost;
-		}
+			return allyChar != otherChar 
+			       && allyChar != _selfCharacter 
+			       && allyChar.IsCharacterRevealed()
+			       && !allyChar.IsDead() 
+			       && _selfCharacter.IsAllyTo(allyChar) 
+			       && allyChar.TryGetComponent(out CharacterBrain brain)
+			       && brain.canChase
+			       && brain._chaseCharacter == otherChar;
+		});
 	}
 
 	private void SaveTargetPosition()
@@ -568,8 +587,20 @@ public class CharacterBrain : MonoBehaviour
 				DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red);
 				DebugDrawer.WireDisc(_chaseCharacter.GetPosition(), _chaseCharacter.transform.forward, _chaseCharacter.GetRadius(), Color.red);
 			}
+			
+			debugString = "";
+			
+			if (_aggroMap.Count > 0)
+			{
+				foreach (var other in _aggroMap.Keys)
+				{
+					var totalAggro = CalculateAggro(other);
+					debugString += (_chaseCharacter == other ? ">" : " ") + totalAggro.ToString("N2") + " " + other.name + "\n";
+				}
+			}
 		}
 	}
+	#endregion
 
 	private string debugString;
 	private void OnGUI()
@@ -583,24 +614,16 @@ public class CharacterBrain : MonoBehaviour
 			if(_chaseCharacter)
 				Utils.DrawWorldGUI((Vector3)_lastTargetKnownPosition, _chaseCharacter.name + " chased by " + name);
 
-			if (_aggroMap.Count > 0)
+			if (!string.IsNullOrEmpty(debugString))
 			{
-				debugString = "";
-				
-				foreach (var other in _aggroMap.Keys)
-				{
-					var totalAggro = CalculateAggro(other);
-					debugString += (_chaseCharacter == other ? ">" : " ") + totalAggro.ToString("N2") + " " + other.name + "\n";
-				}
-
 				Utils.DrawWorldGUI(_selfCharacter.GetPosition(), debugString.Trim('\n'));
 			}
 		}
 	}
-
+	
 	private void OnDrawGizmos()
 	{
-		if (wanderingPoint && !Application.isPlaying)
+		if (wanderingPoint )
 		{
 			float wanderingDistance = wanderingPoint.radius;
 			Gizmos.color = Color.blue;
