@@ -103,7 +103,7 @@ public class AttackTrigger : MonoBehaviour
 				if (isInstantAttack) 
 					selfCharacter.Routines.AssignPerformAttack(otherCharacter, useAttackAction);
 				else 
-					selfCharacter.Routines.AssignMoveAndAttack(otherCharacter, useAttackAction);
+					selfCharacter.Routines.AssignMoveAndAttack(otherCharacter, !noLOS, useAttackAction);
 				
 				triggerCount++;
 				

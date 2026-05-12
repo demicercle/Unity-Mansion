@@ -41,19 +41,13 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		return activeInstances.Contains(this);
 	}
-
-	public void AssignMoveAndAttack(IAttackable target, float reachDistance) =>
-		AssignMoveAndAttack(target, reachDistance, true, true);
-	public void AssignMoveAndAttack(IAttackable target, bool useAction) =>
-		AssignMoveAndAttack(target, _selfCharacter.GetAttackReachDistance(target), true, useAction);
-	public void AssignMoveAndAttack(IAttackable target) =>
-		AssignMoveAndAttack(target, _selfCharacter.GetAttackReachDistance(target), true, true);
-	public void AssignMoveAndAttack(IAttackable target, float reachDistance, bool losCheck, bool useAction)
+	
+	public void AssignMoveAndAttack(IAttackable target, bool losCheck, bool useAction)
 	{
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = target;
-		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " useAction=" + useAction  + " losCheck=" + losCheck + " reachDistance=" + reachDistance + " time=" + LastTimeAssignedTarget);
-		StartNewRoutine(WaitCharacterAttack(target, reachDistance, losCheck, !_selfCharacter.InParty()));
+		if(debugMode > 0) Debug.Log(this + " AssignAttack " + target + " useAction=" + useAction  + " losCheck=" + losCheck + " time=" + LastTimeAssignedTarget);
+		StartNewRoutine(WaitCharacterAttack(target, losCheck, !_selfCharacter.InParty()));
 	}
 
 	public void AssignShootAt(Vector3 position, bool useAction = true)
@@ -90,7 +84,7 @@ public class CharacterRoutines : MonoBehaviour
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToDestination " + navPosition);
-		StartNewRoutine(WaitCharacterMoved(navPosition, reachDistance, raycastForDestructible));
+		StartNewRoutine(WaitCharacterMoved(navPosition, reachDistance, raycastForDestructible)); // assign move to destination
 	}
 	public void AssignMoveToWaypoint(Waypoint waypoint, System.Action onComplete = null)
 	{
@@ -170,7 +164,7 @@ public class CharacterRoutines : MonoBehaviour
 	public void Leader_AssignAttack(IAttackable other)
 	{
 		if(debugMode > 0) Debug.Log(this + " Leader_AssignAttack ");
-		_selfCharacter.Routines.AssignMoveAndAttack(other);
+		_selfCharacter.Routines.AssignMoveAndAttack(other, true, GameTurnManager.Instance.IsTurnBasedMode());
 		Leader_AssignFollows();
 	}
 	public void Leader_AssignTalk(CharacterEntity npc)
@@ -300,8 +294,8 @@ public class CharacterRoutines : MonoBehaviour
 
 		var agent = _selfCharacter.GetAgent();
 		agent.SetReachDistance(reachRadius);
-
-		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
+ 
+		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false)); // assign interact
 		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtWaypoint prop=" + clickedProp + " waypoint=" + foundWaypoint + " reachRadius=" + reachRadius);
 		if (agent.ReachedDestination(destination, reachRadius))
@@ -351,7 +345,7 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 
-		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false));
+		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false)); // interact @position
 		yield return null;
 		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtPosition " + clickedProp + " check reach destination");
@@ -386,12 +380,11 @@ public class CharacterRoutines : MonoBehaviour
 			Debug.Log(this + " not at reach") ;
 		}
 	}
-
-	private IEnumerator WaitCharacterAttack(IAttackable target, bool losCheck, bool raycastForDestructible) =>
-		WaitCharacterAttack(target, _selfCharacter.GetAttackReachDistance(target), losCheck, raycastForDestructible);
 	
-	private IEnumerator WaitCharacterAttack(IAttackable target, float reachDistance, bool losCheck, bool raycastForDestructible)
+	private IEnumerator WaitCharacterAttack(IAttackable target, bool losCheck, bool raycastForDestructible)
 	{
+		var reachDistance = _selfCharacter.GetAttackReachDistance(target);
+		
 		if(debugMode > 0) Debug.Log("WaitCharacterAttack " + _selfCharacter + " " + target + " losCheck=" + losCheck + " reachDistance=" + reachDistance);
 
 		if (_selfCharacter.TryGetAnimation(out var characterAnim))
@@ -400,15 +393,13 @@ public class CharacterRoutines : MonoBehaviour
 			do yield return null;
 			while (characterAnim.IsSwitchingWeapons);
 		}
-
+		
 		var atAttackRange = _selfCharacter.IsAtAttackRange(target, losCheck);
 
 		if (!atAttackRange)
 		{
-			reachDistance = Mathf.Min(reachDistance, _selfCharacter.GetAttackReachDistance(target));
-			
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
-			yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
+			yield return StartCoroutine(WaitCharacterMovedToTarget(target, reachDistance, raycastForDestructible));
 			
 			atAttackRange = _selfCharacter.IsAtAttackRange(target, losCheck);
 			if (debugMode > 0) Debug.Log(this + " ends move, atAttackRange=" + atAttackRange);
@@ -687,7 +678,7 @@ public class CharacterRoutines : MonoBehaviour
 		
 		if (currentDistance <= reachDistance)
 		{
-			if(debugMode > 0) Debug.Log("character already at reachDistance=" + reachDistance+ ", abort");
+			if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved character already at reachDistance=" + reachDistance+ ", abort");
 			yield break;
 		}
 			
@@ -695,12 +686,12 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StopMovement(); // stop any movement
 		agent.SetReachDistance(reachDistance);
 		
-		if (debugMode > 0) Debug.Log(this + " assign destination: " + dest);
+		if (debugMode > 0) Debug.Log(this + " WaitCharacterMoved assign destination: " + dest);
 		yield return agent.AssignDestination(dest);
 
 		if (!agent.hasDestination)
 		{
-			if (raycastForDestructible && debugMode > 0) Debug.Log(this + " !agent.hasDestination RaycastForDestructible");
+			if (raycastForDestructible && debugMode > 0) Debug.Log(this + " WaitCharacterMoved !agent.hasDestination RaycastForDestructible");
 			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0f, 2.0f, out var destructible))
 			{
 				agent.StopMovement();
@@ -715,13 +706,13 @@ public class CharacterRoutines : MonoBehaviour
 		var path = agent.GetCurrentPath();
 		if (path.Length < 1)
 		{
-			Debug.LogWarning(this + " path invalid");
+			Debug.LogWarning(this + " WaitCharacterMoved path invalid");
 			yield break;
 		}
 		
 		if(debugMode > 0) DebugDrawer.Path(path, false, Color.blue, 1.0f);
 			
-		if(debugMode > 0) Debug.Log(this + " agent.StartMove and SetReachDistance=" + reachDistance);
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved agent.StartMove and SetReachDistance=" + reachDistance);
 		agent.SetReachDistance(reachDistance);
 		agent.StartMove();
 		
@@ -732,20 +723,20 @@ public class CharacterRoutines : MonoBehaviour
 
 			if (debugTimeout < 0.01f && !agent.IsMoving())
 			{
-				if(debugMode > 0) Debug.Log(this + " force start move");
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved force start move");
 				agent.StartMove();
 			}
 
 			while (_selfCharacter.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons)
 			{
-				if(debugMode > 1) Debug.Log(this + " wait switch weapons");
+				if(debugMode > 1) Debug.Log(this + " WaitCharacterMoved wait switch weapons");
 				do yield return null;
 				while (anim.IsSwitchingWeapons);
 			}
 			
 			if (Time.time - startTime > SearchPathTimeout)
 			{
-				Debug.LogWarning(this + " TIMED_OUT!");
+				Debug.LogWarning(this + " WaitCharacterMoved TIMED_OUT!");
 				_selfCharacter.FloatingText_Cant();
 				_selfCharacter.StopAgent();
 				yield break;
@@ -753,13 +744,13 @@ public class CharacterRoutines : MonoBehaviour
 
 			if (!_selfCharacter.IsMoving())
 			{
-				if(debugMode > 0) Debug.Log(this + " something stopped movement");
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved something stopped movement");
 				yield break;
 			}
 			
 			if (!_selfCharacter.HasMovePoints())
 			{
-				if(debugMode > 0) Debug.Log(this + " !HasMovePoints");
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved !HasMovePoints");
 				if(_selfCharacter.IsControllableByPlayer()) _selfCharacter.FloatingText_Cant();
 				agent.StopMovement();
 				yield break;
@@ -767,7 +758,7 @@ public class CharacterRoutines : MonoBehaviour
 
 			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0.5f, 1.5f, out var destructible))
 			{
-				if(debugMode > 0) Debug.Log(this + " RaycastForDestructible " + destructible);
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved RaycastForDestructible " + destructible);
 				agent.StopMovement();
 				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
 				yield break;
@@ -783,7 +774,7 @@ public class CharacterRoutines : MonoBehaviour
 
 			var newPosition = _selfCharacter.GetPosition();
 			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
-			if(debugMode > 1) Debug.Log(this + " moving " + deltaPos);
+			if(debugMode > 1) Debug.Log(this + " WaitCharacterMoved moving " + deltaPos);
 			if (deltaPos >= MinDeltaToMove) // character has moved
 			{
 				//agent.DropOnGround(); // to avoid overlapping obstacles
@@ -796,7 +787,110 @@ public class CharacterRoutines : MonoBehaviour
 				_selfCharacter.ConsumeMovePoints(0, true);
 		}
 		
-		if(debugMode > 0) Debug.Log(this + " WaitMoveLastPath reached destination reachDistance=" + reachDistance + " current navDistance=" + NavUtils.NavDistance(dest, _selfCharacter.GetPosition()));
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved reached destination reachDistance=" + reachDistance + " current navDistance=" + NavUtils.NavDistance(dest, _selfCharacter.GetPosition()));
+		agent.StopMovement();
+	}
+	
+	private IEnumerator WaitCharacterMovedToTarget(object target, float reachDistance, bool raycastForDestructible)
+	{
+		debugString = "WaitCharacterMovedToTarget " + target + " " + reachDistance.ToString("N2");
+		if(debugMode > 0) Debug.Log("WaitCharacterMovedToTarget " + target + " " + reachDistance.ToString("N2"));
+		
+		var agent = _selfCharacter.GetAgent();
+		agent.StopMovement(); // stop any movement
+		if (target is CharacterEntity)
+		{
+			agent.AssignCharacterDestination(target as CharacterEntity, reachDistance);
+		}
+		else if (target is Waypoint)
+		{
+			agent.AssignWaypointDestination(target as Waypoint, reachDistance);
+		}
+		else  if (target is Component)
+		{
+			agent.AssignTargetDestination((target as Component).transform, reachDistance);
+		}
+		else
+		{
+			Debug.LogWarning(this + " invalid target !!! " + target);
+			yield break;
+		}
+			
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget agent.StartMove and SetReachDistance=" + reachDistance);
+		agent.SetReachDistance(reachDistance);
+		agent.StartMove();
+		
+		var startTime = Time.time;
+		while (agent.GetTargetDestination(out var dest) && !agent.ReachedDestination(dest, reachDistance))
+		{
+			debugTimeout = (Time.time - startTime);
+
+			if (debugTimeout < 0.01f && !agent.IsMoving())
+			{
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget force start move");
+				agent.StartMove();
+			}
+
+			while (_selfCharacter.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons)
+			{
+				if(debugMode > 1) Debug.Log(this + " WaitCharacterMovedToTarget wait switch weapons");
+				do yield return null;
+				while (anim.IsSwitchingWeapons);
+			}
+			
+			if (Time.time - startTime > SearchPathTimeout)
+			{
+				Debug.LogWarning(this + " WaitCharacterMovedToTarget TIMED_OUT!");
+				_selfCharacter.FloatingText_Cant();
+				_selfCharacter.StopAgent();
+				yield break;
+			}
+
+			if (!_selfCharacter.IsMoving())
+			{
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget something stopped movement");
+				yield break;
+			}
+			
+			if (!_selfCharacter.HasMovePoints())
+			{
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget !HasMovePoints");
+				if(_selfCharacter.IsControllableByPlayer()) _selfCharacter.FloatingText_Cant();
+				agent.StopMovement();
+				yield break;
+			}
+
+			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0.5f, 1.5f, out var destructible))
+			{
+				if(debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget RaycastForDestructible " + destructible);
+				agent.StopMovement();
+				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
+				yield break;
+			}
+
+			var oldPosition = _selfCharacter.GetPosition();
+
+			if(debugMode > 0) DebugDrawer.Path(agent.GetCurrentPath(), false, Color.cyan);
+			if(debugMode > 0) DebugDrawer.WireDisc(dest, reachDistance, Color.cyan, 0f);
+			
+			yield return null;
+
+			var newPosition = _selfCharacter.GetPosition();
+			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points
+			if(debugMode > 1) Debug.Log(this + " WaitCharacterMovedToTarget moving " + deltaPos);
+			if (deltaPos >= MinDeltaToMove) // character has moved
+			{
+				//agent.DropOnGround(); // to avoid overlapping obstacles
+				startTime = Time.time; // reset timeout
+			}
+
+			if (GameTurnManager.Instance.IsTurnBasedMode())
+				_selfCharacter.ConsumeMovePoints(deltaPos, true);
+			else
+				_selfCharacter.ConsumeMovePoints(0, true);
+		}
+		
+		if(debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget reached destination");
 		agent.StopMovement();
 	}
 	
@@ -815,7 +909,7 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) Debug.Log(">> WaitCharacterTalk: " + this + " " + npc);
 
 		var talkDistance = _selfCharacter.GetTalkDistance(npc);
-		yield return StartCoroutine(WaitCharacterMoved(npc.GetPosition(),talkDistance,false));
+		yield return StartCoroutine(WaitCharacterMovedToTarget(npc,talkDistance,false)); // wait character talk
 
 		if (!_selfCharacter.GetAgent().ReachedDestination())
 		{
@@ -863,11 +957,10 @@ public class CharacterRoutines : MonoBehaviour
 			    useRange)
 			{
 				if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItem WaitCharacterMoved");
-				yield return StartCoroutine(WaitCharacterMoved(otherCharacter.GetPosition(), useRange, false));
+				yield return StartCoroutine(WaitCharacterMovedToTarget(otherCharacter, useRange, false));
 			}
 
-			if (useRange <= 0 ||
-			    NavUtils.NavDistance(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
+			if (useRange <= 0 ||  NavUtils.NavDistance(_selfCharacter.GetPosition(), otherCharacter.GetPosition()) <= useRange)
 			{
 				if (debugMode > 0) Debug.Log(this + " WaitCharacterUseItem at useRange");
 				while (otherCharacter != _selfCharacter && !_selfCharacter.IsFacingPosition(otherCharacter.GetPosition()))
@@ -988,7 +1081,7 @@ public class CharacterRoutines : MonoBehaviour
 		
 		if (_selfCharacter.GetDistanceTo(partyChar.GetPosition()) > reachDistance)
 		{
-			yield return StartCoroutine(WaitCharacterMoved(partyChar.GetPosition(), reachDistance, false));
+			yield return StartCoroutine(WaitCharacterMovedToTarget(partyChar, reachDistance, false));
 		}
 
 		if (_selfCharacter.GetDistanceTo(partyChar.GetPosition()) <= reachDistance)
@@ -1034,7 +1127,7 @@ public class CharacterRoutines : MonoBehaviour
 		var reachDistance =_selfCharacter.GetRadius() + MinGiveDistance;
 		if (_selfCharacter.GetDistanceTo(worldPosition) > reachDistance)
 		{
-			yield return StartCoroutine(WaitCharacterMoved(worldPosition, reachDistance, false));
+			yield return StartCoroutine(WaitCharacterMoved(worldPosition, reachDistance, false)); // drop item
 		}
 
 		if (_selfCharacter.GetDistanceTo(worldPosition) <= reachDistance)

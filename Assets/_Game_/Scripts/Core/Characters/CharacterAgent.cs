@@ -143,11 +143,12 @@ public class CharacterAgent : MonoBehaviour
 		DropOnGround();
 		UpdateObstacle();
 		if(clamp) ClampOnNavigation();
+		StopFollow();
+		ClearDestination();
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
 		aiPath.canSearch = false;
-		ClearDestination();
 	}
 
 	public void UpdateObstacle()
@@ -168,9 +169,7 @@ public class CharacterAgent : MonoBehaviour
 	{
 		//if(debugMode > 1) Debug.Log(this + " Assign_new_Destination");
 		ClearPath();
-		
-		if (IsFollowing()) 
-			AssignFollowTransform(null);
+		StopFollow();
 		
 		StopAllCoroutines();
 		return StartCoroutine(DoAssignDestination(hitPoint));
@@ -201,17 +200,56 @@ public class CharacterAgent : MonoBehaviour
 
 	public void AssignFollowTransform(Transform followTarget, float distance = 0f)
 	{
-		if(!aiDestinationSetter) aiDestinationSetter = GetComponent<AIDestinationSetter>();
-		if(!aiDestinationSetter) aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
-		if (aiDestinationSetter.target == followTarget) return;
 		if (debugMode > 0) Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
 		hasDestination = false;
 		aiDestinationSetter.enabled = followTarget;
 		aiDestinationSetter.target = followTarget;
 		aiPath.canSearch = followTarget;
+		
 		if (TryGetComponent(out CharacterFollows follows))
 			follows.enabled = aiDestinationSetter.enabled;
+		
 		if(followTarget) aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
+	}
+
+	public void AssignWaypointDestination(Waypoint waypoint, float distance = 0f) =>
+		AssignTargetDestination(waypoint.transform, Mathf.Max(distance, waypoint.radius));
+
+	public void AssignCharacterDestination(CharacterEntity character, float distance = 0f) =>
+		AssignTargetDestination(character.transform,
+			Mathf.Max(distance, character.GetRadius() + _selfCharacter.GetRadius() + GetMinReachDistance()));
+	
+	public void AssignTargetDestination(Transform target, float distance)
+	{
+		if (target)
+		{
+			aiDestinationSetter.enabled = true;
+			aiDestinationSetter.target = target;
+			hasDestination = true;
+			aiPath.endReachedDistance = distance;
+			aiPath.canSearch = true;
+		}
+	}
+
+	public bool GetTargetDestination(out Vector3 dest)
+	{
+		if (aiDestinationSetter.enabled)
+		{
+			dest = aiDestinationSetter.target.position;
+			return true;
+		}
+		
+		dest = Vector3.zero;
+		return false;
+	}
+
+	public void StopFollow()
+	{
+		aiDestinationSetter.enabled = false;
+		aiDestinationSetter.target = null;
+		hasDestination = false;
+		if (TryGetComponent(out CharacterFollows follows))
+			follows.enabled = false;
 	}
 
 	public void ClearDestination()
@@ -219,6 +257,7 @@ public class CharacterAgent : MonoBehaviour
 		debugString = "";
 		bestWaypoint = null;
 		hasDestination = false;
+		aiPath.canSearch = false;
 		lastVectorPath = new List<Vector3>();
 		StopAllCoroutines();
 	}
@@ -329,12 +368,13 @@ public class CharacterAgent : MonoBehaviour
 
 	private void UpdateComponent()
 	{
-		aiPath = GetComponent<AIPath>();
+		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
 		aiPath.radius = radius;
 		aiPath.height = height;
 		if(minReachDistance > 0f) aiPath.endReachedDistance = minReachDistance;
 		if(Application.isPlaying) aiPath.gravity = Physics.gravity; // force gravity
-		rvoController = GetComponent<RVOController>();
+		rvoController = Utils.GetOrAddComponent<RVOController>(gameObject);
+		aiDestinationSetter = Utils.GetOrAddComponent<AIDestinationSetter>(gameObject);
 	}
 
 	private IEnumerator SearchBestWaypoint()

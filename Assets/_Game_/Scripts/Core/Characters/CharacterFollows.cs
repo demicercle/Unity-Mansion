@@ -65,7 +65,6 @@ public class CharacterFollows : MonoBehaviour
 			if (debugMode>0) Debug.Log(this + " OnDisable");
 			selfCharacter.Routines.onStarted -= OnNewRoutineStarted;
 			StopAllCoroutines();
-			agent.AssignFollowTransform(null);
 		}
 	}
 

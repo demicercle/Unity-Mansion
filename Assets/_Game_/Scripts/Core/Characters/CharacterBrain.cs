@@ -255,7 +255,7 @@ public class CharacterBrain : MonoBehaviour
 			}
 			else if (_selfCharacter.HasMovePoints())
 			{
-				_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter, _chaseDistance);
+				_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter, true, GameTurnManager.Instance.IsTurnBasedMode());
 				
 				do yield return null;
 				while (_selfCharacter.Routines.AnyActive());

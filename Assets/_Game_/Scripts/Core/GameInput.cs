@@ -931,7 +931,7 @@ public class GameInput : MonoBehaviour
 			if (hit.collider && hit.collider.TryGetComponent(out IAttackable attackable) &&
 			    !selectedCharacter.IsAtAttackRange(attackable, true))
 			{
-				selectedCharacter.Routines.AssignMoveAndAttack(attackable);
+				selectedCharacter.Routines.AssignMoveAndAttack(attackable, false, GameTurnManager.Instance.IsTurnBasedMode());
 				return;
 			}
 		}
@@ -982,7 +982,7 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter);
+							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter, true, GameTurnManager.Instance.IsTurnBasedMode());
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter);
 					}
@@ -1023,7 +1023,7 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + clickedCharacter);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter);
+							selectedCharacter.Routines.AssignMoveAndAttack(clickedCharacter, true, GameTurnManager.Instance.IsTurnBasedMode());
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(clickedCharacter);
 					}
@@ -1133,7 +1133,8 @@ public class GameInput : MonoBehaviour
 					{
 						if (debugMode > 0) Debug.Log(this + " " + selectedCharacter + " Assign Attack " + attackable);
 						if (!IsLeaderMode())
-							selectedCharacter.Routines.AssignMoveAndAttack(attackable);
+							selectedCharacter.Routines.AssignMoveAndAttack(attackable, true,
+								GameTurnManager.Instance.IsTurnBasedMode());
 						else
 							selectedCharacter.Routines.Leader_AssignAttack(attackable);
 						//selectedCharacter.Routines.AssignAttack(clickedCharacter, false, false);
