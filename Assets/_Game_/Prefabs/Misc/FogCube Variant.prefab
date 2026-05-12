@@ -9,6 +9,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 306407345481268825, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 306407345481268825, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: -876546973899608171, guid: 923138ab6ae405e49b1c450bd6e41f96, type: 3}
@@ -71,5 +75,48 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2251922595011403660, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3612979728835160594}
   m_SourcePrefab: {fileID: 100100000, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+--- !u!1 &2919371265802337509 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2251922595011403660, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+  m_PrefabInstance: {fileID: 4018300593712259945}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3612979728835160594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2919371265802337509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac9f2a04d6e2448c83e5fa5ee326cf7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonoEventHandler
+  onEnable:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3711894917598862640}
+        m_TargetAssemblyTypeName: UnityEngine.MeshRenderer, UnityEngine
+        m_MethodName: set_enabled
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onDisable:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!23 &3711894917598862640 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 306407345481268825, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+  m_PrefabInstance: {fileID: 4018300593712259945}
+  m_PrefabAsset: {fileID: 0}
