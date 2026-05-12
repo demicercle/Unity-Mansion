@@ -168,7 +168,7 @@ public class CharacterAgent : MonoBehaviour
 		//if(debugMode > 1) Debug.Log(this + " Assign_new_Destination");
 		ClearPath();
 		StopFollow();
-		
+		bestWaypoint = null;
 		StopAllCoroutines();
 		return StartCoroutine(DoAssignDestination(hitPoint));
 	}
@@ -567,14 +567,17 @@ public class CharacterAgent : MonoBehaviour
 		if (!moveTarget.gameObject.activeSelf)
 			return;
 		
-		moveTarget.transform.position = aiPath.destination;
+		moveTarget.transform.position = bestWaypoint ? bestWaypoint.GetPosition() : aiPath.destination;
 		moveTarget.SetColor(ColorSettings.GetCharacterColor(_selfCharacter, true, true));
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
 
 	private bool ShowMoveTarget()
 	{
-		if (IsFollowing() || !_selfCharacter.IsPlayer() || _selfCharacter.IsAiming())
+		if (!_selfCharacter.IsPlayer() || _selfCharacter.IsAiming() || IsFollowing())
+			return false;
+
+		if (!IsMoving())
 			return false;
 
 		if (!GameTurnManager.Instance.IsPlayerTurn() || GameTurnManager.Instance.IsWaiting())

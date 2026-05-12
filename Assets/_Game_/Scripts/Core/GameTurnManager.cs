@@ -332,14 +332,11 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
-				
-				otherCharacter.Rest(); // rest not player character
-				
 				if (!otherCharacter.IsCharacterRevealed()) continue;
 				
-				yield return YieldRoutines();
-				
 				currentAICharacter = otherCharacter;
+				
+				otherCharacter.Rest(); // rest not player character
 				
 				cameraPivot.Focus(otherCharacter);
 				yield return new WaitForSeconds(focusCharacterSeconds);
@@ -352,20 +349,18 @@ public class GameTurnManager : MonoBehaviour
 				}
 
 				otherCharacter.GetAgent().SetObstacle(false);
-				yield return YieldRoutines();
 				yield return WaitNavigationDirty();
 				
 				if(debugMode > 0) Debug.Log(this + " start think " + otherBrain);
+				otherBrain.StartThink();
 				do
 				{
-					if(!otherBrain.IsThinking)
-						otherBrain.StartThink();
-					
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
 				
-				otherCharacter.GetAgent().SetObstacle(true);
 				yield return YieldRoutines();
+				
+				otherCharacter.GetAgent().SetObstacle(true);
 				yield return WaitNavigationDirty();
 			}
 			
@@ -496,7 +491,6 @@ public class GameTurnManager : MonoBehaviour
 			
 			anyCharacter.Routines.StopAllRoutines();
 			anyCharacter.StopAgent();
-			anyCharacter.GetAgent().UpdateObstacle();
 			
 			if (!anyCharacter.InParty())
 			{

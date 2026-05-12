@@ -396,7 +396,14 @@ public class CharacterRoutines : MonoBehaviour
 		if (!atAttackRange)
 		{
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
-			yield return StartCoroutine(WaitCharacterMovedToTarget(target, reachDistance, raycastForDestructible));
+			if (GameTurnManager.Instance.IsTurnBasedMode())
+			{
+				yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
+			}
+			else
+			{
+				yield return StartCoroutine(WaitCharacterMovedToTarget(target, reachDistance, raycastForDestructible));
+			}
 			
 			atAttackRange = _selfCharacter.IsAtAttackRange(target, losCheck);
 			if (debugMode > 0) Debug.Log(this + " ends move, atAttackRange=" + atAttackRange);
@@ -730,14 +737,6 @@ public class CharacterRoutines : MonoBehaviour
 				do yield return null;
 				while (anim.IsSwitchingWeapons);
 			}
-			
-			if (Time.time - startTime > SearchPathTimeout)
-			{
-				Debug.LogWarning(this + " WaitCharacterMoved TIMED_OUT!");
-				_selfCharacter.FloatingText_Cant();
-				_selfCharacter.StopAgent();
-				yield break;
-			}
 
 			if (!_selfCharacter.IsMoving())
 			{
@@ -768,6 +767,14 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 0) DebugDrawer.WireDisc(dest, agent.GetRadius(), Color.cyan, 0f);
 			
 			yield return null;
+			
+			if (Time.time - startTime > SearchPathTimeout)
+			{
+				Debug.LogWarning(this + " WaitCharacterMoved TIMED_OUT!");
+				_selfCharacter.FloatingText_Cant();
+				_selfCharacter.StopAgent();
+				yield break;
+			}
 
 			var newPosition = _selfCharacter.GetPosition();
 			var deltaPos = (newPosition - oldPosition).magnitude; // TODO: use length squared and recalculate move points

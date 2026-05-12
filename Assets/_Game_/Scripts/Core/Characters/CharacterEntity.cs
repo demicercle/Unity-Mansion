@@ -638,6 +638,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		StopFollow();
 		agent.StopMovement();
+		agent.UpdateObstacle();
 	}
 
 	public void StopFollow()
