@@ -347,8 +347,7 @@ public class GameTurnManager : MonoBehaviour
 					yield return new WaitForSeconds(noActionsSeconds);
 					continue;
 				}
-
-				otherCharacter.GetAgent().SetObstacle(false);
+				
 				yield return WaitNavigationDirty();
 				
 				if(debugMode > 0) Debug.Log(this + " start think " + otherBrain);
@@ -360,7 +359,6 @@ public class GameTurnManager : MonoBehaviour
 				
 				yield return YieldRoutines();
 				
-				otherCharacter.GetAgent().SetObstacle(true);
 				yield return WaitNavigationDirty();
 			}
 			
@@ -694,6 +692,9 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.EndArea();
 		}
 	}
+	public bool IsCurrentCharacter(CharacterEntity entity) => IsPlayerTurn() ? 
+																currentAICharacter == CharacterSelection.TryGetSelectedCharacter(out var selected) && selected == entity && selected.IsControllableByPlayer()
+																: currentAICharacter == entity;
 
 	public override string ToString() => "<b>GTM</b>";
 }

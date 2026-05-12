@@ -697,7 +697,7 @@ public class GameInput : MonoBehaviour
 		
 		foreach (var character in CharacterEntity.GetPartyCharacters())
 		{
-			if (character.IsSelected() && gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn())
+			if (character.IsSelected() && gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn() && !gameTurnManager.IsWaiting())
 			{
 				character.GetAgent().DrawPath();
 			}

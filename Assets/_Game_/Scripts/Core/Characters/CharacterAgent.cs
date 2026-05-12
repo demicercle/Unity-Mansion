@@ -58,16 +58,10 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 	}
 
-	public void SetObstacle(bool value)
+	private void SetObstacle(bool value)
 	{
 		if (isObstacle == value)
 			return;
-
-		if (value && noObstacleIfNotRevealed && !_selfCharacter.IsCharacterRevealed())
-		{
-			SetObstacle(false);
-			return;
-		}
 		
 		isObstacle = value;
 		if (debugMode > 0) Debug.Log(this + " SetObstacle " + isObstacle);
@@ -141,20 +135,20 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if(debugMode > 0) Debug.Log(this + " StopMovement()");
 		DropOnGround();
-		UpdateObstacle();
 		if(clamp) ClampOnNavigation();
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
 		aiPath.canSearch = false;
+		UpdateObstacle();
 	}
 
-	public void UpdateObstacle()
+	private void UpdateObstacle()
 	{
-		SetObstacle(!_selfCharacter.IsSelected() 
-		            && !_selfCharacter.IsMoving()
-		            && _selfCharacter.IsCharacterRevealed() 
-		            && GameTurnManager.Instance.IsTurnBasedMode());
+		SetObstacle( GameTurnManager.Instance.IsTurnBasedMode()
+						&& !GameTurnManager.Instance.IsCurrentCharacter(_selfCharacter) 
+						&& _selfCharacter.IsCharacterRevealed() 
+						&& !_selfCharacter.IsMoving() );
 	}
 
 	public Coroutine AssignDestination(CharacterEntity character)
@@ -600,6 +594,19 @@ public class CharacterAgent : MonoBehaviour
 		//rvoController.enabled = !_selfCharacter.IsCurrentTurn() || !_selfCharacter.IsSelected();
 		
 		UpdateMoveTarget(_selfCharacter.IsMoving());
+		UpdateObstacle();
+
+		if (_selfCharacter.IsMoving() && _selfCharacter.TryGetAnimation(out var anim))
+		{
+			if (anim.IsSwitchingWeapons)
+			{
+				aiPath.updatePosition = false;
+			}
+			else if (!aiPath.updatePosition)
+			{
+				aiPath.updatePosition = true;
+			}
+		}
 		
 		if (debugMode > 0)
 		{
