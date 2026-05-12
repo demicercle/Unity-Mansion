@@ -577,6 +577,9 @@ public class CharacterAgent : MonoBehaviour
 		if (IsFollowing() || !_selfCharacter.IsPlayer() || _selfCharacter.IsAiming())
 			return false;
 
+		if (!GameTurnManager.Instance.IsPlayerTurn() || GameTurnManager.Instance.IsWaiting())
+			return false;
+
 		if (bestWaypoint)
 			return true;
 

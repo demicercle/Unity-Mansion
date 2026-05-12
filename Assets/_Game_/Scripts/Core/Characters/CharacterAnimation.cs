@@ -36,6 +36,7 @@ public class CharacterAnimation : MonoBehaviour
 		public string switchOffTrigger;
 		public string switchOnTrigger;
 		public string instantSwitchTrigger;
+		public string detectEnemyTrigger;
 		//[Header("RPG Anims")]
 		//public string weapon;
 		//public string triggerNumber;
@@ -193,6 +194,11 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.turnEnded += OnTurnEnded;
 		_selfCharacter.onDamagedBy += OnDamagedBy;
 		_selfCharacter.onAiming += OnAiming;
+
+		if (_selfCharacter.TryGetComponent(out CharacterDetection detection))
+		{
+			detection.onCharacterDetected += OnCharacterDetected;
+		}
 	}
 
 	private void OnDisable()
@@ -216,6 +222,19 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.onAiming -= OnAiming;
 		
 		StopAllCoroutines();
+
+		if (_selfCharacter.TryGetComponent(out CharacterDetection detection))
+		{
+			detection.onCharacterDetected += OnCharacterDetected;
+		}
+	}
+
+	private void OnCharacterDetected(CharacterEntity other)
+	{
+		if (_selfCharacter.IsEnemyTo(other) && !_selfCharacter.IsDead() && _selfCharacter.IsCharacterRevealed())
+		{
+			TrySetTrigger(parameters.detectEnemyTrigger);
+		}
 	}
 
 	private void OnSceneLoaded()
