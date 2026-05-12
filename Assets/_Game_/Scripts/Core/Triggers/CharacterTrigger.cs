@@ -58,11 +58,6 @@ public class CharacterTrigger : MonoBehaviour
 
 	bool IsCharacterValid(CharacterEntity character) => !character.IsDead() && (!partyOnly || character.InParty()) && (!enemyOnly || character.IsEnemyToPlayer());
 
-	private void OnDrawGizmosSelected()
-	{
-		Utils.GetOrAddComponent<Collider>(gameObject).isTrigger = true;
-	}
-
 	private void TriggerNow()
 	{
 		if (maxCount == 0) return;
@@ -99,6 +94,8 @@ public class CharacterTrigger : MonoBehaviour
 	private void Awake()
 	{
 		collider = GetComponent<Collider>();
+		if (collider is MeshCollider)
+			(collider as MeshCollider).convex = true;
 		collider.isTrigger = true;
 		collider.enabled = false;
 	}
