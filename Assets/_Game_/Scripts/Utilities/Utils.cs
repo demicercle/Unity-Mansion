@@ -353,6 +353,29 @@ public static class Utils
 	}
 }
 
+public static class StringUtils
+{
+	public static string Colorize(string message, Color color)
+	{
+		return "<color=#" + ColorUtility.ToHtmlStringRGBA(color) + ">" + message + "</color>";
+	}
+
+	public static string Greyscale(string message, float alpha)
+	{
+		return Colorize(message, Utils.ColorScale(Color.white, alpha));
+	}
+	
+	public static string Size(string message, int size)
+	{
+		return "<size="+size+">" + message + "</size>";
+	}
+	
+	public static string Bold(string message)
+	{
+		return "<b>" + message + "</b>";
+	}
+}
+
 public static class NavUtils
 {
 	public static float NavDistance(Vector3 from, Vector3 to, float decimals = 100f)

@@ -188,6 +188,9 @@ public class GameCanvas : MonoBehaviour
 		}
 	}
 
+	private Color hitColor => Color.softGreen;
+	private Color missColor => Color.softRed;
+	
 	private void LateUpdate()
 	{
 		UpdateSelectables(); // TODO with events
@@ -220,33 +223,45 @@ public class GameCanvas : MonoBehaviour
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
 				
 				cursorText.text = "<size=14><b>" + targetCharacter.GetDisplayName() + "</b></size>\n";
-				cursorText.text += "<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n";
-				
+				cursorText.text += StringUtils.Greyscale("<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n", targetCharacter.GetDamageProgress());
+
+				//cursorText.text += "<size=11>";
 				if (displayHitChance)
 				{
-					cursorText.text += "<size=11>Hit on: <b>" + calculatedHitChance + "+</b>";
-					if (displayLastResultDice) cursorText.text += " / " + DicePool.LastResult; 
-					cursorText.text += "\n" + (willHit ?  LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss);
+					cursorText.text += StringUtils.Size("<b>" + LanguageSettings.Main.DescribeHitChance(calculatedHitChance) + "</b>", 13);
+					if (displayLastResultDice) cursorText.text += " / " + DicePool.LastResult;
+					cursorText.text += " > " + StringUtils.Colorize(
+						willHit ? LanguageSettings.Main.WillHit : LanguageSettings.Main.WillMiss,
+						willHit ? hitColor : missColor);
 				}
-
+				//cursorText.text += "</size>";
+				
+				cursorText.text += "<size=8>";
 				if (selectedCharacter.IsUsingRangeWeapon())
 				{
 					if (!hitBlocked && displayRangeMod)
 					{
 						rangeMod = selectedCharacter.GetHitChanceModifiedByRange(selectedCharacter.GetDistanceTo(targetCharacter.GetPosition()), targetCharacter.GetRadius());
-						if(rangeMod > selectedCharacter.GetHitChance()) cursorText.text += "\nRange +" + Mathf.Abs(rangeMod - selectedCharacter.GetHitChance());
-						if(rangeMod < selectedCharacter.GetHitChance()) cursorText.text += "\nRange -" + Mathf.Abs(rangeMod - selectedCharacter.GetHitChance());
+						if(rangeMod > selectedCharacter.GetHitChance()) cursorText.text += StringUtils.Colorize("\nRange +" + Mathf.Abs(rangeMod - selectedCharacter.GetHitChance()), hitColor);
+						if(rangeMod < selectedCharacter.GetHitChance()) cursorText.text += StringUtils.Colorize("\nRange -" + Mathf.Abs(rangeMod - selectedCharacter.GetHitChance()), missColor);
 					}
 					
 					if (!hitBlocked && displayHeightMod)
 					{
 						heightMod = selectedCharacter.GetHitChanceHeightModifier(targetCharacter.GetPosition().y - selectedCharacter.GetPosition().y);
-						if (heightMod != 0) cursorText.text += "\nHeight " + (heightMod > 0 ? "+" : "-") + Mathf.Abs(heightMod);
+						if (heightMod != 0)
+							cursorText.text += StringUtils.Colorize(
+								"\nHeight " + (heightMod > 0 ? "+" : "-") + Mathf.Abs(heightMod),
+								heightMod > 0 ? hitColor : missColor);
 					}
 				}
-				
-				if (displayHitBlocked && hitBlocked) cursorText.text += "\n" + LanguageSettings.Main.HitBlocked;
 				cursorText.text += "</size>";
+
+				if (displayHitBlocked && hitBlocked)
+				{
+					cursorText.text += StringUtils.Colorize(StringUtils.Size("\n" + LanguageSettings.Main.HitBlocked, 11), missColor);
+				}
+				
 				cursorText.gameObject.SetActive(true);
 			}
 		}

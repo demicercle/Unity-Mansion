@@ -699,6 +699,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public bool IsDead() => isDead;
 
 
+	public string GetHealthDescription()
+	{
+		var health01 = (float)GetCurrentHealth() / (float)GetMaxHealth();
+		if (health01 <= 1f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(26, "HP 20%");
+		if (health01 <= 2f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(25, "HP 40%");
+		if (health01 <= 3f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(24, "HP 60%");
+		if (health01 < 1f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(23, "HP 80%");
+		return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(22, "HP 100%");
+	}
+
 	public void AddMaxHealth(int i)
 	{
 		extraHP += i;
@@ -1387,15 +1397,5 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 
 		return result;
-	}
-
-	public string GetHealthDescription()
-	{
-		var health01 = (float)GetCurrentHealth() / (float)GetMaxHealth();
-		if (health01 <= 1f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(26, "HP 20%");
-		if (health01 <= 2f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(25, "HP 40%");
-		if (health01 <= 3f / 5f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(24, "HP 60%");
-		if (health01 < 1f) return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(23, "HP 80%");
-		return LanguageSettings.GetDialogLines(DialogFiles.main).GetLine(22, "HP 100%");
 	}
 }
