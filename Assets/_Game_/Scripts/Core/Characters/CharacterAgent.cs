@@ -25,7 +25,7 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0f, 1f)] private float priorityFollower = 0.5f;
 	[SerializeField] [Range(0f, 1f)] private float priorityOther = 0.3f;
 	[SerializeField] private bool noObstacleIfNotRevealed = true;
-	[SerializeField] [Range(0f, 1f)] private float obstacleRadiusScale = 1.0f;
+	[SerializeField] [Range(0f, 2f)] private float obstacleRadiusScale = 1.0f;
 	[SerializeField] private float turnBasedVelocityScale = 1.2f;
 	
 	[Header("Rendering")]
