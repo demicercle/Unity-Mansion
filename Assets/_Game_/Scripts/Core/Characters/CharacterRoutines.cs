@@ -178,11 +178,8 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		if(debugMode > 0) Debug.Log(this + " AssignFollows " + leader);
 		StopAllRoutines();
-		
-		var follow = GetComponent<CharacterFollows>();
-		if (!follow) follow = gameObject.AddComponent<CharacterFollows>();
-		follow.SetLeader(leader);
-		follow.enabled = true;
+
+		_selfCharacter.GetAgent().SetFollowLeader(leader);
 	}
 
 	private void Leader_AssignFollows()

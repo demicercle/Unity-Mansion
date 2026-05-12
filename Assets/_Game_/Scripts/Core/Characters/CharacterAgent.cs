@@ -143,8 +143,6 @@ public class CharacterAgent : MonoBehaviour
 		DropOnGround();
 		UpdateObstacle();
 		if(clamp) ClampOnNavigation();
-		StopFollow();
-		ClearDestination();
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
@@ -243,13 +241,17 @@ public class CharacterAgent : MonoBehaviour
 		return false;
 	}
 
+	public void SetFollowLeader(CharacterEntity leader)
+	{
+		follows.SetLeader(leader);
+	}
+
 	public void StopFollow()
 	{
 		aiDestinationSetter.enabled = false;
 		aiDestinationSetter.target = null;
 		hasDestination = false;
-		if (TryGetComponent(out CharacterFollows follows))
-			follows.enabled = false;
+		follows.enabled = false;
 	}
 
 	public void ClearDestination()
@@ -295,6 +297,8 @@ public class CharacterAgent : MonoBehaviour
 		{
 			aiPath.updatePosition = aiPath.updateRotation = false;
 			SetObstacle(false);
+			StopFollow();
+			ClearDestination();
 		}
 	}
 	
@@ -314,6 +318,7 @@ public class CharacterAgent : MonoBehaviour
 	#region PRIVATE
 	//private Transform followTarget;
 	private AIDestinationSetter aiDestinationSetter;
+	private CharacterFollows follows;
 	private AIPath aiPath;
 	private CharacterEntity _selfCharacter;
 	private GameTurnManager _gameTurnManager; // TODO
@@ -375,6 +380,7 @@ public class CharacterAgent : MonoBehaviour
 		if(Application.isPlaying) aiPath.gravity = Physics.gravity; // force gravity
 		rvoController = Utils.GetOrAddComponent<RVOController>(gameObject);
 		aiDestinationSetter = Utils.GetOrAddComponent<AIDestinationSetter>(gameObject);
+		follows = Utils.GetOrAddComponent<CharacterFollows>(gameObject);
 	}
 
 	private IEnumerator SearchBestWaypoint()
