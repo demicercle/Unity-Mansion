@@ -577,7 +577,19 @@ public class GameInput : MonoBehaviour
 				navigationHit = interactionHit;
 			}
 		}
-		
+
+		if (lastCursorResult == CursorRaycastResult_Navigation)
+		{
+			if (selectedCharacter)
+			{
+				if (lastMouseOverObject && lastMouseOverObject.gameObject.layer != Layers.LayerGround)
+				{
+					SetCurrentCursorType(CursorType.Blocked);
+					lastCursorResult = CursorRaycastResult_None;
+				}
+			}
+		}
+
 		if (lastCursorResult == CursorRaycastResult_Navigation)
 		{
 			if (selectedCharacter)
@@ -585,11 +597,6 @@ public class GameInput : MonoBehaviour
 				SetCurrentCursorType(CursorType.Navigate);
 				navigationTarget.gameObject.SetActive(true);
 //				Debug.Log("navigate!!");
-				
-				if (CanAssignOnMouseOver(selectedCharacter) && !itemToUse && (mouseOverChanged || mouseHasMoved))
-				{
-					selectedCharacter.GetAgent().AssignDestination(lastNavPosition); // mouse over navigation
-				}
 
 				if (CanAssignOnMouseOver(selectedCharacter) && itemToUse)
 				{
@@ -603,6 +610,11 @@ public class GameInput : MonoBehaviour
 							projectileInHand.Simulate(selectedCharacter.GetCenterPosition(), lastNavPosition);
 						}
 					}
+				}
+				
+				if (CanAssignOnMouseOver(selectedCharacter) && !itemToUse && (mouseOverChanged || mouseHasMoved))
+				{
+					selectedCharacter.GetAgent().AssignDestination(lastNavPosition); // mouse over navigation
 				}
 			}
 			//else if(isDebugMode) Debug.Log("no selected character");
