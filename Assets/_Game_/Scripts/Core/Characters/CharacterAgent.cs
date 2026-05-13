@@ -455,7 +455,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void UpdateRVO()
 	{
-		rvoController.enabled = aiPath.enabled && _selfCharacter.IsControllableByPlayer();
+		rvoController.enabled = aiPath.enabled && _selfCharacter.IsControllableByPlayer() && !GameTurnManager.Instance.IsTurnBasedMode();
 		
 		//rvoController.layer = rvoController.enabled ? RVOLayer.DefaultAgent : RVOLayer.Layer2;
 		

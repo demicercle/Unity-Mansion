@@ -144,7 +144,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   snap: 1
-  ignoreY: 1
+  ignoreY: 0
   preventNegativeScale: 1
 --- !u!114 &6355173570402279760
 MonoBehaviour:

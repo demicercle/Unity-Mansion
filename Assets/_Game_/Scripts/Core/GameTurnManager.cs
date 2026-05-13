@@ -326,7 +326,6 @@ public class GameTurnManager : MonoBehaviour
 			}
 			
 			yield return WaitNavigationDirty();
-			yield return YieldRoutines();
 		
 			foreach (var otherCharacter in levelCharacters)
 			{

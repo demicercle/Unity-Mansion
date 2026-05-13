@@ -778,15 +778,15 @@ MonoBehaviour:
   orientation: 0
   enableRotation: 1
   autoRepath:
-    mode: 2
-    period: 0.5
+    mode: 1
+    period: 0.25
     sensitivity: 10
     maximumPeriod: 1
     visualizeSensitivity: 0
   maxAcceleration: -2.5
-  rotationSpeed: 360
+  rotationSpeed: 720
   slowdownDistance: 0.75
-  pickNextWaypointDist: 0.25
+  pickNextWaypointDist: 0.5
   alwaysDrawGizmos: 0
   slowWhenNotFacingTarget: 0
   preventMovingBackwards: 1
@@ -863,7 +863,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b516620e7a5f4087a2b020d253b0edb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
-  followDistance: 1.5
+  followDistance: 4
   avoidDistance: 0
   tickTime: 0
   headingDistance: 1.7

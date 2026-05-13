@@ -35,10 +35,6 @@ public class CharacterFollows : MonoBehaviour
 	{
 		dummy = new GameObject("Follow Dummy (" + name + ")").transform;
 		dummy.gameObject.hideFlags = HideFlags.HideInHierarchy;
-	}
-
-	private void Start()
-	{
 		enabled = false;
 	}
 
@@ -61,9 +57,9 @@ public class CharacterFollows : MonoBehaviour
 
 	private void OnDisable() // enabled=false on assign (CharacterRoutines)
 	{
+		if (debugMode>0) Debug.Log(this + " OnDisable ");
 		if (selfCharacter)
 		{
-			if (debugMode>0) Debug.Log(this + " OnDisable");
 			selfCharacter.Routines.onStarted -= OnNewRoutineStarted;
 		}
 	}
@@ -82,7 +78,7 @@ public class CharacterFollows : MonoBehaviour
 			
 			headingPos = leaderCharacter.GetPosition();
 			
-			headingPos -= leaderCharacter.GetDirection() * headingDistance;
+			headingPos -= leaderCharacter.GetDirection() * (leaderCharacter.IsMoving() ? 1.0f : 0.0f) * headingDistance / Vector3.Distance(selfCharacter.GetPosition(), leaderCharacter.GetPosition());
 			
 			dummy.position = headingSpeed <= 0 ? headingPos :
 				Vector3.MoveTowards(dummy.position, headingPos, Time.deltaTime * headingSpeed * selfCharacter.GetAgent().GetMaxSpeed());
