@@ -23,7 +23,7 @@ public class CharacterBrain : MonoBehaviour
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
 	[SerializeField] private bool turnHostileWhenDamaged = false;
-	[SerializeField] private float aggroAlliesModifier = 0.5f;
+	[SerializeField] private float aggroAlliesModifier = 0.8f;
 	[SerializeField] private Waypoint wanderingPoint;
 
 	public UnityEvent onStartThink;
