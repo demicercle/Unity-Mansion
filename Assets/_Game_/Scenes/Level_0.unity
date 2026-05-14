@@ -299,7 +299,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -12
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.y
@@ -307,7 +307,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1721,6 +1721,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4803376508205812826, guid: cdc2916602637c14c980df071353d0e2, type: 3}
   m_PrefabInstance: {fileID: 6820318622884760647}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &430356049 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6356768765544130209, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
+  m_PrefabInstance: {fileID: 1035404187}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &450840382
 GameObject:
   m_ObjectHideFlags: 0
@@ -1867,6 +1872,11 @@ Transform:
 Transform:
   m_CorrespondingSourceObject: {fileID: 4466470785513590464, guid: 5c6acbda9d3f8494cb5b6d2871ee0560, type: 3}
   m_PrefabInstance: {fileID: 5865506335584677707}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &576455095 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7081189552569672189, guid: 55cbfbc42a1c5784386abf5d72ca7f4a, type: 3}
+  m_PrefabInstance: {fileID: 7292959262284892674}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &589077901
 PrefabInstance:
@@ -3248,6 +3258,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1315457670206092175, guid: 895190acdc97e2342864d089b4eca750, type: 3}
       insertIndex: -1
       addedObject: {fileID: 810419775}
+    - targetCorrespondingSourceObject: {fileID: 1315457670206092175, guid: 895190acdc97e2342864d089b4eca750, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 810419795}
   m_SourcePrefab: {fileID: 100100000, guid: 895190acdc97e2342864d089b4eca750, type: 3}
 --- !u!4 &810419758 stripped
 Transform:
@@ -3267,6 +3280,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameScript
   startGraph: {fileID: 11400000, guid: 2af6609b8d2518c429b0ca9d30404ba5, type: 2}
+--- !u!114 &810419795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 249051964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9679e68a0f1144e79c664d9a11ca121, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.AIDestinationSetter
+  version: 1073741824
+  target: {fileID: 0}
+  useRotation: 0
 --- !u!1001 &849582011
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3289,7 +3317,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.25
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3297,7 +3325,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 5.25
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3993,7 +4021,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6356768765544130209, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1035404207}
   m_SourcePrefab: {fileID: 100100000, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
 --- !u!4 &1035404188 stripped
 Transform:
@@ -4005,12 +4036,27 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5745611760749173238, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
   m_PrefabInstance: {fileID: 1035404187}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 430356049}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7371863386a46299d7e0db5a61d3cdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1035404207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430356049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9679e68a0f1144e79c664d9a11ca121, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.AIDestinationSetter
+  version: 1073741824
+  target: {fileID: 0}
+  useRotation: 0
 --- !u!4 &1040753791 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2615429215624379560, guid: fe94f1582c0e74843ad07a9ae76401e2, type: 3}
@@ -4675,6 +4721,16 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7759030945254331081, guid: 62095b5d5a365a8448bc1583f62602e0, type: 3}
   m_PrefabInstance: {fileID: 1186393121}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1188544396 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1693055383195580825, guid: 94072d63212b13f48b479b2d295f2179, type: 3}
+  m_PrefabInstance: {fileID: 4635732660381546543}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1218783979 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2628907512657444900, guid: 5407317dc4b96c54187bcbb03e8de98d, type: 3}
+  m_PrefabInstance: {fileID: 4516975660671616201}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1222429007 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5409373734523598299, guid: c58fcb13d0ebb2640a553a91016cff2a, type: 3}
@@ -4905,7 +4961,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4913,7 +4969,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5.75
+      value: -4.75
       objectReference: {fileID: 0}
     - target: {fileID: 2758457443287784188, guid: f3a6db55d9f9f2546984e605dcbc3ace, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4983,7 +5039,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2578416470699615839, guid: f184ed9af3c552d4db89b629d882a0d8, type: 3}
       propertyPath: m_LocalScale.y
-      value: 6.610562
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 2578416470699615839, guid: f184ed9af3c552d4db89b629d882a0d8, type: 3}
       propertyPath: m_LocalScale.z
@@ -6255,6 +6311,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5137010538731516600, guid: 2fa844bd44c6e034182dc4c9727723a6, type: 3}
   m_PrefabInstance: {fileID: 1771079711}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1791157637 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6356768765544130209, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
+  m_PrefabInstance: {fileID: 2783038442818534275}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1800092941
 GameObject:
   m_ObjectHideFlags: 0
@@ -7291,14 +7352,17 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6356768765544130209, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2783038442818534295}
   m_SourcePrefab: {fileID: 100100000, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
 --- !u!114 &2783038442818534276 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5745611760749173238, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
   m_PrefabInstance: {fileID: 2783038442818534275}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1791157637}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e7371863386a46299d7e0db5a61d3cdb, type: 3}
@@ -7309,6 +7373,21 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7238060625527304640, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
   m_PrefabInstance: {fileID: 2783038442818534275}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2783038442818534295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791157637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9679e68a0f1144e79c664d9a11ca121, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.AIDestinationSetter
+  version: 1073741824
+  target: {fileID: 0}
+  useRotation: 0
 --- !u!1001 &2822048900100442502
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7882,13 +7961,31 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2628907512657444900, guid: 5407317dc4b96c54187bcbb03e8de98d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4516975660671616222}
   m_SourcePrefab: {fileID: 100100000, guid: 5407317dc4b96c54187bcbb03e8de98d, type: 3}
 --- !u!4 &4516975660671616202 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1747052771439810373, guid: 5407317dc4b96c54187bcbb03e8de98d, type: 3}
   m_PrefabInstance: {fileID: 4516975660671616201}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4516975660671616222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1218783979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9679e68a0f1144e79c664d9a11ca121, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.AIDestinationSetter
+  version: 1073741824
+  target: {fileID: 0}
+  useRotation: 0
 --- !u!4 &4616952227068855023
 Transform:
   m_ObjectHideFlags: 0
@@ -8096,13 +8193,31 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1693055383195580825, guid: 94072d63212b13f48b479b2d295f2179, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4635732660381546564}
   m_SourcePrefab: {fileID: 100100000, guid: 94072d63212b13f48b479b2d295f2179, type: 3}
 --- !u!4 &4635732660381546544 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3115354801398542072, guid: 94072d63212b13f48b479b2d295f2179, type: 3}
   m_PrefabInstance: {fileID: 4635732660381546543}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4635732660381546564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1188544396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9679e68a0f1144e79c664d9a11ca121, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.AIDestinationSetter
+  version: 1073741824
+  target: {fileID: 0}
+  useRotation: 0
 --- !u!1001 &4668079497136874316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9008,13 +9123,31 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7081189552569672189, guid: 55cbfbc42a1c5784386abf5d72ca7f4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7292959262284892695}
   m_SourcePrefab: {fileID: 100100000, guid: 55cbfbc42a1c5784386abf5d72ca7f4a, type: 3}
 --- !u!4 &7292959262284892675 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6773543755327403676, guid: 55cbfbc42a1c5784386abf5d72ca7f4a, type: 3}
   m_PrefabInstance: {fileID: 7292959262284892674}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7292959262284892695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576455095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9679e68a0f1144e79c664d9a11ca121, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.AIDestinationSetter
+  version: 1073741824
+  target: {fileID: 0}
+  useRotation: 0
 --- !u!1001 &7359358429502595652
 PrefabInstance:
   m_ObjectHideFlags: 0

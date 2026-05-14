@@ -933,6 +933,7 @@ MonoBehaviour:
   version: 1073741824
   aiPath: {fileID: 3402239913564902258}
   heightTolerance: 0.5
+  losCheck: 1
 --- !u!1 &3549809914347783905
 GameObject:
   m_ObjectHideFlags: 0
@@ -1193,7 +1194,7 @@ MonoBehaviour:
   meleeWeaponOnly: 1
   isInstantAttack: 1
   useAttackAction: 0
-  noLOS: 1
+  noLOS: 0
   requiresWeaponReady: 0
   maxTriggerCount: -1
   filters: 

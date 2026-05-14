@@ -228,7 +228,6 @@ public class CharacterBrain : MonoBehaviour
 			if (!_chaseCharacter)
 			{
 				if (debugMode > 0) Debug.Log(this + " has no target to chase");
-				StopThink();
 				yield break;
 			}
 			

@@ -114,7 +114,7 @@ public class GameTurnManager : MonoBehaviour
 	private CameraPivot cameraPivot => CameraPivot.Instance;
 	private IEnumerable<CharacterEntity> partyCharacters => CharacterEntity.GetPartyCharacters();
 	
-	private CharacterEntity[] levelCharacters;
+	private CharacterEntity[] levelCharacters = Array.Empty<CharacterEntity>();
 	private CharacterEntity currentAICharacter;
 	private CharacterEntity focusCharacter;
 	private int currentTurn;
@@ -655,7 +655,7 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.BeginVertical("textfield");
 			
 			GUILayout.Label("GAME TURN MANAGER");
-			GUILayout.Label("levelCharacters: " + levelCharacters?.Length);
+			GUILayout.Label("levelCharacters: " + levelCharacters.Length);
 			
 			GUILayout.BeginVertical("textfield");
 			GUILayout.Label("turnBasedMode: " + turnBasedMode);
@@ -677,14 +677,27 @@ public class GameTurnManager : MonoBehaviour
 				
 				foreach (var character in levelCharacters)
 				{
-					if (!character.IsCharacterRevealed()) continue;
-					
 					var label = character.name;
-					if (character.IsDead()) label += " (DEAD)";
-					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
 					
 					var isCurrent = (playerTurn && character.InParty()) ||
 					                (!playerTurn && currentAICharacter == character);
+					
+					if (debugMode > 1)
+					{
+						if (!character.IsCharacterRevealed())
+						{
+							label += " (HIDDEN)";
+							isCurrent = false;
+						}
+					}
+					else
+					{
+						if (!character.IsCharacterRevealed()) 
+							continue;
+					}
+					
+					if (character.IsDead()) label += " (DEAD)";
+					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
 						
 					GUILayout.Toggle(isCurrent, label);
 				}

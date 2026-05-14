@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -22,6 +23,7 @@ public class AttackTrigger : MonoBehaviour
 	
 	private SphereCollider sphereCollider;
 	private int triggerCount;
+	private List<CharacterEntity> triggeredCharacters = new List<CharacterEntity>();
 	
 	private void Awake()
 	{
@@ -44,6 +46,8 @@ public class AttackTrigger : MonoBehaviour
 	{
 		sphereCollider.enabled = true;
 		selfCharacter.onStatsChanged += OnCharacterStatsChanged;
+		GameTurnManager.Instance.onTurnStarted += OnTurnChanged;
+		GameTurnManager.Instance.onTurnEnded += OnTurnChanged;
 		if(debugMode > 0) Debug.Log(this + " OnEnable");
 	}
 
@@ -53,6 +57,8 @@ public class AttackTrigger : MonoBehaviour
 
 		if (!selfCharacter) return;
 		selfCharacter.onStatsChanged -= OnCharacterStatsChanged;
+		GameTurnManager.Instance.onTurnStarted -= OnTurnChanged;
+		GameTurnManager.Instance.onTurnEnded -= OnTurnChanged;
 		if(debugMode > 0) Debug.Log(this + " OnDisable");
 	}
 
@@ -74,6 +80,9 @@ public class AttackTrigger : MonoBehaviour
 		
 		if (other.TryGetComponent(out CharacterEntity otherCharacter))
 		{
+			if (triggeredCharacters.Contains(otherCharacter))
+				return;
+			
 			if (!otherCharacter.IsDead() && TagCheck(filters, otherCharacter))
 			{
 				if (movingCharacterOnly && !otherCharacter.IsMoving()) 
@@ -98,6 +107,9 @@ public class AttackTrigger : MonoBehaviour
 
 				if (debugMode > 0) Debug.Log(this + " triggers instant:" + isInstantAttack + " on " + otherCharacter);
 				
+				triggerCount++;
+				triggeredCharacters.Add(otherCharacter);
+				
 				otherCharacter.StopAgent();
 				
 				if (isInstantAttack) 
@@ -105,9 +117,7 @@ public class AttackTrigger : MonoBehaviour
 				else 
 					selfCharacter.Routines.AssignMoveAndAttack(otherCharacter, !noLOS, useAttackAction);
 				
-				triggerCount++;
-				
-				if (debugMode > 0) Debug.Log(this + " in " + selfCharacter + " triggers opportunity attack on " + otherCharacter);
+				//if (debugMode > 0) Debug.Log(this + " in " + selfCharacter + " triggers opportunity attack on " + otherCharacter);
 			}
 		}
 	}
@@ -115,6 +125,12 @@ public class AttackTrigger : MonoBehaviour
 	private void OnCharacterStatsChanged()
 	{
 		sphereCollider.radius = triggerRange;
+	}
+
+	private void OnTurnChanged()
+	{
+		if(selfCharacter.IsCurrentTurn())
+			triggeredCharacters.Clear();
 	}
 	
 	private bool TagCheck(string filters, object obj)
