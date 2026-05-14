@@ -84,7 +84,7 @@ public class CharacterRoutines : MonoBehaviour
 		LastTimeAssignedTarget = Time.time;
 		assignedTarget = null;
 		if(debugMode > 0) Debug.Log(this + " AssignMoveToDestination " + navPosition);
-		StartNewRoutine(WaitCharacterMoved(navPosition, reachDistance, raycastForDestructible)); // assign move to destination
+		StartNewRoutine(WaitCharacterMoved(navPosition, reachDistance, raycastForDestructible, false)); // assign move to destination
 	}
 	public void AssignMoveToWaypoint(Waypoint waypoint, System.Action onComplete = null)
 	{
@@ -292,7 +292,7 @@ public class CharacterRoutines : MonoBehaviour
 		var agent = _selfCharacter.GetAgent();
 		agent.SetReachDistance(reachRadius);
  
-		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false)); // assign interact
+		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false, false)); // assign interact
 		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtWaypoint prop=" + clickedProp + " waypoint=" + foundWaypoint + " reachRadius=" + reachRadius);
 		if (agent.ReachedDestination(destination, reachRadius))
@@ -342,7 +342,7 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 
-		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false)); // interact @position
+		yield return StartCoroutine(WaitCharacterMoved(destination, reachRadius, false, false)); // interact @position
 		yield return null;
 		
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterInteractAtPosition " + clickedProp + " check reach destination");
@@ -398,7 +398,7 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
 			if (GameTurnManager.Instance.IsTurnBasedMode())
 			{
-				yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible));
+				yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible, losCheck));
 			}
 			else
 			{
@@ -427,6 +427,7 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 0) Debug.Log(_selfCharacter + " no at attack range");
 		}
 	}
+
 
 	private bool LOSCheck(IAttackable target)
 	{
@@ -660,7 +661,7 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitMoveCharacterToWaypoint";
 		if(debugMode > 0) Debug.Log(this + " WaitMoveCharacterToWaypoint " + waypoint);
 		
-		yield return StartCoroutine(WaitCharacterMoved(waypoint.GetPosition(), waypoint.radius, false));
+		yield return StartCoroutine(WaitCharacterMoved(waypoint.GetPosition(), waypoint.radius, false, false));
 		
 		if (_selfCharacter.WaypointReached(waypoint))
 		{
@@ -671,8 +672,7 @@ public class CharacterRoutines : MonoBehaviour
 		onComplete?.Invoke();
 	}
 
-	private List<Waypoint> ignoreWaypoints = new List<Waypoint>();
-	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance, bool raycastForDestructible)
+	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance, bool raycastForDestructible, bool losCheck)
 	{
 		reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAgent().GetMinReachDistance());
 
@@ -721,8 +721,10 @@ public class CharacterRoutines : MonoBehaviour
 		agent.StartMove();
 		
 		var startTime = Time.time;
-		while (!agent.ReachedDestination(dest, reachDistance))
+		while (true)
 		{
+			if (agent.ReachedDestination(dest, reachDistance) && (!losCheck || _selfCharacter.LOSCheck(dest))) break; // destination reached
+			
 			debugTimeout = (Time.time - startTime);
 
 			if (debugTimeout < 0.01f && !agent.IsMoving())
@@ -1131,7 +1133,7 @@ public class CharacterRoutines : MonoBehaviour
 		var reachDistance =_selfCharacter.GetRadius() + MinGiveDistance;
 		if (_selfCharacter.GetDistanceTo(worldPosition) > reachDistance)
 		{
-			yield return StartCoroutine(WaitCharacterMoved(worldPosition, reachDistance, false)); // drop item
+			yield return StartCoroutine(WaitCharacterMoved(worldPosition, reachDistance, false, false)); // drop item
 		}
 
 		if (_selfCharacter.GetDistanceTo(worldPosition) <= reachDistance)

@@ -907,6 +907,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight(), other is Component ? (other as Component).GetComponent<Collider>() : null);
 	}
 
+	public bool LOSCheck(Vector3 pos) => LOSCheck(GetCenterPosition(), pos);
+
 	public bool LOSCheck(Vector3 start, Vector3 end, Collider other = null)
 	{
 		if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, end, Color.green, 1.0f);

@@ -15,8 +15,9 @@ REFACTO
 - assign attack : should update destination if target moves: "assign follow transform"
 - check "min time between assigns"
 - wood break SFX
-- issue with cutscene zombi 7: more wait time or yield routine between "turns"
-- character "enemy" detected > scream should be "only once"
+- opportunity attacks through walls + should trigger only once (retake logic/conditions)
+- try to reach dest taking wall
+- cutscene: if zombi 7 does not detect players, then should patrol or move
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
