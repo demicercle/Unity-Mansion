@@ -14,6 +14,9 @@ REFACTO
 - when zombi about to attack, should display if "dice will hit"
 - assign attack : should update destination if target moves: "assign follow transform"
 - check "min time between assigns"
+- wood break SFX
+- issue with cutscene zombi 7: more wait time or yield routine between "turns"
+- character "enemy" detected > scream should be "only once"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

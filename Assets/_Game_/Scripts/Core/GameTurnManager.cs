@@ -333,6 +333,8 @@ public class GameTurnManager : MonoBehaviour
 				if (otherCharacter.IsDead()) continue;
 				if (!otherCharacter.IsCharacterRevealed()) continue;
 				
+				yield return YieldRoutines(); // for possible scripts
+				
 				currentAICharacter = otherCharacter;
 				
 				otherCharacter.Rest(); // rest not player character
@@ -483,17 +485,20 @@ public class GameTurnManager : MonoBehaviour
 		
 		foreach (var anyCharacter in levelCharacters)
 		{
-			if (anyCharacter.IsDead() || !anyCharacter.IsCharacterRevealed())
+			if (anyCharacter.IsDead())
 				continue;
 			
 			anyCharacter.Routines.StopAllRoutines();
 			anyCharacter.StopAgent();
 			
+			if (anyCharacter.TryGetComponent(out CharacterBrain otherBrain))
+				otherBrain.StopThink();
+
+			if (!anyCharacter.IsCharacterRevealed())
+				continue;
+			
 			if (!anyCharacter.InParty())
 			{
-				if (anyCharacter.TryGetComponent(out CharacterBrain otherBrain))
-					otherBrain.StopThink();
-
 				if (anyCharacter.IsEnemyToPlayer())
 				{
 					if (forceEnemyDetectParty)

@@ -229,11 +229,16 @@ public class CharacterAnimation : MonoBehaviour
 		}
 	}
 
+	private bool hasDetectedEnemy;
 	private void OnCharacterDetected(CharacterEntity other)
 	{
 		if (_selfCharacter.IsEnemyTo(other) && !_selfCharacter.IsDead() && _selfCharacter.IsCharacterRevealed())
 		{
-			TrySetTrigger(parameters.detectEnemyTrigger);
+			if (!hasDetectedEnemy)
+			{
+				hasDetectedEnemy = true;
+				TrySetTrigger(parameters.detectEnemyTrigger);
+			}
 		}
 	}
 
@@ -241,7 +246,8 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		hasSwitchOnTrigger = !string.IsNullOrWhiteSpace(parameters.switchOnTrigger);
 		hasSwitchOffTrigger = !string.IsNullOrWhiteSpace(parameters.switchOffTrigger);
-		
+
+		hasDetectedEnemy = false;
 		weaponInHand = Weapon.Relax;
 		
 		TrySetFloat(parameters.velocityX, 0.0f);      
@@ -351,6 +357,7 @@ public class CharacterAnimation : MonoBehaviour
 		//TrySetTrigger(parameters.trigger);
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
+		hasDetectedEnemy = false;
 		if (rpgAnimationHandler)
 		{
 			rpgAnimationHandler.Death();
