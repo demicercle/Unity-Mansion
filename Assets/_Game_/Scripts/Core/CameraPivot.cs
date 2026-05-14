@@ -14,7 +14,7 @@ public class CameraPivot : MonoBehaviour
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawSphere(focusPosition, 0.5f);
-        UpdateBounds();
+        //UpdateBounds();
         UpdatePosition();
         //UpdateAnimator();
         //UpdateSpotLight();
@@ -275,7 +275,7 @@ public class CameraPivot : MonoBehaviour
 
     private void LateUpdate()
     {
-        UpdateBounds();
+        //UpdateBounds();
         UpdatePosition();
         UpdateAnimator();
     }
@@ -288,12 +288,12 @@ public class CameraPivot : MonoBehaviour
         }
     }
     
-    private void UpdateBounds()
+    /*private void UpdateBounds()
     {
         if (worldHeight <= 0f) return;
         worldBounds.center = Vector3.up * worldHeight + Vector3.up * worldY;
         worldBounds.extents = new Vector3(worldBounds.extents.x, worldHeight, worldBounds.extents.z);
-    }
+    }*/
     
     private void UpdatePosition()
     {

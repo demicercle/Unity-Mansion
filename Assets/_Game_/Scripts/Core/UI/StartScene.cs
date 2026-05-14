@@ -34,6 +34,7 @@ public class StartScene : MonoBehaviour
 	private void ClickNewGame()
 	{
 		GameSave.Current.Clear(true);
+		GameSave.Current.LoadFirstLevel();
 		sceneLoader.LoadNow();
 	}
 

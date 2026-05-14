@@ -245,10 +245,14 @@ public class GameSave : ScriptableObject
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
 
-	private static bool shouldLoad;
+	private bool shouldLoad;
 	public bool ShouldLoad() => shouldLoad;
 	public void MarkAsLoad() => shouldLoad = true;
-	
+
+
+	private bool loadFirstLevel;
+	public void MarkFirstLevel() => loadFirstLevel = true;
+	public bool LoadFirstLevel() => loadFirstLevel;
 	public bool IsEmpty() => version == 0;
 
 	public void SetSavedValue(string valueName, int newValue)

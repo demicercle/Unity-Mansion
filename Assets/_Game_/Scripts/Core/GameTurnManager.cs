@@ -17,7 +17,7 @@ public class GameTurnManager : MonoBehaviour
 	public event System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded, onGameOver;
 	
-	[SerializeField] private string nextLevelName = "Level_0";
+	[SerializeField] private string firstLevelName = "Level_0";
 	[Header("Camera")]
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[SerializeField] private bool focusWhenCharacterUseAction = true;
@@ -162,7 +162,8 @@ public class GameTurnManager : MonoBehaviour
 		FadeScreen.FadeIn(true);
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
-		sceneLoader.SetSceneToLoad(nextLevelName, LoadSceneMode.Additive);
+		if(GameSave.Current.LoadFirstLevel())
+			sceneLoader.SetSceneToLoad(firstLevelName, LoadSceneMode.Additive);
 
 		isLoading = true;
 		Debug.Log(this + " loading...");
