@@ -165,6 +165,7 @@ public class RoomTrigger : MonoBehaviour
 
 		foreach (var trigger in triggers)
 		{
+			if (!trigger) continue;
 			var bounds = trigger.GetWorldBounds();
 			Gizmos.color = Utils.ColorAlpha(Color.yellow, 0.5f);
 			Gizmos.DrawWireCube(bounds.center, bounds.size);

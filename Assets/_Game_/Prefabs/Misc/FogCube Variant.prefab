@@ -64,9 +64,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1495521155709676638, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2251922595011403660, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
       propertyPath: m_Name
       value: FogCube Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 5799231115807842419, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: 923138ab6ae405e49b1c450bd6e41f96, type: 3}
+    - target: {fileID: 8771403931283440583, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+      propertyPath: m_Size.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8771403931283440583, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+      propertyPath: m_Center.y
+      value: 0.25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
