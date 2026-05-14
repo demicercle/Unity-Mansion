@@ -206,14 +206,6 @@ PrefabInstance:
       propertyPath: worldBounds.m_Extent.z
       value: 14.999999
       objectReference: {fileID: 0}
-    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
-      propertyPath: positionCurve.m_Curve.Array.data[0].value
-      value: 17
-      objectReference: {fileID: 0}
-    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
-      propertyPath: positionCurve.m_Curve.Array.data[1].value
-      value: 7
-      objectReference: {fileID: 0}
     - target: {fileID: 6873523688060535263, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: m_LocalPosition.x
       value: -17.5
