@@ -104,9 +104,7 @@ public class CameraPivot : MonoBehaviour
     [Range(-180f, 180)][SerializeField]  private float editorYaw; 
     [Space]
     [Header("Bounds")]
-    [SerializeField] private Bounds worldBounds;
-    [SerializeField] private float worldY = 0f;
-    [Min(0f)][SerializeField] private float worldHeight = 12f;
+    [ReadOnly] [SerializeField] private Bounds worldBounds;
     [Space]
     [Header("Scene Settings")]
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
@@ -318,6 +316,8 @@ public class CameraPivot : MonoBehaviour
 #endif
         
         focusPosition = worldBounds.ClosestPoint(focusPosition);
+
+        focusPosition.y = worldBounds.center.y;
         
         // lerp rotation
         currentYaw = !Application.isPlaying ? enableEditorMovement ? editorYaw : desiredYaw : Mathf.LerpAngle(currentYaw, desiredYaw, Time.unscaledDeltaTime * rotationSpeed.y * Consts.RAD_TO_DEG);
