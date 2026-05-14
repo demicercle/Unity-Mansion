@@ -171,16 +171,28 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: focusPosition.x
+      value: -17.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: focusPosition.y
-      value: 3
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: orbitMaxSpeed.x
       value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: worldBounds.m_Center.x
+      value: -37.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: worldBounds.m_Center.y
-      value: 0
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: worldBounds.m_Center.z
+      value: -1.500001
       objectReference: {fileID: 0}
     - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: worldBounds.m_Extent.x
@@ -188,11 +200,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: worldBounds.m_Extent.y
-      value: 8
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: worldBounds.m_Extent.z
-      value: 15
+      value: 14.999999
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: positionCurve.m_Curve.Array.data[0].value
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476284808873527906, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: positionCurve.m_Curve.Array.data[1].value
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6873523688060535263, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: m_LocalPosition.x

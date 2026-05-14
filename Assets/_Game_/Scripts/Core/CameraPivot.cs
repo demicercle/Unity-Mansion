@@ -110,9 +110,10 @@ public class CameraPivot : MonoBehaviour
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
     [Space]
     [Header("References")]
-    [SerializeField] private Animator animator;
-    [SerializeField] private string zoomParameter;
     [SerializeField] private Transform rotationPivot;
+    [SerializeField] private Transform positionPivot;
+    [SerializeField] private AnimationCurve rotationCurve;
+    [SerializeField] private AnimationCurve positionCurve;
     [Space]
     [Header("ReadOnly (CameraSettings)")]
     [ReadOnly] [SerializeField] private float lerpSpeed = 1.5f;
@@ -162,14 +163,12 @@ public class CameraPivot : MonoBehaviour
     public void Zoom(float delta)
     {
         desiredZoom = Mathf.Clamp01(desiredZoom + zoomSpeed * delta * 0.1f);
-        UpdateAnimator();
     }
 
     public void SetZoom(float value)
     {
         if (debugMode > 0) Debug.Log(this + " SetZoom " + value);
         desiredZoom = Mathf.Clamp01(value);
-        UpdateAnimator();
     }
 
     public Coroutine OrbitTowards(float yaw)
@@ -268,22 +267,18 @@ public class CameraPivot : MonoBehaviour
     private void Start()
     {
         ApplySettings();
-        UpdateAnimator();
     }
 
     private void LateUpdate()
     {
         //UpdateBounds();
         UpdatePosition();
-        UpdateAnimator();
     }
     
-    private void UpdateAnimator()
+    private void FixedUpdate()
     {
-        if (animator && !string.IsNullOrEmpty(zoomParameter))
-        {
-            animator.SetFloat(zoomParameter, currentZoom);
-        }
+        rotationPivot.localEulerAngles = new Vector3(-rotationCurve.Evaluate(currentZoom), 0, 0);
+        positionPivot.localPosition = Vector3.up * positionCurve.Evaluate(currentZoom);
     }
     
     /*private void UpdateBounds()

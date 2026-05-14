@@ -27,7 +27,7 @@ TagManager:
   - Door
   - Dead
   - Loot
-  - 
+  - CollideCamera
   - 
   - 
   - 
