@@ -46,4 +46,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   radius: 0.4
   ignoreRotation: 1
-  color: {r: 0.12963653, g: 1, b: 0, a: 0.49803922}
+  ignoreNavigation: 0
+  color: {r: 0, g: 0.5439868, b: 1, a: 0.49803922}

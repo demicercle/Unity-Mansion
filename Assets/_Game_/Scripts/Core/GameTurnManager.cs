@@ -185,16 +185,16 @@ public class GameTurnManager : MonoBehaviour
 		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
 		yield return null; // for triggers
 
+		yield return StartCoroutine(SpawnParty());
+		
 		InitLevel();
+		
 		
 		Debug.Log(this + " found levelCharacters=" + levelCharacters.Length);
 		
-		var partyIndex = 0;
 		foreach (var character in levelCharacters)
 		{
 			character.Spawn();
-			if(character.GetCurrentFaction() == CharacterFaction.Player)
-				character.SetPartyIndex(partyIndex++);
 		}
 
 		if (GameSave.Current.ShouldLoad())
@@ -257,6 +257,17 @@ public class GameTurnManager : MonoBehaviour
 		}
 	}
 
+	private IEnumerator SpawnParty()
+	{
+		if (!PlayerStart.FindCurrent(out var ps))
+		{
+			Debug.LogError(this + " cannot find player start!");
+			yield break;
+		}
+		
+		yield return StartCoroutine(ps.Spawn());
+	}
+	
 	private void InitLevel()
 	{
 		levelCharacters = CharacterEntity.AllCharacters
