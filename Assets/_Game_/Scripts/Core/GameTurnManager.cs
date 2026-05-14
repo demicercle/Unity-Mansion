@@ -274,7 +274,8 @@ public class GameTurnManager : MonoBehaviour
 			.OrderBy(c => c.transform.GetSiblingIndex())
 			.ToArray();
 
-		Utils.FindFirstObject<LevelComponent>().Init(levelCharacters);
+		var level = Utils.FindFirstObject<LevelComponent>();
+		level.Init(levelCharacters);
 	}
 
 	private IEnumerator TurnBasedCoroutine()

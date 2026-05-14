@@ -11,10 +11,10 @@ public static class OpenEditorScenes
 	static void OpenScenes_GameScene() => OpenScenes("GameScene");
 	
 	[MenuItem("[Scenes]/Levels/Level_0")]
-	static void OpenScenes_Levels_Level_0() => OpenScenes("GameScene", "Level_0", "Level_0_Env");
+	static void OpenScenes_Levels_Level_0() => OpenScenes("GameScene", "Level_Globals", "Level_0", "Level_0_Env");
 	
 	[MenuItem("[Scenes]/Levels/Level_1")]
-	static void OpenScenes_Levels_Level_1() => OpenScenes("GameScene", "Level_1", "Level_1_Env");
+	static void OpenScenes_Levels_Level_1() => OpenScenes("GameScene", "Level_Globals", "Level_1", "Level_1_Env");
 
 	static void OpenScenes(params string[] scenes)
 	{

@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 7609907940526296612}
   - component: {fileID: 3993351974707439097}
   - component: {fileID: 3707570885431278476}
-  - component: {fileID: 4833798763918923341}
   - component: {fileID: 4093696222227633728}
+  - component: {fileID: 8593216416215639958}
   - component: {fileID: 1999162733985184059}
   m_Layer: 0
   m_Name: LevelBase
@@ -164,24 +164,6 @@ MonoBehaviour:
   movementPlane: 0
   useNavmeshAsObstacle: 0
   drawQuadtree: 0
---- !u!114 &4833798763918923341
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2113469372072591625}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5cd40be529044b7eb331e8a191301869, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelGrid
-  cellFillColor: {r: 0, g: 0, b: 0, a: 0}
-  cellLineColor: {r: 0, g: 1, b: 0, a: 0.6117647}
-  extends: {x: 10, y: 10}
-  cellSize: 2.5
-  nodeSize: 0.25
-  offset: {x: 1.25, y: 0.1, z: 0}
 --- !u!114 &4093696222227633728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,6 +177,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AstarOptimizer
   maxFrameTimeMS: 24
+--- !u!114 &8593216416215639958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113469372072591625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c06a9ca4b754ccd81c335858ffcb176, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
+  sceneToLoad: Level_Globals
+  loadSceneMode: 1
+  autoLoad: 1
 --- !u!114 &1999162733985184059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -207,6 +204,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46b288c107404971b964885889359214, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelComponent
+  aStar: {fileID: 3993351974707439097}
+  worldHeight: 12
   enemySpreadHP: 0
   hpMaxSpread: 1
 --- !u!1 &2233729156539003407
