@@ -6,6 +6,7 @@ public class GameEventTrigger : MonoBehaviour
 {
 	public UnityEvent turnEnded, turnStarted;
 	public UnityEvent onFightStarts, onFightEnds;
+	public UnityEvent onGameOver;
 	public UnityEvent<bool> onTurnBasedChanged;
 	public UnityEvent<bool> onPlayerChanged;
 	public bool debugMode;
@@ -20,6 +21,7 @@ public class GameEventTrigger : MonoBehaviour
 		_gameTurnManager.onTurnStarted += turnStarted.Invoke;
 		_gameTurnManager.onPlayerChanged += onPlayerChanged.Invoke;
 		_gameTurnManager.onTurnBasedChanged += OnTurnBasedChanged;
+		_gameTurnManager.onGameOver += OnGameOver;
 	}
 
 	private void OnDestroy()
@@ -28,6 +30,12 @@ public class GameEventTrigger : MonoBehaviour
 		_gameTurnManager.onTurnStarted -= turnStarted.Invoke;
 		_gameTurnManager.onPlayerChanged -= onPlayerChanged.Invoke;
 		_gameTurnManager.onTurnBasedChanged -= OnTurnBasedChanged;
+		_gameTurnManager.onGameOver -= OnGameOver;
+	}
+
+	private void OnGameOver()
+	{
+		onGameOver.Invoke();
 	}
 	
 	private void OnTurnBasedChanged(bool value)

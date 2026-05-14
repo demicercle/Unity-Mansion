@@ -111,7 +111,7 @@ public class CameraPivot : MonoBehaviour
     [Header("Scene Settings")]
     [Range(0f,1f)] [SerializeField] private  float awakeZoom = 0.2f;
     [Space]
-    [Header("References")] 
+    [Header("References")]
     [SerializeField] private Animator animator;
     [SerializeField] private string zoomParameter;
     [SerializeField] private Transform rotationPivot;

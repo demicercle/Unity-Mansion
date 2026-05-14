@@ -146,6 +146,14 @@ public class ConsoleCommands : MonoBehaviour
 	{
 		DiceLauncher.AllowedDiceRolls += count;
 	}
+	
+	
+
+	[ConsoleMethod("set_next_dice", "")]
+	public static void SetNextDiceResult(int value)
+	{
+		DicePool.SetNextDiceResult(value);
+	}
 
 	[ConsoleMethod("quit_game", "")]
 	public static void QuitGame()
@@ -170,6 +178,12 @@ public class ConsoleCommands : MonoBehaviour
 		ResetGame();
 	}
 
+	[ConsoleMethod("open_save_folder", "")]
+	public static void OpenSaveFolder()
+	{
+		Application.OpenURL("file://" + GameSave.folderPath);
+	}
+ 
 	[ConsoleMethod("dtset", "")]
 	public static void DtSet(float value)
 	{
@@ -199,10 +213,13 @@ public class ConsoleCommands : MonoBehaviour
 			Debug.LogWarning("Selected character " + selectedCharacter + " has no inventory");
 			return;
 		}
+		
+		itemData = itemData.Duplicate();
 
 		if (!inventory.TryAddItem(itemData))
 		{
 			Debug.LogWarning("Selected character " + selectedCharacter + " inventory full");
+			Destroy(itemData);
 			return;
 		}
 		
@@ -253,6 +270,18 @@ public class ConsoleCommands : MonoBehaviour
 		_DebugTriggers(value);
 		_DebugGtm(value);
 	}*/
+	
+	[ConsoleMethod("debug_props", "")]
+	public static void _DebugProps(int value)
+	{
+		Debug.Log("debug_props=" + (PropComponent.debugMode = value));
+	}
+
+	[ConsoleMethod("debug_noise", "")]
+	public static void _DebugNoise(int value)
+	{
+		Debug.Log("debug_noise=" + (NoiseTrigger.debugMode = value));
+	}
 	
 
 	[ConsoleMethod("debug_save", "")]

@@ -155,6 +155,7 @@ public class RoomTrigger : MonoBehaviour
 	
 	private void OnDrawGizmosSelected()
 	{
+		if (Application.isPlaying) return;
 		foreach (var door in doors)
 		{
 			if (!door) continue;
@@ -164,6 +165,7 @@ public class RoomTrigger : MonoBehaviour
 
 		foreach (var trigger in triggers)
 		{
+			if (!trigger) continue;
 			var bounds = trigger.GetWorldBounds();
 			Gizmos.color = Utils.ColorAlpha(Color.yellow, 0.5f);
 			Gizmos.DrawWireCube(bounds.center, bounds.size);
@@ -198,7 +200,7 @@ public class RoomTrigger : MonoBehaviour
 	private void OnDisable()
 	{
 		activeRooms.Remove(this);
-		if(debugMode > 0) Debug.Log(this + " OnEnable activeRooms=" + activeRooms.Count);
+		if(debugMode > 0) Debug.Log(this + " OnDisable activeRooms=" + activeRooms.Count);
 		
 		foreach (var doorObj in doors)
 		{

@@ -1,0 +1,189 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6653806591753127089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4135ccbab73b4b6cbe122f5d7849f62c, type: 3}
+  m_Name: Started
+  m_EditorClassIdentifier: Assembly-CSharp::NodeStarted
+  graph: {fileID: 11400000}
+  position: {x: -616, y: -120}
+  ports:
+    keys:
+    - _out
+    values:
+    - _fieldName: _out
+      _node: {fileID: -6653806591753127089}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _in
+        node: {fileID: 2124882485324695773}
+        reroutePoints: []
+      - fieldName: _in
+        node: {fileID: -5035446225243804785}
+        reroutePoints: []
+      - fieldName: _in
+        node: {fileID: -3293232152861389096}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+--- !u!114 &-5035446225243804785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666d329e9aa64926b620636f13bbd6e0, type: 3}
+  m_Name: Give Extra Actions
+  m_EditorClassIdentifier: Assembly-CSharp::NodeGiveExtraActions
+  graph: {fileID: 11400000}
+  position: {x: -250.5, y: -110.5}
+  ports:
+    keys:
+    - _in
+    - _character
+    - _amount
+    values:
+    - _fieldName: _in
+      _node: {fileID: -5035446225243804785}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: -6653806591753127089}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _character
+      _node: {fileID: -5035446225243804785}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _amount
+      _node: {fileID: -5035446225243804785}
+      _typeQualifiedName: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _amount: 2
+--- !u!114 &-3293232152861389096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61819447ae8540a6b329b4e3f53812bb, type: 3}
+  m_Name: Destroy Script
+  m_EditorClassIdentifier: Assembly-CSharp::NodeDestroyScript
+  graph: {fileID: 11400000}
+  position: {x: -229.5, y: 47.5}
+  ports:
+    keys:
+    - _in
+    - _delay
+    values:
+    - _fieldName: _in
+      _node: {fileID: -3293232152861389096}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: -6653806591753127089}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _delay
+      _node: {fileID: -3293232152861389096}
+      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _delay: 0
+  destroyGameObject: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 356af8172615ede43a450e1112ea2b1c, type: 3}
+  m_Name: Graph_Item_Soda
+  m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
+  nodes:
+  - {fileID: -6653806591753127089}
+  - {fileID: 2124882485324695773}
+  - {fileID: -5035446225243804785}
+  - {fileID: -3293232152861389096}
+--- !u!114 &2124882485324695773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8db2783124c44aab2efdc3c43580045, type: 3}
+  m_Name: Instantiate
+  m_EditorClassIdentifier: Assembly-CSharp::NodeInstantiate
+  graph: {fileID: 11400000}
+  position: {x: -206.5, y: -270.5}
+  ports:
+    keys:
+    - _in
+    - _position
+    values:
+    - _fieldName: _in
+      _node: {fileID: 2124882485324695773}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: -6653806591753127089}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _position
+      _node: {fileID: 2124882485324695773}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  prefab: {fileID: 1042361525996828, guid: 6943138a0c4a8fd4ea27b63049acac96, type: 3}

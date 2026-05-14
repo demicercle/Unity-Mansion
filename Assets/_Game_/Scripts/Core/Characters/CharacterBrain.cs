@@ -22,9 +22,9 @@ public class CharacterBrain : MonoBehaviour
 	
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
-	//[SerializeField] [Min(0f)] private float defaultWait = 1.5f;
+	[SerializeField] private bool turnHostileWhenDamaged = false;
+	[SerializeField] private float aggroAlliesModifier = 0.8f;
 	[SerializeField] private Waypoint wanderingPoint;
-	//private bool canUseRunAction => GameTurnManager.Instance.IsTurnBasedMode();
 
 	public UnityEvent onStartThink;
 	
@@ -56,6 +56,65 @@ public class CharacterBrain : MonoBehaviour
 	}
 
 	public bool HasWanderingPoint(Waypoint wp) => wanderingPoint == wp;
+	
+	#region PRIVATE
+	private CharacterEntity _selfCharacter;
+	private CharacterDetection _characterDetection;
+	private CharacterEntity _chaseCharacter;
+	private float _chaseDistance;
+	private PatrolRoute _patrolRoute;
+	private List<Waypoint> _waypointList;
+	private Waypoint _currentWaypoint;
+	private Vector3 _lastTargetKnownPosition;
+	private Vector3 _wanderingPos, _lastWanderingPos;
+	private Dictionary<CharacterEntity, float> _aggroMap = new Dictionary<CharacterEntity, float>();
+	private float _startedThinkingTime;
+	private Vector3 _lastPosition;
+	private CharacterAgent _agent;
+	
+	private void Awake()
+	{
+		_selfCharacter = GetComponent<CharacterEntity>();
+		if (!_selfCharacter)
+		{
+			Debug.LogWarning(this + " has no character controller!");
+			enabled = false;
+			return;
+		}
+
+		_selfCharacter.onPartyIndexChanged += OnPartyIndexChanged;
+		_selfCharacter.onDead += OnCharacterDead;
+		_selfCharacter.onDamagedBy += OnDamagedBy;
+		
+		_waypointList = new List<Waypoint>();
+		_agent = GetComponent<CharacterAgent>();
+	}
+
+	private void OnDestroy()
+	{
+		_selfCharacter.onPartyIndexChanged -= OnPartyIndexChanged;
+		_selfCharacter.onDead -= OnCharacterDead;
+		_selfCharacter.onDamagedBy -= OnDamagedBy;
+	}
+
+	private void OnEnable()
+	{
+		if (!_characterDetection) _characterDetection = GetComponent<CharacterDetection>();
+		if (_characterDetection)
+		{
+			_characterDetection.onCharacterDetected += OnCharacterDetected;
+			_characterDetection.onCharacterLost += OnCharacterLost;
+		}
+	}
+
+	private void OnDisable()
+	{
+		if (_characterDetection)
+		{
+			_characterDetection.onCharacterDetected -= OnCharacterDetected;
+			_characterDetection.onCharacterLost -= OnCharacterLost;
+		}
+	}
 
 	private IEnumerator Think()
 	{
@@ -83,6 +142,11 @@ public class CharacterBrain : MonoBehaviour
 		if(debugMode > 1) Debug.Log(this + " ends");
 
 		IsThinking = false;
+	}
+
+	private void ResetTimeout()
+	{
+		_startedThinkingTime = Time.time;
 	}
 
 	private IEnumerator ThinkTimeoutCoroutine()
@@ -118,16 +182,47 @@ public class CharacterBrain : MonoBehaviour
 			yield break;
 		}
 		
-		if (_chaseCharacter)
+		ResetTimeout();
+		while (_selfCharacter.HasActions())
 		{
-			if (_chaseCharacter.IsDead())
+			if (_selfCharacter.WeaponNeedsReload())
 			{
+				if (debugMode > 0) Debug.Log(this + " weapon needs reload");
+				if (_selfCharacter.TryFindAmmo(out var ammoItem))
+				{
+					_selfCharacter.Routines.AssignReloadWeapon(_selfCharacter.GetCurrentWeapon(), ammoItem);
+				}
+				else
+				{
+					if(debugMode > 0) Debug.Log(this + " can't reload weapon, switching default weapon");
+					_selfCharacter.FloatingText_Cant();
+					yield return new WaitForSeconds(0.5f);
+					_selfCharacter.SwitchDefaultWeapon();
+
+					if (_selfCharacter.TryGetAnimation(out var anim))
+					{
+						do yield return null;
+						while (anim.IsSwitchingWeapons);
+					}
+				}
+				
+				do yield return null;
+				while (_selfCharacter.Routines.AnyActive());
+				
+				if(!_selfCharacter.HasActions())
+				{
+					if (debugMode > 0) Debug.Log(this + " no actions after reload, abort");
+					StopThink();
+					yield break;
+				}
+			}
+			
+			if (_chaseCharacter && _chaseCharacter.IsDead())
+			{
+				if (debugMode > 0) Debug.Log(this + " forget dead target:" + _chaseCharacter);
 				ForgetTarget();
 			}
-		}
-
-		if (!_chaseCharacter)
-		{
+			
 			yield return StartCoroutine(YieldTryFindNewTarget());
 
 			if (!_chaseCharacter)
@@ -135,31 +230,35 @@ public class CharacterBrain : MonoBehaviour
 				if (debugMode > 0) Debug.Log(this + " has no target to chase");
 				yield break;
 			}
-		}
-
-		if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
-		
-		while (_chaseCharacter && _selfCharacter.CanAttackOther(_chaseCharacter))
-		{
-			if (!_selfCharacter.Routines.AnyActive())
+			
+			if (debugMode > 0) Debug.Log(this + " chase " + _chaseCharacter);
+			SaveTargetPosition();
+			
+			if (!_selfCharacter.HasMovePoints())
 			{
-				SaveTargetPosition();
-				
-				if (_selfCharacter.IsAtAttackRange(_chaseCharacter))
-				{
-					_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter);
-				}
-				else if (_selfCharacter.HasMovePoints())
-				{
-					_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter,  _selfCharacter.IsUsingRangeWeapon());
-				}
-				else if (_selfCharacter.CanUseAction(CharacterAction.Run))
+				if (_selfCharacter.CanUseAction(CharacterAction.Run))
 				{
 					_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+				
+					do yield return null;
+					while (_selfCharacter.Routines.AnyActive());
 				}
 			}
-			
-			yield return StartCoroutine(YieldTryFindNewTarget());
+				
+			if (_selfCharacter.IsAtAttackRange(_chaseCharacter, true))
+			{
+				_selfCharacter.Routines.AssignPerformAttack(_chaseCharacter);
+				
+				do yield return null;
+				while (_selfCharacter.Routines.AnyActive());
+			}
+			else if (_selfCharacter.HasMovePoints())
+			{
+				_selfCharacter.Routines.AssignMoveAndAttack(_chaseCharacter, true, GameTurnManager.Instance.IsTurnBasedMode());
+				
+				do yield return null;
+				while (_selfCharacter.Routines.AnyActive());
+			}
 		}
 
 		if (debugMode > 0) Debug.Log(this + " end chase");
@@ -268,7 +367,7 @@ public class CharacterBrain : MonoBehaviour
 		}
 
 		_lastWanderingPos = _wanderingPos;
-		_selfCharacter.Routines.AssignMoveToDestination(_wanderingPos);
+		_selfCharacter.Routines.AssignMoveToDestination(_wanderingPos, _selfCharacter.GetAgent().GetMinReachDistance());
 		do
 		{
 			if (_chaseCharacter && canChase)
@@ -286,32 +385,80 @@ public class CharacterBrain : MonoBehaviour
 		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 
-	private IEnumerator YieldCantAttack()
+	private const int MaxAttemptToFindTarget = 6;
+	private IEnumerator YieldTryFindNewTarget(int attempt = 0)
 	{
-		if(debugMode > 0) Debug.Log(this + " Yield CantAttack");
-		yield return new WaitForSeconds(DefaultWaitSeconds);
-	}
-
-	private bool TryFindTarget(out CharacterEntity newTarget)
-	{
-		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
-		newTarget = allTargets.LastOrDefault();
-		return newTarget && newTarget != _chaseCharacter;
-	}
-
-	private IEnumerator YieldTryFindNewTarget()
-	{
-		if (TryFindTarget(out var newTarget))
+		if (attempt >= MaxAttemptToFindTarget)
 		{
-			_chaseCharacter = newTarget;
-			if(debugMode > 0) Debug.Log(this + " gets new target: " + _chaseCharacter);
-			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red, 1.0f);
-			_selfCharacter.Routines.StopAllRoutines();
-			yield return CharacterRoutines.DoLookPositionOn(_selfCharacter, newTarget.GetPosition());
+			if(debugMode > 0) Debug.Log(this + " cannot find any target");
+			ForgetTarget();
+			yield break;
+		}
+
+		//if(attempt == 0)
+		//	ResetTimeout();
+		
+		var bestTarget = default(CharacterEntity);
+		var bestPath = 0f;
+		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
+		while(allTargets.Count > 0)
+		{
+			var newTarget = allTargets.LastOrDefault();
+			allTargets.Remove(newTarget);
+			if (!newTarget || newTarget.IsDead()) continue;
+
+			if (_selfCharacter.IsAtAttackRange(newTarget, true))
+			{
+				if (debugMode > 0) Debug.Log(this + " at attack range of " + newTarget + ", chase this");
+				bestTarget = newTarget;
+				break;
+			}
+			
+			_agent.StopMovement();
+			_agent.ClearDestination();
+			_agent.SetReachDistance(_selfCharacter.GetAttackRange() + attempt * _selfCharacter.GetRadius() * 2f);
+			if (debugMode > 0) Debug.Log(this + " search path to possible target " + newTarget + " attempt=" + attempt + " reachDistance=" + _agent.GetReachDistance());
+			yield return _agent.AssignDestination(newTarget.GetPosition());
+			if (_agent.hasDestination)
+			{
+				var currentPath = _agent.GetCurrentPath();
+				if (currentPath.Length > 0 &&
+				    Mathf.Abs(currentPath.Last().y - newTarget.GetPosition().y) > _agent.GetHeight())
+				{
+					if (debugMode > 0) Debug.Log(this + " path height is invalid to " + newTarget);
+					continue;
+				}
+				
+				var pathLength = Utils.PathLength(currentPath);
+				if (debugMode > 0) Debug.Log(this + " found path length=" + pathLength);
+				if (!bestTarget || pathLength < bestPath)
+				{
+					bestTarget = newTarget;
+					bestPath = pathLength;
+				}
+			}
+			else
+			{
+				if(debugMode > 0) Debug.Log(this + " cannot find destination to " + newTarget + ", pick next one: " + allTargets.Count);
+			}
+		}
+
+		if (!bestTarget)
+		{
+			if (debugMode > 0) Debug.Log(this + " cannot find destination best target, next attempt");
+			yield return StartCoroutine(YieldTryFindNewTarget(attempt + 1));
 		}
 		else
 		{
-			yield return null;
+			_chaseCharacter = bestTarget;
+			_chaseDistance = _agent.GetReachDistance();
+			if(debugMode > 0) Debug.Log(this + " gets new target: " + _chaseCharacter);
+			if(debugMode > 0) DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red, 1.0f);
+			while (!_selfCharacter.IsFacingPosition(_chaseCharacter.GetPosition()))
+			{
+				_selfCharacter.LookWorldPosition(_chaseCharacter.GetPosition(), Time.deltaTime);
+				yield return null;
+			}
 		}
 	}
 
@@ -322,64 +469,26 @@ public class CharacterBrain : MonoBehaviour
 		var vDist = Utils.VDistance(_selfCharacter.GetPosition(), other.GetPosition());
 		if (hDist + vDist > maxDist * 2)
 			return -Mathf.Infinity;
+
+		hDist *= CountAlliesChasing(other) * aggroAlliesModifier + 1;
 			
 		var aggro = _aggroMap[other];
 		return aggro - hDist * AggroHDistanceScale - vDist * AggroVDistanceScale;
 	}
-	
-	private CharacterEntity _selfCharacter;
-	private CharacterDetection _characterDetection;
-	private CharacterEntity _chaseCharacter;
-	private PatrolRoute _patrolRoute;
-	private List<Waypoint> _waypointList;
-	private Waypoint _currentWaypoint;
-	private Vector3 _lastTargetKnownPosition;
-	private Vector3 _wanderingPos, _lastWanderingPos;
-	private Dictionary<CharacterEntity, float> _aggroMap = new Dictionary<CharacterEntity, float>();
-	private float _startedThinkingTime;
-	private Vector3 _lastPosition;
-	
-	private void Awake()
+
+	private int CountAlliesChasing(CharacterEntity otherChar)
 	{
-		_selfCharacter = GetComponent<CharacterEntity>();
-		if (!_selfCharacter)
+		return CharacterEntity.AllCharacters.Count(allyChar =>
 		{
-			Debug.LogWarning(this + " has no character controller!");
-			enabled = false;
-			return;
-		}
-
-		_selfCharacter.onPartyIndexChanged += OnPartyIndexChanged;
-		_selfCharacter.onDead += OnCharacterDead;
-		_selfCharacter.onDamagedBy += OnDamagedBy;
-		
-		_waypointList = new List<Waypoint>();
-	}
-
-	private void OnDestroy()
-	{
-		_selfCharacter.onPartyIndexChanged -= OnPartyIndexChanged;
-		_selfCharacter.onDead -= OnCharacterDead;
-		_selfCharacter.onDamagedBy -= OnDamagedBy;
-	}
-
-	private void OnEnable()
-	{
-		if (!_characterDetection) _characterDetection = GetComponent<CharacterDetection>();
-		if (_characterDetection)
-		{
-			_characterDetection.onCharacterDetected += OnCharacterDetected;
-			_characterDetection.onCharacterLost += OnCharacterLost;
-		}
-	}
-
-	private void OnDisable()
-	{
-		if (_characterDetection)
-		{
-			_characterDetection.onCharacterDetected -= OnCharacterDetected;
-			_characterDetection.onCharacterLost -= OnCharacterLost;
-		}
+			return allyChar != otherChar 
+			       && allyChar != _selfCharacter 
+			       && allyChar.IsCharacterRevealed()
+			       && !allyChar.IsDead() 
+			       && _selfCharacter.IsAllyTo(allyChar) 
+			       && allyChar.TryGetComponent(out CharacterBrain brain)
+			       && brain.canChase
+			       && brain._chaseCharacter == otherChar;
+		});
 	}
 
 	private void SaveTargetPosition()
@@ -422,6 +531,13 @@ public class CharacterBrain : MonoBehaviour
 
 	private void OnDamagedBy(CharacterEntity other, float amount)
 	{
+		if(debugMode > 0) Debug.Log(this + " OnDamagedBy " + other + " amount="  + amount);
+
+		if (turnHostileWhenDamaged && amount > 0 && other.IsPlayer())
+		{
+			_selfCharacter.SetCurrentFaction(CharacterFaction.Enemy);
+		}
+		
 		AddAggro(other, amount);
 	}
 
@@ -470,8 +586,20 @@ public class CharacterBrain : MonoBehaviour
 				DebugDrawer.Line(_selfCharacter.GetEyesPosition(), _chaseCharacter.GetCenterPosition(), Color.red);
 				DebugDrawer.WireDisc(_chaseCharacter.GetPosition(), _chaseCharacter.transform.forward, _chaseCharacter.GetRadius(), Color.red);
 			}
+			
+			debugString = "";
+			
+			if (_aggroMap.Count > 0)
+			{
+				foreach (var other in _aggroMap.Keys)
+				{
+					var totalAggro = CalculateAggro(other);
+					debugString += (_chaseCharacter == other ? ">" : " ") + totalAggro.ToString("N2") + " " + other.name + "\n";
+				}
+			}
 		}
 	}
+	#endregion
 
 	private string debugString;
 	private void OnGUI()
@@ -485,24 +613,16 @@ public class CharacterBrain : MonoBehaviour
 			if(_chaseCharacter)
 				Utils.DrawWorldGUI((Vector3)_lastTargetKnownPosition, _chaseCharacter.name + " chased by " + name);
 
-			if (_aggroMap.Count > 0)
+			if (!string.IsNullOrEmpty(debugString))
 			{
-				debugString = "";
-				
-				foreach (var other in _aggroMap.Keys)
-				{
-					var totalAggro = CalculateAggro(other);
-					debugString += (_chaseCharacter == other ? ">" : " ") + totalAggro.ToString("N2") + " " + other.name + "\n";
-				}
-
 				Utils.DrawWorldGUI(_selfCharacter.GetPosition(), debugString.Trim('\n'));
 			}
 		}
 	}
-
+	
 	private void OnDrawGizmos()
 	{
-		if (wanderingPoint)
+		if (wanderingPoint )
 		{
 			float wanderingDistance = wanderingPoint.radius;
 			Gizmos.color = Color.blue;

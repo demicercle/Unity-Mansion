@@ -9,13 +9,15 @@ public class CharacterFollows : MonoBehaviour
 	public static int debugMode { get; set; }
 	
 	[SerializeField] [Range(0.5f, 12.0f)] private float followDistance = 3.0f;
-	[SerializeField] [Range(0.1f, 10f)] private float tickTime = 1.0f;
+	[SerializeField] [Range(0.0f, 12.0f)] private float avoidDistance = 1.0f;
+	[SerializeField] [Range(0.0f, 10f)] private float tickTime = 1.0f;
 	[SerializeField] private float headingDistance = 0.5f;
 	[SerializeField] [Min(0)] private float headingSpeed = 1.5f;
 
 	public void SetLeader(CharacterEntity newLeader)
 	{
 		leaderCharacter = newLeader;
+		enabled = true;
 	}
 
 	public CharacterEntity GetLeader() => leaderCharacter;
@@ -26,11 +28,14 @@ public class CharacterFollows : MonoBehaviour
 	private Transform dummy;
 	private Vector3 headingPos;
 	private Vector3 leaderWorldVelocity;
+	private float distanceToDummy;
+	private float distanceToLeader;
 
 	private void Awake()
 	{
-		enabled = false;
 		dummy = new GameObject("Follow Dummy (" + name + ")").transform;
+		dummy.gameObject.hideFlags = HideFlags.HideInHierarchy;
+		enabled = false;
 	}
 
 	private void OnDestroy()
@@ -48,18 +53,14 @@ public class CharacterFollows : MonoBehaviour
 			agent = selfCharacter.GetAgent();
 		}
 		selfCharacter.Routines.onStarted += OnNewRoutineStarted;
-		StartCoroutine(FollowCoroutine());
 	}
 
 	private void OnDisable() // enabled=false on assign (CharacterRoutines)
 	{
+		if (debugMode>0) Debug.Log(this + " OnDisable ");
 		if (selfCharacter)
 		{
-			if (debugMode>0) Debug.Log(this + " OnDisable");
 			selfCharacter.Routines.onStarted -= OnNewRoutineStarted;
-			StopAllCoroutines();
-			agent.AssignFollowTransform(null);
-			agent.updateRotation = true;
 		}
 	}
 
@@ -69,55 +70,31 @@ public class CharacterFollows : MonoBehaviour
 		enabled = false;
 	}
 
-	IEnumerator FollowCoroutine()
-	{
-		yield return null;
-
-		dummy.position = transform.position;
-		
-		while (leaderCharacter && !leaderCharacter.IsDead() && !selfCharacter.IsDead() && GameInput.Instance.IsLeaderMode())
-		{
-			headingPos = leaderCharacter.GetPosition();
-			headingPos += leaderCharacter.GetDirectionTo(selfCharacter.GetPosition()) * headingDistance;
-			
-			agent.AssignFollowTransform(dummy, followDistance);
-			agent.SetObstacle(!agent.IsMoving());
-			
-			if (debugMode > 0)
-			{
-				DebugDrawer.Line(selfCharacter.GetCenterPosition(), leaderCharacter.GetCenterPosition(), Utils.ColorAlpha(Color.black, 0.3f), tickTime);
-				DebugDrawer.Line(selfCharacter.GetCenterPosition(), headingPos, Color.softBlue, tickTime);
-				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, tickTime);
-			}
-
-			if (tickTime > 0) 
-				yield return new WaitForSeconds(tickTime);
-			else 
-				yield return null;
-		}
-
-		enabled = false;
-	}
-
 	private void LateUpdate()
 	{
 		if (dummy)
 		{
 			dummy.SetParent(null, true);
 			
+			headingPos = leaderCharacter.GetPosition();
+			
+			headingPos -= leaderCharacter.GetDirection() * (leaderCharacter.IsMoving() ? 1.0f : 0.0f) * headingDistance / Vector3.Distance(selfCharacter.GetPosition(), leaderCharacter.GetPosition());
+			
 			dummy.position = headingSpeed <= 0 ? headingPos :
-				Vector3.Lerp(dummy.position, headingPos, Time.deltaTime * headingSpeed);
-
-			if (leaderCharacter && agent.velocity.magnitude <= MinVelocityToLook)
+				Vector3.MoveTowards(dummy.position, headingPos, Time.deltaTime * headingSpeed * selfCharacter.GetAgent().GetMaxSpeed());
+		
+			distanceToDummy = selfCharacter.GetDistanceTo(dummy.position);
+			
+			if (distanceToDummy <= Mathf.Min(headingDistance, followDistance))
 			{
-				agent.updateRotation = false;
-				//selfCharacter.HeadLookAt(leaderCharacter.GetEyesPosition(), Time.deltaTime);
+				agent.StopMovement();
 			}
 			else
 			{
-				agent.updateRotation = true;
+				agent.AssignFollowTransform(dummy, followDistance);
+				agent.StartMove();
 			}
-		
+			
 			if (debugMode > 0)
 			{
 				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, 0);
@@ -128,7 +105,7 @@ public class CharacterFollows : MonoBehaviour
 
 	private void OnDrawGizmosSelected()
 	{
-		if (!Utils.IsEditorPrefabStage()) 
+		if (!Utils.IsEditorPrefabStage() || Application.isPlaying) 
 			return;
 		
 		Gizmos.color = Color.softBlue;

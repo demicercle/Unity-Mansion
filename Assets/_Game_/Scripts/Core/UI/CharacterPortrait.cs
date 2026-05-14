@@ -11,9 +11,10 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 {
 	public RawImage rawImage;
 	public TMP_Text nameLabel;
-	public Toggle toggleSelected, toggleHasActions, toggleTurnBased, toggleDodge, togglePrepare;
+	public Toggle toggleSelected, toggleHasActions, toggleTurnBased, toggleDodge, toggleRiposte;
 	public Image healthSprite;
 	public TMP_Text healthLabel;
+	public TMP_Text actionsLabel;
 	public TMP_Text dodgeLabel1, dodgeLabel2;
 
 	public int GetIndex() => transform.GetSiblingIndex();
@@ -72,7 +73,7 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 
 	private void UpdateStats()
 	{
-		togglePrepare.isOn = _assignedCharacter.CanRiposte();
+		toggleRiposte.isOn = _assignedCharacter.CanRiposte();
 		
 		toggleSelected.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);
 		toggleSelected.interactable = _assignedCharacter.IsControllableByPlayer();
@@ -87,6 +88,16 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 		healthSprite.fillAmount = 1f - _assignedCharacter.GetDamageProgress();
 		healthLabel.text = _assignedCharacter.GetCurrentHealth() + "/" +
 		                   _assignedCharacter.GetMaxHealth();
+
+		if (actionsLabel)
+		{
+			actionsLabel.text = "";
+			
+			for (int i = 0; i < _assignedCharacter.GetRemainingActions(); i++)
+			{
+				actionsLabel.text += "!";
+			}
+		}
 	}
 
 	private void Awake()

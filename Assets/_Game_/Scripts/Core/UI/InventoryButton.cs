@@ -1,6 +1,7 @@
 ﻿using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -92,18 +93,13 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		hold = false;
 
 		var useItem = GameInput.Instance.GetItemToUse();
-		if (useItem && mouseOverIndex == selfIndex)
+		if (useItem && mouseOverIndex == selfIndex && selfInventory.TryGetComponent(out CharacterEntity selfCharacter))
 		{
 			if (mouseOverIndex == Inventory.InventorySlot_Weapon && itemData
-			                                                     && itemData.IsWeapon(out var reloadWeapon) 
-			                                                     && reloadWeapon.CanUseAmmo(useItem))
+			                                                     && itemData.IsWeapon(out var reloadWeapon) )
 			{
-				if (selfInventory.TryGetComponent(out CharacterEntity selfCharacter))
-				{
-					GameInput.Instance.SetItemToUse(null, true); // assign reload
-					selfCharacter.Routines.AssignReloadWeapon(reloadWeapon, useItem);
-					return;
-				}
+				selfCharacter.Routines.AssignReloadWeapon(reloadWeapon, useItem);
+				GameInput.Instance.SetItemToUse(null, true); // assign reload
 			}
 		}
 		
@@ -119,7 +115,7 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 				
 				 if (mouseOverIndex != Inventory.InventorySlot_Weapon || draggedItem.IsWeapon(out var _))
 				{
-					selfInventory.SwapIndex(mouseOverIndex, draggedIndex);
+					selfInventory.SwapIndex(mouseOverIndex, draggedIndex, true);
 					GameInput.Instance.SetDraggedItem(null);
 				}
 			}
@@ -181,13 +177,31 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 		WeaponData.onWeaponChanged -= OnWeaponChanged;
 	}
 
+	public UnityEvent onSwapped;
 	private void OnToggleChanged(bool isOn)
 	{
 		//Debug.LogWarning(this + " " + itemData + " ToggleChanged " + isOn + " TODO");
 		//toggle.isOn = false;
-		if (isOn && itemData && itemData.IsUsable())
+		if (isOn && itemData)
 		{
-			GameInput.Instance.SetItemToUse(itemData, true);
+			if (itemData.IsUsable())
+			{
+				GameInput.Instance.SetItemToUse(itemData, true);
+			}
+			else if (itemData.IsWeapon(out var weaponData))
+			{
+				if (CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+				{
+					if (selectedCharacter.GetCurrentWeapon() != weaponData && selectedCharacter.CanSwitchWeapons())
+					{
+						if (selectedCharacter.TryGetComponent(out Inventory selectedInventory))
+						{
+							selectedInventory.SwapIndex(Inventory.InventorySlot_Weapon, selfIndex, true); // weapon slotted to aim button
+							if(selfIndex == Inventory.InventorySlot_Weapon) onSwapped?.Invoke();
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -238,16 +252,9 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			{
 				if (dropOnGround)
 				{
-					if (selfInventory.TryCreateLootBag(itemData, out var bag))
+					if (!selfInventory.TryCreateLootBag(itemData, out var bag) || !selfInventory.TryRemoveItem(itemData))
 					{
-						if (selfInventory.TryRemoveItem(itemData))
-						{
-							if (Inventory.debugMode > 0) Debug.Log(this + " Created Loot Bag " + bag);
-						}
-						else
-						{
-							Debug.LogWarning(this + " !TryRemoveItem "  + itemData + " from inventory " + selfInventory);
-						}
+						Debug.LogWarning(this + " unable to drop item correctly");
 					}
 				}
 				else
@@ -264,4 +271,10 @@ public class InventoryButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
 			draggedIndex = -1;
 		}
 	}
+
+	public string GetTooltipDescription()
+	{
+		return !itemData ? string.Empty : itemData.GetTooltipDescription();
+	}
+
 }

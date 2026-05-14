@@ -13,14 +13,20 @@ MonoBehaviour:
   m_Name: Item_Grenade
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
-    lineIndex: 2
+    lineIndex: 12
     text: Grenade
+  description:
+    lineIndex: 13
+    text: When thrown, explodes after a few seconds, dealing 3-18 damages all round.
+  lootBagPrefab: {fileID: 8968371192725667608, guid: cdc2916602637c14c980df071353d0e2, type: 3}
   icon: {fileID: 2800000, guid: a34885405289bb34585d132b60c4cd7e, type: 3}
   itemTags: Grenade
   equipOnHand: 1
   weaponData: {fileID: 0}
   targetType: 2
+  actionType: 12
   usableOnDead: 0
+  turnBasedOnly: 0
   useRange: 8
   useGroundRadius: 0.2
   isProjectile: 1

@@ -15,15 +15,18 @@ public class GameTurnManager : MonoBehaviour
 	public static int debugMode { get; set; }
 
 	public event System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
-	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
+	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded, onGameOver;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
+	[Header("Camera")]
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
+	[SerializeField] private bool focusWhenCharacterUseAction = true;
 	[Space]
 	[Header("Game Rules")]
 	[SerializeField] private bool rollDiceWhenTurnStarts = true;
 	[SerializeField] private bool rollDiceWhenTurnEnds = true;
 	[SerializeField] private bool forceEnemyDetectParty = true;
+	[SerializeField] private bool forceNeutralDetectEnemies = true;
 	[Space]
 	[Header("Timings")]
 	[SerializeField] [Range(0.3f,3f)] private float realTimeTicks = 0.5f;
@@ -111,7 +114,7 @@ public class GameTurnManager : MonoBehaviour
 	private CameraPivot cameraPivot => CameraPivot.Instance;
 	private IEnumerable<CharacterEntity> partyCharacters => CharacterEntity.GetPartyCharacters();
 	
-	private CharacterEntity[] levelCharacters;
+	private CharacterEntity[] levelCharacters = Array.Empty<CharacterEntity>();
 	private CharacterEntity currentAICharacter;
 	private CharacterEntity focusCharacter;
 	private int currentTurn;
@@ -131,6 +134,8 @@ public class GameTurnManager : MonoBehaviour
 
 		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
+		CharacterEntity.onAnyCharacterUsesAction += OnAnyActionUsed;
+		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
 		RoomTrigger.onChanged += OnRoomChanged;
 	}
 
@@ -138,19 +143,22 @@ public class GameTurnManager : MonoBehaviour
 	{
 		CharacterDetection.onAnyCharacterDetectionChanged -= OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
+		CharacterEntity.onAnyCharacterUsesAction -= OnAnyActionUsed;
+		CharacterEntity.onAnyCharacterDead -= OnAnyCharacterDead;
 		RoomTrigger.onChanged -= OnRoomChanged;
 	}
 
 	private IEnumerator Start()
 	{
 		Debug.Log(this + " Starts");
-
+		
 		foreach (var go in startupObjects)
 		{
 			Debug.Log(this + " Instantiate startupObjects " + go);
 			Instantiate(go);
 		}
 		
+		DisableAudio(true);
 		FadeScreen.FadeIn(true);
 		
 		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
@@ -177,9 +185,7 @@ public class GameTurnManager : MonoBehaviour
 		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
 		yield return null; // for triggers
 
-		levelCharacters = CharacterEntity.AllCharacters
-			.OrderBy(c => c.transform.GetSiblingIndex())
-			.ToArray();
+		InitLevel();
 		
 		Debug.Log(this + " found levelCharacters=" + levelCharacters.Length);
 		
@@ -206,9 +212,9 @@ public class GameTurnManager : MonoBehaviour
 				
 				CharacterSelection.SelectCharacter(previouslySelected);
 			}
+			
+			yield return new WaitForSeconds(postLoadSaveDuration);
 		}
-		
-		yield return new WaitForSeconds(postLoadSaveDuration);
 		
 		Debug.Log("loading complete");
 		isLoading = false;
@@ -218,6 +224,7 @@ public class GameTurnManager : MonoBehaviour
 		onLoadingGame?.Invoke(false);
 		onSceneLoaded?.Invoke();
 		
+		DisableAudio(false);
 		FadeScreen.FadeOut();
 		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);
 		
@@ -228,6 +235,35 @@ public class GameTurnManager : MonoBehaviour
 			yield return StartCoroutine(TurnBasedCoroutine());
 			yield return null; // safety for loop
 		}
+	}
+
+	private Coroutine DisableAudio(bool disabled)
+	{
+		return StartCoroutine(DoAudioTween(disabled ? 0f : 1f));
+	}
+
+	private IEnumerator DoAudioTween(float targetValue)
+	{
+		if (targetValue <= 0f)
+		{
+			AudioListener.volume = 0f;
+			yield break;
+		}
+
+		while (AudioListener.volume < targetValue)
+		{
+			AudioListener.volume = Mathf.MoveTowards(AudioListener.volume, targetValue, Time.deltaTime);
+			yield return null;
+		}
+	}
+
+	private void InitLevel()
+	{
+		levelCharacters = CharacterEntity.AllCharacters
+			.OrderBy(c => c.transform.GetSiblingIndex())
+			.ToArray();
+
+		Utils.FindFirstObject<LevelComponent>().Init(levelCharacters);
 	}
 
 	private IEnumerator TurnBasedCoroutine()
@@ -292,20 +328,18 @@ public class GameTurnManager : MonoBehaviour
 			}
 			
 			yield return WaitNavigationDirty();
-			yield return YieldRoutines();
 		
 			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
-				
-				otherCharacter.Rest(); // rest not player character
-				
 				if (!otherCharacter.IsCharacterRevealed()) continue;
 				
-				yield return YieldRoutines();
+				yield return YieldRoutines(); // for possible scripts
 				
 				currentAICharacter = otherCharacter;
+				
+				otherCharacter.Rest(); // rest not player character
 				
 				cameraPivot.Focus(otherCharacter);
 				yield return new WaitForSeconds(focusCharacterSeconds);
@@ -316,22 +350,18 @@ public class GameTurnManager : MonoBehaviour
 					yield return new WaitForSeconds(noActionsSeconds);
 					continue;
 				}
-
-				otherCharacter.GetAgent().SetObstacle(false);
-				yield return YieldRoutines();
+				
 				yield return WaitNavigationDirty();
 				
 				if(debugMode > 0) Debug.Log(this + " start think " + otherBrain);
+				otherBrain.StartThink();
 				do
 				{
-					if(!otherBrain.IsThinking)
-						otherBrain.StartThink();
-					
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
 				
-				otherCharacter.GetAgent().SetObstacle(true);
 				yield return YieldRoutines();
+				
 				yield return WaitNavigationDirty();
 			}
 			
@@ -349,9 +379,9 @@ public class GameTurnManager : MonoBehaviour
 		onPlayerChanged?.Invoke(true);
 		playerTurn = false;
 		
-		foreach (var partyChar in partyCharacters)
+		foreach (var anyChar in levelCharacters)
 		{
-			if (partyChar.TryGetAnimation(out var anim))
+			if (anyChar.TryGetAnimation(out var anim))
 				anim.SwitchWeapons(false);
 		}
 		
@@ -455,35 +485,62 @@ public class GameTurnManager : MonoBehaviour
 		                                                         + "_" + character.name)
 			.ToArray();
 		
-		foreach (var character in levelCharacters)
+		foreach (var anyCharacter in levelCharacters)
 		{
-			if (character.IsDead() || !character.IsCharacterRevealed())
+			if (anyCharacter.IsDead())
 				continue;
 			
-			character.Routines.StopAllRoutines();
-			character.StopAgent();
-			character.GetAgent().UpdateObstacle();
+			anyCharacter.Routines.StopAllRoutines();
+			anyCharacter.StopAgent();
 			
-			if (!character.InParty())
-			{
-				if (character.TryGetComponent(out CharacterBrain otherBrain))
-					otherBrain.StopThink();
+			if (anyCharacter.TryGetComponent(out CharacterBrain otherBrain))
+				otherBrain.StopThink();
 
-				if (forceEnemyDetectParty && character.IsEnemyToPlayer())
+			if (!anyCharacter.IsCharacterRevealed())
+				continue;
+			
+			if (!anyCharacter.InParty())
+			{
+				if (anyCharacter.IsEnemyToPlayer())
 				{
-					if (character.TryGetComponent(out CharacterDetection otherDetection))
+					if (forceEnemyDetectParty)
 					{
-						foreach (var partyChar in partyCharacters)
+						if (anyCharacter.TryGetComponent(out CharacterDetection enemyDetection))
 						{
-							otherDetection.SetCharacterDetected(partyChar, true);
+							foreach (var partyChar in partyCharacters)
+							{
+								enemyDetection.SetCharacterDetected(partyChar, true);
+							}
+						}
+					}
+				}
+				else
+				{
+					if (forceNeutralDetectEnemies)
+					{
+						if (anyCharacter.TryGetComponent(out CharacterDetection neutralDetection))
+						{
+							foreach (var partyChar in partyCharacters)
+							{
+								if (neutralDetection.IsCharacterDetected(partyChar))
+								{
+									foreach (var enemyChar in partyChar.GetLivingEnemyCharacters())
+									{
+										if(enemyChar.TryGetComponent(out CharacterDetection enemyDetection) && enemyDetection.IsCharacterDetected(partyChar))
+											neutralDetection.SetCharacterDetected(enemyChar, true);
+									}
+
+									break;
+								}
+							}
 						}
 					}
 				}
 			}
 
-			if (character.InParty() || character.HasDetectedAnyPartyCharacter())
+			if (anyCharacter.InParty() || anyCharacter.HasDetectedAnyPartyCharacter())
 			{
-				if (character.TryGetAnimation(out var anim))
+				if (anyCharacter.TryGetAnimation(out var anim))
 				{
 					anim.SwitchWeapons(true);
 				}
@@ -545,6 +602,28 @@ public class GameTurnManager : MonoBehaviour
 		return false;
 	}
 
+	private void OnAnyActionUsed(CharacterEntity character, CharacterAction action)
+	{
+		if (IsTurnBasedMode() && focusWhenCharacterUseAction)
+		{
+			cameraPivot.Focus(character);
+		}
+	}
+
+	private void OnAnyCharacterDead(CharacterEntity character)
+	{
+		if (character.InParty())
+		{
+			foreach (var partyChar in partyCharacters)
+			{
+				if (!partyChar.IsDead())
+					return;
+			}
+			
+			onGameOver?.Invoke();
+		}
+	}
+
 	private void OnAnyCharacterDamaged(CharacterEntity damaged, DamageInfo dmgInfo, object objectFrom)
 	{
 		if (!turnBasedMode)
@@ -580,8 +659,17 @@ public class GameTurnManager : MonoBehaviour
 
 	[Header("Debug")]
 	[SerializeField] private Rect debugGUIRect;
+	[SerializeField] private KeyCode speedUpTimeKey;
 	private void OnGUI()
 	{
+		if (Debug.isDebugBuild || Application.isEditor)
+		{
+			if (Event.current.type == EventType.KeyDown && Event.current.keyCode == speedUpTimeKey)
+				Time.timeScale = Mathf.PI;
+			else if (Event.current.type == EventType.KeyUp && Event.current.keyCode == speedUpTimeKey)
+				Time.timeScale = 1.0f;
+		}
+		
 		if (debugMode > 0)
 		{
 			if (GameInput.IsConsoleVisible()) return;
@@ -592,7 +680,7 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.BeginVertical("textfield");
 			
 			GUILayout.Label("GAME TURN MANAGER");
-			GUILayout.Label("levelCharacters: " + levelCharacters?.Length);
+			GUILayout.Label("levelCharacters: " + levelCharacters.Length);
 			
 			GUILayout.BeginVertical("textfield");
 			GUILayout.Label("turnBasedMode: " + turnBasedMode);
@@ -614,14 +702,27 @@ public class GameTurnManager : MonoBehaviour
 				
 				foreach (var character in levelCharacters)
 				{
-					if (!character.IsCharacterRevealed()) continue;
-					
 					var label = character.name;
-					if (character.IsDead()) label += " (DEAD)";
-					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
 					
 					var isCurrent = (playerTurn && character.InParty()) ||
 					                (!playerTurn && currentAICharacter == character);
+					
+					if (debugMode > 1)
+					{
+						if (!character.IsCharacterRevealed())
+						{
+							label += " (HIDDEN)";
+							isCurrent = false;
+						}
+					}
+					else
+					{
+						if (!character.IsCharacterRevealed()) 
+							continue;
+					}
+					
+					if (character.IsDead()) label += " (DEAD)";
+					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
 						
 					GUILayout.Toggle(isCurrent, label);
 				}
@@ -633,6 +734,9 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.EndArea();
 		}
 	}
+	public bool IsCurrentCharacter(CharacterEntity entity) => IsPlayerTurn() ? 
+																currentAICharacter == CharacterSelection.TryGetSelectedCharacter(out var selected) && selected == entity && selected.IsControllableByPlayer()
+																: currentAICharacter == entity;
 
 	public override string ToString() => "<b>GTM</b>";
 }

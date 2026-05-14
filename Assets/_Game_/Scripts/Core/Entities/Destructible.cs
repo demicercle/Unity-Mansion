@@ -7,28 +7,32 @@ public class Destructible : MonoBehaviour, IAttackable
 {
 	public static List<Destructible> allInstances = new List<Destructible>();
 
-	public Vector3 GetReachPosition()
-	{
-		return GetCenterPosition();
-	}
-
+	public bool IsDoor() => isDoor || CompareTag(Tags.TagDoor);
 	public bool IsName(string s) => name == s;
 	public string GetName() => name;
 	public static int debugMode => CharacterEntity.debugStats;
 
 	public static event System.Action<Destructible, DamageInfo, object> onAnyDestructibleHit;
-	
+
+	[SerializeField] private Transform pivot;
 	[SerializeField] [Range(0.1f, 5.0f)] private float radius = 1.0f;
 	[SerializeField] [Range(1.0f, 99.0f)] private float maxHealth = 1.0f;
+	[SerializeField] private bool isDoor;
 	[SerializeField] private Rigidbody[] rigidbodies;
 	[SerializeField] private GameObject[] deactivateObjects;
-	[SerializeField] private Destructible linkedDestructible;
 
-	public Vector3 GetCenterPosition() => transform.position;
-	public float GetRadius() => radius;
-	public float GetHeight() => radius;
+	public Vector3 GetPosition()
+	{
+		return pivot ? pivot.position : GetCenterPosition();
+	}
 
-	public bool damagedWithRangeWeapons;
+	public Vector3 GetCenterPosition() => collider ? collider.bounds.center : transform.position;
+	
+	public float GetRadius() => collider ? Mathf.Max(collider.bounds.size.x, collider.bounds.size.z) / 2f : radius;
+	
+	public float GetHeight() => collider ? collider.bounds.size.y : radius;
+
+	public bool ignoreRangedWeapons;
 	public UnityEvent takeDamage;
 	public UnityEvent breaks;
 
@@ -45,18 +49,13 @@ public class Destructible : MonoBehaviour, IAttackable
 
 	public void TakeDamage(DamageInfo dmgInfo, object instigator)
 	{
-		if (!damagedWithRangeWeapons && dmgInfo.isRanged)
+		if (ignoreRangedWeapons && dmgInfo.isRanged)
 		{
 			dmgInfo.amount = 0;
 		}
 		
 		damageAmount += dmgInfo.amount;
 		if(debugMode > 0) Debug.Log(this + " take damage " + dmgInfo + " total=" + damageAmount + "/" + maxHealth);
-		
-		if (linkedDestructible)
-		{
-			linkedDestructible.TakeDamage(dmgInfo, instigator);
-		}
 
 		onAnyDestructibleHit?.Invoke(this, dmgInfo, instigator);
 		
@@ -98,6 +97,7 @@ public class Destructible : MonoBehaviour, IAttackable
 	
 	private bool isBroken;
 	private float damageAmount;
+	private new Collider collider;
 
 	[ContextMenu("Collect Rigidbodies")]
 	private void CollectRigidbodies()
@@ -109,6 +109,8 @@ public class Destructible : MonoBehaviour, IAttackable
 	private void Awake()
 	{
 		allInstances.Add(this);
+		
+		collider = GetComponent<Collider>();
 			
 		foreach (var obj in deactivateObjects)
 		{
@@ -130,12 +132,21 @@ public class Destructible : MonoBehaviour, IAttackable
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.yellow;
-		Utils.DrawGizmosCircle(GetCenterPosition(), transform.up, radius);
+		Utils.DrawGizmosCircle(GetPosition(), transform.up, radius);
 		foreach (var rb in rigidbodies)
 		{
 			if (!rb) continue;
 			var coll = rb.GetComponent<Collider>();
 			Gizmos.DrawWireCube(coll.bounds.center, coll.bounds.size);
+		}
+	}
+
+	private void OnDrawGizmos()
+	{
+		if (Application.isPlaying && !IsBroken())
+		{
+			Gizmos.color = Utils.ColorAlpha(Color.lightYellow, .25f);
+			Gizmos.DrawWireCube(GetCenterPosition(), new Vector3(GetRadius()*2f, GetHeight(), GetRadius()*2f));
 		}
 	}
 }

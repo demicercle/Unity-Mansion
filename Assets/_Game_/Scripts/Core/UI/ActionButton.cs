@@ -7,6 +7,10 @@ public class ActionButton : MonoBehaviour
 {
 	[SerializeField] private CharacterAction actionType;
 	[SerializeField] private Toggle toggleUseDice;
+
+	public string GetTooltipDescription() =>
+		LanguageSettings.GetDialogLines(DialogFiles.main)
+			.GetLine(30 + (int)actionType, "MISSING DESCRIPTION: " + actionType);
 	
 	private Button button;
 	
@@ -24,6 +28,7 @@ public class ActionButton : MonoBehaviour
 	private void LateUpdate()
 	{
 		button.interactable = CharacterSelection.TryGetSelectedCharacter(out var selected) 
+		                      && !GameTurnManager.Instance.IsWaiting()
 		                      && selected.IsControllableByPlayer() 
 		                      && selected.CanUseAction(actionType);
 		

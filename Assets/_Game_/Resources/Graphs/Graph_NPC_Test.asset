@@ -1,44 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7953189124686401581
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a9fcf3ac4164941aa8eed58573731c0, type: 3}
-  m_Name: Debug Log
-  m_EditorClassIdentifier: Assembly-CSharp::NodeDebugLog
-  graph: {fileID: 11400000}
-  position: {x: -344, y: -264}
-  ports:
-    keys:
-    - _in
-    - message
-    values:
-    - _fieldName: _in
-      _node: {fileID: -7953189124686401581}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: message
-      _node: {fileID: -7953189124686401581}
-      _typeQualifiedName: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-  message: ' talked'
-  debugBreak: 0
 --- !u!114 &-7592384207479827874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -99,7 +60,6 @@ MonoBehaviour:
     - _start
     - _character
     - _to
-    - _finished
     values:
     - _fieldName: _start
       _node: {fileID: -6396237199070666795}
@@ -134,15 +94,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _finished
-      _node: {fileID: -6396237199070666795}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
 --- !u!114 &-4710916101070361956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,7 +113,6 @@ MonoBehaviour:
     - _start
     - _character
     - _to
-    - _finished
     values:
     - _fieldName: _start
       _node: {fileID: -4710916101070361956}
@@ -194,15 +144,6 @@ MonoBehaviour:
         node: {fileID: -459421777807978833}
         reroutePoints: []
       _direction: 0
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
-    - _fieldName: _finished
-      _node: {fileID: -4710916101070361956}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
@@ -413,7 +354,6 @@ MonoBehaviour:
     - _start
     - _character
     - _to
-    - _finished
     values:
     - _fieldName: _start
       _node: {fileID: -454481680373365717}
@@ -448,15 +388,6 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _finished
-      _node: {fileID: -454481680373365717}
-      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
-      connections: []
-      _direction: 1
-      _connectionType: 0
-      _typeConstraint: 0
-      _dynamic: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -470,7 +401,6 @@ MonoBehaviour:
   m_Name: Graph_NPC_Test
   m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
   nodes:
-  - {fileID: -7953189124686401581}
   - {fileID: 1661894733017915128}
   - {fileID: -1777878850390571389}
   - {fileID: 6287711585738284144}
@@ -591,7 +521,7 @@ MonoBehaviour:
       _dynamic: 0
   message:
     lineIndex: 10
-    text: "Hello\r"
+    text: Hello
 --- !u!114 &3831391080928794222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -685,7 +615,7 @@ MonoBehaviour:
       _dynamic: 0
   message:
     lineIndex: 12
-    text: "Let me alone\r"
+    text: Let me alone
 --- !u!114 &6287711585738284144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -738,7 +668,7 @@ MonoBehaviour:
       _dynamic: 0
   message:
     lineIndex: 11
-    text: "I don't want to speak\r"
+    text: I don't want to speak
 --- !u!114 &6982387692696900501
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -55,6 +55,9 @@ MonoBehaviour:
       - fieldName: _in
         node: {fileID: 4832534939016810699}
         reroutePoints: []
+      - fieldName: _in
+        node: {fileID: -4867216251651297726}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
@@ -102,6 +105,62 @@ MonoBehaviour:
       _dynamic: 0
   _delay: 0.1
   destroyGameObject: 1
+--- !u!114 &-4867216251651297726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a365ba9b6ff4739be710a360844ea53, type: 3}
+  m_Name: Emit Noise
+  m_EditorClassIdentifier: Assembly-CSharp::NodeEmitNoise
+  graph: {fileID: 11400000}
+  position: {x: -56, y: 232}
+  ports:
+    keys:
+    - _in
+    - _position
+    - _instigator
+    values:
+    - _fieldName: _in
+      _node: {fileID: -4867216251651297726}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: -6631334845870373768}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _position
+      _node: {fileID: -4867216251651297726}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _instigator
+      _node: {fileID: -4867216251651297726}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 2846710604673029695}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  rayCount: 32
+  rayLength: 24
+  radius: 0.1
 --- !u!114 &-3092285336613203082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,6 +234,7 @@ MonoBehaviour:
   - {fileID: 4832534939016810699}
   - {fileID: -3092285336613203082}
   - {fileID: 2846710604673029695}
+  - {fileID: -4867216251651297726}
 --- !u!114 &337713039080081053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,6 +276,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   prefab: {fileID: 1257399411437645990, guid: e6cd9fa2f288a30469925fe17f654d5a, type: 3}
+  ignoreRotation: 1
 --- !u!114 &2846710604673029695
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -241,6 +302,9 @@ MonoBehaviour:
       connections:
       - fieldName: _instigator
         node: {fileID: 4832534939016810699}
+        reroutePoints: []
+      - fieldName: _instigator
+        node: {fileID: -4867216251651297726}
         reroutePoints: []
       _direction: 1
       _connectionType: 0

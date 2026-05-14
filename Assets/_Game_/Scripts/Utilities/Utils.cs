@@ -315,17 +315,17 @@ public static class Utils
 		return t;
 	}
 	
-	public static float VDistance(Vector3 aiPathPosition, Vector3 dest)
+	public static float VDistance(Vector3 v1, Vector3 v2)
 	{
-		aiPathPosition.x = dest.x;
-		aiPathPosition.z = dest.z;
-		return Vector3.Distance(aiPathPosition, dest);
+		v1.x = v2.x;
+		v1.z = v2.z;
+		return Vector3.Distance(v1, v2);
 	}
 	
-	public static float HDistance(Vector3 aiPathPosition, Vector3 dest)
+	public static float HDistance(Vector3 v1, Vector3 v2)
 	{
-		aiPathPosition.y = dest.y;
-		return Vector3.Distance(aiPathPosition, dest);
+		v1.y = v2.y;
+		return Vector3.Distance(v1, v2);
 	}
 
 	public static float FlatDot(Vector3 dir1, Vector3 dir2)
@@ -350,6 +350,29 @@ public static class Utils
 	public static Rect RectScale(Rect r, Rect s)
 	{
 		return new Rect(r.x * s.x, r.y * s.y, r.width * s.width, r.height * s.height);
+	}
+}
+
+public static class StringUtils
+{
+	public static string Colorize(string message, Color color)
+	{
+		return "<color=#" + ColorUtility.ToHtmlStringRGBA(color) + ">" + message + "</color>";
+	}
+
+	public static string Greyscale(string message, float alpha)
+	{
+		return Colorize(message, Utils.ColorScale(Color.white, alpha));
+	}
+	
+	public static string Size(string message, int size)
+	{
+		return "<size="+size+">" + message + "</size>";
+	}
+	
+	public static string Bold(string message)
+	{
+		return "<b>" + message + "</b>";
 	}
 }
 

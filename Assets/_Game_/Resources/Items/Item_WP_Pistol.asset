@@ -13,14 +13,20 @@ MonoBehaviour:
   m_Name: Item_WP_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName:
-    lineIndex: 4
+    lineIndex: 16
     text: Pistol
+  description:
+    lineIndex: 17
+    text: Deals 1-6 damages, up to 12 meters.
+  lootBagPrefab: {fileID: 874894045392881510, guid: 68ee6c6af1c26eb4892b878e80cd0616, type: 3}
   icon: {fileID: 2800000, guid: c1b2124051e69c54e88fc2582713def4, type: 3}
   itemTags: Pistol
   equipOnHand: 0
   weaponData: {fileID: 11400000, guid: ae09845b446b806478324b0d8d7f8fcb, type: 2}
   targetType: 0
+  actionType: 0
   usableOnDead: 0
+  turnBasedOnly: 0
   useRange: 0
   useGroundRadius: 0
   isProjectile: 0

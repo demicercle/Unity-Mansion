@@ -15,7 +15,6 @@ MonoBehaviour:
   cursorType: 3
   textures:
   - {fileID: 2800000, guid: efc884d58811d994a8b881c2187aaeb4, type: 3}
-  - {fileID: 2800000, guid: 7fa79ab960c190f42a8237e9b72e5efa, type: 3}
   hotspot: {x: 16, y: 16}
   animationSpeed: 1
   loopAnimation: 0

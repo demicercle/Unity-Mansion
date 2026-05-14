@@ -390,10 +390,10 @@ MonoBehaviour:
   characterData: {fileID: 11400000, guid: f9716a470e779c34ca36480462a12243, type: 2}
   characterCanvas: {fileID: 437776869319342895}
   clearActionsDelay: 3
-  rollDiceToDodge: 0
-  rollDiceOnDefense: 1
+  rollDiceToDodge: 1
+  rollDiceOnDefense: 0
   rollDiceOnRun: 0
-  rollDiceOnRiposte: 1
+  rollDiceOnRiposte: 0
   visionRange: 4
   defaultAttackHitTime: 1
   factionOverride: -1
@@ -456,16 +456,16 @@ MonoBehaviour:
   radius: 0.5
   height: 1.5
   minReachDistance: 0.1
-  priorityLeader: 0.7
+  priorityLeader: 0.96
   priorityFollower: 0.5
   priorityOther: 0.3
-  heightTolerance: 0.5
+  noObstacleIfNotRevealed: 1
+  obstacleRadiusScale: 1.8
+  turnBasedVelocityScale: 1.1
   pathRenderers:
   - {fileID: 5255465170416904580}
   - {fileID: 2283550923626056868}
   moveTarget: {fileID: 6868811281604459853}
-  endPointDistance: 0.25
-  endPointYTolerance: 0.5
 --- !u!114 &6410703130520739872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -480,8 +480,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
   rpgAnimationHandler: {fileID: 0}
-  switchWeaponExtraTime: 0
-  waitToRelaxTime: 6
+  switchWeaponExtraTime: 0.5
+  waitToRelaxTime: 3
   parameters:
     moving: 
     velocityX: 
@@ -494,10 +494,11 @@ MonoBehaviour:
     switchOffTrigger: 
     switchOnTrigger: 
     instantSwitchTrigger: 
+    detectEnemyTrigger: 
   eventTypes: 
+  forceRunning: 0
   velocityScale: 1
   minMovePointsToRun: 0.1
-  roomsReveleadSeconds: 1
   shouldSwitchWeaponWhenDamaged: 1
   reloadAnimDuration: 2
 --- !u!114 &3789455635990092813
@@ -514,6 +515,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterBrain
   canChase: 1
   canPatrol: 1
+  turnHostileWhenDamaged: 0
+  aggroAlliesModifier: 0.5
   wanderingPoint: {fileID: 0}
   onStartThink:
     m_PersistentCalls:
@@ -775,17 +778,17 @@ MonoBehaviour:
   orientation: 0
   enableRotation: 1
   autoRepath:
-    mode: 2
-    period: 0.5
+    mode: 1
+    period: 0.25
     sensitivity: 10
     maximumPeriod: 1
     visualizeSensitivity: 0
   maxAcceleration: -2.5
-  rotationSpeed: 360
-  slowdownDistance: 1.5
+  rotationSpeed: 720
+  slowdownDistance: 0.75
   pickNextWaypointDist: 0.5
   alwaysDrawGizmos: 0
-  slowWhenNotFacingTarget: 1
+  slowWhenNotFacingTarget: 0
   preventMovingBackwards: 1
   constrainInsideGraph: 1
 --- !u!114 &8722277412283640718
@@ -860,10 +863,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b516620e7a5f4087a2b020d253b0edb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFollows
-  followDistance: 2
-  tickTime: 0.5
-  headingDistance: 2
-  headingSpeed: 3
+  followDistance: 4
+  avoidDistance: 0
+  tickTime: 0
+  headingDistance: 1.7
+  headingSpeed: 0.9
 --- !u!114 &-9001009375405151572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -881,9 +885,9 @@ MonoBehaviour:
   heightBackingField: 2
   centerBackingField: 1
   locked: 0
-  lockWhenNotMoving: 1
-  agentTimeHorizon: 2
-  obstacleTimeHorizon: 2
+  lockWhenNotMoving: 0
+  agentTimeHorizon: 1
+  obstacleTimeHorizon: 1
   maxNeighbours: 10
   layer: 1
   collidesWith: 3
@@ -903,9 +907,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a609e5ba6eb248d9a921da0a8cfb9add, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  maxSize: 6
+  maxSize: 7
   lootBagPrefab: {fileID: 3870844094002656079, guid: e06b8a3ef8b241e4290237da71253253, type: 3}
   saveInventory: 0
+  destroyIfEmpty: 0
   items:
   - {fileID: 0}
   - {fileID: 0}
@@ -928,6 +933,7 @@ MonoBehaviour:
   version: 1073741824
   aiPath: {fileID: 3402239913564902258}
   heightTolerance: 0.5
+  losCheck: 1
 --- !u!1 &3549809914347783905
 GameObject:
   m_ObjectHideFlags: 0
@@ -1180,16 +1186,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackTrigger
   selfCharacter: {fileID: 1077634328985660634}
-  triggerRangeOffset: 0.592
+  triggerRange: 1
   triggerOnExit: 1
   triggerOnEnter: 0
   movingCharacterOnly: 1
   enemyCharacterOnly: 1
   meleeWeaponOnly: 1
   isInstantAttack: 1
-  stopAgent: 1
   useAttackAction: 0
-  requiresWeaponReady: 1
+  noLOS: 0
+  requiresWeaponReady: 0
   maxTriggerCount: -1
   filters: 
 --- !u!1 &5631688854807395945

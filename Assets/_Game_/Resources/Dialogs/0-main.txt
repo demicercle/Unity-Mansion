@@ -13,6 +13,31 @@ hit!
 can't!
 take this!
 run!
-heal!
+healed!
 empty!
 full!
+loaded!
+not now!
+
+Uninjured
+Lightly wounded
+Wounded
+Badly wounded
+At death's doors
+
+:
+
+//None,
+Increase your max movement distance for this turn.
+//Attack,
+//Interact,
+//Talk,
+Get an extra chance to dodge the next attack on you.
+The next attack on you will trigger a counter-attack.
+//Reload,
+//UseItem,
+//GiveItem,
+//DropItem,
+//PickupItem,
+//LaunchItem,
+//DrinkItem,

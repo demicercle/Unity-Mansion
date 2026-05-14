@@ -29,7 +29,6 @@ public class LanguageSettings : ScriptableObject
 	public class Main
 	{
 		public static string GetLine(int index, string fallback) => GetDialogLines(DialogFiles.main).GetLine(index, fallback);
-		public static string NoActions => GetLine(9, "no actions!");
 		public static string Miss => GetLine(10, "miss!");
 		public static string WillMiss => GetLine(10, "miss!");
 		public static string Dodge => GetLine(11, "dodge!");
@@ -42,8 +41,15 @@ public class LanguageSettings : ScriptableObject
 		public static string Heal => GetLine(16, "heal!");
 		public static string Empty => GetLine(17, "empty!");
 		public static string Full => GetLine(18, "full!");
+		public static string Reload => GetLine(19, "loaded!");
+		public static string NotNow => GetLine(20, "not now!");
 
 		public static string AttackResult(CharacterEntity.AttackResult ar) => ar == CharacterEntity.AttackResult.Miss ? Miss : ar == CharacterEntity.AttackResult.Dodge ? Dodge : Hit;
+
+		public static string DescribeHitChance(int calculatedHitChance)
+		{
+			return GetLine(28, string.Empty).TrimEnd(' ') + " " + calculatedHitChance + "+";
+		}
 	}
 
 	[SerializeField][ReadOnly] private DialogLines[] dialogLines;

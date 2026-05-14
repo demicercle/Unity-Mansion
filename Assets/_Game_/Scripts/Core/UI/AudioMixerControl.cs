@@ -13,21 +13,21 @@ public class AudioMixerControl : MonoBehaviour
 
 	private Slider slider;
 
-	private void Awake()
+	private void OnEnable()
 	{
 		slider = GetComponent<Slider>();
 		slider.onValueChanged.AddListener(OnValueChanged);
-		slider.value = PlayerPrefs.GetFloat(audioMixer.name + "." + parameterName, 0);
+		slider.value = PlayerPrefs.GetFloat(audioMixer.name + "." + parameterName, slider.value);
 	}
 
-	private void OnDestroy()
+	private void OnDisable()
 	{
 		slider.onValueChanged.RemoveListener(OnValueChanged);
 	}
 
 	private void OnValueChanged(float value)
 	{
-		PlayerPrefs.SetFloat(audioMixer.name + "." + parameterName, value);
 		audioMixer.SetFloat(parameterName, valueCurve.Evaluate(value));
+		PlayerPrefs.SetFloat(audioMixer.name + "." + parameterName, value);
 	}
 }

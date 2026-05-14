@@ -1,5 +1,46 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5108611265399494735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8db2783124c44aab2efdc3c43580045, type: 3}
+  m_Name: Instantiate
+  m_EditorClassIdentifier: Assembly-CSharp::NodeInstantiate
+  graph: {fileID: 11400000}
+  position: {x: -248, y: 56}
+  ports:
+    keys:
+    - _in
+    - _position
+    values:
+    - _fieldName: _in
+      _node: {fileID: -5108611265399494735}
+      _typeQualifiedName: NodeExec, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections:
+      - fieldName: _out
+        node: {fileID: 7167503854543085475}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: _position
+      _node: {fileID: -5108611265399494735}
+      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  prefab: {fileID: 1042361525996828, guid: 6943138a0c4a8fd4ea27b63049acac96, type: 3}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16,6 +57,7 @@ MonoBehaviour:
   - {fileID: 7167503854543085475}
   - {fileID: 624561134456437675}
   - {fileID: 3365870759824373871}
+  - {fileID: -5108611265399494735}
 --- !u!114 &624561134456437675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,6 +179,9 @@ MonoBehaviour:
         reroutePoints: []
       - fieldName: _in
         node: {fileID: 3365870759824373871}
+        reroutePoints: []
+      - fieldName: _in
+        node: {fileID: -5108611265399494735}
         reroutePoints: []
       _direction: 1
       _connectionType: 0

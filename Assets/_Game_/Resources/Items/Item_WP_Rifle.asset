@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdc478c8643c45d6a47c13b529165a46, type: 3}
+  m_Name: Item_WP_Rifle
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  displayName:
+    lineIndex: 26
+    text: Rifle
+  description:
+    lineIndex: 27
+    text: Deals 4-8 damages, up to 6 meters.
+  lootBagPrefab: {fileID: 874894045392881510, guid: 68ee6c6af1c26eb4892b878e80cd0616, type: 3}
+  icon: {fileID: 2800000, guid: ce89e0646153e414d87ab696e9282784, type: 3}
+  itemTags: Rifle
+  equipOnHand: 0
+  weaponData: {fileID: 11400000, guid: e47c7fa16b0851447842cf46c8ed9acb, type: 2}
+  targetType: 0
+  actionType: 0
+  usableOnDead: 0
+  turnBasedOnly: 0
+  useRange: 0
+  useGroundRadius: 0
+  isProjectile: 0
+  onUseScript: {fileID: 0}
+  isAmmo: 0
+  maxQuantity: 1

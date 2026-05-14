@@ -3,19 +3,19 @@
 REFACTO
 - add namespaces
 - clean "CharacterController"
-- retake "door breaks trigger" with enemy tag (zombi will destroy, others will open...)
+- retake "raycast for destructible" (zombi will destroy, others will open...)
 - dialog line reference bug in editor
 - door nav obstacle
-- items can be weapons
-- toggle reload
 - training mannequin (invicible life)
-- floating text uses "world canvas" and connect to events in inspector
-
-- reload should consume action
-- when attacking normally, should not stay in aiming after
-- tweak "follow"
-- 8+ HIT but dice is 7
-- floating text "reload"
+- NPC should try to flee if no ammo, no health (even triggering opportunity attacks)
+- save camera rotation
+- do "CursorRaycast" only in FixedUpdate
+- if you miss while triggering turn based, should add 1 miss to the gauge
+- when zombi about to attack, should display if "dice will hit"
+- assign attack : should update destination if target moves: "assign follow transform"
+- check "min time between assigns"
+- wood break SFX
+- no going to door waypoint
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
@@ -28,7 +28,6 @@ SAVE
 UI
 - popup "are you sure you want to reroll dices?"
 - popup "you have no karma points!"
-- display zombies hp to the player?
 - retake gamelog : should warn about dice launch
 
 ENV ART
@@ -37,38 +36,24 @@ ENV ART
 NODES
 - retakes "scene reference" with a list of references in GameScript
 
-INPUT
-- min time between assigns
-- aim button and IK hands with pistol (lookAt)
-
 GAMEPLAY
-- pistol ammo / Reload Action
-- run should also roll dices?
-- randomize enemies hp on game seed 
 - is dying state (-1 HP / turn or 6 seconds
-- check can fire pistol through walls
-- check clicks on "IsWaiting" while real time
-- assign attack : should update destination if target moves
 
 ITEMS
 - equip, drop and equip weapons
-- pistol ammo
 - create new items:
 	> a "key" to use on a "locked" door
-	> "Soda" (give 1 extra action next turn)
 	> "Chicken" (heal HP)
-	> replace "Bandage" by "First aid kit" (to revive characters)
-	> "Grigri" (roll the dice for free, but cost 1 action, unlimited uses)
+	> "Bag of chips" starts with 1d20 chips inside
 	
-	
-	ItemData
-	
-	> WeaponData
-	
-	> UsableItemData
 	
 URLs
 	https://opengameart.org/content/medieval-props-textured
 	https://kaylousberg.itch.io/halloween-bits
 	https://kenney.nl/assets/retro-urban-kit
 	https://pigeon-gang.itch.io/3d-fences
+	
+	
+<b>First Aid Kit</b>
+<color=gray>Usable on any character</color>
+Give +5HP to the target. Can be used on dying people.

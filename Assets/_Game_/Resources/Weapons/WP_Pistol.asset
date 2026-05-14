@@ -15,7 +15,7 @@ MonoBehaviour:
   noAttack: 0
   hitChance: 10
   minDamage: 1
-  maxDamage: 3
+  maxDamage: 6
   damageCurve:
     serializedVersion: 2
     m_Curve:
@@ -55,7 +55,7 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.16403873
     - serializedVersion: 3
-      time: 0.2
+      time: 0.5
       value: 1
       inSlope: 0
       outSlope: 0
@@ -117,8 +117,12 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  consumeAmmo: 1
   ammoTags: Pistol
   maxAmmo: 6
+  shootFlat: 0
+  shootOffset: {x: 0, y: 0, z: 0}
+  shootInfos: []
   decals:
   - {fileID: 11400000, guid: 81ec251bb3653ec40ba7865c61980dbe, type: 2}
   - {fileID: 11400000, guid: 3d1d45a1c8055ba4f8809c776eadb01b, type: 2}
@@ -126,3 +130,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2bde35fa989f9c241a8ce26b5d7156d1, type: 2}
   rpgWeaponR: 17
   rpgWeaponL: -1
+  noAim: 0

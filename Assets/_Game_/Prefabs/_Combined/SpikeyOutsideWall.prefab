@@ -9,7 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 868259990954718345}
-  m_Layer: 0
+  - component: {fileID: 8956064528969369162}
+  - component: {fileID: 3757079626516906336}
+  m_Layer: 7
   m_Name: SpikeyOutsideWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33,6 +35,40 @@ Transform:
   - {fileID: 1177047057967628916}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8956064528969369162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8450897159679933912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b249dd0a734aeaaca2ece7aec2b39c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HideChildInPrefab
+  setHidden: 0
+--- !u!65 &3757079626516906336
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8450897159679933912}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3095665, y: 2.237569, z: 2.4915967}
+  m_Center: {x: 0.019540787, y: 1.1072987, z: -0.0032567978}
 --- !u!1001 &4121958128552609535
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -97,7 +133,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5303358629265888180, guid: 0f0cfea3eaa7145489658657b7c13ee9, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -159,7 +196,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Prop_Handrail_Stone_01
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5927904063301402413, guid: 9a4773fc7f52fe24498632747d201501, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

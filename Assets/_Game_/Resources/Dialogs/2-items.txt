@@ -1,11 +1,36 @@
-﻿Bandage
+﻿Usable on any character
+Usable on ground
+Usable on other item
+Usable on self only
+	
+	
+	
+	
+	
+First aid kit
+Give back +5 HP. Can be used on dead people.
 Grenade
-Ammo Box
+When thrown, explodes after a few seconds, dealing 3-18 damages all round.
+Pistol Ammo
+Used to reload Pistols
 Pistol
+Deals 1-6 damages, up to 12 meters.
 Knife
+Deals 1-3 damages, melee only.
 Baseball Bat
-
-
+Deals 2-6 damages, melee only.
+Energy Drink
+Give 2 extra actions for this turn, only usable in combat.
+Salt & Pepper Chips
+Give +1 HP. 
+Rifle
+Deals 4-8 damages, up to 6 meters.
+Rifle Ammo
+Used to reload Rifles
+Shotgun
+Deals 4-8 damages, up to 6 meters.
+Shotgun Ammo
+Used to reload Shotgun
 
 
 

@@ -48,11 +48,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nextLevelName: Level_0
   cameraStartZoom: 0.204
+  focusWhenCharacterUseAction: 1
   rollDiceWhenTurnStarts: 0
-  rollDiceWhenTurnEnds: 0
+  rollDiceWhenTurnEnds: 1
+  forceEnemyDetectParty: 1
+  forceNeutralDetectEnemies: 1
   realTimeTicks: 1.5
-  postLoadSceneDuration: 1
-  postLoadSaveDuration: 2
+  postLoadSceneDuration: 2
+  postLoadSaveDuration: 3
   turnChangedSeconds: 2
   focusCharacterSeconds: 1
   noActionsSeconds: 3
@@ -68,6 +71,7 @@ MonoBehaviour:
     y: 0
     width: 0.35
     height: 1
+  speedUpTimeKey: 116
 --- !u!1001 &4690182601283876028
 PrefabInstance:
   m_ObjectHideFlags: 0

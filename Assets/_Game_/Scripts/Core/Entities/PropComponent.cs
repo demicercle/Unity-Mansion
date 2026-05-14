@@ -11,6 +11,8 @@ public class PropComponent : MonoBehaviour
 	private static List<PropComponent> allInstances = new List<PropComponent>();
 	public static PropComponent[] GetSavedInstances() => allInstances.Where(p => p.saveProp).ToArray();
 	
+	public static int debugMode { get; set; }
+	
 	public System.Action onInteracted;
 	public System.Action<CharacterEntity> onInteractedBy;
 
@@ -77,12 +79,12 @@ public class PropComponent : MonoBehaviour
 			{
 				if (setTrigger)
 				{
-					Debug.Log(this + " SetTrigger " + animatorTrigger + " on " + animator);
+					if(debugMode > 0) Debug.Log(this + " SetTrigger " + animatorTrigger + " on " + animator);
 					animator.SetTrigger(animatorTrigger);
 				}
 				else
 				{
-					Debug.Log(this + " ResetTrigger " + animatorTrigger + " on " + animator);
+					if(debugMode > 0) Debug.Log(this + " ResetTrigger " + animatorTrigger + " on " + animator);
 					animator.ResetTrigger(animatorTrigger);
 				}
 			}
@@ -91,7 +93,7 @@ public class PropComponent : MonoBehaviour
 
 	public void InteractedBy(CharacterEntity characterInstigator)
 	{
-		Debug.Log(this + " InteractedBy " + characterInstigator + " " + interactionCount);
+		if(debugMode > 0) Debug.Log(this + " InteractedBy " + characterInstigator + " " + interactionCount);
 		interactionCount++;
 		
 		TriggerAnimators(true);
@@ -186,7 +188,7 @@ public class PropComponent : MonoBehaviour
 
 	private IEnumerator DoWaitInteractionEvent(CharacterEntity characterInstigator)
 	{
-		Debug.Log(this + " DoWaitInteractionEvent " + animationEvent + " instigator=" + characterInstigator);
+		if(debugMode > 0) Debug.Log(this + " DoWaitInteractionEvent " + animationEvent + " instigator=" + characterInstigator);
 		
 		if (animationEvent != default)
 		{
@@ -200,7 +202,7 @@ public class PropComponent : MonoBehaviour
 			}
 		}
 
-		Debug.Log("yield " + triggerDelay);
+		if(debugMode > 0) Debug.Log("yield " + triggerDelay);
 		yield return new WaitForSeconds(triggerDelay);
 	}
 	#endregion
@@ -208,6 +210,7 @@ public class PropComponent : MonoBehaviour
 	#if UNITY_EDITOR
 	public void DrawGizmoBox() // public used by RoomTrigger
 	{
+		if (Application.isPlaying) return;
 		var boxCollider = GetComponent<BoxCollider>();
 		if (boxCollider != null)
 		{

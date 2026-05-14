@@ -28,7 +28,8 @@ public class GameSave : ScriptableObject
 		}
 	}
 	
-	private static string filePath => Application.persistentDataPath + "/GameSave.json";
+	public static string folderPath => Application.persistentDataPath;
+	public static string filePath => folderPath + "/GameSave.json";
 	public static bool SaveExists() => System.IO.File.Exists(filePath);
 	public static void DeleteSave() => System.IO.File.Delete(filePath);
 
@@ -244,7 +245,7 @@ public class GameSave : ScriptableObject
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
 
-	private bool shouldLoad;
+	private static bool shouldLoad;
 	public bool ShouldLoad() => shouldLoad;
 	public void MarkAsLoad() => shouldLoad = true;
 	
@@ -353,30 +354,6 @@ public class GameSave : ScriptableObject
 				}
 			}
 
-			foreach (var roomName in savedLevel.revealedRooms)
-			{
-				foreach (var room in RoomTrigger.allRooms)
-				{
-					if (!room.IsRevealed() && room.IsName(roomName))
-					{
-						room.Explore();
-						break;
-					}
-				}
-			}
-
-			foreach (var savedProp in savedLevel.savedProps)
-			{
-				foreach (var prop in PropComponent.GetSavedInstances())
-				{
-					if (prop.IsName(savedProp.name))
-					{
-						savedProp.Load(prop);
-						break;
-					}
-				}
-			}
-
 			foreach (var savedInv in savedLevel.savedInventories)
 			{
 				foreach (var inv in Inventory.GetSavedInventories())
@@ -384,6 +361,23 @@ public class GameSave : ScriptableObject
 					if (inv.IsName(savedInv.name))
 					{
 						savedInv.Load(inv);
+						break;
+					}
+				}
+			}
+
+			foreach (var savedLoot in savedLevel.savedLoots)
+			{
+				savedLoot.Load(lootBagPrefab);
+			}
+
+			foreach (var roomName in savedLevel.revealedRooms)
+			{
+				foreach (var room in RoomTrigger.allRooms)
+				{
+					if (!room.IsRevealed() && room.IsName(roomName))
+					{
+						room.Explore();
 						break;
 					}
 				}
@@ -398,9 +392,16 @@ public class GameSave : ScriptableObject
 				}
 			}
 
-			foreach (var savedLoot in savedLevel.savedLoots)
+			foreach (var savedProp in savedLevel.savedProps)
 			{
-				savedLoot.Load(lootBagPrefab);
+				foreach (var prop in PropComponent.GetSavedInstances())
+				{
+					if (prop.IsName(savedProp.name))
+					{
+						savedProp.Load(prop);
+						break;
+					}
+				}
 			}
 		}
 		
@@ -442,22 +443,6 @@ public class GameSave : ScriptableObject
 			savedLevels[0].levelCharacters.Add(new SavedCharacter(levelChar));	
 		}
 
-		foreach (var room in RoomTrigger.allRooms)
-		{
-			if(room.IsRevealed())
-				savedLevels[0].revealedRooms.Add(room.GetName());
-		}
-
-		foreach (var prop in PropComponent.GetSavedInstances())
-		{
-			savedLevels[0].savedProps.Add(new SavedProp(prop));
-		}
-		
-		foreach (var inv in Inventory.GetSavedInventories())
-		{
-			savedLevels[0].savedInventories.Add(new SavedInventory(inv));
-		}
-
 		foreach (var destructible in Destructible.allInstances)
 		{
 			if(destructible.IsBroken())
@@ -467,6 +452,22 @@ public class GameSave : ScriptableObject
 		foreach (var lootBag in Inventory.GetLootBags())
 		{
 			savedLevels[0].savedLoots.Add(new SavedLoot(lootBag));
+		}
+
+		foreach (var room in RoomTrigger.allRooms)
+		{
+			if(room.IsRevealed())
+				savedLevels[0].revealedRooms.Add(room.GetName());
+		}
+		
+		foreach (var inv in Inventory.GetSavedInventories())
+		{
+			savedLevels[0].savedInventories.Add(new SavedInventory(inv));
+		}
+
+		foreach (var prop in PropComponent.GetSavedInstances())
+		{
+			savedLevels[0].savedProps.Add(new SavedProp(prop));
 		}
 		
 		Debug.Log(this + " Game saved");

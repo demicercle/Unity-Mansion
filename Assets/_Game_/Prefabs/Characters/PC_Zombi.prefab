@@ -112,7 +112,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -233,7 +232,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -353,7 +351,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -505,7 +502,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -625,7 +621,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -777,7 +772,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -897,7 +891,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1017,7 +1010,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1137,7 +1129,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1258,7 +1249,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1378,7 +1368,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1498,7 +1487,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1618,7 +1606,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1738,7 +1725,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1858,7 +1844,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -1978,7 +1963,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -2098,7 +2082,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -2311,7 +2294,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -2431,7 +2413,6 @@ MonoBehaviour:
   renderers: []
   shootLine: {fileID: 0}
   aimLine: {fileID: 0}
-  maxShootDistance: 5
   shootFromEyesPosition: 0
   aimFromEyesPosition: 0
   onShoot:
@@ -2450,7 +2431,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 467592031822895063, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: uniqueID
-      value: 6575320937452672698
+      value: 1659507275383791517
+      objectReference: {fileID: 0}
+    - target: {fileID: 467592031822895063, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: characterData
@@ -2777,8 +2762,8 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: parameters.runTrigger
-      value: 
+      propertyPath: eventTypes.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: 'aiBrains.Array.data[0]'
@@ -2791,6 +2776,14 @@ PrefabInstance:
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.deathTrigger
       value: Death
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: 'eventTypes.Array.data[0]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: 'eventTypes.Array.data[1]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: parameters.attackTrigger
@@ -2809,11 +2802,7 @@ PrefabInstance:
       value: Revive
       objectReference: {fileID: 0}
     - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: parameters.switchOnTrigger
-      value: Scream
-      objectReference: {fileID: 0}
-    - target: {fileID: 6410703130520739872, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
-      propertyPath: parameters.instantSwitchTrigger
+      propertyPath: parameters.detectEnemyTrigger
       value: Scream
       objectReference: {fileID: 0}
     - target: {fileID: 6483927452517428826, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
@@ -3076,9 +3065,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0922a977f3c24802baaf96f2f5245272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutlineRenderer
-  boxSize: 0.5
-  defaultSize: 0.5
-  defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1 &5757940252883871167 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100050, guid: e57e9b8cd5e115f4f8d7736473e5c7fd, type: 3}

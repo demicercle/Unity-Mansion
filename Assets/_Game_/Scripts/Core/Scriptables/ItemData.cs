@@ -6,7 +6,8 @@ public enum TargetType
 	None,
 	AnyCharacter,
 	GroundPosition,
-	OtherItem
+	OtherItem,
+	SelfCharacter
 }
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "ItemData", order = 0)]
@@ -51,8 +52,38 @@ public class ItemData : ScriptableObject
 	
 	[Header("General")]
 	[SerializeField] private LocalizedText displayName;
+	[SerializeField] private LocalizedText description;
+	[SerializeField] private Inventory lootBagPrefab;
 	[SerializeField] private Texture2D icon;
 	[SerializeField] private string itemTags;
+
+	public bool TryGetLootBagPrefab(out Inventory prefab)
+	{
+		prefab = lootBagPrefab;
+		return prefab;
+	}
+	
+	public string GetDisplayName() => displayName.GetValue(DialogFiles.items);
+	
+	public Texture2D GetIcon() => icon;
+	
+	[ContextMenu("Parse")]
+	public void Parse()
+	{
+		displayName.Parse(DialogFiles.items);
+		description.Parse(DialogFiles.items);
+		Utils.SetDirty(this);
+	}
+
+	public string GetTooltipDescription()
+	{
+		return $"<b><size=22>{GetDisplayName()}</size></b>\n{GetUsabilityDescription()}\n{GetUserDescription()}";
+	}
+
+	public string GetUsabilityDescription() => targetType == TargetType.None ? "" :
+		"<color=grey>" + LanguageSettings.GetDialogLines(DialogFiles.items).GetLine((int)targetType, Utils.SplitCamelCase(targetType.ToString())) + "</color>";
+
+	public string GetUserDescription() => description.GetValue(DialogFiles.items);
 
 	[Header("Equipable")] 
 	[SerializeField] private bool equipOnHand;
@@ -65,12 +96,14 @@ public class ItemData : ScriptableObject
 	}
 	
 	[Header("Usable")]
-	[SerializeField] private TargetType targetType;
-	[SerializeField] private bool usableOnDead;
-	[SerializeField] [Range(0f, 12f)] private float useRange;
+	[SerializeField] private TargetType targetType = TargetType.None;
+	[SerializeField] private CharacterAction actionType = CharacterAction.UseItem;
+	[SerializeField] private bool usableOnDead = false;
+	[SerializeField] private bool turnBasedOnly = false;
+	[SerializeField] [Range(0f, 12f)] private float useRange = 0.0f;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
-	[SerializeField] private bool isProjectile;
-	[SerializeField] private GameScriptGraph onUseScript;
+	[SerializeField] private bool isProjectile = false;
+	[SerializeField] private GameScriptGraph onUseScript = null;
 	
 	[Header("Consommable")]
 	[SerializeField] private bool isAmmo;
@@ -78,7 +111,13 @@ public class ItemData : ScriptableObject
 
 	private int currentQuantity;
 
+	public CharacterAction GetCharacterAction() => actionType;
+
+	public bool TurnBasedOnly() => turnBasedOnly;
+	
 	public bool IsUsable() => targetType != TargetType.None;
+
+	public bool IsUsableOnSelf() => targetType == TargetType.SelfCharacter;
 
 	public void SetQuantity(int newValue)
 	{
@@ -140,7 +179,7 @@ public class ItemData : ScriptableObject
 			}
 		}
 
-		return string.IsNullOrEmpty(tags+itemTags);
+		return string.IsNullOrEmpty(tags) && string.IsNullOrEmpty(itemTags);
 	}
 	
 	public float GetUseRange() => useRange;
@@ -164,9 +203,15 @@ public class ItemData : ScriptableObject
 		return false;
 	}
 
-	public void LaunchProjectile(GameObject target, Vector3 destination)
+	public void LaunchProjectile(CharacterEntity target, Vector3 destination)
 	{
-		foreach (var weapon in target.GetComponentsInChildren<WeaponRenderer>())
+		if (!target.TryGetAnimation(out var anim))
+		{
+			Debug.LogWarning(this + " cannot launch projectile: no anim with weapon renderer");
+			return;
+		}
+		
+		foreach (var weapon in anim.GetWeaponRenderers())
 		{
 			if (weapon.rpgWeapon == Weapon.RightItem && CompareTags(weapon.itemTags))
 			{
@@ -180,6 +225,7 @@ public class ItemData : ScriptableObject
 					if (projectile.Launch(startPosition, destination, out var clone))
 					{
 						UseOn(clone.gameObject, target.gameObject);
+						weapon.gameObject.SetActive(false);
 						return;
 					}
 				}
@@ -193,16 +239,5 @@ public class ItemData : ScriptableObject
 		var script = target.AddComponent<GameScript>();
 		script.SetInstigator(instigator);
 		script.SetGraph(onUseScript);
-	}
-
-	public string GetDisplayName() => displayName.GetValue(DialogFiles.items);
-	
-	public Texture2D GetIcon() => icon;
-	
-	[ContextMenu("Parse")]
-	public void Parse()
-	{
-		displayName.Parse(DialogFiles.items);
-		Utils.SetDirty(this);
 	}
 }

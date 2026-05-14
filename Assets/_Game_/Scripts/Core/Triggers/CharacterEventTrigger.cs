@@ -12,7 +12,6 @@ public class CharacterEventTrigger : MonoBehaviour
 	public class ActionEvent
 	{
 		public CharacterAction actionType;
-		public string filters;
 		public UnityEvent onActionUsed;
 		public void Invoke() => onActionUsed?.Invoke();
 	}
@@ -116,9 +115,9 @@ public class CharacterEventTrigger : MonoBehaviour
 	{
 		foreach (var actionEvt in actionEvents)
 		{
-			if (action == actionEvt.actionType && TagCheck(actionEvt.filters, target))
+			if (action == actionEvt.actionType)
 			{
-				if(debugMode) Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " filters=" + actionEvt.filters + "onActionUsed.Invoke " + action);
+				if(debugMode) Debug.Log(this + " OnCharacterUseAction " + actionEvt.actionType + " on " + target + " onActionUsed.Invoke " + action);
 				actionEvt.Invoke();
 				break;
 			};
@@ -165,7 +164,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		yield return new WaitForSeconds(0.5f);
 		if (other && other.IsDead())
 		{
-			Debug.Log(this + " in " + character + " CheckDead " + other + " lastKill!");
+//			Debug.Log(this + " in " + character + " CheckDead " + other + " lastKill!");
 			onLastKill?.Invoke();
 		}
 	}
@@ -177,7 +176,7 @@ public class CharacterEventTrigger : MonoBehaviour
 		if (obj is ItemData)
 			return (obj as ItemData).CompareTags(filters);
 		
-		return obj == null || string.IsNullOrWhiteSpace(filters) ||
+		return (obj == null && string.IsNullOrWhiteSpace(filters)) ||
 		       filters.Split(',').ToList().Any(tag =>
 		       {
 			       if (obj is Component)

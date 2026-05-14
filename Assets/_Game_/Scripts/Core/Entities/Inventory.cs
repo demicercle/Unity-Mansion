@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class Inventory : MonoBehaviour
 		var bag = Instantiate(lootBagPrefab.gameObject).GetComponent<Inventory>();
 		bag.isLootBag = true;
 		bag.maxSize = 1;
+		bag.saveInventory = false;
 		bag.destroyIfEmpty = true;
 		NavUtils.TryGetNearestNavPosition(navPosition, CreateLootNavDistance, out navPosition);
 		bag.transform.position = navPosition;
@@ -26,7 +28,7 @@ public class Inventory : MonoBehaviour
 		return bag;
 	}
 	
-	private const float CreateLootNavDistance = 1.0f;
+	private const float CreateLootNavDistance = 1.5f;
 	
 	public string GetName() => name;
 	public bool IsName(string s) => s == name;
@@ -42,12 +44,14 @@ public class Inventory : MonoBehaviour
 	public static void NotifyTransfered(Inventory from, Inventory to, ItemData item) =>
 		onAnyItemTransfered?.Invoke(from, to, item);
 	
-	[SerializeField] [Range(1, 32)] private int maxSize = 6;
+	[SerializeField] [Range(1, 32)] private int maxSize = 1;
 	[SerializeField] private Inventory lootBagPrefab = null;
 	[SerializeField] private bool saveInventory;
+	[SerializeField] private bool destroyIfEmpty;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
 	
 	private bool isLootBag;
+	public ItemData[] GetItems() => items.Where(it => it).ToArray();
 	
 	public string[] SerializeToSlots()
 	{
@@ -58,7 +62,7 @@ public class Inventory : MonoBehaviour
 	{
 		if(slots == null) return;
 		
-		ClearInventory();
+		ClearInventory(false);
 		
 		for (int i = 0; i < slots.Length; i++)
 		{
@@ -70,69 +74,65 @@ public class Inventory : MonoBehaviour
 		NotifyChanged();
 	}
 
-	public void SwapIndex(int index1, int index2)
+	public void SwapIndex(int index1, int index2, bool notifyChanged)
 	{
 		var item1 = items[index1];
 		var item2 = items[index2];
 		items[index1] = item2;
 		items[index2] = item1;
 		
-		NotifyChanged();
+		if(notifyChanged) NotifyChanged();
 	}
 
-	public void ClearInventory()
+	public void ClearInventory(bool notifyChanged)
 	{
 		for (int i = 0; i < items.Count; i++)
 		{
-			ClearItem(i);
+			ClearItem(i, false);
 		}
+		
+		if(notifyChanged) NotifyChanged();
 	}
 
-	private void ClearItem(int index)
+	private void ClearItem(int index, bool notifyChanged)
 	{
 		if (index < 0 || index >= items.Count)
 			return;
-		
-		if(items[index])
-			Destroy(items[index]);
 
+		if (!items[index])
+			return;
+		
+		
+		if(debugMode > 0) Debug.Log(this + " onAnyItemRemoved " + items[index]);
+		onAnyItemRemoved?.Invoke(this, items[index]);
+
+		Destroy(items[index]);
 		items[index] = null;
-	}
-	
-	private void SetItemName(int index, string itemName, int qty)
-	{
-		if (index < 0 || index >= items.Count)
+		
+		
+		if (notifyChanged)
 		{
-			Debug.LogWarning(this + " invalid SetItemName index: " + index + " items=" + items.Count);
-			return;
+			NotifyChanged();
 		}
-		
-		var newItem = ItemData.GetItemFromName(itemName);
-		
-		var lastItem = items[index];
-		if (lastItem)
-		{
-			onAnyItemRemoved?.Invoke(this, lastItem);
-		}
-		
-		items[index] = newItem;
-
-		if (items[index])
-		{
-			items[index] = items[index].Duplicate();
-			items[index].AddQuantity(qty);
-			
-			onAnyItemAdded?.Invoke(this, items[index]);
-		}
-		
-		NotifyChanged();
 	}
 
 	public bool TryCreateLootBag(ItemData itemData, out Inventory bag) =>
 		TryCreateLootBag(itemData, GetPosition(), out bag);
+	
 	public bool TryCreateLootBag(ItemData itemData, Vector3 position, out Inventory bag)
 	{
-		if (!lootBagPrefab)
+		int itemIndex = items.IndexOf(itemData);
+		if (itemIndex < 0)
+		{
+			Debug.LogWarning(this +  " cannot create loot bag: item not in inventory ");
+			bag = null;
+			return false;
+		}
+		
+		if(!itemData.TryGetLootBagPrefab(out var lootPrefab))
+			lootPrefab = lootBagPrefab;
+		
+		if (!lootPrefab)
 		{
 			Debug.LogWarning(this + " cannot CreateLootBag because no prefab set!");
 			bag = null;
@@ -146,42 +146,69 @@ public class Inventory : MonoBehaviour
 			return false;
 		}
 
-		bag = CreateLootBag(lootBagPrefab, navPosition);
-		bag.TryAddItem(itemData);
+		bag = CreateLootBag(lootPrefab, navPosition);
+		bag.ClearInventory(false);
+		if (!bag.TryAddItem(itemData))
+		{
+			Debug.LogWarning(this + " error while adding item to loot bag: " + bag);
+			return false;
+		}
 		bag.transform.position = position;
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+		items[itemIndex] = null;
+		NotifyChanged();
 		return true;
 	}
 
 	private bool IsEmpty() => items.All(it => !it);
 
-	public bool DropOnGround(out Inventory bag)
+	public bool DropAllOnGround()
 	{
+		var bag = default(Inventory);
+
+		var changed = false;
+		for (int i = 0; i < items.Count; i++)
+		{
+			var itemData = items[i];
+
+			if (itemData && TryCreateLootBag(itemData, out bag))
+			{
+				changed = true;
+				ClearItem(i, false);
+			}
+		}
+
+		if (changed)
+		{
+			NotifyChanged();
+		}
+
+		if (IsEmpty())
+		{
+			return true;
+		}
+		
 		if (!lootBagPrefab)
 		{
 			Debug.LogWarning(this + " cannot CreateLootBag because no prefab set!");
-			bag = null;
 			return false;
 		}
 
 		if (IsEmpty())
 		{
-			bag = null;
 			return false;
 		}
 
 		if (!NavUtils.TryGetNearestNavPosition(transform.position, CreateLootNavDistance, out var navPosition))
 		{
 			Debug.LogWarning(this + " cannot CreateLootBag: no nav position found");
-			bag = null;
 			return false;
 		}
 		
 		bag = CreateLootBag(lootBagPrefab, navPosition);
 		bag.items.AddRange(items);
 		bag.transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-		items.Clear();
-		foreach(var it in bag.items) items.Add(null);
+		ClearInventory(false);
 		NotifyChanged();
 		return true;
 	}
@@ -202,6 +229,26 @@ public class Inventory : MonoBehaviour
 	
 	public int GetMaxSize() => maxSize;
 
+	public bool TryTransfertItemTo(ItemData itemToTransfer, Inventory otherInventory)
+	{
+		for (int i = 0; i < items.Count; i++)
+		{
+			if (items[i] == itemToTransfer)
+			{
+				if (otherInventory.TryAddItem(itemToTransfer))
+				{
+					items[i] = null;
+					NotifyChanged();
+					return true;
+				}
+				
+				break;
+			}
+		}
+
+		return false;
+	}
+	
 	public void TransfertTo(Inventory otherInventory)
 	{
 		for (int i = 0; i < items.Count; i++)
@@ -249,10 +296,9 @@ public class Inventory : MonoBehaviour
 		{
 			if (items[i] == itemToUse)
 			{
-				if(debugMode > 0) Debug.Log(this + " onAnyItemRemoved " + items[i]);
-				onAnyItemRemoved?.Invoke(this, items[i]);
-				items[i] = null;
+				ClearItem(i, false);
 				NotifyChanged();
+				
 				return true;
 			}
 		}
@@ -268,7 +314,7 @@ public class Inventory : MonoBehaviour
 	}
 	
 	#region PRIVATE
-	private bool destroyIfEmpty;
+	
 	private CharacterEntity selfCharacter;
 	
 	private void Awake()

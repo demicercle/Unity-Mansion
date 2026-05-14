@@ -45,12 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2573c8841a09f24488d74776bb16fd3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  navigationTarget: {fileID: 7986720061970377997}
+  navigationTarget: {fileID: 8499358828757570320}
   orbitSpeedAngle: 270
-  orbitSpeedInput: 3.14
   orbitCameraFromCenterScreen: 0
   orbitCameraY: 0
+  flattenShootOnGround: 0
   maxNavDistance: 0.5
+  nodeSize: 0.25
   onClick:
     m_PersistentCalls:
       m_Calls:

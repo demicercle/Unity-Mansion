@@ -16,7 +16,7 @@ public class InventoryPanel : MonoBehaviour
 	
 	public void AssignInventory(Inventory newInventory)
 	{
-		Debug.Log(this + " AssignInventory " + newInventory);
+//		Debug.Log(this + " AssignInventory " + newInventory);
 		selfInventory = newInventory;
 		if (!selfInventory)
 		{
