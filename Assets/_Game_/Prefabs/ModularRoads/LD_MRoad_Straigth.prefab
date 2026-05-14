@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6369535508127092227}
   - component: {fileID: 8133105641622787242}
   - component: {fileID: 10391555704207873}
-  - component: {fileID: 2229497600505299121}
+  - component: {fileID: 7836389198416528441}
   m_Layer: 6
   m_Name: LD_MRoad_Straigth
   m_TagString: Untagged
@@ -91,8 +91,8 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &2229497600505299121
-MeshCollider:
+--- !u!65 &7836389198416528441
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -109,7 +109,6 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -4716466835041963574, guid: 9db3604353d75804b8d201feea17f31f, type: 3}
+  serializedVersion: 3
+  m_Size: {x: 2.5000002, y: 5, z: 0.30000022}
+  m_Center: {x: 1.2500001, y: -2.5, z: 0.049999874}
