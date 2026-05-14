@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -11,6 +12,14 @@ public class LevelComponent : MonoBehaviour
 	[Header("Balancing")]
 	[SerializeField] private int enemySpreadHP;
 	[SerializeField][Min(1)] private int hpMaxSpread;
+
+	private void OnDrawGizmos()
+	{
+		if (!Application.isPlaying)
+		{
+			UpdateBounds();
+		}
+	}
 
 	[ContextMenu("Update Bounds")]
 	private void UpdateBounds()
