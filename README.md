@@ -15,7 +15,6 @@ REFACTO
 - assign attack : should update destination if target moves: "assign follow transform"
 - check "min time between assigns"
 - wood break SFX
-- no going to door waypoint
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
