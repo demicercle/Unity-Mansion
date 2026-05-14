@@ -15,7 +15,7 @@ public class GameTurnManager : MonoBehaviour
 	public static int debugMode { get; set; }
 
 	public event System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
-	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded;
+	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded, onGameOver;
 	
 	[SerializeField] private string nextLevelName = "Level_0";
 	[Header("Camera")]
@@ -135,6 +135,7 @@ public class GameTurnManager : MonoBehaviour
 		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
 		CharacterEntity.onAnyCharacterUsesAction += OnAnyActionUsed;
+		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
 		RoomTrigger.onChanged += OnRoomChanged;
 	}
 
@@ -143,6 +144,7 @@ public class GameTurnManager : MonoBehaviour
 		CharacterDetection.onAnyCharacterDetectionChanged -= OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
 		CharacterEntity.onAnyCharacterUsesAction -= OnAnyActionUsed;
+		CharacterEntity.onAnyCharacterDead -= OnAnyCharacterDead;
 		RoomTrigger.onChanged -= OnRoomChanged;
 	}
 
@@ -605,6 +607,20 @@ public class GameTurnManager : MonoBehaviour
 		if (IsTurnBasedMode() && focusWhenCharacterUseAction)
 		{
 			cameraPivot.Focus(character);
+		}
+	}
+
+	private void OnAnyCharacterDead(CharacterEntity character)
+	{
+		if (character.InParty())
+		{
+			foreach (var partyChar in partyCharacters)
+			{
+				if (!partyChar.IsDead())
+					return;
+			}
+			
+			onGameOver?.Invoke();
 		}
 	}
 
