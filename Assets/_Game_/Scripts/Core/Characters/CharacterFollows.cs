@@ -17,6 +17,7 @@ public class CharacterFollows : MonoBehaviour
 	public void SetLeader(CharacterEntity newLeader)
 	{
 		leaderCharacter = newLeader;
+		enabled = true;
 	}
 
 	public CharacterEntity GetLeader() => leaderCharacter;
@@ -33,10 +34,7 @@ public class CharacterFollows : MonoBehaviour
 	private void Awake()
 	{
 		dummy = new GameObject("Follow Dummy (" + name + ")").transform;
-	}
-
-	private void Start()
-	{
+		dummy.gameObject.hideFlags = HideFlags.HideInHierarchy;
 		enabled = false;
 	}
 
@@ -55,17 +53,14 @@ public class CharacterFollows : MonoBehaviour
 			agent = selfCharacter.GetAgent();
 		}
 		selfCharacter.Routines.onStarted += OnNewRoutineStarted;
-		StartCoroutine(FollowCoroutine());
 	}
 
 	private void OnDisable() // enabled=false on assign (CharacterRoutines)
 	{
+		if (debugMode>0) Debug.Log(this + " OnDisable ");
 		if (selfCharacter)
 		{
-			if (debugMode>0) Debug.Log(this + " OnDisable");
 			selfCharacter.Routines.onStarted -= OnNewRoutineStarted;
-			StopAllCoroutines();
-			agent.AssignFollowTransform(null);
 		}
 	}
 
@@ -75,42 +70,20 @@ public class CharacterFollows : MonoBehaviour
 		enabled = false;
 	}
 
-	IEnumerator FollowCoroutine()
+	private void LateUpdate()
 	{
-		yield return null;
-
-		dummy.position = transform.position;
-		
-		while (true)
+		if (dummy)
 		{
-			if (tickTime > 0) 
-				yield return new WaitForSeconds(tickTime);
-			else 
-				yield return null;
-
-			if (!leaderCharacter || leaderCharacter.IsDead() || selfCharacter.IsDead() ||
-			    !GameInput.Instance.IsLeaderMode())
-			{
-				yield break;
-			}
-			
-			if (GameTurnManager.Instance.IsTurnBasedMode())
-			{
-				yield break;
-			}
+			dummy.SetParent(null, true);
 			
 			headingPos = leaderCharacter.GetPosition();
-			headingPos -= leaderCharacter.GetDirection() * headingDistance;
 			
-			agent.SetObstacle(false);
-
+			headingPos -= leaderCharacter.GetDirection() * (leaderCharacter.IsMoving() ? 1.0f : 0.0f) * headingDistance / Vector3.Distance(selfCharacter.GetPosition(), leaderCharacter.GetPosition());
+			
+			dummy.position = headingSpeed <= 0 ? headingPos :
+				Vector3.MoveTowards(dummy.position, headingPos, Time.deltaTime * headingSpeed * selfCharacter.GetAgent().GetMaxSpeed());
+		
 			distanceToDummy = selfCharacter.GetDistanceTo(dummy.position);
-			distanceToLeader = selfCharacter.GetDistanceTo(leaderCharacter.GetPosition());
-
-			if (distanceToLeader <= avoidDistance)
-			{
-				headingPos = selfCharacter.GetAvoidPosition(leaderCharacter.GetPosition(), avoidDistance);
-			}
 			
 			if (distanceToDummy <= Mathf.Min(headingDistance, followDistance))
 			{
@@ -122,24 +95,6 @@ public class CharacterFollows : MonoBehaviour
 				agent.StartMove();
 			}
 			
-			if (debugMode > 0)
-			{
-				DebugDrawer.Line(selfCharacter.GetCenterPosition(), leaderCharacter.GetCenterPosition(), Utils.ColorAlpha(Color.black, 0.3f), tickTime);
-				DebugDrawer.Line(selfCharacter.GetCenterPosition(), headingPos, Color.softBlue, tickTime);
-				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, tickTime);
-			}
-		}
-	}
-
-	private void LateUpdate()
-	{
-		if (dummy)
-		{
-			dummy.SetParent(null, true);
-			
-			dummy.position = headingSpeed <= 0 ? headingPos :
-				Vector3.MoveTowards(dummy.position, headingPos, Time.deltaTime * headingSpeed * selfCharacter.GetAgent().GetMaxSpeed());
-		
 			if (debugMode > 0)
 			{
 				DebugDrawer.WireDisc(headingPos, followDistance, Color.softBlue, 0);

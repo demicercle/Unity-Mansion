@@ -25,7 +25,7 @@ public class CharacterAgent : MonoBehaviour
 	[SerializeField] [Range(0f, 1f)] private float priorityFollower = 0.5f;
 	[SerializeField] [Range(0f, 1f)] private float priorityOther = 0.3f;
 	[SerializeField] private bool noObstacleIfNotRevealed = true;
-	[SerializeField] [Range(0f, 1f)] private float obstacleRadiusScale = 1.0f;
+	[SerializeField] [Range(0f, 2f)] private float obstacleRadiusScale = 1.0f;
 	[SerializeField] private float turnBasedVelocityScale = 1.2f;
 	
 	[Header("Rendering")]
@@ -58,16 +58,10 @@ public class CharacterAgent : MonoBehaviour
 		aiPath.rotation = Quaternion.Euler(0, newRot, 0);
 	}
 
-	public void SetObstacle(bool value)
+	private void SetObstacle(bool value)
 	{
 		if (isObstacle == value)
 			return;
-
-		if (value && noObstacleIfNotRevealed && !_selfCharacter.IsCharacterRevealed())
-		{
-			SetObstacle(false);
-			return;
-		}
 		
 		isObstacle = value;
 		if (debugMode > 0) Debug.Log(this + " SetObstacle " + isObstacle);
@@ -141,21 +135,20 @@ public class CharacterAgent : MonoBehaviour
 	{
 		if(debugMode > 0) Debug.Log(this + " StopMovement()");
 		DropOnGround();
-		UpdateObstacle();
 		if(clamp) ClampOnNavigation();
 		aiPath.isStopped = true;
 		aiPath.updatePosition = aiPath.updateRotation = false;
 		aiPath.simulateMovement = false;
 		aiPath.canSearch = false;
-		ClearDestination();
+		UpdateObstacle();
 	}
 
-	public void UpdateObstacle()
+	private void UpdateObstacle()
 	{
-		SetObstacle(!_selfCharacter.IsSelected() 
-		            && !_selfCharacter.IsMoving()
-		            && _selfCharacter.IsCharacterRevealed() 
-		            && GameTurnManager.Instance.IsTurnBasedMode());
+		SetObstacle( GameTurnManager.Instance.IsTurnBasedMode()
+						&& !GameTurnManager.Instance.IsCurrentCharacter(_selfCharacter) 
+						&& _selfCharacter.IsCharacterRevealed() 
+						&& !_selfCharacter.IsMoving() );
 	}
 
 	public Coroutine AssignDestination(CharacterEntity character)
@@ -168,10 +161,8 @@ public class CharacterAgent : MonoBehaviour
 	{
 		//if(debugMode > 1) Debug.Log(this + " Assign_new_Destination");
 		ClearPath();
-		
-		if (IsFollowing()) 
-			AssignFollowTransform(null);
-		
+		StopFollow();
+		bestWaypoint = null;
 		StopAllCoroutines();
 		return StartCoroutine(DoAssignDestination(hitPoint));
 	}
@@ -201,17 +192,60 @@ public class CharacterAgent : MonoBehaviour
 
 	public void AssignFollowTransform(Transform followTarget, float distance = 0f)
 	{
-		if(!aiDestinationSetter) aiDestinationSetter = GetComponent<AIDestinationSetter>();
-		if(!aiDestinationSetter) aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
-		if (aiDestinationSetter.target == followTarget) return;
 		if (debugMode > 0) Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
 		hasDestination = false;
 		aiDestinationSetter.enabled = followTarget;
 		aiDestinationSetter.target = followTarget;
 		aiPath.canSearch = followTarget;
+		
 		if (TryGetComponent(out CharacterFollows follows))
 			follows.enabled = aiDestinationSetter.enabled;
+		
 		if(followTarget) aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
+	}
+
+	public void AssignWaypointDestination(Waypoint waypoint, float distance = 0f) =>
+		AssignTargetDestination(waypoint.transform, Mathf.Max(distance, waypoint.radius));
+
+	public void AssignCharacterDestination(CharacterEntity character, float distance = 0f) =>
+		AssignTargetDestination(character.transform,
+			Mathf.Max(distance, character.GetRadius() + _selfCharacter.GetRadius() + GetMinReachDistance()));
+	
+	public void AssignTargetDestination(Transform target, float distance)
+	{
+		if (target)
+		{
+			aiDestinationSetter.enabled = true;
+			aiDestinationSetter.target = target;
+			hasDestination = true;
+			aiPath.endReachedDistance = distance;
+			aiPath.canSearch = true;
+		}
+	}
+
+	public bool GetTargetDestination(out Vector3 dest)
+	{
+		if (aiDestinationSetter.enabled)
+		{
+			dest = aiDestinationSetter.target.position;
+			return true;
+		}
+		
+		dest = Vector3.zero;
+		return false;
+	}
+
+	public void SetFollowLeader(CharacterEntity leader)
+	{
+		follows.SetLeader(leader);
+	}
+
+	public void StopFollow()
+	{
+		aiDestinationSetter.enabled = false;
+		aiDestinationSetter.target = null;
+		hasDestination = false;
+		follows.enabled = false;
 	}
 
 	public void ClearDestination()
@@ -219,6 +253,7 @@ public class CharacterAgent : MonoBehaviour
 		debugString = "";
 		bestWaypoint = null;
 		hasDestination = false;
+		aiPath.canSearch = false;
 		lastVectorPath = new List<Vector3>();
 		StopAllCoroutines();
 	}
@@ -256,6 +291,8 @@ public class CharacterAgent : MonoBehaviour
 		{
 			aiPath.updatePosition = aiPath.updateRotation = false;
 			SetObstacle(false);
+			StopFollow();
+			ClearDestination();
 		}
 	}
 	
@@ -275,6 +312,7 @@ public class CharacterAgent : MonoBehaviour
 	#region PRIVATE
 	//private Transform followTarget;
 	private AIDestinationSetter aiDestinationSetter;
+	private CharacterFollows follows;
 	private AIPath aiPath;
 	private CharacterEntity _selfCharacter;
 	private GameTurnManager _gameTurnManager; // TODO
@@ -329,12 +367,14 @@ public class CharacterAgent : MonoBehaviour
 
 	private void UpdateComponent()
 	{
-		aiPath = GetComponent<AIPath>();
+		aiPath = Utils.GetOrAddComponent<AIPath>(gameObject);
 		aiPath.radius = radius;
 		aiPath.height = height;
 		if(minReachDistance > 0f) aiPath.endReachedDistance = minReachDistance;
 		if(Application.isPlaying) aiPath.gravity = Physics.gravity; // force gravity
-		rvoController = GetComponent<RVOController>();
+		rvoController = Utils.GetOrAddComponent<RVOController>(gameObject);
+		aiDestinationSetter = Utils.GetOrAddComponent<AIDestinationSetter>(gameObject);
+		follows = Utils.GetOrAddComponent<CharacterFollows>(gameObject);
 	}
 
 	private IEnumerator SearchBestWaypoint()
@@ -415,7 +455,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void UpdateRVO()
 	{
-		rvoController.enabled = aiPath.enabled && _selfCharacter.IsControllableByPlayer();
+		rvoController.enabled = aiPath.enabled && _selfCharacter.IsControllableByPlayer() && !GameTurnManager.Instance.IsTurnBasedMode();
 		
 		//rvoController.layer = rvoController.enabled ? RVOLayer.DefaultAgent : RVOLayer.Layer2;
 		
@@ -521,14 +561,20 @@ public class CharacterAgent : MonoBehaviour
 		if (!moveTarget.gameObject.activeSelf)
 			return;
 		
-		moveTarget.transform.position = aiPath.destination;
+		moveTarget.transform.position = bestWaypoint ? bestWaypoint.GetPosition() : aiPath.destination;
 		moveTarget.SetColor(ColorSettings.GetCharacterColor(_selfCharacter, true, true));
 		TransformAnimations.BounceRealtime(moveTarget.transform, isBlinking);
 	}
 
 	private bool ShowMoveTarget()
 	{
-		if (IsFollowing() || !_selfCharacter.IsPlayer() || _selfCharacter.IsAiming())
+		if (!_selfCharacter.IsPlayer() || _selfCharacter.IsAiming() || IsFollowing())
+			return false;
+
+		if (!IsMoving())
+			return false;
+
+		if (!GameTurnManager.Instance.IsPlayerTurn() || GameTurnManager.Instance.IsWaiting())
 			return false;
 
 		if (bestWaypoint)
@@ -548,6 +594,19 @@ public class CharacterAgent : MonoBehaviour
 		//rvoController.enabled = !_selfCharacter.IsCurrentTurn() || !_selfCharacter.IsSelected();
 		
 		UpdateMoveTarget(_selfCharacter.IsMoving());
+		UpdateObstacle();
+
+		if (_selfCharacter.IsMoving() && _selfCharacter.TryGetAnimation(out var anim))
+		{
+			if (anim.IsSwitchingWeapons)
+			{
+				aiPath.updatePosition = false;
+			}
+			else if (!aiPath.updatePosition)
+			{
+				aiPath.updatePosition = true;
+			}
+		}
 		
 		if (debugMode > 0)
 		{

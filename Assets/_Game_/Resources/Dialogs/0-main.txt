@@ -25,7 +25,7 @@ Wounded
 Badly wounded
 At death's doors
 
-
+:
 
 //None,
 Increase your max movement distance for this turn.

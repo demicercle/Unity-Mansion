@@ -114,7 +114,7 @@ public class GameTurnManager : MonoBehaviour
 	private CameraPivot cameraPivot => CameraPivot.Instance;
 	private IEnumerable<CharacterEntity> partyCharacters => CharacterEntity.GetPartyCharacters();
 	
-	private CharacterEntity[] levelCharacters;
+	private CharacterEntity[] levelCharacters = Array.Empty<CharacterEntity>();
 	private CharacterEntity currentAICharacter;
 	private CharacterEntity focusCharacter;
 	private int currentTurn;
@@ -326,20 +326,18 @@ public class GameTurnManager : MonoBehaviour
 			}
 			
 			yield return WaitNavigationDirty();
-			yield return YieldRoutines();
 		
 			foreach (var otherCharacter in levelCharacters)
 			{
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
-				
-				otherCharacter.Rest(); // rest not player character
-				
 				if (!otherCharacter.IsCharacterRevealed()) continue;
 				
-				yield return YieldRoutines();
+				yield return YieldRoutines(); // for possible scripts
 				
 				currentAICharacter = otherCharacter;
+				
+				otherCharacter.Rest(); // rest not player character
 				
 				cameraPivot.Focus(otherCharacter);
 				yield return new WaitForSeconds(focusCharacterSeconds);
@@ -350,22 +348,18 @@ public class GameTurnManager : MonoBehaviour
 					yield return new WaitForSeconds(noActionsSeconds);
 					continue;
 				}
-
-				otherCharacter.GetAgent().SetObstacle(false);
-				yield return YieldRoutines();
+				
 				yield return WaitNavigationDirty();
 				
 				if(debugMode > 0) Debug.Log(this + " start think " + otherBrain);
+				otherBrain.StartThink();
 				do
 				{
-					if(!otherBrain.IsThinking)
-						otherBrain.StartThink();
-					
 					yield return null;
 				} while (!otherCharacter.IsDead() && otherBrain.IsThinking);
 				
-				otherCharacter.GetAgent().SetObstacle(true);
 				yield return YieldRoutines();
+				
 				yield return WaitNavigationDirty();
 			}
 			
@@ -491,18 +485,20 @@ public class GameTurnManager : MonoBehaviour
 		
 		foreach (var anyCharacter in levelCharacters)
 		{
-			if (anyCharacter.IsDead() || !anyCharacter.IsCharacterRevealed())
+			if (anyCharacter.IsDead())
 				continue;
 			
 			anyCharacter.Routines.StopAllRoutines();
 			anyCharacter.StopAgent();
-			anyCharacter.GetAgent().UpdateObstacle();
+			
+			if (anyCharacter.TryGetComponent(out CharacterBrain otherBrain))
+				otherBrain.StopThink();
+
+			if (!anyCharacter.IsCharacterRevealed())
+				continue;
 			
 			if (!anyCharacter.InParty())
 			{
-				if (anyCharacter.TryGetComponent(out CharacterBrain otherBrain))
-					otherBrain.StopThink();
-
 				if (anyCharacter.IsEnemyToPlayer())
 				{
 					if (forceEnemyDetectParty)
@@ -659,7 +655,7 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.BeginVertical("textfield");
 			
 			GUILayout.Label("GAME TURN MANAGER");
-			GUILayout.Label("levelCharacters: " + levelCharacters?.Length);
+			GUILayout.Label("levelCharacters: " + levelCharacters.Length);
 			
 			GUILayout.BeginVertical("textfield");
 			GUILayout.Label("turnBasedMode: " + turnBasedMode);
@@ -681,14 +677,27 @@ public class GameTurnManager : MonoBehaviour
 				
 				foreach (var character in levelCharacters)
 				{
-					if (!character.IsCharacterRevealed()) continue;
-					
 					var label = character.name;
-					if (character.IsDead()) label += " (DEAD)";
-					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
 					
 					var isCurrent = (playerTurn && character.InParty()) ||
 					                (!playerTurn && currentAICharacter == character);
+					
+					if (debugMode > 1)
+					{
+						if (!character.IsCharacterRevealed())
+						{
+							label += " (HIDDEN)";
+							isCurrent = false;
+						}
+					}
+					else
+					{
+						if (!character.IsCharacterRevealed()) 
+							continue;
+					}
+					
+					if (character.IsDead()) label += " (DEAD)";
+					else label += " (" + character.GetCurrentHealth().ToString("N2") + ")";
 						
 					GUILayout.Toggle(isCurrent, label);
 				}
@@ -700,6 +709,9 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.EndArea();
 		}
 	}
+	public bool IsCurrentCharacter(CharacterEntity entity) => IsPlayerTurn() ? 
+																currentAICharacter == CharacterSelection.TryGetSelectedCharacter(out var selected) && selected == entity && selected.IsControllableByPlayer()
+																: currentAICharacter == entity;
 
 	public override string ToString() => "<b>GTM</b>";
 }

@@ -28,6 +28,7 @@ public class ActionButton : MonoBehaviour
 	private void LateUpdate()
 	{
 		button.interactable = CharacterSelection.TryGetSelectedCharacter(out var selected) 
+		                      && !GameTurnManager.Instance.IsWaiting()
 		                      && selected.IsControllableByPlayer() 
 		                      && selected.CanUseAction(actionType);
 		

@@ -36,6 +36,7 @@ public class CharacterAnimation : MonoBehaviour
 		public string switchOffTrigger;
 		public string switchOnTrigger;
 		public string instantSwitchTrigger;
+		public string detectEnemyTrigger;
 		//[Header("RPG Anims")]
 		//public string weapon;
 		//public string triggerNumber;
@@ -193,6 +194,11 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.turnEnded += OnTurnEnded;
 		_selfCharacter.onDamagedBy += OnDamagedBy;
 		_selfCharacter.onAiming += OnAiming;
+
+		if (_selfCharacter.TryGetComponent(out CharacterDetection detection))
+		{
+			detection.onCharacterDetected += OnCharacterDetected;
+		}
 	}
 
 	private void OnDisable()
@@ -216,13 +222,32 @@ public class CharacterAnimation : MonoBehaviour
 		_selfCharacter.onAiming -= OnAiming;
 		
 		StopAllCoroutines();
+
+		if (_selfCharacter.TryGetComponent(out CharacterDetection detection))
+		{
+			detection.onCharacterDetected += OnCharacterDetected;
+		}
+	}
+
+	private bool hasDetectedEnemy;
+	private void OnCharacterDetected(CharacterEntity other)
+	{
+		if (_selfCharacter.IsEnemyTo(other) && !_selfCharacter.IsDead() && _selfCharacter.IsCharacterRevealed())
+		{
+			if (!hasDetectedEnemy)
+			{
+				hasDetectedEnemy = true;
+				TrySetTrigger(parameters.detectEnemyTrigger);
+			}
+		}
 	}
 
 	private void OnSceneLoaded()
 	{
 		hasSwitchOnTrigger = !string.IsNullOrWhiteSpace(parameters.switchOnTrigger);
 		hasSwitchOffTrigger = !string.IsNullOrWhiteSpace(parameters.switchOffTrigger);
-		
+
+		hasDetectedEnemy = false;
 		weaponInHand = Weapon.Relax;
 		
 		TrySetFloat(parameters.velocityX, 0.0f);      
@@ -332,6 +357,7 @@ public class CharacterAnimation : MonoBehaviour
 		//TrySetTrigger(parameters.trigger);
 		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
 		TrySetTrigger(parameters.deathTrigger);
+		hasDetectedEnemy = false;
 		if (rpgAnimationHandler)
 		{
 			rpgAnimationHandler.Death();

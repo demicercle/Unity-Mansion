@@ -45,6 +45,11 @@ public class LanguageSettings : ScriptableObject
 		public static string NotNow => GetLine(20, "not now!");
 
 		public static string AttackResult(CharacterEntity.AttackResult ar) => ar == CharacterEntity.AttackResult.Miss ? Miss : ar == CharacterEntity.AttackResult.Dodge ? Dodge : Hit;
+
+		public static string DescribeHitChance(int calculatedHitChance)
+		{
+			return GetLine(28, string.Empty).TrimEnd(' ') + " " + calculatedHitChance + "+";
+		}
 	}
 
 	[SerializeField][ReadOnly] private DialogLines[] dialogLines;

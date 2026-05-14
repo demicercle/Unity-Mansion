@@ -5,8 +5,8 @@ using Random = System.Random;
 public static class DicePool
 {
 	public static int debugMode { get; set; }
-	//public static float DiceToFloat(int faces, int value) => Mathf.InverseLerp(1, Mathf.Max(1, faces), value);
-	//public static int FloatToDice(int faces, float value) => (int)Mathf.Lerp(1, faces, Mathf.Clamp01(value));
+	public static float DiceToFloat(int value, int faces = 20) => Mathf.InverseLerp(1, Mathf.Max(1, faces), value);
+	public static int FloatToDice(int value, float faces = 20) => (int)Mathf.Lerp(1, faces, Mathf.Clamp01(value));
 	
 	public static event System.Action onDiceRolled;
 

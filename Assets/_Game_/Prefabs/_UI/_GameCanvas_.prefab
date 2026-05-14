@@ -1373,7 +1373,7 @@ MonoBehaviour:
   inventoryPanel: {fileID: 2398437629576074096}
   itemCursorImage: {fileID: 6692672816484174597}
   cursorText: {fileID: 4676958143716694364}
-  displayHitChance: 0
+  displayHitChance: 1
   displayLastResultDice: 0
   displayHitBlocked: 1
   displayHeightMod: 1
