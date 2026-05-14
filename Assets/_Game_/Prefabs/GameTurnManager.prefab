@@ -71,6 +71,7 @@ MonoBehaviour:
     y: 0
     width: 0.35
     height: 1
+  speedUpTimeKey: 116
 --- !u!1001 &4690182601283876028
 PrefabInstance:
   m_ObjectHideFlags: 0

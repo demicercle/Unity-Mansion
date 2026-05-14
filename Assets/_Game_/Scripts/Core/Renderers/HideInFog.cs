@@ -30,6 +30,7 @@ public class HideInFog : MonoBehaviour
 		character.onSpawned += RoomChanged;
 		GameTurnManager.Instance.onSceneLoaded += RoomChanged;
 		RoomTrigger.onChanged += RoomChanged;
+		RoomChanged();
 	}
 
 	private void OnDisable()

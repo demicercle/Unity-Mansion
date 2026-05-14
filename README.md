@@ -15,9 +15,7 @@ REFACTO
 - assign attack : should update destination if target moves: "assign follow transform"
 - check "min time between assigns"
 - wood break SFX
-x opportunity attacks through walls + should trigger only once (retake logic/conditions)
-x try to reach dest taking wall
-- cutscene: if zombi 7 does not detect players, then should patrol or move
+- no going to door waypoint
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

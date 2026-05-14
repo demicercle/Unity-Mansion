@@ -643,8 +643,17 @@ public class GameTurnManager : MonoBehaviour
 
 	[Header("Debug")]
 	[SerializeField] private Rect debugGUIRect;
+	[SerializeField] private KeyCode speedUpTimeKey;
 	private void OnGUI()
 	{
+		if (Debug.isDebugBuild || Application.isEditor)
+		{
+			if (Event.current.type == EventType.KeyDown && Event.current.keyCode == speedUpTimeKey)
+				Time.timeScale = Mathf.PI;
+			else if (Event.current.type == EventType.KeyUp && Event.current.keyCode == speedUpTimeKey)
+				Time.timeScale = 1.0f;
+		}
+		
 		if (debugMode > 0)
 		{
 			if (GameInput.IsConsoleVisible()) return;
