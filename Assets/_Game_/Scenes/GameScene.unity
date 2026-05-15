@@ -142,6 +142,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: CameraPivot
       objectReference: {fileID: 0}
+    - target: {fileID: 5820440422213840781, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
+      propertyPath: raycastMask.m_Bits
+      value: 262144
+      objectReference: {fileID: 0}
     - target: {fileID: 6448026860638161089, guid: 4a2643e32cccea04a8e8ddce9273fb01, type: 3}
       propertyPath: sceneLoaded.m_PersistentCalls.m_Calls.Array.size
       value: 0
