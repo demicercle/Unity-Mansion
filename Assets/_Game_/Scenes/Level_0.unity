@@ -965,6 +965,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1999162733985184059, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+      propertyPath: worldHeight
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1999162733985184059, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       propertyPath: enemySpreadHP
       value: 18
       objectReference: {fileID: 0}

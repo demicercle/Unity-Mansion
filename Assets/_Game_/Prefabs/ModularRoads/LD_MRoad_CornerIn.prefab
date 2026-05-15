@@ -11,13 +11,13 @@ GameObject:
   - component: {fileID: 5624153158611305828}
   - component: {fileID: 455674784075990972}
   - component: {fileID: 7157117577769404847}
-  - component: {fileID: 5146372197006075721}
+  - component: {fileID: 9201527777312269476}
   m_Layer: 6
   m_Name: LD_MRoad_CornerIn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &5624153158611305828
 Transform:
@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3552024193681931391}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.50000066, y: -0.49999934, z: -0.49999937, w: 0.5000006}
+  m_LocalRotation: {x: -0.5, y: -0.5, z: -0.5, w: 0.5}
   m_LocalPosition: {x: -22.5, y: 0.25, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -91,7 +91,7 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &5146372197006075721
+--- !u!64 &9201527777312269476
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -112,4 +112,4 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: -1497237412037767583, guid: 9db3604353d75804b8d201feea17f31f, type: 3}
+  m_Mesh: {fileID: 354168858214602611, guid: 9db3604353d75804b8d201feea17f31f, type: 3}

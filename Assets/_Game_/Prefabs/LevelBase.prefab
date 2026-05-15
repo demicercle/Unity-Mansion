@@ -205,7 +205,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelComponent
   aStar: {fileID: 3993351974707439097}
-  worldHeight: 12
+  worldHeight: 8
   enemySpreadHP: 0
   hpMaxSpread: 1
 --- !u!1 &2233729156539003407
