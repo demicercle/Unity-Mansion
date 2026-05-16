@@ -13,8 +13,8 @@ public class CameraTrigger : MonoBehaviour
 	
 	private void FixedUpdate()
 	{
-		foreach(var roof in _roofs)
-			roof.SetBlend(1.0f);
+		foreach (var roof in _roofs)
+			roof.SetBlend(true);
 
 		_roofs.Clear();
 
@@ -25,7 +25,7 @@ public class CameraTrigger : MonoBehaviour
 				if (hit.collider.TryGetComponent(out RoofRenderer roof) && !_roofs.Contains(roof))
 				{
 					_roofs.Add(roof);
-					roof.SetBlend(0.0f);
+					roof.SetBlend(false);
 				}
 			}
 		}
