@@ -206,8 +206,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelComponent
   aStar: {fileID: 3993351974707439097}
-  worldHeight: 8
-  boundsExtraSize: 20
+  worldHeight: 7.25
+  boundsExtraSize: 40
   worldBoundsFogCubes:
   - {fileID: 7584564494942746600}
   - {fileID: 6826245531033498255}

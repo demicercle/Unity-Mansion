@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -97,6 +98,9 @@ public class GameCanvas : MonoBehaviour
 		if (instance) Debug.LogError(this + " duplicated!");
 		instance = this;
 		
+		for(int i = 0; i < portraits.Length; i++)
+			portraits[i].gameObject.SetActive(false);
+		
 		canvasScaler = GetComponent<CanvasScaler>();
 		
 		floatingText.gameObject.SetActive(false);
@@ -168,8 +172,11 @@ public class GameCanvas : MonoBehaviour
 		}
 	}
 
-	private void Start()
+	private IEnumerator Start()
 	{
+		do yield return null;
+		while (GameTurnManager.Instance.IsLoading());
+		
 		UpdateSelectables();
 		
 		// event system checks

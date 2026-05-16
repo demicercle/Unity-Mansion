@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firstLevelName: Level_0
-  cameraStartZoom: 0.204
+  cameraStartZoom: 0.8
   focusWhenCharacterUseAction: 1
   rollDiceWhenTurnStarts: 0
   rollDiceWhenTurnEnds: 1
