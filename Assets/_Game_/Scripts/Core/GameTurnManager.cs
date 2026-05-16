@@ -90,8 +90,6 @@ public class GameTurnManager : MonoBehaviour
 	}
 
 	public CharacterEntity[] GetLevelCharacters() => levelCharacters.ToArray();
-	
-	public bool IsLevelIndex(int index) => index == 0; // TODO
 
 	public void SetWaitTime(float newTime)
 	{
@@ -113,10 +111,14 @@ public class GameTurnManager : MonoBehaviour
 	{
 		return StartCoroutine(LoadLevel(levelIndex, playerStartIndex));
 	}
+
+	public int GetCurrentLevelIndex() => currentLevelData ? currentLevelData.levelIndex : 0;
+
+	public bool IsLevelIndex(int index) => index == GetCurrentLevelIndex();
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
-	private IEnumerable<CharacterEntity> partyCharacters => CharacterEntity.GetPartyCharacters();
+	private CharacterEntity[] partyCharacters => CharacterEntity.GetPartyCharacters();
 	
 	private CharacterEntity[] levelCharacters = Array.Empty<CharacterEntity>();
 	private CharacterEntity currentAICharacter;
@@ -197,12 +199,24 @@ public class GameTurnManager : MonoBehaviour
 		StartCoroutine("MainCoroutine");
 	}
 
-	private IEnumerator LoadLevel(LevelData newLevel)
+	private IEnumerator LoadLevel(LevelData newLevel = null)
 	{
-		Debug.Log(this + " LoadLevel " + newLevel);
-		
+		if (!newLevel)
+		{
+			currentLevel = Utils.FindFirstObject<LevelComponent>();
+			
+			if (currentLevel)
+				newLevel = currentLevel.GetLevelData();
+			else
+				newLevel = LevelData.GetLevel(0);
+
+			Debug.Log(this + " LoadFirstLevel " + newLevel);
+		}
+
 		if (currentLevelData)
 		{
+			yield return StartCoroutine(SaveGame());
+			
 			foreach (var sceneToUnload in currentLevelData.scenesToLoad)
 			{
 				if (!newLevel.scenesToLoad.Contains(sceneToUnload) && SceneManager.GetSceneByName(sceneToUnload).isLoaded)
@@ -225,13 +239,33 @@ public class GameTurnManager : MonoBehaviour
 					yield return SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
 				}
 			}
+
+			if (partyCharacters.Length == 0)
+			{
+				yield return StartCoroutine(SpawnParty());
+			}
+		
+			yield return null;
+			RoomTrigger.activeRooms.ForEach(r => r.Refresh());
+			yield return null;
+		
+			currentLevel = Utils.FindFirstObject<LevelComponent>();
+		
+			levelCharacters = CharacterEntity.AllCharacters
+				.OrderBy(c => c.transform.GetSiblingIndex())
+				.ToArray();
+		
+			Debug.Log(this + " init level " + currentLevel + " found levelCharacters=" + levelCharacters.Length);
+		
+			foreach (var character in levelCharacters)
+			{
+				character.Spawn();
+			}
+		
+			currentLevel.Init(levelCharacters);
+			
+			yield return StartCoroutine(LoadGame());
 		}
-		
-		yield return null;
-		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
-		yield return null;
-		
-		InitLevel();
 	}
 
 	private IEnumerator Start()
@@ -243,19 +277,13 @@ public class GameTurnManager : MonoBehaviour
 		}
 		
 		isLoading = true;
+		Debug.Log(this + " first loading...");
+		onLoadingGame?.Invoke(true);
+		
 		DisableAudio(true);
 		FadeScreen.FadeIn(true);
-
-		if (!currentLevelData)
-		{
-			currentLevel = Utils.FindFirstObject<LevelComponent>();
-			if (currentLevel) 
-				currentLevelData = currentLevel.GetLevelData();
-			else 
-				currentLevelData = LevelData.GetLevel(0);
-		}
 		
-		yield return StartCoroutine(LoadLevel(currentLevelData));
+		yield return StartCoroutine(LoadLevel(null));
 		
 		do // ensure that everything is properly loaded
 		{
@@ -267,33 +295,7 @@ public class GameTurnManager : MonoBehaviour
 			yield return new WaitForSeconds(postLoadSceneDuration);
 		} while (SceneLoader.AnyInstanceActive);
 		
-		Debug.Log(this + " first loading...");
-		onLoadingGame?.Invoke(true);
-		
 		yield return WaitNavigationDirty();
-		
-		Debug.Log(" loading complete");
-
-		yield return StartCoroutine(SpawnParty());
-
-		if (GameSave.Current.ShouldLoad())
-		{
-			Debug.Log(this + " Load game save version=" + GameSave.Current.version);
-			GameSave.Current.LoadGame();
-			yield return new WaitForSeconds(0.3f);
-			
-			if (CharacterSelection.TryGetSelectedCharacter(out var previouslySelected)) // TODO hak selection on load
-			{
-				foreach (var partyCharacter in CharacterEntity.GetPartyCharacters())
-				{
-					CharacterSelection.SelectCharacter(partyCharacter, true);
-				}
-				
-				CharacterSelection.SelectCharacter(previouslySelected);
-			}
-			
-			yield return new WaitForSeconds(postLoadSaveDuration);
-		}
 		
 		Debug.Log("loading complete");
 		isLoading = false;
@@ -306,6 +308,26 @@ public class GameTurnManager : MonoBehaviour
 		FadeScreen.FadeOut();
 		
 		StartCoroutine("MainCoroutine");
+	}
+
+	private IEnumerator SaveGame()
+	{
+		Debug.Log(this + " SaveGame");
+		
+		GameSave.Current.SaveGame();
+		yield return new WaitForSeconds(0.3f);
+	}
+
+	private IEnumerator LoadGame()
+	{
+		Debug.Log(this + " LoadGame");
+		
+		GameSave.Current.LoadGame();
+		yield return new WaitForSeconds(0.3f);
+		
+		yield return WaitNavigationDirty();
+		
+		yield return new WaitForSeconds(postLoadSaveDuration);
 	}
 
 	private IEnumerator MainCoroutine()
@@ -344,25 +366,8 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator SpawnParty()
 	{
 		var playerStart = PlayerStart.GetPlayerStarts().FirstOrDefault();
+		Debug.Log(this + " SpawnParty playerStart=" + playerStart);
 		yield return StartCoroutine(playerStart.SpawnParty());
-	}
-	
-	private void InitLevel()
-	{
-		currentLevel = Utils.FindFirstObject<LevelComponent>();
-		
-		levelCharacters = CharacterEntity.AllCharacters
-			.OrderBy(c => c.transform.GetSiblingIndex())
-			.ToArray();
-		
-		Debug.Log(this + " init level " + currentLevel + " found levelCharacters=" + levelCharacters.Length);
-		
-		foreach (var character in levelCharacters)
-		{
-			character.Spawn();
-		}
-		
-		currentLevel.Init(levelCharacters);
 	}
 
 	private IEnumerator TurnBasedCoroutine()
