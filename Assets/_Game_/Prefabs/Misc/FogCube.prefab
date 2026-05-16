@@ -297,7 +297,7 @@ Transform:
   m_GameObject: {fileID: 5028313424375010385}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: -0.000008836388}
-  m_LocalPosition: {x: 0.25, y: 0.25, z: -0.0000044107437}
+  m_LocalPosition: {x: 0.25, y: 0.25, z: -0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -545,10 +545,10 @@ PrefabInstance:
       addedObject: {fileID: 6482832187913256654}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4998443362275719635}
+      addedObject: {fileID: 2570004680600512485}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2570004680600512485}
+      addedObject: {fileID: 4998443362275719635}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 65c4c05c1694dac48837a2f48b2c94ea, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1454167869222730256}
@@ -664,6 +664,9 @@ MonoBehaviour:
   onFightEnds:
     m_PersistentCalls:
       m_Calls: []
+  onGameOver:
+    m_PersistentCalls:
+      m_Calls: []
   onTurnBasedChanged:
     m_PersistentCalls:
       m_Calls:
@@ -702,10 +705,10 @@ MonoBehaviour:
   - {fileID: 6253884378984951134}
   - {fileID: 2719509973945975668}
   raycastDirections:
-  - {x: 0, y: 0, z: 1}
-  - {x: 0, y: 0, z: -1}
   - {x: 1, y: 0, z: 0}
   - {x: -1, y: 0, z: 0}
+  - {x: 0, y: 0, z: -1}
+  - {x: 0, y: 0, z: 1}
 --- !u!1001 &8433618611019371189
 PrefabInstance:
   m_ObjectHideFlags: 0

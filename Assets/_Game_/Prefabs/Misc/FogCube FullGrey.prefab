@@ -70,7 +70,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2251922595011403660, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
       propertyPath: m_Name
-      value: FogCube Variant
+      value: FogCube FullGrey
       objectReference: {fileID: 0}
     - target: {fileID: 5799231115807842419, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'

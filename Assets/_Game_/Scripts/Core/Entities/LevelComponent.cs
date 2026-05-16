@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -99,7 +96,11 @@ public class LevelComponent : MonoBehaviour
 			}
 
 			cube.transform.position = new Vector3(cube.transform.position.x, center.y - extends.y, cube.transform.position.z);
+			cube.transform.localScale = new Vector3(cube.transform.localScale.x, worldHeight * 2, cube.transform.localScale.z);
 		}
+		
+		if(Application.isPlaying)
+			FogCube.UpdateAll();
 	}
 	
 	public void Init(CharacterEntity[] levelCharacters)

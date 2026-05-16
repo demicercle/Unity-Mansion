@@ -5,26 +5,24 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class FogCube : MonoBehaviour
 {
+	public static void UpdateAll() => activeCubes.ForEach(c => c.DelayedChanged());
+	
 	[SerializeField] private float raycastDistance = 0.5f;
-
 	[SerializeField] private Renderer[] planesRenderers = new Renderer[4]
 	{
 		null, null, null, null
 	};
 	
-	[SerializeField] private Vector3[] raycastDirections = new Vector3[4]
-	{
-		Vector3.forward,
-		Vector3.back,
-		Vector3.right,
-		Vector3.left
-	};
-	
 	private static List<FogCube> activeCubes  = new List<FogCube>();
 	private new Collider collider;
-	
-	private Ray GetRay(int dirIndex) => new Ray(collider.bounds.center - raycastDirections[dirIndex] * raycastDistance * 0.5f + Vector3.Scale(collider.bounds.extents, raycastDirections[dirIndex]), raycastDirections[dirIndex]);
 
+	private Ray GetRay(int i)
+	{
+		return planesRenderers[i]
+			? new Ray(planesRenderers[i].transform.position + planesRenderers[i].transform.forward * raycastDistance * 0.5f, -planesRenderers[i].transform.forward)
+			: new Ray(transform.position, transform.forward);
+	}
+	
 	private void Awake()
 	{
 		collider =  GetComponent<Collider>();
@@ -51,8 +49,9 @@ public class FogCube : MonoBehaviour
 	[ContextMenu("Changed")]
 	private void Changed()
 	{
+//		Debug.Log(this + " Changed");
 		if(!collider) collider = GetComponent<Collider>();
-		for (int i = 0; i < raycastDirections.Length; i++)
+		for (int i = 0; i < planesRenderers.Length; i++)
 		{
 			if (planesRenderers[i])
 			{
@@ -67,7 +66,7 @@ public class FogCube : MonoBehaviour
 	{
 		if(!collider) collider = GetComponent<Collider>();
 		Gizmos.color = Color.white;
-		for (int i = 0; i < raycastDirections.Length; i++)
+		for (int i = 0; i < planesRenderers.Length; i++)
 		{
 			var ray = GetRay(i);
 			Gizmos.DrawLine(ray.origin, ray.GetPoint(raycastDistance) );

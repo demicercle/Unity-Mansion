@@ -7,25 +7,13 @@ using System.Linq;
 public class PlayerStart : MonoBehaviour
 {
 	private static List<PlayerStart> instances = new List<PlayerStart>();
-
-	public static bool FindCurrent(out PlayerStart ps)
-	{
-		if (instances.Count > 0)
-		{
-			ps = instances.FirstOrDefault();
-			return true;
-		}
-
-		ps = null;
-		return false;
-	}
+	public static PlayerStart[] GetPlayerStarts() => instances.OrderBy(ps => ps.index).ToArray();
 	
+	[SerializeField] private int index;
 	[SerializeField] private Waypoint[] waypoints;
 	[SerializeField] private GameObject[] playerPrefabs;
 
 	private LevelComponent parentLevel;
-	
-	public LevelComponent GetParentLevel() => parentLevel;
 
 	public void TeleportParty() => TeleportParty(CharacterEntity.GetPartyCharacters());
 	public void TeleportParty(CharacterEntity[] partyChars)

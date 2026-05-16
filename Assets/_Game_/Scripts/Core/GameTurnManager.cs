@@ -287,7 +287,7 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator SpawnParty()
 	{
-		var playerStart = Utils.FindFirstObject<PlayerStart>();
+		var playerStart = PlayerStart.GetPlayerStarts().FirstOrDefault();
 		yield return StartCoroutine(playerStart.SpawnParty());
 	}
 	
