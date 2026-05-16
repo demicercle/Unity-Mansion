@@ -8,6 +8,11 @@ public class PlayerStart : MonoBehaviour
 {
 	private static List<PlayerStart> instances = new List<PlayerStart>();
 	public static PlayerStart[] GetPlayerStarts() => instances.OrderBy(ps => ps.index).ToArray();
+
+	public static PlayerStart GetPlayerStart(int playerStartIndex)
+	{
+		return instances.FirstOrDefault(ps => ps.index == playerStartIndex);
+	}
 	
 	[SerializeField] private int index;
 	[SerializeField] private Waypoint[] waypoints;
@@ -21,6 +26,7 @@ public class PlayerStart : MonoBehaviour
 		for (int i = 0; i < partyChars.Length; i++)
 		{
 			partyChars[i].Teleport(waypoints[i].GetPosition(), waypoints[i].GetRotation());
+			RoomTrigger.RevealAtPosition(waypoints[i].GetPosition());
 		}
 	}
 
@@ -34,6 +40,7 @@ public class PlayerStart : MonoBehaviour
 			player.Spawn();
 			player.SetPartyIndex(i);
 			player.Teleport(waypoints[i].GetPosition(), waypoints[i].GetRotation());
+			RoomTrigger.RevealAtPosition(waypoints[i].GetPosition());
 		}
 	}
 	

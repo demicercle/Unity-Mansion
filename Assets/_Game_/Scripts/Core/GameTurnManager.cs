@@ -108,6 +108,11 @@ public class GameTurnManager : MonoBehaviour
 
 		return false;
 	}
+
+	public Coroutine PartyTravel(int levelIndex, int playerStartIndex)
+	{
+		return StartCoroutine(LoadLevel(levelIndex, playerStartIndex));
+	}
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
@@ -149,6 +154,49 @@ public class GameTurnManager : MonoBehaviour
 		RoomTrigger.onChanged -= OnRoomChanged;
 	}
 
+	private IEnumerator LoadLevel(int levelIndex, int playerStartIndex)
+	{
+		StopCoroutine("MainCoroutine");
+		onLoadingGame?.Invoke(true);
+		isLoading = true;
+		yield return FadeScreen.FadeIn();
+		DisableAudio(true);
+
+		foreach (var levelCharacter in levelCharacters)
+		{
+			levelCharacter.StopAgent();
+		}
+
+		foreach (var partyChar in partyCharacters)
+		{
+			partyChar.StopAgent();
+			partyChar.gameObject.SetActive(false);
+		}
+		
+		var levelData = LevelData.GetLevel(levelIndex);
+		yield return StartCoroutine(LoadLevel(levelData));
+
+		yield return WaitNavigationDirty();
+		yield return null;
+
+		foreach (var partyChar in partyCharacters)
+		{
+			partyChar.gameObject.SetActive(true);
+		}
+		
+		var playerStart = PlayerStart.GetPlayerStart(playerStartIndex);
+		playerStart.TeleportParty();
+		yield return null;
+		
+		isLoading = false;
+		onLoadingGame?.Invoke(false);
+		onSceneLoaded?.Invoke();
+		
+		DisableAudio(false);
+		FadeScreen.FadeOut();
+		StartCoroutine("MainCoroutine");
+	}
+
 	private IEnumerator LoadLevel(LevelData newLevel)
 	{
 		Debug.Log(this + " LoadLevel " + newLevel);
@@ -179,6 +227,8 @@ public class GameTurnManager : MonoBehaviour
 			}
 		}
 		
+		yield return null;
+		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
 		yield return null;
 		
 		InitLevel();
@@ -223,9 +273,6 @@ public class GameTurnManager : MonoBehaviour
 		yield return WaitNavigationDirty();
 		
 		Debug.Log(" loading complete");
-		
-		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
-		yield return null; // for triggers
 
 		yield return StartCoroutine(SpawnParty());
 
@@ -263,6 +310,8 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator MainCoroutine()
 	{
+		Debug.Log(this + " starts MainCoroutine");
+		
 		while (true)
 		{
 			yield return StartCoroutine(RealTimeCoroutine());
