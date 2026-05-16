@@ -653,7 +653,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (9)
+      value: Prop_Door_Simple_9
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -1283,10 +1283,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 6100771718776727966, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8338201792734464210, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 654181010}
-    - targetCorrespondingSourceObject: {fileID: 6100771718776727966, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8338201792734464210, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1422376014}
     - targetCorrespondingSourceObject: {fileID: 2232387536913732081, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
@@ -1408,6 +1408,12 @@ PrefabInstance:
       addedObject: {fileID: 484594142}
     - targetCorrespondingSourceObject: {fileID: 98106688315356320, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 701814046061015811}
+    - targetCorrespondingSourceObject: {fileID: 98106688315356320, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1311188340}
+    - targetCorrespondingSourceObject: {fileID: 98106688315356320, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 1161811219735845378}
     - targetCorrespondingSourceObject: {fileID: 98106688315356320, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       insertIndex: -1
@@ -1436,12 +1442,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 98106688315356320, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 210159151}
-    - targetCorrespondingSourceObject: {fileID: 98106688315356320, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 701814046061015811}
-    - targetCorrespondingSourceObject: {fileID: 98106688315356320, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1311188340}
     - targetCorrespondingSourceObject: {fileID: 2752555749342996868, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2768915823071690618}
@@ -1944,7 +1944,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (8)
+      value: Prop_Door_Simple_7
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -2213,7 +2213,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (10)
+      value: Prop_Door_Simple_8
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -2454,7 +2454,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (4)
+      value: Prop_Door_Simple_6
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -2628,7 +2628,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (5)
+      value: Prop_Door_Simple_3
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -2997,7 +2997,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3564069843848961591, guid: 2fa844bd44c6e034182dc4c9727723a6, type: 3}
       propertyPath: m_Name
-      value: Squad (1)
+      value: Squad_1
       objectReference: {fileID: 0}
     - target: {fileID: 3568312211943832620, guid: 2fa844bd44c6e034182dc4c9727723a6, type: 3}
       propertyPath: characters.Array.size
@@ -3451,7 +3451,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (7)
+      value: Prop_Door_Simple_5
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -4021,11 +4021,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameScript
   startGraph: {fileID: 11400000, guid: a9425239fa3b46545aa72a523738abb5, type: 2}
---- !u!4 &943585694 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6100771718776727966, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
-  m_PrefabInstance: {fileID: 251902895}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &950012086 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6356768765544130209, guid: 210100f1dda17e44a974f31140c87e34, type: 3}
@@ -4962,7 +4957,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (6)
+      value: Prop_Door_Simple_4
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -5382,7 +5377,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (3)
+      value: Prop_Door_Simple_2
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -5612,7 +5607,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7939727362816494209, guid: 05071a91fe518f044b637aadeb1077c9, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Double_1 (1)
+      value: Prop_Door_Double_2
       objectReference: {fileID: 0}
     - target: {fileID: 7939727362816494209, guid: 05071a91fe518f044b637aadeb1077c9, type: 3}
       propertyPath: m_IsActive
@@ -5933,7 +5928,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 943585694}
+    m_TransformParent: {fileID: 1642445565}
     m_Modifications:
     - target: {fileID: 584851687388459417, guid: 1a0fef9c7ed66554b8cbae0eb151e898, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6347,6 +6342,11 @@ MonoBehaviour:
   version: 1073741824
   target: {fileID: 0}
   useRotation: 0
+--- !u!4 &1642445565 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8338201792734464210, guid: 1685a00637c71454e8fc11dcaf81791e, type: 3}
+  m_PrefabInstance: {fileID: 251902895}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1664151318
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7623,7 +7623,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (0)
+      value: Prop_Door_Simple_0
       objectReference: {fileID: 0}
     - target: {fileID: 7241956466656801432, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: uniqueID
@@ -8435,7 +8435,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3564069843848961591, guid: 2fa844bd44c6e034182dc4c9727723a6, type: 3}
       propertyPath: m_Name
-      value: Squad (2)
+      value: Squad_2
       objectReference: {fileID: 0}
     - target: {fileID: 3568312211943832620, guid: 2fa844bd44c6e034182dc4c9727723a6, type: 3}
       propertyPath: characters.Array.size
@@ -9189,7 +9189,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 943585694}
+    m_TransformParent: {fileID: 1642445565}
     m_Modifications:
     - target: {fileID: 584851687388459417, guid: 1a0fef9c7ed66554b8cbae0eb151e898, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9454,7 +9454,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_Name
-      value: Prop_Door_Simple (1)
+      value: Prop_Door_Simple_1
       objectReference: {fileID: 0}
     - target: {fileID: 3681349746299014106, guid: cf90aca1d233bcc4bbeb1915a5fd2db3, type: 3}
       propertyPath: m_IsActive
