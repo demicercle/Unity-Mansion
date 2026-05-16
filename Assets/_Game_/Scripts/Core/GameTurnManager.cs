@@ -109,6 +109,7 @@ public class GameTurnManager : MonoBehaviour
 
 	public Coroutine PartyTravel(int levelIndex, int playerStartIndex)
 	{
+		Debug.Log(this + " PartyTravel " + levelIndex + " " + playerStartIndex);
 		return StartCoroutine(LoadLevel(levelIndex, playerStartIndex));
 	}
 
@@ -189,6 +190,8 @@ public class GameTurnManager : MonoBehaviour
 		var playerStart = PlayerStart.GetPlayerStart(playerStartIndex);
 		playerStart.TeleportParty();
 		yield return null;
+		
+		yield return StartCoroutine(SaveGame());
 		
 		isLoading = false;
 		onLoadingGame?.Invoke(false);
@@ -282,8 +285,15 @@ public class GameTurnManager : MonoBehaviour
 		
 		DisableAudio(true);
 		FadeScreen.FadeIn(true);
-		
-		yield return StartCoroutine(LoadLevel(null));
+
+		if (GameSave.Current.GetCurrentLevel() != GetCurrentLevelIndex())
+		{
+			yield return PartyTravel(GameSave.Current.GetCurrentLevel(), 0);
+		}
+		else
+		{
+			yield return StartCoroutine(LoadLevel(null));
+		}
 		
 		do // ensure that everything is properly loaded
 		{
@@ -323,6 +333,7 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log(this + " LoadGame");
 		
 		GameSave.Current.LoadGame();
+		
 		yield return new WaitForSeconds(0.3f);
 		
 		yield return WaitNavigationDirty();

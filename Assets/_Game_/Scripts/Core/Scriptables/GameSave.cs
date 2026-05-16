@@ -247,17 +247,12 @@ public class GameSave : ScriptableObject
 	[ReadOnly] [Min(0)] public int version;
 	[ReadOnly] public int gameSeed;
 	[ReadOnly] public int selectedCharacter;
+	[ReadOnly] public int currentLevelIndex;
 	[ReadOnly] public List<SavedPC> savedPCs = new List<SavedPC>();
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
 
-	private bool shouldLoad;
-	public bool ShouldLoad() => shouldLoad;
-	public void MarkAsLoad() => shouldLoad = true;
-	
-	private bool loadFirstLevel;
-	public void MarkFirstLevel() => loadFirstLevel = true;
-	public bool LoadFirstLevel() => loadFirstLevel;
+	public int GetCurrentLevel() => currentLevelIndex;
 	public bool IsEmpty() => version == 0;
 
 	public void SetSavedValue(string valueName, int newValue)
@@ -302,7 +297,6 @@ public class GameSave : ScriptableObject
 		savedValues.Clear();
 		selectedCharacter = 0;
 		version = 0;
-		shouldLoad = false;
 		if(newSeed) gameSeed = DicePool.GetRandomSeed();
 		DicePool.SetSeed(gameSeed);
 		if(!Application.isPlaying) Utils.SetDirty(this);
@@ -317,9 +311,11 @@ public class GameSave : ScriptableObject
 			Debug.LogWarning(this + " LoadGame works only in play mode!");
 			return;
 		}
-		
+
 		if (fromFile)
+		{
 			LoadFromFile();
+		}
 
 		if(gameSeed > 0)
 			DicePool.SetSeed(gameSeed);
@@ -484,6 +480,8 @@ public class GameSave : ScriptableObject
 		}
 
 		AppendNewLevel(savedLevel);
+
+		currentLevelIndex = savedLevel.levelIndex;
 		
 		Debug.Log(this + " Game saved");
 		

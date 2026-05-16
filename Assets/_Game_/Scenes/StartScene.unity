@@ -2024,7 +2024,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c06a9ca4b754ccd81c335858ffcb176, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
-  sceneToLoad: GameScene
+  scenesToLoad:
+  - GameScene
   loadSceneMode: 0
   autoLoad: 0
 --- !u!114 &2052348502
