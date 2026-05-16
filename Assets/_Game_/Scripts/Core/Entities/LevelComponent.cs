@@ -10,12 +10,16 @@ public class LevelComponent : MonoBehaviour
 	[Header("Level Settings")] 
 	[SerializeField] private AstarPath aStar;
 	[SerializeField] private float worldHeight = 12f;
+	[SerializeField] private float boundsExtraSize = 20.0f;
+
+	[SerializeField]
+	private FogCube[] worldBoundsFogCubes = new FogCube[8] { null, null, null, null, null, null, null, null };
 	
 	[Header("Balancing")]
 	[SerializeField] private int enemySpreadHP;
 	[SerializeField][Min(1)] private int hpMaxSpread;
 
-	private void OnDrawGizmos()
+	private void OnDrawGizmosSelected()
 	{
 		if (!Application.isPlaying)
 		{
@@ -46,6 +50,56 @@ public class LevelComponent : MonoBehaviour
 		bounds.size = new Vector3(bounds.size.x, worldHeight, bounds.size.z);
 		bounds.center = new Vector3(bounds.center.x, worldHeight / 2f, bounds.center.z);
 		cameraPivot.SetWorldBounds(bounds);
+
+		for (int i = 0; i < worldBoundsFogCubes.Length; i++) // Left, Left Fwd, Fwd, Right Fwd, Right, Right Back, Back, Left Back
+		{
+			var cube =  worldBoundsFogCubes[i];
+			if (!cube) continue;
+			var center = bounds.center;
+			var extends = bounds.extents;
+			if (i == 0) // Left
+			{
+				cube.transform.position = center - extends;
+				cube.transform.localScale = new Vector3(boundsExtraSize, cube.transform.localScale.y, extends.z * 4);
+			}
+			else if (i == 1) // Left Fwd
+			{
+				cube.transform.position = center - extends + Vector3.forward * extends.z * 2;
+				cube.transform.localScale = new Vector3(boundsExtraSize, cube.transform.localScale.y, boundsExtraSize);
+			}
+			else if (i == 2) // Fwd
+			{
+				cube.transform.position = center + extends;
+				cube.transform.localScale = new Vector3(extends.x * 4, cube.transform.localScale.y, boundsExtraSize);
+			}
+			else if (i == 3) // Right Fwd
+			{
+				cube.transform.position = center + extends;
+				cube.transform.localScale = new Vector3(boundsExtraSize, cube.transform.localScale.y, boundsExtraSize);
+			}
+			else if (i == 4) // Right
+			{
+				cube.transform.position = center + extends;
+				cube.transform.localScale = new Vector3(boundsExtraSize, cube.transform.localScale.y, extends.z * 4);
+			}
+			else if (i == 5) // Right Back
+			{
+				cube.transform.position = center + extends - Vector3.forward * extends.z * 2;
+				cube.transform.localScale = new Vector3(boundsExtraSize, cube.transform.localScale.y, boundsExtraSize);
+			}
+			else if (i == 6) //  Back
+			{
+				cube.transform.position = center - extends;
+				cube.transform.localScale = new Vector3(extends.x * 4, cube.transform.localScale.y, boundsExtraSize);
+			}
+			else if (i == 7) // Left Back
+			{
+				cube.transform.position = center - extends;
+				cube.transform.localScale = new Vector3(boundsExtraSize, cube.transform.localScale.y, boundsExtraSize);
+			}
+
+			cube.transform.position = new Vector3(cube.transform.position.x, center.y - extends.y, cube.transform.position.z);
+		}
 	}
 	
 	public void Init(CharacterEntity[] levelCharacters)
