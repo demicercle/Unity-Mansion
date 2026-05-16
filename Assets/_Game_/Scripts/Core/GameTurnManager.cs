@@ -117,6 +117,8 @@ public class GameTurnManager : MonoBehaviour
 	private CharacterEntity[] levelCharacters = Array.Empty<CharacterEntity>();
 	private CharacterEntity currentAICharacter;
 	private CharacterEntity focusCharacter;
+	private LevelData currentLevelData;
+	private LevelComponent currentLevel;
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
@@ -148,26 +150,55 @@ public class GameTurnManager : MonoBehaviour
 		RoomTrigger.onChanged -= OnRoomChanged;
 	}
 
+	private IEnumerator LoadLevel(LevelData newLevel)
+	{
+		Debug.Log(this + " LoadLevel " + newLevel);
+		
+		if (currentLevelData)
+		{
+			foreach (var sceneToUnload in currentLevelData.scenesToLoad)
+			{
+				if (!newLevel.scenesToLoad.Contains(sceneToUnload) && SceneManager.GetSceneByName(sceneToUnload).isLoaded)
+				{
+					Debug.Log(this + " UnloadSceneAsync " + sceneToUnload);
+					yield return SceneManager.UnloadSceneAsync(sceneToUnload);
+				}
+			}
+		}
+
+		currentLevelData = newLevel;
+		
+		if (currentLevelData)
+		{
+			foreach (var sceneToLoad in currentLevelData.scenesToLoad)
+			{
+				if (!SceneManager.GetSceneByName(sceneToLoad).isLoaded)
+				{
+					Debug.Log(this + " LoadSceneAsync " + sceneToLoad);
+					yield return SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
+				}
+			}
+		}
+		
+		InitLevel();
+	}
+
 	private IEnumerator Start()
 	{
-		Debug.Log(this + " Starts");
-		
 		foreach (var go in startupObjects)
 		{
 			Debug.Log(this + " Instantiate startupObjects " + go);
 			Instantiate(go);
 		}
 		
+		isLoading = true;
 		DisableAudio(true);
 		FadeScreen.FadeIn(true);
-		
-		var sceneLoader = gameObject.AddComponent<SceneLoader>(); // load level
-		if(GameSave.Current.LoadFirstLevel())
-			sceneLoader.SetSceneToLoad(firstLevelName, LoadSceneMode.Additive);
 
-		isLoading = true;
-		Debug.Log(this + " loading...");
-		onLoadingGame?.Invoke(true);
+		if (!currentLevelData)
+			currentLevelData = LevelData.GetAllLevels().FirstOrDefault();
+		
+		yield return StartCoroutine(LoadLevel(currentLevelData));
 		
 		do // ensure that everything is properly loaded
 		{
@@ -179,24 +210,17 @@ public class GameTurnManager : MonoBehaviour
 			yield return new WaitForSeconds(postLoadSceneDuration);
 		} while (SceneLoader.AnyInstanceActive);
 		
+		Debug.Log(this + " first loading...");
+		onLoadingGame?.Invoke(true);
+		
 		yield return WaitNavigationDirty();
 		
-		Debug.Log(" loading scene complete");
+		Debug.Log(" loading complete");
 		
 		RoomTrigger.activeRooms.ForEach(r => r.Refresh());
 		yield return null; // for triggers
 
 		yield return StartCoroutine(SpawnParty());
-		
-		InitLevel();
-		
-		
-		Debug.Log(this + " found levelCharacters=" + levelCharacters.Length);
-		
-		foreach (var character in levelCharacters)
-		{
-			character.Spawn();
-		}
 
 		if (GameSave.Current.ShouldLoad())
 		{
@@ -220,15 +244,18 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log("loading complete");
 		isLoading = false;
 		yield return null; // for graph events to init
-		yield return null; // for graph events to init
 		
 		onLoadingGame?.Invoke(false);
 		onSceneLoaded?.Invoke();
 		
 		DisableAudio(false);
 		FadeScreen.FadeOut();
-		yield return new WaitForSeconds(FadeScreen.FadeDuration / 2f);
 		
+		StartCoroutine("MainCoroutine");
+	}
+
+	private IEnumerator MainCoroutine()
+	{
 		while (true)
 		{
 			yield return StartCoroutine(RealTimeCoroutine());
@@ -237,7 +264,7 @@ public class GameTurnManager : MonoBehaviour
 			yield return null; // safety for loop
 		}
 	}
-
+	
 	private Coroutine DisableAudio(bool disabled)
 	{
 		return StartCoroutine(DoAudioTween(disabled ? 0f : 1f));
@@ -260,23 +287,26 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator SpawnParty()
 	{
-		if (!PlayerStart.FindCurrent(out var ps))
-		{
-			Debug.LogError(this + " cannot find player start!");
-			yield break;
-		}
-		
-		yield return StartCoroutine(ps.Spawn());
+		var playerStart = Utils.FindFirstObject<PlayerStart>();
+		yield return StartCoroutine(playerStart.SpawnParty());
 	}
 	
 	private void InitLevel()
 	{
+		currentLevel = Utils.FindFirstObject<LevelComponent>();
+		
 		levelCharacters = CharacterEntity.AllCharacters
 			.OrderBy(c => c.transform.GetSiblingIndex())
 			.ToArray();
-
-		var level = Utils.FindFirstObject<LevelComponent>();
-		level.Init(levelCharacters);
+		
+		Debug.Log(this + " init level " + currentLevel + " found levelCharacters=" + levelCharacters.Length);
+		
+		foreach (var character in levelCharacters)
+		{
+			character.Spawn();
+		}
+		
+		currentLevel.Init(levelCharacters);
 	}
 
 	private IEnumerator TurnBasedCoroutine()

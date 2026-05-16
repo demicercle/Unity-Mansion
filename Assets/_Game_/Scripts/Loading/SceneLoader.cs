@@ -10,12 +10,6 @@ public class SceneLoader : MonoBehaviour
 	private static List<SceneLoader> activeInstances = new List<SceneLoader>();
 	public static bool AnyInstanceActive => activeInstances.Count > 0;
 
-	public void SetSceneToLoad(string sceneName, LoadSceneMode mode)
-	{
-		sceneToLoad = sceneName;
-		loadSceneMode = mode;
-	}
-
 	public void Reload() // TODO Reload scene??
 	{
 		enabled = true;
@@ -25,7 +19,7 @@ public class SceneLoader : MonoBehaviour
 
 	public void LoadNow() => autoLoad = true;
 
-	[SerializeField] private string sceneToLoad;
+	[SerializeField] private List<string> scenesToLoad = new List<string>();
 	[SerializeField] private LoadSceneMode loadSceneMode = LoadSceneMode.Additive;
 	[SerializeField] private bool autoLoad = true;
 
@@ -53,26 +47,29 @@ public class SceneLoader : MonoBehaviour
 			yield return null; // wait other scene loaders
 		}
 
-		if (!string.IsNullOrWhiteSpace(sceneToLoad))
+		foreach (var sceneToLoad in scenesToLoad)
 		{
-			if (SceneManager.GetSceneByName(sceneToLoad).isLoaded)
+			if (!string.IsNullOrWhiteSpace(sceneToLoad))
 			{
-				Debug.Log(this + " skips load scene: " + sceneToLoad + " because already loaded");
-			}
-			else
-			{
-				Debug.Log(this + " loads scene: " + sceneToLoad + " " + loadSceneMode);
-				var asyncOp = SceneManager.LoadSceneAsync(sceneToLoad, loadSceneMode);
-				while (!asyncOp.isDone)
+				if (SceneManager.GetSceneByName(sceneToLoad).isLoaded)
 				{
-					currentProgress = asyncOp.progress;
-					FadeScreen.SetLoadingProgress(currentProgress);
-					yield return null;
+					Debug.Log(this + " skips load scene: " + sceneToLoad + " because already loaded");
+				}
+				else
+				{
+					Debug.Log(this + " loads scene: " + sceneToLoad + " " + loadSceneMode);
+					var asyncOp = SceneManager.LoadSceneAsync(sceneToLoad, loadSceneMode);
+					while (!asyncOp.isDone)
+					{
+						currentProgress = asyncOp.progress;
+						FadeScreen.SetLoadingProgress(currentProgress);
+						yield return null;
+					}
 				}
 			}
+			else Debug.LogWarning(this + " cannot loads empty scene name");
 		}
-		else Debug.LogWarning(this + " cannot loads empty scene name");
-
+		
 		enabled = false;
 	}
 }

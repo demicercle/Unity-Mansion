@@ -23,17 +23,29 @@ public class PlayerStart : MonoBehaviour
 	[SerializeField] private Waypoint[] waypoints;
 	[SerializeField] private GameObject[] playerPrefabs;
 
-	public IEnumerator Spawn()
+	private LevelComponent parentLevel;
+	
+	public LevelComponent GetParentLevel() => parentLevel;
+
+	public void TeleportParty() => TeleportParty(CharacterEntity.GetPartyCharacters());
+	public void TeleportParty(CharacterEntity[] partyChars)
 	{
-		for (int i = 0; i < waypoints.Length; i++)
+		for (int i = 0; i < partyChars.Length; i++)
 		{
-			var prefab = playerPrefabs[i];
-			var instance = Instantiate(prefab).GetComponent<CharacterEntity>();
-			instance.name = prefab.name;
+			partyChars[i].Teleport(waypoints[i].GetPosition(), waypoints[i].GetRotation());
+		}
+	}
+
+	public IEnumerator SpawnParty()
+	{
+		for (int i = 0; i < playerPrefabs.Length; i++)
+		{
+			var player = Instantiate(playerPrefabs[i]).GetComponent<CharacterEntity>();
+			player.name = playerPrefabs[i].name;
 			yield return null;
-			instance.Spawn();
-			instance.SetPartyIndex(i);
-			instance.Teleport(waypoints[i].GetPosition(), waypoints[i].GetRotation());
+			player.Spawn();
+			player.SetPartyIndex(i);
+			player.Teleport(waypoints[i].GetPosition(), waypoints[i].GetRotation());
 		}
 	}
 	
@@ -46,6 +58,7 @@ public class PlayerStart : MonoBehaviour
 
 	private void Awake()
 	{
+		parentLevel = GetComponentInParent<LevelComponent>();
 		instances.Add(this);
 	}
 

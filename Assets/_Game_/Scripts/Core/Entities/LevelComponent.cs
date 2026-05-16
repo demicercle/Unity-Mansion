@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
 public class LevelComponent : MonoBehaviour
-{
-	[Header("Level Settings")]
+{	
+	[Header("Level Settings")] 
 	[SerializeField] private AstarPath aStar;
 	[SerializeField] private float worldHeight = 12f;
 	

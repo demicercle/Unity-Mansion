@@ -20,11 +20,6 @@ public class FadeScreen : MonoBehaviour
 	}
 	public static void SetText(string text) => GetInstance().tmpTxt.text = text; //TODO: not in use
 	public static bool IsFadingOrVisible => GetInstance().image.enabled; //TODO: not in use
-	private static void Create()
-	{
-		if (instance) return;
-		Instantiate(Resources.Load<GameObject>("FadeScreen")); //TODO Pathing issue
-	}
 	
 	#region PRIVATE
 	private static FadeScreen instance;
@@ -33,7 +28,6 @@ public class FadeScreen : MonoBehaviour
 	private static FadeScreen GetInstance()
 	{
 		if (!instance) instance = Utils.FindFirstObject<FadeScreen>();
-		if (!instance) Create();
 		if (!instance) Debug.LogError("No Fade Screen!");
 		return instance;
 	}
