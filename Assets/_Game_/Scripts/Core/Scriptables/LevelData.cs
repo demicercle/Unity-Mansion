@@ -7,6 +7,11 @@ using UnityEngine;
 public class LevelData : ScriptableObject
 {
 	public static LevelData[] GetAllLevels() => Resources.LoadAll<LevelData>(Consts.ResPath_Levels).OrderBy(l => l.levelIndex).ToArray();
+
+	public static LevelData GetLevel(int index)
+	{
+		return GetAllLevels().FirstOrDefault(l => l.levelIndex == index);
+	}
 	
 	public bool IsName(string n) => name == n;
 	public string GetName() => name;
