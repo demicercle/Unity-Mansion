@@ -3,11 +3,14 @@ using UnityEngine;
 
 
 public class LevelComponent : MonoBehaviour
-{	
+{
 	[Header("Level Settings")] 
+	[SerializeField] private LevelData levelData;
 	[SerializeField] private AstarPath aStar;
 	[SerializeField] private float worldHeight = 12f;
 	[SerializeField] private float boundsExtraSize = 20.0f;
+
+	public LevelData GetLevelData() => levelData;
 
 	[SerializeField]
 	private FogCube[] worldBoundsFogCubes = new FogCube[8] { null, null, null, null, null, null, null, null };
