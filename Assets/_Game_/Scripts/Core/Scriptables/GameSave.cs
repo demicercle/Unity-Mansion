@@ -296,6 +296,7 @@ public class GameSave : ScriptableObject
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Clear");
 #endif
+		Debug.Log(this + " Clear newSeed=" + newSeed);
 		savedLevels.Clear();
 		savedPCs.Clear();
 		savedValues.Clear();
@@ -431,8 +432,6 @@ public class GameSave : ScriptableObject
 			Debug.LogWarning(this + " SaveGame works only in play mode!");
 			return;
 		}
-		
-		Clear(false);
 
 		version = LastGameVersion;
 
@@ -450,6 +449,7 @@ public class GameSave : ScriptableObject
 
 		var savedLevel = new SavedLevel();
 		savedLevel.levelIndex = GameTurnManager.Instance.GetCurrentLevelIndex();
+		
 		foreach (var levelChar in GameTurnManager.Instance.GetLevelCharacters())
 		{
 			if (levelChar.InParty()) continue;
@@ -498,11 +498,13 @@ public class GameSave : ScriptableObject
 			if (savedLevels[i].levelIndex == savedLevel.levelIndex)
 			{
 				savedLevels[i] = savedLevel;
+				Debug.Log(this + " savedLevels[" + i + "] = " + savedLevel.levelIndex);
 				return;
 			}
 		}
 		
 		savedLevels.Add(savedLevel);
+		Debug.Log(this + " savedLevels Add " + savedLevel.levelIndex);
 	}
 
 	[ContextMenu("Save To File")]
