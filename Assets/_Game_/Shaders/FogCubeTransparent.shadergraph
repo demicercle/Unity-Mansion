@@ -25,9 +25,6 @@
         },
         {
             "m_Id": "4210e765844149b1b68cafaebef3a138"
-        },
-        {
-            "m_Id": "bdf231729b1d4cc8ac21582a037dfe75"
         }
     ],
     "m_GroupDatas": [],
@@ -301,48 +298,6 @@
 
 {
     "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.SubGraphNode",
-    "m_ObjectId": "bdf231729b1d4cc8ac21582a037dfe75",
-    "m_Group": {
-        "m_Id": ""
-    },
-    "m_Name": "Face Normal",
-    "m_DrawState": {
-        "m_Expanded": true,
-        "m_Position": {
-            "serializedVersion": "2",
-            "x": -745.0,
-            "y": -98.0,
-            "width": 256.0,
-            "height": 298.0
-        }
-    },
-    "m_Slots": [
-        {
-            "m_Id": "f36ee5a3ccc44d2eb8db0edf82bfda99"
-        }
-    ],
-    "synonyms": [],
-    "m_Precision": 0,
-    "m_PreviewExpanded": true,
-    "m_DismissedVersion": 0,
-    "m_PreviewMode": 0,
-    "m_CustomColors": {
-        "m_SerializableColors": []
-    },
-    "m_SerializedSubGraph": "{\n    \"subGraph\": {\n        \"fileID\": -5475051401550479605,\n        \"guid\": \"e1024532a1a801f41a6f45f93c8da7a8\",\n        \"type\": 3\n    }\n}",
-    "m_PropertyGuids": [],
-    "m_PropertyIds": [],
-    "m_Dropdowns": [
-        "_Space"
-    ],
-    "m_DropdownSelectedEntries": [
-        "Tangent"
-    ]
-}
-
-{
-    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.ColorRGBMaterialSlot",
     "m_ObjectId": "d12348d1850f4402af7e421d4db0644c",
     "m_Id": 0,
@@ -408,7 +363,7 @@
     "m_ZWriteControl": 2,
     "m_ZTestMode": 4,
     "m_AlphaMode": 0,
-    "m_RenderFace": 2,
+    "m_RenderFace": 0,
     "m_AlphaClip": false,
     "m_CustomEditorGUI": ""
 }
@@ -445,28 +400,5 @@
         "m_SerializableColors": []
     },
     "m_SerializedDescriptor": "VertexDescription.Tangent"
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
-    "m_ObjectId": "f36ee5a3ccc44d2eb8db0edf82bfda99",
-    "m_Id": 1,
-    "m_DisplayName": "Out",
-    "m_SlotType": 1,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Out",
-    "m_StageCapability": 2,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_Labels": []
 }
 

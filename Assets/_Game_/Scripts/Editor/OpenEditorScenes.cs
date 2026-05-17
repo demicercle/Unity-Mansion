@@ -24,5 +24,8 @@ public static class OpenEditorScenes
 		{
 			EditorSceneManager.OpenScene(SCENE_PATH + scenes[i] + ".unity", i == 0 ? OpenSceneMode.Single : OpenSceneMode.Additive);
 		}
+
+		var level = Utils.FindFirstObject<LevelComponent>();
+		if(level) Selection.activeGameObject = level.gameObject;
 	}
 }
