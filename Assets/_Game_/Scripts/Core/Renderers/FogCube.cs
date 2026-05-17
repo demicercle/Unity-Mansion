@@ -8,11 +8,14 @@ public class FogCube : MonoBehaviour
 	public static void UpdateAll() => activeCubes.ForEach(c => c.DelayedChanged());
 	
 	[SerializeField] private float raycastDistance = 0.5f;
-	[SerializeField] private ParticleSystem fogParticles;
 	[SerializeField] private Renderer[] planesRenderers = new Renderer[4]
 	{
 		null, null, null, null
 	};
+	
+	[SerializeField] private ParticleSystem fogParticles;
+	[SerializeField] private Vector3 fogBoxOffset = Vector3.zero;
+	[SerializeField] private float fogParticlesAmountScale = 0.75f;
 	
 	private static List<FogCube> activeCubes  = new List<FogCube>();
 	private new Collider collider;
@@ -47,7 +50,6 @@ public class FogCube : MonoBehaviour
 		Invoke("Changed", 0.1f);
 	}
 
-	[SerializeField] private float fogBoxGrows = -0.5f;
 	[ContextMenu("Update Particles")]
 	private void UpdateParticles()
 	{
@@ -56,10 +58,10 @@ public class FogCube : MonoBehaviour
 		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(fogParticles, "Update Particles");
 		#endif
 		var shapeModule = fogParticles.shape;
-		shapeModule.scale = transform.localScale * 0.5f + Vector3.one * fogBoxGrows;
+		shapeModule.scale = transform.localScale * 0.5f + fogBoxOffset;
 		fogParticles.transform.position = collider.bounds.center;
 		var emissionModule = fogParticles.emission;
-		emissionModule.rateOverTime = Mathf.RoundToInt(shapeModule.scale.x * shapeModule.scale.y * shapeModule.scale.z / 5f);
+		emissionModule.rateOverTime = Mathf.RoundToInt(shapeModule.scale.x * shapeModule.scale.y * shapeModule.scale.z * fogParticlesAmountScale);
 		if(!Application.isPlaying) Utils.SetDirty(fogParticles);
 	}
 	

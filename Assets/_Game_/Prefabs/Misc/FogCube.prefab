@@ -707,6 +707,9 @@ MonoBehaviour:
   - {fileID: 246709927625020696}
   - {fileID: 6253884378984951134}
   - {fileID: 2719509973945975668}
+  fogParticles: {fileID: 0}
+  fogBoxOffset: {x: -1, y: 0, z: -1}
+  fogParticlesAmountScale: 20
 --- !u!114 &2513105255562761606
 MonoBehaviour:
   m_ObjectHideFlags: 0

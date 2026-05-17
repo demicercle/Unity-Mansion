@@ -114,6 +114,9 @@ public class CameraPivot : MonoBehaviour
     [SerializeField] private Transform positionPivot;
     [SerializeField] private AnimationCurve rotationCurve;
     [SerializeField] private AnimationCurve positionCurve;
+    [SerializeField] private bool updateFog;
+    [SerializeField] private AnimationCurve fogStartCurve;
+    [SerializeField] private AnimationCurve fogEndCurve;
     [Space]
     [Header("ReadOnly (CameraSettings)")]
     [ReadOnly] [SerializeField] private float lerpSpeed = 1.5f;
@@ -271,8 +274,8 @@ public class CameraPivot : MonoBehaviour
 
     private void LateUpdate()
     {
-        //UpdateBounds();
         UpdatePosition();
+        UpdateFog();
     }
     
     private void FixedUpdate()
@@ -287,6 +290,13 @@ public class CameraPivot : MonoBehaviour
         worldBounds.center = Vector3.up * worldHeight + Vector3.up * worldY;
         worldBounds.extents = new Vector3(worldBounds.extents.x, worldHeight, worldBounds.extents.z);
     }*/
+
+    private void UpdateFog()
+    {
+        if (!updateFog) return;
+        RenderSettings.fogStartDistance = fogStartCurve.Evaluate(currentZoom);
+        RenderSettings.fogEndDistance = fogEndCurve.Evaluate(currentZoom);
+    }
     
     private void UpdatePosition()
     {
