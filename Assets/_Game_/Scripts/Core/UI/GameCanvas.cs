@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -97,6 +98,9 @@ public class GameCanvas : MonoBehaviour
 		if (instance) Debug.LogError(this + " duplicated!");
 		instance = this;
 		
+		for(int i = 0; i < portraits.Length; i++)
+			portraits[i].gameObject.SetActive(false);
+		
 		canvasScaler = GetComponent<CanvasScaler>();
 		
 		floatingText.gameObject.SetActive(false);
@@ -168,8 +172,11 @@ public class GameCanvas : MonoBehaviour
 		}
 	}
 
-	private void Start()
+	private IEnumerator Start()
 	{
+		do yield return null;
+		while (GameTurnManager.Instance.IsLoading());
+		
 		UpdateSelectables();
 		
 		// event system checks
@@ -223,7 +230,7 @@ public class GameCanvas : MonoBehaviour
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
 				
 				cursorText.text = "<size=14><b>" + targetCharacter.GetDisplayName() + "</b></size>\n";
-				cursorText.text += StringUtils.Greyscale("<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n", targetCharacter.GetDamageProgress());
+				cursorText.text += StringUtils.Greyscale("<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n", Mathf.Lerp(0.2f, 0.8f, targetCharacter.GetDamageProgress()));
 
 				//cursorText.text += "<size=11>";
 				if (displayHitChance)

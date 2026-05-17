@@ -50,6 +50,11 @@ public class GameInput : MonoBehaviour
 	public int CursorRaycast(out RaycastHit outRaycast, Camera cam = null)
 	{
 		outRaycast = default(RaycastHit);
+
+		if (GameTurnManager.Instance.IsLoading())
+		{
+			return CursorRaycastResult_None;
+		}
 		
 		if (!cam) cam = Camera.main;
 		if (!cam)

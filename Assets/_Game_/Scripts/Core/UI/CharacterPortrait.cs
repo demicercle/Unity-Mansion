@@ -73,6 +73,9 @@ public class CharacterPortrait : MonoBehaviour, IPointerClickHandler, IPointerEn
 
 	private void UpdateStats()
 	{
+		if (!_assignedCharacter)
+			return;
+		
 		toggleRiposte.isOn = _assignedCharacter.CanRiposte();
 		
 		toggleSelected.isOn = CharacterSelection.IsCharacterSelected(_assignedCharacter);

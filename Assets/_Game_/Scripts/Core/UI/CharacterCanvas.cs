@@ -15,30 +15,15 @@ public class CharacterCanvas : MonoBehaviour
 	private void OnEnable()
 	{
 		if (!selfCharacter) selfCharacter = GetComponentInParent<CharacterEntity>();
-		
-		if (selfCharacter.TryGetComponent(out selfDetection))
-		{
-			//selfDetection.onAwarenessChanged += OnAwarenessChanged;
-		}
-
+		if (!selfCharacter) return;
+		selfCharacter.TryGetComponent(out selfDetection);
 		detectionFill.fillAmount = detectionAmount = 0f;
-	}
-
-	private void OnDisable()
-	{
-		if (selfDetection)
-		{
-			//selfDetection.onAwarenessChanged -= OnAwarenessChanged;
-		}
-	}
-
-	private void OnAwarenessChanged(float maxValue)
-	{
-		detectionAmount = maxValue;
 	}
 
 	private void LateUpdate()
 	{
+		if (!selfCharacter) return;
+		
 		detectionAmount = selfDetection ? selfDetection.GetAwarenessValueMax() : 0f;
 		
 		toggleDetection.isOn = selfCharacter.IsCharacterRevealed() && !selfCharacter.IsDead()

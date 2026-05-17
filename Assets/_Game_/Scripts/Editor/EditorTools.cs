@@ -119,6 +119,28 @@ public static class EditorTools
 		}
 	}
 	
+	[MenuItem("Tools/Selection/SmartRename")]
+	private static void SmartRename()
+	{
+		var transforms = Selection.transforms;
+		Undo.RecordObjects(transforms, "SmartRename");
+		for (int i = 0; i < transforms.Length; i++)
+		{
+			transforms[i].name = transforms[i].name.Replace(' ', '_').TrimEnd(' ', '_', '(', ')','0','1','2','3','4','5','6','7','8','9') + "_" + i;
+		}
+	}
+	
+	[MenuItem("Tools/Selection/SortAlphanumeric")]
+	private static void SortAlphanumeric()
+	{
+		var transforms = Selection.transforms.OrderBy(t => t.name).ToArray();
+		Undo.RecordObjects(transforms, "SmartRename");
+		for (int i = 0; i < transforms.Length; i++)
+		{
+			transforms[i].SetSiblingIndex(i);
+		}
+	}
+	
 	[MenuItem("Tools/Selection/UnfoldAllGameObjects")]
 	private static void UnfoldAllGameObjects()
 	{

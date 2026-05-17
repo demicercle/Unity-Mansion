@@ -7,33 +7,40 @@ using System.Linq;
 public class PlayerStart : MonoBehaviour
 {
 	private static List<PlayerStart> instances = new List<PlayerStart>();
+	public static PlayerStart[] GetPlayerStarts() => instances.OrderBy(ps => ps.index).ToArray();
 
-	public static bool FindCurrent(out PlayerStart ps)
+	public static PlayerStart GetPlayerStart(int playerStartIndex)
 	{
-		if (instances.Count > 0)
-		{
-			ps = instances.FirstOrDefault();
-			return true;
-		}
-
-		ps = null;
-		return false;
+		return instances.FirstOrDefault(ps => ps.index == playerStartIndex);
 	}
 	
+	[SerializeField] private int index;
 	[SerializeField] private Waypoint[] waypoints;
 	[SerializeField] private GameObject[] playerPrefabs;
 
-	public IEnumerator Spawn()
+	private LevelComponent parentLevel;
+
+	public void TeleportParty() => TeleportParty(CharacterEntity.GetPartyCharacters());
+	public void TeleportParty(CharacterEntity[] partyChars)
 	{
-		for (int i = 0; i < waypoints.Length; i++)
+		for (int i = 0; i < partyChars.Length; i++)
 		{
-			var prefab = playerPrefabs[i];
-			var instance = Instantiate(prefab).GetComponent<CharacterEntity>();
-			instance.name = prefab.name;
+			partyChars[i].Teleport(waypoints[i].GetPosition(), waypoints[i].GetRotation());
+			RoomTrigger.RevealAtPosition(waypoints[i].GetPosition());
+		}
+	}
+
+	public IEnumerator SpawnParty()
+	{
+		for (int i = 0; i < playerPrefabs.Length; i++)
+		{
+			var player = Instantiate(playerPrefabs[i]).GetComponent<CharacterEntity>();
+			player.name = playerPrefabs[i].name;
 			yield return null;
-			instance.Spawn();
-			instance.SetPartyIndex(i);
-			instance.Teleport(waypoints[i].GetPosition(), waypoints[i].GetRotation());
+			player.Spawn();
+			player.SetPartyIndex(i);
+			player.Teleport(waypoints[i].GetPosition(), waypoints[i].GetRotation());
+			RoomTrigger.RevealAtPosition(waypoints[i].GetPosition());
 		}
 	}
 	
@@ -46,6 +53,7 @@ public class PlayerStart : MonoBehaviour
 
 	private void Awake()
 	{
+		parentLevel = GetComponentInParent<LevelComponent>();
 		instances.Add(this);
 	}
 

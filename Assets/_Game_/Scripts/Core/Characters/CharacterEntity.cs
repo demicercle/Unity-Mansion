@@ -642,7 +642,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public void StopFollow()
 	{
-		follows.enabled = false;
+		if(follows) follows.enabled = false;
 	}
 
 	public bool TryGetFollowing(out CharacterEntity leader)

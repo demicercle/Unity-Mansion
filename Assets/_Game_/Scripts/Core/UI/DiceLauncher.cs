@@ -45,19 +45,28 @@ public class DiceLauncher : MonoBehaviour
 		AllowedDiceRolls = defaultDiceRolls;
 		
 		GameTurnManager.Instance.onTurnBasedChanged += OnTurnBasedChanged;
+		GameTurnManager.Instance.onSceneLoaded += OnSceneLoaded;
 		DicePool.onDiceRolled += OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
 		CharacterEntity.onAttackResult += OnAttackResult;
 		launchButton.onClick.AddListener(ClickedLaunch);
+		
+		gameObject.SetActive(false);
 	}
 
 	private void OnDestroy()
 	{
 		GameTurnManager.Instance.onTurnBasedChanged -= OnTurnBasedChanged;
+		GameTurnManager.Instance.onSceneLoaded -= OnSceneLoaded;
 		DicePool.onDiceRolled -= OnDiceRolled;
 		CharacterEntity.onAnyCharacterDead -= OnAnyCharacterDead;
 		CharacterEntity.onAttackResult -= OnAttackResult;
 		launchButton.onClick.RemoveListener(ClickedLaunch);
+	}
+
+	private void OnSceneLoaded()
+	{
+		gameObject.SetActive(true);
 	}
 
 	private void OnTurnBasedChanged(bool value)

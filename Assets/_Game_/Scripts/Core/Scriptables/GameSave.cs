@@ -17,13 +17,19 @@ public class GameSave : ScriptableObject
 	{
 		get
 		{
-			if (!currentInstance) currentInstance = Resources.LoadAll<GameSave>("").FirstOrDefault();
 			if (!currentInstance)
 			{
-				Debug.LogWarning(" cannot find game save in ressources, create one");
-				currentInstance = CreateInstance<GameSave>();
-			}
+				currentInstance = Resources.LoadAll<GameSave>("").FirstOrDefault();
+			
+				if (!currentInstance)
+				{
+					Debug.LogWarning(" cannot find game save in ressources, create one");
+					currentInstance = CreateInstance<GameSave>();
+				}
 
+				currentInstance.Clear();
+			}
+			
 			return currentInstance;
 		}
 	}
@@ -241,18 +247,12 @@ public class GameSave : ScriptableObject
 	[ReadOnly] [Min(0)] public int version;
 	[ReadOnly] public int gameSeed;
 	[ReadOnly] public int selectedCharacter;
+	[ReadOnly] public int currentLevelIndex;
 	[ReadOnly] public List<SavedPC> savedPCs = new List<SavedPC>();
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
 
-	private bool shouldLoad;
-	public bool ShouldLoad() => shouldLoad;
-	public void MarkAsLoad() => shouldLoad = true;
-
-
-	private bool loadFirstLevel;
-	public void MarkFirstLevel() => loadFirstLevel = true;
-	public bool LoadFirstLevel() => loadFirstLevel;
+	public int GetCurrentLevel() => currentLevelIndex;
 	public bool IsEmpty() => version == 0;
 
 	public void SetSavedValue(string valueName, int newValue)
@@ -291,12 +291,12 @@ public class GameSave : ScriptableObject
 #if UNITY_EDITOR
 		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(this, "Clear");
 #endif
+		Debug.Log(this + " Clear newSeed=" + newSeed);
 		savedLevels.Clear();
 		savedPCs.Clear();
 		savedValues.Clear();
 		selectedCharacter = 0;
 		version = 0;
-		shouldLoad = false;
 		if(newSeed) gameSeed = DicePool.GetRandomSeed();
 		DicePool.SetSeed(gameSeed);
 		if(!Application.isPlaying) Utils.SetDirty(this);
@@ -311,9 +311,11 @@ public class GameSave : ScriptableObject
 			Debug.LogWarning(this + " LoadGame works only in play mode!");
 			return;
 		}
-		
+
 		if (fromFile)
+		{
 			LoadFromFile();
+		}
 
 		if(gameSeed > 0)
 			DicePool.SetSeed(gameSeed);
@@ -340,24 +342,26 @@ public class GameSave : ScriptableObject
 
 		foreach (var savedLevel in savedLevels)
 		{
-			if (GameTurnManager.Instance.IsLevelIndex(savedLevel.levelIndex))
+			if (!GameTurnManager.Instance.IsLevelIndex(savedLevel.levelIndex))
 			{
-				var levelCharacters = GameTurnManager.Instance.GetLevelCharacters();
-				foreach (var savedChar in savedLevel.levelCharacters)
-				{
-					var levelChar = levelCharacters.FirstOrDefault(pc => pc.IsName(savedChar.name));
-					if (!levelChar)
-					{
-						Debug.LogWarning(this + " cannot find savedChar " + savedChar.name);
-						continue;
-					}
-					
-					if (levelChar.InParty()) continue;
-					
-					savedChar.Load(levelChar);
-				}
+				continue;
 			}
 
+			var levelCharacters = GameTurnManager.Instance.GetLevelCharacters();
+			foreach (var savedChar in savedLevel.levelCharacters)
+			{
+				var levelChar = levelCharacters.FirstOrDefault(pc => pc.IsName(savedChar.name));
+				if (!levelChar)
+				{
+					Debug.LogWarning(this + " cannot find savedChar " + savedChar.name);
+					continue;
+				}
+					
+				if (levelChar.InParty()) continue;
+					
+				savedChar.Load(levelChar);
+			}
+			
 			foreach (var savedInv in savedLevel.savedInventories)
 			{
 				foreach (var inv in Inventory.GetSavedInventories())
@@ -409,7 +413,8 @@ public class GameSave : ScriptableObject
 			}
 		}
 		
-		CharacterSelection.SelectCharacterAt(selectedCharacter);
+		if(selectedCharacter >= 0)
+			CharacterSelection.SelectCharacterAt(selectedCharacter);
 		
 		Debug.Log(this + " Game loaded");
 	}
@@ -423,8 +428,6 @@ public class GameSave : ScriptableObject
 			Debug.LogWarning(this + " SaveGame works only in play mode!");
 			return;
 		}
-		
-		Clear(false);
 
 		version = LastGameVersion;
 
@@ -439,45 +442,67 @@ public class GameSave : ScriptableObject
 		{
 			savedPCs.Add(new SavedPC(partyChar));
 		}
+
+		var savedLevel = new SavedLevel();
+		savedLevel.levelIndex = GameTurnManager.Instance.GetCurrentLevelIndex();
 		
-		savedLevels.Insert(0, new SavedLevel());
 		foreach (var levelChar in GameTurnManager.Instance.GetLevelCharacters())
 		{
 			if (levelChar.InParty()) continue;
-			savedLevels[0].levelCharacters.Add(new SavedCharacter(levelChar));	
+			savedLevel.levelCharacters.Add(new SavedCharacter(levelChar));	
 		}
 
 		foreach (var destructible in Destructible.allInstances)
 		{
 			if(destructible.IsBroken())
-				savedLevels[0].destroyedProps.Add(destructible.GetName());
+				savedLevel.destroyedProps.Add(destructible.GetName());
 		}
 
 		foreach (var lootBag in Inventory.GetLootBags())
 		{
-			savedLevels[0].savedLoots.Add(new SavedLoot(lootBag));
+			savedLevel.savedLoots.Add(new SavedLoot(lootBag));
 		}
 
 		foreach (var room in RoomTrigger.allRooms)
 		{
 			if(room.IsRevealed())
-				savedLevels[0].revealedRooms.Add(room.GetName());
+				savedLevel.revealedRooms.Add(room.GetName());
 		}
 		
 		foreach (var inv in Inventory.GetSavedInventories())
 		{
-			savedLevels[0].savedInventories.Add(new SavedInventory(inv));
+			savedLevel.savedInventories.Add(new SavedInventory(inv));
 		}
 
 		foreach (var prop in PropComponent.GetSavedInstances())
 		{
-			savedLevels[0].savedProps.Add(new SavedProp(prop));
+			savedLevel.savedProps.Add(new SavedProp(prop));
 		}
+
+		AppendNewLevel(savedLevel);
+
+		currentLevelIndex = savedLevel.levelIndex;
 		
 		Debug.Log(this + " Game saved");
 		
 		if(toFile)
 			SaveToFile();
+	}
+
+	private void AppendNewLevel(SavedLevel savedLevel)
+	{
+		for (int i = 0; i < savedLevels.Count; i++)
+		{
+			if (savedLevels[i].levelIndex == savedLevel.levelIndex)
+			{
+				savedLevels[i] = savedLevel;
+				Debug.Log(this + " savedLevels[" + i + "] = " + savedLevel.levelIndex);
+				return;
+			}
+		}
+		
+		savedLevels.Add(savedLevel);
+		Debug.Log(this + " savedLevels Add " + savedLevel.levelIndex);
 	}
 
 	[ContextMenu("Save To File")]

@@ -88,6 +88,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: -478882678752539408, guid: 5c95a4a2dcf3c224c97f28fcaa5f10b5, type: 3}
+    - target: {fileID: 4227905675288060949, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+      propertyPath: onTurnBasedChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5799231115807842419, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -109,6 +113,7 @@ PrefabInstance:
     - {fileID: 5028313424375010385, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
     - {fileID: 3629433929455443973, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
     - {fileID: 7863706289224614260, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+    - {fileID: 9205371255996001039, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2251922595011403660, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}

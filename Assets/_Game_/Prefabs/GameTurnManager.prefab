@@ -46,8 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7729333bcd8a4aae93c93ec2c73e3e27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nextLevelName: Level_0
-  cameraStartZoom: 0.204
+  firstLevelName: Level_0
+  cameraStartZoom: 0.8
   focusWhenCharacterUseAction: 1
   rollDiceWhenTurnStarts: 0
   rollDiceWhenTurnEnds: 1

@@ -251,6 +251,12 @@ public class ConsoleCommands : MonoBehaviour
 			}
 		}
 	}
+
+	[ConsoleMethod("party_travel", "")]
+	public static void PartyTravel(int level, int playerStart = 0)
+	{
+		GameTurnManager.Instance.PartyTravel(level, playerStart);
+	}
 	
 	#region DEBUG
 

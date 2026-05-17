@@ -1,18 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Renderer))]
 public class RoofRenderer : MonoBehaviour
 {
 	[SerializeField] private float tweenSpeed = 3.14f;
+	[SerializeField] private List<RoofRenderer> linkedRoofs =  new List<RoofRenderer>();
 	
-	private Renderer renderer;
+	private new Renderer renderer;
 	
-	public void SetBlend(float value)
+	public void SetBlend(bool visible)
 	{
-		_targetBlend = value;
-	}
+		_targetBlend = visible ? 1.0f : 0.0f;
 
+		foreach (var linkedRoof in linkedRoofs)
+		{
+			if (linkedRoof)
+				linkedRoof._targetBlend = _targetBlend;
+		}
+	}
+	
 	private float _currentBlend, _targetBlend;
 	private Material _material;
 	private Color _defaultColor;

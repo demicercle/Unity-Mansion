@@ -110,7 +110,7 @@ MonoBehaviour:
   worldBounds:
     m_Center: {x: 0, y: 3, z: 0}
     m_Extent: {x: 25, y: 3, z: 25}
-  awakeZoom: 1
+  awakeZoom: 0.5
   rotationPivot: {fileID: 1017557397532967885}
   positionPivot: {fileID: 8501545024436134705}
   rotationCurve:
@@ -151,7 +151,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 1
-      value: 11
+      value: 8
       inSlope: 0.0019606103
       outSlope: 0.0019606103
       tangentMode: 0

@@ -24,6 +24,20 @@ public class RoomTrigger : MonoBehaviour
 		return true;
 	}
 
+	public static void RevealAtPosition(Vector3 getPosition)
+	{
+		if (!IsPositionVisible(getPosition))
+		{
+			foreach (var room in activeRooms.ToArray())
+			{
+				if (room.HasPosition(getPosition))
+				{
+					room.Explore();
+				}
+			}
+		}
+	}
+
 	public bool IsName(string n) => name == n;
 	public string GetName() => name;
 
