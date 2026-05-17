@@ -8,6 +8,7 @@ public class FogCube : MonoBehaviour
 	public static void UpdateAll() => activeCubes.ForEach(c => c.DelayedChanged());
 	
 	[SerializeField] private float raycastDistance = 0.5f;
+	[SerializeField] private ParticleSystem fogParticles;
 	[SerializeField] private Renderer[] planesRenderers = new Renderer[4]
 	{
 		null, null, null, null
@@ -45,6 +46,22 @@ public class FogCube : MonoBehaviour
 		CancelInvoke("Changed");
 		Invoke("Changed", 0.1f);
 	}
+
+	[SerializeField] private float fogBoxGrows = -0.5f;
+	[ContextMenu("Update Particles")]
+	private void UpdateParticles()
+	{
+		if (!fogParticles) return;
+		#if UNITY_EDITOR
+		if(!Application.isPlaying) UnityEditor.Undo.RecordObject(fogParticles, "Update Particles");
+		#endif
+		var shapeModule = fogParticles.shape;
+		shapeModule.scale = transform.localScale * 0.5f + Vector3.one * fogBoxGrows;
+		fogParticles.transform.position = collider.bounds.center;
+		var emissionModule = fogParticles.emission;
+		emissionModule.rateOverTime = Mathf.RoundToInt(shapeModule.scale.x * shapeModule.scale.y * shapeModule.scale.z / 5f);
+		if(!Application.isPlaying) Utils.SetDirty(fogParticles);
+	}
 	
 	[ContextMenu("Changed")]
 	private void Changed()
@@ -59,6 +76,8 @@ public class FogCube : MonoBehaviour
 				planesRenderers[i].enabled = !Physics.Raycast(ray, out var hit, raycastDistance, Layers.MaskFog);
 			}
 		}
+		
+		UpdateParticles();
 	}
 
 	#if UNITY_EDITOR
