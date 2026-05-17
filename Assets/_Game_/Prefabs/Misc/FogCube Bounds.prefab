@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: VolumeFog_Black
       objectReference: {fileID: 0}
+    - target: {fileID: 1237281881322232079, guid: 4cb27a0f34214fc458b6e2bfdc57d984, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6730547126939293717, guid: 4cb27a0f34214fc458b6e2bfdc57d984, type: 3}
       propertyPath: m_LocalScale.y
       value: 1
@@ -94,7 +98,11 @@ PrefabInstance:
     - target: {fileID: 306407345481268825, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: -876546973899608171, guid: 923138ab6ae405e49b1c450bd6e41f96, type: 3}
+      objectReference: {fileID: -876546973899608171, guid: b6fa12e637bfb0845bc1eebd92194b31, type: 3}
+    - target: {fileID: 306407345481268825, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: b6fa12e637bfb0845bc1eebd92194b31, type: 3}
     - target: {fileID: 384509246915734716, guid: abcd5ecb3f68c9c4887e16d079cae562, type: 3}
       propertyPath: fogBoxGrows
       value: -3
