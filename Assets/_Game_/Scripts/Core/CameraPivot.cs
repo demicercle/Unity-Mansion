@@ -15,7 +15,6 @@ public class CameraPivot : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawSphere(focusPosition, 0.5f);
         //UpdateBounds();
-        UpdatePosition();
         //UpdateAnimator();
         //UpdateSpotLight();
     }
@@ -24,6 +23,10 @@ public class CameraPivot : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
+        if (!Application.isPlaying)
+        {
+            UpdatePosition();
+        }
     }
 #endif
     
@@ -305,6 +308,11 @@ public class CameraPivot : MonoBehaviour
 #if UNITY_EDITOR
         if (!Application.isPlaying)
         {
+            if (!focusTransform)
+            {
+                focusTransform = Utils.FindFirstObject<PlayerStart>()?.transform;
+            }
+            
             if (focusTransform)
             {
                 Focus(focusTransform);
@@ -317,6 +325,10 @@ public class CameraPivot : MonoBehaviour
                 focusPosition.x = Mathf.Lerp(worldBounds.center.x - worldBounds.extents.x, worldBounds.center.x + worldBounds.extents.x, editorFocusX);
                 focusPosition.z = Mathf.Lerp(worldBounds.center.z - worldBounds.extents.z, worldBounds.center.z + worldBounds.extents.z, editorFocusZ);
             }
+        }
+        else
+        {
+            focusTransform = null;
         }
 #endif
         

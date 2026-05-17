@@ -36,6 +36,14 @@ public class RoofRenderer : MonoBehaviour
 	private void Start()
 	{
 		_currentBlend = _targetBlend = 1.0f;
+
+		var worldBounds = CameraPivot.Instance.GetWorldBounds();
+		var position = transform.position;
+		position.y = worldBounds.center.y;
+		if (!worldBounds.Contains(position))
+		{
+			enabled = false;
+		}
 	}
 
 	private void LateUpdate()
