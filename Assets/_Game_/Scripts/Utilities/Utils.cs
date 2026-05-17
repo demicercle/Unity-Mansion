@@ -65,7 +65,7 @@ public static class Utils
 		return System.Text.RegularExpressions.Regex.Replace(input, "([A-Z])", " $1", System.Text.RegularExpressions.RegexOptions.Compiled).Trim();
 	}
 	public static Color ColorAlpha(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
-	public static Color ColorScale(Color color, float alpha) => new Color(color.r * alpha, color.g * alpha, color.b * alpha, color.a * alpha);
+	public static Color ColorScale(Color color, float alpha, bool ignoreAlpha = true) => new Color(color.r * alpha, color.g * alpha, color.b * alpha, ignoreAlpha ? color.a : color.a * alpha);
 
 	public static Color HTML_To_Color(string html)
 	{
@@ -362,7 +362,7 @@ public static class StringUtils
 
 	public static string Greyscale(string message, float alpha)
 	{
-		return Colorize(message, Utils.ColorScale(Color.white, alpha));
+		return Colorize(message, Utils.ColorScale(Color.white, alpha, true));
 	}
 	
 	public static string Size(string message, int size)

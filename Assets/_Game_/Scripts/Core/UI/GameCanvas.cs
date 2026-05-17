@@ -230,7 +230,7 @@ public class GameCanvas : MonoBehaviour
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
 				
 				cursorText.text = "<size=14><b>" + targetCharacter.GetDisplayName() + "</b></size>\n";
-				cursorText.text += StringUtils.Greyscale("<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n", targetCharacter.GetDamageProgress());
+				cursorText.text += StringUtils.Greyscale("<size=9>(" + targetCharacter.GetHealthDescription() + ")</size>\n", Mathf.Lerp(0.2f, 0.8f, targetCharacter.GetDamageProgress()));
 
 				//cursorText.text += "<size=11>";
 				if (displayHitChance)
