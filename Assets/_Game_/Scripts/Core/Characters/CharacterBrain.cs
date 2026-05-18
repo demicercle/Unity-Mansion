@@ -225,8 +225,15 @@ public class CharacterBrain : MonoBehaviour
 				if (debugMode > 0) Debug.Log(this + " forget dead target:" + _chaseCharacter);
 				ForgetTarget();
 			}
-			
-			yield return StartCoroutine(YieldTryFindNewTarget());
+
+			if (_selfCharacter.IsUsingRangeWeapon())
+			{
+				yield return StartCoroutine(TryFindOptimalTargetPosition());
+			}
+			else
+			{
+				yield return StartCoroutine(TryFindNewTargetToChase());
+			}
 
 			do yield return null;
 			while (_selfCharacter.Routines.AnyActive());
@@ -242,10 +249,19 @@ public class CharacterBrain : MonoBehaviour
 			
 			if (!_selfCharacter.HasMovePoints())
 			{
-				ThinkNoMovePoints();
+				var dist = _selfCharacter.GetDistanceTo(_chaseCharacter.GetPosition());
+				if (dist < _selfCharacter.GetMaxMovePoints())
+				{
+					yield return StartCoroutine(TryUseFallbackAction());
+				}
 				
-				do yield return null;
-				while (_selfCharacter.Routines.AnyActive());
+				if (canUseRunAction && _selfCharacter.CanUseAction(CharacterAction.Run))
+				{
+					_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+					
+					do yield return null;
+					while (_selfCharacter.Routines.AnyActive());
+				}
 			}
 				
 			if (_selfCharacter.IsAtAttackRange(_chaseCharacter, true))
@@ -265,37 +281,6 @@ public class CharacterBrain : MonoBehaviour
 		}
 
 		if (debugMode > 0) Debug.Log(this + " end chase");
-	}
-
-	private void ThinkNoMovePoints()
-	{
-		var dist = _selfCharacter.GetDistanceTo(_chaseCharacter.GetPosition());
-		if (dist < _selfCharacter.GetMaxMovePoints())
-		{
-			if (canUseDefendAction && _selfCharacter.CanUseAction(CharacterAction.Defend)
-			    && canUseRiposteAction && _selfCharacter.CanUseAction(CharacterAction.Riposte))
-			{
-				_selfCharacter.Routines.AssignUseAction(DicePool.RollDice() < _selfCharacter.GetCurrentHealth() ? CharacterAction.Riposte : CharacterAction.Defend);
-				return;
-			}
-			
-			if (canUseDefendAction && _selfCharacter.CanUseAction(CharacterAction.Defend))
-			{
-				_selfCharacter.Routines.AssignUseAction(CharacterAction.Defend);
-				return;
-			}
-			
-			if (canUseRiposteAction && _selfCharacter.CanUseAction(CharacterAction.Riposte))
-			{
-				_selfCharacter.Routines.AssignUseAction(CharacterAction.Riposte);
-				return;
-			}
-		}
-				
-		if (canUseRunAction && _selfCharacter.CanUseAction(CharacterAction.Run))
-		{
-			_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
-		}
 	}
 	
 	private IEnumerator TryPatrol()
@@ -419,8 +404,86 @@ public class CharacterBrain : MonoBehaviour
 		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 
+	private IEnumerator TryFindOptimalTargetPosition()
+	{
+		var allWaypoints = Waypoint.GetAllInstances()
+			.Where(w => !w.ignoreNavigation && _selfCharacter.GetDistanceTo(w.GetPosition()) > _selfCharacter.GetRadius() + w.radius)
+			.OrderBy(w => _selfCharacter.GetDistanceTo(w.GetPosition()))
+			.ToArray();
+		
+		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
+		while (allTargets.Count > 0)
+		{
+			var newTarget = allTargets.LastOrDefault();
+			allTargets.Remove(newTarget);
+			if (!newTarget || newTarget.IsDead()) continue;
+
+			foreach (var wp in allWaypoints)
+			{
+				if (!wp.ignoreNavigation
+				    && Vector3.Distance(wp.GetPosition(), newTarget.GetPosition()) <= _selfCharacter.GetAttackRange()
+				    && _selfCharacter.LOSCheck(wp.GetPosition() + _selfCharacter.GetEyesPosition(true), newTarget.GetCenterPosition()))
+				{
+					_agent.StopMovement();
+					_agent.ClearDestination();
+					_agent.SetReachDistance(wp.radius);
+					yield return _agent.AssignDestination(wp.GetPosition());
+					
+					if (_agent.hasDestination)
+					{
+						if (debugMode > 0) Debug.Log(this + " TryFindOptimalTargetPosition HAS DESTINATION wp=" + wp + " newTarget=" + newTarget);
+						_chaseCharacter = newTarget;
+						_selfCharacter.Routines.AssignMoveToDestination(wp.GetPosition(), wp.radius, true);
+						yield break;
+					}
+
+					else
+					{
+						
+						if (debugMode > 0) Debug.Log(this + " TryFindOptimalTargetPosition FAILED wp=" + wp + " newTarget=" + newTarget);
+					}
+				}
+			}
+		}
+
+		if (allWaypoints.Length > 0)
+		{
+			var fallbackWp = allWaypoints.First();
+			if (debugMode > 0) Debug.Log(this + " TryFindOptimalTargetPosition no target found, fallbackWP=" + fallbackWp);
+			_selfCharacter.Routines.AssignMoveToDestination(fallbackWp.GetPosition(), fallbackWp.radius, true);
+			do yield return null;
+			while (_selfCharacter.Routines.AnyActive());
+		}
+
+		yield return StartCoroutine(TryUseFallbackAction());
+	}
+
+	private IEnumerator TryUseFallbackAction()
+	{
+		if (debugMode > 0) Debug.Log(this + " TryUseFallbackAction");
+		
+		if (canUseDefendAction && _selfCharacter.CanUseAction(CharacterAction.Defend)
+		                       && canUseRiposteAction && _selfCharacter.CanUseAction(CharacterAction.Riposte))
+		{
+			_selfCharacter.Routines.AssignUseAction(DicePool.RollDice() < _selfCharacter.GetCurrentHealth() ? CharacterAction.Riposte : CharacterAction.Defend);
+		}
+			
+		else if (canUseDefendAction && _selfCharacter.CanUseAction(CharacterAction.Defend))
+		{
+			_selfCharacter.Routines.AssignUseAction(CharacterAction.Defend);
+		}
+			
+		else if (canUseRiposteAction && _selfCharacter.CanUseAction(CharacterAction.Riposte))
+		{
+			_selfCharacter.Routines.AssignUseAction(CharacterAction.Riposte);
+		}
+		
+		do yield return null;
+		while (_selfCharacter.Routines.AnyActive());
+	}
+
 	private const int MaxAttemptToFindTarget = 6;
-	private IEnumerator YieldTryFindNewTarget(int attempt = 0)
+	private IEnumerator TryFindNewTargetToChase(int attempt = 0)
 	{
 		if (attempt >= MaxAttemptToFindTarget)
 		{
@@ -473,21 +536,6 @@ public class CharacterBrain : MonoBehaviour
 			}
 			else
 			{
-				if (_selfCharacter.IsUsingRangeWeapon())
-				{
-					foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(_selfCharacter.GetPosition(), newTarget.GetPosition()))
-					{
-						if ( !wp.ignoreNavigation
-							&& Vector3.Distance(wp.GetPosition(), newTarget.GetPosition()) <= _selfCharacter.GetAttackRange()
-						&& _selfCharacter.LOSCheck(wp.GetPosition() + _selfCharacter.GetEyesPosition(true), newTarget.GetCenterPosition()))
-						{
-							if (debugMode > 0) Debug.Log(this + " move to wp " + wp + " to attack " + newTarget);
-							_selfCharacter.Routines.AssignMoveToDestination(wp.GetPosition(), wp.radius, true);
-							yield break;
-						}
-					}
-				}
-				
 				if(debugMode > 0) Debug.Log(this + " cannot find destination to " + newTarget + ", pick next one: " + allTargets.Count);
 			}
 		}
@@ -495,7 +543,7 @@ public class CharacterBrain : MonoBehaviour
 		if (!bestTarget)
 		{
 			if (debugMode > 0) Debug.Log(this + " cannot find destination best target, next attempt");
-			yield return StartCoroutine(YieldTryFindNewTarget(attempt + 1));
+			yield return StartCoroutine(TryFindNewTargetToChase(attempt + 1));
 		}
 		else
 		{
