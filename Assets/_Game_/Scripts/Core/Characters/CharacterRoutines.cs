@@ -672,6 +672,27 @@ public class CharacterRoutines : MonoBehaviour
 		onComplete?.Invoke();
 	}
 
+	private IEnumerator WaitCharacterRaycastForDestructible()
+	{
+		var agent = _selfCharacter.GetAgent();
+		
+		if (_selfCharacter.HasActions() && _selfCharacter.RaycastForDestructible(out var destructible))
+		{
+			if (debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget RaycastForDestructible " + destructible);
+			
+			agent.StopMovement();
+			
+			if (_selfCharacter.CanOpenDoors() && destructible.TryGetComponent(out PropComponent propDoor) && propDoor.IsDoor())
+			{
+				yield return StartCoroutine(WaitCharacterInteract(propDoor));
+			}
+			else
+			{
+				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
+			}
+		}
+	}
+
 	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance, bool raycastForDestructible, bool losCheck, IAttackable target = null)
 	{
 		reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAgent().GetMinReachDistance());
@@ -695,12 +716,9 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (!agent.hasDestination)
 		{
-			if (raycastForDestructible && debugMode > 0) Debug.Log(this + " WaitCharacterMoved !agent.hasDestination RaycastForDestructible");
-			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0f, 2.0f, out var destructible))
+			if (raycastForDestructible)
 			{
-				agent.StopMovement();
-				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
-				yield break;
+				yield return StartCoroutine(WaitCharacterRaycastForDestructible());
 			}
 			
 			Debug.LogWarning(this + " WaitCharacterMoved !agent.hasDestination");
@@ -754,12 +772,9 @@ public class CharacterRoutines : MonoBehaviour
 				yield break;
 			}
 
-			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0.5f, 1.5f, out var destructible))
+			if (raycastForDestructible )
 			{
-				if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved RaycastForDestructible " + destructible);
-				agent.StopMovement();
-				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
-				yield break;
+				yield return StartCoroutine(WaitCharacterRaycastForDestructible());
 			}
 
 			var oldPosition = _selfCharacter.GetPosition();
@@ -866,12 +881,9 @@ public class CharacterRoutines : MonoBehaviour
 				yield break;
 			}
 
-			if (raycastForDestructible && _selfCharacter.RaycastForDestructible(0.5f, 1.5f, out var destructible))
+			if (raycastForDestructible)
 			{
-				if(debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget RaycastForDestructible " + destructible);
-				agent.StopMovement();
-				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
-				yield break;
+				yield return StartCoroutine(WaitCharacterRaycastForDestructible());
 			}
 
 			var oldPosition = _selfCharacter.GetPosition();

@@ -1215,6 +1215,10 @@ PrefabInstance:
       value: 7.96
       objectReference: {fileID: 0}
     - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
+      propertyPath: canOpenDoors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: defaultWeapon
       value: 
       objectReference: {fileID: 11400000, guid: e8a8d22e9f43eb04584acc75ca3f418e, type: 2}
@@ -1490,7 +1494,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterLookAt
   lookTarget: {fileID: 7155099250292984196}
   dotRange: {x: 0.01, y: 0.2, z: 0.6}
-  tickTime: 0.5
   lerpSpeed: 1.5
   maxDistanceToLookAt: 5
 --- !u!4 &7155099250292984196 stripped

@@ -66,6 +66,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public static int debugStats { get; set; }
 	public static int debugAim { get; set; }
+	public static int debugRoutines => CharacterRoutines.debugMode;
 	
 	public static List<CharacterEntity> AllCharacters => _allCharacters;
 
@@ -121,12 +122,18 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	[SerializeField] private bool rollDiceOnDefense = false;
 	[SerializeField] private bool rollDiceOnRun = false;
 	[SerializeField] private bool rollDiceOnRiposte = false;
+	[SerializeField] private bool canOpenDoors = false;
 	[Range(0f, 10f)] [SerializeField] private float visionRange = 2.0f; // TODO remove
 	[Min(0f)] [SerializeField] private float defaultAttackHitTime = 1f;
 	[SerializeField] private CharacterFaction factionOverride;
 	[SerializeField] private WeaponData defaultWeapon;
 	[SerializeField] private bool noRevive = false;
 	public CharacterRoutines Routines => routines;
+
+	public bool CanOpenDoors()
+	{
+		return canOpenDoors;
+	}
 
 	public bool IsName(string savedPCName)
 	{
@@ -915,12 +922,12 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public bool LOSCheck(Vector3 start, Vector3 end, Collider other = null)
 	{
-		if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, end, Color.green, 1.0f);
+		if(debugRoutines > 0) DebugDrawer.Line(start, end, Color.green, 1.0f);
 		
 		/*if(Physics.Linecast(start, end, out var hit, Layers.MaskObstruction) && hit.collider != other)
 		{
-			if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
-			if(CharacterRoutines.debugMode > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
+			if(debugRoutines > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
+			if(debugRoutines > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
 			return false;
 		}*/
 
@@ -929,8 +936,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if (hit.collider != other)
 			{
-				if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
-				//if(CharacterRoutines.debugMode > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
+				if(debugRoutines > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
+				//if(debugRoutines > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
 				return false;
 			}
 		}
@@ -1198,14 +1205,25 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return characterData.GetStealthValue();
 	}
 
-	public bool RaycastForDestructible(float forwardOffset, float radiusScale, out Destructible o)
+	[SerializeField] private float raycastForwardOffset = 0.5f;
+	[SerializeField] private float raycastRadiusScale = 0.2f;
+	public bool RaycastForDestructible(out Destructible o)
 	{
-		foreach(var coll in Physics.OverlapSphere(GetPosition() + GetDirection() * GetRadius() * forwardOffset, GetRadius() * radiusScale, Layers.MaskDestructible))
+		var pos = GetPosition() + GetDirection() * GetRadius() * raycastForwardOffset;
+		var radius = GetRadius() * raycastRadiusScale;
+		if(debugRoutines > 0) DebugDrawer.WireDisc(pos, radius, Color.red, 0.5f);
+		foreach(var coll in Physics.OverlapSphere(pos, radius, Layers.MaskDestructible))
 		{
 			if (coll.TryGetComponent(out Destructible destructible))
 			{
-				if (destructible.IsDoor() && IsOnLastAgentPath(destructible.gameObject))
+				if (destructible.IsDoor())
 				{
+				/*	if (!IsOnLastAgentPath(destructible.gameObject))
+					{
+						if(debugRoutines > 0) Debug.Log(this + " raycast for destructible " + destructible + " but it is not on path");
+						continue;
+					}*/
+					
 					o = destructible;
 					return true;
 				}
@@ -1216,14 +1234,16 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return false;
 	}
 
-	private bool IsOnLastAgentPath(GameObject go)
+	/*private bool IsOnLastAgentPath(GameObject go)
 	{
+		if(debugRoutines > 0) DebugDrawer.Line(GetPosition(), go.transform.position, Color.lightPink, 1.0f);
 		var offset = agent.GetHeight() * 0.5f * Vector3.up;
 		var lastPath = agent.GetCurrentPath();
 		for (int i = 1; i < lastPath.Length; i++)
 		{
 			var p0 = lastPath[i - 1] + offset;
 			var p1 = lastPath[i] + offset;
+			if(debugRoutines > 0) DebugDrawer.Line(p0, p1, Color.magenta, 1.0f);
 			if (Physics.Linecast(p0, p1, out var hit, go.layer))
 			{
 				if (hit.collider.gameObject == go)
@@ -1234,7 +1254,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 
 		return false;
-	}
+	}*/
 
 	public bool ActionUsesDiceRolls(CharacterAction actionType)
 	{
