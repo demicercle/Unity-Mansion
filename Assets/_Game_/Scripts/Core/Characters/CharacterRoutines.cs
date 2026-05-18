@@ -751,7 +751,7 @@ public class CharacterRoutines : MonoBehaviour
 				agent.StartMove();
 			}
 
-			agent.SetSpeed(_selfCharacter.InBattle() ? 1.0f : 0.5f);
+			agent.SetSpeed(_selfCharacter.InBattle() || _selfCharacter.InParty() ? 1.0f : 0.5f);
 
 			while (_selfCharacter.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons)
 			{
