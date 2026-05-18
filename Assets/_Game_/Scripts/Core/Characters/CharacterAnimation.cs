@@ -383,7 +383,6 @@ public class CharacterAnimation : MonoBehaviour
 			//TrySetTrigger(parameters.trigger);
 			//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
 			TrySetTrigger(parameters.runTrigger);
-			_selfCharacter.FloatingText(LanguageSettings.Main.Run);
 		}
 		
 		else if (actionType == CharacterAction.Attack)

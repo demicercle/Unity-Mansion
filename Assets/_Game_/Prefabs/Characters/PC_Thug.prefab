@@ -16,6 +16,14 @@ PrefabInstance:
       propertyPath: 'items.Array.data[6]'
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 4054300530273574562, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: uniqueID
+      value: 7026204860170209119
+      objectReference: {fileID: 0}
+    - target: {fileID: 5131075226992206587, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: uniqueID
+      value: 4951037734591612570
+      objectReference: {fileID: 0}
     - target: {fileID: 5745611760749173238, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: noRevive
       value: 1
@@ -75,6 +83,14 @@ PrefabInstance:
     - target: {fileID: 7238060625527304640, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8493467912093083937, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: canUseDefendAction
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8493467912093083937, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: canUseRiposteAction
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8493467912093083937, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: turnHostileWhenDamaged

@@ -378,6 +378,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if (rollDiceOnRun) RollDice();
 			usedMovePoints -= characterData.GetRunActionExtraMovePoints();
+			FloatingText(LanguageSettings.Main.Run);
 		}
 		else if (actionType == CharacterAction.Attack)
 		{
@@ -395,11 +396,13 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if (rollDiceOnDefense) RollDice();
 			dodgeCount++;
+			FloatingText(LanguageSettings.Main.Defend);
 		}
 		else if (actionType == CharacterAction.Riposte)
 		{
 			if (rollDiceOnRiposte) RollDice();
 			riposteCount++;
+			FloatingText(LanguageSettings.Main.Ready);
 		}
 		
 		onUseAction?.Invoke(actionType, param);

@@ -23,6 +23,9 @@ public class CharacterBrain : MonoBehaviour
 	[SerializeField] private bool canChase = true;
 	[SerializeField] private bool canPatrol = true;
 	[SerializeField] private bool turnHostileWhenDamaged = false;
+	[SerializeField] private bool canUseRunAction = true;
+	[SerializeField] private bool canUseDefendAction = false;
+	[SerializeField] private bool canUseRiposteAction = false;
 	[SerializeField] private float aggroAlliesModifier = 0.8f;
 	[SerializeField] private Waypoint wanderingPoint;
 
@@ -236,13 +239,10 @@ public class CharacterBrain : MonoBehaviour
 			
 			if (!_selfCharacter.HasMovePoints())
 			{
-				if (_selfCharacter.CanUseAction(CharacterAction.Run))
-				{
-					_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+				ThinkNoMovePoints();
 				
-					do yield return null;
-					while (_selfCharacter.Routines.AnyActive());
-				}
+				do yield return null;
+				while (_selfCharacter.Routines.AnyActive());
 			}
 				
 			if (_selfCharacter.IsAtAttackRange(_chaseCharacter, true))
@@ -264,6 +264,37 @@ public class CharacterBrain : MonoBehaviour
 		if (debugMode > 0) Debug.Log(this + " end chase");
 	}
 
+	private void ThinkNoMovePoints()
+	{
+		var dist = _selfCharacter.GetDistanceTo(_chaseCharacter.GetPosition());
+		if (dist < _selfCharacter.GetMaxMovePoints())
+		{
+			if (canUseDefendAction && _selfCharacter.CanUseAction(CharacterAction.Defend)
+			    && canUseRiposteAction && _selfCharacter.CanUseAction(CharacterAction.Riposte))
+			{
+				_selfCharacter.Routines.AssignUseAction(DicePool.RollDice() < _selfCharacter.GetCurrentHealth() ? CharacterAction.Riposte : CharacterAction.Defend);
+				return;
+			}
+			
+			if (canUseDefendAction && _selfCharacter.CanUseAction(CharacterAction.Defend))
+			{
+				_selfCharacter.Routines.AssignUseAction(CharacterAction.Defend);
+				return;
+			}
+			
+			if (canUseRiposteAction && _selfCharacter.CanUseAction(CharacterAction.Riposte))
+			{
+				_selfCharacter.Routines.AssignUseAction(CharacterAction.Riposte);
+				return;
+			}
+		}
+				
+		if (canUseRunAction && _selfCharacter.CanUseAction(CharacterAction.Run))
+		{
+			_selfCharacter.Routines.AssignUseAction(CharacterAction.Run);
+		}
+	}
+	
 	private IEnumerator TryPatrol()
 	{
 		if (!_selfCharacter.HasMovePoints())

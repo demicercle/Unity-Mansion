@@ -41,3 +41,6 @@ The next attack on you will trigger a counter-attack.
 //PickupItem,
 //LaunchItem,
 //DrinkItem,
+
+defend!
+ready!
