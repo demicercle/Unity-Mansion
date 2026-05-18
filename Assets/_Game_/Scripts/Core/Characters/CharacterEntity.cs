@@ -990,11 +990,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		if (!other.IsCharacterRevealed()) return false;
 		return Vector3.Distance(GetPosition(), other.GetPosition()) <= visionRange;
 	});
-
-	public bool InCombat() => GameTurnManager.Instance.IsTurnBasedMode() 
-	                          && !IsDead() 
-	                          && IsCharacterRevealed() 
-	                          && (InParty() || HasDetectedAnyPartyCharacter());
 	
 	public bool HasDetectedAnyPartyCharacter() => _partyCharacters.Any(HasDetectedOther);
 	
@@ -1289,8 +1284,10 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			false;
 	}
 
-	public bool InBattle() =>
-		GameTurnManager.Instance.IsTurnBasedMode() && (InParty() || HasDetectedAnyPartyCharacter());
+	public bool InBattle() => GameTurnManager.Instance.IsTurnBasedMode() 
+	                         && !IsDead() 
+	                         && IsCharacterRevealed() 
+	                         && (InParty() || HasDetectedAnyPartyCharacter());
 
 	private bool isAiming;
 	private Vector3 aimingPosition;

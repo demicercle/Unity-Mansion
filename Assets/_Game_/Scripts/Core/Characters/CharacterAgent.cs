@@ -40,6 +40,10 @@ public class CharacterAgent : MonoBehaviour
 
 	public float GetHeight() => height;
 
+	public void SetSpeed(float speed01)
+	{
+		aiPath.maxSpeed = Mathf.Clamp01(speed01) * GetMaxSpeed();
+	}
 	
 	public void Teleport(Vector3 newPos, bool stopMovement = true)
 	{
@@ -350,6 +354,8 @@ public class CharacterAgent : MonoBehaviour
 		moveTarget.gameObject.SetActive(false);
 		
 		SetAgentActive(false);
+
+		SetSpeed(1f);
 	}
 	
 	private void OnDestroy()

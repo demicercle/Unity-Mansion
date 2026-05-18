@@ -751,6 +751,8 @@ public class CharacterRoutines : MonoBehaviour
 				agent.StartMove();
 			}
 
+			agent.SetSpeed(_selfCharacter.InBattle() ? 1.0f : 0.5f);
+
 			while (_selfCharacter.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons)
 			{
 				if(debugMode > 1) Debug.Log(this + " WaitCharacterMoved wait switch weapons");

@@ -14,7 +14,7 @@ public class NodeIsInCombat : GameNode
 			_character = GetInputValue("_character", _character);
 			if (_character.TryGetComponent(this, out CharacterEntity character))
 			{
-				_inCombat = character.InCombat();
+				_inCombat = character.InBattle();
 			}
 			else
 			{
