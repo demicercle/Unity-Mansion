@@ -680,7 +680,7 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitCharacterMoved " + reachDistance.ToString("N2");
 		if(debugMode > 0) Debug.Log("WaitCharacterMoved " + _selfCharacter + " reachDistance=" + reachDistance + " currentDistance=" + currentDistance + " raycastForDestructible=" + raycastForDestructible);
 		
-		if (currentDistance <= reachDistance)
+		if (currentDistance <= reachDistance && (!losCheck || _selfCharacter.LOSCheck(dest) || _selfCharacter.LOSCheck(target)))
 		{
 			if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved character already at reachDistance=" + reachDistance+ ", abort");
 			yield break;

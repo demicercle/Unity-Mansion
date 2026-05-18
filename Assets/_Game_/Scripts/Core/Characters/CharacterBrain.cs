@@ -482,7 +482,7 @@ public class CharacterBrain : MonoBehaviour
 						&& _selfCharacter.LOSCheck(wp.GetPosition() + _selfCharacter.GetEyesPosition(true), newTarget.GetCenterPosition()))
 						{
 							if (debugMode > 0) Debug.Log(this + " move to wp " + wp + " to attack " + newTarget);
-							_selfCharacter.Routines.AssignMoveToDestination(wp.GetPosition(), wp.radius, false);
+							_selfCharacter.Routines.AssignMoveToDestination(wp.GetPosition(), wp.radius, true);
 							yield break;
 						}
 					}

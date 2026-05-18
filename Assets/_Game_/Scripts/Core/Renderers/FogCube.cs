@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -26,7 +27,7 @@ public class FogCube : MonoBehaviour
 			? new Ray(planesRenderers[i].transform.position + planesRenderers[i].transform.forward * raycastDistance * 0.5f, -planesRenderers[i].transform.forward)
 			: new Ray(transform.position, transform.forward);
 	}
-	
+
 	private void Awake()
 	{
 		collider =  GetComponent<Collider>();
@@ -87,6 +88,7 @@ public class FogCube : MonoBehaviour
 	{
 		if(!collider) collider = GetComponent<Collider>();
 		Gizmos.color = Color.white;
+		Gizmos.DrawWireCube(collider.bounds.center, collider.bounds.size);
 		for (int i = 0; i < planesRenderers.Length; i++)
 		{
 			var ray = GetRay(i);

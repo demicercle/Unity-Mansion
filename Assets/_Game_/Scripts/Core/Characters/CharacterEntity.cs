@@ -1202,14 +1202,37 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		foreach(var coll in Physics.OverlapSphere(GetPosition() + GetDirection() * GetRadius() * forwardOffset, GetRadius() * radiusScale, Layers.MaskDestructible))
 		{
-			if (coll.TryGetComponent(out Destructible destructible) && destructible.IsDoor())
+			if (coll.TryGetComponent(out Destructible destructible))
 			{
-				o = destructible;
-				return true;
+				if (destructible.IsDoor() && IsOnLastAgentPath(destructible.gameObject))
+				{
+					o = destructible;
+					return true;
+				}
 			}
 		}
 
 		o = null;
+		return false;
+	}
+
+	private bool IsOnLastAgentPath(GameObject go)
+	{
+		var offset = agent.GetHeight() * 0.5f * Vector3.up;
+		var lastPath = agent.GetCurrentPath();
+		for (int i = 1; i < lastPath.Length; i++)
+		{
+			var p0 = lastPath[i - 1] + offset;
+			var p1 = lastPath[i] + offset;
+			if (Physics.Linecast(p0, p1, out var hit, go.layer))
+			{
+				if (hit.collider.gameObject == go)
+				{
+					return true;
+				}
+			}
+		}
+
 		return false;
 	}
 
