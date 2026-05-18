@@ -5,9 +5,9 @@
 #debug_camera 1
 #debug_gtm 1
 
-debug_routines 1
-debug_brains 1
-debug_agent 1
+#debug_routines 1
+#debug_brains 1
+#debug_agent 1
 #debug_follows 1
 
 #debug_anim 1

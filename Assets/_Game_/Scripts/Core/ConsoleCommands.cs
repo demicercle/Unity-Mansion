@@ -112,6 +112,21 @@ public class ConsoleCommands : MonoBehaviour
 
 	[ConsoleMethod("tp", "")]
 	public static void Teleport() => Teleport(0);
+
+	[ConsoleMethod("tp_all", "")]
+	public static void Teleport_All()
+	{
+		var partyChars = CharacterEntity.GetPartyCharacters();
+		var result = GameInput.Instance.CursorRaycast(out var hit);
+		if (result == GameInput.CursorRaycastResult_Navigation)
+		{
+			for (int i = 0; i < partyChars.Length; i++)
+			{
+				partyChars[i].Teleport(hit.point + Quaternion.Euler(0, i * 360f / partyChars.Length, 0) * Vector3.forward * partyChars[i].GetRadius() * 2, true);
+			}
+		}
+	}
+	
 	[ConsoleMethod("teleport", "")]
 	public static void Teleport(int value)
 	{

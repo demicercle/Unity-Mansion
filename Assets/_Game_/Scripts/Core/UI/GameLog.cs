@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class GameLog : MonoBehaviour
 {
+	public static GameLog Instance { get; private set; }
+	
 	[SerializeField] private TMP_Text linePrefab;
 	[SerializeField] private bool noLog;
 	[SerializeField] [Min(-1)] private int maxLines = 3;
@@ -35,6 +37,7 @@ public class GameLog : MonoBehaviour
 
 	private void Awake()
 	{
+		Instance = this;
 		if(!linePrefab) Debug.LogError(this + " has no line prefab");
 		linePrefab.gameObject.SetActive(false);
 	}

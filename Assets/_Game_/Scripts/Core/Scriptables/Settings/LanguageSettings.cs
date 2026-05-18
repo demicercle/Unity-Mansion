@@ -45,6 +45,7 @@ public class LanguageSettings : ScriptableObject
 		public static string NotNow => GetLine(20, "not now!");
 		public static string Defend => GetLine(45, "defend!");
 		public static string Ready => GetLine(46, "ready!");
+		public static string YouMustGatherYourParty => GetLine(6, "You must gather your party");
 
 		public static string AttackResult(CharacterEntity.AttackResult ar) => ar == CharacterEntity.AttackResult.Miss ? Miss : ar == CharacterEntity.AttackResult.Dodge ? Dodge : Hit;
 
