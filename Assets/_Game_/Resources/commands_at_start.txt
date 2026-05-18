@@ -11,7 +11,7 @@ debug_agent 1
 #debug_follows 1
 
 #debug_anim 1
-#debug_aim 1
+debug_aim 1
 #debug_input 1
 
 #debug_props 1

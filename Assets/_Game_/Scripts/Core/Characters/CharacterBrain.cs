@@ -228,6 +228,9 @@ public class CharacterBrain : MonoBehaviour
 			
 			yield return StartCoroutine(YieldTryFindNewTarget());
 
+			do yield return null;
+			while (_selfCharacter.Routines.AnyActive());
+			
 			if (!_chaseCharacter)
 			{
 				if (debugMode > 0) Debug.Log(this + " has no target to chase");
@@ -470,6 +473,21 @@ public class CharacterBrain : MonoBehaviour
 			}
 			else
 			{
+				if (_selfCharacter.IsUsingRangeWeapon())
+				{
+					foreach (var wp in Waypoint.GetOrderedWaypointsFromTo(_selfCharacter.GetPosition(), newTarget.GetPosition()))
+					{
+						if ( !wp.ignoreNavigation
+							&& Vector3.Distance(wp.GetPosition(), newTarget.GetPosition()) <= _selfCharacter.GetAttackRange()
+						&& _selfCharacter.LOSCheck(wp.GetPosition() + _selfCharacter.GetEyesPosition(true), newTarget.GetCenterPosition()))
+						{
+							if (debugMode > 0) Debug.Log(this + " move to wp " + wp + " to attack " + newTarget);
+							_selfCharacter.Routines.AssignMoveToDestination(wp.GetPosition(), wp.radius, false);
+							yield break;
+						}
+					}
+				}
+				
 				if(debugMode > 0) Debug.Log(this + " cannot find destination to " + newTarget + ", pick next one: " + allTargets.Count);
 			}
 		}
