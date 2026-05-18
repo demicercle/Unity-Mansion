@@ -398,7 +398,7 @@ public class CharacterRoutines : MonoBehaviour
 			if(debugMode > 0) Debug.Log(this + " starts moving towards target "+target+ " ; reachDistance=" + reachDistance);
 			if (GameTurnManager.Instance.IsTurnBasedMode())
 			{
-				yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible, losCheck));
+				yield return StartCoroutine(WaitCharacterMoved(target.GetPosition(), reachDistance, raycastForDestructible, losCheck, target));
 			}
 			else
 			{
@@ -672,7 +672,7 @@ public class CharacterRoutines : MonoBehaviour
 		onComplete?.Invoke();
 	}
 
-	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance, bool raycastForDestructible, bool losCheck)
+	private IEnumerator WaitCharacterMoved(Vector3 dest, float reachDistance, bool raycastForDestructible, bool losCheck, IAttackable target = null)
 	{
 		reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAgent().GetMinReachDistance());
 
@@ -723,7 +723,7 @@ public class CharacterRoutines : MonoBehaviour
 		var startTime = Time.time;
 		while (true)
 		{
-			if (agent.ReachedDestination(dest, reachDistance) && (!losCheck || _selfCharacter.LOSCheck(dest))) break; // destination reached
+			if (agent.ReachedDestination(dest, reachDistance) && (!losCheck || _selfCharacter.LOSCheck(dest) || _selfCharacter.LOSCheck(target))) break; // destination reached
 			
 			debugTimeout = (Time.time - startTime);
 

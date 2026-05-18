@@ -901,6 +901,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public bool LOSCheck(IAttackable other)
 	{
+		if (other == null) return false;
 		var start = GetEyesPosition();
 		return LOSCheck(start, other.GetPosition())
 		       || LOSCheck(start, other.GetCenterPosition())
@@ -926,7 +927,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 			if (hit.collider != other)
 			{
 				if(CharacterRoutines.debugMode > 0) DebugDrawer.Line(start, hit.point, Color.red, 1.0f);
-				if(CharacterRoutines.debugMode > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
+				//if(CharacterRoutines.debugMode > 0) Debug.Log(this + " LOSCheck  collide " + hit.collider);
 				return false;
 			}
 		}
