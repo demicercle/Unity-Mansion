@@ -5,23 +5,19 @@ using UnityEngine;
 public class LevelTransition : MonoBehaviour
 {
 	[SerializeField] private PropComponent prop;
-	[SerializeField] private CharacterTrigger trigger;
+	[SerializeField] private float characterDistance;
 	[SerializeField] private int levelIndex;
 	[SerializeField] private int waypointIndex;
 
 	public void TryTravel()
 	{
-		if (trigger)
+		if (characterDistance > 0f)
 		{
-			foreach (var partyChar in CharacterEntity.GetPartyCharacters())
+			if (!CharacterEntity.PartyGathered(characterDistance))
 			{
-				if (!trigger.HasCharacter(partyChar))
-				{
-					// you must gather your party
-					Debug.Log(this + " you must gather your party");
-					GameLog.Instance.AppendLine(LanguageSettings.Main.YouMustGatherYourParty);
-					return;
-				}
+				Debug.Log(this + " PartyTravel YouMustGatherYourParty");
+				GameLog.Instance.AppendLine(LanguageSettings.Main.YouMustGatherYourParty);
+				return;
 			}
 		}
 			

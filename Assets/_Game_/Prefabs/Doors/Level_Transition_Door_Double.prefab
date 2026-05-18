@@ -270,7 +270,7 @@ GameObject:
   - component: {fileID: 8638815196574229263}
   - component: {fileID: 3862354336327419429}
   m_Layer: 11
-  m_Name: Level_Transition_0
+  m_Name: Level_Transition_Door_Double
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -366,7 +366,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelTransition
   prop: {fileID: 0}
-  trigger: {fileID: 1916189637976063282}
+  characterDistance: 4
   levelIndex: 0
   waypointIndex: 0
 --- !u!1001 &4671797950668967830

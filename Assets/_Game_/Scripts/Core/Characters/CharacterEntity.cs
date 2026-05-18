@@ -72,6 +72,31 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public static CharacterEntity[] GetPartyCharacters() => _partyCharacters.ToArray();
 
+	public static bool PartyGathered(float distance)
+	{
+		foreach (var pc0 in _partyCharacters)
+		{
+			if (pc0.IsDead()) continue;
+			if (!IsAtDistance(pc0, distance))
+				return false;
+		}
+
+		return true;
+	}
+
+	public static bool IsAtDistance(CharacterEntity partyChar, float distance)
+	{
+		foreach (var otherPartyChar in _partyCharacters)
+		{
+			if (otherPartyChar.IsDead() || otherPartyChar == partyChar) continue;
+			Debug.Log("IsAtDistance " + partyChar  + " of " + otherPartyChar + " " + otherPartyChar.GetDistanceTo(partyChar.GetPosition()) + " / " + distance);
+			if (otherPartyChar.GetDistanceTo(partyChar.GetPosition()) <= distance)
+				return true;
+		}
+
+		return false;
+	}
+
 	public static bool TryGetPartyCharacter(int index, out CharacterEntity partyChar)
 	{
 		if (index >= 0 && index < _partyCharacters.Count)
