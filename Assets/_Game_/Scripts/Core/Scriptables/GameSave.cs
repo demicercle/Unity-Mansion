@@ -205,10 +205,22 @@ public class GameSave : ScriptableObject
 		public Vector3 position;
 		public string[] itemNames;
 
-		public void Load(Inventory lootBagPrefab)
+		public void Load(Inventory defaultLootBag)
 		{
-			var lootBag = Inventory.CreateLootBag(lootBagPrefab, position);
-			lootBag.DeserializeFromSlots(itemNames);
+			for (int i = 0; i < itemNames.Length; i++)
+			{
+				if (!ItemData.TryDeserialize(itemNames[i], out ItemData itemData))
+				{
+					Debug.LogWarning(this + " cannot Load itemName=" + itemNames[i]);
+					continue;
+				}
+
+				if (!itemData.TryGetLootBagPrefab(out var lootBag))
+					lootBag = defaultLootBag;
+				
+				lootBag = Inventory.CreateLootBag(lootBag, position);
+				lootBag.TryAddItem(itemData);
+			}
 		}
 
 		public void Save(Inventory inv)
