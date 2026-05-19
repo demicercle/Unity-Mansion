@@ -145,6 +145,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 091c9620b0cd6a241954824dc269e7d9, type: 3}
+      propertyPath: m_Icon
+      value: 
+      objectReference: {fileID: 1206586993520771344, guid: 0000000000000000d000000000000000, type: 0}
+    - target: {fileID: 919132149155446097, guid: 091c9620b0cd6a241954824dc269e7d9, type: 3}
       propertyPath: m_Name
       value: LOOT_Item_Medkit
       objectReference: {fileID: 0}

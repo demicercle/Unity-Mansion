@@ -34,7 +34,7 @@ Material:
     - _Noise: 0.19
     - _NoiseScale: 8
     - _NoiseTile: 8
-    - _Offset: 0.05
+    - _Offset: -0.01
     - _Tile: 0.28
     m_Colors: []
   m_BuildTextureStacks: []

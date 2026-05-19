@@ -15,6 +15,8 @@ REFACTO
 - assign attack : should update destination if target moves: "assign follow transform"
 - check "min time between assigns"
 - wood break SFX
+- drop loot on ground: weapons should be removed from hand and loot cleaned when level loaded
+- level transition mouse over in combat "no actions" (so player will not spend 1 action)
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

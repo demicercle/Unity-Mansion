@@ -9,6 +9,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 100000, guid: 8c506e381e613d2448c02962957e574a, type: 3}
+      propertyPath: m_Icon
+      value: 
+      objectReference: {fileID: 1206586993520771344, guid: 0000000000000000d000000000000000, type: 0}
+    - target: {fileID: 100000, guid: 8c506e381e613d2448c02962957e574a, type: 3}
       propertyPath: m_Name
       value: LOOT_Item_Chips
       objectReference: {fileID: 0}
