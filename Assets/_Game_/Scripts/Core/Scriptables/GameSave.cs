@@ -354,7 +354,7 @@ public class GameSave : ScriptableObject
 
 		foreach (var savedLevel in savedLevels)
 		{
-			if (!GameTurnManager.Instance.IsLevelIndex(savedLevel.levelIndex))
+			if (GameTurnManager.LevelIndex != savedLevel.levelIndex)
 			{
 				continue;
 			}
@@ -456,7 +456,7 @@ public class GameSave : ScriptableObject
 		}
 
 		var savedLevel = new SavedLevel();
-		savedLevel.levelIndex = GameTurnManager.Instance.GetCurrentLevelIndex();
+		savedLevel.levelIndex = GameTurnManager.LevelIndex;
 		
 		foreach (var levelChar in GameTurnManager.Instance.GetLevelCharacters())
 		{

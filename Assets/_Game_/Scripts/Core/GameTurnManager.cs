@@ -14,6 +14,8 @@ public class GameTurnManager : MonoBehaviour
 	
 	public static int debugMode { get; set; }
 
+	public static int LevelIndex { get; set; }
+
 	public event System.Action<bool> onLoadingGame, onPlayerChanged, onTurnBasedChanged;
 	public event System.Action onSceneLoaded, onTurnStarted, onTurnEnded, onGameOver;
 	
@@ -112,10 +114,6 @@ public class GameTurnManager : MonoBehaviour
 		Debug.Log(this + " PartyTravel " + levelIndex + " " + playerStartIndex);
 		return StartCoroutine(LoadLevel(levelIndex, playerStartIndex));
 	}
-
-	public int GetCurrentLevelIndex() => currentLevelData ? currentLevelData.levelIndex : 0;
-
-	public bool IsLevelIndex(int index) => index == GetCurrentLevelIndex();
 	
 	#region PRIVATE
 	private CameraPivot cameraPivot => CameraPivot.Instance;
@@ -202,19 +200,9 @@ public class GameTurnManager : MonoBehaviour
 		StartCoroutine("MainCoroutine");
 	}
 
-	private IEnumerator LoadLevel(LevelData newLevel = null)
+	private IEnumerator LoadLevel(LevelData newLevel)
 	{
-		if (!newLevel)
-		{
-			currentLevel = Utils.FindFirstObject<LevelComponent>();
-			
-			if (currentLevel)
-				newLevel = currentLevel.GetLevelData();
-			else
-				newLevel = LevelData.GetLevel(0);
-
-			Debug.Log(this + " LoadFirstLevel " + newLevel);
-		}
+		Debug.Log(this + " LoadLevel " + newLevel);
 
 		if (currentLevelData)
 		{
@@ -286,14 +274,7 @@ public class GameTurnManager : MonoBehaviour
 		DisableAudio(true);
 		FadeScreen.FadeIn(true);
 
-		if (GameSave.Current.GetCurrentLevel() != GetCurrentLevelIndex())
-		{
-			yield return PartyTravel(GameSave.Current.GetCurrentLevel(), 0);
-		}
-		else
-		{
-			yield return StartCoroutine(LoadLevel(null));
-		}
+		yield return StartCoroutine(LoadLevel(LevelData.GetLevel(LevelIndex)));
 		
 		do // ensure that everything is properly loaded
 		{

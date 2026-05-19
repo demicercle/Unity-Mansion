@@ -41,6 +41,7 @@ public class StartScene : MonoBehaviour
 	{
 		if (GameSave.Current.LoadFromFile())
 		{
+			GameTurnManager.LevelIndex = GameSave.Current.GetCurrentLevel();
 			sceneLoader.LoadNow();
 		}
 		else
