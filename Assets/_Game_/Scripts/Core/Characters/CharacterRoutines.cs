@@ -595,7 +595,9 @@ public class CharacterRoutines : MonoBehaviour
 		}
 		
 		if(forceHitTarget != null)
-			ProcessHit(forceHitTarget, atkRoll); 
+			ProcessHit(forceHitTarget, atkRoll);
+
+		yield return new WaitForSeconds(DefaultWaitSeconds);
 	}
 
 	private void ProcessHit(IAttackable target, int atkRoll)

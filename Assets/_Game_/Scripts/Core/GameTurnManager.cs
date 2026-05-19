@@ -734,6 +734,10 @@ public class GameTurnManager : MonoBehaviour
 			
 			if(debugMode > 0) Debug.Log(this + " OnAnyCharacterDamaged " + damaged + " by " + objectFrom + " => next first turn is player: " + nextFirstTurnIsPlayer);
 		}
+		else
+		{
+			cameraPivot.Focus(damaged);
+		}
 	}
 	
 	private void OnAnyDetectionChanged(CharacterEntity char1, CharacterEntity char2, bool detected)

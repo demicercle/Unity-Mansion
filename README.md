@@ -18,6 +18,8 @@ REFACTO
 - drop loot on ground: weapons should be removed from hand and loot cleaned when level loaded
 - level transition mouse over in combat "no actions" (so player will not spend 1 action)
 - item not removed from inventory when loot spawned, so duplicated loot
+- add pause when unit takes damages
+- dead zombi set obstacle FALSE
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

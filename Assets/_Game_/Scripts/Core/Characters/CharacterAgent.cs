@@ -127,12 +127,12 @@ public class CharacterAgent : MonoBehaviour
 	public void StartMove()
 	{
 		if(debugMode > 0) Debug.Log(this + " StartMove");
-		SetObstacle(false);
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.simulateMovement = true;
 		aiPath.maxSpeed = moveSpeed * (GameTurnManager.Instance.IsTurnBasedMode() ? turnBasedVelocityScale : 1.0f);
 		aiPath.isStopped = false;
 		aiPath.canSearch = true;
+		UpdateObstacle();
 	}
 
 	public void StopMovement(bool clamp = false)
@@ -150,9 +150,10 @@ public class CharacterAgent : MonoBehaviour
 	private void UpdateObstacle()
 	{
 		SetObstacle( GameTurnManager.Instance.IsTurnBasedMode()
-						&& !GameTurnManager.Instance.IsCurrentCharacter(_selfCharacter) 
-						&& _selfCharacter.IsCharacterRevealed() 
-						&& !_selfCharacter.IsMoving() );
+		             && !_selfCharacter.IsDead()
+		             && !GameTurnManager.Instance.IsCurrentCharacter(_selfCharacter) 
+		             && _selfCharacter.IsCharacterRevealed() 
+		             && !_selfCharacter.IsMoving() );
 	}
 
 	public Coroutine AssignDestination(CharacterEntity character)
@@ -294,10 +295,11 @@ public class CharacterAgent : MonoBehaviour
 		else
 		{
 			aiPath.updatePosition = aiPath.updateRotation = false;
-			SetObstacle(false);
 			StopFollow();
 			ClearDestination();
 		}
+		
+		UpdateObstacle();
 	}
 	
 	public Vector3 velocity => aiPath.velocity;
