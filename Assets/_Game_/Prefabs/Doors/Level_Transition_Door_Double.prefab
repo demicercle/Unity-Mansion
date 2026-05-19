@@ -195,6 +195,7 @@ MonoBehaviour:
   consumeAction: 3
   saveProp: 0
   onlyOnce: 0
+  disableTurnBased: 1
   autoTriggerDelay: 0
   animatorTrigger: 
   triggerDelay: 0

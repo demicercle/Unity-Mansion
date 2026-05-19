@@ -551,6 +551,9 @@ public class GameInput : MonoBehaviour
 						{
 							selectedAgent = selectedCharacter.GetAgent();
 							selectedAgent.AssignWaypointDestinationAsync(overProp); // mouse over prop
+							
+							if(gameTurnManager.IsTurnBasedMode() && !overProp.AllowTurnBase())
+								SetCurrentCursorType(CursorType.NoActions);
 						}
 					}
 					debugString += "\n>" + currentCursor;
@@ -1085,6 +1088,14 @@ public class GameInput : MonoBehaviour
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter))
 		{
 			onClick?.Invoke();
+
+			if (gameTurnManager.IsTurnBasedMode() && !clickedProp.AllowTurnBase())
+			{
+				Debug.Log(this + " disabled in turn base " + clickedProp);
+
+				selectedCharacter.FloatingText_Cant();
+				return;
+			}
 			
 			if (CanAssignOnClick(selectedCharacter)) // interact with prop
 			{

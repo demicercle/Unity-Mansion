@@ -11,11 +11,6 @@ public class LevelTransition : MonoBehaviour
 
 	public void TryTravel()
 	{
-		if (GameTurnManager.Instance.IsTurnBasedMode())
-		{
-			return;
-		}
-		
 		if (characterDistance > 0f)
 		{
 			if (!CharacterEntity.PartyGathered(characterDistance))

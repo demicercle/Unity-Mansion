@@ -26,6 +26,7 @@ public class PropComponent : MonoBehaviour
 	
 	[Header("Trigger")]
 	[SerializeField] private bool onlyOnce;
+	[SerializeField] private bool disableTurnBased;
 	//[SerializeField] private bool rebuildNavigation;  // TODO component NavMeshRebuilder
 	[Min(0f)][SerializeField] private float autoTriggerDelay;
 	[SerializeField] private string animatorTrigger;
@@ -47,8 +48,8 @@ public class PropComponent : MonoBehaviour
 	}
 
 	public bool IsDoor() => CompareTag(Tags.TagDoor);
-	
-	
+
+	public bool AllowTurnBase() => !disableTurnBased;
 	
 	public bool AnimFinished() => animFinished;
 	
