@@ -1135,6 +1135,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private void OnDestroy()
 	{
 		_allCharacters.Remove(this);
+		if (_partyCharacters.Contains(this))
+			_partyCharacters.Remove(this);
 	}
 
 	private void OnEnable()

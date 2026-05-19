@@ -183,9 +183,9 @@ public class GameSave : ScriptableObject
 
 		public void Load(Inventory inventory)
 		{
-			if(debugMode >0) Debug.Log(this + " Save " + inventory);
 			if (inventory.IsName(name))
 			{
+				if(debugMode >0) Debug.Log(this + " Load " + inventory);
 				inventory.DeserializeFromSlots(slots);
 			}
 		}
@@ -346,6 +346,18 @@ public class GameSave : ScriptableObject
 			{
 				continue;
 			}
+			
+			foreach (var savedInv in savedLevel.savedInventories)
+			{
+				foreach (var inv in Inventory.GetSavedInventories())
+				{
+					if (inv.IsName(savedInv.name))
+					{
+						savedInv.Load(inv);
+						break;
+					}
+				}
+			}
 
 			var levelCharacters = GameTurnManager.Instance.GetLevelCharacters();
 			foreach (var savedChar in savedLevel.levelCharacters)
@@ -360,18 +372,6 @@ public class GameSave : ScriptableObject
 				if (levelChar.InParty()) continue;
 					
 				savedChar.Load(levelChar);
-			}
-			
-			foreach (var savedInv in savedLevel.savedInventories)
-			{
-				foreach (var inv in Inventory.GetSavedInventories())
-				{
-					if (inv.IsName(savedInv.name))
-					{
-						savedInv.Load(inv);
-						break;
-					}
-				}
 			}
 
 			foreach (var savedLoot in savedLevel.savedLoots)

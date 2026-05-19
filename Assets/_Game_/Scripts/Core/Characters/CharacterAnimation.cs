@@ -173,6 +173,9 @@ public class CharacterAnimation : MonoBehaviour
 		if (rpgAnimationHandler) rpgAnimationHandler.name = rpgAnimationHandler.name + " (" + name + ")";
 
 		weaponRenderers = GetComponentsInChildren<WeaponRenderer>();
+		
+		foreach(var wp in weaponRenderers)
+			wp.gameObject.SetActive(false);
 	}
 	
 	private void OnEnable()
@@ -250,16 +253,20 @@ public class CharacterAnimation : MonoBehaviour
 		hasDetectedEnemy = false;
 		weaponInHand = Weapon.Relax;
 		
-		TrySetFloat(parameters.velocityX, 0.0f);      
-		TrySetFloat(parameters.velocityZ, 0.0f);        
-		TrySetBool(parameters.moving, false);
+		if (!_selfCharacter.IsDead())
+		{
+			TrySetFloat(parameters.velocityX, 0.0f);      
+			TrySetFloat(parameters.velocityZ, 0.0f);        
+			TrySetBool(parameters.moving, false);
+		}
 		
 		StartCoroutine("WeaponSwitchCoroutine");
 	}
 
 	private IEnumerator WeaponSwitchCoroutine()
 	{
-		InstantSwitchWeapons(false, true);
+		if(!_selfCharacter.IsDead())
+			InstantSwitchWeapons(false, true);
 		
 		yield return new WaitForSeconds(switchWeaponExtraTime);
 

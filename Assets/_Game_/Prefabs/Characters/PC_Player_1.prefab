@@ -9,6 +9,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 95382248871835717, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
+      propertyPath: saveInventory
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 95382248871835717, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: 'items.Array.data[6]'
       value: 
       objectReference: {fileID: 11400000, guid: 37062cc4f33ecc84a9d8c47332463568, type: 2}
@@ -90,7 +94,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6356768765544130209, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Name
-      value: PC_Player_1 Variant
+      value: PC_Player_1
       objectReference: {fileID: 0}
     - target: {fileID: 6807004109366110947, guid: 79901ded464b0a345b6835347c7814a5, type: 3}
       propertyPath: m_Enabled

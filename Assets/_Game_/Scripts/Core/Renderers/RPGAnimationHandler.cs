@@ -160,12 +160,17 @@ public class RPGAnimationHandler : MonoBehaviour // dirty handler for "RPG Chara
     {
 	   // EndAction(HandlerTypes.Block);
 	   if(debugWalkthrough) Debug.Log(this + " Death");
-	   Invoke("DelayedDeath", 0.2f);
+	   GetHit();
+	   InvokeRepeating("DelayedDeath", 0.2f, 0.2f);
+    }
+
+    public void Dead()
+    {
+	    CancelInvoke("DelayedDeath");
     }
 
     private void DelayedDeath()
     {
-	    CancelInvoke("DelayedDeath");
 	    if(debugWalkthrough) Debug.Log(this + " DelayedDeath");
 	    animator.SetAnimatorTrigger(AnimatorTrigger.DeathTrigger);
 	    Lock(true, true, false, 0.1f, 0f);
