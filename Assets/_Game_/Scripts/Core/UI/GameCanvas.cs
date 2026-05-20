@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -248,7 +249,7 @@ public class GameCanvas : MonoBehaviour
 				{
 					if (!hitBlocked && displayRangeMod)
 					{
-						rangeMod = selectedCharacter.GetHitChanceModifiedByRange(selectedCharacter.GetDistanceTo(targetCharacter.GetPosition()), targetCharacter.GetRadius());
+						rangeMod = selectedCharacter.GetHitChanceModifiedByRange(targetCharacter);
 						if(rangeMod > selectedCharacter.GetHitChance()) cursorText.text += StringUtils.Colorize("\nRange +" + Mathf.Abs(rangeMod - selectedCharacter.GetHitChance()), hitColor);
 						if(rangeMod < selectedCharacter.GetHitChance()) cursorText.text += StringUtils.Colorize("\nRange -" + Mathf.Abs(rangeMod - selectedCharacter.GetHitChance()), missColor);
 					}
@@ -381,4 +382,18 @@ public class GameCanvas : MonoBehaviour
 		inventoryPanel.AssignInventory(null);
 	}
 	#endregion
+
+	private void OnGUI()
+	{
+		if (CharacterEntity.debugStats > 0 && selectedCharacter&& targetCharacter)
+		{
+			var debugString = "";
+			debugString += "hitChance Raw " + selectedCharacter.GetHitChance();
+			debugString += "\nhitChance Range " + selectedCharacter.GetHitChanceModifiedByRange(targetCharacter);
+			debugString += "\nhitChance Height " + selectedCharacter.GetHitChanceHeightModifier(targetCharacter);
+			debugString += "\nhitChance = " + selectedCharacter.CalculateHitChance(targetCharacter);
+			
+			Utils.DrawWorldGUI(targetCharacter.GetPosition(), debugString);
+		}
+	}
 }

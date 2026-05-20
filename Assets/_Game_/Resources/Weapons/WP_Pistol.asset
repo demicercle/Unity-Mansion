@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26b91483504440d7b3e2d5878f8dde34, type: 3}
   m_Name: WP_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  noAttack: 0
   hitChance: 10
   minDamage: 1
   maxDamage: 6
@@ -79,7 +78,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: -1
+      time: -5
       value: -0.25
       inSlope: 0
       outSlope: 0
@@ -106,7 +105,7 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 1
+      time: 5
       value: 0.25
       inSlope: 0
       outSlope: 0
@@ -120,6 +119,7 @@ MonoBehaviour:
   consumeAmmo: 1
   ammoTags: Pistol
   maxAmmo: 6
+  allowMultipleHit: 0
   shootFlat: 0
   shootOffset: {x: 0, y: 0, z: 0}
   shootInfos: []

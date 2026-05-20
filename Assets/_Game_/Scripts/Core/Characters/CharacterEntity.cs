@@ -58,9 +58,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 {
 	private const float MinFacingDot = 0.9f;
 	private const float MinAttackRange = 0.05f;
-	//private const float DodgeCountToChance = 2f / 20f;
-	private const float MovePointsToDodge = 0.02f;
-	private const float MovePointsToHit = 0.00f;
+	private const float MovePointsToDodge = 0.01f;
+	private const float MovePointsToHit = 0.01f;
 
 	public Vector3 GetReachPosition() => GetPosition();
 	
@@ -298,12 +297,17 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 
 	public int GetHitChance() => Mathf.Clamp(currentWeapon.GetHitChance() + Mathf.RoundToInt(GetRemainingMovePoints() * MovePointsToHit), 1, 20);
 
+	public int GetHitChanceModifiedByRange(IAttackable target) =>
+		GetHitChanceModifiedByRange(GetDistanceTo(target.GetPosition()), target.GetRadius());
+	
 	public int GetHitChanceModifiedByRange(float range, float radius)
 	{
 		return (int)(GetHitChance() *
 		             Mathf.Clamp01(currentWeapon.EvaluateRange(range, GetRadius() + radius)));
 	}
 
+	public int GetHitChanceHeightModifier(IAttackable target) => GetHitChanceHeightModifier(Mathf.Abs(target.GetPosition().y - GetPosition().y));
+	
 	public int GetHitChanceHeightModifier(float height)
 	{
 		return (int)(currentWeapon.EvaluateHeight(Mathf.Abs(height)) * 20f);
@@ -1227,11 +1231,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return characterData.GetStealthValue();
 	}
 
-	[SerializeField] private float raycastForwardOffset = 0.5f;
-	[SerializeField] private float raycastRadiusScale = 0.2f;
+	[SerializeField] private float raycastForwardOffset = 1.0f;
+	[SerializeField] private float raycastRadiusScale = 0.5f;
 	public bool RaycastForDestructible(out Destructible o)
 	{
-		var pos = GetPosition() + GetDirection() * GetRadius() * raycastForwardOffset;
+		var pos = GetCenterPosition() + GetDirection() * GetRadius() * raycastForwardOffset;
 		var radius = GetRadius() * raycastRadiusScale;
 		if(debugRoutines > 0) DebugDrawer.WireDisc(pos, radius, Color.red, 0.5f);
 		foreach(var coll in Physics.OverlapSphere(pos, radius, Layers.MaskDestructible))

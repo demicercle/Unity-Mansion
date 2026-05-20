@@ -57,16 +57,19 @@ public class CharacterLookAt : MonoBehaviour
 			}
 			else
 			{
-				if (_selfCharacter.IsSelected())
+				if (!_selfCharacter.IsActing() && !_selfCharacter.IsMoving())
 				{
-					GameInput.Instance.TryGetNavigationTarget(out _followTarget);
-				}
-					
-				else if (_selfCharacter.IsControllableByPlayer())
-				{
-					if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity leader) && leader != _selfCharacter)
+					if (_selfCharacter.IsSelected())
 					{
-						_followTarget = leader.transform;
+						GameInput.Instance.TryGetNavigationTarget(out _followTarget);
+					}
+					
+					else if (_selfCharacter.IsControllableByPlayer())
+					{
+						if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity leader) && leader != _selfCharacter)
+						{
+							_followTarget = leader.transform;
+						}
 					}
 				}
 			}
