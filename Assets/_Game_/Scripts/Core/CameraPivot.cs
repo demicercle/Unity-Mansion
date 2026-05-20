@@ -133,6 +133,18 @@ public class CameraPivot : MonoBehaviour
 
     
     #region PUBLIC
+
+
+    public void SetRotation(int cameraRotation)
+    {
+        currentYaw = desiredYaw = cameraRotation;
+    }
+
+    public int GetRotation()
+    {
+        return Mathf.RoundToInt(desiredYaw);
+    }
+    
     public float GetDistanceTo(Vector3 world) => Vector3.Distance(focusPosition, world);
     public Vector3 GetFocusPosition()
     {
@@ -353,6 +365,4 @@ public class CameraPivot : MonoBehaviour
     }
     
     #endregion
-
-    
 }

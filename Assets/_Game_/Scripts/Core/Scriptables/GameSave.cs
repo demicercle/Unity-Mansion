@@ -260,6 +260,7 @@ public class GameSave : ScriptableObject
 	[ReadOnly] public int gameSeed;
 	[ReadOnly] public int selectedCharacter;
 	[ReadOnly] public int currentLevelIndex;
+	[ReadOnly] public int cameraRotation;
 	[ReadOnly] public List<SavedPC> savedPCs = new List<SavedPC>();
 	[ReadOnly] public List<SavedValue> savedValues = new List<SavedValue>();
 	[ReadOnly] public List<SavedLevel> savedLevels = new List<SavedLevel>();
@@ -427,6 +428,8 @@ public class GameSave : ScriptableObject
 		
 		if(selectedCharacter >= 0)
 			CharacterSelection.SelectCharacterAt(selectedCharacter);
+
+		CameraPivot.Instance.SetRotation(cameraRotation);
 		
 		Debug.Log(this + " Game loaded");
 	}
@@ -448,6 +451,7 @@ public class GameSave : ScriptableObject
 		savedValues.Add(new SavedValue(){ name = SavedValue.Karma, value = DiceLauncher.AllowedDiceRolls});
 		//savedValues.Add(new SavedValue(){ name = SavedValue.MissCount, value = DiceLauncher.MissCount});
 
+		cameraRotation = CameraPivot.Instance.GetRotation();
 		selectedCharacter = CharacterSelection.GetSelectedPartyCharacterIndex();
 		
 		foreach (var partyChar in CharacterEntity.GetPartyCharacters())
