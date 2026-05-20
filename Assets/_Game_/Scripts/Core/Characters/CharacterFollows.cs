@@ -79,9 +79,10 @@ public class CharacterFollows : MonoBehaviour
 			headingPos = leaderCharacter.GetPosition();
 			
 			headingPos -= leaderCharacter.GetDirection() * (leaderCharacter.IsMoving() ? 1.0f : 0.0f) * headingDistance / Vector3.Distance(selfCharacter.GetPosition(), leaderCharacter.GetPosition());
+
+			NavUtils.TryGetNearestNavPosition(headingPos, agent.GetRadius(), out headingPos);
 			
-			dummy.position = headingSpeed <= 0 ? headingPos :
-				Vector3.MoveTowards(dummy.position, headingPos, Time.deltaTime * headingSpeed * selfCharacter.GetAgent().GetMaxSpeed());
+			dummy.position = headingSpeed <= 0 ? headingPos : Vector3.MoveTowards(dummy.position, headingPos, Time.deltaTime * headingSpeed * selfCharacter.GetAgent().GetMaxSpeed());
 		
 			distanceToDummy = selfCharacter.GetDistanceTo(dummy.position);
 			
