@@ -4,7 +4,7 @@ using XNode;
 [CreateNodeMenu("Events/Interacted")]
 public class NodeInteracted : GameNode
 {
-	[Input] public SceneReference _prop;
+	[Input] public GameObject _prop;
 	[Output] public NodeExec _out;
 
 	// Return the correct value of an output port when requested
@@ -22,8 +22,8 @@ public class NodeInteracted : GameNode
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
-		_prop = GetInputValue<SceneReference>("_prop", _prop);
-		if (_prop.TryGetComponent(this, out prop))
+		_prop = GetInputValue("_prop", Script.gameObject);
+		if (_prop.TryGetComponent(out prop))
 		{
 			DebugLog("init prop: "  + prop);
 			prop.onInteracted += Interacted;

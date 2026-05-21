@@ -1,21 +1,22 @@
-﻿using XNode;
+﻿using UnityEngine;
+using XNode;
 
 [Node.CreateNodeMenu("Actions/Teleport")]
 public class NodeTeleport : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public SceneReference _character;
-	[Input] public SceneReference _waypoint;
+	[Input] public GameObject _character;
+	[Input] public GameObject _waypoint;
 
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
 		_in.InitInput(this, "_in", () =>
 		{
-			_character = GetInputValue("_character", _character);
-			_waypoint = GetInputValue("_waypoint", _waypoint);
-			if (_character.TryGetComponent(this, out CharacterEntity character) &&
-			    _waypoint.TryGetComponent(this, out Waypoint waypoint))
+			_character = GetInputValue("_character", Script.gameObject);
+			_waypoint = GetInputValue("_waypoint", Script.gameObject);
+			if (_character.TryGetComponent(out CharacterEntity character) &&
+			    _waypoint.TryGetComponent(out Waypoint waypoint))
 			{
 				character.StopAgent();
 				character.Teleport(waypoint.GetPosition(), waypoint.GetRotation());

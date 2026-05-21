@@ -1,8 +1,10 @@
-﻿[CreateNodeMenu("Actions/Give Extra Actions")]
+﻿using UnityEngine;
+
+[CreateNodeMenu("Actions/Give Extra Actions")]
 public class NodeGiveExtraActions : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public SceneReference _character;
+	[Input] public GameObject _character;
 	[Input] public int _amount = 2;
 
 	protected override void OnScriptStart()
@@ -10,9 +12,9 @@ public class NodeGiveExtraActions : GameNode
 		base.OnScriptStart();
 		_in.InitInput(this, "_in", () =>
 		{
-			_character = GetInputValue("_character", _character);
+			_character = GetInputValue("_character", Script.gameObject);
 			_amount = GetInputValue("_amount", _amount);
-			if (_character.TryGetComponent(this, out CharacterEntity character) && _amount > 0)
+			if (_character.TryGetComponent(out CharacterEntity character) && _amount > 0)
 			{
 				character.GiveExtraActions(_amount);
 			}

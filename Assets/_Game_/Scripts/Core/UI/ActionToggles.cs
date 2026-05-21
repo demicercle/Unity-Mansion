@@ -36,7 +36,7 @@ public class ActionToggles : MonoBehaviour
 		{
 			if (CharacterSelection.TryGetSelectedCharacter(out var selected))
 			{
-				selected.UseAction(CharacterAction.Reload);
+				selected.UseAction(CharacterAction.Reload, true, selected.GetCurrentWeapon());
 			}
 		}
 	}

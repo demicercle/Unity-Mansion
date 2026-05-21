@@ -6,9 +6,7 @@ using XNode;
 public class NodeFindGameObject : GameNode
 {
 	[Input] public string findName;
-	[Output] public SceneReference _out;
-
-	private GameObject _gameObject;
+	[Output] public GameObject _out;
 	
 	#if UNITY_EDITOR
 	[ContextMenu("Find in editor")]
@@ -31,19 +29,15 @@ public class NodeFindGameObject : GameNode
 	{
 		if (port.fieldName == "_out")
 		{
-			if (!_gameObject)
+			if (!_out)
 			{
 				findName = GetInputValue("findName", findName);
-				_gameObject = GameObject.Find(findName);
+				_out = GameObject.Find(findName);
 			}
 
-			if (!_gameObject)
+			if (!_out)
 			{
 				Debug.LogError(this + " cannot find GameObject " + findName);
-			}
-			else
-			{
-				_out.SetGameObject(_gameObject);
 			}
 			
 			return _out;

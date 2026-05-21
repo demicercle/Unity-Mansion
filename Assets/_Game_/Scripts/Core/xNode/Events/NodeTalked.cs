@@ -4,7 +4,7 @@ using XNode;
 [CreateNodeMenu("Events/Talked")]
 public class NodeTalked : GameNode
 {
-	[Input] public SceneReference _character;
+	[Input] public GameObject _character;
 	[Output] public NodeExec _out;
 
 	private CharacterEntity character;
@@ -20,8 +20,8 @@ public class NodeTalked : GameNode
 
 	protected override void OnScriptStart()
 	{
-		_character = GetInputValue<SceneReference>("_character", _character);
-		if (_character.TryGetComponent(this, out character))
+		_character = GetInputValue("_character", Script.gameObject);
+		if (_character.TryGetComponent(out character))
 		{
 			DebugLog("init character: "  + character);
 			character.onTalkedBy += OnTalkedBy;

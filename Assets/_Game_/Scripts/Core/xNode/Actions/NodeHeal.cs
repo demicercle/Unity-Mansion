@@ -1,8 +1,10 @@
-﻿[CreateNodeMenu("Actions/Heal")]
+﻿using UnityEngine;
+
+[CreateNodeMenu("Actions/Heal")]
 public class NodeHeal : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public SceneReference _character;
+	[Input] public GameObject _character;
 	[Input] public float _amount;
 
 	protected override void OnScriptStart()
@@ -11,10 +13,10 @@ public class NodeHeal : GameNode
 		//_in = GetInputValue("_in", _in);
 		_in.InitInput(this, "_in", () =>
 		{
-			_amount = GetInputValue<float>("_amount", _amount);
-			_character = GetInputValue("_character", _character);
+			_amount = GetInputValue("_amount", _amount);
+			_character = GetInputValue("_character", Script.gameObject);
 			
-			if (_character.TryGetComponent(this, out CharacterEntity character))
+			if (_character.TryGetComponent(out CharacterEntity character))
 			{
 				DebugLog("healed: " + character + " by " + _amount);
 				character.Heal(_amount);

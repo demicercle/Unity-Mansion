@@ -9,7 +9,7 @@ public class NodeFloatingText : GameNode
 {
 	//[Output] public NodeExec _out;
 	[Input] public NodeExec _in;
-	[Input] public SceneReference _character;
+	[Input] public GameObject _character;
 	[Input] public LocalizedText message;
 
 	[ContextMenu("Parse")]
@@ -40,10 +40,15 @@ public class NodeFloatingText : GameNode
 
 	private void OnCallback()
 	{
-		if (_character.TryGetComponent(this, out CharacterEntity character))
+		_character = GetInputValue("_character", Script.gameObject);
+		if (_character.TryGetComponent(out CharacterEntity character))
 		{
 			character.FloatingText(GetInputValue("message", message).GetValue(DialogFiles.script));
 			//_out.Invoke();
+		}
+		else
+		{
+			DebugLogWarning("no character found");
 		}
 	}
 }

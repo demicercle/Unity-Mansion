@@ -23,8 +23,8 @@ MonoBehaviour:
     values:
     - _fieldName: _character
       _node: {fileID: -8835191273465707991}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -63,6 +63,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   _currentTurn: 2
 --- !u!114 &-6333504337139077274
 MonoBehaviour:
@@ -151,8 +152,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: -6056364367511601025}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _target
         node: {fileID: 2094922989693918644}
@@ -162,6 +163,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: Waypoint_Script_0
+  _out: {fileID: 0}
 --- !u!114 &-5488248169363102848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,8 +185,8 @@ MonoBehaviour:
     values:
     - _fieldName: _character
       _node: {fileID: -5488248169363102848}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 860757095209417797}
@@ -205,6 +207,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   _inCombat: 0
 --- !u!114 &-2494798922176130470
 MonoBehaviour:
@@ -240,8 +243,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: -2494798922176130470}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 2038153680870968287}
@@ -252,8 +255,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _patrol
       _node: {fileID: -2494798922176130470}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 7459007204536694495}
@@ -262,6 +265,8 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
+  _patrol: {fileID: 0}
 --- !u!114 &-373289405852831925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -296,8 +301,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _prop
       _node: {fileID: -373289405852831925}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 8982146529360608915}
@@ -308,13 +313,15 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _instigator
       _node: {fileID: -373289405852831925}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _prop: {fileID: 0}
+  _instigator: {fileID: 0}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,7 +372,7 @@ MonoBehaviour:
   m_Name: Find Game Object
   m_EditorClassIdentifier: Assembly-CSharp::NodeFindGameObject
   graph: {fileID: 11400000}
-  position: {x: 584, y: 312}
+  position: {x: 584, y: 280}
   ports:
     keys:
     - findName
@@ -382,10 +389,10 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: 491524707927891582}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
-      - fieldName: _to
+      - fieldName: _destination
         node: {fileID: 3872703963223777726}
         reroutePoints: []
       _direction: 1
@@ -393,6 +400,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: Waypoint_Script_2
+  _out: {fileID: 0}
 --- !u!114 &773295089929343215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,8 +498,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: 860757095209417797}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _character
         node: {fileID: -5488248169363102848}
@@ -501,6 +509,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: PC_Zombi_7
+  _out: {fileID: 0}
 --- !u!114 &862892588390126656
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -603,8 +612,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: 1913820063056849607}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 2038153680870968287}
@@ -615,8 +624,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _waypoint
       _node: {fileID: 1913820063056849607}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 3047157872543670551}
@@ -625,6 +634,8 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
+  _waypoint: {fileID: 0}
 --- !u!114 &2038153680870968287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -655,8 +666,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: 2038153680870968287}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _character
         node: {fileID: 1913820063056849607}
@@ -672,6 +683,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: PC_Zombi_7
+  _out: {fileID: 0}
 --- !u!114 &2094922989693918644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -705,8 +717,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _target
       _node: {fileID: 2094922989693918644}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: -6056364367511601025}
@@ -715,6 +727,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _target: {fileID: 0}
 --- !u!114 &3007218651998927448
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -745,8 +758,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: 3007218651998927448}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _character
         node: {fileID: 3032324045232946370}
@@ -756,6 +769,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: PC_Zombi_0
+  _out: {fileID: 0}
 --- !u!114 &3032324045232946370
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -777,8 +791,8 @@ MonoBehaviour:
     values:
     - _fieldName: _character
       _node: {fileID: 3032324045232946370}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 3007218651998927448}
@@ -799,6 +813,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   _inCombat: 1
 --- !u!114 &3047157872543670551
 MonoBehaviour:
@@ -830,8 +845,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: 3047157872543670551}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _waypoint
         node: {fileID: 1913820063056849607}
@@ -841,6 +856,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: Waypoint_Script_1
+  _out: {fileID: 0}
 --- !u!114 &3738203550012870745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -922,7 +938,7 @@ MonoBehaviour:
     keys:
     - _start
     - _character
-    - _to
+    - _destination
     values:
     - _fieldName: _start
       _node: {fileID: 3872703963223777726}
@@ -938,8 +954,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: 3872703963223777726}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 2038153680870968287}
@@ -948,10 +964,10 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _to
+    - _fieldName: _destination
       _node: {fileID: 3872703963223777726}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
         node: {fileID: 491524707927891582}
@@ -960,6 +976,8 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
+  _destination: {fileID: 0}
 --- !u!114 &5729644215421045415
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1031,8 +1049,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: 7459007204536694495}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _patrol
         node: {fileID: -2494798922176130470}
@@ -1042,6 +1060,7 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: Patrol_4
+  _out: {fileID: 0}
 --- !u!114 &7653379556797502613
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1284,8 +1303,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: 8982146529360608915}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _prop
         node: {fileID: -373289405852831925}
@@ -1295,3 +1314,4 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   findName: Prop_Door_Double_0
+  _out: {fileID: 0}

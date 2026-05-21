@@ -1,9 +1,10 @@
-﻿using XNode;
+﻿using UnityEngine;
+using XNode;
 
 [Node.CreateNodeMenu("Conditions/Is DEAD")]
 public class NodeIsDead : GameNode
 {
-	[Input] public SceneReference _character;
+	[Input] public GameObject _character;
 
 	[Output] public bool _isDead;
 
@@ -11,8 +12,8 @@ public class NodeIsDead : GameNode
 	{
 		if (port.fieldName == "_inCombat")
 		{
-			_character = GetInputValue("_character", _character);
-			if (_character.TryGetComponent(this, out CharacterEntity character))
+			_character = GetInputValue("_character", Script.gameObject);
+			if (_character.TryGetComponent(out CharacterEntity character))
 			{
 				_isDead = character.IsDead();
 			}
