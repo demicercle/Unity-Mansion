@@ -25,18 +25,9 @@ public class Projectile : MonoBehaviour
 
 	public void DestroyNow() => Destroy(gameObject);
 
-	public void StopSimulate()
-	{
-		lineRenderer.enabled = false;
-		rb.isKinematic = true;
-		rb.detectCollisions = false;
-	}
-
 	[SerializeField] private LineRenderer lineRenderer;
 	public void Simulate(Vector3 startPoint, Vector3 targetPoint)
 	{
-		StopSimulate();
-
 		var gravity = Physics.gravity * gravityScale;
 		if (!ProjectileTrajectoryOptimized.CalculateLaunchVelocity(startPoint, targetPoint, out var initialVelocity, out var duration, gravity))
 		{
@@ -69,6 +60,16 @@ public class Projectile : MonoBehaviour
 		lineRenderer.useWorldSpace = true;
 		lineRenderer.positionCount = points.Count;
 		lineRenderer.SetPositions(points.ToArray());
+		
+		CancelInvoke("StopSimulate");
+		Invoke("StopSimulate", 0.1f);
+	}
+
+	private void StopSimulate()
+	{
+		lineRenderer.enabled = false;
+		rb.isKinematic = true;
+		rb.detectCollisions = false;
 	}
 
 	private void OnCollisionEnter(Collision other)

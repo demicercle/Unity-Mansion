@@ -635,10 +635,6 @@ public class GameInput : MonoBehaviour
 				if (CanAssignOnMouseOver(selectedCharacter))
 				{
 					selectedCharacter.GetAgent().ClearDestination();
-					foreach (var projectileInHand in selectedCharacter.GetComponentsInChildren<Projectile>())
-					{
-						projectileInHand.StopSimulate();
-					}
 				}
 			}
 		}
