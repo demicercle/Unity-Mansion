@@ -119,15 +119,18 @@ MonoBehaviour:
   onFightEnds:
     m_PersistentCalls:
       m_Calls: []
+  onGameOver:
+    m_PersistentCalls:
+      m_Calls: []
   onTurnBasedChanged:
     m_PersistentCalls:
       m_Calls: []
   onPlayerChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8728720412636102918}
-        m_TargetAssemblyTypeName: Pathfinding.GraphUpdateScene, AstarPathfindingProject
-        m_MethodName: set_enabled
+      - m_Target: {fileID: 4197416605773948541}
+        m_TargetAssemblyTypeName: GraphUpdateHelper, Assembly-CSharp
+        m_MethodName: SetObstacle
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

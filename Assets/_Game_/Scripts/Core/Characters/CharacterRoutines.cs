@@ -678,19 +678,27 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		var agent = _selfCharacter.GetAgent();
 		
-		if (_selfCharacter.HasActions() && _selfCharacter.RaycastForDestructible(out var destructible))
+		if (_selfCharacter.RaycastForDestructible(out var destructible))
 		{
 			if (debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget RaycastForDestructible " + destructible);
 			
 			agent.StopMovement();
-			
-			if (_selfCharacter.CanOpenDoors() && destructible.TryGetComponent(out PropComponent propDoor) && propDoor.IsDoor())
+
+			if (_selfCharacter.HasActions())
 			{
-				yield return StartCoroutine(WaitCharacterInteract(propDoor));
+				if (_selfCharacter.CanOpenDoors() && destructible.TryGetComponent(out PropComponent propDoor) && propDoor.IsDoor())
+				{
+					yield return StartCoroutine(WaitCharacterInteract(propDoor));
+				}
+				else
+				{
+					yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
+				}
 			}
 			else
 			{
-				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
+				_selfCharacter.FloatingText_Cant();
+				yield return new WaitForSeconds(DefaultWaitSeconds);
 			}
 		}
 	}
