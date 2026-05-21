@@ -4,14 +4,13 @@ using XNode;
 [Node.CreateNodeMenu("Variables/Get Instigator")]
 public class NodeGetInstigator : GameNode
 {
-	[Output] public SceneReference _out;
+	[Output] public GameObject _out;
 
 	public override object GetValue(NodePort port)
 	{
 		if (port.fieldName == "_out")
 		{
-			_out.SetGameObject(Script.GetInstigator());
-			return _out;
+			return _out = Script.GetInstigator();
 		}
 		
 		return base.GetValue(port);

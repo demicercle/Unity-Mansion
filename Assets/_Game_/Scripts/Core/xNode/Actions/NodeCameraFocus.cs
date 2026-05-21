@@ -4,7 +4,7 @@
 public class NodeCameraFocus : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public SceneReference _target;
+	[Input] public GameObject _target;
 
 	protected override void OnScriptStart()
 	{
@@ -12,16 +12,16 @@ public class NodeCameraFocus : GameNode
 		_in.InitInput(this, "_in", () =>
 		{
 			_target = GetInputValue("_target", _target);
-			if (_target.TryGetComponent(this, out Waypoint waypoint))
+			if (_target.TryGetComponent(out Waypoint waypoint))
 			{
 				CameraPivot.Instance.Focus(waypoint.transform);
 				CameraPivot.Instance.OrbitTowards(waypoint.GetRotation());
 			}
-			else if (_target.TryGetComponent(this, out CharacterEntity character))
+			else if (_target.TryGetComponent( out CharacterEntity character))
 			{
 				CameraPivot.Instance.Focus(character);
 			}
-			else if (_target.TryGetComponent(this, out Transform transform))
+			else if (_target.TryGetComponent(out Transform transform))
 			{
 				CameraPivot.Instance.Focus(transform);
 			}

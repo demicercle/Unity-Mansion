@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Instantiate
   m_EditorClassIdentifier: Assembly-CSharp::NodeInstantiate
   graph: {fileID: 11400000}
-  position: {x: -248, y: 56}
+  position: {x: -264, y: -88}
   ports:
     keys:
     - _in
-    - _position
+    - _target
     values:
     - _fieldName: _in
       _node: {fileID: -5108611265399494735}
@@ -31,16 +31,18 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _position
+    - _fieldName: _target
       _node: {fileID: -5108611265399494735}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _target: {fileID: 0}
   prefab: {fileID: 1042361525996828, guid: 6943138a0c4a8fd4ea27b63049acac96, type: 3}
+  ignoreRotation: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51,7 +53,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 356af8172615ede43a450e1112ea2b1c, type: 3}
-  m_Name: Graph_Item_Bandage
+  m_Name: Graph_Item_Medkit
   m_EditorClassIdentifier: Assembly-CSharp::GameScriptGraph
   nodes:
   - {fileID: 7167503854543085475}
@@ -92,8 +94,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: 624561134456437675}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -108,6 +110,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   _amount: 5
 --- !u!114 &3365870759824373871
 MonoBehaviour:
@@ -122,7 +125,7 @@ MonoBehaviour:
   m_Name: Destroy Script
   m_EditorClassIdentifier: Assembly-CSharp::NodeDestroyScript
   graph: {fileID: 11400000}
-  position: {x: -264, y: -72}
+  position: {x: -264, y: -312}
   ports:
     keys:
     - _in

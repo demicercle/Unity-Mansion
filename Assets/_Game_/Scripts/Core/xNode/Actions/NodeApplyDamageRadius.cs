@@ -5,8 +5,8 @@ using UnityEngine;
 public class NodeApplyDamageRadius : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public SceneReference _position;
-	[Input] public SceneReference _instigator;
+	[Input] public GameObject _target;
+	[Input] public GameObject _instigator;
 	[Input] public float _damage;
 	[Input] public float _radius;
 	
@@ -21,20 +21,20 @@ public class NodeApplyDamageRadius : GameNode
 		{
 			_damage = GetInputValue("_damage", _damage);
 			_radius = GetInputValue("_radius", _radius);
-			_position = GetInputValue("_position", _position);
 			_instigator = GetInputValue("_instigator", _instigator);
 			
-			if (!_position.TryGetComponent(this, out Transform transform))
+			_target = GetInputValue("_target", Script.gameObject);
+			if (!_target)
 			{
-				DebugLogWarning("invalid position");
+				DebugLogWarning("invalid target");
 				return;
 			}
 
-			DebugDrawer.WireCapsule(transform.position, transform.rotation, _radius, _radius, Color.red, 1.0f);
+			DebugDrawer.WireCapsule(_target.transform.position, _target.transform.rotation, _radius, _radius, Color.red, 1.0f);
 			
-			foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskInteraction))
+			foreach (var obj in Physics.OverlapSphere(_target.transform.position, _radius, Layers.MaskInteraction))
 			{
-				var distance = Vector3.Distance(transform.position, obj.transform.position);
+				var distance = Vector3.Distance(_target.transform.position, obj.transform.position);
 				if (obj.TryGetComponent(out IAttackable attackable))
 				{
 					var amount = _damage * _fallOff.Evaluate(Mathf.Clamp01(distance / _radius));
@@ -42,11 +42,11 @@ public class NodeApplyDamageRadius : GameNode
 					attackable.TakeDamage(new DamageInfo()
 					{
 						amount = amount, isRanged = false
-					}, _instigator.TryGetComponent(this, out CharacterEntity instigatorCharacter) ? instigatorCharacter : null);
+					}, _instigator.TryGetComponent(out CharacterEntity instigatorCharacter) ? instigatorCharacter : null);
 				}
 			}
 
-			Script.StartCoroutine(DelayedExplosion(transform));
+			Script.StartCoroutine(DelayedExplosion(_target.transform));
 		});
 	}
 

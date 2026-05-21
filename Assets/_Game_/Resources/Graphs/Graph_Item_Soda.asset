@@ -70,8 +70,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: -5035446225243804785}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -86,6 +86,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   _amount: 2
 --- !u!114 &-3293232152861389096
 MonoBehaviour:
@@ -100,7 +101,7 @@ MonoBehaviour:
   m_Name: Destroy Script
   m_EditorClassIdentifier: Assembly-CSharp::NodeDestroyScript
   graph: {fileID: 11400000}
-  position: {x: -229.5, y: 47.5}
+  position: {x: -248, y: 8}
   ports:
     keys:
     - _in
@@ -159,11 +160,11 @@ MonoBehaviour:
   m_Name: Instantiate
   m_EditorClassIdentifier: Assembly-CSharp::NodeInstantiate
   graph: {fileID: 11400000}
-  position: {x: -206.5, y: -270.5}
+  position: {x: -248, y: -248}
   ports:
     keys:
     - _in
-    - _position
+    - _target
     values:
     - _fieldName: _in
       _node: {fileID: 2124882485324695773}
@@ -177,13 +178,15 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _position
+    - _fieldName: _target
       _node: {fileID: 2124882485324695773}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _target: {fileID: 0}
   prefab: {fileID: 1042361525996828, guid: 6943138a0c4a8fd4ea27b63049acac96, type: 3}
+  ignoreRotation: 0

@@ -4,7 +4,7 @@ using XNode;
 [CreateNodeMenu("Events/Turn Changed")]
 public class NodeTurnChanged : GameNode
 {
-	[Input] public SceneReference _character;
+	[Input] public GameObject _character;
 	[Output] public NodeExec _turnStarted;
 	[Output] public NodeExec _turnEnded;
 	[Output] public int _currentTurn;
@@ -29,7 +29,7 @@ public class NodeTurnChanged : GameNode
 	{
 		base.OnScriptStart();
 		_character = GetInputValue("_character", _character);
-		if (_character.TryGetComponent(this, out selfCharacter))
+		if (_character && _character.TryGetComponent(out selfCharacter))
 		{
 			DebugLog("init character: "  + selfCharacter);
 			selfCharacter.turnStarted += TurnStarted;

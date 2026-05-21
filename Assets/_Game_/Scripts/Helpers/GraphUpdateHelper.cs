@@ -6,6 +6,12 @@ using UnityEngine;
 public class GraphUpdateHelper : MonoBehaviour
 {
 	public Vector3 size = new Vector3(0.6f, 0f, 0.2f);
+
+	public void SetObstacle(bool value)
+	{
+		var graphUpdate = GetComponent<GraphUpdateScene>();
+		graphUpdate.modifyWalkability = value;
+	}
 	
 	#if UNITY_EDITOR
 	[ContextMenu("Apply")]

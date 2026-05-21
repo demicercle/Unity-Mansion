@@ -5,18 +5,18 @@ using XNode;
 public class NodeSwitchPatrol : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public SceneReference _character;
-	[Input] public SceneReference _patrol;
+	[Input] public GameObject _character;
+	[Input] public GameObject _patrol;
 
 	protected override void OnScriptStart()
 	{
 		base.OnScriptStart();
 		_in.InitInput(this, "_in", () =>
 		{
-			_character = GetInputValue("_character", _character);
-			_patrol = GetInputValue("_patrol", _patrol);
-			if (_character.TryGetComponent(this, out CharacterEntity character) &&
-			    _patrol.TryGetComponent(this, out PatrolRoute patrol))
+			_character = GetInputValue("_character", Script.gameObject);
+			_patrol = GetInputValue("_patrol", Script.gameObject);
+			if (_character.TryGetComponent(out CharacterEntity character) &&
+			    _patrol.TryGetComponent(out PatrolRoute patrol))
 			{
 				DebugLog("assign patrol " + patrol + " to " + character);
 				patrol.AssignPatrol(character);

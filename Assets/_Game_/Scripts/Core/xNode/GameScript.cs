@@ -36,7 +36,7 @@ public class GameScript : MonoBehaviour
 
 		if (newGraph)
 		{
-			graph = Instantiate(newGraph);
+			graph = newGraph.Duplicate();
 			if(debugMode > 0) Debug.Log(this + " SetGraph " + graph);
 		
 			foreach (var node in graph.nodes.OfType<GameNode>())

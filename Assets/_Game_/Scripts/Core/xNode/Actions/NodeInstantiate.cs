@@ -4,7 +4,7 @@
 public class NodeInstantiate : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public SceneReference _position;
+	[Input] public GameObject _target;
 
 	public GameObject prefab;
 	public bool ignoreRotation;
@@ -21,16 +21,16 @@ public class NodeInstantiate : GameNode
 				return;
 			}
 
-			_position = GetInputValue("_position", _position);
-			if (!_position.TryGetComponent(this, out Transform transform))
+			_target = GetInputValue("_target", Script.gameObject);
+			if (!_target)
 			{
 				DebugLogWarning("no valid position setup");
 				return;
 			}
 			
 			var instance = Instantiate(prefab);
-			instance.transform.position = transform.position;
-			if(!ignoreRotation) instance.transform.rotation = transform.rotation;
+			instance.transform.position = _target.transform.position;
+			if(!ignoreRotation) instance.transform.rotation = _target.transform.rotation;
 		});
 	}
 

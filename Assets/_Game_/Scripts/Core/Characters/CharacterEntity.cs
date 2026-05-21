@@ -401,7 +401,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		return AttackResult.Hit;
 	}
 	
-	public void UseAction(CharacterAction actionType, bool useAction = true, object param = null)
+	public void UseAction(CharacterAction actionType, bool useAction, object param)
 	{
 		if (useAction)
 		{
@@ -426,7 +426,14 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		}
 		else if (actionType == CharacterAction.Talk)
 		{
-			(param as CharacterEntity)?.onTalkedBy?.Invoke(this);
+			if (!(param is CharacterEntity))
+			{
+				Debug.LogWarning(this + " invalid target to talk: " + param);
+			}
+			else
+			{
+				(param as CharacterEntity).onTalkedBy?.Invoke(this);
+			}
 		}
 		else if (actionType == CharacterAction.Defend)
 		{

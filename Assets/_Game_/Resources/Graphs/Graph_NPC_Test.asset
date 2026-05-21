@@ -30,17 +30,18 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: -7592384207479827874}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
-      - fieldName: _to
-        node: {fileID: -454481680373365717}
+      - fieldName: _destination
+        node: {fileID: -4710916101070361956}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
   findName: Waypoint_NPC_1
+  _out: {fileID: 0}
 --- !u!114 &-6396237199070666795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,7 +60,7 @@ MonoBehaviour:
     keys:
     - _start
     - _character
-    - _to
+    - _destination
     values:
     - _fieldName: _start
       _node: {fileID: -6396237199070666795}
@@ -75,25 +76,27 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: -6396237199070666795}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _to
+    - _fieldName: _destination
       _node: {fileID: -6396237199070666795}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
-        node: {fileID: 3831391080928794222}
+        node: {fileID: -459421777807978833}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
+  _destination: {fileID: 0}
 --- !u!114 &-4710916101070361956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -112,7 +115,7 @@ MonoBehaviour:
     keys:
     - _start
     - _character
-    - _to
+    - _destination
     values:
     - _fieldName: _start
       _node: {fileID: -4710916101070361956}
@@ -128,25 +131,27 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: -4710916101070361956}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _to
+    - _fieldName: _destination
       _node: {fileID: -4710916101070361956}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
-        node: {fileID: -459421777807978833}
+        node: {fileID: -7592384207479827874}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
+  _destination: {fileID: 0}
 --- !u!114 &-1777878850390571389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -275,8 +280,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: -1036241989258757978}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -291,6 +296,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   message:
     lineIndex: 13
     text: Stop that
@@ -324,17 +330,18 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: -459421777807978833}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
-      - fieldName: _to
-        node: {fileID: -4710916101070361956}
+      - fieldName: _destination
+        node: {fileID: -6396237199070666795}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
   findName: Waypoint_NPC_3
+  _out: {fileID: 0}
 --- !u!114 &-454481680373365717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,7 +360,7 @@ MonoBehaviour:
     keys:
     - _start
     - _character
-    - _to
+    - _destination
     values:
     - _fieldName: _start
       _node: {fileID: -454481680373365717}
@@ -369,25 +376,27 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: -454481680373365717}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _to
+    - _fieldName: _destination
       _node: {fileID: -454481680373365717}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: _out
-        node: {fileID: -7592384207479827874}
+        node: {fileID: 3831391080928794222}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
+  _destination: {fileID: 0}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -503,8 +512,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: 1661894733017915128}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -519,6 +528,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   message:
     lineIndex: 10
     text: Hello
@@ -552,17 +562,18 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _out
       _node: {fileID: 3831391080928794222}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections:
-      - fieldName: _to
-        node: {fileID: -6396237199070666795}
+      - fieldName: _destination
+        node: {fileID: -454481680373365717}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
   findName: Waypoint_NPC_2
+  _out: {fileID: 0}
 --- !u!114 &4533588354387013093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -597,8 +608,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: 4533588354387013093}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -613,6 +624,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   message:
     lineIndex: 12
     text: Let me alone
@@ -650,8 +662,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _character
       _node: {fileID: 6287711585738284144}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -666,6 +678,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
   message:
     lineIndex: 11
     text: I don't want to speak
@@ -682,7 +695,7 @@ MonoBehaviour:
   m_Name: Node Talked
   m_EditorClassIdentifier: Assembly-CSharp::NodeTalked
   graph: {fileID: 11400000}
-  position: {x: -888, y: 88}
+  position: {x: -936, y: 104}
   ports:
     keys:
     - _character
@@ -690,8 +703,8 @@ MonoBehaviour:
     values:
     - _fieldName: _character
       _node: {fileID: 6982387692696900501}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
+      _typeQualifiedName: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 0
@@ -712,6 +725,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
+  _character: {fileID: 0}
 --- !u!114 &7751640997977408073
 MonoBehaviour:
   m_ObjectHideFlags: 0

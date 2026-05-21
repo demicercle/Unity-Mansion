@@ -306,7 +306,7 @@ public class CharacterRoutines : MonoBehaviour
 					yield return null;
 				}
 		
-				_selfCharacter.UseAction(clickedProp.GetInteractAction(), clickedProp);
+				_selfCharacter.UseAction(clickedProp.GetInteractAction(), true, clickedProp);
 				yield return clickedProp.WaitInteraction(_selfCharacter);
 		
 				clickedProp.InteractedBy(_selfCharacter);
@@ -357,7 +357,7 @@ public class CharacterRoutines : MonoBehaviour
 					yield return null;
 				}
 		
-				_selfCharacter.UseAction(clickedProp.GetInteractAction(), clickedProp);
+				_selfCharacter.UseAction(clickedProp.GetInteractAction(), true, clickedProp);
 				yield return clickedProp.WaitInteraction(_selfCharacter);
 		
 				clickedProp.InteractedBy(_selfCharacter);
@@ -678,19 +678,27 @@ public class CharacterRoutines : MonoBehaviour
 	{
 		var agent = _selfCharacter.GetAgent();
 		
-		if (_selfCharacter.HasActions() && _selfCharacter.RaycastForDestructible(out var destructible))
+		if (_selfCharacter.RaycastForDestructible(out var destructible))
 		{
 			if (debugMode > 0) Debug.Log(this + " WaitCharacterMovedToTarget RaycastForDestructible " + destructible);
 			
 			agent.StopMovement();
-			
-			if (_selfCharacter.CanOpenDoors() && destructible.TryGetComponent(out PropComponent propDoor) && propDoor.IsDoor())
+
+			if (_selfCharacter.HasActions())
 			{
-				yield return StartCoroutine(WaitCharacterInteract(propDoor));
+				if (_selfCharacter.CanOpenDoors() && destructible.TryGetComponent(out PropComponent propDoor) && propDoor.IsDoor())
+				{
+					yield return StartCoroutine(WaitCharacterInteract(propDoor));
+				}
+				else
+				{
+					yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
+				}
 			}
 			else
 			{
-				yield return StartCoroutine(WaitCharacterPerformAttack(destructible, true));
+				_selfCharacter.FloatingText_Cant();
+				yield return new WaitForSeconds(DefaultWaitSeconds);
 			}
 		}
 	}
@@ -921,7 +929,7 @@ public class CharacterRoutines : MonoBehaviour
 		debugString = "WaitAction " + action;
 		if(debugMode > 0) Debug.Log(">> WaitAction: " + this + " " + action);
 		yield return new WaitForSeconds(DefaultWaitSeconds*0.25f);
-		_selfCharacter.UseAction(action);
+		_selfCharacter.UseAction(action, true, null);
 		yield return new WaitForSeconds(DefaultWaitSeconds*0.75f);
 	}
 
@@ -951,8 +959,8 @@ public class CharacterRoutines : MonoBehaviour
 			yield return null;
 		}
 
-		if(debugMode > 0) Debug.Log(this + " Use Talk action");
-		_selfCharacter.UseAction(CharacterAction.Talk, npc);
+		if(debugMode > 0) Debug.Log(this + " Use Talk action npc=" + npc);
+		_selfCharacter.UseAction(CharacterAction.Talk, true, npc);
 	}
 
 	private IEnumerator WaitCharacterUseItemOn( ItemData itemToUse, object objectTo)
@@ -999,7 +1007,7 @@ public class CharacterRoutines : MonoBehaviour
 				}
 				
 				_selfCharacter.SetItemToUse(itemToUse);
-				_selfCharacter.UseAction(itemToUse.GetCharacterAction(), otherCharacter);
+				_selfCharacter.UseAction(itemToUse.GetCharacterAction(), true, otherCharacter);
 				
 				if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
 				{
@@ -1062,7 +1070,7 @@ public class CharacterRoutines : MonoBehaviour
 			while (anim.IsSwitchingWeapons);
 		}
 				
-		_selfCharacter.UseAction(itemToUse.GetCharacterAction(), itemToUse);
+		_selfCharacter.UseAction(itemToUse.GetCharacterAction(), true, itemToUse);
 
 		if (anim)
 		{
@@ -1130,7 +1138,7 @@ public class CharacterRoutines : MonoBehaviour
 					if(debugMode > 0) Debug.Log(this + " WaitCharacterGiveItem NotifyTransfered");
 					Inventory.NotifyTransfered(selfInventory, partyInventory, draggedItem);
 					
-					_selfCharacter.UseAction(CharacterAction.GiveItem, true);
+					_selfCharacter.UseAction(CharacterAction.GiveItem, true, partyChar);
 					
 					if (_selfCharacter.TryGetAnimation(out var anim))
 						yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
@@ -1166,7 +1174,7 @@ public class CharacterRoutines : MonoBehaviour
 				{
 					Inventory.NotifyTransfered(selfInventory, lootBag, draggedItem);
 					
-					_selfCharacter.UseAction(CharacterAction.DropItem, true);
+					_selfCharacter.UseAction(CharacterAction.DropItem, true, draggedItem);
 					
 					if (_selfCharacter.TryGetAnimation(out var anim))
 						yield return anim.WaitEvents(EventType.Hit, EventType.Shoot);
@@ -1238,7 +1246,7 @@ public class CharacterRoutines : MonoBehaviour
 			yield break;
 		}
 		
-		_selfCharacter.UseAction(CharacterAction.Reload, true);
+		_selfCharacter.UseAction(CharacterAction.Reload, true, weapon);
 
 		while (ammoItem.GetQuantity() > 0 && !weapon.IsFullAmmo())
 		{
