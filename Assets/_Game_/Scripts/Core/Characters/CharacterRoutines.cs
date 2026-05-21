@@ -1039,6 +1039,7 @@ public class CharacterRoutines : MonoBehaviour
 		
 		if (!_selfCharacter.HasActions())
 		{
+			if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItemAt !_selfCharacter.HasActions");
 			_selfCharacter.FloatingText_Cant();
 			_selfCharacter.SetItemToUse(null);
 			yield break;
@@ -1046,6 +1047,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (itemToUse.TurnBasedOnly() && !GameTurnManager.Instance.IsTurnBasedMode())
 		{
+			if(debugMode > 0) Debug.Log(this + " WaitCharacterUseItemAt !IsTurnBasedMode");
 			_selfCharacter.FloatingText(LanguageSettings.Main.NotNow);
 			_selfCharacter.SetItemToUse(null);
 			yield break;
@@ -1060,12 +1062,14 @@ public class CharacterRoutines : MonoBehaviour
 
 		while (!_selfCharacter.IsFacingPosition(position))
 		{
+			if(debugMode >1) Debug.Log(this + " WaitCharacterUseItemAt LookWorldPosition");
 			_selfCharacter.LookWorldPosition(position, Time.deltaTime);
 			yield return null;
 		}
 		
 		if (_selfCharacter.TryGetAnimation(out CharacterAnimation anim))
 		{
+			if(debugMode >0) Debug.Log(this + " WaitCharacterUseItemAt IsSwitchingWeapons");
 			do yield return null;
 			while (anim.IsSwitchingWeapons);
 		}
@@ -1074,6 +1078,7 @@ public class CharacterRoutines : MonoBehaviour
 
 		if (anim)
 		{
+			if(debugMode >0) Debug.Log(this + " WaitCharacterUseItemAt WaitEvents");
 			anim.WaitEvents(EventType.Hit, EventType.Shoot);
 			do
 			{

@@ -884,9 +884,8 @@ public class GameInput : MonoBehaviour
 					if (itemToUse.CanBeUsedAt(hit.point) && selectedCharacter.CanUseItem(itemToUse))
 					{
 						selectedCharacter.Routines.AssignUseItemAt(itemToUse, hit.point);
+						SetItemToUse(null, false);
 					}
-					
-					SetItemToUse(null, false);
 				}
 
 				else
