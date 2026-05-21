@@ -21,20 +21,20 @@ public class NodeApplyDamageRadius : GameNode
 		{
 			_damage = GetInputValue("_damage", _damage);
 			_radius = GetInputValue("_radius", _radius);
-			_target = GetInputValue("_target", _target);
 			_instigator = GetInputValue("_instigator", _instigator);
 			
-			if (!_target.TryGetComponent( out Transform transform))
+			_target = GetInputValue("_target", Script.gameObject);
+			if (!_target)
 			{
-				DebugLogWarning("invalid position");
+				DebugLogWarning("invalid target");
 				return;
 			}
 
-			DebugDrawer.WireCapsule(transform.position, transform.rotation, _radius, _radius, Color.red, 1.0f);
+			DebugDrawer.WireCapsule(_target.transform.position, _target.transform.rotation, _radius, _radius, Color.red, 1.0f);
 			
-			foreach (var obj in Physics.OverlapSphere(transform.position, _radius, Layers.MaskInteraction))
+			foreach (var obj in Physics.OverlapSphere(_target.transform.position, _radius, Layers.MaskInteraction))
 			{
-				var distance = Vector3.Distance(transform.position, obj.transform.position);
+				var distance = Vector3.Distance(_target.transform.position, obj.transform.position);
 				if (obj.TryGetComponent(out IAttackable attackable))
 				{
 					var amount = _damage * _fallOff.Evaluate(Mathf.Clamp01(distance / _radius));
@@ -46,7 +46,7 @@ public class NodeApplyDamageRadius : GameNode
 				}
 			}
 
-			Script.StartCoroutine(DelayedExplosion(transform));
+			Script.StartCoroutine(DelayedExplosion(_target.transform));
 		});
 	}
 
