@@ -33,6 +33,15 @@ public class NavmeshRebuilder : MonoBehaviour
 		isMainInstance = GetComponent<GameTurnManager>();
 		if(!isMainInstance)
 			yield break;
+		
+		var rb = GetComponent<Rigidbody>();
+		if (rb)
+		{
+			do yield return null;
+			while (rb.linearVelocity.magnitude > Consts.MinMagnitude);
+			
+			rb.Sleep();
+		}
 
 		while (true)
 		{

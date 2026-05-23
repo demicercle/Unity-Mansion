@@ -50,7 +50,7 @@ public class CharacterLookAt : MonoBehaviour
 			
 			if (GameTurnManager.Instance.IsTurnBasedMode())
 			{
-				if (_selfCharacter.TryGetClosestEnemy(out CharacterEntity enemy))
+				if (_selfCharacter.TryGetClosestEnemy(_selfCharacter.GetHeight(), out CharacterEntity enemy))
 				{
 					_followTarget = enemy.transform;
 				}
