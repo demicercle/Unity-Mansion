@@ -215,7 +215,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		onSelectionChanged?.Invoke(value);
 	}
 
-	public bool TryGetClosestEnemy(float maxHeight, out CharacterEntity closestEnemy)
+	public bool TryGetClosestEnemy(out CharacterEntity closestEnemy)
 	{
 		closestEnemy = null;
 		
@@ -224,7 +224,6 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 		{
 			if (IsEnemyTo(enemy) && !enemy.IsDead() && enemy.IsCharacterRevealed())
 			{
-				if (maxHeight > 0 && Utils.VDistance(enemy.GetPosition(), GetPosition()) > maxHeight) continue;
 				var distance = Vector3.Distance(GetPosition(), enemy.GetPosition());
 				if (!closestEnemy || closestDistance > distance)
 				{

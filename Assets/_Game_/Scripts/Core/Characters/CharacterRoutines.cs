@@ -9,11 +9,10 @@ using EventType = CharacterAnimation.EventType;
 
 public class CharacterRoutines : MonoBehaviour
 {
-	private const float SearchPathTimeout = 6.0f;
+	private const float SearchPathTimeout = 8.0f;
 	private const float DefaultWaitSeconds = 1.0f;
-	private const float MinDeltaToMove = 0.1f;
-	private const float HeightPenalty = 1.0f;
-	private const float MinGiveDistance = 0.25f;
+	private const float MinDeltaToMove = 0.01f;
+	private const float MinGiveDistance = 0.15f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();

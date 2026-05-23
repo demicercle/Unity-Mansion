@@ -131,22 +131,22 @@ public class GameInput : MonoBehaviour
 
 	public bool IsLeaderMode() => !ungroupMode && !gameTurnManager.IsTurnBasedMode();
 
-	public bool TryGetNavigationTarget(out Transform navTarget)
+	public bool TryGetLookTarget(out Transform lookTarget)
 	{
-		navTarget = null;
+		lookTarget = null;
 		
 		if (navigationTarget.gameObject.activeSelf)
 		{
-			navTarget = navigationTarget;
+			lookTarget = navigationTarget;
 		}
 
 		else if (lastMouseOverObject)
 		{
 			if (lastMouseOverObject.TryGetComponent(out CharacterEntity other))
-				navTarget = lastMouseOverObject.transform;
+				lookTarget = other.transform;
 		}
 
-		return navTarget;
+		return lookTarget;
 	}
 
 	#region PRIVATE

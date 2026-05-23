@@ -6,7 +6,6 @@ public class CharacterLookAt : MonoBehaviour
 {
 	[SerializeField] private Transform lookTarget;
 	[SerializeField] private Vector3 dotRange = new Vector3(0.01f, 0.2f, 0.5f);
-	[SerializeField] [Min(0f)] private float lerpSpeed = 1.5f;
 	[SerializeField] private float maxDistanceToLookAt = 5.0f;
 	
 	private CharacterEntity _selfCharacter;
@@ -25,54 +24,41 @@ public class CharacterLookAt : MonoBehaviour
 		_selfFollows = GetComponent<CharacterFollows>();
 	}
 
-	private void OnEnable()
+	private void UpdateFollows()
 	{
-		StartCoroutine("UpdateFollows");
-	}
-
-	private void OnDisable()
-	{
-		StopAllCoroutines();
-	}
-
-	private IEnumerator UpdateFollows()
-	{
-		while (true)
+		_followTarget = null;
+		
+		if (_selfCharacter.IsDead() || _selfCharacter.IsActing() || _selfCharacter.IsMoving() || !_selfCharacter.IsCharacterRevealed())
 		{
-			yield return new WaitForSeconds(1.0f);
-			
+			return;
+		}
+		
+		if (GameTurnManager.Instance.IsTurnBasedMode())
+		{
+			if (_selfCharacter.TryGetClosestEnemy(out CharacterEntity enemy))
+			{
+				_followTarget = enemy.transform;
+			}
+		}
+		else
+		{
+			if (_selfCharacter.IsSelected())
+			{
+				GameInput.Instance.TryGetLookTarget(out _followTarget);
+			}
+				
+			else if (_selfCharacter.IsControllableByPlayer())
+			{
+				if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity selected) && selected != _selfCharacter && _selfCharacter.TryGetFollowing(out var following) && following == selected)
+				{
+					_followTarget = following.transform;
+				}
+			}
+		}
+
+		if (_followTarget == transform)
+		{
 			_followTarget = null;
-			
-			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
-			{
-				continue;
-			}
-			
-			if (GameTurnManager.Instance.IsTurnBasedMode())
-			{
-				if (_selfCharacter.TryGetClosestEnemy(_selfCharacter.GetHeight(), out CharacterEntity enemy))
-				{
-					_followTarget = enemy.transform;
-				}
-			}
-			else
-			{
-				if (!_selfCharacter.IsActing() && !_selfCharacter.IsMoving())
-				{
-					if (_selfCharacter.IsSelected())
-					{
-						GameInput.Instance.TryGetNavigationTarget(out _followTarget);
-					}
-					
-					else if (_selfCharacter.IsControllableByPlayer())
-					{
-						if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity leader) && leader != _selfCharacter)
-						{
-							_followTarget = leader.transform;
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -93,36 +79,39 @@ public class CharacterLookAt : MonoBehaviour
 			}
 		}
 
+		worldPosition = _selfCharacter.GetEyesPosition() + _selfCharacter.GetDirection() * (_selfCharacter.GetRadius() * 2);
+
+		UpdateFollows();
+		
+		if (_followTarget)
+		{
+			if (Vector3.Distance(_followTarget.position, _selfCharacter.GetPosition()) <= maxDistanceToLookAt
+			    && Utils.VDistance(_followTarget.position, _selfCharacter.GetPosition()) <= _selfCharacter.GetHeight())
+			{
+				worldPosition = _followTarget.position + Vector3.up * _selfCharacter.GetHeight();
+			}
+		}
+		
 		_isAiming = _selfCharacter.TryGetAimingPosition(out var aimingPosition);
 		
-		if( _selfCharacter.IsActing() || (!_followTarget && !_isAiming))
+		if (_isAiming)
 		{
-			_isRotating = false;
-			lookTarget.parent = _selfCharacter.transform; // no target, back to default pos
-			lookTarget.localPosition = Vector3.forward * (_selfCharacter.GetRadius() * 2) + Vector3.up * _selfCharacter.GetHeight();
+			worldPosition = aimingPosition;
 		}
-		else
+			
+		lookTarget.name = "LookTarget (" + _selfCharacter.name + ")";
+		lookTarget.SetParent(null, true);
+		lookTarget.position = worldPosition;
+			
+		worldDir = _selfCharacter.GetDirectionTo(lookTarget.position);
+		worldDot = Mathf.Abs(1f - Utils.FlatDot(transform.forward, worldDir));
+		minDotToRotate = _isAiming ? dotRange.x : _isRotating ? dotRange.y : dotRange.z;
+		if (worldDot > minDotToRotate && !_selfCharacter.IsMoving())
 		{
-			if (_followTarget && Vector3.Distance(_followTarget.position, transform.position) <= maxDistanceToLookAt)
-				worldPosition = _followTarget.position + Vector3.up * _selfCharacter.GetHeight();
-			
-			if (_isAiming) 
-				worldPosition = aimingPosition;
-			
-			var f = Time.deltaTime;
-			lookTarget.parent = null;
-			lookTarget.position = lerpSpeed <= 0 ? worldPosition : Vector3.Lerp(lookTarget.position, worldPosition, f * lerpSpeed);
-			
-			worldDir = _selfCharacter.GetDirectionTo(lookTarget.position);
-			worldDot = Mathf.Abs(1f - Utils.FlatDot(transform.forward, worldDir));
-			minDotToRotate = _isAiming ? dotRange.x : _isRotating ? dotRange.y : dotRange.z;
-			if (worldDot > minDotToRotate && !_selfCharacter.IsMoving())
-			{
-				_isRotating = true;
-				_selfCharacter.LookWorldPosition(lookTarget.position, f);
-			}
-			else _isRotating = false;
+			_isRotating = true;
+			_selfCharacter.LookWorldPosition(lookTarget.position, Time.deltaTime);
 		}
+		else _isRotating = false;
 		
 		if (CharacterFollows.debugMode > 1 )
 		{

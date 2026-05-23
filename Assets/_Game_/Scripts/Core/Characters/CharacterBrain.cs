@@ -168,7 +168,7 @@ public class CharacterBrain : MonoBehaviour
 				yield break;
 			}
 			
-			if (_selfCharacter.IsMoving() || NavUtils.NavDistance(_lastPosition, _selfCharacter.GetPosition()) >= MinDistanceToDetectMovement)
+			if (_selfCharacter.IsMoving() || _selfCharacter.IsActing() || NavUtils.NavDistance(_lastPosition, _selfCharacter.GetPosition()) >= MinDistanceToDetectMovement)
 				_startedThinkingTime = Time.time; // reset timeout
 			
 			yield return null;
@@ -604,7 +604,7 @@ public class CharacterBrain : MonoBehaviour
 	{
 		if (!_chaseCharacter)
 		{
-			Debug.LogWarning(this + " ForgetTarget() no target");
+//			Debug.LogWarning(this + " ForgetTarget() no target");
 			return;
 		}
 		
