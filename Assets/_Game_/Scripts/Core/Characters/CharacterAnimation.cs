@@ -170,7 +170,7 @@ public class CharacterAnimation : MonoBehaviour
 		
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponent<RPGAnimationHandler>();
 		if(!rpgAnimationHandler) rpgAnimationHandler = GetComponentInChildren<RPGAnimationHandler>();
-		if (rpgAnimationHandler) rpgAnimationHandler.name = rpgAnimationHandler.name + " (" + name + ")";
+		//if (rpgAnimationHandler) rpgAnimationHandler.name = rpgAnimationHandler.name + " (" + name + ")";
 
 		weaponRenderers = GetComponentsInChildren<WeaponRenderer>();
 		
@@ -275,18 +275,21 @@ public class CharacterAnimation : MonoBehaviour
 		while (true)
 		{
 			yield return null;
-			
-			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
-				continue;
 
-			if (isSwitchingWeapons || _selfCharacter.IsActing() || _selfCharacter.InBattle() || _selfCharacter.IsAiming() || _selfCharacter.HasItemToUse(out var _))
+			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
+			{
+				continue;
+			}
+			
+//			if(debugMode > 1) Debug.Log(this + " isSwitchingWeapons=" + isSwitchingWeapons + " lastTimeWeaponSwitched=" + lastTimeWeaponSwitched);
+			
+			if (isSwitchingWeapons)
 			{
 				lastTimeWeaponSwitched = waitToRelaxTime;
 			}
 			else if(lastTimeWeaponSwitched > 0)
 			{
 				lastTimeWeaponSwitched -= Time.deltaTime;
-				if(debugMode > 1) Debug.Log(this + " lastTimeWeaponSwitched=" + lastTimeWeaponSwitched);
 			}
 
 			if (!isSwitchingWeapons)
@@ -295,7 +298,7 @@ public class CharacterAnimation : MonoBehaviour
 				{
 					SwitchWeapons(true);
 				}
-				else if (!isSwitchingWeapons && !_selfCharacter.IsActing())
+				else if (!isSwitchingWeapons && !_selfCharacter.IsActing() && !_selfCharacter.HasItemToUse(out var item))
 				{
 					if(lastTimeWeaponSwitched <= 0)
 						SwitchWeapons(false);
@@ -361,24 +364,33 @@ public class CharacterAnimation : MonoBehaviour
 	//public UnityEvent onDead;
 	private void OnDead()
 	{
-		//TrySetTrigger(parameters.trigger);
-		//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.DeathTrigger);
-		TrySetTrigger(parameters.deathTrigger);
 		hasDetectedEnemy = false;
+		isSwitchingWeapons = false;
+		
+		TrySetTrigger(parameters.deathTrigger);
+		
 		if (rpgAnimationHandler)
 		{
 			rpgAnimationHandler.Death();
 		}
+		
+		UpdateWeaponRenderers();
+		StopAllCoroutines();
 	}
 
 	private void OnRevive()
 	{
+		isSwitchingWeapons = false;
+		
 		TrySetTrigger(parameters.reviveTrigger);
+		
 		if (rpgAnimationHandler)
 		{
-			InstantSwitchWeapons(true);
 			rpgAnimationHandler.Revive();
 		}
+		
+		UpdateWeaponRenderers();
+		StartCoroutine("WeaponSwitchCoroutine");
 	}
 
 	private void OnUseAction(CharacterAction actionType, object args = null)
@@ -570,8 +582,9 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		if (debugMode > 0)
 		{
-			if(lastTimeWeaponSwitched > 0)
-				Utils.DrawWorldGUI(transform.position, lastTimeWeaponSwitched.ToString("N2"));
+			var debugString = weaponInHand.ToString();
+			if (lastTimeWeaponSwitched > 0) debugString += "\n" + lastTimeWeaponSwitched.ToString("N2");
+			Utils.DrawWorldGUI(transform.position, debugString);
 		}
 	}
 
