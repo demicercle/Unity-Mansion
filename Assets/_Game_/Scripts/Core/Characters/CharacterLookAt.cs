@@ -33,26 +33,24 @@ public class CharacterLookAt : MonoBehaviour
 			return;
 		}
 		
-		if (GameTurnManager.Instance.IsTurnBasedMode())
+		if (_selfCharacter.IsSelected())
+		{
+			GameInput.Instance.TryGetLookTarget(out _followTarget);
+		}
+				
+		else if (_selfCharacter.IsControllableByPlayer())
+		{
+			if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity selected) && selected != _selfCharacter && _selfCharacter.TryGetFollowing(out var following) && following == selected)
+			{
+				_followTarget = following.transform;
+			}
+		}
+		
+		if (GameTurnManager.Instance.IsTurnBasedMode() && !_selfCharacter.HasItemToUse(out var _))
 		{
 			if (_selfCharacter.TryGetClosestEnemy(out CharacterEntity enemy))
 			{
 				_followTarget = enemy.transform;
-			}
-		}
-		else
-		{
-			if (_selfCharacter.IsSelected())
-			{
-				GameInput.Instance.TryGetLookTarget(out _followTarget);
-			}
-				
-			else if (_selfCharacter.IsControllableByPlayer())
-			{
-				if (CharacterSelection.TryGetSelectedCharacter(out CharacterEntity selected) && selected != _selfCharacter && _selfCharacter.TryGetFollowing(out var following) && following == selected)
-				{
-					_followTarget = following.transform;
-				}
 			}
 		}
 
@@ -125,7 +123,7 @@ public class CharacterLookAt : MonoBehaviour
 	{
 		if (CharacterFollows.debugMode > 1)
 		{
-			Utils.DrawWorldGUI(_selfCharacter.GetEyesPosition(), worldDot.ToString("N2"));
+			Utils.DrawWorldGUI(_selfCharacter.GetEyesPosition(), worldDot.ToString("N2") + "\n" + "Aim:" + _isAiming);
 		}
 	}
 }

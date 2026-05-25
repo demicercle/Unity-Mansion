@@ -10,6 +10,8 @@ REFACTO
 - if you miss while triggering turn based, should add 1 miss to the gauge
 - check "min time between assigns"
 - wood break SFX
+- weapon not displayed after launched grenade
+- decal not correctly spawn "on ground"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

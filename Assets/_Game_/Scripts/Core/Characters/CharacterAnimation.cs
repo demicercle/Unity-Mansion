@@ -276,6 +276,12 @@ public class CharacterAnimation : MonoBehaviour
 		{
 			yield return null;
 
+			if (_selfCharacter.HasItemToUse(out var _))
+			{
+				lastTimeWeaponSwitched = waitToRelaxTime / 2f;
+				continue;
+			}
+
 			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
 			{
 				continue;
@@ -298,7 +304,7 @@ public class CharacterAnimation : MonoBehaviour
 				{
 					SwitchWeapons(true);
 				}
-				else if (!isSwitchingWeapons && !_selfCharacter.IsActing() && !_selfCharacter.HasItemToUse(out var item))
+				else if (!isSwitchingWeapons && !_selfCharacter.IsActing())
 				{
 					if(lastTimeWeaponSwitched <= 0)
 						SwitchWeapons(false);
@@ -325,12 +331,10 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		if (waitForEvents.Contains(eventType))
 		{
-			if (debugMode > 0) Debug.Log(this + " OnCharacterAnimationEvent " + eventType + " Contains");
+			if (debugMode > 0) Debug.Log(this + " OnCharacterAnimationEvent " + eventType);
 			waitForEvents.Clear();
 			return;
 		}
-		
-		if (debugMode > 0) Debug.Log(this + " OnCharacterAnimationEvent " + eventType);
 	}
 	
 	private void OnTurnStarted()

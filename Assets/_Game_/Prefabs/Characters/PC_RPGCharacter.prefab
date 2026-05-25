@@ -1200,7 +1200,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 467592031822895063, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: uniqueID
-      value: 1312932393844645761
+      value: 2649735823342699391
       objectReference: {fileID: 0}
     - target: {fileID: 1077634328985660634, guid: e8c79e1225971d94983b89ae4fb378c3, type: 3}
       propertyPath: moveSpeed
@@ -1494,7 +1494,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterLookAt
   lookTarget: {fileID: 7155099250292984196}
   dotRange: {x: 0.01, y: 0.2, z: 0.6}
-  lerpSpeed: 1.5
   maxDistanceToLookAt: 5
 --- !u!4 &7155099250292984196 stripped
 Transform:
@@ -2093,7 +2092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8bf315116540e8aace59c6f3be0352, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEventHandler
-  debugMode: 1
+  debugMode: 0
   character: {fileID: 5745611760749173238}
   revealedOnly: 0
   actionEvents:
