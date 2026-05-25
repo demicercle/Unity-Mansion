@@ -134,6 +134,7 @@ public class CameraPivot : MonoBehaviour
     
     #region PUBLIC
 
+    public bool MovedFromInput() => movedFromInput;
 
     public void SetRotation(int cameraRotation)
     {
@@ -176,6 +177,7 @@ public class CameraPivot : MonoBehaviour
         world = Quaternion.Euler(0, desiredYaw, 0) * world;
         focusPosition.x += world.x * inputSpeed;
         focusPosition.z += world.z * inputSpeed;
+        movedFromInput = true;
     }
 
     public void Zoom(float delta)
@@ -251,6 +253,7 @@ public class CameraPivot : MonoBehaviour
         {
             //Debug.Log(this + " " + mousePosition + " " + screen + " " + motion);
             focusPosition += Quaternion.Euler(0, desiredYaw, 0) * motion * panSpeed * scale;
+            movedFromInput = true;
             return true;
         }
 
@@ -274,6 +277,7 @@ public class CameraPivot : MonoBehaviour
     private Vector3 currentPosition;
     private Vector2 orbitScale;
     private CameraSettings _cameraSettings;
+    private bool movedFromInput;
 
     private void Awake()
     {
@@ -291,6 +295,7 @@ public class CameraPivot : MonoBehaviour
     {
         UpdatePosition();
         UpdateFog();
+        movedFromInput = false;
     }
     
     private void FixedUpdate()

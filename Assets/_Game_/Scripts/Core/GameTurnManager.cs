@@ -22,6 +22,7 @@ public class GameTurnManager : MonoBehaviour
 	[Header("Camera")]
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[SerializeField] private bool focusWhenCharacterUseAction = true;
+	[SerializeField] private bool focusWhenCharacterMoves = true;
 	[Space]
 	[Header("Game Rules")]
 	[SerializeField] private bool rollDiceWhenTurnStarts = true;
@@ -141,8 +142,9 @@ public class GameTurnManager : MonoBehaviour
 
 		CharacterDetection.onAnyCharacterDetectionChanged += OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged += OnAnyCharacterDamaged;
-		CharacterEntity.onAnyCharacterUsesAction += OnAnyActionUsed;
+		CharacterEntity.onAnyCharacterUsesAction += OnAnyCharacterUsedAction;
 		CharacterEntity.onAnyCharacterDead += OnAnyCharacterDead;
+		CharacterEntity.onAnyCharacterMoved += OnAnyCharacterMoved;
 		RoomTrigger.onChanged += OnRoomChanged;
 	}
 
@@ -150,8 +152,9 @@ public class GameTurnManager : MonoBehaviour
 	{
 		CharacterDetection.onAnyCharacterDetectionChanged -= OnAnyDetectionChanged;
 		CharacterEntity.onAnyCharacterDamaged -= OnAnyCharacterDamaged;
-		CharacterEntity.onAnyCharacterUsesAction -= OnAnyActionUsed;
+		CharacterEntity.onAnyCharacterUsesAction -= OnAnyCharacterUsedAction;
 		CharacterEntity.onAnyCharacterDead -= OnAnyCharacterDead;
+		CharacterEntity.onAnyCharacterMoved -= OnAnyCharacterMoved;
 		RoomTrigger.onChanged -= OnRoomChanged;
 	}
 
@@ -698,9 +701,17 @@ public class GameTurnManager : MonoBehaviour
 		return false;
 	}
 
-	private void OnAnyActionUsed(CharacterEntity character, CharacterAction action)
+	private void OnAnyCharacterUsedAction(CharacterEntity character, CharacterAction action)
 	{
 		if (IsTurnBasedMode() && focusWhenCharacterUseAction)
+		{
+			cameraPivot.Focus(character);
+		}
+	}
+
+	private void OnAnyCharacterMoved(CharacterEntity character)
+	{
+		if (IsTurnBasedMode() && focusWhenCharacterMoves && !cameraPivot.MovedFromInput() && character == currentAICharacter)
 		{
 			cameraPivot.Focus(character);
 		}
