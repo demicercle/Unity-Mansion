@@ -56,6 +56,21 @@ public static class Utils
 #endif
 	}
 
+	public static Vector3[] GetCapsuleCorners(Vector3 center, float radius, float height)
+	{
+		return new Vector3[]
+		{
+			center - Vector3.up * height + Vector3.forward * radius,
+			center - Vector3.up * height - Vector3.forward * radius,
+			center - Vector3.up * height + Vector3.left * radius,
+			center - Vector3.up * height - Vector3.left * radius,
+			center + Vector3.up * height + Vector3.forward * radius,
+			center + Vector3.up * height - Vector3.forward * radius,
+			center + Vector3.up * height + Vector3.left * radius,
+			center + Vector3.up * height - Vector3.left * radius,
+		};
+	}
+
 	public static bool SnapCompareVector3(Vector3 a, Vector3 b, float snap)
 	{
 		return Snapping.Snap(a, Vector3.one * snap) == Snapping.Snap(b, Vector3.one * snap);

@@ -947,11 +947,11 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	
 	public bool LOSCheck(IAttackable other)
 	{
-		if (other == null) return false;
-		var start = GetEyesPosition();
-		return LOSCheck(start, other.GetPosition())
-		       || LOSCheck(start, other.GetCenterPosition())
-		       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight(), other is Component ? (other as Component).GetComponent<Collider>() : null);
+		return other != null && Utils.GetCapsuleCorners(other.GetCenterPosition(), other.GetRadius(), other.GetHeight())
+			.Any(corner => LOSCheck(GetEyesPosition(), corner));
+		/*	return LOSCheck(start, other.GetPosition())
+			       || LOSCheck(start, other.GetCenterPosition())
+			       || LOSCheck(start, other.GetPosition() + Vector3.up * other.GetHeight(), other is Component ? (other as Component).GetComponent<Collider>() : null);*/
 	}
 
 	public bool LOSCheck(Vector3 pos) => LOSCheck(GetCenterPosition(), pos);

@@ -727,9 +727,11 @@ public class GameInput : MonoBehaviour
 
 	// KEY INPUT
 
+	private bool CanUseActionInputs() => gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn();
+
 	private void OnInputAction_Run(CallbackContext ctx)
 	{
-		if (!gameTurnManager.IsPlayerTurn()) return;
+		if (!CanUseActionInputs()) return;
 		
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Run))
 				selectedCharacter.Routines.AssignUseAction(CharacterAction.Run);
@@ -737,7 +739,7 @@ public class GameInput : MonoBehaviour
 	
 	private void OnInputAction_Defend(CallbackContext ctx)
 	{
-		if (!gameTurnManager.IsPlayerTurn()) return;
+		if (!CanUseActionInputs()) return;
 		
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Defend))
 			selectedCharacter.Routines.AssignUseAction(CharacterAction.Defend);
@@ -750,7 +752,7 @@ public class GameInput : MonoBehaviour
 	
 	private void OnInputFocusSelected(CallbackContext ctx)
 	{
-		if (!gameTurnManager.IsPlayerTurn()) return;
+		if (!CanUseActionInputs()) return;
 		
 		if(CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
 			cameraPivot.Focus(selectedCharacter);

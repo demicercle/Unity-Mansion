@@ -687,7 +687,7 @@ MonoBehaviour:
   - {fileID: -1483201716, guid: e33ac4f366da32443a35edf913068327, type: 3}
   - {fileID: 1733024629, guid: e33ac4f366da32443a35edf913068327, type: 3}
   - {fileID: 1601903518, guid: e33ac4f366da32443a35edf913068327, type: 3}
-  framesDuration: 120
+  framesDuration: 60
   allowedRollsText: {fileID: 3315673588460933132}
   launchButton: {fileID: 3615573469051152235}
   missFill: {fileID: 1393770035420621265}

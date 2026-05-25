@@ -744,7 +744,6 @@ public class CharacterRoutines : MonoBehaviour
 		if(debugMode > 0) DebugDrawer.Path(path, false, Color.blue, 1.0f);
 			
 		if(debugMode > 0) Debug.Log(this + " WaitCharacterMoved agent.StartMove and SetReachDistance=" + reachDistance);
-		agent.SetReachDistance(reachDistance);
 		agent.StartMove();
 		
 		var startTime = Time.time;
