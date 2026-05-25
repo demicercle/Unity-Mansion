@@ -61,6 +61,7 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private RPGAnimationHandler rpgAnimationHandler;
 	[SerializeField] [Min(0)] private float switchWeaponExtraTime = 0.5f;
 	[SerializeField] [Min(0)] private float waitToRelaxTime = 3.0f;
+	[SerializeField] [Min(0)] private float itemUsedTime = 1.2f;
 	[Space]
 	[SerializeField] private Parameters parameters;
 	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
@@ -143,7 +144,8 @@ public class CharacterAnimation : MonoBehaviour
 	private List<EventType> waitForEvents = new List<EventType>();
 	private Weapon weaponInHand = Weapon.Relax;
 	private bool hasSwitchOnTrigger, hasSwitchOffTrigger, isSwitchingWeapons;
-	private float lastTimeWeaponSwitched;
+	private float weaponSwitchTimer;
+	private float lastTimeUsedItem;
 	private WeaponRenderer[] weaponRenderers;
 	private float timeAiming;
 	private bool started;
@@ -263,70 +265,6 @@ public class CharacterAnimation : MonoBehaviour
 		StartCoroutine("WeaponSwitchCoroutine");
 	}
 
-	private IEnumerator WeaponSwitchCoroutine()
-	{
-		if(!_selfCharacter.IsDead())
-			InstantSwitchWeapons(false, true);
-		
-		yield return new WaitForSeconds(switchWeaponExtraTime);
-
-		started = true;
-		
-		while (true)
-		{
-			yield return null;
-
-			if (_selfCharacter.HasItemToUse(out var _))
-			{
-				lastTimeWeaponSwitched = waitToRelaxTime / 2f;
-				continue;
-			}
-
-			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
-			{
-				continue;
-			}
-			
-//			if(debugMode > 1) Debug.Log(this + " isSwitchingWeapons=" + isSwitchingWeapons + " lastTimeWeaponSwitched=" + lastTimeWeaponSwitched);
-			
-			if (isSwitchingWeapons)
-			{
-				lastTimeWeaponSwitched = waitToRelaxTime;
-			}
-			else if(lastTimeWeaponSwitched > 0)
-			{
-				lastTimeWeaponSwitched -= Time.deltaTime;
-			}
-
-			if (!isSwitchingWeapons)
-			{
-				if (_selfCharacter.IsAiming() || _selfCharacter.InBattle())
-				{
-					SwitchWeapons(true);
-				}
-				else if (!isSwitchingWeapons && !_selfCharacter.IsActing())
-				{
-					if(lastTimeWeaponSwitched <= 0)
-						SwitchWeapons(false);
-				}
-			}
-		}
-	}
-
-	private void LateUpdate()
-	{
-		var localVelocity = _selfCharacter.GetVelocity();
-		var isMoving = _selfCharacter.IsMoving();
-		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
-		{
-			isMoving = isMoving || forceRunning; // force running
-			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
-		}
-		TrySetFloat(parameters.velocityX, 0);      
-		TrySetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
-		TrySetBool(parameters.moving, isMoving);
-	}
-
 	private void OnCharacterAnimationEvent(EventType eventType)
 	{
 		if (waitForEvents.Contains(eventType))
@@ -403,8 +341,6 @@ public class CharacterAnimation : MonoBehaviour
 		
 		if (actionType == CharacterAction.Run)
 		{
-			//TrySetTrigger(parameters.trigger);
-			//TrySetInteger(parameters.triggerNumber, (int)AnimatorTrigger.ReloadTrigger);
 			TrySetTrigger(parameters.runTrigger);
 		}
 		
@@ -424,6 +360,11 @@ public class CharacterAnimation : MonoBehaviour
 			{
 				_selfCharacter.FloatingText(LanguageSettings.Main.TakeThis);
 			}
+		}
+		
+		else if (actionType.ToString().Contains("Item"))
+		{
+			lastTimeUsedItem = Time.time;
 		}
 	}
 
@@ -521,6 +462,52 @@ public class CharacterAnimation : MonoBehaviour
 		if (debugMode > 0) Debug.Log(this + " weapon switched" );
 		isSwitchingWeapons = false;
 	}
+
+	private IEnumerator WeaponSwitchCoroutine()
+	{
+		if(!_selfCharacter.IsDead())
+			InstantSwitchWeapons(false, true);
+		
+		yield return new WaitForSeconds(switchWeaponExtraTime);
+
+		started = true;
+		
+		while (true)
+		{
+			yield return null;
+
+			if (_selfCharacter.IsDead() || !_selfCharacter.IsCharacterRevealed())
+			{
+				continue;
+			}
+			
+//			if(debugMode > 1) Debug.Log(this + " isSwitchingWeapons=" + isSwitchingWeapons + " lastTimeWeaponSwitched=" + lastTimeWeaponSwitched);
+			
+			if (isSwitchingWeapons)
+			{
+				weaponSwitchTimer = waitToRelaxTime;
+			}
+
+			if (!isSwitchingWeapons && !_selfCharacter.HasItemToUse(out var itemToUse))
+			{
+				if (_selfCharacter.IsAiming() || _selfCharacter.InBattle())
+				{
+					if (Time.time - lastTimeUsedItem >= itemUsedTime)
+						SwitchWeapons(true);
+				}
+				else if (!isSwitchingWeapons && !_selfCharacter.IsActing())
+				{
+					if(weaponSwitchTimer <= 0)
+						SwitchWeapons(false);
+				}
+			}
+			
+			if(weaponSwitchTimer > 0)
+			{
+				weaponSwitchTimer -= Time.deltaTime;
+			}
+		}
+	}
 	
 	private IEnumerator DoWaitEvents(float timeout, params EventType[] eventTypes)
 	{
@@ -582,12 +569,26 @@ public class CharacterAnimation : MonoBehaviour
 		return true;
 	}
 
+	private void LateUpdate()
+	{
+		var localVelocity = _selfCharacter.GetVelocity();
+		var isMoving = _selfCharacter.IsMoving();
+		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
+		{
+			isMoving = isMoving || forceRunning; // force running
+			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
+		}
+		TrySetFloat(parameters.velocityX, 0);      
+		TrySetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
+		TrySetBool(parameters.moving, isMoving);
+	}
+
 	private void OnGUI()
 	{
 		if (debugMode > 0)
 		{
 			var debugString = weaponInHand.ToString();
-			if (lastTimeWeaponSwitched > 0) debugString += "\n" + lastTimeWeaponSwitched.ToString("N2");
+			if (weaponSwitchTimer > 0) debugString += "\n" + weaponSwitchTimer.ToString("N2");
 			Utils.DrawWorldGUI(transform.position, debugString);
 		}
 	}
