@@ -8,18 +8,17 @@ REFACTO
 - save camera rotation
 - do "CursorRaycast" only in FixedUpdate
 - if you miss while triggering turn based, should add 1 miss to the gauge
-- check "min time between assigns"
+- retake "initative" rules
+- tweak (again) range weapon atk modifier
 - wood break SFX
-- weapon not displayed after launched grenade
-- decal not correctly spawn "on ground"
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
-- add a "drop on ground" and "pickup loot bag" Animation
-- display setItemToUse with others than grenades
+- check a "drop on ground" and "pickup loot bag" Animation
+- display setItemToUse with other items than grenades
 
 SAVE
-- travel to next level?
+- 
 
 UI
 - popup "are you sure you want to reroll dices?"
@@ -30,17 +29,15 @@ ENV ART
 - add a "roof" (ceiling plane) to cull sun light, and point light in the buildings
 
 NODES
-- retakes "scene reference" with a list of references in GameScript
+- 
 
 GAMEPLAY
 - is dying state (-1 HP / turn or 6 seconds
 
 ITEMS
-- equip, drop and equip weapons
 - create new items:
 	> a "key" to use on a "locked" door
-	> "Chicken" (heal HP)
-	> "Bag of chips" starts with 1d20 chips inside
+	> "food" item (self heal HP)
 	
 	
 URLs
