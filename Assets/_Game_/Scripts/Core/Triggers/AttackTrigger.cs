@@ -110,7 +110,7 @@ public class AttackTrigger : MonoBehaviour
 				triggerCount++;
 				triggeredCharacters.Add(otherCharacter);
 				
-				otherCharacter.StopAgent();
+				otherCharacter.Stop();
 				
 				if (isInstantAttack) 
 					selfCharacter.Routines.AssignPerformAttack(otherCharacter, useAttackAction);

@@ -729,12 +729,16 @@ public class GameInput : MonoBehaviour
 
 	private void OnInputAction_Run(CallbackContext ctx)
 	{
+		if (!gameTurnManager.IsPlayerTurn()) return;
+		
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Run))
 				selectedCharacter.Routines.AssignUseAction(CharacterAction.Run);
 	}
 	
 	private void OnInputAction_Defend(CallbackContext ctx)
 	{
+		if (!gameTurnManager.IsPlayerTurn()) return;
+		
 		if (CharacterSelection.TryGetSelectedCharacter(out selectedCharacter) && selectedCharacter.CanUseAction(CharacterAction.Defend))
 			selectedCharacter.Routines.AssignUseAction(CharacterAction.Defend);
 	}
@@ -746,13 +750,11 @@ public class GameInput : MonoBehaviour
 	
 	private void OnInputFocusSelected(CallbackContext ctx)
 	{
-		if (gameTurnManager.IsPlayerTurn())
-		{
-			if(CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
-				cameraPivot.Focus(selectedCharacter);
-			else Debug.Log("no selected character");
-		}
-		else if(debugMode>0) Debug.Log("not in player turn");
+		if (!gameTurnManager.IsPlayerTurn()) return;
+		
+		if(CharacterSelection.TryGetSelectedCharacter(out var selectedCharacter))
+			cameraPivot.Focus(selectedCharacter);
+		else Debug.Log("no selected character");
 	}
 
 	private void OnInputToggleGroup(CallbackContext ctx)
