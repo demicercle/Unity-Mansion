@@ -156,16 +156,18 @@ public class CharacterAgent : MonoBehaviour
 		             && !_selfCharacter.IsMoving() );
 	}
 
-	public Coroutine AssignDestination(CharacterEntity character)
+	public Coroutine AssignDestination(CharacterEntity character, bool useAttackRange)
 	{
-		SetReachDistance(GetRadius() + character.GetRadius() + GetMinReachDistance());
+		var reachDistance = GetRadius() + character.GetRadius() + GetMinReachDistance();
+		if (useAttackRange)
+			reachDistance = Mathf.Max(reachDistance, _selfCharacter.GetAttackRange());
+		SetReachDistance(reachDistance);
 		return AssignDestination(character.GetPosition());
 	}
 	
 	public Coroutine AssignDestination(Vector3 hitPoint)
 	{
 		//if(debugMode > 1) Debug.Log(this + " Assign_new_Destination");
-		ClearPath();
 		StopFollow();
 		bestWaypoint = null;
 		StopAllCoroutines();
@@ -520,7 +522,7 @@ public class CharacterAgent : MonoBehaviour
 		//if (debugMode > 0) DebugDrawer.WireDisc(dest, aiPath.endReachedDistance, hasDestination ? Color.green : Color.yellow, 1.0f);
 	}
 
-	public void ClearPath()
+	private void ClearPath()
 	{
 		for (int i = 0; i < pathRenderers.Count; i++)
 		{
@@ -529,10 +531,20 @@ public class CharacterAgent : MonoBehaviour
 		}
 	}
 	
-	public void DrawPath()
+	private void DrawPath()
 	{
 		drawPath = lastVectorPath.ToArray();
 		pathRenderers[0].enabled = hasDestination;
+		
+		if (GameInput.Instance.TryGetMouseOver(out CharacterEntity otherCharacter) &&
+		    _selfCharacter.ShouldAttack(otherCharacter))
+		{
+			if (_selfCharacter.IsAtAttackRange(otherCharacter, true))
+			{
+				pathRenderers[0].enabled = false;
+			}
+		}
+		
 		if (pathRenderers[0].enabled) // draw path thin
 		{
 			pathRenderers[0].startColor = pathRenderers[0].endColor = ColorSettings.GetDisabledColor(_selfCharacter.GetCurrentFaction());
@@ -543,16 +555,10 @@ public class CharacterAgent : MonoBehaviour
 		}
 		
 		drawPath = lastVectorPath.ToArray();
-		pathRenderers[1].enabled = !IsMoving();
+		pathRenderers[1].enabled = pathRenderers[0].enabled && !IsMoving();
 		if (pathRenderers[1].enabled) // draw path thick
 		{
 			maxDrawLength = _selfCharacter.GetRemainingMovePoints();
-			if (_selfCharacter.IsSelected() && _selfCharacter.IsControllableByPlayer()
-			                                && GameInput.Instance.TryGetMouseOver<CharacterEntity>(out var mouseOverCharacter))
-			{
-				if(_selfCharacter.ShouldAttack(mouseOverCharacter))
-					maxDrawLength = Mathf.Min(maxDrawLength, drawPath.Length - _selfCharacter.GetAttackReachDistance(mouseOverCharacter));
-			}
 			drawPath = Utils.LimitPathTotalLength(drawPath, maxDrawLength);
 			pathRenderers[1].startColor = pathRenderers[1].endColor = ColorSettings.GetCharacterColor(_selfCharacter, true, true);
 			pathRenderers[1].positionCount = drawPath.Length;
@@ -615,6 +621,16 @@ public class CharacterAgent : MonoBehaviour
 				aiPath.updatePosition = true;
 			}
 		}
+
+		if (!_selfCharacter.IsSelected() || _selfCharacter.IsActing() || _selfCharacter.IsMoving())
+		{
+			ClearPath();
+		}
+
+		else if (_selfCharacter.IsSelected() && _gameTurnManager.IsTurnBasedMode() && _gameTurnManager.IsPlayerTurn())
+		{
+			DrawPath();
+		}
 		
 		if (debugMode > 0)
 		{
@@ -629,11 +645,9 @@ public class CharacterAgent : MonoBehaviour
 			{
 				debugString += "path:" + lastVectorPath.Count + "\n";
 
-				
-				if(hasDestination)
-					debugString += NavUtils.NavDistance(aiPath.position, aiPath.destination).ToString("N2") 
-					               + ":" + aiPath.endReachedDistance.ToString("N2")
-					               + ":" + NavUtils.NavDistance(aiPath.endOfPath, aiPath.destination).ToString("N2");
+				debugString += aiPath.endReachedDistance.ToString("N2")
+				               + "/" + NavUtils.NavDistance(aiPath.position, aiPath.destination).ToString("N2");
+				//+ "/" + NavUtils.NavDistance(aiPath.endOfPath, aiPath.destination).ToString("N2");
 			}
 				
 			if (lastVectorPath.Count > 0) DebugDrawer.Path(lastVectorPath.ToArray(), false,Color.cyan);

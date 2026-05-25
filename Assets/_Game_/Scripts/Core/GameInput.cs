@@ -494,89 +494,15 @@ public class GameInput : MonoBehaviour
 		{
 			if (lastMouseOverObject.TryGetComponent(out CharacterEntity overCharacter))
 			{
-				if (debugMode > 1) Debug.Log(this + " overCharacter=" + overCharacter);
-				if (selectedCharacter != null)
-				{
-					var agent = selectedCharacter.GetAgent();
-					if (overCharacter.InParty())
-					{
-						SetCurrentCursorType(CursorType.Select);
-						//lastCursorResult = CursorRaycastResult_None; // mouse over party char
-
-						if (itemToUse)
-							canUseItem = itemToUse.CanBeUsedOn(overCharacter);
-						
-						else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
-							agent.ClearDestination();// mouse over another party member
-						
-					}
-					else if (overCharacter.IsEnemyToPlayer())
-					{
-						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
-						//lastCursorResult = CursorRaycastResult_None; // mouse over enemy;
-						
-						if (itemToUse)
-							canUseItem = itemToUse.CanBeUsedOn(overCharacter);
-						
-						else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
-							agent.AssignDestination(overCharacter); // mouse over enemy
-					}
-					else
-					{
-						SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
-						//lastCursorResult = CursorRaycastResult_None; // mouse over talk
-						
-						if (itemToUse)
-							canUseItem = itemToUse.CanBeUsedOn(overCharacter);
-						else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
-							agent.AssignDestination(overCharacter); // mouse over character
-					}
-				}
-				//else if(isDebugMode) Debug.Log("no selected character");
-			} // TODO ISelectable, ITalkable
+				MouveOverCharacter(overCharacter);
+			} 
 			else if (lastMouseOverObject.TryGetComponent(out PropComponent overProp))  // TODO IInteractable
 			{
-				if (debugMode > 1) Debug.Log(this + " overProp=" + overProp);
-				if (selectedCharacter != null)
-				{
-					SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : overProp.GetCursorType());
-					//lastCursorResult = CursorRaycastResult_None; // mouse over prop
-						
-					if (itemToUse)
-						canUseItem = itemToUse.CanBeUsedOn(overCharacter);
-					
-					else if (CanAssignOnMouseOver(selectedCharacter)) 
-					{
-						if (mouseOverChanged) // assign waypoint destination only if it changed
-						{
-							selectedAgent = selectedCharacter.GetAgent();
-							selectedAgent.AssignWaypointDestinationAsync(overProp); // mouse over prop
-							
-							if(gameTurnManager.IsTurnBasedMode() && !overProp.AllowTurnBase())
-								SetCurrentCursorType(CursorType.NoActions);
-						}
-					}
-					debugString += "\n>" + currentCursor;
-				}
-				//else if(isDebugMode) Debug.Log("no selected character");
+				MouseOverProp(overProp);
 			}
 			else if (lastMouseOverObject.TryGetComponent(out IAttackable overAttackable))
 			{
-				if (debugMode > 1) Debug.Log(this + " overAttackable=" + overAttackable);
-				if (selectedCharacter != null)
-				{
-					SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
-					//lastCursorResult = CursorRaycastResult_None; // mouse over IAttackable
-					
-					
-					if (itemToUse)
-						canUseItem = itemToUse.CanBeUsedOn(overCharacter);
-					
-					else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) 
-					{
-						selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition()); // mouse over prop attackable
-					}
-				}
+				MouseOverAttackable(overAttackable);
 			}
 
 			else
@@ -588,44 +514,7 @@ public class GameInput : MonoBehaviour
 
 		if (lastCursorResult == CursorRaycastResult_Navigation)
 		{
-			if (selectedCharacter)
-			{
-				if (lastMouseOverObject && lastMouseOverObject.gameObject.layer != Layers.LayerGround)
-				{
-					SetCurrentCursorType(CursorType.Blocked);
-					lastCursorResult = CursorRaycastResult_None;
-				}
-			}
-		}
-
-		if (lastCursorResult == CursorRaycastResult_Navigation)
-		{
-			if (selectedCharacter)
-			{
-				SetCurrentCursorType(CursorType.Navigate);
-				navigationTarget.gameObject.SetActive(true);
-//				Debug.Log("navigate!!");
-
-				if (CanAssignOnMouseOver(selectedCharacter) && itemToUse)
-				{
-					SetCurrentCursorType(CursorType.UseItem);
-
-					if (itemToUse.IsProjectile())
-					{
-						selectedCharacter.LookWorldPosition(lastNavPosition, Time.deltaTime);
-						foreach (var projectileInHand in selectedCharacter.GetComponentsInChildren<Projectile>()) // TODO Optim
-						{
-							projectileInHand.Simulate(selectedCharacter.GetCenterPosition(), lastNavPosition);
-						}
-					}
-				}
-				
-				if (CanAssignOnMouseOver(selectedCharacter) && !itemToUse && (mouseOverChanged || mouseHasMoved))
-				{
-					selectedCharacter.GetAgent().AssignDestination(lastNavPosition); // mouse over navigation
-				}
-			}
-			//else if(isDebugMode) Debug.Log("no selected character");
+			MouseOverNavigation();
 		}
 		
 		if(lastCursorResult == CursorRaycastResult_None) // mouse over raycast no result
@@ -694,6 +583,130 @@ public class GameInput : MonoBehaviour
 		}
 	}
 
+	private void MouseOverNavigation()
+	{
+		if (selectedCharacter)
+		{
+			if (lastMouseOverObject && lastMouseOverObject.gameObject.layer != Layers.LayerGround)
+			{
+				SetCurrentCursorType(CursorType.Blocked);
+				return;
+			}
+			
+			SetCurrentCursorType(CursorType.Navigate);
+			navigationTarget.gameObject.SetActive(true);
+//				Debug.Log("navigate!!");
+
+			if (CanAssignOnMouseOver(selectedCharacter) && itemToUse)
+			{
+				SetCurrentCursorType(CursorType.UseItem);
+
+				if (itemToUse.IsProjectile())
+				{
+					selectedCharacter.LookWorldPosition(lastNavPosition, Time.deltaTime);
+					foreach (var projectileInHand in selectedCharacter.GetComponentsInChildren<Projectile>()) // TODO Optim
+					{
+						projectileInHand.Simulate(selectedCharacter.GetCenterPosition(), lastNavPosition);
+					}
+				}
+			}
+				
+			if (CanAssignOnMouseOver(selectedCharacter) && !itemToUse && (mouseOverChanged || mouseHasMoved))
+			{
+				selectedCharacter.GetAgent().AssignDestination(lastNavPosition); // mouse over navigation
+			}
+		}
+		//else if(isDebugMode) Debug.Log("no selected character");
+	}
+
+	private void MouseOverAttackable(IAttackable overAttackable)
+	{
+		if (debugMode > 1) Debug.Log(this + " overAttackable=" + overAttackable);
+		if (selectedCharacter)
+		{
+			SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
+			//lastCursorResult = CursorRaycastResult_None; // mouse over IAttackable
+					
+			if (itemToUse)
+				canUseItem = itemToUse.CanBeUsedOn(overAttackable);
+					
+			else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged) 
+			{
+				selectedCharacter.GetAgent().AssignDestination(overAttackable.GetPosition()); // mouse over prop attackable
+			}
+		}
+	}
+
+	private void MouseOverProp(PropComponent overProp)
+	{
+		if (debugMode > 1) Debug.Log(this + " overProp=" + overProp);
+		if (selectedCharacter != null)
+		{
+			SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : overProp.GetCursorType());
+			//lastCursorResult = CursorRaycastResult_None; // mouse over prop
+						
+			if (itemToUse)
+				canUseItem = itemToUse.CanBeUsedOn(overProp);
+					
+			else if (CanAssignOnMouseOver(selectedCharacter)) 
+			{
+				if (mouseOverChanged) // assign waypoint destination only if it changed
+				{
+					selectedAgent = selectedCharacter.GetAgent();
+					selectedAgent.AssignWaypointDestinationAsync(overProp); // mouse over prop
+							
+					if(gameTurnManager.IsTurnBasedMode() && !overProp.AllowTurnBase())
+						SetCurrentCursorType(CursorType.NoActions);
+				}
+			}
+			debugString += "\n>" + currentCursor;
+		}
+		//else if(isDebugMode) Debug.Log("no selected character");
+	}
+
+	private void MouveOverCharacter(CharacterEntity overCharacter)
+	{
+		if (debugMode > 1) Debug.Log(this + " MouveOverCharacter=" + overCharacter);
+		if (selectedCharacter != null)
+		{
+			var agent = selectedCharacter.GetAgent();
+			if (overCharacter.InParty())
+			{
+				SetCurrentCursorType(CursorType.Select);
+				//lastCursorResult = CursorRaycastResult_None; // mouse over party char
+
+				if (itemToUse)
+					canUseItem = itemToUse.CanBeUsedOn(overCharacter);
+						
+				else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
+					agent.ClearDestination();// mouse over another party member
+						
+			}
+			else if (overCharacter.IsEnemyToPlayer())
+			{
+				SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Attack);
+				//lastCursorResult = CursorRaycastResult_None; // mouse over enemy;
+						
+				if (itemToUse)
+					canUseItem = itemToUse.CanBeUsedOn(overCharacter);
+						
+				else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
+					agent.AssignDestination(overCharacter, true); // mouse over enemy
+			}
+			else
+			{
+				SetCurrentCursorType(hasNoActionsCursor && !selectedCharacter.HasActions() ? CursorType.NoActions : CursorType.Talk);
+				//lastCursorResult = CursorRaycastResult_None; // mouse over talk
+						
+				if (itemToUse)
+					canUseItem = itemToUse.CanBeUsedOn(overCharacter);
+				else if (CanAssignOnMouseOver(selectedCharacter) && mouseOverChanged)
+					agent.AssignDestination(overCharacter, false); // mouse over character
+			}
+		}
+		//else if(isDebugMode) Debug.Log("no selected character");
+	}
+
 	private void OnMouseEnter(Collider overCollider)
 	{
 		
@@ -706,19 +719,6 @@ public class GameInput : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		
-		foreach (var character in CharacterEntity.GetPartyCharacters())
-		{
-			if (character.IsSelected() && gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn() && !gameTurnManager.IsWaiting())
-			{
-				character.GetAgent().DrawPath();
-			}
-			else
-			{
-				character.GetAgent().ClearPath();
-			}
-		}
-		
 		lastMousePosition = mousePosition;
 		mouseHasMoved = false;
 		mouseDown = false;
