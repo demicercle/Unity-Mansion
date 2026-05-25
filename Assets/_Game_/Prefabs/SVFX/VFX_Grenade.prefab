@@ -271,3 +271,5 @@ MonoBehaviour:
   newParent: {fileID: 0}
   findTag: 
   worldPositionStays: 1
+  raycastForGround: 1
+  snapToNavmesh: 1
