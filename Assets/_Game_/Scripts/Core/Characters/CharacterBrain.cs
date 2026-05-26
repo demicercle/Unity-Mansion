@@ -214,9 +214,16 @@ public class CharacterBrain : MonoBehaviour
 				
 				if(!_selfCharacter.HasActions())
 				{
-					if (debugMode > 0) Debug.Log(this + " no actions after reload, abort");
-					StopThink();
-					yield break;
+					if (_selfCharacter.HasMovePoints())
+					{
+						if(debugMode > 0) Debug.Log(this + " TryChangeAttackPosition after reload");
+						yield return StartCoroutine(TryChangeAttackPosition());
+						
+						do yield return null;
+						while (_selfCharacter.Routines.AnyActive());
+						
+						StopThink();
+					}
 				}
 			}
 			
@@ -402,6 +409,53 @@ public class CharacterBrain : MonoBehaviour
 		} while (_selfCharacter.Routines.AnyActive());
 
 		yield return new WaitForSeconds(DefaultWaitSeconds);
+	}
+
+	private IEnumerator TryChangeAttackPosition()
+	{
+		var allWaypoints = Waypoint.GetAllInstances()
+			.Where(w => !w.ignoreNavigation && _selfCharacter.GetDistanceTo(w.GetPosition()) > _selfCharacter.GetRadius() + w.radius)
+			.OrderBy(w => _selfCharacter.GetDistanceTo(w.GetPosition()))
+			.ToArray();
+		
+		var allTargets = _aggroMap.Keys.OrderBy(CalculateAggro).ToList();
+		while (allTargets.Count > 0)
+		{
+			var newTarget = allTargets.LastOrDefault();
+			allTargets.Remove(newTarget);
+			if (!newTarget || newTarget.IsDead()) continue;
+
+			foreach (var wp in allWaypoints)
+			{
+				if (!wp.ignoreNavigation
+				    && Vector3.Distance(wp.GetPosition(), newTarget.GetPosition()) <= _selfCharacter.GetAttackRange()
+				    && _selfCharacter.LOSCheck(wp.GetPosition() + _selfCharacter.GetEyesPosition(true), newTarget.GetCenterPosition()))
+				{
+					_agent.StopMovement();
+					_agent.ClearDestination();
+					_agent.SetReachDistance(wp.radius);
+					yield return _agent.AssignDestination(wp.GetPosition());
+					
+					if (_agent.hasDestination)
+					{
+						if (debugMode > 0) Debug.Log(this + " TryChangeAttackPosition HAS DESTINATION wp=" + wp);
+						_selfCharacter.Routines.AssignMoveToDestination(wp.GetPosition(), wp.radius, true);
+						yield break;
+					}
+				}
+			}
+		}
+
+		if (allWaypoints.Length > 0)
+		{
+			var fallbackWp = allWaypoints.First();
+			if (debugMode > 0) Debug.Log(this + " TryChangeAttackPosition no target found, fallbackWP=" + fallbackWp);
+			_selfCharacter.Routines.AssignMoveToDestination(fallbackWp.GetPosition(), fallbackWp.radius, true);
+			do yield return null;
+			while (_selfCharacter.Routines.AnyActive());
+		}
+
+		yield return StartCoroutine(TryUseFallbackAction());
 	}
 
 	private IEnumerator TryFindOptimalTargetPosition()

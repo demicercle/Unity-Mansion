@@ -150,10 +150,11 @@ public class CharacterAgent : MonoBehaviour
 	private void UpdateObstacle()
 	{
 		SetObstacle( GameTurnManager.Instance.IsTurnBasedMode()
-		             && !_selfCharacter.IsDead()
-		             && !GameTurnManager.Instance.IsCurrentCharacter(_selfCharacter) 
 		             && _selfCharacter.IsCharacterRevealed() 
-		             && !_selfCharacter.IsMoving() );
+		             && !_selfCharacter.IsDead()
+		             && !_selfCharacter.IsSelected()
+		             && !_selfCharacter.IsMoving()
+		             && !GameTurnManager.Instance.IsCurrentCharacter(_selfCharacter)  );
 	}
 
 	public Coroutine AssignDestination(CharacterEntity character, bool useAttackRange)
