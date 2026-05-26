@@ -10,11 +10,11 @@ public class DiceSprite : MonoBehaviour
 	[SerializeField] private Image spriteImage;
 	[SerializeField] private Sprite[] numberSprites;
 	
-	private float displayResult;
+	private int displayResult;
 	private float time;
 	private int lastIndex;
 
-	public void Emit(GameObject owner, float lastResult)
+	public void Emit(GameObject owner, int lastResult)
 	{
 		var clone = Instantiate(gameObject).GetComponent<DiceSprite>();
 		clone.transform.SetParent(transform.parent, false);
@@ -42,7 +42,7 @@ public class DiceSprite : MonoBehaviour
 		}
 	}
 
-	private void OnAnyDiceRolled(CharacterEntity character, float lastResult)
+	private void OnAnyDiceRolled(CharacterEntity character, int lastResult)
 	{
 		Emit(character.gameObject, lastResult);
 	}
@@ -55,7 +55,7 @@ public class DiceSprite : MonoBehaviour
 		}
 		else
 		{
-			spriteImage.sprite = numberSprites[(int)Mathf.Lerp(0, numberSprites.Length - 1, displayResult)];
+			spriteImage.sprite = numberSprites[Mathf.Clamp(displayResult-1, 0, numberSprites.Length)];
 		}
 		
 		time += Time.deltaTime;

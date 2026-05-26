@@ -113,7 +113,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	public static int PartyCount => _partyCharacters.Count;
 	
 	public static event System.Action onPartyChanged;
-	public static event System.Action<CharacterEntity, float> onAnyCharacterRollDice;
+	public static event System.Action<CharacterEntity, int> onAnyCharacterRollDice;
 	public static event System.Action<CharacterEntity, DamageInfo, object> onAnyCharacterDamaged;
 	public static event System.Action<CharacterEntity, float> onAnyCharacterHealed;
 	public static event System.Action<CharacterEntity> onAddedToParty, onRemovedFromParty;
