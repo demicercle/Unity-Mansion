@@ -124,7 +124,7 @@ public class GameTurnManager : MonoBehaviour
 	private CharacterEntity currentAICharacter;
 	private CharacterEntity focusCharacter;
 	private LevelData currentLevelData;
-	private LevelComponent currentLevel;
+	private LevelComponent currentLevelComponent;
 	private int currentTurn;
 	private bool playerTurn;
 	private bool isLoading;
@@ -211,6 +211,8 @@ public class GameTurnManager : MonoBehaviour
 
 		if (currentLevelData)
 		{
+			yield return StartCoroutine(SaveGame());
+			
 			foreach (var sceneToUnload in currentLevelData.scenesToLoad)
 			{
 				if (!newLevel.scenesToLoad.Contains(sceneToUnload) && SceneManager.GetSceneByName(sceneToUnload).isLoaded)
@@ -225,6 +227,8 @@ public class GameTurnManager : MonoBehaviour
 		
 		if (currentLevelData)
 		{
+			LevelIndex = currentLevelData.levelIndex;
+			
 			foreach (var sceneToLoad in currentLevelData.scenesToLoad)
 			{
 				if (!SceneManager.GetSceneByName(sceneToLoad).isLoaded)
@@ -243,20 +247,20 @@ public class GameTurnManager : MonoBehaviour
 			RoomTrigger.activeRooms.ForEach(r => r.Refresh());
 			yield return null;
 		
-			currentLevel = Utils.FindFirstObject<LevelComponent>();
+			currentLevelComponent = Utils.FindFirstObject<LevelComponent>();
 		
 			levelCharacters = CharacterEntity.AllCharacters
 				.OrderBy(c => c.transform.GetSiblingIndex())
 				.ToArray();
 		
-			if(debugMode > 0) Debug.Log(this + " init level " + currentLevel + " found levelCharacters=" + levelCharacters.Length);
+			if(debugMode > 0) Debug.Log(this + " init level " + LevelIndex + " levelComponent=" + currentLevelComponent + " levelData=" + currentLevelData + " ; found levelCharacters=" + levelCharacters.Length);
 		
 			foreach (var character in levelCharacters)
 			{
 				character.Spawn();
 			}
 		
-			currentLevel.Init(levelCharacters);
+			currentLevelComponent.Init(levelCharacters);
 			
 			yield return StartCoroutine(LoadGame());
 		}
@@ -306,7 +310,7 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator SaveGame()
 	{
-		Debug.Log(this + " SaveGame");
+		if(debugMode > 0) Debug.Log(this + " SaveGame");
 		
 		GameSave.Current.SaveGame();
 		yield return new WaitForSeconds(0.3f);
@@ -314,11 +318,11 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator LoadGame()
 	{
-		Debug.Log(this + " LoadGame");
+		if(debugMode > 0) Debug.Log(this + " LoadGame");
 		
 		GameSave.Current.LoadGame();
 		
-		yield return new WaitForSeconds(0.3f);
+		yield return new WaitForSeconds(1.0f);
 		
 		yield return WaitNavigationDirty();
 		
@@ -327,7 +331,7 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator MainCoroutine()
 	{
-		Debug.Log(this + " starts MainCoroutine");
+		if(debugMode > 0) Debug.Log(this + " starts MainCoroutine");
 		
 		while (true)
 		{
@@ -361,13 +365,13 @@ public class GameTurnManager : MonoBehaviour
 	private IEnumerator SpawnParty()
 	{
 		var playerStart = PlayerStart.GetPlayerStarts().FirstOrDefault();
-		Debug.Log(this + " SpawnParty playerStart=" + playerStart);
+		if(debugMode > 0) Debug.Log(this + " SpawnParty playerStart=" + playerStart);
 		yield return StartCoroutine(playerStart.SpawnParty());
 	}
 
 	private IEnumerator TurnBasedCoroutine()
 	{
-		Debug.Log(this + " Enters TurnBasedCoroutine");
+		if(debugMode > 0) Debug.Log(this + " Enters TurnBasedCoroutine");
 		onTurnBasedChanged?.Invoke(true);
 		
 		currentTurn = 0;
@@ -414,7 +418,7 @@ public class GameTurnManager : MonoBehaviour
 					if (turnBasedMode && ShouldExitTurnBased())
 					{
 						turnBasedMode = false;
-						Debug.Log(this + " Switch To RealTime");
+						if(debugMode > 0) Debug.Log(this + " Switch To RealTime");
 						yield break;
 					}
 					
@@ -470,7 +474,7 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator RealTimeCoroutine()
 	{
-		Debug.Log(this + " Enters RealTimeCoroutine");
+		if(debugMode > 0) Debug.Log(this + " Enters RealTimeCoroutine");
 		onTurnBasedChanged?.Invoke(false);
 
 		currentTurn = 0;
@@ -507,7 +511,7 @@ public class GameTurnManager : MonoBehaviour
 			if (!turnBasedMode && (leaveTurnBased || IsAnyEnemyAroundCheck()))
 			{
 				turnBasedMode = true;
-				Debug.Log(this + " Switch Turn Based Mode");
+				if(debugMode > 0) Debug.Log(this + " Switch Turn Based Mode");
 			}
 			
 			yield return WaitNavigationDirty();

@@ -324,6 +324,8 @@ public class GameSave : ScriptableObject
 			Debug.LogWarning(this + " LoadGame works only in play mode!");
 			return;
 		}
+		
+		if(debugMode > 0) Debug.Log(this + " LoadGame fromFile=" + fromFile);
 
 		if (fromFile)
 		{
@@ -359,6 +361,8 @@ public class GameSave : ScriptableObject
 			{
 				continue;
 			}
+			
+			if(debugMode > 0) Debug.Log(this + " Load savedLevel=" + savedLevel);
 			
 			foreach (var savedInv in savedLevel.savedInventories)
 			{
