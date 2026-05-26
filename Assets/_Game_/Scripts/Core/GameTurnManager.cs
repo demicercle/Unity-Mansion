@@ -160,6 +160,8 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator LoadLevel(int levelIndex, int playerStartIndex)
 	{
+		if(debugMode > 0) Debug.Log(this + " LoadLevel " + levelIndex + " " + playerStartIndex);
+		
 		StopCoroutine("MainCoroutine");
 		onLoadingGame?.Invoke(true);
 		isLoading = true;
@@ -194,8 +196,6 @@ public class GameTurnManager : MonoBehaviour
 		cameraPivot.SetRotation(playerStart.GetFocusRotation());
 		yield return null;
 		
-		yield return StartCoroutine(SaveGame());
-		
 		isLoading = false;
 		onLoadingGame?.Invoke(false);
 		onSceneLoaded?.Invoke();
@@ -207,17 +207,15 @@ public class GameTurnManager : MonoBehaviour
 
 	private IEnumerator LoadLevel(LevelData newLevel)
 	{
-		Debug.Log(this + " LoadLevel " + newLevel);
+		if(debugMode > 0) Debug.Log(this + " LoadLevel " + newLevel);
 
 		if (currentLevelData)
 		{
-			yield return StartCoroutine(SaveGame());
-			
 			foreach (var sceneToUnload in currentLevelData.scenesToLoad)
 			{
 				if (!newLevel.scenesToLoad.Contains(sceneToUnload) && SceneManager.GetSceneByName(sceneToUnload).isLoaded)
 				{
-					Debug.Log(this + " UnloadSceneAsync " + sceneToUnload);
+					if(debugMode > 0) Debug.Log(this + " UnloadSceneAsync " + sceneToUnload);
 					yield return SceneManager.UnloadSceneAsync(sceneToUnload);
 				}
 			}
@@ -231,7 +229,7 @@ public class GameTurnManager : MonoBehaviour
 			{
 				if (!SceneManager.GetSceneByName(sceneToLoad).isLoaded)
 				{
-					Debug.Log(this + " LoadSceneAsync " + sceneToLoad);
+					if(debugMode > 0) Debug.Log(this + " LoadSceneAsync " + sceneToLoad);
 					yield return SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
 				}
 			}
@@ -251,7 +249,7 @@ public class GameTurnManager : MonoBehaviour
 				.OrderBy(c => c.transform.GetSiblingIndex())
 				.ToArray();
 		
-			Debug.Log(this + " init level " + currentLevel + " found levelCharacters=" + levelCharacters.Length);
+			if(debugMode > 0) Debug.Log(this + " init level " + currentLevel + " found levelCharacters=" + levelCharacters.Length);
 		
 			foreach (var character in levelCharacters)
 			{
