@@ -453,3 +453,129 @@ public static class NavUtils
 		return false;
 	}
 }
+public static class PhysicsUtils
+{
+	private const float CalculateLinearForceMultiplier = 10.0f;
+	
+	/// <summary>
+    /// Applique une force linéaire ET une force angulaire à un Rigidbody à partir d'un point d'impact.
+    /// </summary>
+    /// <param name="rb">Le Rigidbody à affecter.</param>
+    /// <param name="impactPoint">Le point d'impact en coordonnées monde.</param>
+    /// <param name="linearForce">La force linéaire à appliquer. Si Vector3.zero, elle sera calculée automatiquement.</param>
+    /// <param name="angularForce">La force angulaire (couple) à appliquer. Si Vector3.zero, elle sera calculée automatiquement.</param>
+    /// <param name="forceMode">Le mode d'application de la force.</param>
+    public static void ApplyForceAtPoint(
+        Rigidbody rb,
+        Vector3 impactPoint,
+        Vector3 linearForce = default,
+        Vector3 angularForce = default,
+        ForceMode forceMode = ForceMode.Impulse)
+    {
+        if (rb == null)
+        {
+            Debug.LogError("Rigidbody is null!");
+            return;
+        }
+
+        // Si linearForce n'est pas spécifiée, utilise la version automatique
+        if (linearForce == Vector3.zero)
+        {
+            linearForce = CalculateLinearForce(rb, impactPoint);
+        }
+
+        // Applique la force linéaire
+        rb.AddForceAtPosition(linearForce, impactPoint, forceMode);
+
+        // Si angularForce n'est pas spécifiée, calcule-la automatiquement
+        if (angularForce == Vector3.zero)
+        {
+            angularForce = CalculateAngularForce(rb, impactPoint, linearForce);
+        }
+
+        // Applique la force angulaire
+        rb.AddTorque(angularForce, forceMode);
+    }
+
+    /// <summary>
+    /// Calcule automatiquement la force linéaire à partir du point d'impact.
+    /// Utilise la direction depuis le centre de masse vers le point d'impact.
+    /// </summary>
+    private static Vector3 CalculateLinearForce(Rigidbody rb, Vector3 impactPoint)
+    {
+        // Direction depuis le centre de masse vers le point d'impact
+        Vector3 direction = (impactPoint - rb.worldCenterOfMass).normalized;
+
+        // Intensité proportionnelle à la masse (pour un effet réaliste)
+        float intensity = rb.mass * CalculateLinearForceMultiplier; // Ajuste le multiplicateur (10f) selon tes besoins
+
+        return direction * intensity;
+    }
+
+    /// <summary>
+    /// Calcule automatiquement la force angulaire (couple) à partir du point d'impact et de la force linéaire.
+    /// Utilise le produit vectoriel : Torque = r × F
+    /// </summary>
+    private static Vector3 CalculateAngularForce(Rigidbody rb, Vector3 impactPoint, Vector3 linearForce)
+    {
+        // Vecteur depuis le centre de masse vers le point d'impact
+        Vector3 r = impactPoint - rb.worldCenterOfMass;
+
+        // Calcule le couple : Torque = r × F
+        return Vector3.Cross(r, linearForce);
+    }
+
+    // ------------------------------------------------------------------------
+    // Override pour les collisions (avec vitesse relative)
+    // ------------------------------------------------------------------------
+
+    /// <summary>
+    /// Applique une force à partir d'une collision, en calculant automatiquement
+    /// linearForce et angularForce à partir de la vitesse relative et du point d'impact.
+    /// </summary>
+    /// <param name="rb">Le Rigidbody à affecter.</param>
+    /// <param name="collision">Les données de collision (depuis OnCollisionEnter).</param>
+    /// <param name="forceMode">Le mode d'application de la force.</param>
+    public static void ApplyForceAtPoint(
+        Rigidbody rb,
+        Collision collision,
+        ForceMode forceMode = ForceMode.Impulse)
+    {
+        if (rb == null || collision == null)
+        {
+            Debug.LogError("Rigidbody or Collision is null!");
+            return;
+        }
+
+        // Récupère le premier point de contact
+        ContactPoint contact = collision.contacts[0];
+        Vector3 impactPoint = contact.point;
+        Vector3 normal = contact.normal;
+
+        // Calcule la force linéaire à partir de la vitesse relative et de la normale
+        Vector3 linearForce = CalculateLinearForceFromCollision(rb, collision, normal);
+
+        // Calcule la force angulaire automatiquement
+        Vector3 angularForce = CalculateAngularForce(rb, impactPoint, linearForce);
+
+        // Applique les forces
+        ApplyForceAtPoint(rb, impactPoint, linearForce, angularForce, forceMode);
+    }
+
+    /// <summary>
+    /// Calcule la force linéaire à partir d'une collision, en tenant compte de la vitesse relative.
+    /// </summary>
+    private static Vector3 CalculateLinearForceFromCollision(Rigidbody rb, Collision collision, Vector3 normal)
+    {
+        // Vitesse relative entre les deux objets en collision
+        Vector3 relativeVelocity = collision.relativeVelocity;
+
+        // Intensité proportionnelle à la vitesse relative et à la masse
+        float intensity = relativeVelocity.magnitude * rb.mass;
+
+        // Direction : opposée à la normale (pour un rebond réaliste)
+        Vector3 direction = -normal;
+
+        return direction * intensity;
+    }
+}

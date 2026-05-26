@@ -63,11 +63,16 @@ public class Destructible : MonoBehaviour, IAttackable
 		
 		if (damageAmount >= maxHealth)
 		{
-			Break();
+			if (instigator is Component)
+				BreakFrom((instigator as Component).transform.position);
+			else
+				Break();
 		}
 	}
 
-	public void Break()
+	public void Break() => BreakFrom(collider.bounds.center);
+	
+	public void BreakFrom(Vector3 fromPoint)
 	{
 		if (isBroken) return;
 		isBroken = true;
@@ -88,6 +93,7 @@ public class Destructible : MonoBehaviour, IAttackable
 			if (!rb) continue;
 			rb.isKinematic = false;
 			rb.useGravity = true;
+			PhysicsUtils.ApplyForceAtPoint(rb, fromPoint);
 			//rb.angularVelocity = new Vector3(0, Mathf.PI, 0);
 		}
 			
