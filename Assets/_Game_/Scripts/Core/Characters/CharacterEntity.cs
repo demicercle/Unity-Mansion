@@ -653,7 +653,7 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	{
 		dir.y = 0;
 		dir.Normalize();
-		return dir.sqrMagnitude > Consts.MinMagnitude && Vector3.Dot(dir, transform.forward) >= MinFacingDot;
+		return dir.magnitude < Consts.MinMagnitude || Vector3.Dot(dir, transform.forward) >= MinFacingDot;
 	}
 	
 	public Vector3 GetDirection() => transform.forward;
