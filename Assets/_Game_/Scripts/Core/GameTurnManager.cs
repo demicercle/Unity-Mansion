@@ -22,7 +22,7 @@ public class GameTurnManager : MonoBehaviour
 	[Header("Camera")]
 	[SerializeField] [Range(0f,1f)] private float cameraStartZoom = .5f;
 	[SerializeField] private bool focusWhenCharacterUseAction = true;
-	[SerializeField] private bool focusWhenCharacterMoves = true;
+//	[SerializeField] private bool focusWhenCharacterMoves = true;
 	[Space]
 	[Header("Game Rules")]
 	[SerializeField] private bool rollDiceWhenTurnStarts = true;
@@ -440,7 +440,7 @@ public class GameTurnManager : MonoBehaviour
 				
 				otherCharacter.Rest(); // rest not player character
 				
-				cameraPivot.Focus(otherCharacter);
+				cameraPivot.StartFollow(otherCharacter.transform);
 				yield return new WaitForSeconds(focusCharacterSeconds);
 
 				if (!otherCharacter.TryGetComponent(out CharacterBrain otherBrain))
@@ -711,10 +711,10 @@ public class GameTurnManager : MonoBehaviour
 
 	private void OnAnyCharacterMoved(CharacterEntity character)
 	{
-		if (IsTurnBasedMode() && focusWhenCharacterMoves && !cameraPivot.MovedFromInput() && character == currentAICharacter)
+		/*if (IsTurnBasedMode() && focusWhenCharacterMoves && !cameraPivot.MovedFromInput() && character == currentAICharacter)
 		{
 			cameraPivot.Focus(character);
-		}
+		}*/
 	}
 
 	private void OnAnyCharacterDead(CharacterEntity character)

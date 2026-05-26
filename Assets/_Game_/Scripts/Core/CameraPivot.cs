@@ -134,8 +134,6 @@ public class CameraPivot : MonoBehaviour
     
     #region PUBLIC
 
-    public bool MovedFromInput() => movedFromInput;
-
     public void SetRotation(int cameraRotation)
     {
         currentYaw = desiredYaw = cameraRotation;
@@ -158,6 +156,11 @@ public class CameraPivot : MonoBehaviour
         if(updatePosition) UpdatePosition();
     }
 
+    public void StartFollow(Transform target)
+    {
+        followTransform = target;
+    }
+
     public void Focus(UnityEngine.Object go)
     {
         if(go is Component) Focus(((Component)go).transform.position);
@@ -169,6 +172,7 @@ public class CameraPivot : MonoBehaviour
     {
         focusPosition = world;
         lastTimeFocused = Time.realtimeSinceStartup;
+        followTransform = null;
     }
 
     public void MoveFromInput(Vector2 readValue)
@@ -177,7 +181,7 @@ public class CameraPivot : MonoBehaviour
         world = Quaternion.Euler(0, desiredYaw, 0) * world;
         focusPosition.x += world.x * inputSpeed;
         focusPosition.z += world.z * inputSpeed;
-        movedFromInput = true;
+        followTransform = null;
     }
 
     public void Zoom(float delta)
@@ -253,7 +257,7 @@ public class CameraPivot : MonoBehaviour
         {
             //Debug.Log(this + " " + mousePosition + " " + screen + " " + motion);
             focusPosition += Quaternion.Euler(0, desiredYaw, 0) * motion * panSpeed * scale;
-            movedFromInput = true;
+            followTransform = null;
             return true;
         }
 
@@ -277,7 +281,7 @@ public class CameraPivot : MonoBehaviour
     private Vector3 currentPosition;
     private Vector2 orbitScale;
     private CameraSettings _cameraSettings;
-    private bool movedFromInput;
+    private Transform followTransform;
 
     private void Awake()
     {
@@ -295,7 +299,6 @@ public class CameraPivot : MonoBehaviour
     {
         UpdatePosition();
         UpdateFog();
-        movedFromInput = false;
     }
     
     private void FixedUpdate()
@@ -348,6 +351,11 @@ public class CameraPivot : MonoBehaviour
             focusTransform = null;
         }
 #endif
+
+        if (followTransform)
+        {
+            focusPosition = followTransform.position;
+        }
         
         focusPosition = worldBounds.ClosestPoint(focusPosition);
 
