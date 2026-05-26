@@ -104,7 +104,10 @@ public class PropComponent : MonoBehaviour
 
 		if (TryGetComponent(out Inventory selfInventory) && characterInstigator.TryGetComponent(out Inventory otherInventory))
 		{
-			selfInventory.TransfertTo(otherInventory);
+			if (!selfInventory.TransfertTo(otherInventory)) // pickup item
+			{
+				characterInstigator.FloatingText(LanguageSettings.Main.Full);
+			}
 		}
 		
 		onInteracted?.Invoke();

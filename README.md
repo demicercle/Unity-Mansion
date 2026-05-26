@@ -13,6 +13,7 @@ REFACTO
 - wood break SFX
 - check how path is calculated when mouse overing a zombi
 - display item name when mouse over loot
+- display "inventory full" feedback
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"

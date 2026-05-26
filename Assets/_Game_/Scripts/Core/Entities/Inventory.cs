@@ -249,7 +249,7 @@ public class Inventory : MonoBehaviour
 		return false;
 	}
 	
-	public void TransfertTo(Inventory otherInventory)
+	public bool TransfertTo(Inventory otherInventory)
 	{
 		for (int i = 0; i < items.Count; i++)
 		{
@@ -257,8 +257,8 @@ public class Inventory : MonoBehaviour
 			{
 				if (!otherInventory.TryAddItem(items[i]))
 				{
-					Debug.LogWarning(this + " inventory full " + otherInventory);
-					return;
+					//Debug.LogWarning(this + " inventory full " + otherInventory);
+					return false;
 				}
 						
 				if(debugMode > 0) Debug.Log(this + " onAnyItemTransfered " + this + " " + otherInventory + " " + items[i]);
@@ -266,6 +266,8 @@ public class Inventory : MonoBehaviour
 				items[i] = null; // remove from this inventory
 			}
 		}
+
+		return true;
 	}
 	
 	public bool TryGetItem(int index, out ItemData item)
