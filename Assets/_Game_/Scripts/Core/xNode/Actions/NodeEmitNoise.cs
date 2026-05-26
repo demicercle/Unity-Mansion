@@ -4,8 +4,8 @@
 public class NodeEmitNoise : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public GameObject _target;
-	[Input] public GameObject _instigator;
+	[Input] public ObjectReference _target;
+	[Input] public ObjectReference _instigator;
 	
 	public int rayCount = 16;
 	public float rayLength = 6.0f;
@@ -16,11 +16,11 @@ public class NodeEmitNoise : GameNode
 		base.OnScriptStart();
 		_in.InitInput(this, "_in", () =>
 		{
-			_target = GetInputValue("_target", Script.gameObject);
+			_target = GetInputValue("_target", new ObjectReference(Script.gameObject));
 			if (!_target.TryGetComponent(out Transform transform))
 				DebugLogWarning("No position found");
 			
-			_instigator = GetInputValue("_instigator",  Script.gameObject);
+			_instigator = GetInputValue("_instigator", new ObjectReference(Script.gameObject));
 			if (!_instigator.TryGetComponent(out CharacterEntity characterInstigator))
 				DebugLogWarning("No instigator found");
 			

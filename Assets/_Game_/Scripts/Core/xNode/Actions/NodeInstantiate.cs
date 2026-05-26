@@ -4,7 +4,7 @@
 public class NodeInstantiate : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public GameObject _target;
+	[Input] public ObjectReference _target;
 
 	public GameObject prefab;
 	public bool ignoreRotation;
@@ -21,8 +21,8 @@ public class NodeInstantiate : GameNode
 				return;
 			}
 
-			_target = GetInputValue("_target", Script.gameObject);
-			if (!_target)
+			_target = GetInputValue("_target", new ObjectReference(Script.gameObject));
+			if (!_target.gameObject)
 			{
 				DebugLogWarning("no valid position setup");
 				return;

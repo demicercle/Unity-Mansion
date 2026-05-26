@@ -5,8 +5,8 @@ using XNode;
 public class NodeInteract : GameNode/*, ISceneLoaded*/
 {
 	[Input] public NodeExec _in;
-	[Input] public GameObject _prop;
-	[Input] public GameObject _instigator;
+	[Input] public ObjectReference _prop;
+	[Input] public ObjectReference _instigator;
 	
 	public override object GetValue(NodePort port)
 	{
@@ -19,10 +19,10 @@ public class NodeInteract : GameNode/*, ISceneLoaded*/
 		base.OnScriptStart();
 		_in.InitInput(this, "_in", () =>
 		{
-			_prop = GetInputValue("_prop", Script.gameObject);
+			_prop = GetInputValue("_prop", new ObjectReference(Script.gameObject));
 			if (_prop.TryGetComponent(out PropComponent prop))
 			{
-				_instigator = GetInputValue("_instigator", Script.gameObject);
+				_instigator = GetInputValue("_instigator", new ObjectReference(Script.gameObject));
 				
 				if (_instigator.TryGetComponent(out CharacterEntity character))
 					prop.InteractedBy(character);

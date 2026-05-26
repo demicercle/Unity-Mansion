@@ -4,7 +4,7 @@
 public class NodeHeal : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public GameObject _character;
+	[Input] public ObjectReference _character;
 	[Input] public float _amount;
 
 	protected override void OnScriptStart()
@@ -14,7 +14,7 @@ public class NodeHeal : GameNode
 		_in.InitInput(this, "_in", () =>
 		{
 			_amount = GetInputValue("_amount", _amount);
-			_character = GetInputValue("_character", Script.gameObject);
+			_character = GetInputValue("_character", new ObjectReference(Script.gameObject));
 			
 			if (_character.TryGetComponent(out CharacterEntity character))
 			{

@@ -9,7 +9,7 @@ public class NodeFloatingText : GameNode
 {
 	//[Output] public NodeExec _out;
 	[Input] public NodeExec _in;
-	[Input] public GameObject _character;
+	[Input] public ObjectReference _character;
 	[Input] public LocalizedText message;
 
 	[ContextMenu("Parse")]
@@ -40,7 +40,7 @@ public class NodeFloatingText : GameNode
 
 	private void OnCallback()
 	{
-		_character = GetInputValue("_character", Script.gameObject);
+		_character = GetInputValue("_character", new ObjectReference(Script.gameObject));
 		if (_character.TryGetComponent(out CharacterEntity character))
 		{
 			character.FloatingText(GetInputValue("message", message).GetValue(DialogFiles.script));

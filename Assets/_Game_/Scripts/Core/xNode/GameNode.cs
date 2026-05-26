@@ -95,3 +95,21 @@ public class NodeExec
 
 	private static NodeExec otherExec;
 }
+
+[System.Serializable]
+public struct ObjectReference
+{
+	public GameObject gameObject { get; set; }
+	public Transform transform => gameObject?.transform;
+
+	public ObjectReference(GameObject go = null)
+	{
+		gameObject = go;
+	}
+
+	public bool TryGetComponent<T>(out T outComponent) where T:Component
+	{
+		outComponent = null;
+		return gameObject && gameObject.TryGetComponent(out outComponent);
+	}
+}

@@ -230,6 +230,7 @@ public class ConsoleCommands : MonoBehaviour
 		}
 		
 		itemData = itemData.Duplicate();
+		itemData.SetMaxQuantity();
 
 		if (!inventory.TryAddItem(itemData))
 		{

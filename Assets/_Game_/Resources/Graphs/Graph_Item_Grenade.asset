@@ -122,7 +122,7 @@ MonoBehaviour:
   ports:
     keys:
     - _in
-    - _position
+    - _target
     - _instigator
     values:
     - _fieldName: _in
@@ -137,9 +137,9 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _position
+    - _fieldName: _target
       _node: {fileID: -4867216251651297726}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      _typeQualifiedName: ObjectReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections: []
       _direction: 0
@@ -148,7 +148,7 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _instigator
       _node: {fileID: -4867216251651297726}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      _typeQualifiedName: ObjectReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
       - fieldName: _out
@@ -174,7 +174,7 @@ MonoBehaviour:
   m_Name: Launch Dices
   m_EditorClassIdentifier: Assembly-CSharp::NodeLaunchDices
   graph: {fileID: 11400000}
-  position: {x: -424, y: -40}
+  position: {x: -424, y: -8}
   ports:
     keys:
     - _count
@@ -252,7 +252,7 @@ MonoBehaviour:
   ports:
     keys:
     - _in
-    - _position
+    - _target
     values:
     - _fieldName: _in
       _node: {fileID: 337713039080081053}
@@ -266,9 +266,9 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _position
+    - _fieldName: _target
       _node: {fileID: 337713039080081053}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      _typeQualifiedName: ObjectReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections: []
       _direction: 0
@@ -297,7 +297,7 @@ MonoBehaviour:
     values:
     - _fieldName: _out
       _node: {fileID: 2846710604673029695}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      _typeQualifiedName: ObjectReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
       - fieldName: _instigator
@@ -327,7 +327,7 @@ MonoBehaviour:
   ports:
     keys:
     - _in
-    - _position
+    - _target
     - _damage
     - _radius
     - _instigator
@@ -344,9 +344,9 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-    - _fieldName: _position
+    - _fieldName: _target
       _node: {fileID: 4832534939016810699}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      _typeQualifiedName: ObjectReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections: []
       _direction: 0
@@ -376,7 +376,7 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: _instigator
       _node: {fileID: 4832534939016810699}
-      _typeQualifiedName: SceneReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      _typeQualifiedName: ObjectReference, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       connections:
       - fieldName: _out

@@ -5,8 +5,8 @@ using UnityEngine;
 public class NodeApplyDamageRadius : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public GameObject _target;
-	[Input] public GameObject _instigator;
+	[Input] public ObjectReference _target;
+	[Input] public ObjectReference _instigator;
 	[Input] public float _damage;
 	[Input] public float _radius;
 	
@@ -23,8 +23,8 @@ public class NodeApplyDamageRadius : GameNode
 			_radius = GetInputValue("_radius", _radius);
 			_instigator = GetInputValue("_instigator", _instigator);
 			
-			_target = GetInputValue("_target", Script.gameObject);
-			if (!_target)
+			_target = GetInputValue("_target", new ObjectReference(Script.gameObject));
+			if (!_target.gameObject)
 			{
 				DebugLogWarning("invalid target");
 				return;

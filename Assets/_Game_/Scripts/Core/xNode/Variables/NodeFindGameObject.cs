@@ -6,7 +6,7 @@ using XNode;
 public class NodeFindGameObject : GameNode
 {
 	[Input] public string findName;
-	[Output] public GameObject _out;
+	[Output] public ObjectReference _out;
 	
 	#if UNITY_EDITOR
 	[ContextMenu("Find in editor")]
@@ -29,13 +29,13 @@ public class NodeFindGameObject : GameNode
 	{
 		if (port.fieldName == "_out")
 		{
-			if (!_out)
+			if (!_out.gameObject)
 			{
 				findName = GetInputValue("findName", findName);
-				_out = GameObject.Find(findName);
+				_out = new ObjectReference(GameObject.Find(findName));
 			}
 
-			if (!_out)
+			if (!_out.gameObject)
 			{
 				Debug.LogError(this + " cannot find GameObject " + findName);
 			}

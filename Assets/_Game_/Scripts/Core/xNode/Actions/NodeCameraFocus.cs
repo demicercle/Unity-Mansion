@@ -4,7 +4,7 @@
 public class NodeCameraFocus : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public GameObject _target;
+	[Input] public ObjectReference _target;
 
 	protected override void OnScriptStart()
 	{

@@ -5,7 +5,7 @@ using XNode;
 public class NodeGiveItem : GameNode
 {
 	[Input] public NodeExec _in;
-	[Input] public GameObject _character;
+	[Input] public ObjectReference _character;
 	
 	public ItemData itemData;
 
@@ -25,7 +25,7 @@ public class NodeGiveItem : GameNode
 		//_in = GetInputValue("_in", _in);
 		_in.InitInput(this, "_in", () =>
 		{
-			_character = GetInputValue("_character",  Script.gameObject);
+			_character = GetInputValue("_character", new ObjectReference(Script.gameObject));
 			if (_character.TryGetComponent(out Inventory inv))
 			{
 				if (inv.TryAddItem(itemData))
