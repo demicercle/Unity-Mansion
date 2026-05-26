@@ -9,7 +9,7 @@ public class LevelTransition : MonoBehaviour
 	[SerializeField] private int levelIndex;
 	[SerializeField] private int waypointIndex;
 
-	public void TryTravel()
+	public bool TryTravel()
 	{
 		if (characterDistance > 0f)
 		{
@@ -17,12 +17,13 @@ public class LevelTransition : MonoBehaviour
 			{
 				Debug.Log(this + " PartyTravel YouMustGatherYourParty");
 				GameLog.Instance.AppendLine(LanguageSettings.Main.YouMustGatherYourParty);
-				return;
+				return false;
 			}
 		}
 			
 		Debug.Log(this + " PartyTravel " + levelIndex + " " + waypointIndex);
 		GameTurnManager.Instance.PartyTravel(levelIndex,waypointIndex);
+		return true;
 	}
 
 	private void Awake()

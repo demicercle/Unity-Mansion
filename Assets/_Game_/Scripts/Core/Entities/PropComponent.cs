@@ -109,6 +109,14 @@ public class PropComponent : MonoBehaviour
 				characterInstigator.FloatingText(LanguageSettings.Main.Full);
 			}
 		}
+
+		if (TryGetComponent(out LevelTransition levelTransition))
+		{
+			if (!levelTransition.TryTravel()) // travel
+			{
+				characterInstigator.FloatingText_Cant();
+			}
+		}
 		
 		onInteracted?.Invoke();
 		onInteractedBy?.Invoke(characterInstigator);
