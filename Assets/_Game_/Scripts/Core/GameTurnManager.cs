@@ -190,6 +190,8 @@ public class GameTurnManager : MonoBehaviour
 		
 		var playerStart = PlayerStart.GetPlayerStart(playerStartIndex);
 		playerStart.TeleportParty();
+		cameraPivot.Focus(playerStart.GetFocusPosition());
+		cameraPivot.SetRotation(playerStart.GetFocusRotation());
 		yield return null;
 		
 		yield return StartCoroutine(SaveGame());

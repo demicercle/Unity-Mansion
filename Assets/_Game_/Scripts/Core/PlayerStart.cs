@@ -20,6 +20,9 @@ public class PlayerStart : MonoBehaviour
 
 	private LevelComponent parentLevel;
 
+	public Vector3 GetFocusPosition() => transform.position;
+	public int GetFocusRotation() => (int)transform.eulerAngles.y;
+
 	public void TeleportParty() => TeleportParty(CharacterEntity.GetPartyCharacters());
 	public void TeleportParty(CharacterEntity[] partyChars)
 	{
@@ -60,5 +63,11 @@ public class PlayerStart : MonoBehaviour
 	private void OnDestroy()
 	{
 		instances.Remove(this);
+	}
+
+	private void OnDrawGizmos()
+	{
+		Gizmos.color = Color.blue;
+		Utils.DrawGizmosArrow(transform.position, transform.forward);
 	}
 }

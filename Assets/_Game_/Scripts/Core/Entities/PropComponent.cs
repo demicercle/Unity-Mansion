@@ -63,8 +63,12 @@ public class PropComponent : MonoBehaviour
 	
 	public void SetInteractionCount(int newCount)
 	{
+		if(debugMode > 0) Debug.Log(this + " SetInteractionCount " + newCount);
 		interactionCount = newCount;
 		TriggerAnimators(interactionCount % 2 != 0);
+		
+		onInteracted?.Invoke();
+		_interacted?.Invoke(); //TODO in Unity
 		
 		if (onlyOnce && interactionCount > 0)
 		{

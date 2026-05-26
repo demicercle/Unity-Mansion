@@ -31,7 +31,6 @@ public class LevelTransition : MonoBehaviour
 		if (prop)
 		{
 			prop.onInteracted += OnPropInteracted;
-			gameObject.SetActive(false);
 		}
 	}
 
@@ -43,8 +42,13 @@ public class LevelTransition : MonoBehaviour
 		}
 	}
 
+	private void Start()
+	{
+		OnPropInteracted();
+	}
+
 	private void OnPropInteracted()
 	{
-		gameObject.SetActive(!gameObject.activeSelf);
+		gameObject.SetActive(prop && prop.IsOpened());
 	}
 }
