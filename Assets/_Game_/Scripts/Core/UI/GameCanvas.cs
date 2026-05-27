@@ -224,8 +224,6 @@ public class GameCanvas : MonoBehaviour
 																	&& (selectedCharacter.IsEnemyTo(targetCharacter) 
 																	    || (selectedCharacter.IsAiming() && selectedCharacter.WillHit(targetCharacter.gameObject))))
 			{
-				cursorText.transform.position = gameInput.GetMousePosition();
-				cursorText.raycastTarget = false;
 				calculatedHitChance = 20 - Mathf.Clamp(selectedCharacter.CalculateHitChance(targetCharacter), 1, 20);
 				willHit = (DicePool.LastResult > 1 && calculatedHitChance < DicePool.LastResult) || DicePool.LastResult >= 20;
 				hitBlocked = selectedCharacter.IsUsingRangeWeapon() && !selectedCharacter.LOSCheck(targetCharacter);
@@ -272,6 +270,21 @@ public class GameCanvas : MonoBehaviour
 				
 				cursorText.gameObject.SetActive(true);
 			}
+		}
+
+		if (GameInput.Instance.TryGetMouseOver(out PropComponent overProp) && overProp.TryGetComponent(out Inventory overInventory))
+		{
+			if (overInventory.TryGetItem(0, out var itemData))
+			{
+				cursorText.gameObject.SetActive(true);
+				cursorText.text = StringUtils.Bold(itemData.GetDisplayName());
+			}
+		}
+
+		if (cursorText.gameObject.activeSelf)
+		{
+			cursorText.transform.position = gameInput.GetMousePosition();
+			cursorText.raycastTarget = false;
 		}
 	}
 

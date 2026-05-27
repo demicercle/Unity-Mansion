@@ -12,9 +12,6 @@ REFACTO
 - tweak (again) range weapon atk modifier
 - wood break SFX
 - check how path is calculated when mouse overing a zombi
-- display item name when mouse over loot
-- destroyed door are not saved
-- opened door are not saved (when travelling back and forth)
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
