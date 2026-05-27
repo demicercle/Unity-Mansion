@@ -263,6 +263,8 @@ public class GameTurnManager : MonoBehaviour
 			currentLevelComponent.Init(levelCharacters);
 			
 			yield return StartCoroutine(LoadGame());
+
+			currentLevelComponent.UpdateBounds();
 		}
 	}
 

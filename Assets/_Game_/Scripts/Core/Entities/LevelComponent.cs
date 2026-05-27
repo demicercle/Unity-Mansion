@@ -24,7 +24,7 @@ public class LevelComponent : MonoBehaviour
 	}
 
 	[ContextMenu("Update Bounds")]
-	private void UpdateBounds()
+	public void UpdateBounds()
 	{
 		var cameraPivot = CameraPivot.Instance;
 		if (!cameraPivot) cameraPivot = Utils.FindFirstObject<CameraPivot>();
@@ -50,8 +50,6 @@ public class LevelComponent : MonoBehaviour
 	
 	public void Init(CharacterEntity[] levelCharacters)
 	{
-		UpdateBounds();
-		
 		if (enemySpreadHP > 0)
 		{
 			var rng = new System.Random(GameSave.Current.gameSeed);
