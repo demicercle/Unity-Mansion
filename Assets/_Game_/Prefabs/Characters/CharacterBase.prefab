@@ -485,6 +485,7 @@ MonoBehaviour:
   rpgAnimationHandler: {fileID: 0}
   switchWeaponExtraTime: 0.5
   waitToRelaxTime: 3
+  itemUsedTime: 1.2
   parameters:
     moving: 
     velocityX: 
@@ -1248,6 +1249,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e65e21edf4364c909eb7047d4a9555b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HideInFog
+  collectEquipment: 1
   character: {fileID: 1077634328985660634}
   transparentFX:
   - {fileID: 4939472226289180237}
