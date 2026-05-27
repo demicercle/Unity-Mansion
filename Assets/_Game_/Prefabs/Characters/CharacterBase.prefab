@@ -500,9 +500,7 @@ MonoBehaviour:
     instantSwitchTrigger: 
     detectEnemyTrigger: 
   eventTypes: 
-  forceRunning: 0
   velocityScale: 1
-  minMovePointsToRun: 0.1
   shouldSwitchWeaponWhenDamaged: 1
   reloadAnimDuration: 2
 --- !u!114 &3789455635990092813
@@ -1250,6 +1248,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HideInFog
   collectEquipment: 1
+  equipments: []
   character: {fileID: 1077634328985660634}
   transparentFX:
   - {fileID: 4939472226289180237}

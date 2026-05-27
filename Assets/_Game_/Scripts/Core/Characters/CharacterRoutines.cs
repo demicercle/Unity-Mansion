@@ -13,6 +13,7 @@ public class CharacterRoutines : MonoBehaviour
 	private const float DefaultWaitSeconds = 1.0f;
 	private const float MinDeltaToMove = 0.01f;
 	private const float MinGiveDistance = 0.15f;
+	private const float PatrolSpeedScale = 0.45f;
 	
 	public static int debugMode { get; set; }
 	public static List<CharacterRoutines> activeInstances = new List<CharacterRoutines>();
@@ -759,7 +760,7 @@ public class CharacterRoutines : MonoBehaviour
 				agent.StartMove();
 			}
 
-			agent.SetSpeed(_selfCharacter.InBattle() || _selfCharacter.InParty() ? 1.0f : 0.5f);
+			agent.SetSpeed(_selfCharacter.InBattle() || _selfCharacter.InParty() ? 1.0f : PatrolSpeedScale);
 
 			while (_selfCharacter.TryGetAnimation(out var anim) && anim.IsSwitchingWeapons)
 			{
