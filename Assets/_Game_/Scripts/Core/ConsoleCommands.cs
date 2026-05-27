@@ -193,6 +193,12 @@ public class ConsoleCommands : MonoBehaviour
 		ResetGame();
 	}
 
+	[ConsoleMethod("travel_save", "")]
+	public static void TravelSave(int value)
+	{
+		Debug.Log("travel_save=" + (LevelTransition.noSave = value == 0));
+	}
+
 	[ConsoleMethod("open_save_folder", "")]
 	public static void OpenSaveFolder()
 	{
@@ -269,9 +275,9 @@ public class ConsoleCommands : MonoBehaviour
 	}
 
 	[ConsoleMethod("party_travel", "")]
-	public static void PartyTravel(int level, int playerStart = 0)
+	public static void PartyTravel(int level, int playerStart = 0, int saveToFile = 0)
 	{
-		GameTurnManager.Instance.PartyTravel(level, playerStart);
+		GameTurnManager.Instance.PartyTravel(level, playerStart, saveToFile > 0);
 	}
 	
 	#region DEBUG

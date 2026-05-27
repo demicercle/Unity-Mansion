@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class LevelTransition : MonoBehaviour
 {
+	public static bool noSave { get; set; }
+	
 	[SerializeField] private PropComponent prop;
 	[SerializeField] private float characterDistance;
 	[SerializeField] private int levelIndex;
@@ -22,7 +24,7 @@ public class LevelTransition : MonoBehaviour
 		}
 			
 		Debug.Log(this + " PartyTravel " + levelIndex + " " + waypointIndex);
-		GameTurnManager.Instance.PartyTravel(levelIndex,waypointIndex);
+		GameTurnManager.Instance.PartyTravel(levelIndex,waypointIndex, !noSave);
 		return true;
 	}
 

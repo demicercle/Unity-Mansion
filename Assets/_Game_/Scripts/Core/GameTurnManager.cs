@@ -110,10 +110,10 @@ public class GameTurnManager : MonoBehaviour
 		return false;
 	}
 
-	public Coroutine PartyTravel(int levelIndex, int playerStartIndex)
+	public Coroutine PartyTravel(int levelIndex, int playerStartIndex, bool saveToFile)
 	{
-		Debug.Log(this + " PartyTravel " + levelIndex + " " + playerStartIndex);
-		return StartCoroutine(LoadLevel(levelIndex, playerStartIndex));
+		Debug.Log(this + " PartyTravel " + levelIndex + " " + playerStartIndex + " saveToFile=" + saveToFile);
+		return StartCoroutine(LoadLevel(levelIndex, playerStartIndex, saveToFile));
 	}
 	
 	#region PRIVATE
@@ -158,9 +158,9 @@ public class GameTurnManager : MonoBehaviour
 		RoomTrigger.onChanged -= OnRoomChanged;
 	}
 
-	private IEnumerator LoadLevel(int levelIndex, int playerStartIndex)
+	private IEnumerator LoadLevel(int levelIndex, int playerStartIndex, bool saveToFile)
 	{
-		if(debugMode > 0) Debug.Log(this + " LoadLevel " + levelIndex + " " + playerStartIndex);
+		if(debugMode > 0) Debug.Log(this + " LoadLevel " + levelIndex + " " + playerStartIndex + " saveToFile=" + saveToFile);
 		
 		StopCoroutine("MainCoroutine");
 		onLoadingGame?.Invoke(true);
@@ -180,7 +180,7 @@ public class GameTurnManager : MonoBehaviour
 		}
 		
 		var levelData = LevelData.GetLevel(levelIndex);
-		yield return StartCoroutine(LoadLevel(levelData));
+		yield return StartCoroutine(LoadLevel(levelData, saveToFile));
 
 		yield return WaitNavigationDirty();
 		yield return null;
@@ -205,13 +205,13 @@ public class GameTurnManager : MonoBehaviour
 		StartCoroutine("MainCoroutine");
 	}
 
-	private IEnumerator LoadLevel(LevelData newLevel)
+	private IEnumerator LoadLevel(LevelData newLevel, bool saveToFile)
 	{
-		if(debugMode > 0) Debug.Log(this + " LoadLevel " + newLevel);
+		if(debugMode > 0) Debug.Log(this + " LoadLevel " + newLevel + " saveToFile=" + saveToFile);
 
 		if (currentLevelData)
 		{
-			yield return StartCoroutine(SaveGame());
+			yield return StartCoroutine(SaveGame(saveToFile));
 			
 			foreach (var sceneToUnload in currentLevelData.scenesToLoad)
 			{
@@ -281,7 +281,7 @@ public class GameTurnManager : MonoBehaviour
 		DisableAudio(true);
 		FadeScreen.FadeIn(true);
 
-		yield return StartCoroutine(LoadLevel(LevelData.GetLevel(LevelIndex)));
+		yield return StartCoroutine(LoadLevel(LevelData.GetLevel(LevelIndex), false));
 		
 		do // ensure that everything is properly loaded
 		{
@@ -308,12 +308,12 @@ public class GameTurnManager : MonoBehaviour
 		StartCoroutine("MainCoroutine");
 	}
 
-	private IEnumerator SaveGame()
+	private IEnumerator SaveGame(bool saveToFile)
 	{
-		if(debugMode > 0) Debug.Log(this + " SaveGame");
+		if(debugMode > 0) Debug.Log(this + " SaveGame saveToFile=" + saveToFile);
 		
-		GameSave.Current.SaveGame();
-		yield return new WaitForSeconds(0.3f);
+		GameSave.Current.SaveGame(saveToFile);
+		yield return new WaitForSeconds(1.0f);
 	}
 
 	private IEnumerator LoadGame()
@@ -366,6 +366,8 @@ public class GameTurnManager : MonoBehaviour
 	{
 		var playerStart = PlayerStart.GetPlayerStarts().FirstOrDefault();
 		if(debugMode > 0) Debug.Log(this + " SpawnParty playerStart=" + playerStart);
+		cameraPivot.Focus(playerStart.GetFocusPosition());
+		cameraPivot.SetRotation(playerStart.GetFocusRotation()); 
 		yield return StartCoroutine(playerStart.SpawnParty());
 	}
 
