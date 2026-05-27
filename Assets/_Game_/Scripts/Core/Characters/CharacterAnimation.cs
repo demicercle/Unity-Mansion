@@ -66,9 +66,9 @@ public class CharacterAnimation : MonoBehaviour
 	[SerializeField] private Parameters parameters;
 	[SerializeField] private List<EventType> eventTypes = new List<EventType>();
 	[Space] 
-	[SerializeField] private bool forceRunning = false;
+	//[SerializeField] private bool forceRunning = false;
 	[SerializeField] private float velocityScale = 1.0f;
-	[SerializeField] private float minMovePointsToRun = 0.1f;
+	//[SerializeField] private float minMovePointsToRun = 0.1f;
 	[SerializeField] private bool shouldSwitchWeaponWhenDamaged = true;
 	[SerializeField] private float reloadAnimDuration = 2.0f;
 	
@@ -573,11 +573,11 @@ public class CharacterAnimation : MonoBehaviour
 	{
 		var localVelocity = _selfCharacter.GetVelocity();
 		var isMoving = _selfCharacter.IsMoving();
-		if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
+		/*if (minMovePointsToRun >= 0f && _selfCharacter.HasUsedAction(CharacterAction.Run) && _selfCharacter.HasMovePoints(minMovePointsToRun) && _selfCharacter.IsCurrentTurn())
 		{
 			isMoving = isMoving || forceRunning; // force running
 			localVelocity = Vector3.forward * _selfCharacter.GetAgent().GetMaxSpeed();
-		}
+		}*/
 		TrySetFloat(parameters.velocityX, 0);      
 		TrySetFloat(parameters.velocityZ, localVelocity.magnitude * velocityScale);  
 		TrySetBool(parameters.moving, isMoving);
