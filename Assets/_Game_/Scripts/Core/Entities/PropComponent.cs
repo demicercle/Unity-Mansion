@@ -77,6 +77,9 @@ public class PropComponent : MonoBehaviour
 			onInteracted?.Invoke();
 			_interacted?.Invoke(); //TODO in Unity
 		}
+			
+		if(interactionCount > 0 && TryGetComponent(out Inventory inventory) && inventory.DestroyIfEmpty())
+			inventory.ClearInventory(true);
 		
 		if (onlyOnce && interactionCount > 0)
 		{

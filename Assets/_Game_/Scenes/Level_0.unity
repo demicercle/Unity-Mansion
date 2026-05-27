@@ -339,7 +339,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 334607647094823755, guid: acb0f982c31d653479d68c1323f5d207, type: 3}
       propertyPath: m_Name
-      value: LOOT_Item_Medkit
+      value: LOOT_Item_Medkit_1
       objectReference: {fileID: 0}
     - target: {fileID: 1148157652552319473, guid: acb0f982c31d653479d68c1323f5d207, type: 3}
       propertyPath: m_LocalPosition.x
@@ -732,7 +732,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 334607647094823755, guid: acb0f982c31d653479d68c1323f5d207, type: 3}
       propertyPath: m_Name
-      value: LOOT_Item_Medkit (1)
+      value: LOOT_Item_Medkit_0
       objectReference: {fileID: 0}
     - target: {fileID: 1148157652552319473, guid: acb0f982c31d653479d68c1323f5d207, type: 3}
       propertyPath: m_LocalPosition.x

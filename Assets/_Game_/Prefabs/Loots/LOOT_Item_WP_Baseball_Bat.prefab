@@ -74,7 +74,8 @@ MonoBehaviour:
   cursorType: 10
   consumeAction: 11
   saveProp: 0
-  onlyOnce: 0
+  onlyOnce: 1
+  disableTurnBased: 0
   autoTriggerDelay: 0
   animatorTrigger: 
   triggerDelay: 0

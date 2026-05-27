@@ -49,6 +49,8 @@ public class Inventory : MonoBehaviour
 	[SerializeField] private bool saveInventory;
 	[SerializeField] private bool destroyIfEmpty;
 	[SerializeField] private List<ItemData> items = new List<ItemData>();
+
+	public bool DestroyIfEmpty() => destroyIfEmpty;
 	
 	private bool isLootBag;
 	public ItemData[] GetItems() => items.Where(it => it).ToArray();
