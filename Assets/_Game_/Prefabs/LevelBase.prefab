@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 3993351974707439097}
   - component: {fileID: 3707570885431278476}
   - component: {fileID: 4093696222227633728}
-  - component: {fileID: 8593216416215639958}
   - component: {fileID: 1999162733985184059}
   m_Layer: 0
   m_Name: LevelBase
@@ -178,21 +177,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AstarOptimizer
   maxFrameTimeMS: 24
---- !u!114 &8593216416215639958
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2113469372072591625}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c06a9ca4b754ccd81c335858ffcb176, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
-  scenesToLoad: []
-  loadSceneMode: 1
-  autoLoad: 1
 --- !u!114 &1999162733985184059
 MonoBehaviour:
   m_ObjectHideFlags: 0

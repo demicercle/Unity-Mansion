@@ -209,7 +209,7 @@ public class GameTurnManager : MonoBehaviour
 	{
 		if(debugMode > 0) Debug.Log(this + " LoadLevel " + newLevel + " saveToFile=" + saveToFile);
 
-		if (currentLevelData)
+		if (currentLevelData && currentLevelData != newLevel)
 		{
 			yield return StartCoroutine(SaveGame(saveToFile));
 			
@@ -237,17 +237,16 @@ public class GameTurnManager : MonoBehaviour
 					yield return SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
 				}
 			}
-
-			if (partyCharacters.Length == 0)
-			{
-				yield return StartCoroutine(SpawnParty());
-			}
+			
+			NavmeshRebuilder.SetNavigationDirty();
+			do yield return null;
+			while (NavmeshRebuilder.IsNavigationDirty());
 		
-			yield return null;
 			RoomTrigger.activeRooms.ForEach(r => r.Refresh());
 			yield return null;
-		
+			
 			currentLevelComponent = Utils.FindFirstObject<LevelComponent>();
+			currentLevelComponent.UpdateBounds();
 		
 			levelCharacters = CharacterEntity.AllCharacters
 				.OrderBy(c => c.transform.GetSiblingIndex())
@@ -261,10 +260,13 @@ public class GameTurnManager : MonoBehaviour
 			}
 		
 			currentLevelComponent.Init(levelCharacters);
+
+			if (partyCharacters.Length == 0)
+			{
+				yield return StartCoroutine(SpawnParty());
+			}
 			
 			yield return StartCoroutine(LoadGame());
-
-			currentLevelComponent.UpdateBounds();
 		}
 	}
 
@@ -283,7 +285,16 @@ public class GameTurnManager : MonoBehaviour
 		DisableAudio(true);
 		FadeScreen.FadeIn(true);
 
-		yield return StartCoroutine(LoadLevel(LevelData.GetLevel(LevelIndex), false));
+		currentLevelComponent = Utils.FindFirstObject<LevelComponent>();
+		if (currentLevelComponent)
+		{
+			currentLevelData = currentLevelComponent.GetLevelData();
+			yield return StartCoroutine(LoadLevel(currentLevelData, false));
+		}
+		else
+		{
+			yield return StartCoroutine(LoadLevel(LevelData.GetLevel(LevelIndex), false));
+		}
 		
 		do // ensure that everything is properly loaded
 		{

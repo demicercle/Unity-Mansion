@@ -3,6 +3,7 @@
 #debug_stats 1
 #debug_dices 1
 #debug_camera 1
+
 #debug_gtm 1
 
 #debug_routines 1

@@ -11,12 +11,10 @@ REFACTO
 - retake "initative" rules
 - tweak (again) range weapon atk modifier
 - wood break SFX
-- check how path is calculated when mouse overing a zombi
 
 ANIMS / VFX
 - add anims and VFX/SFX for actions "Run", "Defend"
 - check a "drop on ground" and "pickup loot bag" Animation
-- display setItemToUse with other items than grenades
 
 SAVE
 - 
