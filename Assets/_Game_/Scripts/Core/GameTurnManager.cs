@@ -509,8 +509,9 @@ public class GameTurnManager : MonoBehaviour
 
 		do
 		{
-			foreach (var otherCharacter in levelCharacters)
+			foreach (var otherCharacter in levelCharacters.ToArray())
 			{
+				if (!otherCharacter) break;
 				if (otherCharacter.InParty()) continue;
 				if (otherCharacter.IsDead()) continue;
 				if (otherCharacter.Routines.AnyActive()) continue;
