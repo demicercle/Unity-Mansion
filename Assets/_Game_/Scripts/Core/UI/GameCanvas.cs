@@ -272,7 +272,7 @@ public class GameCanvas : MonoBehaviour
 			}
 		}
 
-		if (GameInput.Instance.TryGetMouseOver(out PropComponent overProp) && overProp.TryGetComponent(out Inventory overInventory))
+		if (GameInput.Instance.TryGetMouseOver(out PropComponent overProp) && overProp.TryGetComponent(out Inventory overInventory) && overInventory.IsLoot())
 		{
 			if (overInventory.TryGetItem(0, out var itemData))
 			{

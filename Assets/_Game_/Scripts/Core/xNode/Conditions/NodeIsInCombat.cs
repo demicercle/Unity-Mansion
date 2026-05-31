@@ -4,7 +4,7 @@ using XNode;
 [Node.CreateNodeMenu("Conditions/Is In Combat")]
 public class NodeIsInCombat : GameNode
 {
-	[Input] public GameObject _character;
+	[Input] public ObjectReference _character;
 
 	[Output] public bool _inCombat;
 
@@ -12,7 +12,7 @@ public class NodeIsInCombat : GameNode
 	{
 		if (port.fieldName == "_inCombat")
 		{
-			_character = GetInputValue("_character", Script.gameObject);
+			_character = GetInputValue("_character", new ObjectReference(Script.gameObject));
 			if (_character.TryGetComponent(out CharacterEntity character))
 			{
 				_inCombat = character.InBattle();

@@ -32,6 +32,10 @@ public class Inventory : MonoBehaviour
 	
 	public string GetName() => name;
 	public bool IsName(string s) => s == name;
+	public bool IsLoot()
+	{
+		return gameObject.layer == Layers.LayerLoot;
+	}
 	
 	public bool Locked { get; set; }
 	

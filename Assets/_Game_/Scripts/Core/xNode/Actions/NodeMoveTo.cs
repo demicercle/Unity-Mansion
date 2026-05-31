@@ -5,8 +5,8 @@ using UnityEngine;
 public class NodeMoveTo : GameNode
 {
 	[Input] public NodeExec _start;
-	[Input] public GameObject _character;
-	[Input] public GameObject _destination;
+	[Input] public ObjectReference _character;
+	[Input] public ObjectReference _destination;
 
 	protected override void OnScriptStart()
 	{
@@ -14,14 +14,14 @@ public class NodeMoveTo : GameNode
 		//_start = GetInputValue("_start", _start);
 		_start.InitInput(this, "_start", () =>
 		{
-			_character = GetInputValue("_character", Script.gameObject);
+			_character = GetInputValue("_character", new ObjectReference(Script.gameObject));
 			if (!_character.TryGetComponent(out CharacterEntity character))
 			{
 				DebugLogWarning("no character found");
 				return;
 			}
 
-			_destination = GetInputValue("_destination", Script.gameObject);
+			_destination = GetInputValue("_destination", new ObjectReference(Script.gameObject));
 			if (_destination.TryGetComponent(out Waypoint waypoint))
 			{
 				DebugLog("Assign move: " + character + " to waypoint: " + waypoint);
