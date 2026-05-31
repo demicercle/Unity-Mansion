@@ -727,7 +727,7 @@ public class GameInput : MonoBehaviour
 
 	// KEY INPUT
 
-	private bool CanUseActionInputs() => gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn();
+	private bool CanUseActionInputs() => gameTurnManager.IsTurnBasedMode() && gameTurnManager.IsPlayerTurn() && !gameTurnManager.IsWaiting();
 
 	private void OnInputAction_Run(CallbackContext ctx)
 	{
@@ -761,6 +761,8 @@ public class GameInput : MonoBehaviour
 
 	private void OnInputToggleGroup(CallbackContext ctx)
 	{
+		if (!CanUseActionInputs()) return;
+		
 		if (gameTurnManager.IsTurnBasedMode()) ungroupMode = true;
 		else if (ctx.ReadValueAsButton()) ungroupMode = !ungroupMode;
 		if(debugMode > 0) Debug.Log(this + " ungroupMode=" + ungroupMode);
@@ -768,11 +770,9 @@ public class GameInput : MonoBehaviour
 	
 	private void OnInputSelectNext(CallbackContext ctx)
 	{
-		if (gameTurnManager.IsPlayerTurn())
-		{
-			CharacterSelection.SelectNextCharacter();
-		}
-		else Debug.Log("not in player turn");
+		if (!CanUseActionInputs()) return;
+		
+		CharacterSelection.SelectNextCharacter();
 	}
 	
 	// MOUSE INPUT

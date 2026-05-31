@@ -126,6 +126,9 @@ public class CharacterAgent : MonoBehaviour
 
 	public void StartMove()
 	{
+		if (IsMoving())
+			return;
+		
 		if(debugMode > 0) Debug.Log(this + " StartMove");
 		aiPath.updatePosition = aiPath.updateRotation = true;
 		aiPath.simulateMovement = true;
@@ -200,6 +203,9 @@ public class CharacterAgent : MonoBehaviour
 
 	public void AssignFollowTransform(Transform followTarget, float distance = 0f)
 	{
+		if (aiDestinationSetter.enabled && aiDestinationSetter.target == followTarget)
+			return;
+		
 		if (debugMode > 0) Debug.Log(this + " Assign followTarget=" + followTarget + " " + distance);
 		hasDestination = false;
 		aiDestinationSetter.enabled = followTarget;
@@ -210,6 +216,17 @@ public class CharacterAgent : MonoBehaviour
 			follows.enabled = aiDestinationSetter.enabled;
 		
 		if(followTarget) aiPath.endReachedDistance = Mathf.Max(distance, GetMinReachDistance());
+	}
+
+	public void StopFollow()
+	{
+		if (!aiDestinationSetter.enabled) return;
+		if(debugMode > 0) Debug.Log(this + " StopFollow " + aiDestinationSetter.target);
+		aiDestinationSetter.enabled = false;
+		aiDestinationSetter.target = null;
+		hasDestination = false;
+		follows.enabled = false;
+		aiPath.isStopped = true;
 	}
 
 	public void AssignWaypointDestination(Waypoint waypoint, float distance = 0f) =>
@@ -246,14 +263,6 @@ public class CharacterAgent : MonoBehaviour
 	public void SetFollowLeader(CharacterEntity leader)
 	{
 		follows.SetLeader(leader);
-	}
-
-	public void StopFollow()
-	{
-		aiDestinationSetter.enabled = false;
-		aiDestinationSetter.target = null;
-		hasDestination = false;
-		follows.enabled = false;
 	}
 
 	public void ClearDestination()
@@ -307,7 +316,7 @@ public class CharacterAgent : MonoBehaviour
 	
 	public Vector3 velocity => aiPath.velocity;
 
-	public bool IsMoving() => !aiPath.isStopped;
+	public bool IsMoving() => !aiPath.isStopped && hasDestination;
 	   
 	public float GetMinReachDistance() => minReachDistance;
 
@@ -500,6 +509,7 @@ public class CharacterAgent : MonoBehaviour
 	
 	private IEnumerator DoAssignDestination(Vector3 dest)
 	{
+		if(debugMode > 0) Debug.Log(this + " DoAssignDestination " + dest);
 		hasDestination = false;
 		
 		while (NavmeshRebuilder.IsNavigationDirty())
@@ -509,6 +519,7 @@ public class CharacterAgent : MonoBehaviour
 
 		aiPath.destination = dest;
 		aiPath.canSearch = true;
+		aiPath.isStopped = true;
 		aiPath.SearchPath();
 		
 		do
@@ -610,6 +621,9 @@ public class CharacterAgent : MonoBehaviour
 		
 		UpdateMoveTarget(_selfCharacter.IsMoving());
 		UpdateObstacle();
+		
+		if (_gameTurnManager.IsTurnBasedMode())
+			StopFollow();
 
 		if (_selfCharacter.IsMoving() && _selfCharacter.TryGetAnimation(out var anim))
 		{
