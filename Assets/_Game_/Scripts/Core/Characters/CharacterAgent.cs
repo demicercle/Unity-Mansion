@@ -316,7 +316,7 @@ public class CharacterAgent : MonoBehaviour
 	
 	public Vector3 velocity => aiPath.velocity;
 
-	public bool IsMoving() => !aiPath.isStopped && hasDestination;
+	public bool IsMoving() => !aiPath.isStopped && (hasDestination || IsFollowing());
 	   
 	public float GetMinReachDistance() => minReachDistance;
 
@@ -505,7 +505,7 @@ public class CharacterAgent : MonoBehaviour
 			aiPath.Teleport(newPosition);
 	}
 	
-	private bool IsFollowing() => aiDestinationSetter && aiDestinationSetter.target;
+	private bool IsFollowing() => aiDestinationSetter && aiDestinationSetter.enabled && aiDestinationSetter.target;
 	
 	private IEnumerator DoAssignDestination(Vector3 dest)
 	{
