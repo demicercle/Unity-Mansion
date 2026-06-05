@@ -31,11 +31,13 @@ Material:
     m_Floats:
     - _BUILTIN_QueueControl: 0
     - _BUILTIN_QueueOffset: 0
-    - _Noise: 0.19
+    - _Metallic: 0
+    - _Noise: 0.28
     - _NoiseScale: 8
     - _NoiseTile: 8
-    - _Offset: -0.01
-    - _Tile: 0.28
+    - _Offset: -0.02
+    - _Smoothness: 0
+    - _Tile: 0.13
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
