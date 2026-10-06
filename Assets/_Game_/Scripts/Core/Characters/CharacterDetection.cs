@@ -176,6 +176,9 @@ public class CharacterDetection : MonoBehaviour
 		while (true)
 		{
 			yield return null;
+			
+			if (GameTurnManager.Instance.IsLoading())
+				continue;
 
 			if (selfCharacter.InParty() || !selfCharacter.IsCharacterRevealed() || selfCharacter.IsDead())
 				continue;
