@@ -25,6 +25,7 @@ public class DiceLauncher : MonoBehaviour
 	public Toggle toggleMissCount;
 	
 	private int animCount;
+	private Coroutine animateCoroutine;
 	
 	private void ClickedLaunch()
 	{
@@ -105,7 +106,7 @@ public class DiceLauncher : MonoBehaviour
 	{
 		animCount++;
 		if(DicePool.debugMode>0) Debug.Log(this + " OnDiceRolled " + animCount);
-		if(animCount == 1) StartCoroutine("Animate");
+		if(animCount == 1 && animateCoroutine == null) animateCoroutine = StartCoroutine(Animate());
 	}
 
 	private IEnumerator Animate()
@@ -129,6 +130,7 @@ public class DiceLauncher : MonoBehaviour
 		}
 
 		allowedRollsText.gameObject.SetActive(true);
+		animateCoroutine = null;
 	}
 
 	private void LateUpdate()

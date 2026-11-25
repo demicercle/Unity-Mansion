@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
+[DefaultExecutionOrder(-100)] // make sure Instance is set before other scripts Awake/OnEnable
 public class GameTurnManager : MonoBehaviour
 {
 	private static GameTurnManager _instance;
@@ -121,6 +122,7 @@ public class GameTurnManager : MonoBehaviour
 	private CharacterEntity[] partyCharacters => CharacterEntity.GetPartyCharacters();
 	
 	private CharacterEntity[] levelCharacters = Array.Empty<CharacterEntity>();
+	private Coroutine mainCoroutine;
 	private CharacterEntity currentAICharacter;
 	private CharacterEntity focusCharacter;
 	private LevelData currentLevelData;
@@ -162,7 +164,7 @@ public class GameTurnManager : MonoBehaviour
 	{
 		if(debugMode > 0) Debug.Log(this + " LoadLevel " + levelIndex + " " + playerStartIndex + " saveToFile=" + saveToFile);
 		
-		StopCoroutine("MainCoroutine");
+		if (mainCoroutine != null) StopCoroutine(mainCoroutine);
 		onLoadingGame?.Invoke(true);
 		isLoading = true;
 		yield return FadeScreen.FadeIn();
@@ -202,7 +204,7 @@ public class GameTurnManager : MonoBehaviour
 		
 		DisableAudio(false);
 		FadeScreen.FadeOut();
-		StartCoroutine("MainCoroutine");
+		mainCoroutine = StartCoroutine(MainCoroutine());
 	}
 
 	private IEnumerator LoadLevel(LevelData newLevel, bool saveToFile)
@@ -318,7 +320,7 @@ public class GameTurnManager : MonoBehaviour
 		DisableAudio(false);
 		FadeScreen.FadeOut();
 		
-		StartCoroutine("MainCoroutine");
+		mainCoroutine = StartCoroutine(MainCoroutine());
 	}
 
 	private IEnumerator SaveGame(bool saveToFile)
@@ -599,9 +601,10 @@ public class GameTurnManager : MonoBehaviour
 		nextFirstTurnIsPlayer = false;
 		if(debugMode > 0) Debug.Log(this + " FirstTurn playerTurn=" + playerTurn);
 
-		levelCharacters = levelCharacters.OrderBy((character) => (int)character.GetCurrentFaction()
-		                                                         + "_" + (character.TryGetComponent(out CharacterDetection detection) ? detection.GetLastTimeDetectedInterval() : 0).ToString("N3")
-		                                                         + "_" + character.name)
+		levelCharacters = levelCharacters
+			.OrderBy(character => (int)character.GetCurrentFaction())
+			.ThenBy(character => character.TryGetComponent(out CharacterDetection detection) ? detection.GetLastTimeDetectedInterval() : 0f)
+			.ThenBy(character => character.name)
 			.ToArray();
 		
 		foreach (var anyCharacter in levelCharacters)
@@ -865,9 +868,9 @@ public class GameTurnManager : MonoBehaviour
 			GUILayout.EndArea();
 		}
 	}
-	public bool IsCurrentCharacter(CharacterEntity entity) => IsPlayerTurn() ? 
-																currentAICharacter == CharacterSelection.TryGetSelectedCharacter(out var selected) && selected == entity && selected.IsControllableByPlayer()
-																: currentAICharacter == entity;
+	public bool IsCurrentCharacter(CharacterEntity entity) => IsPlayerTurn()
+		? CharacterSelection.TryGetSelectedCharacter(out var selected) && selected == entity && selected.IsControllableByPlayer()
+		: currentAICharacter == entity;
 
 	public override string ToString() => "<b>GTM</b>";
 }

@@ -536,6 +536,7 @@ public class CharacterAgent : MonoBehaviour
 
 	private void ClearPath()
 	{
+		if (pathRenderers == null) return;
 		for (int i = 0; i < pathRenderers.Count; i++)
 		{
 			if (pathRenderers[i])
@@ -545,6 +546,12 @@ public class CharacterAgent : MonoBehaviour
 	
 	private void DrawPath()
 	{
+		if (pathRenderers == null || pathRenderers.Count < 2)
+		{
+			ClearPath();
+			return;
+		}
+		
 		drawPath = lastVectorPath.ToArray();
 		pathRenderers[0].enabled = hasDestination;
 		

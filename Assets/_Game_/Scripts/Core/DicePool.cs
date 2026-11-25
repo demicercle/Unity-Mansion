@@ -22,7 +22,12 @@ public static class DicePool
 		onDiceRolled?.Invoke();
 	}
 
-	public static int RollDice() => UnityEngine.Random.Range(0, 20) + 1;
+	public static int RollDice()
+	{
+		if (seed == 0 || rng == null)
+			SetSeed(GetRandomSeed());
+		return rng.Next(0, 20) + 1;
+	}
 	
 	public static void RollNewDice()
 	{
@@ -38,9 +43,11 @@ public static class DicePool
 		onDiceRolled?.Invoke();
 	}
 
-	public static int GetRandomSeed() => int.Parse(System.DateTime.Now.Minute.ToString() +
-	                                               System.DateTime.Now.Second.ToString() +
-	                                               System.DateTime.Now.Millisecond.ToString());
+	public static int GetRandomSeed()
+	{
+		var newSeed = (int)(System.DateTime.Now.Ticks % int.MaxValue);
+		return newSeed == 0 ? 1 : newSeed; // 0 means "unset"
+	}
 	
 	public static int LastResult => lastResult;
 	public static int Seed => seed;
