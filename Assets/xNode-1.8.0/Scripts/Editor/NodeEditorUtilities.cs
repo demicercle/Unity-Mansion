@@ -7,6 +7,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
+#pragma warning disable CS0619
 
 namespace XNodeEditor {
     /// <summary> A set of editor-only utilities and extensions for xNode </summary>
