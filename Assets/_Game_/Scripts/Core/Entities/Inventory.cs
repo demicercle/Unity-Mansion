@@ -70,7 +70,7 @@ public class Inventory : MonoBehaviour
 		
 		ClearInventory(false);
 		
-		for (int i = 0; i < slots.Length; i++)
+		for (int i = 0; i < slots.Length && i < items.Count; i++)
 		{
 			var serializedItem = slots[i];
 			if (ItemData.TryDeserialize(serializedItem, out var newItem))

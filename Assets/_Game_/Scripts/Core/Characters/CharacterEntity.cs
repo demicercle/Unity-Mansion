@@ -264,7 +264,8 @@ public class CharacterEntity : MonoBehaviour, IAttackable
 	private object lastDamageInstigator;
 	public bool TryGetLastDamageInstigator(out CharacterEntity instigator)
 	{
-		return (instigator = lastAttackTarget as CharacterEntity) != null;
+		instigator = lastDamageInstigator as CharacterEntity;
+		return instigator != null;
 	}
 	
 	public int RollDice()
