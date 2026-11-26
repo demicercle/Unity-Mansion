@@ -30,6 +30,5 @@ MonoBehaviour:
   useRange: 0
   useGroundRadius: 0
   isProjectile: 0
-  onUseScript: {fileID: 11400000, guid: b080c24f8e919734fafb813e4d03448b, type: 2}
   isAmmo: 0
   maxQuantity: 1

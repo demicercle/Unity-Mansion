@@ -103,7 +103,6 @@ public class ItemData : ScriptableObject
 	[SerializeField] [Range(0f, 12f)] private float useRange = 0.0f;
 	[SerializeField] [Min(0f)] private float useGroundRadius = 0.2f;
 	[SerializeField] private bool isProjectile = false;
-	[SerializeField] private GameScriptGraph onUseScript = null;
 	
 	[Header("Consommable")]
 	[SerializeField] private bool isAmmo;
@@ -236,8 +235,5 @@ public class ItemData : ScriptableObject
 	public void UseOn(GameObject target, GameObject instigator)
 	{
 		Debug.Log(this + " UseOn " + target + " by " + instigator);
-		var script = target.AddComponent<GameScript>();
-		script.SetInstigator(instigator);
-		script.SetGraph(onUseScript);
 	}
 }
